@@ -1,0 +1,87 @@
+# Pre-commit hooks for InvoiceShelf security and code quality
+# Install with: pre-commit install
+# Run manually with: pre-commit run --all-files
+
+repos:
+  # TruffleHog for secrets detection
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.88.0
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Detect secrets in your data.
+        entry: bash -c 'trufflehog git file://. --since-commit HEAD --only-verified --fail'
+        language: system
+        stages: [commit, push]
+        
+  # Additional security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package-lock.json
+
+  # Code quality hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^docker/.*\.yml$  # Exclude docker-compose files
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # PHP specific hooks
+  - repo: https://github.com/hookrepo/pre-commit-php
+    rev: 3.1.0
+    hooks:
+      - id: php-lint
+        files: \.(php)$
+        exclude: ^(vendor/|storage/|bootstrap/cache/)
+      - id: php-unit
+        files: \.(php)$
+        exclude: ^(vendor/|storage/|bootstrap/cache/)
+        args: [--configuration=phpunit.xml]
+        
+  # JavaScript/Node.js hooks
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.18.0
+    hooks:
+      - id: eslint
+        files: \.(js|ts|vue)$
+        types: [file]
+        exclude: ^(node_modules/|public/build/)
+        additional_dependencies:
+          - eslint@9.18.0
+          - '@vue/eslint-config-typescript'
+
+  # Docker security
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: [--ignore, DL3008, --ignore, DL3009, --ignore, DL3015]
+        files: Dockerfile.*
+
+# Configuration
+default_stages: [commit]
+fail_fast: false
+
+# CI configuration  
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
