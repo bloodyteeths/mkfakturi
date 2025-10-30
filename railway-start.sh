@@ -46,6 +46,31 @@ echo "DB_PORT: $DB_PORT"
 echo "DB_DATABASE: $DB_DATABASE"
 echo "DB_USERNAME: $DB_USERNAME"
 
+# Create .env file if it doesn't exist (Railway needs this for installation wizard)
+if [ ! -f ".env" ]; then
+    echo "Creating .env file..."
+    cat > .env << EOF
+APP_NAME="${APP_NAME}"
+APP_ENV="${APP_ENV}"
+APP_KEY="${APP_KEY}"
+APP_DEBUG="${APP_DEBUG}"
+APP_URL="${APP_URL}"
+
+DB_CONNECTION="${DB_CONNECTION}"
+DB_HOST="${DB_HOST}"
+DB_PORT="${DB_PORT}"
+DB_DATABASE="${DB_DATABASE}"
+DB_USERNAME="${DB_USERNAME}"
+DB_PASSWORD="${DB_PASSWORD}"
+
+CACHE_STORE="${CACHE_STORE}"
+SESSION_DRIVER="${SESSION_DRIVER}"
+QUEUE_CONNECTION="${QUEUE_CONNECTION}"
+BROADCAST_DRIVER="${BROADCAST_DRIVER}"
+EOF
+    chmod 664 .env
+fi
+
 # Create required storage directories
 echo "Creating storage directories..."
 mkdir -p storage/framework/{sessions,views,cache}
