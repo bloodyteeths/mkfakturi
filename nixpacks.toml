@@ -15,7 +15,7 @@ cmds = [
 ]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t public"
+cmd = "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php -S 0.0.0.0:$PORT -t public"
 
 [variables]
 APP_ENV = "production"
