@@ -14,7 +14,8 @@ if [ ! -z "$MYSQLHOST" ]; then
     export DB_CONNECTION=mysql
     export DB_HOST="$MYSQLHOST"
     export DB_PORT="$MYSQLPORT"
-    export DB_DATABASE="$MYSQLDATABASE"
+    # Railway uses MYSQL_DATABASE with underscore
+    export DB_DATABASE="${MYSQL_DATABASE:-$MYSQLDATABASE}"
     export DB_USERNAME="$MYSQLUSER"
     export DB_PASSWORD="$MYSQLPASSWORD"
 elif [ ! -z "$DATABASE_URL" ]; then
