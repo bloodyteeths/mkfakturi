@@ -47,9 +47,15 @@ echo "DB_DATABASE: $DB_DATABASE"
 echo "DB_USERNAME: $DB_USERNAME"
 
 # Run Railway installation seeder if RAILWAY_AUTO_INSTALL is true
+# Only run if database is empty (no users table data)
 if [ "$RAILWAY_AUTO_INSTALL" = "true" ]; then
-    echo "Running Railway auto-install..."
-    php artisan db:seed --class=RailwayInstallSeeder --force || echo "Install seeder failed or already installed"
+    USER_COUNT=$(php artisan tinker --execute="echo \App\Models\User::count();" 2>/dev/null | tail -1)
+    if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+        echo "Running Railway auto-install..."
+        php artisan db:seed --class=RailwayInstallSeeder --force || echo "Install seeder failed"
+    else
+        echo "Users already exist, skipping auto-install..."
+    fi
 fi
 
 # Create required storage directories
@@ -74,9 +80,9 @@ php artisan cache:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
-# Run migrations
+# Run migrations (continue even if some fail)
 echo "Running migrations..."
-php artisan migrate --force
+php artisan migrate --force || echo "Some migrations failed, continuing..."
 
 # Seed database if RAILWAY_SEED_DB is set
 if [ "$RAILWAY_SEED_DB" = "true" ]; then
