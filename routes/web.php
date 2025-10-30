@@ -162,5 +162,10 @@ Route::post('/webhooks/paddle', [\Modules\Mk\Http\PaddleWebhookController::class
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // Health check endpoints for Docker
+// Simple ping endpoint for Railway healthcheck (no DB required)
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok', 'timestamp' => now()->toISOString()], 200);
+});
+
 Route::get('/health', [App\Http\Controllers\HealthController::class, 'health']);
 Route::get('/ready', [App\Http\Controllers\HealthController::class, 'ready']);
