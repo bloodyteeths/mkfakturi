@@ -15,7 +15,7 @@ cmds = [
 ]
 
 [start]
-cmd = "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php -S 0.0.0.0:$PORT -t public"
+cmd = "bash railway-start.sh"
 
 [variables]
 APP_ENV = "production"
