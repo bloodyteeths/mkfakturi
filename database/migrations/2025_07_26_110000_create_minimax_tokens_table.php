@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('minimax_tokens', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id'); // companies.id is unsigned int, not bigint
             $table->string('token_name');
             $table->text('api_token'); // Encrypted token storage
             $table->boolean('is_active')->default(true);

@@ -15,6 +15,7 @@ $tablesToDrop = [
     'import_temp_invoices',
     'import_temp_customers',
     'partner_company_links',
+    'minimax_tokens',
 ];
 
 foreach ($tablesToDrop as $table) {
