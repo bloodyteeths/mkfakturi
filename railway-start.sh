@@ -46,6 +46,13 @@ echo "DB_PORT: $DB_PORT"
 echo "DB_DATABASE: $DB_DATABASE"
 echo "DB_USERNAME: $DB_USERNAME"
 
+# Create required storage directories
+echo "Creating storage directories..."
+mkdir -p storage/framework/{sessions,views,cache}
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+
 # Run migrations
 echo "Running migrations..."
 php artisan migrate --force
@@ -54,6 +61,10 @@ php artisan migrate --force
 echo "Caching config..."
 php artisan config:cache
 php artisan route:cache
+
+# Create storage link
+echo "Creating storage link..."
+php artisan storage:link || echo "Storage link already exists or failed"
 
 # Start PHP server
 echo "Starting PHP server on port $PORT..."
