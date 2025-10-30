@@ -54,6 +54,7 @@ mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
 # Force cache/queue to file-based (override any defaults)
+export CACHE_STORE=file
 export CACHE_DRIVER=file
 export QUEUE_CONNECTION=sync
 export BROADCAST_DRIVER=log
@@ -86,6 +87,15 @@ echo "Skipping config cache to allow dynamic environment variables..."
 echo "Creating storage link..."
 php artisan storage:link || echo "Storage link already exists or failed"
 
+# Show final environment check
+echo "=== Final Environment Check ==="
+echo "CACHE_STORE: $CACHE_STORE"
+echo "CACHE_DRIVER: $CACHE_DRIVER"
+echo "QUEUE_CONNECTION: $QUEUE_CONNECTION"
+echo "SESSION_DRIVER: $SESSION_DRIVER"
+echo "REDIS_CLIENT: $REDIS_CLIENT"
+echo "BROADCAST_DRIVER: $BROADCAST_DRIVER"
+
 # Start PHP server
 echo "Starting PHP server on port $PORT..."
-php -S 0.0.0.0:$PORT -t public
+php -S 0.0.0.0:$PORT -t public 2>&1 | tee -a storage/logs/server.log
