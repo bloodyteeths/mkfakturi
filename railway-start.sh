@@ -46,6 +46,12 @@ echo "DB_PORT: $DB_PORT"
 echo "DB_DATABASE: $DB_DATABASE"
 echo "DB_USERNAME: $DB_USERNAME"
 
+# Drop problematic table if it exists (temporary fix)
+if [ -f "drop-table.php" ]; then
+    echo "Running drop-table cleanup script..."
+    php drop-table.php || echo "Drop table script failed or table doesn't exist"
+fi
+
 # Run migrations
 echo "Running migrations..."
 php artisan migrate --force
