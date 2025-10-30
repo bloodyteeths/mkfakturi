@@ -53,11 +53,19 @@ mkdir -p storage/logs
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Force cache/queue to file-based (override any defaults)
+export CACHE_DRIVER=file
+export QUEUE_CONNECTION=sync
+export BROADCAST_DRIVER=log
+export REDIS_CLIENT=
+
 # Clear any cached config that might have wrong values
 echo "Clearing caches..."
+rm -rf bootstrap/cache/*.php || true
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan route:clear || true
+php artisan view:clear || true
 
 # Run migrations
 echo "Running migrations..."
