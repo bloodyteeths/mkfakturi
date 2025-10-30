@@ -63,10 +63,16 @@ php artisan route:clear || true
 echo "Running migrations..."
 php artisan migrate --force
 
-# Cache configuration
-echo "Caching config..."
-php artisan config:cache
-php artisan route:cache
+# Seed database if RAILWAY_SEED_DB is set
+if [ "$RAILWAY_SEED_DB" = "true" ]; then
+    echo "Seeding database..."
+    php artisan db:seed --force || echo "Seeding failed or already seeded"
+fi
+
+# Don't cache config in production - causes issues with environment variables
+echo "Skipping config cache to allow dynamic environment variables..."
+# php artisan config:cache
+# php artisan route:cache
 
 # Create storage link
 echo "Creating storage link..."
