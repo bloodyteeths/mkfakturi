@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('partner_company_links', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('partner_id')->constrained('partners')->onDelete('cascade');
-            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->unsignedBigInteger('partner_id');
+            $table->foreign('partner_id')->references('id')->on('partners')->onDelete('cascade');
+            $table->unsignedInteger('company_id'); // companies.id is unsigned int, not bigint
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->boolean('is_primary')->default(false)->comment('Primary company for partner');
             $table->decimal('override_commission_rate', 5, 2)->nullable()->comment('Override default partner commission for this company');
             $table->json('permissions')->nullable()->comment('Specific permissions for this company');
