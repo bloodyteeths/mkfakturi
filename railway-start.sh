@@ -53,6 +53,12 @@ mkdir -p storage/logs
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Clear any cached config that might have wrong values
+echo "Clearing caches..."
+php artisan config:clear || true
+php artisan cache:clear || true
+php artisan route:clear || true
+
 # Run migrations
 echo "Running migrations..."
 php artisan migrate --force
