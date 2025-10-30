@@ -50,7 +50,7 @@ return new class extends Migration
             // References
             $table->unsignedBigInteger('import_job_id');
             $table->foreign('import_job_id')->references('id')->on('import_jobs')->onDelete('cascade');
-            $table->unsignedInteger('existing_customer_id')->nullable(); // Link to existing customer if duplicate
+            $table->unsignedBigInteger('existing_customer_id')->nullable(); // Link to existing customer if duplicate
             $table->foreign('existing_customer_id')->references('id')->on('customers')->onDelete('set null');
             
             $table->timestamps();
