@@ -46,6 +46,13 @@ echo "DB_PORT: $DB_PORT"
 echo "DB_DATABASE: $DB_DATABASE"
 echo "DB_USERNAME: $DB_USERNAME"
 
+# Create a minimal .env file if it doesn't exist (installation wizard needs it)
+if [ ! -f ".env" ]; then
+    echo "Creating minimal .env file for installation wizard..."
+    touch .env
+    chmod 666 .env
+fi
+
 # Run Railway installation seeder if RAILWAY_AUTO_INSTALL is true
 # Only run if database is empty (no users table data)
 if [ "$RAILWAY_AUTO_INSTALL" = "true" ]; then
