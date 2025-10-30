@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostPromptSubmit": [
+      {
+        "matcher": {
+          "prompt": "@claude:"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claude agent smart-agent-selector \"${prompt}\""
+          }
+        ]
+      }
+    ]
+  }
+}

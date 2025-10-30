@@ -1,0 +1,37 @@
+version: '3.8'
+
+# Fallback Cypress setup using Node.js base image
+# This is lighter than cypress/included and faster to download
+
+services:
+  cypress-fallback:
+    image: node:18-alpine
+    container_name: facturino_cypress_fallback  
+    working_dir: /e2e
+    volumes:
+      - ./cypress:/e2e/cypress
+      - ./cypress.config.js:/e2e/cypress.config.js
+      - ./tests/_output:/e2e/cypress/screenshots
+      - ./tests/_output:/e2e/cypress/videos
+      - ./package.json:/e2e/package.json
+      - ./package-lock.json:/e2e/package-lock.json
+    networks:
+      - facturino
+    environment:
+      - CYPRESS_baseUrl=http://app:80
+      - NODE_ENV=test
+    command: >
+      sh -c "
+        echo 'Installing Cypress dependencies...' &&
+        npm ci &&
+        echo 'Running Cypress tests...' &&
+        npx cypress run --spec 'cypress/e2e/l10n.cy.js' --browser electron --headless
+      "
+    depends_on:
+      - app
+    profiles:
+      - testing
+
+networks:
+  facturino:
+    external: true

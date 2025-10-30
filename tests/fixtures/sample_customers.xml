@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customers>
+    <customer>
+        <name>Компанија Македонија ООД</name>
+        <email>macedonia@example.mk</email>
+        <phone>+38970123456</phone>
+        <address>ул. Партизанска 15, Скопје</address>
+        <vat_number>MK4080012562123</vat_number>
+        <website>https://macedonia.com.mk</website>
+        <currency>MKD</currency>
+    </customer>
+    <customer>
+        <name>Балкан Трговија ДООЕЛ</name>
+        <email>balkan@example.mk</email>
+        <phone>+38971234567</phone>
+        <address>ул. Македонија 22, Битола</address>
+        <vat_number>MK4080012562124</vat_number>
+        <website>https://balkan.mk</website>
+        <currency>MKD</currency>
+    </customer>
+</customers>

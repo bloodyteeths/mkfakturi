@@ -1,0 +1,6 @@
+name,email,phone,address,vat_number,website,currency
+Компанија Македонија ООД,macedonia@example.mk,+38970123456,"ул. Партизанска 15, Скопје",MK4080012562123,https://macedonia.com.mk,MKD
+Балкан Трговија ДООЕЛ,balkan@example.mk,+38971234567,"ул. Македонија 22, Битола",MK4080012562124,https://balkan.mk,MKD
+Евро Сервис ООД,euro@example.mk,+38972345678,"бул. Јане Сандански 45, Струмица",MK4080012562125,https://euroservis.mk,EUR
+Tech Solutions LLC,tech@solutions.com,+1555123456,"123 Main St, New York",US123456789,https://techsolutions.com,USD
+Global Import Export,global@trade.com,+44207123456,"456 London Road, London",GB123456789,https://globaltrading.co.uk,GBP

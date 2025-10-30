@@ -1,0 +1,6 @@
+expense_date,amount,category,vendor,description,tax_amount,currency,receipt_number
+2024-01-15,500.00,Office Supplies,Канцелариски материјали ООД,Купување на канцелариски материјали,100.00,MKD,R-001
+2024-01-20,2000.00,Software,Microsoft,Office 365 license renewal,400.00,MKD,MS-2024-001
+2024-01-25,300.00,Travel,Macedonian Railways,Патување до Битола за состанок,60.00,MKD,MR-2024-001
+2024-02-01,1500.00,Equipment,Tech Store Скопје,Нов лаптоп за тимот,300.00,MKD,TS-2024-001
+2024-02-05,800.00,Utilities,EVN Macedonia,Месечна сметка за струја,160.00,MKD,EVN-2024-02

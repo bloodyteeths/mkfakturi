@@ -1,0 +1,117 @@
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/locale/th.blade.php:31:THSarabunNew
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:11:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:291:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:291:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:294:padding-top:0px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:299:header-section-right company-details company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:315:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:323:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/payment/payment.blade.php:350:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:11:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:401:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:401:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:415:company-address-container company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:435:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:440:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:449:shipping-address-container shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:449:shipping-address-container--left shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:449:padding-left:30px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:457:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate1.blade.php:460:position:relative
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:10:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:80:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:423:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:423:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:426:padding-top: 0px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:432:header-section-right estimate-details-container
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:443:company-address-container company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:448:shipping-address-container shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:456:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:456:float:right; margin-right:30px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate2.blade.php:462:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:1: border=
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:4:pl-0 text-left item-table-heading
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:6:text-right item-table-heading
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:8:pr-20 text-right item-table-heading
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:9:pr-20 text-right item-table-heading
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:11:pl-10 text-right item-table-heading
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:13:text-right item-table-heading
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:21:pr-20 text-right item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:22:vertical-align: top;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:27:pl-0 text-left item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:37:text-right item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:37:vertical-align: top;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:42:pr-20 text-right item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:43:vertical-align: top;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:48:pr-20 text-right item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:49:vertical-align: top;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:54:pl-10 text-right item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:54:vertical-align: top;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:63:text-right item-cell
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:63:vertical-align: top;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:76:0px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:78:border-0 total-table-attribute-label
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:79:border-0 item-cell total-table-attribute-value 
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:85:pl-10 border-0 total-table-attribute-label
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:93:text-right border-0 item-cell total-table-attribute-value
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:108:border-0 total-table-attribute-label
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:115:py-2 border-0 item-cell total-table-attribute-value
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:123:border-0 total-table-attribute-label
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:130:border-0 item-cell total-table-attribute-value
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:138:py-3
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:139:py-3
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:142:border-0 total-border-left total-table-attribute-label
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/partials/table.blade.php:143:py-8 border-0 total-border-right item-cell total-table-attribute-value
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:11:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:361:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:361:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:366:text-right company-address-container company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:378:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:385:shipping-address-container shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:385:shipping-address-container--left shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:392:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/estimate/estimate3.blade.php:411:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/tax-summary.blade.php:8:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/sales-items.blade.php:8:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/sales-items.blade.php:160:sub-heading-text text-center
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/sales-customers.blade.php:8:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/sales-customers.blade.php:160:sub-heading-text text-center
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/profit-loss.blade.php:8:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/reports/expenses.blade.php:8:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:12:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:321:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:321:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:326:text-right company-address-container company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:338:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:345:shipping-address-container shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:345:shipping-address-container--left shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:351:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice3.blade.php:370:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:10:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:392:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:392:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:394:padding-top: 0px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:400:header-section-right invoice-details-container
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:413:company-address-container company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:418:shipping-address-container shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:427:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:427:float:right; margin-right:30px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice2.blade.php:434:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:6:Content-Type
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:11:DejaVu Sans
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:339:height:50px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:339:Company Logo
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:353:padding-top: 30px
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:354:company-address-container company-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:375:clear: both;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:378:billing-address-container billing-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:386:shipping-address-container shipping-address
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:386:float:left;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:386:display:block; float:left: padding-left: 0px;
+BLADE:/Users/tamsar/Downloads/mkaccounting/resources/views/app/pdf/invoice/invoice1.blade.php:394:position: relative; clear: both;

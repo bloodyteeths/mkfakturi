@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Фактура - МК-2024-008</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            font-family: "DejaVu Sans", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header-logo {
+            text-align: center;
+            color: #7675ff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .company-info {
+            float: left;
+            width: 40%;
+        }
+        .invoice-details {
+            float: right;
+            width: 50%;
+        }
+        .billing-info {
+            clear: both;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #E8E8E8;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #f5f5f5;
+        }
+        .totals {
+            float: right;
+            width: 300px;
+            margin-top: 20px;
+        }
+        .totals table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .totals td {
+            padding: 5px 10px;
+            border: 1px solid #E8E8E8;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        .reduced-vat {
+            background-color: #fff3cd;
+        }
+        .clear {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-logo">
+        <h2>FACTURINO - Македонска Сметководствена Платформа</h2>
+    </div>
+
+    <div class="company-info">
+        <h3>FACTURINO ООД</h3>
+        <p>ул. Кеј 13 Ноември 6<br>
+        1000 Скопје, Македонија<br>
+        Тел: +389 2 3200 500<br>
+        Email: info@facturino.mk<br>
+        ЕДБ: 4080012345000<br>
+        ЕМБС: 7128574</p>
+    </div>
+
+    <div class="invoice-details">
+        <table>
+            <tr><td><strong>Број на фактура:</strong></td><td>МК-2024-008</td></tr>
+            <tr><td><strong>Датум:</strong></td><td>22.07.2024</td></tr>
+            <tr><td><strong>Доспева:</strong></td><td>22.08.2024</td></tr>
+            <tr><td><strong>Статус:</strong></td><td>Испратена</td></tr>
+            <tr><td><strong>Тип:</strong></td><td>B2C (Физичко лице)</td></tr>
+        </table>
+    </div>
+
+    <div class="billing-info">
+        <h4>Наплата до:</h4>
+        <p><strong>Приватна лекарска практика др. Петровски</strong><br>
+        ул. Франклин Рузвелт 22<br>
+        1000 Скопје<br>
+        Контакт: Д-р Стефан Петровски<br>
+        Email: drpetrovski@gmail.com<br>
+        <em>Без ЕДБ (физичко лице)</em></p>
+    </div>
+
+    <table class="items-table">
+        <tr>
+            <th>Ред</th>
+            <th>Опис</th>
+            <th>Количина</th>
+            <th>Единечна цена</th>
+            <th>ДДВ</th>
+            <th>Износ</th>
+        </tr>
+        <tr class="reduced-vat">
+            <td>1</td>
+            <td>Медицински информационен систем<br><small>Систем за управување со пациенти - намалена ДДВ за здравство</small></td>
+            <td>1 лиценца</td>
+            <td>35.000,00 MKD</td>
+            <td>5% (намалена)</td>
+            <td>35.000,00 MKD</td>
+        </tr>
+    </table>
+
+    <div class="totals">
+        <table>
+            <tr><td>Подзбир:</td><td>35.000,00 MKD</td></tr>
+            <tr class="reduced-vat"><td>ДДВ (5% - здравство):</td><td>1.750,00 MKD</td></tr>
+            <tr class="total-row"><td>Вкупно:</td><td>36.750,00 MKD</td></tr>
+        </table>
+    </div>
+
+    <div class="clear"></div>
+
+    <div style="margin-top: 40px;">
+        <h4>Забелешки:</h4>
+        <p>Медицински информационен систем за управување со пациенти. Применета е намалена ДДВ ставка од 5% согласно Законот за ДДВ за здравствени услуги. Лиценцата важи 12 месеци.</p>
+        
+        <div style="margin-top: 20px; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #28a745;">
+            <strong>B2C Фактура:</strong> Оваа фактура е издадена за физичко лице (приватна лекарска практика) и не содржи ЕДБ број.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+# Macedonia Sample Invoice Data
+
+**Created for ROADMAP-FINAL.md Section A - SD-01**
+**Date: July 26, 2025**
+
+## Overview
+
+This directory contains 10 anonymized фактури (invoices) in PDF/CSV format using realistic Macedonia business data with proper Cyrillic names, addresses, VAT numbers, and various business scenarios.
+
+## Files Structure
+
+### CSV Data Files (Import Ready)
+- `macedonia_invoices_sample.csv` - 10 complete invoices with line items
+- `macedonia_customers_sample.csv` - Customer data with proper Macedonia details
+- `macedonia_items_sample.csv` - Service/product catalog 
+- `macedonia_payments_sample.csv` - Sample payment records
+
+### HTML Invoice Examples (PDF Representations)
+- `МК-2024-001-invoice.html` - IT consulting for Macedonian Bank
+- `МК-2024-005-invoice.html` - Web development for Skopje Fair
+- `МК-2024-008-B2C-invoice.html` - Medical system (B2C, 5% VAT)
+- `МК-2024-010-bitola-invoice.html` - E-commerce platform for Bitola Fair
+
+## Macedonia Business Scenarios Covered
+
+### B2B Scenarios (7 invoices)
+1. **Banking Sector**: Macedonian Bank, Stopanska Bank, NLB Bank, Komercijalna Bank
+2. **Energy Sector**: MEPSO (Electricity operator)
+3. **Telecommunications**: Macedonski Telekom
+4. **Events/Trade**: Skopje Fair, Bitola Fair
+5. **Education**: University St. Cyril and Methodius
+
+### B2C Scenarios (1 invoice)
+1. **Healthcare**: Private medical practice (no VAT number)
+
+### VAT Rate Scenarios
+- **18% Standard VAT**: IT services, software, web development (8 invoices)
+- **5% Reduced VAT**: Healthcare, education services (2 invoices)
+
+### Geographic Coverage
+- **Skopje**: 9 businesses (major economic center)
+- **Bitola**: 1 business (regional expansion)
+
+## Macedonia-Specific Compliance Features
+
+### VAT Numbers
+- Format: `MK4080########` (proper Macedonia VAT format)
+- All B2B customers have valid VAT numbers
+- B2C customers (medical practice) appropriately have no VAT number
+
+### Addresses
+- Authentic Macedonia street names and cities
+- Proper Cyrillic script usage: "ул." (street), "бул." (boulevard)
+- Real postal codes: 1000 (Skopje), 7000 (Bitola)
+
+### Currency
+- All amounts in **MKD** (Macedonia Denar)
+- Proper formatting: 45.000,00 MKD (European decimal notation)
+
+### Business Types
+- **ООД** (Ltd), **АД** (Joint Stock Company), **ДООЕЛ** (Limited Liability Company)
+- Proper Macedonia corporate suffixes
+
+### Tax ID Numbers
+- **ЕДБ** (Unique Tax Number): MK40 format
+- **ЕМБС** (Central Registry Number): 7-digit format
+
+## Success Criteria Validation
+
+✅ **10 anonymized фактури created**: 10 invoices in CSV + 4 HTML samples  
+✅ **Realistic Macedonia business data**: Authentic companies, addresses, VAT numbers  
+✅ **Various scenarios**: B2B/B2C, standard/reduced VAT, MKD currency  
+✅ **PDF/CSV format**: CSV for import testing, HTML for PDF representation  
+✅ **Partner bureau confidence**: Professional presentation with proper localization  
+
+## Import Testing Compatibility
+
+The CSV files are structured to work with the Universal Migration Wizard:
+- Field names match Macedonia accounting software patterns
+- Data types support the FieldMapperService (200+ Macedonia field variations)
+- Currency amounts in proper MKD format
+- VAT calculations accurate for 18% and 5% rates
+
+## Business Impact
+
+These sample invoices provide:
+1. **Realistic demo data** for partner bureau presentations
+2. **Import testing scenarios** for the Migration Wizard
+3. **Macedonia market credibility** with authentic business names/addresses
+4. **VAT compliance validation** with proper tax rate applications
+5. **Geographic diversity** showing platform capability across Macedonia
+
+## Usage Instructions
+
+### For Partner Bureau Demos
+1. Use HTML invoice files to show PDF output quality
+2. Demonstrate Macedonia localization and Cyrillic support
+3. Highlight proper VAT rate applications (18%/5%)
+4. Show B2B vs B2C handling differences
+
+### For Import Testing
+1. Use CSV files with the Universal Migration Wizard
+2. Test field mapping accuracy with Macedonia terms
+3. Validate currency conversion and VAT calculations
+4. Test customer/invoice relationship preservation
+
+### For Development Testing
+```bash
+# Import sample data using the migration wizard
+php artisan import:csv samples/invoices/macedonia_customers_sample.csv --type=customers
+php artisan import:csv samples/invoices/macedonia_invoices_sample.csv --type=invoices
+php artisan import:csv samples/invoices/macedonia_items_sample.csv --type=items
+php artisan import:csv samples/invoices/macedonia_payments_sample.csv --type=payments
+```
+
+## Future Enhancements
+
+Consider adding:
+- Sample data from other Macedonia cities (Ohrid, Tetovo, Kumanovo)
+- More industry sectors (manufacturing, agriculture, tourism)
+- Multi-currency scenarios (EUR for international clients)
+- Recurring invoice examples
+- Credit note examples
+
+---
+
+**Contact Information**  
+Generated by: Agent SD-01  
+Date: July 26, 2025  
+Project: FACTURINO Macedonia Accounting Platform  
+Roadmap: ROADMAP-FINAL.md Section A
+

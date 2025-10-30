@@ -1,0 +1,335 @@
+# Multi-stage Dockerfile for mkaccounting
+# Based on the architecture plan and dependency analysis
+
+# ===== Stage 1: PHP Base with Extensions =====
+FROM php:8.2-fpm-alpine AS php-base
+
+# Install system dependencies and PHP extensions
+RUN apk add --no-cache \
+    # System tools
+    curl \
+    git \
+    zip \
+    unzip \
+    bash \
+    # Image optimization
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    # Database clients
+    sqlite \
+    mysql-client \
+    postgresql-client \
+    # Build dependencies
+    $PHPIZE_DEPS \
+    # PHP extension dependencies
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libxml2-dev \
+    postgresql-dev \
+    imagemagick-dev \
+    curl-dev \
+    # For Redis
+    && pecl install redis imagick \
+    && docker-php-ext-enable redis imagick \
+    # Configure and install PHP extensions
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_mysql \
+        pdo_pgsql \
+        mysqli \
+        zip \
+        gd \
+        bcmath \
+        intl \
+        mbstring \
+        xml \
+        curl \
+        opcache \
+        exif \
+    # Cleanup
+    && apk del $PHPIZE_DEPS \
+    && rm -rf /var/cache/apk/* /tmp/*
+
+# Install Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
+# Configure PHP
+COPY <<EOF /usr/local/etc/php/conf.d/custom.ini
+memory_limit = 512M
+upload_max_filesize = 50M
+post_max_size = 50M
+max_execution_time = 600
+EOF
+
+WORKDIR /var/www/html
+
+# ===== Stage 2: Composer Dependencies =====
+FROM php-base AS composer-deps
+
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+
+# Install dependencies
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --no-interaction
+
+# Copy rest of application
+COPY . .
+
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize --no-dev
+
+# ===== Stage 3: Node.js Frontend Build =====
+FROM node:20-alpine AS frontend-builder
+
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# Copy package files for caching
+COPY package.json package-lock.json ./
+
+# Install all dependencies (needed for build) with Cypress skip
+ENV CYPRESS_INSTALL_BINARY=0
+RUN npm ci --prefer-offline --no-audit
+
+# Copy frontend source files
+COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+COPY resources/ ./resources/
+COPY public/ ./public/
+COPY lang/ ./lang/
+
+# Build production assets
+RUN npm run build
+
+# ===== Stage 4: Production Image =====
+FROM php:8.2-fpm-alpine AS production
+
+# Install runtime dependencies only
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    bash \
+    sqlite \
+    mysql-client \
+    postgresql-client \
+    # Image optimization tools
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    # PHP extensions runtime dependencies
+    icu-libs \
+    oniguruma \
+    libzip \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    libxml2 \
+    postgresql-libs \
+    imagemagick \
+    && rm -rf /var/cache/apk/*
+
+# Copy PHP extensions from base stage
+COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+# Create non-root user
+RUN addgroup -g 1000 -S www && \
+    adduser -u 1000 -S www -G www
+
+# Set up directory structure
+RUN mkdir -p /var/www/html && \
+    mkdir -p /var/log/supervisor && \
+    mkdir -p /run/nginx && \
+    chown -R www:www /var/www /var/log/supervisor /run/nginx
+
+WORKDIR /var/www/html
+
+# Copy application from composer stage
+COPY --from=composer-deps --chown=www:www /var/www/html .
+
+# Copy built frontend assets
+COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+
+# Create required directories
+RUN mkdir -p storage/app/public \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache \
+    && chown -R www:www storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Set up .env template for installation
+RUN cp .env.example .env
+
+# Configure Nginx
+COPY <<'EOF' /etc/nginx/nginx.conf
+user www;
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /run/nginx/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+    
+    access_log /var/log/nginx/access.log main;
+    
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    gzip on;
+    
+    server {
+        listen 80;
+        server_name _;
+        root /var/www/html/public;
+        index index.php;
+        
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+        
+        location ~ \.php$ {
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index index.php;
+            fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
+        
+        location ~ /\.(?!well-known).* {
+            deny all;
+        }
+    }
+}
+EOF
+
+# Configure PHP-FPM
+COPY <<'EOF' /usr/local/etc/php-fpm.d/www.conf
+[www]
+user = www
+group = www
+listen = 127.0.0.1:9000
+pm = dynamic
+pm.max_children = 50
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 35
+pm.max_requests = 500
+EOF
+
+# Configure Supervisor
+COPY <<'EOF' /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+
+[program:php-fpm]
+command=/usr/local/sbin/php-fpm -F
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+
+[program:nginx]
+command=/usr/sbin/nginx -g "daemon off;"
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+
+[program:queue-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www
+numprocs=2
+redirect_stderr=true
+stdout_logfile=/var/www/html/storage/logs/queue.log
+stopwaitsecs=3600
+
+[program:scheduler]
+command=/bin/sh -c "while [ true ]; do (php /var/www/html/artisan schedule:run --verbose --no-interaction &); sleep 60; done"
+autostart=true
+autorestart=true
+user=www
+stdout_logfile=/var/www/html/storage/logs/scheduler.log
+stderr_logfile=/var/www/html/storage/logs/scheduler.log
+EOF
+
+# Create entrypoint script
+COPY <<'EOF' /entrypoint.sh
+#!/bin/bash
+set -e
+
+# Ensure proper .env setup for installation
+echo "Starting application for installation..."
+
+# Generate application key if missing
+if ! grep -q "APP_KEY=base64:" /var/www/html/.env; then
+    echo "Generating application key..."
+    php artisan key:generate --force
+fi
+
+# Clear and cache config (but only cache if DB is ready)
+echo "Optimizing application..."
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# Only cache if not in installation mode
+if php artisan tinker --execute="echo 'test';" 2>/dev/null; then
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+fi
+
+# Create storage symlink
+php artisan storage:link || true
+
+# Start supervisor
+echo "Starting application..."
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+EOF
+
+RUN chmod +x /entrypoint.sh
+
+# Expose port
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]

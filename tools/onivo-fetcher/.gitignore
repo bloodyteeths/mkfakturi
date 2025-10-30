@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+
+# Downloads and output
+downloads/
+*.csv
+*.xlsx
+*.xls
+*.json
+
+# Logs
+*.log
+onivo-fetcher.log
+
+# Screenshots (debugging)
+*.png
+*.jpg
+
+# Playwright browsers and cache
+.playwright/
+test-results/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp

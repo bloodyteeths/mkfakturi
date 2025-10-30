@@ -1,0 +1,96 @@
+#-------------------------------------------
+# Facturino Live Test Docker Compose
+# Based on InvoiceShelf PostgreSQL variant
+# For smoke testing the complete stack
+#-------------------------------------------
+
+services:
+  db:
+    container_name: facturino_db
+    image: postgres:16
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_USER=facturino
+      - POSTGRES_DB=facturino
+    networks:
+      - facturino
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U facturino"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: invoiceshelf/invoiceshelf:nightly
+    container_name: facturino_app
+    ports:
+      - 80:80
+    volumes:
+      - ./public:/var/www/html/InvoiceShelf/public
+      - ./lang:/var/www/html/InvoiceShelf/lang
+      - ./resources:/var/www/html/InvoiceShelf/resources
+      - ./config:/var/www/html/InvoiceShelf/config
+      - ./app:/var/www/html/InvoiceShelf/app
+      - ./storage:/data
+      - ./.env:/var/www/html/InvoiceShelf/.env
+      - ./tests/_output:/var/www/html/tests/_output
+    networks:
+      - facturino
+    environment:
+      - PHP_TZ=UTC
+      - TIMEZONE=UTC
+      - APP_NAME=Facturino
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=facturino
+      - DB_USERNAME=facturino
+      - DB_PASSWORD=secret
+      - CACHE_STORE=file
+      - SESSION_DRIVER=file
+      - SESSION_LIFETIME=120
+      - SESSION_ENCRYPT=false
+      - SESSION_PATH=/
+      - SESSION_DOMAIN=localhost
+      - SANCTUM_STATEFUL_DOMAINS=localhost
+      - STARTUP_DELAY=15
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  cypress:
+    image: cypress/included:13.6.0
+    container_name: facturino_cypress
+    working_dir: /e2e
+    volumes:
+      - ./cypress:/e2e/cypress
+      - ./cypress.config.docker.js:/e2e/cypress.config.js
+      - ./tests/_output:/e2e/cypress/screenshots
+      - ./tests/_output:/e2e/cypress/videos
+    networks:
+      - facturino
+    environment:
+      - CYPRESS_baseUrl=http://app:80
+    command: ["cypress", "run", "--spec", "cypress/e2e/l10n-basic.cy.js"]
+    profiles:
+      - testing
+
+networks:
+  facturino:
+
+volumes:
+  postgres_data:

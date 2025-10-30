@@ -1,0 +1,110 @@
+# Production Docker Compose for mkaccounting
+# Clean, optimized setup without volume mount conflicts
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mkaccounting
+      target: production
+    image: mkaccounting:install-ready
+    container_name: mkaccounting_app
+    ports:
+      - "80:80"
+    environment:
+      # Application
+      - APP_NAME=mkaccounting
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost
+      
+      # Database
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=mkaccounting
+      - DB_USERNAME=mkaccounting
+      - DB_PASSWORD=secret
+      
+      # Cache & Session
+      - CACHE_STORE=redis
+      - SESSION_DRIVER=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=secret
+      
+      # Queue
+      - QUEUE_CONNECTION=redis
+      
+      # Mail (use log driver for now)
+      - MAIL_MAILER=log
+      
+      # Security
+      - SESSION_SECURE_COOKIE=false
+      - SESSION_ENCRYPT=false
+      
+    networks:
+      - mkaccounting
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  db:
+    image: postgres:16-alpine
+    container_name: mkaccounting_db
+    environment:
+      - POSTGRES_DB=mkaccounting
+      - POSTGRES_USER=mkaccounting
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mkaccounting
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mkaccounting"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  redis:
+    image: redis:7-alpine
+    container_name: mkaccounting_redis
+    command: redis-server --appendonly yes --requirepass secret
+    volumes:
+      - redis_data:/data
+    networks:
+      - mkaccounting
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  mkaccounting:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

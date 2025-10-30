@@ -1,0 +1,125 @@
+{
+  "companies": [
+    {
+      "name": "Македонска Компанија ДОО",
+      "email": "kontakt@kompanija.mk",
+      "phone": "+38970123456",
+      "tax_id": "MK4080003501411",
+      "address": {
+        "street": "бул. Македонија 15",
+        "city": "Скопје",
+        "zip": "1000",
+        "country": "Macedonia"
+      }
+    },
+    {
+      "name": "Битолска Трговија АД",
+      "email": "info@bitola-trgovija.mk",
+      "phone": "+38947555123",
+      "tax_id": "MK4080003501422",
+      "address": {
+        "street": "ул. Маршал Тито 45",
+        "city": "Битола",
+        "zip": "7000",
+        "country": "Macedonia"
+      }
+    }
+  ],
+  "customers": [
+    {
+      "name": "Охридски Ресторан ДООЕЛ",
+      "email": "rezervacii@ohrid-restoran.mk",
+      "phone": "+38946789456",
+      "tax_id": "MK4080003501433",
+      "address": {
+        "street": "ул. Климент Охридски 12",
+        "city": "Охрид",
+        "zip": "6000",
+        "country": "Macedonia"
+      }
+    },
+    {
+      "name": "Струмичка Индустрија АД",
+      "email": "prodazba@strumica-industrija.mk",
+      "phone": "+38934567890",
+      "tax_id": "MK4080003501444",
+      "address": {
+        "street": "Индустриска Зона бб",
+        "city": "Струмица",
+        "zip": "2400",
+        "country": "Macedonia"
+      }
+    }
+  ],
+  "services": [
+    {
+      "name": "Консултантски Услуги",
+      "description": "Професионални консултантски услуги за бизнис развој",
+      "price": 2500,
+      "unit": "час",
+      "tax_rate": 18
+    },
+    {
+      "name": "ИТ Поддршка",
+      "description": "Техничка поддршка и одржување на компјутерски системи",
+      "price": 1800,
+      "unit": "час",
+      "tax_rate": 18
+    },
+    {
+      "name": "Обука за Персонал",
+      "description": "Едукативни програми за развој на човечки ресурси",
+      "price": 5000,
+      "unit": "ден",
+      "tax_rate": 5
+    }
+  ],
+  "payment_methods": [
+    {
+      "name": "Банкарски Трансфер",
+      "description": "Пренос преку банка"
+    },
+    {
+      "name": "Готовина",
+      "description": "Плаќање во готовина"
+    },
+    {
+      "name": "Кредитна Картичка",
+      "description": "Плаќање со кредитна картичка"
+    }
+  ],
+  "test_scenarios": {
+    "standard_invoice": {
+      "customer": "Охридски Ресторан ДООЕЛ",
+      "service": "Консултантски Услуги",
+      "quantity": 8,
+      "expected_total": 23600,
+      "expected_tax": 3600,
+      "currency": "MKD"
+    },
+    "reduced_vat_invoice": {
+      "customer": "Струмичка Индустрија АД",
+      "service": "Обука за Персонал",
+      "quantity": 2,
+      "expected_total": 10500,
+      "expected_tax": 500,
+      "currency": "MKD"
+    }
+  },
+  "partner_data": {
+    "accountant_firms": [
+      {
+        "name": "Сметководствена Куќа Македонија",
+        "email": "info@smetkovodstvo-mk.com",
+        "commission_rate": 15.0,
+        "client_count": 25
+      },
+      {
+        "name": "Аудит Консалтинг Скопје",
+        "email": "kontakt@audit-consulting.mk",
+        "commission_rate": 12.5,
+        "client_count": 18
+      }
+    ]
+  }
+}

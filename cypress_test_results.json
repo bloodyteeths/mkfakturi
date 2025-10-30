@@ -1,0 +1,290 @@
+
+DevTools listening on ws://127.0.0.1:54914/devtools/browser/1deee866-5736-4f7b-90e9-42944b4bc08f
+(node:1808) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///Users/tamsar/Library/Caches/Cypress/14.5.3/Cypress.app/Contents/Resources/app/node_modules/ts-node/esm/transpile-only.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1808) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Opening `/dev/tty` failed (6): Device not configured
+================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        14.5.3                                                                         │
+  │ Browser:        Electron 130 (headless)                                                        │
+  │ Node Version:   v22.16.0 (/Users/tamsar/.nvm/versions/node/v22.16.0/bin/node)                  │
+  │ Specs:          1 found (auth_admin.cy.js)                                                     │
+  │ Searched:       cypress/e2e/auth_admin.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  auth_admin.cy.js                                                                (1 of 1)
+{
+  "stats": {
+    "suites": 2,
+    "tests": 2,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2025-07-27T17:20:47.956Z",
+    "end": "2025-07-27T17:20:48.175Z",
+    "duration": 219
+  },
+  "tests": [
+    {
+      "title": "should load login page with proper elements",
+      "fullTitle": "AUTH-01: Admin Authentication Flow Login Page Accessibility should load login page with proper elements",
+      "file": null,
+      "duration": 176,
+      "currentRetry": 0,
+      "err": {
+        "message": "cy.clearSessionStorage is not a function\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `AUTH-01: Admin Authenticati...`",
+        "name": "TypeError",
+        "stack": "TypeError: cy.clearSessionStorage is not a function\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `AUTH-01: Admin Authenticati...`\n    at Context.eval (webpack:///./cypress/e2e/auth_admin.cy.js:26:7)\n    at runnable.fn (http://localhost/__cypress/runner/cypress_runner.js:141799:19)\n    at callFn (http://localhost/__cypress/runner/cypress_runner.js:160877:21)\n    at Runnable.run (http://localhost/__cypress/runner/cypress_runner.js:160864:7)\n    at <unknown> (http://localhost/__cypress/runner/cypress_runner.js:166957:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost/__cypress/runner/cypress_runner.js:1546:18)",
+        "parsedStack": [
+          {
+            "message": "TypeError: cy.clearSessionStorage is not a function",
+            "whitespace": ""
+          },
+          {
+            "function": "Context.eval",
+            "fileUrl": "http://localhost/__cypress/tests?p=cypress/e2e/auth_admin.cy.js",
+            "originalFile": "webpack:///./cypress/e2e/auth_admin.cy.js",
+            "relativeFile": "cypress/e2e/auth_admin.cy.js",
+            "absoluteFile": "/Users/tamsar/Downloads/mkaccounting/cypress/e2e/auth_admin.cy.js",
+            "line": 26,
+            "column": 7,
+            "whitespace": "    "
+          },
+          {
+            "function": "runnable.fn",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 141799,
+            "column": 19,
+            "whitespace": "    "
+          },
+          {
+            "function": "callFn",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 160877,
+            "column": 21,
+            "whitespace": "    "
+          },
+          {
+            "function": "Runnable.run",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 160864,
+            "column": 7,
+            "whitespace": "    "
+          },
+          {
+            "function": "<unknown>",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 166957,
+            "column": 30,
+            "whitespace": "    "
+          },
+          {
+            "function": "PassThroughHandlerContext.finallyHandler",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 4042,
+            "column": 23,
+            "whitespace": "    "
+          },
+          {
+            "function": "PassThroughHandlerContext.tryCatcher",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 1777,
+            "column": 23,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromiseFromHandler",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 1489,
+            "column": 31,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromise",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 1546,
+            "column": 18,
+            "whitespace": "    "
+          }
+        ],
+        "codeFrame": {
+          "line": 26,
+          "column": 8,
+          "originalFile": "cypress/e2e/auth_admin.cy.js",
+          "relativeFile": "cypress/e2e/auth_admin.cy.js",
+          "absoluteFile": "/Users/tamsar/Downloads/mkaccounting/cypress/e2e/auth_admin.cy.js",
+          "frame": "  24 |     cy.clearCookies()\n  25 |     cy.clearLocalStorage()\n> 26 |     cy.clearSessionStorage()\n     |        ^\n  27 |   })\n  28 |\n  29 |   describe('Login Page Accessibility', () => {",
+          "language": "js"
+        }
+      }
+    },
+    {
+      "title": "should verify proper logout functionality",
+      "fullTitle": "AUTH-01: Admin Authentication Flow Performance and Security Validation should verify proper logout functionality",
+      "file": null,
+      "currentRetry": 0,
+      "err": {}
+    }
+  ],
+  "pending": [],
+  "failures": [
+    {
+      "title": "\"before each\" hook for \"should load login page with proper elements\"",
+      "fullTitle": "AUTH-01: Admin Authentication Flow Login Page Accessibility \"before each\" hook for \"should load login page with proper elements\"",
+      "file": null,
+      "currentRetry": 0,
+      "err": {
+        "message": "cy.clearSessionStorage is not a function\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `AUTH-01: Admin Authenticati...`",
+        "name": "TypeError",
+        "stack": "TypeError: cy.clearSessionStorage is not a function\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `AUTH-01: Admin Authenticati...`\n    at Context.eval (webpack:///./cypress/e2e/auth_admin.cy.js:26:7)\n    at runnable.fn (http://localhost/__cypress/runner/cypress_runner.js:141799:19)\n    at callFn (http://localhost/__cypress/runner/cypress_runner.js:160877:21)\n    at Runnable.run (http://localhost/__cypress/runner/cypress_runner.js:160864:7)\n    at <unknown> (http://localhost/__cypress/runner/cypress_runner.js:166957:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost/__cypress/runner/cypress_runner.js:1546:18)",
+        "parsedStack": [
+          {
+            "message": "TypeError: cy.clearSessionStorage is not a function",
+            "whitespace": ""
+          },
+          {
+            "function": "Context.eval",
+            "fileUrl": "http://localhost/__cypress/tests?p=cypress/e2e/auth_admin.cy.js",
+            "originalFile": "webpack:///./cypress/e2e/auth_admin.cy.js",
+            "relativeFile": "cypress/e2e/auth_admin.cy.js",
+            "absoluteFile": "/Users/tamsar/Downloads/mkaccounting/cypress/e2e/auth_admin.cy.js",
+            "line": 26,
+            "column": 7,
+            "whitespace": "    "
+          },
+          {
+            "function": "runnable.fn",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 141799,
+            "column": 19,
+            "whitespace": "    "
+          },
+          {
+            "function": "callFn",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 160877,
+            "column": 21,
+            "whitespace": "    "
+          },
+          {
+            "function": "Runnable.run",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 160864,
+            "column": 7,
+            "whitespace": "    "
+          },
+          {
+            "function": "<unknown>",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 166957,
+            "column": 30,
+            "whitespace": "    "
+          },
+          {
+            "function": "PassThroughHandlerContext.finallyHandler",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 4042,
+            "column": 23,
+            "whitespace": "    "
+          },
+          {
+            "function": "PassThroughHandlerContext.tryCatcher",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 1777,
+            "column": 23,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromiseFromHandler",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 1489,
+            "column": 31,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromise",
+            "fileUrl": "http://localhost/__cypress/runner/cypress_runner.js",
+            "originalFile": "http://localhost/__cypress/runner/cypress_runner.js",
+            "line": 1546,
+            "column": 18,
+            "whitespace": "    "
+          }
+        ],
+        "codeFrame": {
+          "line": 26,
+          "column": 8,
+          "originalFile": "cypress/e2e/auth_admin.cy.js",
+          "relativeFile": "cypress/e2e/auth_admin.cy.js",
+          "absoluteFile": "/Users/tamsar/Downloads/mkaccounting/cypress/e2e/auth_admin.cy.js",
+          "frame": "  24 |     cy.clearCookies()\n  25 |     cy.clearLocalStorage()\n> 26 |     cy.clearSessionStorage()\n     |        ^\n  27 |   })\n  28 |\n  29 |   describe('Login Page Accessibility', () => {",
+          "language": "js"
+        }
+      }
+    }
+  ],
+  "passes": []
+}
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        11                                                                               │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      10                                                                               │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     0 seconds                                                                        │
+  │ Spec Ran:     auth_admin.cy.js                                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /Users/tamsar/Downloads/mkaccounting/cypress/screenshots/auth_admin.cy.js/AUTH-0    (2560x1440)
+     1 Admin Authentication Flow -- should load login page with proper elements -- be               
+     fore each hook (failed).png                                                                    
+
+
+  (Video)
+
+  -  Video output: /Users/tamsar/Downloads/mkaccounting/cypress/videos/auth_admin.cy.js.mp4
+
+
+Opening `/dev/tty` failed (6): Device not configured
+================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  auth_admin.cy.js                         224ms       11        -        1        -       10 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     224ms       11        -        1        -       10  
+

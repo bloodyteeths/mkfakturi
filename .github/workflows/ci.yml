@@ -1,0 +1,531 @@
+# This pipeline provides complete testing, security scanning, and build automation
+# for the Laravel mkaccounting application with multi-version support and database matrix testing
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'roadmap*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch: # Allow manual triggering
+  schedule:
+    - cron: '0 2 * * 1' # Weekly security scans on Mondays
+
+env:
+  NODE_VERSION: '20'
+  COMPOSER_CACHE_KEY: composer-${{ github.sha }}
+  NPM_CACHE_KEY: npm-${{ github.sha }}
+
+jobs:
+  lint:
+    name: Lint & Code Style
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Required for SonarCloud
+      
+    - name: Setup PHP 8.2 (for linting)
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, pdo_pgsql, dom, filter, gd, json, zip, soap
+        coverage: none
+        tools: composer:v2
+        
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.composer/cache
+        key: ${{ env.COMPOSER_CACHE_KEY }}-composer-lint
+        restore-keys: |
+          composer-lint-
+          
+    - name: Install PHP dependencies
+      run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      
+    - name: Run PHP linter (Pint)
+      run: vendor/bin/pint --test
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install Node dependencies
+      run: npm ci --prefer-offline
+      
+    - name: Run ESLint
+      run: npm run test
+      
+    - name: Check for security vulnerabilities in Node packages
+      run: npm audit --audit-level=moderate
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP 8.2 (for static analysis)
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, pdo_pgsql, dom, filter, gd, json, zip, soap
+        coverage: none
+        tools: composer:v2, phpstan, psalm
+        
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.composer/cache
+        key: ${{ env.COMPOSER_CACHE_KEY }}-composer-static
+        restore-keys: |
+          composer-static-
+          
+    - name: Install PHP dependencies
+      run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      
+    - name: Run PHPStan
+      run: |
+        if [ -f "phpstan.neon" ] || [ -f "phpstan.neon.dist" ]; then
+          vendor/bin/phpstan analyse --memory-limit=2G
+        else
+          echo "PHPStan configuration not found, skipping..."
+        fi
+      continue-on-error: true
+      
+    - name: Run Psalm
+      run: |
+        if [ -f "psalm.xml" ] || [ -f "psalm.xml.dist" ]; then
+          vendor/bin/psalm --show-info=true
+        else
+          echo "Psalm configuration not found, skipping..."
+        fi
+      continue-on-error: true
+
+  test:
+    name: Tests (PHP ${{ matrix.php-version }}, ${{ matrix.database }})
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+        database: ['mysql', 'pgsql']
+        include:
+          - database: mysql
+            db_port: 3306
+            db_service: mysql:8.0
+            db_username: invoiceshelf
+            db_password: password
+            db_database: invoiceshelf_test
+          - database: pgsql
+            db_port: 5432
+            db_service: postgres:15
+            db_username: invoiceshelf
+            db_password: password
+            db_database: invoiceshelf_test
+    
+    services:
+      mysql:
+        image: ${{ matrix.database == 'mysql' && 'mysql:8.0' || '' }}
+        env:
+          MYSQL_DATABASE: ${{ matrix.db_database }}
+          MYSQL_USER: ${{ matrix.db_username }}
+          MYSQL_PASSWORD: ${{ matrix.db_password }}
+          MYSQL_ROOT_PASSWORD: root_password
+        ports:
+          - 3306:3306
+        options: ${{ matrix.database == 'mysql' && '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5' || '' }}
+        
+      postgres:
+        image: ${{ matrix.database == 'pgsql' && 'postgres:15' || '' }}
+        env:
+          POSTGRES_DB: ${{ matrix.db_database }}
+          POSTGRES_USER: ${{ matrix.db_username }}
+          POSTGRES_PASSWORD: ${{ matrix.db_password }}
+        ports:
+          - 5432:5432
+        options: ${{ matrix.database == 'pgsql' && '--health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5' || '' }}
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP ${{ matrix.php-version }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, pdo_pgsql, dom, filter, gd, json, zip, soap, redis, bcmath
+        coverage: ${{ matrix.php-version == '8.2' && matrix.database == 'mysql' && 'pcov' || 'none' }}
+        tools: composer:v2
+        
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.composer/cache
+        key: ${{ env.COMPOSER_CACHE_KEY }}-composer-${{ matrix.php-version }}
+        restore-keys: |
+          composer-${{ matrix.php-version }}-
+          composer-
+          
+    - name: Install PHP dependencies
+      run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      
+    - name: Create .env file
+      run: |
+        cp .env.example .env || echo "APP_NAME=InvoiceShelf" > .env
+        echo "APP_ENV=testing" >> .env
+        echo "APP_KEY=" >> .env
+        echo "APP_DEBUG=true" >> .env
+        echo "APP_URL=http://localhost" >> .env
+        echo "DB_CONNECTION=${{ matrix.database }}" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=${{ matrix.db_port }}" >> .env
+        echo "DB_DATABASE=${{ matrix.db_database }}" >> .env
+        echo "DB_USERNAME=${{ matrix.db_username }}" >> .env
+        echo "DB_PASSWORD=${{ matrix.db_password }}" >> .env
+        echo "CACHE_DRIVER=array" >> .env
+        echo "QUEUE_CONNECTION=sync" >> .env
+        echo "SESSION_DRIVER=array" >> .env
+        echo "MAIL_MAILER=array" >> .env
+        echo "BROADCAST_DRIVER=log" >> .env
+        
+    - name: Generate application key
+      run: php artisan key:generate
+      
+    - name: Wait for database
+      run: |
+        if [ "${{ matrix.database }}" = "mysql" ]; then
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -proot_password &> /dev/null; then
+              break
+            fi
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+        else
+          for i in {1..30}; do
+            if pg_isready -h 127.0.0.1 -p 5432 -U ${{ matrix.db_username }} &> /dev/null; then
+              break
+            fi
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+        fi
+      
+    - name: Create database schema
+      run: php artisan migrate --force
+        
+    - name: Run database seeders
+      run: php artisan db:seed --class=DatabaseSeeder
+      continue-on-error: true # Seeders might fail in some test scenarios
+      
+    - name: Run tests
+      run: |
+        if [ "${{ matrix.php-version }}" = "8.2" ] && [ "${{ matrix.database }}" = "mysql" ]; then
+          vendor/bin/pest --coverage --min=60 --coverage-clover=coverage.xml
+        else
+          vendor/bin/pest --parallel
+        fi
+      
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      if: matrix.php-version == '8.2' && matrix.database == 'mysql'
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: false
+        flags: unittests
+        name: codecov-umbrella
+
+  build:
+    name: Build Assets
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ env.NPM_CACHE_KEY }}-node-modules
+        restore-keys: |
+          npm-node-modules-
+          
+    - name: Install Node dependencies
+      run: npm ci --prefer-offline
+      
+    - name: Build frontend assets for production
+      run: npm run build
+      env:
+        NODE_ENV: production
+        
+    - name: Check build size
+      run: |
+        echo "Build directory size:"
+        du -sh public/build/ || echo "Build directory not found"
+        find public/build/ -name "*.js" -o -name "*.css" | head -10 || echo "No build files found"
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-assets-${{ github.sha }}
+        path: |
+          public/build/
+          public/mix-manifest.json
+        retention-days: 7
+
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Required for some security scanners
+      
+    - name: Setup PHP 8.2 (for security scanning)
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json, zip, soap
+        coverage: none
+        tools: composer:v2
+        
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.composer/cache
+        key: ${{ env.COMPOSER_CACHE_KEY }}-composer-security
+        restore-keys: |
+          composer-security-
+          
+    - name: Install PHP dependencies
+      run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      
+    - name: Run Composer security audit
+      run: composer audit --format=plain
+      continue-on-error: true
+      
+    - name: Run security checker for PHP dependencies
+      uses: symfonycorp/security-checker-action@v5
+      continue-on-error: true
+      
+    - name: Setup Node.js for security scanning
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install Node dependencies
+      run: npm ci --prefer-offline
+      
+    - name: Run npm audit
+      run: |
+        echo "Running npm audit..."
+        npm audit --audit-level=moderate --json > npm-audit.json || true
+        cat npm-audit.json
+      continue-on-error: true
+      
+    - name: Run Semgrep security scan
+      uses: semgrep/semgrep-action@v1
+      with:
+        config: auto
+        generateSarif: true
+      env:
+        SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+      continue-on-error: true
+      
+    - name: Upload Semgrep SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: semgrep.sarif
+      continue-on-error: true
+      
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        languages: javascript,php
+      continue-on-error: true
+
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP 8.2
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json, zip, soap
+        coverage: none
+        tools: composer:v2
+        
+    - name: Install PHP dependencies
+      run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      
+    - name: Run performance tests
+      run: |
+        if [ -d "tests/Performance" ]; then
+          vendor/bin/pest tests/Performance --parallel
+        else
+          echo "No performance tests found, skipping..."
+        fi
+      continue-on-error: true
+
+  docker:
+    name: Docker Build & Test
+    runs-on: ubuntu-latest
+    needs: [test, build, security]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-assets-${{ github.sha }}
+        path: public/
+        
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/Dockerfile
+        push: false
+        tags: |
+          invoiceshelf/invoiceshelf:${{ github.sha }}
+          invoiceshelf/invoiceshelf:latest
+        platforms: linux/amd64,linux/arm64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Test Docker image
+      run: |
+        docker run --rm -d --name test-container \
+          -e APP_ENV=testing \
+          -e APP_KEY=base64:$(openssl rand -base64 32) \
+          -p 8080:80 \
+          invoiceshelf/invoiceshelf:${{ github.sha }}
+        sleep 30
+        curl -f http://localhost:8080/health || exit 1
+        docker stop test-container
+      continue-on-error: true
+      
+    - name: Run container security scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'invoiceshelf/invoiceshelf:${{ github.sha }}'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+      continue-on-error: true
+      
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+      continue-on-error: true
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [docker, performance]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: Deploy to staging notification
+      run: |
+        echo "🚀 Deploying to staging environment"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "All tests passed - ready for staging deployment"
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [docker, performance]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Production deployment notification
+      run: |
+        echo "🎯 Ready for production deployment"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Docker image: invoiceshelf/invoiceshelf:${{ github.sha }}"
+        echo ""
+        echo "To deploy to production:"
+        echo "1. Review all test results above"
+        echo "2. Run manual deployment: cd docker && ./deploy.sh your-domain.com"
+        echo "3. Verify deployment health checks"
+
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [test, build, security, docker]
+    if: always()
+    
+    steps:
+    - name: Clean up old artifacts
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            run_id: context.runId,
+          });
+          
+          console.log(`Found ${artifacts.data.artifacts.length} artifacts`);
+          
+          // Keep only the last 10 artifacts
+          const oldArtifacts = artifacts.data.artifacts
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(10);
+            
+          for (const artifact of oldArtifacts) {
+            try {
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+              });
+              console.log(`Deleted artifact: ${artifact.name}`);
+            } catch (error) {
+              console.log(`Failed to delete artifact ${artifact.name}: ${error.message}`);
+            }
+          }

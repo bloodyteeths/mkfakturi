@@ -1,0 +1,6 @@
+payment_date,amount,payment_method,invoice_number,customer_name,reference,currency,notes
+2024-01-20,12000.00,Bank Transfer,INV-2024-001,Компанија Македонија ООД,BT-20240120-001,MKD,Плаќање за фактура INV-2024-001
+2024-02-25,24000.00,Cash,INV-2024-002,Балкан Трговија ДООЕЛ,CASH-20240225-001,MKD,Готовинско плаќање
+2024-02-10,3600.00,Credit Card,INV-2024-005,Global Import Export,CC-20240210-001,GBP,Payment via Stripe
+2024-02-15,2500.00,PayPal,INV-2024-004,Tech Solutions LLC,PP-20240215-001,USD,Partial payment on account
+2024-01-30,1200.00,Check,INV-2024-003,Евро Сервис ООД,CHK-20240130-001,EUR,Check payment received

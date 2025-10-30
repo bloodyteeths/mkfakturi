@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Фактура - МК-2024-010</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            font-family: "DejaVu Sans", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header-logo {
+            text-align: center;
+            color: #7675ff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .company-info {
+            float: left;
+            width: 40%;
+        }
+        .invoice-details {
+            float: right;
+            width: 50%;
+        }
+        .billing-info {
+            clear: both;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #E8E8E8;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #f5f5f5;
+        }
+        .totals {
+            float: right;
+            width: 300px;
+            margin-top: 20px;
+        }
+        .totals table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .totals td {
+            padding: 5px 10px;
+            border: 1px solid #E8E8E8;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        .clear {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-logo">
+        <h2>FACTURINO - Македонска Сметководствена Платформа</h2>
+    </div>
+
+    <div class="company-info">
+        <h3>FACTURINO ООД</h3>
+        <p>ул. Кеј 13 Ноември 6<br>
+        1000 Скопје, Македонија<br>
+        Тел: +389 2 3200 500<br>
+        Email: info@facturino.mk<br>
+        ЕДБ: 4080012345000<br>
+        ЕМБС: 7128574</p>
+    </div>
+
+    <div class="invoice-details">
+        <table>
+            <tr><td><strong>Број на фактура:</strong></td><td>МК-2024-010</td></tr>
+            <tr><td><strong>Датум:</strong></td><td>24.07.2024</td></tr>
+            <tr><td><strong>Доспева:</strong></td><td>24.08.2024</td></tr>
+            <tr><td><strong>Статус:</strong></td><td>Испратена</td></tr>
+        </table>
+    </div>
+
+    <div class="billing-info">
+        <h4>Наплата до:</h4>
+        <p><strong>Битолски Саем ДООЕЛ</strong><br>
+        ул. Маршал Тито 44<br>
+        7000 Битола<br>
+        ЕДБ: MK4080012345686<br>
+        Контакт: Горан Јовановски<br>
+        Email: info@bitolasaem.mk</p>
+    </div>
+
+    <table class="items-table">
+        <tr>
+            <th>Ред</th>
+            <th>Опис</th>
+            <th>Количина</th>
+            <th>Единечна цена</th>
+            <th>ДДВ</th>
+            <th>Износ</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Е-комерс платформа<br><small>Онлајн продавница со платни системи</small></td>
+            <td>1 проект</td>
+            <td>32.000,00 MKD</td>
+            <td>18%</td>
+            <td>32.000,00 MKD</td>
+        </tr>
+    </table>
+
+    <div class="totals">
+        <table>
+            <tr><td>Подзбир:</td><td>32.000,00 MKD</td></tr>
+            <tr><td>ДДВ (18%):</td><td>5.760,00 MKD</td></tr>
+            <tr class="total-row"><td>Вкупно:</td><td>37.760,00 MKD</td></tr>
+        </table>
+    </div>
+
+    <div class="clear"></div>
+
+    <div style="margin-top: 40px;">
+        <h4>Забелешки:</h4>
+        <p>Е-комерс платформа за Битолски Саем со интеграција на платни системи и управување со производи. Проектот ќе биде реализиран во 2 фази со испорака во рок од 60 дена.</p>
+        
+        <div style="margin-top: 20px; padding: 10px; background-color: #e7f3ff; border-left: 4px solid #007bff;">
+            <strong>Регионална клиентела:</strong> Овој проект е за клиент од Битола, што покажува географска експанзија на нашите услуги низ Македонија.
+        </div>
+    </div>
+</body>
+</html>

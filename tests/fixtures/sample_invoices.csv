@@ -1,0 +1,6 @@
+invoice_number,customer_name,invoice_date,due_date,total,subtotal,tax,status,currency,notes
+INV-2024-001,Компанија Македонија ООД,2024-01-15,2024-02-15,12000.00,10000.00,2000.00,SENT,MKD,Фактура за консултантски услуги
+INV-2024-002,Балкан Трговија ДООЕЛ,2024-01-20,2024-02-20,24000.00,20000.00,4000.00,PAID,MKD,Фактура за програмски услуги
+INV-2024-003,Евро Сервис ООД,2024-01-25,2024-02-25,1200.00,1000.00,200.00,OVERDUE,EUR,Monthly maintenance fee
+INV-2024-004,Tech Solutions LLC,2024-02-01,2024-03-01,5000.00,5000.00,0.00,DRAFT,USD,Software license
+INV-2024-005,Global Import Export,2024-02-05,2024-03-05,3600.00,3000.00,600.00,SENT,GBP,Integration services
