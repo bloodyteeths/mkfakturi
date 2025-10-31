@@ -52,9 +52,23 @@ elif [ ! -z "$DATABASE_URL" ]; then
     export DB_PORT="${hostport#*:}"
     export DB_DATABASE="${temp#*/}"
     export DB_CONNECTION=mysql
+elif [ ! -z "$MYSQLHOST" ]; then
+    echo "Using Railway individual MySQL variables..."
+    export DB_HOST="${MYSQLHOST}"
+    export DB_PORT="${MYSQLPORT:-3306}"
+    export DB_DATABASE="${MYSQLDATABASE}"
+    export DB_USERNAME="${MYSQLUSER:-root}"
+    export DB_PASSWORD="${MYSQLPASSWORD}"
+    export DB_CONNECTION=mysql
+
+    echo "Using Railway MySQL variables:"
+    echo "DB_HOST: $DB_HOST"
+    echo "DB_PORT: $DB_PORT"
+    echo "DB_DATABASE: $DB_DATABASE"
+    echo "DB_USERNAME: $DB_USERNAME"
 else
     echo "ERROR: No database configuration found!"
-    echo "Expected either MYSQLHOST or DATABASE_URL"
+    echo "Expected either MYSQL_URL, DATABASE_URL, or MYSQLHOST"
     exit 1
 fi
 

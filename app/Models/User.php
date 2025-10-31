@@ -325,7 +325,7 @@ class User extends Authenticatable implements HasMedia
         }
 
         // Clear user settings cache after update
-        $this->clearComputed('all_settings');
+        $this->clearCachedComputed('all_settings');
     }
 
     public function hasCompany($company_id)
