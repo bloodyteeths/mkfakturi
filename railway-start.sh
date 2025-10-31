@@ -110,6 +110,14 @@ export QUEUE_CONNECTION=sync
 export BROADCAST_DRIVER=log
 export REDIS_CLIENT=
 
+# Set session and Sanctum configuration for Railway domain
+if [ ! -z "$RAILWAY_PUBLIC_DOMAIN" ]; then
+    echo "Configuring session for Railway domain: $RAILWAY_PUBLIC_DOMAIN"
+    export SESSION_DOMAIN=".${RAILWAY_PUBLIC_DOMAIN}"
+    export SANCTUM_STATEFUL_DOMAINS="${RAILWAY_PUBLIC_DOMAIN},localhost,127.0.0.1"
+    export APP_URL="https://${RAILWAY_PUBLIC_DOMAIN}"
+fi
+
 # Clear any cached config that might have wrong values
 echo "Clearing caches..."
 rm -rf bootstrap/cache/*.php || true
