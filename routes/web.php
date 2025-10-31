@@ -169,3 +169,16 @@ Route::get('/ping', function () {
 
 Route::get('/health', [App\Http\Controllers\HealthController::class, 'health']);
 Route::get('/ready', [App\Http\Controllers\HealthController::class, 'ready']);
+
+// Debug route to view Laravel logs (only in production for Railway debugging)
+if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
+    Route::get('/debug/logs', function () {
+        $logFile = storage_path('logs/laravel.log');
+        if (file_exists($logFile)) {
+            $logs = file_get_contents($logFile);
+            $lastLines = implode("\n", array_slice(explode("\n", $logs), -200)); // Last 200 lines
+            return response('<pre>' . htmlspecialchars($lastLines) . '</pre>');
+        }
+        return response('No log file found');
+    });
+}

@@ -213,6 +213,11 @@ else
     npm run build || echo "Frontend build failed"
 fi
 
+# Enable detailed Laravel logging
+export LOG_CHANNEL=stack
+export LOG_LEVEL=debug
+
 # Start PHP server
 echo "Starting PHP server on port $PORT..."
+echo "Laravel logs will be written to storage/logs/laravel.log"
 php -S 0.0.0.0:$PORT -t public 2>&1 | tee -a storage/logs/server.log
