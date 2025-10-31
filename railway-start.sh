@@ -10,15 +10,25 @@ env | sort | grep -E "(DATABASE|DB_|MYSQL|RAILWAY)" || echo "No database env var
 
 # Railway provides these MySQL variables from the MySQL service
 # Map them to Laravel's expected variable names
-if [ ! -z "$MYSQLHOST" ]; then
-    echo "Using Railway MySQL service variables"
+if [ ! -z "$MYSQL_URL" ]; then
+    echo "Using Railway MYSQL_URL to parse connection..."
+    # Parse MYSQL_URL: mysql://user:pass@host:port/database
+    temp="${MYSQL_URL#*://}"
+    userpass="${temp%%@*}"
+    export DB_USERNAME="${userpass%%:*}"
+    export DB_PASSWORD="${userpass#*:}"
+
+    temp="${temp#*@}"
+    hostport="${temp%%/*}"
+    export DB_HOST="${hostport%%:*}"
+    export DB_PORT="${hostport#*:}"
+    export DB_DATABASE="${temp#*/}"
     export DB_CONNECTION=mysql
-    export DB_HOST="$MYSQLHOST"
-    export DB_PORT="$MYSQLPORT"
-    # Railway uses both MYSQL_DATABASE and MYSQLDATABASE - prioritize the one that has a value
-    export DB_DATABASE="${MYSQLDATABASE:-$MYSQL_DATABASE}"
-    export DB_USERNAME="$MYSQLUSER"
-    export DB_PASSWORD="$MYSQLPASSWORD"
+
+    echo "Parsed from MYSQL_URL:"
+    echo "DB_HOST: $DB_HOST"
+    echo "DB_PORT: $DB_PORT"
+    echo "DB_DATABASE: $DB_DATABASE"
 elif [ ! -z "$DATABASE_URL" ]; then
     echo "Parsing DATABASE_URL: $DATABASE_URL"
 
