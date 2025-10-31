@@ -125,11 +125,26 @@ php artisan migrate --force || echo "Some migrations failed, continuing..."
 # Force set profile_complete if RAILWAY_SKIP_INSTALL is true
 if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "RAILWAY_SKIP_INSTALL enabled - forcing installation complete..."
+
+    # Create database marker file (required by InstallUtils::isDbCreated())
+    echo "Creating database_created marker file..."
+    mkdir -p storage/app
+    echo "$(date +%s)" > storage/app/database_created
+    chmod 664 storage/app/database_created
+
+    # Set profile_complete in database
     php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED'); echo 'Set profile_complete to COMPLETED';" 2>/dev/null || echo "Failed to set profile_complete"
 
     # Verify it worked
     VERIFY=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
     echo "Verification - profile_complete is now: $VERIFY"
+
+    # Verify marker file exists
+    if [ -f "storage/app/database_created" ]; then
+        echo "Database marker file created successfully"
+    else
+        echo "WARNING: Failed to create database marker file!"
+    fi
 fi
 
 # Seed database if RAILWAY_SEED_DB is set
