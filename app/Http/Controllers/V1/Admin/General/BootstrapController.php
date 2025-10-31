@@ -25,21 +25,36 @@ class BootstrapController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $current_user = $request->user();
+        // Eager load user relationships to avoid N+1 queries
+        $current_user = $request->user()->load([
+            'currency',
+            'settings',
+            'companies.address',
+            'companies' => function ($query) {
+                // Pre-load roles for each company to avoid N+1 in CompanyResource
+                $query->select('companies.*');
+            }
+        ]);
+
         $current_user_settings = $current_user->getAllSettings();
 
         $main_menu = $this->generateMenu('main_menu', $current_user);
 
         $setting_menu = $this->generateMenu('setting_menu', $current_user);
 
+        // Companies already loaded via eager loading above
         $companies = $current_user->companies;
 
         $current_company = Company::find($request->header('company'));
 
         if ((! $current_company) || ($current_company && ! $current_user->hasCompany($current_company->id))) {
-            $current_company = $current_user->companies()->first();
+            $current_company = $current_user->companies()->with('address')->first();
+        } else {
+            // Ensure address is loaded for the found company
+            $current_company->load('address');
         }
 
+        // Use cached company settings
         $current_company_settings = CompanySetting::getAllSettings($current_company->id);
 
         $current_company_currency = $current_company_settings->has('currency')

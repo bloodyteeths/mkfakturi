@@ -23,10 +23,15 @@ class CompanyResource extends JsonResource
             'unique_hash' => $this->unique_hash,
             'owner_id' => $this->owner_id,
             'slug' => $this->slug,
-            'address' => $this->when($this->address()->exists(), function () {
+            'address' => $this->when($this->relationLoaded('address') && $this->address, function () {
                 return new AddressResource($this->address);
             }),
-            'roles' => RoleResource::collection($this->roles),
+            'roles' => $this->when($this->relationLoaded('roles'), function () {
+                return RoleResource::collection($this->roles);
+            }, function () {
+                // Fall back to fetching roles if not eager loaded
+                return RoleResource::collection($this->roles);
+            }),
         ];
     }
 }

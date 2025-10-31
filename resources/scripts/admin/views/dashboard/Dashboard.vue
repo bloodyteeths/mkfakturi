@@ -20,9 +20,11 @@ const showAiInsights = computed(() => {
 })
 
 onMounted(() => {
-  if (route.meta.ability && !userStore.hasAbilities(route.meta.ability)) {
+  // Only redirect if abilities are loaded AND user lacks the required ability
+  // Don't redirect if abilities haven't loaded yet (empty array)
+  if (route.meta.ability && userStore.currentAbilities.length > 0 && !userStore.hasAbilities(route.meta.ability)) {
     router.push({ name: 'account.settings' })
-  } else if (route.meta.isOwner && !userStore.currentUser.is_owner) {
+  } else if (route.meta.isOwner && userStore.currentUser && !userStore.currentUser.is_owner) {
     router.push({ name: 'account.settings' })
   }
 })

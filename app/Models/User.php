@@ -323,6 +323,9 @@ class User extends Authenticatable implements HasMedia
                 ]
             );
         }
+
+        // Clear user settings cache after update
+        $this->clearComputed('all_settings');
     }
 
     public function hasCompany($company_id)
@@ -334,9 +337,20 @@ class User extends Authenticatable implements HasMedia
 
     public function getAllSettings()
     {
-        return $this->settings()->get()->mapWithKeys(function ($item) {
-            return [$item['key'] => $item['value']];
-        });
+        // Use caching for user settings to avoid repeated DB queries
+        return $this->cacheComputed('all_settings', function () {
+            // If settings are already loaded (eager loading), use them
+            if ($this->relationLoaded('settings')) {
+                return $this->settings->mapWithKeys(function ($item) {
+                    return [$item['key'] => $item['value']];
+                });
+            }
+
+            // Otherwise, fetch from database
+            return $this->settings()->get()->mapWithKeys(function ($item) {
+                return [$item['key'] => $item['value']];
+            });
+        }, CacheServiceProvider::CACHE_TTLS['USER_SETTINGS']);
     }
 
     public function getSettings($settings)

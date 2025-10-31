@@ -50,9 +50,11 @@ const isAppLoaded = computed(() => {
 
 onMounted(() => {
   globalStore.bootstrap().then((res) => {
-    if (route.meta.ability && !userStore.hasAbilities(route.meta.ability)) {
+    // Only redirect if abilities are loaded AND user lacks the required ability
+    // Check if currentAbilities has been populated first
+    if (route.meta.ability && userStore.currentAbilities.length > 0 && !userStore.hasAbilities(route.meta.ability)) {
       router.push({ name: 'account.settings' })
-    } else if (route.meta.isOwner && !userStore.currentUser.is_owner) {
+    } else if (route.meta.isOwner && userStore.currentUser && !userStore.currentUser.is_owner) {
       router.push({ name: 'account.settings' })
     }
 

@@ -74,8 +74,10 @@ const dropdownMenuItems = computed(() => {
 })
 
 watchEffect(() => {
-  if (route.path === '/admin/settings') {
-    router.push('/admin/settings/account-settings')
+  // Only redirect if exactly on /admin/settings path (no child route)
+  // Don't redirect if we're already on a settings sub-route
+  if (route.path === '/admin/settings' && !route.matched.some(r => r.path.includes('/admin/settings/'))) {
+    router.replace('/admin/settings/account-settings')
   }
 
   const item = dropdownMenuItems.value.find((item) => {
