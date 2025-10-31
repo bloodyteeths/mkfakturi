@@ -30,12 +30,8 @@ class CustomFieldValueResource extends JsonResource
             'company_id' => $this->company_id,
             'default_answer' => $this->defaultAnswer,
             'default_formatted_answer' => $this->dateTimeFormat(),
-            'custom_field' => $this->when($this->customField()->exists(), function () {
-                return new CustomFieldResource($this->customField);
-            }),
-            'company' => $this->when($this->company()->exists(), function () {
-                return new CompanyResource($this->company);
-            }),
+            'custom_field' => CustomFieldResource::make($this->whenLoaded('customField')),
+            'company' => CompanyResource::make($this->whenLoaded('company')),
         ];
     }
 

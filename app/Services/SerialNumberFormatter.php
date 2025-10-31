@@ -11,6 +11,7 @@ use App\Models\Customer;
 class SerialNumberFormatter
 {
     public const VALID_PLACEHOLDERS = ['CUSTOMER_SERIES', 'SEQUENCE', 'DATE_FORMAT', 'SERIES', 'RANDOM_SEQUENCE', 'DELIMITER', 'CUSTOMER_SEQUENCE'];
+    public const DEFAULT_FALLBACK_FORMAT = 'INV-{year}-{increment}';
 
     private $model;
 
@@ -92,6 +93,12 @@ class SerialNumberFormatter
                 $companyId
             );
         }
+        if (! $format) {
+            $format = self::DEFAULT_FALLBACK_FORMAT;
+        }
+
+        $format = $this->normalizeFormat($format);
+
         $this->setNextNumbers();
 
         $serialNumber = $this->generateSerialNumber(
@@ -99,6 +106,26 @@ class SerialNumberFormatter
         );
 
         return $serialNumber;
+    }
+
+    private function normalizeFormat(string $format): string
+    {
+        if (str_contains($format, '{{')) {
+            return $format;
+        }
+
+        $normalized = strtr($format, [
+            '{year}' => '{{DATE_FORMAT:Y}}',
+            '{increment}' => '{{SEQUENCE:6}}',
+            '{series}' => '{{SERIES:INV}}',
+            '{delimiter}' => '{{DELIMITER:-}}',
+        ]);
+
+        if (! str_contains($normalized, '{{SEQUENCE')) {
+            $normalized .= '{{DELIMITER:-}}{{SEQUENCE:6}}';
+        }
+
+        return $normalized;
     }
 
     public function setNextNumbers()

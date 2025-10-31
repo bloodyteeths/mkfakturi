@@ -13,6 +13,35 @@ use Illuminate\Http\Request;
 class InvoicesController extends Controller
 {
     /**
+     * Relations required to render the invoice resource without N+1 queries.
+     *
+     * @return array<int, string>
+     */
+    private function invoiceResourceRelations(): array
+    {
+        return [
+            'customer.currency',
+            'customer.company',
+            'customer.billingAddress',
+            'customer.shippingAddress',
+            'customer.fields.customField',
+            'customer.fields.company',
+            'currency',
+            'company',
+            'creator',
+            'items.item',
+            'items.taxes.taxType',
+            'items.taxes.currency',
+            'items.fields.customField',
+            'items.fields.company',
+            'taxes.taxType',
+            'taxes.currency',
+            'fields.customField',
+            'fields.company',
+        ];
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\JsonResponse
@@ -25,7 +54,7 @@ class InvoicesController extends Controller
 
         $invoices = Invoice::whereCompany()
             ->applyFilters($request->all())
-            ->with('customer')
+            ->with($this->invoiceResourceRelations())
             ->latest()
             ->paginateData($limit);
 
@@ -46,6 +75,7 @@ class InvoicesController extends Controller
         $this->authorize('create', Invoice::class);
 
         $invoice = Invoice::createInvoice($request);
+        $invoice->load($this->invoiceResourceRelations());
 
         if ($request->has('invoiceSend')) {
             $invoice->send($request->subject, $request->body);
@@ -64,6 +94,8 @@ class InvoicesController extends Controller
     public function show(Request $request, Invoice $invoice)
     {
         $this->authorize('view', $invoice);
+
+        $invoice->load($this->invoiceResourceRelations());
 
         return new InvoiceResource($invoice);
     }
@@ -85,6 +117,8 @@ class InvoicesController extends Controller
         }
 
         GenerateInvoicePdfJob::dispatch($invoice, true);
+
+        $invoice->load($this->invoiceResourceRelations());
 
         return new InvoiceResource($invoice);
     }

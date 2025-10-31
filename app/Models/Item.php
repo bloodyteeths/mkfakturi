@@ -19,6 +19,7 @@ class Item extends Model
 
     protected $appends = [
         'formattedCreatedAt',
+        'unit_name',
     ];
 
     /**
@@ -39,6 +40,11 @@ class Item extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+    public function getUnitNameAttribute(): ?string
+    {
+        return $this->unit ? $this->unit->name : null;
     }
 
     public function company(): BelongsTo

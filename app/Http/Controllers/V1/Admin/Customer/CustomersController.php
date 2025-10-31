@@ -8,7 +8,6 @@ use App\Http\Requests\DeleteCustomersRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CustomersController extends Controller
 {
@@ -23,16 +22,22 @@ class CustomersController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $customers = Customer::with('creator')
+        $customers = Customer::with([
+                'creator',
+                'billingAddress',
+                'shippingAddress',
+                'fields.customField',
+                'fields.company',
+                'company',
+            ])
             ->whereCompany()
             ->applyFilters($request->all())
-            ->select(
-                'customers.*',
-                DB::raw('sum(invoices.base_due_amount) as base_due_amount'),
-                DB::raw('sum(invoices.due_amount) as due_amount'),
-            )
-            ->groupBy('customers.id')
-            ->leftJoin('invoices', 'customers.id', '=', 'invoices.customer_id')
+            ->withSum(['invoices as base_due_amount' => function ($query) {
+                $query->whereCompany();
+            }], 'base_due_amount')
+            ->withSum(['invoices as due_amount' => function ($query) {
+                $query->whereCompany();
+            }], 'due_amount')
             ->paginateData($limit);
 
         return CustomerResource::collection($customers)

@@ -2,6 +2,7 @@
 
 namespace App\Space;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -33,7 +34,19 @@ class PdfTemplateUtils
      */
     public static function getFormattedTemplates($templateType, $imageFormat = 'base64')
     {
+        if ($imageFormat !== 'base64') {
+            return self::buildFormattedTemplates($templateType, $imageFormat);
+        }
 
+        return Cache::remember(
+            self::cacheKey($templateType, $imageFormat),
+            now()->addDay(),
+            fn () => self::buildFormattedTemplates($templateType, $imageFormat)
+        );
+    }
+
+    protected static function buildFormattedTemplates($templateType, $imageFormat)
+    {
         $files_native = array_map(function ($file) {
             return [
                 'path' => $file,
@@ -78,6 +91,32 @@ class PdfTemplateUtils
                 'custom' => $isCustomTemplate,
             ];
         }, $files);
+    }
+
+    protected static function cacheKey(string $templateType, string $imageFormat): string
+    {
+        return sprintf('pdf_templates:%s:%s', $templateType, $imageFormat);
+    }
+
+    public static function clearTemplateCache(?string $templateType = null): void
+    {
+        $types = $templateType ? [$templateType] : self::availableTemplateTypes();
+
+        foreach ($types as $type) {
+            Cache::forget(self::cacheKey($type, 'base64'));
+        }
+    }
+
+    public static function availableTemplateTypes(): array
+    {
+        $native = collect(Storage::disk('views')->directories('/app/pdf'))
+            ->map(fn ($directory) => trim(str_replace('\\', '/', $directory), '/'))
+            ->map(fn ($directory) => Str::afterLast($directory, '/'));
+
+        $custom = collect(Storage::disk('pdf_templates')->directories('/'))
+            ->map(fn ($directory) => trim(str_replace('\\', '/', $directory), '/'));
+
+        return $native->merge($custom)->filter()->unique()->values()->all();
     }
 
     /**

@@ -68,7 +68,7 @@ class ImportJobResource extends JsonResource
             // Relationships
             'company_id' => $this->company_id,
             'creator_id' => $this->creator_id,
-            'creator' => $this->when($this->creator()->exists(), function () {
+            'creator' => $this->whenLoaded('creator', function () {
                 return [
                     'id' => $this->creator->id,
                     'name' => $this->creator->name,

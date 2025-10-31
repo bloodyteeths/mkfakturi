@@ -51,7 +51,7 @@ class CacheServiceProvider extends ServiceProvider
     {
         // Set default cache tags for better organization
         Cache::macro('rememberForever', function ($key, $callback) {
-            return Cache::rememberForever($key, $callback);
+            return $this->store()->rememberForever($key, $callback);
         });
 
         // Company-scoped cache helper

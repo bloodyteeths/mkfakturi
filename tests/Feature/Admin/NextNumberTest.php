@@ -46,3 +46,23 @@ test('next number', function () {
         'nextNumber' => 'PAY-000001',
     ]);
 });
+
+test('next number falls back to default format when missing setting', function () {
+    $user = User::find(1);
+    $companyId = $user->companies()->first()->id;
+
+    \App\Models\CompanySetting::where('company_id', $companyId)
+        ->where('option', 'invoice_number_format')
+        ->delete();
+
+    $response = getJson('api/v1/next-number?key=invoice');
+
+    $response->assertStatus(200);
+
+    $expectedPrefix = 'INV-'.date('Y').'-';
+
+    expect($response->json('nextNumber'))
+        ->toStartWith($expectedPrefix)
+        ->and($response->json('nextNumber'))
+        ->toEndWith('000001');
+});

@@ -8,7 +8,9 @@ use App\Http\Requests\DeleteItemsRequest;
 use App\Http\Resources\ItemResource;
 use App\Models\Item;
 use App\Models\TaxType;
+use App\Providers\CacheServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ItemsController extends Controller
 {
@@ -24,16 +26,29 @@ class ItemsController extends Controller
         $limit = $request->has('limit') ? $request->limit : 10;
 
         $items = Item::whereCompany()
-            ->leftJoin('units', 'units.id', '=', 'items.unit_id')
+            ->with([
+                'unit',
+                'company',
+                'taxes.taxType',
+                'taxes.currency',
+                'currency',
+            ])
             ->applyFilters($request->all())
-            ->select('items.*', 'units.name as unit_name')
             ->latest()
             ->paginateData($limit);
 
+        $taxTypes = Cache::companyRemember('items:tax-types', CacheServiceProvider::CACHE_TTLS['MEDIUM'], function () {
+            return TaxType::whereCompany()->latest()->get();
+        });
+
+        $itemCount = Cache::companyRemember('items:count', CacheServiceProvider::CACHE_TTLS['SHORT'], function () {
+            return Item::whereCompany()->count();
+        });
+
         return ItemResource::collection($items)
             ->additional(['meta' => [
-                'tax_types' => TaxType::whereCompany()->latest()->get(),
-                'item_total_count' => Item::whereCompany()->count(),
+                'tax_types' => $taxTypes,
+                'item_total_count' => $itemCount,
             ]]);
     }
 

@@ -55,27 +55,13 @@ class InvoiceResource extends JsonResource
             'sales_tax_type' => $this->sales_tax_type,
             'sales_tax_address_type' => $this->sales_tax_address_type,
             'overdue' => $this->overdue,
-            'items' => $this->when($this->items()->exists(), function () {
-                return InvoiceItemResource::collection($this->items);
-            }),
-            'customer' => $this->when($this->customer()->exists(), function () {
-                return new CustomerResource($this->customer);
-            }),
-            'creator' => $this->when($this->creator()->exists(), function () {
-                return new UserResource($this->creator);
-            }),
-            'taxes' => $this->when($this->taxes()->exists(), function () {
-                return TaxResource::collection($this->taxes);
-            }),
-            'fields' => $this->when($this->fields()->exists(), function () {
-                return CustomFieldValueResource::collection($this->fields);
-            }),
-            'company' => $this->when($this->company()->exists(), function () {
-                return new CompanyResource($this->company);
-            }),
-            'currency' => $this->when($this->currency()->exists(), function () {
-                return new CurrencyResource($this->currency);
-            }),
+            'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
+            'customer' => CustomerResource::make($this->whenLoaded('customer')),
+            'creator' => UserResource::make($this->whenLoaded('creator')),
+            'taxes' => TaxResource::collection($this->whenLoaded('taxes')),
+            'fields' => CustomFieldValueResource::collection($this->whenLoaded('fields')),
+            'company' => CompanyResource::make($this->whenLoaded('company')),
+            'currency' => CurrencyResource::make($this->whenLoaded('currency')),
         ];
     }
 }
