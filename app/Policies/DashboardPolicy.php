@@ -13,7 +13,11 @@ class DashboardPolicy
 
     public function view(User $user, Company $company): bool
     {
-        if (BouncerFacade::can('dashboard') && $user->hasCompany($company->id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('dashboard') && $user->hasCompany($company->id)) {
             return true;
         }
 
