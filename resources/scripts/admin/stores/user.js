@@ -129,6 +129,12 @@ export const useUserStore = (useWindow = false) => {
       },
 
       hasAbilities(abilities) {
+        // Owners have all abilities - check if user is owner first
+        if (this.currentUser && this.currentUser.is_owner) {
+          return true
+        }
+        
+        // Check abilities array
         return !!this.currentAbilities.find((ab) => {
           if (ab.name === '*') return true
           if (typeof abilities === 'string') {

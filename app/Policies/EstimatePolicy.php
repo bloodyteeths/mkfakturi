@@ -18,7 +18,11 @@ class EstimatePolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-estimate', Estimate::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-estimate', Estimate::class)) {
             return true;
         }
 
@@ -32,7 +36,11 @@ class EstimatePolicy
      */
     public function view(User $user, Estimate $estimate): bool
     {
-        if (BouncerFacade::can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -46,7 +54,11 @@ class EstimatePolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-estimate', Estimate::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-estimate', Estimate::class)) {
             return true;
         }
 
@@ -60,7 +72,11 @@ class EstimatePolicy
      */
     public function update(User $user, Estimate $estimate): bool
     {
-        if (BouncerFacade::can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -74,7 +90,11 @@ class EstimatePolicy
      */
     public function delete(User $user, Estimate $estimate): bool
     {
-        if (BouncerFacade::can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -88,7 +108,11 @@ class EstimatePolicy
      */
     public function restore(User $user, Estimate $estimate): bool
     {
-        if (BouncerFacade::can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -102,7 +126,11 @@ class EstimatePolicy
      */
     public function forceDelete(User $user, Estimate $estimate): bool
     {
-        if (BouncerFacade::can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -117,7 +145,11 @@ class EstimatePolicy
      */
     public function send(User $user, Estimate $estimate)
     {
-        if (BouncerFacade::can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -131,7 +163,11 @@ class EstimatePolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-estimate', Estimate::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-estimate', Estimate::class)) {
             return true;
         }
 

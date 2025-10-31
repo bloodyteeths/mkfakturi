@@ -19,7 +19,11 @@ class ExpenseCategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class)) {
             return true;
         }
 
@@ -33,7 +37,11 @@ class ExpenseCategoryPolicy
      */
     public function view(User $user, ExpenseCategory $expenseCategory): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
             return true;
         }
 
@@ -47,7 +55,11 @@ class ExpenseCategoryPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class)) {
             return true;
         }
 
@@ -61,7 +73,11 @@ class ExpenseCategoryPolicy
      */
     public function update(User $user, ExpenseCategory $expenseCategory): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
             return true;
         }
 
@@ -75,7 +91,11 @@ class ExpenseCategoryPolicy
      */
     public function delete(User $user, ExpenseCategory $expenseCategory): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
             return true;
         }
 
@@ -89,7 +109,11 @@ class ExpenseCategoryPolicy
      */
     public function restore(User $user, ExpenseCategory $expenseCategory): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
             return true;
         }
 
@@ -103,7 +127,11 @@ class ExpenseCategoryPolicy
      */
     public function forceDelete(User $user, ExpenseCategory $expenseCategory): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-expense', Expense::class) && $user->hasCompany($expenseCategory->company_id)) {
             return true;
         }
 

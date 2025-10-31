@@ -42,6 +42,13 @@ class BootstrapController extends Controller
         // Then get cached abilities (will fetch fresh from DB after refresh)
         BouncerFacade::refreshFor($current_user);
         $current_user_abilities = $current_user->getCachedPermissions();
+        
+        // If user is owner and has no abilities, they should have all permissions
+        // Frontend checks for owner status, but also ensure abilities are returned
+        if ($current_user->isOwner() && empty($current_user_abilities)) {
+            // For owners, return a wildcard ability to indicate all permissions
+            $current_user_abilities = [['name' => '*', 'title' => 'All Abilities']];
+        }
 
         // Generate menus after abilities are loaded and cached
         // Menu generation uses checkAccess() which calls can() - abilities are now cached

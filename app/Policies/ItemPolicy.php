@@ -18,7 +18,11 @@ class ItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-item', Item::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-item', Item::class)) {
             return true;
         }
 
@@ -32,7 +36,11 @@ class ItemPolicy
      */
     public function view(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('view-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -46,7 +54,11 @@ class ItemPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-item', Item::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-item', Item::class)) {
             return true;
         }
 
@@ -60,7 +72,11 @@ class ItemPolicy
      */
     public function update(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('edit-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -74,7 +90,11 @@ class ItemPolicy
      */
     public function delete(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -88,7 +108,11 @@ class ItemPolicy
      */
     public function restore(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -102,7 +126,11 @@ class ItemPolicy
      */
     public function forceDelete(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -116,7 +144,11 @@ class ItemPolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-item', Item::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-item', Item::class)) {
             return true;
         }
 
