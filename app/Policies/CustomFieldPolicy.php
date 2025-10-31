@@ -18,7 +18,11 @@ class CustomFieldPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-custom-field', CustomField::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-custom-field', CustomField::class)) {
             return true;
         }
 
@@ -32,7 +36,11 @@ class CustomFieldPolicy
      */
     public function view(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('view-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
 
@@ -46,7 +54,11 @@ class CustomFieldPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-custom-field', CustomField::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-custom-field', CustomField::class)) {
             return true;
         }
 
@@ -60,7 +72,11 @@ class CustomFieldPolicy
      */
     public function update(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('edit-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
 
@@ -74,7 +90,11 @@ class CustomFieldPolicy
      */
     public function delete(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
 
@@ -88,7 +108,11 @@ class CustomFieldPolicy
      */
     public function restore(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
 
@@ -102,7 +126,11 @@ class CustomFieldPolicy
      */
     public function forceDelete(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
 

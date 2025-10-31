@@ -18,7 +18,11 @@ class ExchangeRateProviderPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-exchange-rate-provider', ExchangeRateProvider::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-exchange-rate-provider', ExchangeRateProvider::class)) {
             return true;
         }
 
@@ -32,7 +36,11 @@ class ExchangeRateProviderPolicy
      */
     public function view(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        if (BouncerFacade::can('view-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
 
@@ -46,7 +54,11 @@ class ExchangeRateProviderPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-exchange-rate-provider', ExchangeRateProvider::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-exchange-rate-provider', ExchangeRateProvider::class)) {
             return true;
         }
 
@@ -60,7 +72,11 @@ class ExchangeRateProviderPolicy
      */
     public function update(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        if (BouncerFacade::can('edit-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
 
@@ -74,7 +90,11 @@ class ExchangeRateProviderPolicy
      */
     public function delete(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        if (BouncerFacade::can('delete-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
 

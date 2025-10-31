@@ -19,7 +19,11 @@ class PaymentMethodPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class)) {
             return true;
         }
 
@@ -33,7 +37,11 @@ class PaymentMethodPolicy
      */
     public function view(User $user, PaymentMethod $paymentMethod): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
 
@@ -47,7 +55,11 @@ class PaymentMethodPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class)) {
             return true;
         }
 
@@ -61,7 +73,11 @@ class PaymentMethodPolicy
      */
     public function update(User $user, PaymentMethod $paymentMethod): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
 
@@ -75,7 +91,11 @@ class PaymentMethodPolicy
      */
     public function delete(User $user, PaymentMethod $paymentMethod): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
 
@@ -89,7 +109,11 @@ class PaymentMethodPolicy
      */
     public function restore(User $user, PaymentMethod $paymentMethod): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
 
@@ -103,7 +127,11 @@ class PaymentMethodPolicy
      */
     public function forceDelete(User $user, PaymentMethod $paymentMethod): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
 

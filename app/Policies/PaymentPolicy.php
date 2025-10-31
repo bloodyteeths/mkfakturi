@@ -18,7 +18,11 @@ class PaymentPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-payment', Payment::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', Payment::class)) {
             return true;
         }
 
@@ -32,7 +36,11 @@ class PaymentPolicy
      */
     public function view(User $user, Payment $payment): bool
     {
-        if (BouncerFacade::can('view-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -46,7 +54,11 @@ class PaymentPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-payment', Payment::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-payment', Payment::class)) {
             return true;
         }
 
@@ -60,7 +72,11 @@ class PaymentPolicy
      */
     public function update(User $user, Payment $payment): bool
     {
-        if (BouncerFacade::can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -74,7 +90,11 @@ class PaymentPolicy
      */
     public function delete(User $user, Payment $payment): bool
     {
-        if (BouncerFacade::can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -88,7 +108,11 @@ class PaymentPolicy
      */
     public function restore(User $user, Payment $payment): bool
     {
-        if (BouncerFacade::can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -102,7 +126,11 @@ class PaymentPolicy
      */
     public function forceDelete(User $user, Payment $payment): bool
     {
-        if (BouncerFacade::can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -116,7 +144,11 @@ class PaymentPolicy
      */
     public function send(User $user, Payment $payment)
     {
-        if (BouncerFacade::can('send-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('send-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -130,7 +162,11 @@ class PaymentPolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-payment', Payment::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-payment', Payment::class)) {
             return true;
         }
 

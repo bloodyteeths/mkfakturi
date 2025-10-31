@@ -13,7 +13,11 @@ class NotePolicy
 
     public function manageNotes(User $user)
     {
-        if (BouncerFacade::can('manage-all-notes', Note::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('manage-all-notes', Note::class)) {
             return true;
         }
 
@@ -22,7 +26,11 @@ class NotePolicy
 
     public function viewNotes(User $user)
     {
-        if (BouncerFacade::can('view-all-notes', Note::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-all-notes', Note::class)) {
             return true;
         }
 

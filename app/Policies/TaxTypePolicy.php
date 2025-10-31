@@ -18,7 +18,11 @@ class TaxTypePolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-tax-type', TaxType::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-tax-type', TaxType::class)) {
             return true;
         }
 
@@ -32,7 +36,11 @@ class TaxTypePolicy
      */
     public function view(User $user, TaxType $taxType): bool
     {
-        if (BouncerFacade::can('view-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -46,7 +54,11 @@ class TaxTypePolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-tax-type', TaxType::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-tax-type', TaxType::class)) {
             return true;
         }
 
@@ -60,7 +72,11 @@ class TaxTypePolicy
      */
     public function update(User $user, TaxType $taxType): bool
     {
-        if (BouncerFacade::can('edit-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -74,7 +90,11 @@ class TaxTypePolicy
      */
     public function delete(User $user, TaxType $taxType): bool
     {
-        if (BouncerFacade::can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -88,7 +108,11 @@ class TaxTypePolicy
      */
     public function restore(User $user, TaxType $taxType): bool
     {
-        if (BouncerFacade::can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -102,7 +126,11 @@ class TaxTypePolicy
      */
     public function forceDelete(User $user, TaxType $taxType): bool
     {
-        if (BouncerFacade::can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
