@@ -23,15 +23,21 @@ router.beforeEach((to, from, next) => {
   let ability = to.meta.ability
   const { isAppLoaded } = globalStore
 
-  if (ability && isAppLoaded && to.meta.requiresAuth) {
+  // Don't check abilities until app is fully loaded AND abilities are populated
+  if (ability && isAppLoaded && to.meta.requiresAuth && userStore.currentAbilities && userStore.currentAbilities.length > 0) {
     if (userStore.hasAbilities(ability)) {
       next()
-    } else next({ name: 'account.settings' })
-  } else if (to.meta.isOwner && isAppLoaded) {
+    } else {
+      next({ name: 'account.settings' })
+    }
+  } else if (to.meta.isOwner && isAppLoaded && userStore.currentUser) {
     if (userStore.currentUser.is_owner) {
       next()
-    } else next({ name: 'dashboard' })
+    } else {
+      next({ name: 'dashboard' })
+    }
   } else {
+    // Allow navigation if app isn't loaded yet or abilities aren't ready
     next()
   }
 })

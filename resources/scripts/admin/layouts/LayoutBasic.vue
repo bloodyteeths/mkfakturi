@@ -17,7 +17,10 @@
     </main>
   </div>
 
-  <BaseGlobalLoader v-else />
+  <!-- Show minimal loader only briefly - don't block entire app -->
+  <div v-else class="h-full flex items-center justify-center">
+    <div class="text-primary-500">Loading...</div>
+  </div>
 </template>
 
 <script setup>
@@ -49,13 +52,18 @@ const isAppLoaded = computed(() => {
 })
 
 onMounted(() => {
+  // Start bootstrap but don't block UI - app will show once isAppLoaded becomes true
   globalStore.bootstrap().then((res) => {
-    // Only redirect if abilities are loaded AND user lacks the required ability
-    // Check if currentAbilities has been populated first
-    if (route.meta.ability && userStore.currentAbilities.length > 0 && !userStore.hasAbilities(route.meta.ability)) {
+    // Only redirect if abilities are fully loaded AND user lacks the required ability
+    if (route.meta.ability && userStore.currentAbilities && userStore.currentAbilities.length > 0) {
+      if (!userStore.hasAbilities(route.meta.ability)) {
+        router.push({ name: 'account.settings' })
+        return
+      }
+    }
+    if (route.meta.isOwner && userStore.currentUser && userStore.currentUser.is_owner === false) {
       router.push({ name: 'account.settings' })
-    } else if (route.meta.isOwner && userStore.currentUser && !userStore.currentUser.is_owner) {
-      router.push({ name: 'account.settings' })
+      return
     }
 
     if (

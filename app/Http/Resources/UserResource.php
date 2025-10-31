@@ -30,6 +30,7 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'avatar' => $this->avatar,
+            // Use cached isOwner - it will use loaded companies if available
             'is_owner' => $this->isOwner(),
             'roles' => $this->roles,
             'formatted_created_at' => $this->formattedCreatedAt,

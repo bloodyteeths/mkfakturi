@@ -101,6 +101,8 @@ export const useGlobalStore = (useWindow = false) => {
                   'mk'
               }
 
+              // Set app as loaded immediately after data is populated
+              // This allows UI to render while any remaining async operations complete
               this.isAppLoaded = true
               resolve(response)
             })
