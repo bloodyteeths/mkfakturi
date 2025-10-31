@@ -27,7 +27,7 @@ class ResetAdminCommand extends Command
 
         if ($admin) {
             $this->info("Found existing user. Resetting password...");
-            $admin->password = Hash::make($password);
+            $admin->password = $password; // Let the model mutator handle hashing
             $admin->save();
             $this->info("Password updated for user: {$admin->email}");
         } else {
@@ -69,7 +69,7 @@ class ResetAdminCommand extends Command
             $admin = User::create([
                 'name' => 'Администратор',
                 'email' => $email,
-                'password' => Hash::make($password),
+                'password' => $password, // Let the model mutator handle hashing
                 'role' => 'super admin',
             ]);
 
