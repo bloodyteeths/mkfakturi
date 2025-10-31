@@ -18,7 +18,13 @@ class RecurringInvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-recurring-invoice', RecurringInvoice::class)) {
+        // Check if user is owner - owners have all permissions
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        // Use the user instance to check abilities (respects Bouncer scope)
+        if ($user->can('view-recurring-invoice', RecurringInvoice::class)) {
             return true;
         }
 
@@ -32,7 +38,11 @@ class RecurringInvoicePolicy
      */
     public function view(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if (BouncerFacade::can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -46,7 +56,11 @@ class RecurringInvoicePolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-recurring-invoice', RecurringInvoice::class)) {
             return true;
         }
 
@@ -60,7 +74,11 @@ class RecurringInvoicePolicy
      */
     public function update(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if (BouncerFacade::can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -74,7 +92,11 @@ class RecurringInvoicePolicy
      */
     public function delete(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if (BouncerFacade::can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -88,7 +110,11 @@ class RecurringInvoicePolicy
      */
     public function restore(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if (BouncerFacade::can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -102,7 +128,11 @@ class RecurringInvoicePolicy
      */
     public function forceDelete(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if (BouncerFacade::can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -116,7 +146,11 @@ class RecurringInvoicePolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-recurring-invoice', RecurringInvoice::class)) {
             return true;
         }
 

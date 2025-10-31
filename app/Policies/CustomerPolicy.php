@@ -18,7 +18,13 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-customer', Customer::class)) {
+        // Check if user is owner - owners have all permissions
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        // Use the user instance to check abilities (respects Bouncer scope)
+        if ($user->can('view-customer', Customer::class)) {
             return true;
         }
 
@@ -32,7 +38,11 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('view-customer', $customer)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('view-customer', $customer)) {
             return true;
         }
 
@@ -46,7 +56,11 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-customer', Customer::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('create-customer', Customer::class)) {
             return true;
         }
 
@@ -60,7 +74,11 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('edit-customer', $customer)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('edit-customer', $customer)) {
             return true;
         }
 
@@ -74,7 +92,11 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-customer', $customer)) {
             return true;
         }
 
@@ -88,7 +110,11 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-customer', $customer)) {
             return true;
         }
 
@@ -102,7 +128,11 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-customer', $customer)) {
             return true;
         }
 
@@ -116,7 +146,11 @@ class CustomerPolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-customer', Customer::class)) {
+        if ($user->isOwner()) {
+            return true;
+        }
+        
+        if ($user->can('delete-customer', Customer::class)) {
             return true;
         }
 
