@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Requests\UserRequest;
 use App\Notifications\MailResetPasswordNotification;
+use App\Providers\CacheServiceProvider;
 use App\Traits\CacheableTrait;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
