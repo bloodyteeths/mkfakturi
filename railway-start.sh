@@ -87,6 +87,10 @@ if [ "$RAILWAY_AUTO_INSTALL" = "true" ]; then
         # Verify it worked
         PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'STILL_NOT_SET';" 2>/dev/null | tail -1)
         echo "After seeder, profile status: $PROFILE_STATUS"
+
+        # Double check by querying the database directly
+        echo "Checking settings table directly..."
+        php artisan tinker --execute="print_r(\App\Models\Setting::where('option', 'profile_complete')->first());" 2>/dev/null | grep -A 5 "Setting Object" || echo "No setting found in database"
     else
         echo "Already installed (profile_complete = COMPLETED), skipping..."
     fi
