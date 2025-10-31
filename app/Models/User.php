@@ -331,9 +331,13 @@ class User extends Authenticatable implements HasMedia
 
     public function hasCompany($company_id)
     {
-        $companies = $this->companies()->pluck('company_id')->toArray();
-
-        return in_array($company_id, $companies);
+        // Use already loaded companies if available to avoid query
+        if ($this->relationLoaded('companies')) {
+            return $this->companies->contains('id', $company_id);
+        }
+        
+        // Fallback to query if not loaded
+        return $this->companies()->where('companies.id', $company_id)->exists();
     }
 
     public function getAllSettings()
@@ -363,17 +367,29 @@ class User extends Authenticatable implements HasMedia
 
     public function isOwner()
     {
-        if (Schema::hasColumn('companies', 'owner_id')) {
-            $company = Company::find(request()->header('company'));
-
-            if ($company && $this->id == $company->owner_id) {
-                return true;
+        // Cache the result to avoid repeated queries
+        return $this->cacheComputed('is_owner', function () {
+            $companyId = request()->header('company');
+            
+            if (Schema::hasColumn('companies', 'owner_id') && $companyId) {
+                // Try to use already loaded companies first
+                if ($this->relationLoaded('companies')) {
+                    $company = $this->companies->firstWhere('id', $companyId);
+                    if ($company && $this->id == $company->owner_id) {
+                        return true;
+                    }
+                } else {
+                    // Fallback to query if not loaded
+                    $company = Company::find($companyId);
+                    if ($company && $this->id == $company->owner_id) {
+                        return true;
+                    }
+                }
             }
-        } else {
+            
+            // Fallback to role check
             return $this->role == 'super admin' || $this->role == 'admin';
-        }
-
-        return false;
+        }, CacheServiceProvider::CACHE_TTLS['SHORT']);
     }
 
     public static function createFromRequest(UserRequest $request)

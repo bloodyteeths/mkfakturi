@@ -38,19 +38,35 @@ class BootstrapController extends Controller
 
         $current_user_settings = $current_user->getAllSettings();
 
-        $main_menu = $this->generateMenu('main_menu', $current_user);
+        // Refresh Bouncer cache first to ensure fresh abilities
+        // Then get cached abilities (will fetch fresh from DB after refresh)
+        BouncerFacade::refreshFor($current_user);
+        $current_user_abilities = $current_user->getCachedPermissions();
 
+        // Generate menus after abilities are loaded and cached
+        // Menu generation uses checkAccess() which calls can() - abilities are now cached
+        $main_menu = $this->generateMenu('main_menu', $current_user);
         $setting_menu = $this->generateMenu('setting_menu', $current_user);
 
         // Companies already loaded via eager loading above
         $companies = $current_user->companies;
 
-        $current_company = Company::find($request->header('company'));
+        // Use loaded companies instead of querying again
+        $companyId = $request->header('company');
+        $current_company = null;
+        
+        if ($companyId) {
+            // Try to find company from already loaded collection
+            $current_company = $current_user->companies->firstWhere('id', $companyId);
+        }
+        
+        // If not found in loaded companies or invalid, get first company
+        if (!$current_company || !$current_user->hasCompany($current_company->id)) {
+            $current_company = $current_user->companies->first();
+        }
 
-        if ((! $current_company) || ($current_company && ! $current_user->hasCompany($current_company->id))) {
-            $current_company = $current_user->companies()->with('address')->first();
-        } else {
-            // Ensure address is loaded for the found company
+        // Ensure address is loaded (should already be via eager load, but just in case)
+        if ($current_company && !$current_company->relationLoaded('address')) {
             $current_company->load('address');
         }
 
@@ -60,8 +76,6 @@ class BootstrapController extends Controller
         $current_company_currency = $current_company_settings->has('currency')
             ? Currency::find($current_company_settings->get('currency'))
             : Currency::first();
-
-        BouncerFacade::refreshFor($current_user);
 
         $global_settings = Setting::getSettings([
             'api_token',
@@ -77,7 +91,7 @@ class BootstrapController extends Controller
         return response()->json([
             'current_user' => new UserResource($current_user),
             'current_user_settings' => $current_user_settings,
-            'current_user_abilities' => $current_user->getAbilities(),
+            'current_user_abilities' => $current_user_abilities,
             'companies' => CompanyResource::collection($companies),
             'current_company' => new CompanyResource($current_company),
             'current_company_settings' => $current_company_settings,
