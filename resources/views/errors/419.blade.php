@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Session Expired - {{ config('app.name') }}</title>
-    @vite(['resources/sass/app.scss', 'resources/scripts/app.js'])
+    @vite(['resources/scripts/main.js'])
 </head>
 <body class="antialiased bg-gray-50">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
