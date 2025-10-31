@@ -151,6 +151,10 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "Creating/resetting admin user with email: $ADMIN_EMAIL"
     php artisan admin:reset --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD"
 
+    # Verify user settings were created
+    echo "Verifying user settings..."
+    php artisan tinker --execute="\$user = \App\Models\User::where('email', '$ADMIN_EMAIL')->first(); \$settings = \$user->settings; echo 'User has ' . \$settings->count() . ' settings'; foreach(\$settings as \$s) { echo \$s->key . ': ' . \$s->value . PHP_EOL; }" 2>/dev/null || echo "Could not verify settings"
+
     # Ensure profile_complete is set
     php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED');" 2>/dev/null || echo "Could not set profile_complete"
 
