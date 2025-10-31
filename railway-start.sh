@@ -73,14 +73,22 @@ if [ ! -f ".env" ]; then
 fi
 
 # Run Railway installation seeder if RAILWAY_AUTO_INSTALL is true
-# Only run if database is empty (no users table data)
 if [ "$RAILWAY_AUTO_INSTALL" = "true" ]; then
-    USER_COUNT=$(php artisan tinker --execute="echo \App\Models\User::count();" 2>/dev/null | tail -1)
-    if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-        echo "Running Railway auto-install..."
+    echo "Checking if auto-install needed..."
+
+    # Check if profile_complete is already set
+    PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
+    echo "Profile status: $PROFILE_STATUS"
+
+    if [ "$PROFILE_STATUS" != "COMPLETED" ]; then
+        echo "Running Railway auto-install seeder..."
         php artisan db:seed --class=RailwayInstallSeeder --force || echo "Install seeder failed"
+
+        # Verify it worked
+        PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'STILL_NOT_SET';" 2>/dev/null | tail -1)
+        echo "After seeder, profile status: $PROFILE_STATUS"
     else
-        echo "Users already exist, skipping auto-install..."
+        echo "Already installed (profile_complete = COMPLETED), skipping..."
     fi
 fi
 
