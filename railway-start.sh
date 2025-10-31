@@ -132,12 +132,17 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "$(date +%s)" > storage/app/database_created
     chmod 664 storage/app/database_created
 
-    # Set profile_complete in database
-    php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED'); echo 'Set profile_complete to COMPLETED';" 2>/dev/null || echo "Failed to set profile_complete"
+    # Run the seeder to create admin user, company, and settings
+    echo "Running RailwayInstallSeeder to create admin user..."
+    php artisan db:seed --class=RailwayInstallSeeder --force || echo "Seeder failed or already run"
 
     # Verify it worked
     VERIFY=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
     echo "Verification - profile_complete is now: $VERIFY"
+
+    # Check if admin user exists
+    USER_CHECK=$(php artisan tinker --execute="echo \App\Models\User::count();" 2>/dev/null | tail -1)
+    echo "Number of users in database: $USER_CHECK"
 
     # Verify marker file exists
     if [ -f "storage/app/database_created" ]; then
@@ -145,6 +150,10 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     else
         echo "WARNING: Failed to create database marker file!"
     fi
+
+    echo "Installation bypass complete. Default credentials (if ADMIN_EMAIL/ADMIN_PASSWORD not set):"
+    echo "  Email: admin@facturino.mk"
+    echo "  Password: password"
 fi
 
 # Seed database if RAILWAY_SEED_DB is set
