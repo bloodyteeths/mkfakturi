@@ -26,10 +26,29 @@ class ResetAdminCommand extends Command
         $admin = User::where('email', $email)->first();
 
         if ($admin) {
-            $this->info("Found existing user. Resetting password...");
+            $this->info("Found existing user. Resetting password and settings...");
             $admin->password = $password; // Let the model mutator handle hashing
             $admin->save();
-            $this->info("Password updated for user: {$admin->email}");
+
+            // Ensure currency exists
+            $currency = Currency::firstOrCreate(
+                ['code' => 'MKD'],
+                [
+                    'name' => 'Macedonian Denar',
+                    'symbol' => 'ден',
+                    'precision' => 2,
+                    'thousand_separator' => '.',
+                    'decimal_separator' => ',',
+                ]
+            );
+
+            // Update user settings to ensure profile is complete
+            $admin->setSettings([
+                'language' => 'mk',
+                'currency' => $currency->id,
+            ]);
+
+            $this->info("Password and settings updated for user: {$admin->email}");
         } else {
             $this->info("No user found. Creating new admin user...");
 
@@ -76,6 +95,12 @@ class ResetAdminCommand extends Command
             // Assign role and company
             Bouncer::assign('super admin')->to($admin);
             $admin->companies()->syncWithoutDetaching([$company->id]);
+
+            // Set initial user settings to mark profile as complete
+            $admin->setSettings([
+                'language' => 'mk',
+                'currency' => $currency->id,
+            ]);
 
             $this->info("Admin user created successfully!");
         }
