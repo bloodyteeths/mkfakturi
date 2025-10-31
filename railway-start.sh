@@ -193,6 +193,18 @@ echo "SESSION_DRIVER: $SESSION_DRIVER"
 echo "REDIS_CLIENT: $REDIS_CLIENT"
 echo "BROADCAST_DRIVER: $BROADCAST_DRIVER"
 
+# Check if build assets exist
+echo "Checking frontend build assets..."
+if [ -d "public/build/assets" ]; then
+    ASSET_COUNT=$(ls -1 public/build/assets | wc -l)
+    echo "Build assets directory exists with $ASSET_COUNT files"
+    ls -lh public/build/assets | head -10
+else
+    echo "WARNING: Build assets directory does not exist!"
+    echo "Running frontend build now..."
+    npm run build || echo "Frontend build failed"
+fi
+
 # Start PHP server
 echo "Starting PHP server on port $PORT..."
 php -S 0.0.0.0:$PORT -t public 2>&1 | tee -a storage/logs/server.log
