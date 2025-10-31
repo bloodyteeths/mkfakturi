@@ -122,6 +122,16 @@ php artisan view:clear || true
 echo "Running migrations..."
 php artisan migrate --force || echo "Some migrations failed, continuing..."
 
+# Force set profile_complete if RAILWAY_SKIP_INSTALL is true
+if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
+    echo "RAILWAY_SKIP_INSTALL enabled - forcing installation complete..."
+    php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED'); echo 'Set profile_complete to COMPLETED';" 2>/dev/null || echo "Failed to set profile_complete"
+
+    # Verify it worked
+    VERIFY=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
+    echo "Verification - profile_complete is now: $VERIFY"
+fi
+
 # Seed database if RAILWAY_SEED_DB is set
 if [ "$RAILWAY_SEED_DB" = "true" ]; then
     echo "Seeding database..."
