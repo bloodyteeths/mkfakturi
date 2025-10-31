@@ -132,11 +132,15 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "$(date +%s)" > storage/app/database_created
     chmod 664 storage/app/database_created
 
+    # First, list all existing users
+    echo "Checking existing users in database..."
+    php artisan tinker --execute="\$users = \App\Models\User::all(['email', 'name']); foreach(\$users as \$u) { echo \$u->email . ' - ' . \$u->name . PHP_EOL; }" 2>/dev/null || echo "Could not list users"
+
     # Create/reset admin user with environment variables or defaults
     ADMIN_EMAIL="${ADMIN_EMAIL:-admin@facturino.mk}"
     ADMIN_PASSWORD="${ADMIN_PASSWORD:-password}"
 
-    echo "Creating/resetting admin user..."
+    echo "Creating/resetting admin user with email: $ADMIN_EMAIL"
     php artisan admin:reset --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD"
 
     # Ensure profile_complete is set
