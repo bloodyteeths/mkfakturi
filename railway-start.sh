@@ -5,7 +5,8 @@ set -e
 
 echo "=== Railway Startup Script ==="
 echo "Environment variables check:"
-env | grep -E "(DATABASE|DB_|MYSQL)" || echo "No database env vars found"
+echo "All environment variables:"
+env | sort | grep -E "(DATABASE|DB_|MYSQL|RAILWAY)" || echo "No database env vars found"
 
 # Railway provides these MySQL variables from the MySQL service
 # Map them to Laravel's expected variable names
