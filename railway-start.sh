@@ -5,8 +5,16 @@ set -e
 
 echo "=== Railway Startup Script ==="
 echo "Environment variables check:"
-echo "All environment variables:"
-env | sort | grep -E "(DATABASE|DB_|MYSQL|RAILWAY)" || echo "No database env vars found"
+echo "All environment variables (searching for MySQL related):"
+env | sort | grep -iE "(DATABASE|DB_|MYSQL|SQL)" || echo "No database env vars found"
+echo ""
+echo "Checking specific variables:"
+echo "MYSQL_URL=${MYSQL_URL:-NOT SET}"
+echo "DATABASE_URL=${DATABASE_URL:-NOT SET}"
+echo "MYSQLHOST=${MYSQLHOST:-NOT SET}"
+echo "MYSQLPORT=${MYSQLPORT:-NOT SET}"
+echo "MYSQLUSER=${MYSQLUSER:-NOT SET}"
+echo "MYSQLDATABASE=${MYSQLDATABASE:-NOT SET}"
 
 # Railway provides these MySQL variables from the MySQL service
 # Map them to Laravel's expected variable names
