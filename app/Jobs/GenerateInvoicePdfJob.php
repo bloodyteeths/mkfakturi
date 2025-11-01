@@ -2,40 +2,38 @@
 
 namespace App\Jobs;
 
+use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
 class GenerateInvoicePdfJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
 
-    public $invoice;
-
-    public $deleteExistingFile;
+    public function __construct(
+        public int $invoiceId,
+        public bool $deleteExistingFile = false
+    ) {
+    }
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($invoice, $deleteExistingFile = false)
-    {
-        $this->invoice = $invoice;
-        $this->deleteExistingFile = $deleteExistingFile;
-    }
-
-    /**
-     * Execute the job.
-     */
     public function handle(): int
     {
-        $this->invoice->generatePDF('invoice', $this->invoice->invoice_number, $this->deleteExistingFile);
+        $invoice = Invoice::find($this->invoiceId);
+
+        if (! $invoice) {
+            return 0;
+        }
+
+        $invoice->generatePDF('invoice', $invoice->invoice_number, $this->deleteExistingFile);
 
         return 0;
     }

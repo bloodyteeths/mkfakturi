@@ -81,11 +81,11 @@ class Payment extends Model implements HasMedia
     protected static function booted()
     {
         static::created(function ($payment) {
-            GeneratePaymentPdfJob::dispatch($payment);
+            GeneratePaymentPdfJob::dispatchAfterResponse($payment->id);
         });
 
         static::updated(function ($payment) {
-            GeneratePaymentPdfJob::dispatch($payment, true);
+            GeneratePaymentPdfJob::dispatchAfterResponse($payment->id, true);
         });
     }
 

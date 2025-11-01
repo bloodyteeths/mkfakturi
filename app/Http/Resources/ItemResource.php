@@ -26,10 +26,18 @@ class ItemResource extends JsonResource
             'updated_at' => $this->updated_at,
             'tax_per_item' => $this->tax_per_item,
             'formatted_created_at' => $this->formattedCreatedAt,
-            'unit' => UnitResource::make($this->whenLoaded('unit')),
-            'company' => CompanyResource::make($this->whenLoaded('company')),
-            'taxes' => TaxResource::collection($this->whenLoaded('taxes')),
-            'currency' => CurrencyResource::make($this->whenLoaded('currency')),
+            'unit' => $this->whenLoaded('unit', function () {
+                return UnitResource::make($this->unit);
+            }),
+            'company' => $this->whenLoaded('company', function () {
+                return CompanyResource::make($this->company);
+            }),
+            'taxes' => $this->whenLoaded('taxes', function () {
+                return TaxResource::collection($this->taxes);
+            }),
+            'currency' => $this->whenLoaded('currency', function () {
+                return CurrencyResource::make($this->currency);
+            }),
         ];
     }
 }

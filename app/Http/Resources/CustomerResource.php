@@ -36,11 +36,21 @@ class CustomerResource extends JsonResource
             'base_due_amount' => $this->base_due_amount,
             'prefix' => $this->prefix,
             'tax_id' => $this->tax_id,
-            'billing' => AddressResource::make($this->whenLoaded('billingAddress')),
-            'shipping' => AddressResource::make($this->whenLoaded('shippingAddress')),
-            'fields' => CustomFieldValueResource::collection($this->whenLoaded('fields')),
-            'company' => CompanyResource::make($this->whenLoaded('company')),
-            'currency' => CurrencyResource::make($this->whenLoaded('currency')),
+            'billing' => $this->whenLoaded('billingAddress', function () {
+                return AddressResource::make($this->billingAddress);
+            }),
+            'shipping' => $this->whenLoaded('shippingAddress', function () {
+                return AddressResource::make($this->shippingAddress);
+            }),
+            'fields' => $this->whenLoaded('fields', function () {
+                return CustomFieldValueResource::collection($this->fields);
+            }),
+            'company' => $this->whenLoaded('company', function () {
+                return CompanyResource::make($this->company);
+            }),
+            'currency' => $this->whenLoaded('currency', function () {
+                return CurrencyResource::make($this->currency);
+            }),
         ];
     }
 }

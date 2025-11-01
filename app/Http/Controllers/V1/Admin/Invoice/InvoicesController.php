@@ -81,7 +81,7 @@ class InvoicesController extends Controller
             $invoice->send($request->subject, $request->body);
         }
 
-        GenerateInvoicePdfJob::dispatch($invoice);
+        GenerateInvoicePdfJob::dispatchAfterResponse($invoice->id);
 
         return new InvoiceResource($invoice);
     }
@@ -116,7 +116,7 @@ class InvoicesController extends Controller
             return respondJson($invoice, $invoice);
         }
 
-        GenerateInvoicePdfJob::dispatch($invoice, true);
+        GenerateInvoicePdfJob::dispatchAfterResponse($invoice->id, true);
 
         $invoice->load($this->invoiceResourceRelations());
 

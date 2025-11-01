@@ -13,7 +13,7 @@ class TaxResource extends JsonResource
      */
     public function toArray($request): array
     {
-        $taxType = $this->whenLoaded('taxType');
+        $taxType = $this->relationLoaded('taxType') ? $this->taxType : null;
 
         return [
             'id' => $this->id,
@@ -34,8 +34,12 @@ class TaxResource extends JsonResource
             'currency_id' => $this->currency_id,
             'type' => optional($taxType)->type,
             'recurring_invoice_id' => $this->recurring_invoice_id,
-            'tax_type' => TaxTypeResource::make($taxType),
-            'currency' => CurrencyResource::make($this->whenLoaded('currency')),
+            'tax_type' => $this->whenLoaded('taxType', function () {
+                return TaxTypeResource::make($this->taxType);
+            }),
+            'currency' => $this->whenLoaded('currency', function () {
+                return CurrencyResource::make($this->currency);
+            }),
         ];
     }
 }

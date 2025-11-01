@@ -297,6 +297,7 @@ class DemoSeeder extends Seeder
             Tax::create([
                 'tax_type_id' => $itemData['tax'],
                 'item_id' => $item->id,
+                'name' => $itemData['tax'] == $vat18->id ? 'ДДВ 18%' : 'ДДВ 5%',
                 'percent' => $itemData['tax'] == $vat18->id ? 18.0 : 5.0,
                 'amount' => ($itemData['price'] * ($itemData['tax'] == $vat18->id ? 18.0 : 5.0)) / 100,
                 'company_id' => $company->id,
@@ -423,6 +424,7 @@ class DemoSeeder extends Seeder
                         'invoice_item_id' => InvoiceItem::where('invoice_id', $invoice->id)
                             ->where('item_id', $invItem['item']->id)
                             ->first()->id,
+                        'name' => $tax->name,
                         'percent' => $tax->percent,
                         'amount' => $taxAmount,
                         'company_id' => $company->id,
@@ -480,4 +482,3 @@ class DemoSeeder extends Seeder
         InstallUtils::createDbMarker();
     }
 }
-
