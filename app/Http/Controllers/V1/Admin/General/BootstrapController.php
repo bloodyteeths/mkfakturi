@@ -12,7 +12,9 @@ use App\Models\Module;
 use App\Models\Setting;
 use App\Traits\GeneratesMenuTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Silber\Bouncer\BouncerFacade;
+use App\Providers\CacheServiceProvider;
 
 class BootstrapController extends Controller
 {
@@ -30,84 +32,82 @@ class BootstrapController extends Controller
             'currency',
             'settings',
             'companies.address',
-            'companies' => function ($query) {
-                // Pre-load roles for each company to avoid N+1 in CompanyResource
-                $query->select('companies.*');
-            }
+            'companies.roles.permissions',
         ]);
 
         $current_user_settings = $current_user->getAllSettings();
 
-        // Refresh Bouncer cache first to ensure fresh abilities
-        // Then get cached abilities (will fetch fresh from DB after refresh)
-        BouncerFacade::refreshFor($current_user);
-        $current_user_abilities = $current_user->getCachedPermissions();
-        
-        // If user is owner and has no abilities, they should have all permissions
-        // Frontend checks for owner status, but also ensure abilities are returned
-        if ($current_user->isOwner() && empty($current_user_abilities)) {
-            // For owners, return a wildcard ability to indicate all permissions
-            $current_user_abilities = [['name' => '*', 'title' => 'All Abilities']];
-        }
-
-        // Generate menus after abilities are loaded and cached
-        // Menu generation uses checkAccess() which calls can() - abilities are now cached
-        $main_menu = $this->generateMenu('main_menu', $current_user);
-        $setting_menu = $this->generateMenu('setting_menu', $current_user);
-
-        // Companies already loaded via eager loading above
-        $companies = $current_user->companies;
-
-        // Use loaded companies instead of querying again
         $companyId = $request->header('company');
-        $current_company = null;
-        
-        if ($companyId) {
-            // Try to find company from already loaded collection
-            $current_company = $current_user->companies->firstWhere('id', $companyId);
-        }
-        
-        // If not found in loaded companies or invalid, get first company
-        if (!$current_company || !$current_user->hasCompany($current_company->id)) {
-            $current_company = $current_user->companies->first();
-        }
 
-        // Ensure address is loaded (should already be via eager load, but just in case)
-        if ($current_company && !$current_company->relationLoaded('address')) {
-            $current_company->load('address');
-        }
+        $cacheKey = sprintf('bootstrap:%d:%s', $current_user->id, $companyId ?: 'primary');
 
-        // Use cached company settings
-        $current_company_settings = CompanySetting::getAllSettings($current_company->id);
+        $payload = Cache::remember($cacheKey, CacheServiceProvider::CACHE_TTLS['SHORT'], function () use ($current_user, $current_user_settings, $companyId) {
+            // Refresh Bouncer cache first to ensure fresh abilities
+            BouncerFacade::refreshFor($current_user);
+            $current_user_abilities = $current_user->getCachedPermissions();
 
-        $current_company_currency = $current_company_settings->has('currency')
-            ? Currency::find($current_company_settings->get('currency'))
-            : Currency::first();
+            if ($current_user->isOwner() && empty($current_user_abilities)) {
+                $current_user_abilities = [['name' => '*', 'title' => 'All Abilities']];
+            }
 
-        $global_settings = Setting::getSettings([
-            'api_token',
-            'admin_portal_theme',
-            'admin_portal_logo',
-            'login_page_logo',
-            'login_page_heading',
-            'login_page_description',
-            'admin_page_title',
-            'copyright_text',
-        ]);
+            $main_menu = $this->generateMenu('main_menu', $current_user);
+            $setting_menu = $this->generateMenu('setting_menu', $current_user);
 
-        return response()->json([
-            'current_user' => new UserResource($current_user),
-            'current_user_settings' => $current_user_settings,
-            'current_user_abilities' => $current_user_abilities,
-            'companies' => CompanyResource::collection($companies),
-            'current_company' => new CompanyResource($current_company),
-            'current_company_settings' => $current_company_settings,
-            'current_company_currency' => $current_company_currency,
-            'config' => config('invoiceshelf'),
-            'global_settings' => $global_settings,
-            'main_menu' => $main_menu,
-            'setting_menu' => $setting_menu,
-            'modules' => Module::where('enabled', true)->pluck('name'),
-        ]);
+            $companies = $current_user->companies;
+
+            $current_company = null;
+
+            if ($companyId) {
+                $current_company = $companies->firstWhere('id', $companyId);
+            }
+
+            if (! $current_company || ! $current_user->hasCompany($current_company->id)) {
+                $current_company = $companies->first();
+            }
+
+            if ($current_company && ! $current_company->relationLoaded('address')) {
+                $current_company->load('address');
+            }
+
+            $current_company_settings = CompanySetting::getAllSettings($current_company->id)->toArray();
+
+            $currencyModel = $current_company_settings->has('currency')
+                ? Currency::find($current_company_settings->get('currency'))
+                : Currency::first();
+
+            $current_company_currency = $currencyModel ? $currencyModel->toArray() : null;
+
+            $global_settings = Setting::getSettings([
+                'api_token',
+                'admin_portal_theme',
+                'admin_portal_logo',
+                'login_page_logo',
+                'login_page_heading',
+                'login_page_description',
+                'admin_page_title',
+                'copyright_text',
+            ])->toArray();
+
+            $userPayload = (new UserResource($current_user))->toArray(request());
+            $companiesPayload = CompanyResource::collection($companies)->toArray(request());
+            $currentCompanyPayload = (new CompanyResource($current_company))->toArray(request());
+
+            return [
+                'current_user' => $userPayload,
+                'current_user_settings' => $current_user_settings,
+                'current_user_abilities' => $current_user_abilities,
+                'companies' => $companiesPayload,
+                'current_company' => $currentCompanyPayload,
+                'current_company_settings' => $current_company_settings,
+                'current_company_currency' => $current_company_currency,
+                'config' => config('invoiceshelf'),
+                'global_settings' => $global_settings,
+                'main_menu' => $main_menu,
+                'setting_menu' => $setting_menu,
+                'modules' => Module::where('enabled', true)->pluck('name')->toArray(),
+            ];
+        });
+
+        return response()->json($payload);
     }
 }
