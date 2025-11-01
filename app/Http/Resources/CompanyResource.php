@@ -26,9 +26,6 @@ class CompanyResource extends JsonResource
             'address' => $this->whenLoaded('address', function () {
                 return new AddressResource($this->address);
             }),
-            'roles' => $this->whenLoaded('roles', function () {
-                return RoleResource::collection($this->roles);
-            }),
         ];
     }
 }

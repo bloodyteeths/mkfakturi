@@ -32,7 +32,6 @@ class BootstrapController extends Controller
             'currency',
             'settings',
             'companies.address',
-            'companies.roles.permissions',
         ]);
 
         $current_user_settings = $current_user->getAllSettings();
@@ -71,9 +70,8 @@ class BootstrapController extends Controller
 
             $current_company_settings = CompanySetting::getAllSettings($current_company->id)->toArray();
 
-            $currencyModel = $current_company_settings->has('currency')
-                ? Currency::find($current_company_settings->get('currency'))
-                : Currency::first();
+            $currencyId = $current_company_settings['currency'] ?? null;
+            $currencyModel = $currencyId ? Currency::find($currencyId) : Currency::first();
 
             $current_company_currency = $currencyModel ? $currencyModel->toArray() : null;
 
