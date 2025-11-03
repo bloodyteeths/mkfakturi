@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->bootAuth();
         $this->bootBroadcast();
+        $this->bootObservers();
 
         // In demo mode, prevent all outgoing emails and notifications
         if (config('app.env') === 'demo') {
@@ -155,4 +156,22 @@ class AppServiceProvider extends ServiceProvider
     {
         Broadcast::routes(['middleware' => 'api.auth']);
     }
+
+    /**
+     * Register model observers for accounting backbone
+     */
+    public function bootObservers(): void
+    {
+        // Only register observers if accounting backbone feature is enabled
+        $isEnabled = config('ifrs.enabled', false) ||
+                     env('FEATURE_ACCOUNTING_BACKBONE', false) ||
+                     (function_exists('feature') && feature('accounting_backbone'));
+
+        if ($isEnabled) {
+            \App\Models\Invoice::observe(\App\Observers\InvoiceObserver::class);
+            \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
+        }
+    }
 }
+
+// CLAUDE-CHECKPOINT

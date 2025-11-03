@@ -91,6 +91,7 @@ use App\Http\Controllers\V1\Admin\Update\MigrateUpdateController;
 use App\Http\Controllers\V1\Admin\Update\UnzipUpdateController;
 use App\Http\Controllers\V1\Admin\Users\UsersController;
 use App\Http\Controllers\V1\Admin\MigrationController;
+use App\Http\Controllers\V1\Admin\Accounting\AccountingReportsController;
 use App\Http\Controllers\V1\Customer\Auth\ForgotPasswordController as AuthForgotPasswordController;
 use App\Http\Controllers\V1\Customer\Auth\ResetPasswordController as AuthResetPasswordController;
 use App\Http\Controllers\V1\Customer\Estimate\AcceptEstimateController as CustomerAcceptEstimateController;
@@ -454,7 +455,18 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{import}/progress', [MigrationController::class, 'progress']);
                 Route::get('/{import}/logs', [MigrationController::class, 'logs']);
             });
+
+            // Accounting Reports (IFRS)
+            // ----------------------------------
+
+            Route::prefix('accounting')->group(function () {
+                Route::get('/trial-balance', [AccountingReportsController::class, 'trialBalance']);
+                Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
+                Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
+            });
         });
+
+// CLAUDE-CHECKPOINT
 
         // Self Update
         // ----------------------------------

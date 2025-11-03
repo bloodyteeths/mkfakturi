@@ -14,14 +14,27 @@
 | laravel/pennant | v1.18.3 | MIT | Feature flag management | FlagsAndDocs agent (Step 0) |
 | symfony/http-client | v7.3.4 | MIT | HTTP client for PSD2/CPAY | FlagsAndDocs agent (Step 0) |
 
+### Step 1: Accounting Backbone
+
+| Package | Version | License | Purpose | Status |
+|---------|---------|---------|---------|--------|
+| ekmungai/eloquent-ifrs | v5.0.4 | MIT | Double-entry accounting ledger (IFRS compliant) | ✅ Installed |
+
+**Features Implemented:**
+- IfrsAdapter service layer for accounting integration
+- Macedonian Chart of Accounts (1000-5999)
+- Invoice/Payment observers for automatic ledger posting
+- API endpoints: `/accounting/trial-balance`, `/balance-sheet`, `/income-statement`
+- Feature flag: `FEATURE_ACCOUNTING_BACKBONE` (default OFF)
+- Supports DR Accounts Receivable + CR Revenue on invoice creation
+- Supports DR Cash + CR Accounts Receivable on payment
+- Payment gateway fee tracking (DR Fee Expense + CR Cash)
+
 ---
 
 ## 🔄 PENDING INTEGRATIONS
 
 The following packages will be installed by their respective agents:
-
-### Step 1: Accounting Backbone
-- **ekmungai/eloquent-ifrs** (v3.2.0, MIT) - Double-entry accounting ledger
 
 ### Step 2: Migration Wizard
 - **maatwebsite/excel** (v3.1.55, MIT) - CSV/XLSX import with queue support
