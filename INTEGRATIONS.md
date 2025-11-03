@@ -30,15 +30,18 @@
 - Supports DR Cash + CR Accounts Receivable on payment
 - Payment gateway fee tracking (DR Fee Expense + CR Cash)
 
+### Step 2: Migration Wizard
+
+| Package | Version | License | Purpose | Installed By |
+|---------|---------|---------|---------|--------------|
+| maatwebsite/excel | v3.1.67 | MIT | CSV/XLSX import with queue support | Migration agent (Step 2) |
+| league/csv | v9.27.1 | MIT | CSV streaming and encoding detection | Migration agent (Step 2) |
+
 ---
 
 ## 🔄 PENDING INTEGRATIONS
 
 The following packages will be installed by their respective agents:
-
-### Step 2: Migration Wizard
-- **maatwebsite/excel** (v3.1.55, MIT) - CSV/XLSX import with queue support
-- **league/csv** (v9.16.0, MIT) - CSV streaming and encoding detection
 
 ### Step 3: Paddle Payments
 - **laravel/cashier-paddle** (v2.8.0, MIT) - Paddle payment gateway integration
@@ -52,9 +55,6 @@ The following packages will be installed by their respective agents:
 
 ### Step 7: MCP AI Tools
 - **@modelcontextprotocol/sdk** (v0.5.0, MIT) - MCP TypeScript SDK
-
-### Step 8: Monitoring
-- **superbalist/laravel-prometheus-exporter** (v2.6.1, MIT) - Prometheus metrics
 
 ---
 

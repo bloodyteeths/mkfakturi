@@ -457,12 +457,27 @@ Route::prefix('/v1')->group(function () {
             });
 
             // Accounting Reports (IFRS)
+            // Feature flag: FEATURE_ACCOUNTING_BACKBONE
             // ----------------------------------
 
             Route::prefix('accounting')->group(function () {
                 Route::get('/trial-balance', [AccountingReportsController::class, 'trialBalance']);
                 Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
                 Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
+            });
+
+            // Migration Wizard (Laravel Excel)
+            // Feature flag: FEATURE_MIGRATION_WIZARD
+            // ----------------------------------
+
+            Route::prefix('migration')->group(function () {
+                Route::post('/upload', [MigrationController::class, 'upload']);
+                Route::get('/{job}/preview', [MigrationController::class, 'preview']);
+                Route::get('/presets/{source}', [MigrationController::class, 'presets']);
+                Route::post('/{job}/dry-run', [MigrationController::class, 'dryRun']);
+                Route::post('/{job}/import', [MigrationController::class, 'import']);
+                Route::get('/{job}/status', [MigrationController::class, 'status']);
+                Route::get('/{job}/errors', [MigrationController::class, 'errors']);
             });
         });
 
