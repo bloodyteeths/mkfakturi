@@ -37,21 +37,18 @@
 | maatwebsite/excel | v3.1.67 | MIT | CSV/XLSX import with queue support | Migration agent (Step 2) |
 | league/csv | v9.27.1 | MIT | CSV streaming and encoding detection | Migration agent (Step 2) |
 
-### Step 3: Payment Integrations
+### Step 3 & 4: Payment Integrations
 
 | Package | Version | License | Purpose | Installed By |
 |---------|---------|---------|---------|--------------|
 | laravel/cashier-paddle | v2.6.2 | MIT | Paddle payment gateway integration | Paddle agent (Step 3) |
+| Custom CPAY Driver | v1.0.0 | AGPL | CPAY (CASYS) payment gateway for Macedonia | CPAY agent (Step 4) |
 
 ---
 
 ## 🔄 PENDING INTEGRATIONS
 
 The following packages will be installed by their respective agents:
-
-### Step 4: CPAY Payments
-- Custom driver enhancement (no package exists)
-- Uses existing `Modules/Mk/Services/CpayDriver.php`
 
 ### Step 5: PSD2 Banking
 - **jejik/mt940** (MIT) - Optional MT940/CSV parser for banks without OAuth

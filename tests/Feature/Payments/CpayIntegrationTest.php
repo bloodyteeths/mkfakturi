@@ -145,8 +145,9 @@ class CpayIntegrationTest extends TestCase
             'company_id' => $this->company->id,
             'customer_id' => $this->customer->id,
             'amount' => 10000, // 100.00 MKD stored as cents
-            'transaction_reference' => 'TXN-TEST-12345',
-            'payment_mode' => Payment::PAYMENT_MODE_CREDIT_CARD,
+            'gateway' => Payment::GATEWAY_CPAY,
+            'gateway_transaction_id' => 'TXN-TEST-12345',
+            'gateway_status' => Payment::GATEWAY_STATUS_COMPLETED,
         ]);
 
         // Assert: Invoice status updated to PAID
@@ -184,7 +185,7 @@ class CpayIntegrationTest extends TestCase
         // Assert: No payment was created
         $this->assertDatabaseMissing('payments', [
             'invoice_id' => $this->invoice->id,
-            'transaction_reference' => 'TXN-TEST-12345',
+            'gateway_transaction_id' => 'TXN-TEST-12345',
         ]);
     }
 
@@ -218,7 +219,7 @@ class CpayIntegrationTest extends TestCase
 
         // Assert: Only one payment was created
         $paymentCount = Payment::where('invoice_id', $this->invoice->id)
-            ->where('transaction_reference', 'TXN-TEST-12345')
+            ->where('gateway_transaction_id', 'TXN-TEST-12345')
             ->count();
 
         $this->assertEquals(1, $paymentCount);
@@ -270,7 +271,7 @@ class CpayIntegrationTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'invoice_id' => $invoice->id,
             'amount' => 10000, // 100.00 MKD stored as cents
-            'transaction_reference' => 'TXN-TEST-67890',
+            'gateway_transaction_id' => 'TXN-TEST-67890',
         ]);
     }
 
@@ -351,7 +352,7 @@ class CpayIntegrationTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'invoice_id' => $this->invoice->id,
             'amount' => 10000, // 100.00 MKD stored as cents
-            'transaction_reference' => 'TXN-TEST-12345',
+            'gateway_transaction_id' => 'TXN-TEST-12345',
         ]);
     }
 
