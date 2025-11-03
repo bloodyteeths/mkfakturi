@@ -79,14 +79,35 @@
 - Bank sync monitoring
 - Telescope debugging interface at `/telescope` (admin only)
 
----
-
-## 🔄 PENDING INTEGRATIONS
-
-The following packages will be installed by their respective agents:
-
 ### Step 7: MCP AI Tools
-- **@modelcontextprotocol/sdk** (v0.5.0, MIT) - MCP TypeScript SDK
+
+| Package | Version | License | Purpose | Status |
+|---------|---------|---------|---------|--------|
+| wshobson/maverick-mcp | latest | MIT | FastMCP 2.0 server (stock analysis + Fakturino tools) | ✅ Installed (git submodule) |
+| fastmcp | v2.0+ | MIT | FastMCP Python framework | ✅ Installed (via maverick-mcp) |
+| requests | latest | Apache-2.0 | HTTP client for Laravel API calls | ✅ Installed (via maverick-mcp) |
+
+**Features Implemented:**
+- MCP server as git submodule at `mcp-server/`
+- Fakturino tools plugin at `maverick_mcp/plugins/fakturino_tools.py`
+- 9 MCP tools: `create_invoice`, `get_company_stats`, `search_customers`, `get_trial_balance`, `ubl_validate`, `tax_explain`, `bank_categorize`, `anomaly_scan`, `get_invoice_details`
+- Internal API endpoints at `/internal/mcp/*`
+- VerifyMcpToken middleware for Bearer token authentication
+- MCP routes in `routes/mcp.php`
+- Feature flag: `FEATURE_MCP_AI_TOOLS` (default OFF)
+- Railway deployment as separate `mcp-server` service (port 3100)
+- Claude Desktop integration via SSE transport
+- Health check endpoint at `/internal/mcp/health`
+- Security: Bearer token authentication, feature flag gating, rate limiting (60 req/min)
+
+**MCP Tools Available:**
+1. **Invoice Management:** `create_invoice`, `get_invoice_details`
+2. **Analytics:** `get_company_stats`
+3. **Search:** `search_customers`
+4. **Accounting:** `get_trial_balance` (requires `FEATURE_ACCOUNTING_BACKBONE`)
+5. **UBL & Tax:** `ubl_validate`, `tax_explain`
+6. **Banking:** `bank_categorize` (requires `FEATURE_PSD2_BANKING`)
+7. **Quality Assurance:** `anomaly_scan`
 
 ---
 

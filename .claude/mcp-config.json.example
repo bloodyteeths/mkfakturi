@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "fakturino": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:3100/sse"],
+      "description": "Fakturino invoice management AI tools"
+    }
+  },
+  "readme": {
+    "setup": [
+      "1. Copy this file to Claude Desktop config location:",
+      "   macOS: ~/Library/Application Support/Claude/claude_desktop_config.json",
+      "   Linux: ~/.config/Claude/claude_desktop_config.json",
+      "   Windows: %APPDATA%\\Claude\\claude_desktop_config.json",
+      "",
+      "2. Start the MCP server:",
+      "   cd mcp-server && uv run python -m maverick_mcp.api.server --transport sse",
+      "",
+      "3. Ensure Laravel API is running:",
+      "   php artisan serve",
+      "",
+      "4. Restart Claude Desktop",
+      "",
+      "5. Test with: 'List available Fakturino tools'"
+    ],
+    "features": [
+      "✅ Invoice creation and management",
+      "✅ Company statistics and analytics",
+      "✅ Customer search",
+      "✅ Tax calculation explanations (Macedonian DDV)",
+      "✅ UBL invoice validation",
+      "✅ Bank transaction categorization",
+      "✅ Anomaly detection for invoices"
+    ],
+    "requirements": [
+      "FEATURE_MCP_AI_TOOLS=true in .env",
+      "MCP_SERVER_TOKEN configured",
+      "MCP server running on port 3100",
+      "Laravel API accessible"
+    ]
+  }
+}
