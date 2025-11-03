@@ -47,6 +47,10 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
                 ->group(base_path('routes/webhooks.php'));
+
+            // Partner Portal routes
+            Route::middleware('web')
+                ->group(base_path('routes/partner.php'));
         });
     }
 

@@ -63,21 +63,22 @@
 - Idempotency by transaction reference
 - Automatic token refresh when expiring
 
-### Step 8: Monitoring & Observability
+### Step 6: Partner Portal APIs
 
-| Package | Version | License | Purpose | Status |
-|---------|---------|---------|---------|--------|
-| arquivei/laravel-prometheus-exporter | dev-add-laravel-12 | MIT | Prometheus metrics (Laravel 12 compatible) | ✅ Installed |
-| laravel/telescope | v5.15+ | MIT | Application debugging and monitoring | ✅ Installed |
+**No external packages required** - Uses existing Laravel/Vue stack
 
 **Features Implemented:**
-- Prometheus metrics at `/metrics` (feature flag: `FEATURE_MONITORING`)
-- Health check endpoint at `/metrics/health`
-- Certificate expiry monitoring (`fakturino_signer_cert_expiry_days`)
-- Business metrics (invoices, customers, revenue)
-- System health metrics (DB, Redis, queues, storage)
-- Bank sync monitoring
-- Telescope debugging interface at `/telescope` (admin only)
+- PartnerApiController with 4 endpoints: dashboard, commissions, clients, profile
+- CommissionCalculatorService for partner statistics and commission calculations
+- Mandatory mocked data safety flag: `FEATURE_PARTNER_MOCKED_DATA=true` (default ON)
+- Feature flag: `FEATURE_PARTNER_PORTAL=false` (default OFF)
+- Pinia store integration with mocked data detection
+- Partner authentication and authorization middleware
+- API routes in `routes/partner.php`
+- All responses include `{"mocked": true/false}` indicator
+- Commission rate configuration: `PARTNER_COMMISSION_RATE=5.0`
+- Comprehensive logging for audit trail
+- 11 tests with 71 assertions
 
 ### Step 7: MCP AI Tools
 
@@ -108,6 +109,22 @@
 5. **UBL & Tax:** `ubl_validate`, `tax_explain`
 6. **Banking:** `bank_categorize` (requires `FEATURE_PSD2_BANKING`)
 7. **Quality Assurance:** `anomaly_scan`
+
+### Step 8: Monitoring & Observability
+
+| Package | Version | License | Purpose | Status |
+|---------|---------|---------|---------|--------|
+| arquivei/laravel-prometheus-exporter | dev-add-laravel-12 | MIT | Prometheus metrics (Laravel 12 compatible) | ✅ Installed |
+| laravel/telescope | v5.15+ | MIT | Application debugging and monitoring | ✅ Installed |
+
+**Features Implemented:**
+- Prometheus metrics at `/metrics` (feature flag: `FEATURE_MONITORING`)
+- Health check endpoint at `/metrics/health`
+- Certificate expiry monitoring (`fakturino_signer_cert_expiry_days`)
+- Business metrics (invoices, customers, revenue)
+- System health metrics (DB, Redis, queues, storage)
+- Bank sync monitoring
+- Telescope debugging interface at `/telescope` (admin only)
 
 ---
 

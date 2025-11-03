@@ -176,6 +176,11 @@ class Company extends Model implements HasMedia
         return $this->partners()->wherePivot('is_active', true);
     }
 
+    public function partnerLinks(): HasMany
+    {
+        return $this->hasMany(PartnerCompany::class);
+    }
+
     public function miniMaxTokens(): HasMany
     {
         return $this->hasMany(MiniMaxToken::class);
