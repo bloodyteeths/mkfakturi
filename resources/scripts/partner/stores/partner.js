@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import axios from 'axios'
 
 export const usePartnerStore = defineStore('partner', () => {
   // State
@@ -9,24 +10,50 @@ export const usePartnerStore = defineStore('partner', () => {
     processedInvoices: 0,
     currentProjects: 0
   })
-  
+
   const recentCommissions = ref([])
   const recentActivities = ref([])
+  const clients = ref([])
   const isLoading = ref(false)
+  const isMocked = ref(false)
+  const mockWarning = ref('')
 
   // Actions
   const loadDashboardStats = async () => {
     isLoading.value = true
     try {
-      // Mock data for now - replace with actual API call
-      dashboardStats.value = {
-        activeClients: 12,
-        monthlyCommissions: 85000,
-        processedInvoices: 234,
-        currentProjects: 8
+      const { data } = await axios.get('/api/v1/partner/dashboard')
+
+      // Check if data is mocked
+      if (data.mocked) {
+        console.warn('⚠️ Partner portal using mocked data')
+        isMocked.value = true
+        mockWarning.value = data.warning || 'Using mocked data for safety'
+        dashboardStats.value = {
+          activeClients: data.data.active_clients,
+          monthlyCommissions: data.data.monthly_commissions,
+          processedInvoices: data.data.processed_invoices,
+          currentProjects: 0  // Not provided by API
+        }
+      } else {
+        isMocked.value = false
+        mockWarning.value = ''
+        dashboardStats.value = {
+          activeClients: data.data.active_clients,
+          monthlyCommissions: data.data.monthly_commissions,
+          processedInvoices: data.data.processed_invoices,
+          currentProjects: 0  // Not provided by API
+        }
       }
     } catch (error) {
       console.error('Error loading dashboard stats:', error)
+      // Fall back to empty state on error
+      dashboardStats.value = {
+        activeClients: 0,
+        monthlyCommissions: 0,
+        processedInvoices: 0,
+        currentProjects: 0
+      }
     } finally {
       isLoading.value = false
     }
@@ -34,32 +61,33 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const loadRecentCommissions = async () => {
     try {
-      // Mock data - replace with actual API call
-      recentCommissions.value = [
-        {
-          id: 1,
-          company_name: 'ТехноСофт ДОО',
-          type: 'monthly',
-          amount: 8500,
-          status: 'paid'
-        },
-        {
-          id: 2, 
-          company_name: 'МедТрејд ДООЕЛ',
-          type: 'invoice',
-          amount: 2500,
-          status: 'pending'
-        },
-        {
-          id: 3,
-          company_name: 'БизнисЦентар АД',
-          type: 'monthly', 
-          amount: 12000,
-          status: 'approved'
-        }
-      ]
+      const { data } = await axios.get('/api/v1/partner/commissions')
+
+      if (data.mocked) {
+        console.warn('⚠️ Partner commissions using mocked data')
+        recentCommissions.value = data.data || []
+      } else {
+        recentCommissions.value = data.data || []
+      }
     } catch (error) {
       console.error('Error loading recent commissions:', error)
+      recentCommissions.value = []
+    }
+  }
+
+  const loadClients = async () => {
+    try {
+      const { data } = await axios.get('/api/v1/partner/clients')
+
+      if (data.mocked) {
+        console.warn('⚠️ Partner clients using mocked data')
+        clients.value = data.data || []
+      } else {
+        clients.value = data.data || []
+      }
+    } catch (error) {
+      console.error('Error loading clients:', error)
+      clients.value = []
     }
   }
 
@@ -93,11 +121,17 @@ export const usePartnerStore = defineStore('partner', () => {
     dashboardStats,
     recentCommissions,
     recentActivities,
+    clients,
     isLoading,
-    
+    isMocked,
+    mockWarning,
+
     // Actions
     loadDashboardStats,
     loadRecentCommissions,
-    loadRecentActivities
+    loadRecentActivities,
+    loadClients
   }
 })
+
+// CLAUDE-CHECKPOINT
