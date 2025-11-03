@@ -516,4 +516,287 @@ class MigrationController extends Controller
             ],
         ]);
     }
+
+    // ==========================================
+    // NEW: Laravel Excel Integration Methods
+    // Feature flag: FEATURE_MIGRATION_WIZARD
+    // ==========================================
+
+    /**
+     * Upload file for Laravel Excel import wizard
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function upload(Request $request)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('create', ImportJob::class);
+
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:10240',
+            'type' => 'required|in:customers,items,invoices',
+            'source' => 'nullable|in:onivo,megasoft',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $file = $request->file('file');
+            $extension = $file->getClientOriginalExtension();
+            $filename = now()->format('Y-m-d_H-i-s') . '_' . uniqid() . '.' . $extension;
+            $path = $file->storeAs('imports/' . request()->header('company'), $filename);
+
+            // Create import job
+            $importJob = ImportJob::create([
+                'company_id' => request()->header('company'),
+                'creator_id' => auth()->id(),
+                'type' => $request->type,
+                'source_system' => $request->source ?? 'manual',
+                'status' => ImportJob::STATUS_PENDING,
+                'file_info' => [
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'extension' => $extension,
+                ],
+                'total_records' => 0,
+                'processed_records' => 0,
+                'successful_records' => 0,
+                'failed_records' => 0,
+            ]);
+
+            return response()->json([
+                'message' => 'File uploaded successfully',
+                'job_id' => $importJob->id,
+                'job' => new ImportJobResource($importJob),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Upload failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Upload failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get preview of first 10 rows
+     *
+     * @param ImportJob $job
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function preview(ImportJob $job)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('view', $job);
+
+        try {
+            $filePath = $job->file_info['path'] ?? null;
+
+            if (!$filePath || !Storage::exists($filePath)) {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+
+            $fullPath = Storage::path($filePath);
+            $extension = $job->file_info['extension'] ?? 'csv';
+
+            if (in_array($extension, ['xlsx', 'xls'])) {
+                // Use PhpSpreadsheet for Excel files
+                $spreadsheet = IOFactory::load($fullPath);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray();
+                $preview = array_slice($rows, 0, 11); // Header + 10 rows
+            } else {
+                // Use League CSV for CSV files
+                $csv = Reader::createFromPath($fullPath, 'r');
+                $csv->setHeaderOffset(0);
+                $preview = [];
+                $preview[] = $csv->getHeader();
+                foreach ($csv->getRecords() as $index => $record) {
+                    if ($index >= 10) break;
+                    $preview[] = array_values($record);
+                }
+            }
+
+            return response()->json([
+                'headers' => $preview[0] ?? [],
+                'rows' => array_slice($preview, 1),
+                'total_preview_rows' => count($preview) - 1,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Preview failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Preview failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get preset mapping for source system
+     *
+     * @param string $source
+     * @param Request $request
+     * @param ImportPresetService $presetService
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function presets(string $source, Request $request, ImportPresetService $presetService)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $entityType = $request->get('entity_type', 'customers');
+
+        try {
+            $preset = $presetService->getPresetStructure($source, $entityType);
+
+            return response()->json($preset);
+
+        } catch (\Exception $e) {
+            Log::error('Preset retrieval failed', ['source' => $source, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to get preset'], 500);
+        }
+    }
+
+    /**
+     * Dry run (validation only, no database insert)
+     *
+     * @param ImportJob $job
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dryRun(ImportJob $job, Request $request)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('update', $job);
+
+        $validator = Validator::make($request->all(), [
+            'mapping' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Update mapping config
+            $job->update([
+                'mapping_config' => $request->mapping,
+                'status' => ImportJob::STATUS_VALIDATING,
+            ]);
+
+            // Dispatch dry-run job
+            ProcessImportJob::dispatch($job, true)->onQueue('migration');
+
+            return response()->json([
+                'message' => 'Dry run started',
+                'job_id' => $job->id,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Dry run failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Dry run failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Execute import (commit to database)
+     *
+     * @param ImportJob $job
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function import(ImportJob $job)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('update', $job);
+
+        try {
+            // Dispatch import job
+            $job->update(['status' => ImportJob::STATUS_COMMITTING]);
+            ProcessImportJob::dispatch($job, false)->onQueue('migration');
+
+            return response()->json([
+                'message' => 'Import started',
+                'job_id' => $job->id,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Import failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Import failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get import status
+     *
+     * @param ImportJob $job
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function status(ImportJob $job)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('view', $job);
+
+        return response()->json([
+            'status' => $job->status,
+            'total_records' => $job->total_records,
+            'processed_records' => $job->processed_records,
+            'successful_records' => $job->successful_records,
+            'failed_records' => $job->failed_records,
+            'progress_percentage' => $job->progressPercentage,
+            'summary' => $job->summary,
+        ]);
+    }
+
+    /**
+     * Download error CSV
+     *
+     * @param ImportJob $job
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+     */
+    public function errors(ImportJob $job)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('view', $job);
+
+        try {
+            $errorPath = $job->error_details['error_csv_path'] ?? null;
+
+            if (!$errorPath || !Storage::exists($errorPath)) {
+                return response()->json(['message' => 'No error file found'], 404);
+            }
+
+            return Storage::download($errorPath, 'import_errors_' . $job->id . '.csv');
+
+        } catch (\Exception $e) {
+            Log::error('Error CSV download failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Download failed'], 500);
+        }
+    }
 }
+
+// CLAUDE-CHECKPOINT

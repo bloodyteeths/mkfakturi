@@ -14,6 +14,13 @@
 | laravel/pennant | v1.18.3 | MIT | Feature flag management | FlagsAndDocs agent (Step 0) |
 | symfony/http-client | v7.3.4 | MIT | HTTP client for PSD2/CPAY | FlagsAndDocs agent (Step 0) |
 
+### Migration Wizard (Step 2)
+
+| Package | Version | License | Purpose | Installed By |
+|---------|---------|---------|---------|--------------|
+| maatwebsite/excel | v3.1.67 | MIT | CSV/XLSX import with queue support | Migration agent (Step 2) |
+| league/csv | v9.27.1 | MIT | CSV streaming and encoding detection | Migration agent (Step 2) |
+
 ---
 
 ## 🔄 PENDING INTEGRATIONS
@@ -23,25 +30,11 @@ The following packages will be installed by their respective agents:
 ### Step 1: Accounting Backbone
 - **ekmungai/eloquent-ifrs** (v3.2.0, MIT) - Double-entry accounting ledger
 
-### Step 2: Migration Wizard
-- **maatwebsite/excel** (v3.1.55, MIT) - CSV/XLSX import with queue support
-- **league/csv** (v9.16.0, MIT) - CSV streaming and encoding detection
-
-### Step 3: Paddle Payments
-- **laravel/cashier-paddle** (v2.8.0, MIT) - Paddle payment gateway integration
-
-### Step 4: CPAY Payments
-- Custom driver enhancement (no package exists)
-- Uses existing `Modules/Mk/Services/CpayDriver.php`
-
 ### Step 5: PSD2 Banking
 - **jejik/mt940** (MIT) - Optional MT940/CSV parser for banks without OAuth
 
 ### Step 7: MCP AI Tools
 - **@modelcontextprotocol/sdk** (v0.5.0, MIT) - MCP TypeScript SDK
-
-### Step 8: Monitoring
-- **superbalist/laravel-prometheus-exporter** (v2.6.1, MIT) - Prometheus metrics
 
 ---
 

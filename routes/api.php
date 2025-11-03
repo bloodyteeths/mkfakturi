@@ -454,6 +454,20 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{import}/progress', [MigrationController::class, 'progress']);
                 Route::get('/{import}/logs', [MigrationController::class, 'logs']);
             });
+
+            // Migration Wizard (Laravel Excel)
+            // Feature flag: FEATURE_MIGRATION_WIZARD
+            // ----------------------------------
+
+            Route::prefix('migration')->group(function () {
+                Route::post('/upload', [MigrationController::class, 'upload']);
+                Route::get('/{job}/preview', [MigrationController::class, 'preview']);
+                Route::get('/presets/{source}', [MigrationController::class, 'presets']);
+                Route::post('/{job}/dry-run', [MigrationController::class, 'dryRun']);
+                Route::post('/{job}/import', [MigrationController::class, 'import']);
+                Route::get('/{job}/status', [MigrationController::class, 'status']);
+                Route::get('/{job}/errors', [MigrationController::class, 'errors']);
+            });
         });
 
         // Self Update
