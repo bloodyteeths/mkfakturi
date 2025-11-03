@@ -58,13 +58,22 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      * Register the Telescope gate.
      *
      * This gate determines who can access Telescope in non-local environments.
+     * CLAUDE-CHECKPOINT
      */
     protected function gate(): void
     {
         Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
+            // Check if monitoring feature is enabled
+            $monitoringEnabled = config('app.features.monitoring', false)
+                || env('FEATURE_MONITORING', false);
+
+            if (!$monitoringEnabled) {
+                return false;
+            }
+
+            // Check if user is an admin (using role check)
+            // Assuming the user has a role relationship or method
+            return $user->role === 'super admin' || $user->isOwner();
         });
     }
 }
