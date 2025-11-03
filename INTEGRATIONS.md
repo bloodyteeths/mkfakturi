@@ -44,6 +44,25 @@
 | laravel/cashier-paddle | v2.6.2 | MIT | Paddle payment gateway integration | Paddle agent (Step 3) |
 | Custom CPAY Driver | v1.0.0 | AGPL | CPAY (CASYS) payment gateway for Macedonia | CPAY agent (Step 4) |
 
+### Step 5: PSD2 Banking Integration
+
+| Package | Version | License | Purpose | Installed By |
+|---------|---------|---------|---------|--------------|
+| jejik/mt940 | v0.6.3 | MIT | MT940/CSV parser for bank statements (fallback) | Banking agent (Step 5) |
+
+**Features Implemented:**
+- BankToken model with encrypted OAuth token storage
+- Psd2Client abstract service class with OAuth2 flow
+- StopanskaOAuth and NlbOAuth gateway implementations
+- Mt940Parser service for CSV fallback import
+- SyncBankTransactions scheduled job (queue: banking)
+- BankAuthController with OAuth endpoints
+- API endpoints: `/banking/{company}/auth/{bank}`, `/banking/{company}/status/{bank}`, `/banking/{company}/disconnect/{bank}`, `/banking/{company}/import-mt940`
+- Feature flag: `FEATURE_PSD2_BANKING` (default OFF)
+- Rate limiting: Stopanska 15 req/min, NLB standard limits
+- Idempotency by transaction reference
+- Automatic token refresh when expiring
+
 ### Step 8: Monitoring & Observability
 
 | Package | Version | License | Purpose | Status |
@@ -65,9 +84,6 @@
 ## 🔄 PENDING INTEGRATIONS
 
 The following packages will be installed by their respective agents:
-
-### Step 5: PSD2 Banking
-- **jejik/mt940** (MIT) - Optional MT940/CSV parser for banks without OAuth
 
 ### Step 7: MCP AI Tools
 - **@modelcontextprotocol/sdk** (v0.5.0, MIT) - MCP TypeScript SDK
