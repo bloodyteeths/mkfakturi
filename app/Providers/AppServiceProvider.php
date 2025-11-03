@@ -163,9 +163,17 @@ class AppServiceProvider extends ServiceProvider
     public function bootObservers(): void
     {
         // Only register observers if accounting backbone feature is enabled
-        $isEnabled = config('ifrs.enabled', false) ||
-                     env('FEATURE_ACCOUNTING_BACKBONE', false) ||
-                     (function_exists('feature') && feature('accounting_backbone'));
+        $isEnabled = config('ifrs.enabled', false) || env('FEATURE_ACCOUNTING_BACKBONE', false);
+
+        // Check database feature flag if available (may not exist during tests/migrations)
+        if (!$isEnabled && function_exists('feature')) {
+            try {
+                $isEnabled = feature('accounting_backbone');
+            } catch (\Exception $e) {
+                // Features table doesn't exist yet (e.g., during migrations or tests)
+                $isEnabled = false;
+            }
+        }
 
         if ($isEnabled) {
             \App\Models\Invoice::observe(\App\Observers\InvoiceObserver::class);
