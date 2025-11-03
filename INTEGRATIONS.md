@@ -14,6 +14,13 @@
 | laravel/pennant | v1.18.3 | MIT | Feature flag management | FlagsAndDocs agent (Step 0) |
 | symfony/http-client | v7.3.4 | MIT | HTTP client for PSD2/CPAY | FlagsAndDocs agent (Step 0) |
 
+### Payment Integrations
+
+| Package | Version | License | Purpose | Installed By |
+|---------|---------|---------|---------|--------------|
+| laravel/cashier-paddle | v2.6.2 | MIT | Paddle payment gateway integration | Paddle agent (Step 3) |
+| Custom CPAY Driver | v1.0.0 | AGPL | CPAY (CASYS) payment gateway for Macedonia | CPAY agent (Step 4) |
+
 ---
 
 ## 🔄 PENDING INTEGRATIONS
@@ -26,13 +33,6 @@ The following packages will be installed by their respective agents:
 ### Step 2: Migration Wizard
 - **maatwebsite/excel** (v3.1.55, MIT) - CSV/XLSX import with queue support
 - **league/csv** (v9.16.0, MIT) - CSV streaming and encoding detection
-
-### Step 3: Paddle Payments
-- **laravel/cashier-paddle** (v2.8.0, MIT) - Paddle payment gateway integration
-
-### Step 4: CPAY Payments
-- Custom driver enhancement (no package exists)
-- Uses existing `Modules/Mk/Services/CpayDriver.php`
 
 ### Step 5: PSD2 Banking
 - **jejik/mt940** (MIT) - Optional MT940/CSV parser for banks without OAuth
