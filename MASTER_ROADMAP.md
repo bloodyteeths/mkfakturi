@@ -1429,10 +1429,149 @@ tests/Feature/Partner/PartnerApiTest.php
 **PR:** `feat(partner): implement APIs with mocked data safety flag`
 
 #### Progress
-(Will be filled by PartnerPortal agent when work begins)
+- **status:** ✅ completed
+- **branch:** feat/partner-portal-apis
+- **commit:** d4cdcd33
+- **owner agent:** PartnerPortal
+- **start date:** 2025-11-03
+- **completion date:** 2025-11-03
 
 #### Completed
-(Will be filled by PartnerPortal agent after merge, including Mini Audit)
+
+**What Was Built:**
+- ✅ Created PartnerApiController with 4 endpoints (dashboard, commissions, clients, profile)
+- ✅ Created CommissionCalculatorService with stats and commission calculation logic
+- ✅ Created FeatureMiddleware for generic feature flag protection
+- ✅ Updated Pinia store to call real APIs and detect mocked data
+- ✅ Created 11 comprehensive tests (71 assertions)
+- ✅ Added partnerLinks() relation to Company model
+- ✅ Registered partner routes with feature flag and auth middleware
+- ✅ Updated .env.example with PARTNER_COMMISSION_RATE configuration
+
+**Files Created (5):**
+```
+app/Http/Controllers/V1/Partner/PartnerApiController.php (294 lines)
+app/Services/Partner/CommissionCalculatorService.php (257 lines)
+app/Http/Middleware/FeatureMiddleware.php (39 lines)
+routes/partner.php (39 lines)
+tests/Feature/Partner/PartnerApiTest.php (383 lines)
+```
+
+**Files Modified (5):**
+```
+resources/scripts/partner/stores/partner.js (updated API calls, mocked data detection)
+app/Models/Company.php (added partnerLinks relation)
+app/Providers/RouteServiceProvider.php (registered partner routes)
+bootstrap/app.php (added partner and feature middleware aliases)
+.env.example (added PARTNER_COMMISSION_RATE=5.0)
+```
+
+**Mini Audit:**
+
+1. **Architecture** ✅
+   - Clean separation: Controller → Service → Model
+   - Feature flag protection at route level
+   - Mocked data flag checked in controller methods
+   - All endpoints return `{"mocked": true/false}` indicator
+   - Profile endpoint always returns real data (no safety needed)
+
+2. **Safety Mechanisms** ✅
+   - FEATURE_PARTNER_MOCKED_DATA defaults to true
+   - Cannot be toggled via UI (environment variable only)
+   - All API responses include mocked indicator
+   - Warning messages included for frontend display
+   - Comprehensive logging of all commission calculations
+
+3. **API Endpoints** ✅
+   - GET /api/v1/partner/dashboard → stats with mocked/real data
+   - GET /api/v1/partner/commissions → paginated commission list
+   - GET /api/v1/partner/clients → paginated client list
+   - GET /api/v1/partner/profile → partner profile (always real)
+
+4. **Authentication & Authorization** ✅
+   - All routes require Sanctum authentication
+   - Partner middleware verifies user has Partner record
+   - Partner middleware checks is_active status
+   - Non-partner users blocked with 403
+   - Inactive partners blocked with 403
+
+5. **Commission Calculation Logic** ✅
+   - getStats(): active_clients, monthly_commissions, processed_invoices, etc.
+   - calculateCommission(): 5% default rate, supports override rates
+   - createCommissionForPayment(): auto-creates commission on invoice payment
+   - Uses partner-company link override rate if available
+   - Falls back to partner's default commission_rate
+
+6. **Testing** ✅
+   - 11 tests covering all scenarios
+   - 71 assertions total
+   - Tests mocked data mode (flag ON)
+   - Tests real data mode (flag OFF)
+   - Tests authentication and authorization
+   - Tests feature flag protection
+   - Tests safety: mocked data always returned when flag ON (even with DB data)
+
+7. **Frontend Integration** ✅
+   - Pinia store updated with real API calls
+   - Detects mocked data via response.mocked flag
+   - Console warnings when mocked data active
+   - isMocked and mockWarning state for UI display
+   - loadDashboardStats(), loadRecentCommissions(), loadClients() actions
+
+8. **Security** ✅
+   - Feature flag defaults to OFF (FEATURE_PARTNER_PORTAL=false)
+   - Mocked data flag defaults to ON (FEATURE_PARTNER_MOCKED_DATA=true)
+   - All endpoints require authentication
+   - Partner authorization checked
+   - No sensitive data exposed in mocked responses
+   - All commission calculations logged
+
+9. **Performance** ✅
+   - Pagination on commissions and clients endpoints (25 per page)
+   - Efficient queries using whereHas for filtering
+   - Single query for dashboard stats aggregation
+   - No N+1 query issues
+
+10. **Documentation** ✅
+    - PHPDoc on all public methods
+    - Controller docblock explains mocked data safety
+    - Test names clearly describe scenarios
+    - Environment variables documented in .env.example
+    - Comprehensive commit message
+
+**Acceptance Criteria:**
+- ✅ With FEATURE_PARTNER_MOCKED_DATA=true → mocked data returned
+- ✅ With flag OFF → real stats from database
+- ✅ Pinia stores updated to call APIs and detect mocked data
+- ✅ Partner authentication middleware works
+- ✅ Commission calculation logic implemented (ready for auto-creation)
+- ✅ Tests passing: php artisan test --filter=Partner (11 tests, 71 assertions)
+- ✅ All endpoints return {"mocked": true} indicator when appropriate
+
+**LOC Added:** 1,095 lines (10 files changed)
+
+**Time Spent:** ~4 hours (vs 16 hour estimate)
+**Reason for Variance:**
+- Models and middleware already existed from foundation work
+- Partner database schema already seeded
+- Service layer straightforward with clear separation
+- Tests written efficiently with shared setup
+
+**Ready for Staging:** ✅ Yes (feature flags OFF by default, mocked data ON by default)
+
+**Known Limitations:**
+- Commission auto-creation on invoice payment not yet wired (requires observer)
+- No UI components created (API-only implementation)
+- No commission payout workflow (future enhancement)
+- No partner referral link generation (future enhancement)
+
+**Recommendations for Next Steps:**
+1. Create InvoicePaymentObserver to auto-create commissions
+2. Build Vue components for partner dashboard UI
+3. Add commission approval workflow (pending → approved → paid)
+4. Implement partner referral link generation with UTM tracking
+5. Add commission payout export (CSV for bank upload)
+6. Create partner onboarding wizard
 
 ---
 
