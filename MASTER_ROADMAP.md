@@ -1422,14 +1422,50 @@ tests/Feature/Monitoring/PrometheusTest.php
 **PR:** `feat(monitoring): enable Prometheus exporter + health checks`
 
 #### Progress
-- **status:** in progress
+- **status:** ✅ completed
 - **branch:** feat/monitoring-prometheus
-- **pr:** (to be created)
+- **commit:** 74606769
 - **owner agent:** Monitoring
 - **start date:** 2025-11-03
+- **completion date:** 2025-11-03
 
 #### Completed
-(Will be filled by Monitoring agent after merge, including Mini Audit)
+
+**Implementation Summary:**
+- ✅ Enabled PrometheusServiceProvider, PrometheusMiddleware, PrometheusController (renamed from .disabled)
+- ✅ Used arquivei/laravel-prometheus-exporter (dev-add-laravel-12 branch for Laravel 12 compatibility)
+- ✅ Added certificate expiry monitoring (fakturino_signer_cert_expiry_days + fakturino_signer_cert_healthy)
+- ✅ Enhanced HealthController with 6 comprehensive checks: database, redis, queues, signer, bank_sync, storage
+- ✅ Enabled Telescope in bootstrap/providers.php
+- ✅ Updated TelescopeServiceProvider gate to check FEATURE_MONITORING flag + admin role
+- ✅ Routes protected by feature:monitoring middleware
+- ✅ Created PrometheusTest.php with 10 test cases
+
+**Metrics Exposed:**
+Business: invoices_total, customers_total, customers_active, revenue_30_days_total
+System: database_healthy, cache_healthy, disk_usage_percent, memory_usage_bytes/percent
+Banking: bank_transactions_24h, bank_transactions_matched/unmatched, bank_match_rate_percent, bank_sync_errors_24h
+Performance: avg_response_time_ms, queue_jobs_pending/failed, uptime_seconds
+Certificate: fakturino_signer_cert_expiry_days, fakturino_signer_cert_healthy
+
+**Documentation Updated:**
+- INTEGRATIONS.md: Added Step 8 Monitoring section with package details
+- RAILWAY.md: Added Prometheus configuration, metrics list, and Telescope access instructions
+
+**Mini Audit:**
+- files touched: app/Providers/PrometheusServiceProvider.php, app/Http/Middleware/PrometheusMiddleware.php, app/Http/Controllers/PrometheusController.php, app/Http/Controllers/HealthController.php, app/Providers/TelescopeServiceProvider.php, INTEGRATIONS.md, RAILWAY.md, tests/Feature/Monitoring/PrometheusTest.php
+- public api changes: new routes GET /metrics, GET /metrics/health (both protected by feature:monitoring middleware)
+- env and flags: FEATURE_MONITORING=false (default), PROMETHEUS_NAMESPACE=fakturino, PROMETHEUS_STORAGE_ADAPTER=memory|redis|apc
+- reliability: certificate expiry checked in health endpoint and exposed as metric, comprehensive health checks for all subsystems
+- observability: 25+ Prometheus metrics covering business, system, banking, and performance indicators
+- telescope: accessible at /telescope for super admin users when monitoring enabled
+- known issues: certificate check fails gracefully if cert file missing (returns -1), bank_transactions table check skipped if table doesn't exist yet
+
+**Next Steps:**
+- Enable FEATURE_MONITORING=true in production when ready
+- Configure Prometheus scraper to collect metrics from /metrics endpoint
+- Set up alerts for cert expiry (< 7 days), high queue depth, low match rate
+- Grant super admin access to developers who need Telescope
 
 ---
 
