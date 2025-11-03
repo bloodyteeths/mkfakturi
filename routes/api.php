@@ -479,6 +479,17 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{job}/status', [MigrationController::class, 'status']);
                 Route::get('/{job}/errors', [MigrationController::class, 'errors']);
             });
+
+            // PSD2 Banking Integration (OAuth + MT940 Fallback)
+            // Feature flag: FEATURE_PSD2_BANKING
+            // ----------------------------------
+
+            Route::prefix('banking')->group(function () {
+                Route::post('/{company}/auth/{bankCode}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'initiateOAuth']);
+                Route::get('/{company}/status/{bankCode}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'getStatus']);
+                Route::delete('/{company}/disconnect/{bankCode}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'revoke']);
+                Route::post('/{company}/import-mt940', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'importCsv']);
+            });
         });
 
 // CLAUDE-CHECKPOINT

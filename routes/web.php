@@ -162,6 +162,11 @@ Route::post('/webhooks/paddle', [\Modules\Mk\Http\PaddleWebhookController::class
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // Health check endpoints for Docker
+// PSD2 Banking OAuth Callback
+// ----------------------------------
+Route::get('/banking/callback/{company}/{bank}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'handleCallback'])
+    ->name('banking.callback');
+
 // Simple ping endpoint for Railway healthcheck (no DB required)
 Route::get('/ping', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()->toISOString()], 200);

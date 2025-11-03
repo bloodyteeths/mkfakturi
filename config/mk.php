@@ -208,7 +208,7 @@ return [
     */
 
     'banks' => [
-        
+
         /*
         |--------------------------------------------------------------------------
         | Supported Banks
@@ -245,6 +245,40 @@ return [
             'max_transactions' => 100, // Maximum transactions per sync
         ],
 
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stopanska Banka PSD2 Settings
+    |--------------------------------------------------------------------------
+    |
+    | OAuth2 configuration for Stopanska Banka PSD2 API
+    |
+    */
+    'stopanska' => [
+        'client_id' => env('STOPANSKA_CLIENT_ID', ''),
+        'client_secret' => env('STOPANSKA_CLIENT_SECRET', ''),
+        'environment' => env('STOPANSKA_ENVIRONMENT', 'sandbox'),
+        'sandbox_base_url' => env('STOPANSKA_SANDBOX_BASE_URL', 'https://sandbox-api.stopanska.com.mk/psd2/v1'),
+        'production_base_url' => env('STOPANSKA_PRODUCTION_BASE_URL', 'https://api.stopanska.com.mk/psd2/v1'),
+        'rate_limit_enabled' => env('STOPANSKA_RATE_LIMIT_ENABLED', true),
+        'max_transactions_per_request' => env('STOPANSKA_MAX_TRANSACTIONS_PER_REQUEST', 200),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | NLB Banka PSD2 Settings
+    |--------------------------------------------------------------------------
+    |
+    | OAuth2 configuration for NLB Banka PSD2 API
+    |
+    */
+    'nlb' => [
+        'client_id' => env('NLB_CLIENT_ID', ''),
+        'client_secret' => env('NLB_CLIENT_SECRET', ''),
+        'environment' => env('NLB_ENVIRONMENT', 'sandbox'),
+        'sandbox_base_url' => env('NLB_SANDBOX_BASE_URL', 'https://sandbox-api-ob.nlb.mk/xs2a/v1'),
+        'production_base_url' => env('NLB_PRODUCTION_BASE_URL', 'https://api-ob.nlb.mk/xs2a/v1'),
     ],
 
     /*
@@ -287,6 +321,7 @@ return [
 
     'features' => [
         'advanced_payments' => env('FEATURE_ADVANCED_PAYMENTS', false),
+        'psd2_banking' => env('FEATURE_PSD2_BANKING', false),
     ],
 
 ];
