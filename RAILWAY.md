@@ -55,11 +55,16 @@ FEATURE_MONITORING=false
 
 **Health Check:**
 ```
-Path: /metrics/health
+Path: /health
 Interval: 30s
 Timeout: 10s
 Success: 200 status
 ```
+
+**Note:** The `/health` endpoint is always available. When `FEATURE_MONITORING=true`, additional monitoring endpoints are available:
+- `/metrics` - Prometheus metrics (text format)
+- `/metrics/health` - Detailed health checks with all subsystems
+- `/telescope` - Telescope debugging interface (admin only)
 
 ---
 
@@ -244,6 +249,36 @@ mcp-server: GET /health
 ```
 api:       GET /metrics (Prometheus format)
 ```
+
+**Available Metrics:**
+- `fakturino_signer_cert_expiry_days` - Days until XML signing certificate expires
+- `fakturino_signer_cert_healthy` - Certificate health status (1=healthy, 0=expiring soon)
+- `invoiceshelf_invoices_total{status}` - Total invoices by status
+- `invoiceshelf_customers_total` - Total customers
+- `invoiceshelf_customers_active` - Active customers (invoiced in last 90 days)
+- `invoiceshelf_revenue_30_days_total` - Total revenue in last 30 days
+- `invoiceshelf_database_healthy` - Database connection health
+- `invoiceshelf_cache_healthy` - Cache connection health
+- `invoiceshelf_queue_jobs_pending` - Number of pending queue jobs
+- `invoiceshelf_queue_jobs_failed` - Number of failed queue jobs
+- `invoiceshelf_bank_transactions_24h` - Bank transactions synced in last 24 hours
+- `invoiceshelf_bank_match_rate_percent` - Bank transaction match rate
+
+**Prometheus Configuration:**
+Set these environment variables to customize Prometheus behavior:
+```bash
+PROMETHEUS_NAMESPACE=fakturino                    # Metric namespace
+PROMETHEUS_STORAGE_ADAPTER=redis                  # memory|redis|apc
+PROMETHEUS_REDIS_HOST=${REDIS_HOST}              # Auto-set by Railway
+PROMETHEUS_REDIS_PORT=${REDIS_PORT}              # Auto-set by Railway
+PROMETHEUS_REDIS_DATABASE=2                       # Separate from cache
+PROMETHEUS_METRICS_ROUTE_ENABLED=false           # Let web.php handle routes
+```
+
+**Telescope Access:**
+- URL: `https://your-app.railway.app/telescope`
+- Access: Super admin users only when `FEATURE_MONITORING=true`
+- Storage: Database tables (telescope_entries, telescope_*)
 
 ### Logs
 ```bash
