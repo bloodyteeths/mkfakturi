@@ -257,7 +257,7 @@ return [
     */
 
     'payment_gateways' => [
-        
+
         /*
         |--------------------------------------------------------------------------
         | CPay Settings
@@ -276,4 +276,18 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Flags
+    |--------------------------------------------------------------------------
+    |
+    | Feature flags for Macedonian-specific features
+    |
+    */
+
+    'features' => [
+        'advanced_payments' => env('FEATURE_ADVANCED_PAYMENTS', false),
+    ],
+
 ];
+// CLAUDE-CHECKPOINT

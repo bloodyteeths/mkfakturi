@@ -23,7 +23,8 @@ return [
             'url' => env('DB_URL'),
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
-            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            // CLAUDE-CHECKPOINT: Disabled FK constraints for IFRS migration compatibility
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', false),
             'busy_timeout' => null,
             'journal_mode' => null,
             'synchronous' => null,

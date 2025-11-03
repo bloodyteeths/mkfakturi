@@ -20,5 +20,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'login',
+        'webhooks/*', // All webhook routes are excluded from CSRF
     ];
 }
+// CLAUDE-CHECKPOINT

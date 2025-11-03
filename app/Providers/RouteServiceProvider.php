@@ -42,6 +42,11 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+
+            // Webhook routes (without CSRF protection)
+            Route::middleware('web')
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
+                ->group(base_path('routes/webhooks.php'));
         });
     }
 
