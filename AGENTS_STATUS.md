@@ -10,16 +10,16 @@
 ### Stage 0: Foundation (Sequential)
 | Agent | Step | Status | Branch | PR | Started | Merged |
 |-------|------|--------|--------|-----|---------|--------|
-| FlagsAndDocs | 0 | ⏸️ Not Started | - | - | - | - |
+| FlagsAndDocs | 0 | ✅ Completed | feat/foundation-flags | Merged to main | 2025-11-03 | 2025-11-03 |
 
 ### Stage A: Core Features (Parallel)
 | Agent | Step | Status | Branch | PR | Started | Merged |
 |-------|------|--------|--------|-----|---------|--------|
-| Accounting | 1 | ⏸️ Waiting for Stage 0 | - | - | - | - |
-| Migration | 2 | ⏸️ Waiting for Stage 0 | - | - | - | - |
-| Paddle | 3 | ⏸️ Waiting for Stage 0 | - | - | - | - |
-| CPAY | 4 | ⏸️ Waiting for Stage 0 | - | - | - | - |
-| Monitoring | 8 | ⏸️ Waiting for Stage 0 | - | - | - | - |
+| Accounting | 1 | 🔄 In Progress | feat/accounting-ifrs-integration | TBD | 2025-11-03 | - |
+| Migration | 2 | 🔄 In Progress | feat/migration-wizard | TBD | 2025-11-03 | - |
+| Paddle | 3 | 🔄 In Progress | feat/payments-paddle | TBD | 2025-11-03 | - |
+| CPAY | 4 | 🔄 In Progress | feat/payments-cpay | TBD | 2025-11-03 | - |
+| Monitoring | 8 | 🔄 In Progress | feat/monitoring-prometheus | TBD | 2025-11-03 | - |
 
 ### Stage B: Advanced Features (Parallel)
 | Agent | Step | Status | Branch | PR | Started | Merged |

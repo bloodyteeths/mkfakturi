@@ -431,7 +431,11 @@ tests/Feature/Accounting/IfrsIntegrationTest.php
 **PR:** `feat(accounting): integrate eloquent-ifrs with adapter layer`
 
 #### Progress
-(Will be filled by Accounting agent when work begins)
+- **status:** in progress
+- **branch:** feat/accounting-ifrs-integration
+- **pr:** (to be created)
+- **owner agent:** Accounting
+- **start date:** 2025-11-03
 
 #### Completed
 (Will be filled by Accounting agent after merge, including Mini Audit)
@@ -560,7 +564,11 @@ tests/Unit/Services/ImportPresetServiceTest.php
 **PR:** `feat(migration): integrate Laravel Excel with Onivo/Megasoft presets`
 
 #### Progress
-(Will be filled by Migration agent when work begins)
+- **status:** in progress
+- **branch:** feat/migration-wizard
+- **pr:** (to be created)
+- **owner agent:** Migration
+- **start date:** 2025-11-03
 
 #### Completed
 (Will be filled by Migration agent after merge, including Mini Audit)
@@ -706,7 +714,11 @@ tests/Unit/Services/PaddlePaymentServiceTest.php
 **PR:** `feat(payments): integrate Paddle with webhook idempotency`
 
 #### Progress
-(Will be filled by Paddle agent when work begins)
+- **status:** in progress
+- **branch:** feat/payments-paddle
+- **pr:** (to be created)
+- **owner agent:** Paddle
+- **start date:** 2025-11-03
 
 #### Completed
 (Will be filled by Paddle agent after merge, including Mini Audit)
@@ -818,7 +830,11 @@ tests/Feature/Payments/CpayIntegrationTest.php
 **PR:** `feat(payments): enhance CPAY driver with signature verification`
 
 #### Progress
-(Will be filled by CPAY agent when work begins)
+- **status:** in progress
+- **branch:** feat/payments-cpay
+- **pr:** (to be created)
+- **owner agent:** CPAY
+- **start date:** 2025-11-03
 
 #### Completed
 (Will be filled by CPAY agent after merge, including Mini Audit)
@@ -1406,7 +1422,11 @@ tests/Feature/Monitoring/PrometheusTest.php
 **PR:** `feat(monitoring): enable Prometheus exporter + health checks`
 
 #### Progress
-(Will be filled by Monitoring agent when work begins)
+- **status:** in progress
+- **branch:** feat/monitoring-prometheus
+- **pr:** (to be created)
+- **owner agent:** Monitoring
+- **start date:** 2025-11-03
 
 #### Completed
 (Will be filled by Monitoring agent after merge, including Mini Audit)
