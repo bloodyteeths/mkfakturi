@@ -9,6 +9,7 @@ use IFRS\Models\Account;
 use IFRS\Models\Transaction;
 use IFRS\Models\LineItem;
 use IFRS\Models\ReportingPeriod;
+use IFRS\Models\Entity;
 use IFRS\Reports\TrialBalance;
 use IFRS\Reports\BalanceSheet;
 use IFRS\Reports\IncomeStatement;
@@ -45,9 +46,15 @@ class IfrsAdapter
         try {
             DB::beginTransaction();
 
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($invoice->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
             // Get or create accounts
-            $arAccount = $this->getAccountsReceivableAccount($invoice->company_id);
-            $revenueAccount = $this->getRevenueAccount($invoice->company_id);
+            $arAccount = $this->getAccountsReceivableAccount($invoice->company_id, $entity->id);
+            $revenueAccount = $this->getRevenueAccount($invoice->company_id, $entity->id);
 
             // Create IFRS Transaction (Client Invoice)
             $transaction = Transaction::create([
@@ -56,6 +63,7 @@ class IfrsAdapter
                 'narration' => "Invoice #{$invoice->invoice_number} - {$invoice->customer->name}",
                 'transaction_type' => Transaction::CS, // Client Invoice
                 'currency_id' => $this->getCurrencyId($invoice->company_id),
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Debit Accounts Receivable
@@ -78,7 +86,7 @@ class IfrsAdapter
 
             // If there's tax, create a line for tax payable
             if ($invoice->tax > 0) {
-                $taxPayableAccount = $this->getTaxPayableAccount($invoice->company_id);
+                $taxPayableAccount = $this->getTaxPayableAccount($invoice->company_id, $entity->id);
                 LineItem::create([
                     'transaction_id' => $transaction->id,
                     'account_id' => $taxPayableAccount->id,
@@ -129,9 +137,15 @@ class IfrsAdapter
         try {
             DB::beginTransaction();
 
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($payment->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
             // Get accounts
-            $cashAccount = $this->getCashAccount($payment->company_id);
-            $arAccount = $this->getAccountsReceivableAccount($payment->company_id);
+            $cashAccount = $this->getCashAccount($payment->company_id, $entity->id);
+            $arAccount = $this->getAccountsReceivableAccount($payment->company_id, $entity->id);
 
             // Create IFRS Transaction (Client Receipt)
             $transaction = Transaction::create([
@@ -140,6 +154,7 @@ class IfrsAdapter
                 'narration' => "Payment #{$payment->payment_number} - {$payment->customer->name}",
                 'transaction_type' => Transaction::CR, // Client Receipt
                 'currency_id' => $this->getCurrencyId($payment->company_id),
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Debit Cash
@@ -202,9 +217,15 @@ class IfrsAdapter
         try {
             DB::beginTransaction();
 
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($payment->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
             // Get accounts
-            $feeExpenseAccount = $this->getFeeExpenseAccount($payment->company_id);
-            $cashAccount = $this->getCashAccount($payment->company_id);
+            $feeExpenseAccount = $this->getFeeExpenseAccount($payment->company_id, $entity->id);
+            $cashAccount = $this->getCashAccount($payment->company_id, $entity->id);
 
             // Create IFRS Transaction (Journal Entry for Fee)
             $transaction = Transaction::create([
@@ -213,6 +234,7 @@ class IfrsAdapter
                 'narration' => "Payment processing fee for #{$payment->payment_number}",
                 'transaction_type' => Transaction::JN, // Journal Entry
                 'currency_id' => $this->getCurrencyId($payment->company_id),
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Debit Fee Expense
@@ -269,8 +291,18 @@ class IfrsAdapter
         try {
             $date = $asOfDate ? Carbon::parse($asOfDate) : Carbon::now();
 
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (!$entity) {
+                return [
+                    'error' => 'IFRS Entity not available',
+                    'message' => 'Failed to get or create IFRS Entity for this company.',
+                    'status' => 'entity_error',
+                ];
+            }
+
             // Check if any accounts exist - if not, accounting system not initialized
-            $accountCount = Account::count();
+            $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
                 return [
                     'error' => 'Accounting system not initialized',
@@ -279,8 +311,8 @@ class IfrsAdapter
                 ];
             }
 
-            // TrialBalance expects year string and entity (passing null for now - multi-tenancy needs proper Entity setup)
-            $trialBalance = new TrialBalance((string)$date->year, null);
+            // TrialBalance expects year string and entity
+            $trialBalance = new TrialBalance((string)$date->year, $entity);
 
             return [
                 'date' => $date->toDateString(),
@@ -290,7 +322,6 @@ class IfrsAdapter
                 'total_debits' => $trialBalance->totalDebits(),
                 'total_credits' => $trialBalance->totalCredits(),
                 'is_balanced' => $trialBalance->totalDebits() === $trialBalance->totalCredits(),
-                'note' => 'Multi-company support requires IFRS Entity setup - currently showing all companies',
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate trial balance", [
@@ -328,8 +359,18 @@ class IfrsAdapter
         try {
             $date = $asOfDate ? Carbon::parse($asOfDate) : Carbon::now();
 
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (!$entity) {
+                return [
+                    'error' => 'IFRS Entity not available',
+                    'message' => 'Failed to get or create IFRS Entity for this company.',
+                    'status' => 'entity_error',
+                ];
+            }
+
             // Check if any accounts exist - if not, accounting system not initialized
-            $accountCount = Account::count();
+            $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
                 return [
                     'error' => 'Accounting system not initialized',
@@ -338,8 +379,8 @@ class IfrsAdapter
                 ];
             }
 
-            // BalanceSheet expects endDate and entity (passing null for entity - multi-tenancy needs proper setup)
-            $balanceSheet = new BalanceSheet($date->toDateString(), null);
+            // BalanceSheet expects endDate and entity
+            $balanceSheet = new BalanceSheet($date->toDateString(), $entity);
 
             return [
                 'date' => $date->toDateString(),
@@ -349,7 +390,6 @@ class IfrsAdapter
                 'total_assets' => $balanceSheet->totalAssets(),
                 'total_liabilities' => $balanceSheet->totalLiabilities(),
                 'total_equity' => $balanceSheet->totalEquity(),
-                'note' => 'Multi-company support requires IFRS Entity setup - currently showing all companies',
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate balance sheet", [
@@ -389,8 +429,18 @@ class IfrsAdapter
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
 
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (!$entity) {
+                return [
+                    'error' => 'IFRS Entity not available',
+                    'message' => 'Failed to get or create IFRS Entity for this company.',
+                    'status' => 'entity_error',
+                ];
+            }
+
             // Check if any accounts exist - if not, accounting system not initialized
-            $accountCount = Account::count();
+            $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
                 return [
                     'error' => 'Accounting system not initialized',
@@ -399,8 +449,8 @@ class IfrsAdapter
                 ];
             }
 
-            // IncomeStatement expects startDate, endDate, and entity (passing null for entity - multi-tenancy needs proper setup)
-            $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), null);
+            // IncomeStatement expects startDate, endDate, and entity
+            $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), $entity);
 
             return [
                 'start_date' => $start->toDateString(),
@@ -410,7 +460,6 @@ class IfrsAdapter
                 'total_revenue' => $incomeStatement->totalRevenue(),
                 'total_expenses' => $incomeStatement->totalExpenses(),
                 'net_income' => $incomeStatement->netIncome(),
-                'note' => 'Multi-company support requires IFRS Entity setup - currently showing all companies',
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate income statement", [
@@ -444,18 +493,63 @@ class IfrsAdapter
     }
 
     /**
+     * Get or create IFRS Entity for a company
+     *
+     * @param Company $company
+     * @return Entity|null
+     */
+    protected function getOrCreateEntityForCompany(Company $company): ?Entity
+    {
+        // If company already has an IFRS entity, return it
+        if ($company->ifrs_entity_id) {
+            $entity = Entity::find($company->ifrs_entity_id);
+            if ($entity) {
+                return $entity;
+            }
+        }
+
+        // Create new IFRS Entity for this company
+        try {
+            $entity = Entity::create([
+                'name' => $company->name,
+                'currency_id' => $this->getCurrencyId($company->id),
+                'year_start' => 1, // January
+                'multi_currency' => false,
+            ]);
+
+            // Link entity to company
+            $company->update(['ifrs_entity_id' => $entity->id]);
+
+            Log::info("Created IFRS Entity for company", [
+                'company_id' => $company->id,
+                'entity_id' => $entity->id,
+            ]);
+
+            return $entity;
+        } catch (\Exception $e) {
+            Log::error("Failed to create IFRS Entity for company", [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
      * Get or create Accounts Receivable account
      *
      * @param int $companyId
+     * @param int $entityId
      * @return Account
      */
-    protected function getAccountsReceivableAccount(int $companyId): Account
+    protected function getAccountsReceivableAccount(int $companyId, int $entityId): Account
     {
         return Account::firstOrCreate(
             [
                 'account_type' => Account::RECEIVABLE,
                 'category_id' => null,
                 'name' => 'Accounts Receivable',
+                'entity_id' => $entityId,
             ],
             [
                 'code' => '1200',
@@ -468,15 +562,17 @@ class IfrsAdapter
      * Get or create Revenue account
      *
      * @param int $companyId
+     * @param int $entityId
      * @return Account
      */
-    protected function getRevenueAccount(int $companyId): Account
+    protected function getRevenueAccount(int $companyId, int $entityId): Account
     {
         return Account::firstOrCreate(
             [
                 'account_type' => Account::OPERATING_REVENUE,
                 'category_id' => null,
                 'name' => 'Sales Revenue',
+                'entity_id' => $entityId,
             ],
             [
                 'code' => '4000',
@@ -489,15 +585,17 @@ class IfrsAdapter
      * Get or create Cash account
      *
      * @param int $companyId
+     * @param int $entityId
      * @return Account
      */
-    protected function getCashAccount(int $companyId): Account
+    protected function getCashAccount(int $companyId, int $entityId): Account
     {
         return Account::firstOrCreate(
             [
                 'account_type' => Account::BANK,
                 'category_id' => null,
                 'name' => 'Cash and Bank',
+                'entity_id' => $entityId,
             ],
             [
                 'code' => '1000',
@@ -510,15 +608,17 @@ class IfrsAdapter
      * Get or create Tax Payable account
      *
      * @param int $companyId
+     * @param int $entityId
      * @return Account
      */
-    protected function getTaxPayableAccount(int $companyId): Account
+    protected function getTaxPayableAccount(int $companyId, int $entityId): Account
     {
         return Account::firstOrCreate(
             [
                 'account_type' => Account::CONTROL,
                 'category_id' => null,
                 'name' => 'Tax Payable',
+                'entity_id' => $entityId,
             ],
             [
                 'code' => '2100',
@@ -531,15 +631,17 @@ class IfrsAdapter
      * Get or create Fee Expense account
      *
      * @param int $companyId
+     * @param int $entityId
      * @return Account
      */
-    protected function getFeeExpenseAccount(int $companyId): Account
+    protected function getFeeExpenseAccount(int $companyId, int $entityId): Account
     {
         return Account::firstOrCreate(
             [
                 'account_type' => Account::OPERATING_EXPENSE,
                 'category_id' => null,
                 'name' => 'Payment Processing Fees',
+                'entity_id' => $entityId,
             ],
             [
                 'code' => '5100',

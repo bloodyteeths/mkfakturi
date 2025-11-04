@@ -8,6 +8,7 @@ use App\Providers\CacheServiceProvider;
 use App\Traits\CacheableTrait;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
+use IFRS\Traits\IFRSUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -29,6 +30,7 @@ class User extends Authenticatable implements HasMedia
     use HasCustomFieldsTrait;
     use HasFactory;
     use HasRolesAndAbilities;
+    use IFRSUser; // CLAUDE-CHECKPOINT: Added IFRSUser trait for IFRS entity relationship
     use InteractsWithMedia;
     use Notifiable;
 

@@ -22,6 +22,10 @@ class Company extends Model implements HasMedia
         'id',
     ];
 
+    protected $fillable = [
+        'ifrs_entity_id',
+    ];
+
     public const COMPANY_LEVEL = 'company_level';
 
     public const CUSTOMER_LEVEL = 'customer_level';
@@ -185,6 +189,16 @@ class Company extends Model implements HasMedia
     {
         return $this->hasMany(MiniMaxToken::class);
     }
+
+    /**
+     * Company's IFRS Entity relationship
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function ifrsEntity(): BelongsTo
+    {
+        return $this->belongsTo(\IFRS\Models\Entity::class, 'ifrs_entity_id');
+    } // CLAUDE-CHECKPOINT: Added ifrsEntity relationship
 
     public function setupRoles()
     {

@@ -32,77 +32,153 @@ class MkIfrsSeeder extends Seeder
     {
         $this->command->info('Seeding Macedonian Chart of Accounts...');
 
-        // Create or get default MKD currency
-        $mkd = Currency::firstOrCreate(
-            ['currency_code' => 'MKD'],
-            ['name' => 'Macedonian Denar']
-        );
+        // Get all companies and create an IFRS Entity for each one
+        $companies = \App\Models\Company::all();
 
-        // Create or get default entity
-        $entity = Entity::first();
-        if (!$entity) {
-            $entity = Entity::create([
-                'name' => 'Default Entity',
-                'currency_id' => $mkd->id,
+        if ($companies->isEmpty()) {
+            $this->command->warn('No companies found. Skipping chart of accounts seeding.');
+            return;
+        }
+
+        // Create or get MKD currency (need an entity_id, so use first company's entity)
+        // Create a temporary entity for currency if needed
+        $firstEntity = Entity::first();
+        if (!$firstEntity) {
+            $firstCompany = $companies->first();
+            $firstEntity = Entity::create([
+                'name' => $firstCompany->name . ' (System)',
+                'year_start' => 1,
+                'multi_currency' => false,
             ]);
         }
 
-        // Create account categories
-        $categories = $this->createCategories();
+        // Create or get MKD currency with entity_id
+        $mkd = Currency::where('currency_code', 'MKD')->first();
+        if (!$mkd) {
+            $mkd = new Currency();
+            $mkd->currency_code = 'MKD';
+            $mkd->name = 'Macedonian Denar';
+            $mkd->entity_id = $firstEntity->id;
+            $mkd->save();
+        }
 
-        // Seed chart of accounts
-        $this->seedAssetAccounts($mkd->id, $categories);
-        $this->seedLiabilityAccounts($mkd->id, $categories);
-        $this->seedEquityAccounts($mkd->id, $categories);
-        $this->seedRevenueAccounts($mkd->id, $categories);
-        $this->seedExpenseAccounts($mkd->id, $categories);
+        foreach ($companies as $company) {
+            $this->command->info("Seeding chart of accounts for company: {$company->name}");
+
+            // Create or get IFRS Entity for this company
+            if ($company->ifrs_entity_id) {
+                $entity = Entity::find($company->ifrs_entity_id);
+            } else {
+                $entity = Entity::create([
+                    'name' => $company->name,
+                    'currency_id' => $mkd->id,
+                    'year_start' => 1, // January
+                    'multi_currency' => false,
+                ]);
+
+                // Link entity to company
+                $company->update(['ifrs_entity_id' => $entity->id]);
+            }
+
+            // Create account categories for this entity
+            $categories = $this->createCategories($entity->id);
+
+            // Seed chart of accounts for this entity
+            $this->seedAssetAccounts($mkd->id, $categories, $entity->id);
+            $this->seedLiabilityAccounts($mkd->id, $categories, $entity->id);
+            $this->seedEquityAccounts($mkd->id, $categories, $entity->id);
+            $this->seedRevenueAccounts($mkd->id, $categories, $entity->id);
+            $this->seedExpenseAccounts($mkd->id, $categories, $entity->id);
+        }
 
         $this->command->info('Macedonian Chart of Accounts seeded successfully!');
     }
 
     /**
-     * Create account categories
+     * Create account categories for an entity
      *
+     * @param int $entityId
      * @return array
      */
-    protected function createCategories(): array
+    protected function createCategories(int $entityId): array
     {
         $categories = [
             'current_assets' => Category::firstOrCreate(
-                ['category_name' => 'Current Assets'],
-                ['category_type' => Account::BANK]
+                [
+                    'name' => 'Current Assets',
+                    'entity_id' => $entityId,
+                ],
+                ['category_type' => Account::CURRENT_ASSET]
             ),
             'fixed_assets' => Category::firstOrCreate(
-                ['category_name' => 'Fixed Assets'],
+                [
+                    'name' => 'Fixed Assets',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::NON_CURRENT_ASSET]
             ),
+            'contra_assets' => Category::firstOrCreate(
+                [
+                    'name' => 'Contra Assets',
+                    'entity_id' => $entityId,
+                ],
+                ['category_type' => Account::CONTRA_ASSET]
+            ),
             'current_liabilities' => Category::firstOrCreate(
-                ['category_name' => 'Current Liabilities'],
+                [
+                    'name' => 'Current Liabilities',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::CURRENT_LIABILITY]
             ),
             'long_term_liabilities' => Category::firstOrCreate(
-                ['category_name' => 'Long-term Liabilities'],
+                [
+                    'name' => 'Long-term Liabilities',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::NON_CURRENT_LIABILITY]
             ),
             'equity' => Category::firstOrCreate(
-                ['category_name' => 'Equity'],
+                [
+                    'name' => 'Equity',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::EQUITY]
             ),
             'operating_revenue' => Category::firstOrCreate(
-                ['category_name' => 'Operating Revenue'],
+                [
+                    'name' => 'Operating Revenue',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::OPERATING_REVENUE]
             ),
             'other_revenue' => Category::firstOrCreate(
-                ['category_name' => 'Other Revenue'],
+                [
+                    'name' => 'Other Revenue',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::NON_OPERATING_REVENUE]
             ),
+            'direct_expenses' => Category::firstOrCreate(
+                [
+                    'name' => 'Direct Expenses',
+                    'entity_id' => $entityId,
+                ],
+                ['category_type' => Account::DIRECT_EXPENSE]
+            ),
             'operating_expenses' => Category::firstOrCreate(
-                ['category_name' => 'Operating Expenses'],
+                [
+                    'name' => 'Operating Expenses',
+                    'entity_id' => $entityId,
+                ],
                 ['category_type' => Account::OPERATING_EXPENSE]
             ),
             'other_expenses' => Category::firstOrCreate(
-                ['category_name' => 'Other Expenses'],
-                ['category_type' => Account::NON_OPERATING_EXPENSE]
+                [
+                    'name' => 'Other Expenses',
+                    'entity_id' => $entityId,
+                ],
+                ['category_type' => Account::OTHER_EXPENSE]
             ),
         ];
 
@@ -114,28 +190,29 @@ class MkIfrsSeeder extends Seeder
      *
      * @param int $currencyId
      * @param array $categories
+     * @param int $entityId
      * @return void
      */
-    protected function seedAssetAccounts(int $currencyId, array $categories): void
+    protected function seedAssetAccounts(int $currencyId, array $categories, int $entityId): void
     {
         $accounts = [
-            // Current Assets (1000-1299)
-            ['code' => '1000', 'name' => 'Касаи банки (Cash and Bank)', 'type' => Account::BANK, 'category' => 'current_assets'],
-            ['code' => '1010', 'name' => 'Каса (Cash on Hand)', 'type' => Account::BANK, 'category' => 'current_assets'],
-            ['code' => '1020', 'name' => 'Жиро сметка (Current Account)', 'type' => Account::BANK, 'category' => 'current_assets'],
-            ['code' => '1030', 'name' => 'Девизна сметка (Foreign Currency Account)', 'type' => Account::BANK, 'category' => 'current_assets'],
+            // Current Assets (1000-1299) - Use CURRENT_ASSET type to match category
+            ['code' => '1000', 'name' => 'Касаи банки (Cash and Bank)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1010', 'name' => 'Каса (Cash on Hand)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1020', 'name' => 'Жиро сметка (Current Account)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1030', 'name' => 'Девизна сметка (Foreign Currency Account)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
 
-            // Receivables (1200-1299)
-            ['code' => '1200', 'name' => 'Побарувања од купувачи (Accounts Receivable)', 'type' => Account::RECEIVABLE, 'category' => 'current_assets'],
-            ['code' => '1210', 'name' => 'Побарувања - домашни (Domestic Receivables)', 'type' => Account::RECEIVABLE, 'category' => 'current_assets'],
-            ['code' => '1220', 'name' => 'Побарувања - странски (Foreign Receivables)', 'type' => Account::RECEIVABLE, 'category' => 'current_assets'],
-            ['code' => '1290', 'name' => 'Сомнителни побарувања (Doubtful Receivables)', 'type' => Account::RECEIVABLE, 'category' => 'current_assets'],
+            // Receivables (1200-1299) - Use CURRENT_ASSET type to match category
+            ['code' => '1200', 'name' => 'Побарувања од купувачи (Accounts Receivable)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1210', 'name' => 'Побарувања - домашни (Domestic Receivables)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1220', 'name' => 'Побарувања - странски (Foreign Receivables)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1290', 'name' => 'Сомнителни побарувања (Doubtful Receivables)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
 
-            // Inventory (1300-1399)
-            ['code' => '1300', 'name' => 'Залихи (Inventory)', 'type' => Account::INVENTORY, 'category' => 'current_assets'],
-            ['code' => '1310', 'name' => 'Суровини (Raw Materials)', 'type' => Account::INVENTORY, 'category' => 'current_assets'],
-            ['code' => '1320', 'name' => 'Готови производи (Finished Goods)', 'type' => Account::INVENTORY, 'category' => 'current_assets'],
-            ['code' => '1330', 'name' => 'Стока (Merchandise)', 'type' => Account::INVENTORY, 'category' => 'current_assets'],
+            // Inventory (1300-1399) - Use CURRENT_ASSET type to match category
+            ['code' => '1300', 'name' => 'Залихи (Inventory)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1310', 'name' => 'Суровини (Raw Materials)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1320', 'name' => 'Готови производи (Finished Goods)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
+            ['code' => '1330', 'name' => 'Стока (Merchandise)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
 
             // Other Current Assets (1400-1499)
             ['code' => '1400', 'name' => 'Аванси дадени (Prepaid Expenses)', 'type' => Account::CURRENT_ASSET, 'category' => 'current_assets'],
@@ -147,17 +224,23 @@ class MkIfrsSeeder extends Seeder
             ['code' => '1520', 'name' => 'Опрема (Equipment)', 'type' => Account::NON_CURRENT_ASSET, 'category' => 'fixed_assets'],
             ['code' => '1530', 'name' => 'Возила (Vehicles)', 'type' => Account::NON_CURRENT_ASSET, 'category' => 'fixed_assets'],
             ['code' => '1540', 'name' => 'Компјутери и софтвер (Computers and Software)', 'type' => Account::NON_CURRENT_ASSET, 'category' => 'fixed_assets'],
-            ['code' => '1600', 'name' => 'Акумулирана амортизација (Accumulated Depreciation)', 'type' => Account::CONTRA_ASSET, 'category' => 'fixed_assets'],
+
+            // Contra Assets
+            ['code' => '1600', 'name' => 'Акумулирана амортизација (Accumulated Depreciation)', 'type' => Account::CONTRA_ASSET, 'category' => 'contra_assets'],
         ];
 
         foreach ($accounts as $account) {
             Account::firstOrCreate(
-                ['code' => $account['code']],
+                [
+                    'code' => $account['code'],
+                    'entity_id' => $entityId,
+                ],
                 [
                     'name' => $account['name'],
                     'account_type' => $account['type'],
                     'category_id' => $categories[$account['category']]->id ?? null,
                     'currency_id' => $currencyId,
+                    'entity_id' => $entityId,
                 ]
             );
         }
@@ -170,20 +253,21 @@ class MkIfrsSeeder extends Seeder
      *
      * @param int $currencyId
      * @param array $categories
+     * @param int $entityId
      * @return void
      */
-    protected function seedLiabilityAccounts(int $currencyId, array $categories): void
+    protected function seedLiabilityAccounts(int $currencyId, array $categories, int $entityId): void
     {
         $accounts = [
-            // Current Liabilities (2000-2499)
-            ['code' => '2000', 'name' => 'Обврски кон добавувачи (Accounts Payable)', 'type' => Account::PAYABLE, 'category' => 'current_liabilities'],
-            ['code' => '2010', 'name' => 'Обврски - домашни (Domestic Payables)', 'type' => Account::PAYABLE, 'category' => 'current_liabilities'],
-            ['code' => '2020', 'name' => 'Обврски - странски (Foreign Payables)', 'type' => Account::PAYABLE, 'category' => 'current_liabilities'],
+            // Current Liabilities (2000-2499) - Use CURRENT_LIABILITY type to match category
+            ['code' => '2000', 'name' => 'Обврски кон добавувачи (Accounts Payable)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
+            ['code' => '2010', 'name' => 'Обврски - домашни (Domestic Payables)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
+            ['code' => '2020', 'name' => 'Обврски - странски (Foreign Payables)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
 
-            // Tax Liabilities (2100-2199)
-            ['code' => '2100', 'name' => 'ДДВ за уплата (VAT Payable)', 'type' => Account::CONTROL, 'category' => 'current_liabilities'],
-            ['code' => '2110', 'name' => 'Данок на добивка (Corporate Tax Payable)', 'type' => Account::CONTROL, 'category' => 'current_liabilities'],
-            ['code' => '2120', 'name' => 'Персонален данок (Personal Income Tax Payable)', 'type' => Account::CONTROL, 'category' => 'current_liabilities'],
+            // Tax Liabilities (2100-2199) - Use CURRENT_LIABILITY type to match category
+            ['code' => '2100', 'name' => 'ДДВ за уплата (VAT Payable)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
+            ['code' => '2110', 'name' => 'Данок на добивка (Corporate Tax Payable)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
+            ['code' => '2120', 'name' => 'Персонален данок (Personal Income Tax Payable)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
 
             // Payroll Liabilities (2200-2299)
             ['code' => '2200', 'name' => 'Плати за исплата (Wages Payable)', 'type' => Account::CURRENT_LIABILITY, 'category' => 'current_liabilities'],
@@ -200,12 +284,16 @@ class MkIfrsSeeder extends Seeder
 
         foreach ($accounts as $account) {
             Account::firstOrCreate(
-                ['code' => $account['code']],
+                [
+                    'code' => $account['code'],
+                    'entity_id' => $entityId,
+                ],
                 [
                     'name' => $account['name'],
                     'account_type' => $account['type'],
                     'category_id' => $categories[$account['category']]->id ?? null,
                     'currency_id' => $currencyId,
+                    'entity_id' => $entityId,
                 ]
             );
         }
@@ -218,9 +306,10 @@ class MkIfrsSeeder extends Seeder
      *
      * @param int $currencyId
      * @param array $categories
+     * @param int $entityId
      * @return void
      */
-    protected function seedEquityAccounts(int $currencyId, array $categories): void
+    protected function seedEquityAccounts(int $currencyId, array $categories, int $entityId): void
     {
         $accounts = [
             ['code' => '3000', 'name' => 'Капитал (Share Capital)', 'type' => Account::EQUITY, 'category' => 'equity'],
@@ -231,12 +320,16 @@ class MkIfrsSeeder extends Seeder
 
         foreach ($accounts as $account) {
             Account::firstOrCreate(
-                ['code' => $account['code']],
+                [
+                    'code' => $account['code'],
+                    'entity_id' => $entityId,
+                ],
                 [
                     'name' => $account['name'],
                     'account_type' => $account['type'],
                     'category_id' => $categories[$account['category']]->id ?? null,
                     'currency_id' => $currencyId,
+                    'entity_id' => $entityId,
                 ]
             );
         }
@@ -249,16 +342,17 @@ class MkIfrsSeeder extends Seeder
      *
      * @param int $currencyId
      * @param array $categories
+     * @param int $entityId
      * @return void
      */
-    protected function seedRevenueAccounts(int $currencyId, array $categories): void
+    protected function seedRevenueAccounts(int $currencyId, array $categories, int $entityId): void
     {
         $accounts = [
             // Operating Revenue (4000-4499)
             ['code' => '4000', 'name' => 'Приходи од продажба (Sales Revenue)', 'type' => Account::OPERATING_REVENUE, 'category' => 'operating_revenue'],
             ['code' => '4010', 'name' => 'Приходи од услуги (Service Revenue)', 'type' => Account::OPERATING_REVENUE, 'category' => 'operating_revenue'],
             ['code' => '4020', 'name' => 'Приходи од консалтинг (Consulting Revenue)', 'type' => Account::OPERATING_REVENUE, 'category' => 'operating_revenue'],
-            ['code' => '4100', 'name' => 'Попусти одобрени (Sales Discounts)', 'type' => Account::CONTRA_REVENUE, 'category' => 'operating_revenue'],
+            ['code' => '4100', 'name' => 'Попусти одобрени (Sales Discounts)', 'type' => Account::OPERATING_REVENUE, 'category' => 'operating_revenue'],
 
             // Other Revenue (4500-4999)
             ['code' => '4500', 'name' => 'Приходи од камата (Interest Income)', 'type' => Account::NON_OPERATING_REVENUE, 'category' => 'other_revenue'],
@@ -268,12 +362,16 @@ class MkIfrsSeeder extends Seeder
 
         foreach ($accounts as $account) {
             Account::firstOrCreate(
-                ['code' => $account['code']],
+                [
+                    'code' => $account['code'],
+                    'entity_id' => $entityId,
+                ],
                 [
                     'name' => $account['name'],
                     'account_type' => $account['type'],
                     'category_id' => $categories[$account['category']]->id ?? null,
                     'currency_id' => $currencyId,
+                    'entity_id' => $entityId,
                 ]
             );
         }
@@ -286,13 +384,14 @@ class MkIfrsSeeder extends Seeder
      *
      * @param int $currencyId
      * @param array $categories
+     * @param int $entityId
      * @return void
      */
-    protected function seedExpenseAccounts(int $currencyId, array $categories): void
+    protected function seedExpenseAccounts(int $currencyId, array $categories, int $entityId): void
     {
         $accounts = [
-            // Cost of Sales (5000-5099)
-            ['code' => '5000', 'name' => 'Трошоци на продадена стока (Cost of Goods Sold)', 'type' => Account::DIRECT_EXPENSE, 'category' => 'operating_expenses'],
+            // Cost of Sales (5000-5099) - Direct Expenses
+            ['code' => '5000', 'name' => 'Трошоци на продадена стока (Cost of Goods Sold)', 'type' => Account::DIRECT_EXPENSE, 'category' => 'direct_expenses'],
 
             // Operating Expenses (5100-5499)
             ['code' => '5100', 'name' => 'Провизии за плаќање (Payment Processing Fees)', 'type' => Account::OPERATING_EXPENSE, 'category' => 'operating_expenses'],
@@ -307,19 +406,23 @@ class MkIfrsSeeder extends Seeder
             ['code' => '5420', 'name' => 'Амортизација (Depreciation)', 'type' => Account::OPERATING_EXPENSE, 'category' => 'operating_expenses'],
 
             // Other Expenses (5500-5999)
-            ['code' => '5500', 'name' => 'Камати (Interest Expense)', 'type' => Account::NON_OPERATING_EXPENSE, 'category' => 'other_expenses'],
-            ['code' => '5600', 'name' => 'Загуби од течајни разлики (Foreign Exchange Losses)', 'type' => Account::NON_OPERATING_EXPENSE, 'category' => 'other_expenses'],
-            ['code' => '5700', 'name' => 'Останати трошоци (Other Expenses)', 'type' => Account::NON_OPERATING_EXPENSE, 'category' => 'other_expenses'],
+            ['code' => '5500', 'name' => 'Камати (Interest Expense)', 'type' => Account::OTHER_EXPENSE, 'category' => 'other_expenses'],
+            ['code' => '5600', 'name' => 'Загуби од течајни разлики (Foreign Exchange Losses)', 'type' => Account::OTHER_EXPENSE, 'category' => 'other_expenses'],
+            ['code' => '5700', 'name' => 'Останати трошоци (Other Expenses)', 'type' => Account::OTHER_EXPENSE, 'category' => 'other_expenses'],
         ];
 
         foreach ($accounts as $account) {
             Account::firstOrCreate(
-                ['code' => $account['code']],
+                [
+                    'code' => $account['code'],
+                    'entity_id' => $entityId,
+                ],
                 [
                     'name' => $account['name'],
                     'account_type' => $account['type'],
                     'category_id' => $categories[$account['category']]->id ?? null,
                     'currency_id' => $currencyId,
+                    'entity_id' => $entityId,
                 ]
             );
         }
