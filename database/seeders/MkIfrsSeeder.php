@@ -7,6 +7,7 @@ use IFRS\Models\Account;
 use IFRS\Models\Currency;
 use IFRS\Models\Entity;
 use IFRS\Models\Category;
+use IFRS\Models\ReportingPeriod;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -78,6 +79,23 @@ class MkIfrsSeeder extends Seeder
 
                 // Link entity to company
                 $company->update(['ifrs_entity_id' => $entity->id]);
+            }
+
+            // Create 2025 reporting period for all Macedonian companies
+            $existingPeriod = ReportingPeriod::where('entity_id', $entity->id)
+                ->where('calendar_year', 2025)
+                ->first();
+
+            if (!$existingPeriod) {
+                $period = new ReportingPeriod();
+                $period->period_count = 1;
+                $period->calendar_year = 2025;
+                $period->entity_id = $entity->id;
+                $period->status = 'OPEN';
+                $period->save();
+                $this->command->info("  → Created 2025 reporting period");
+            } else {
+                $this->command->info("  → 2025 reporting period already exists");
             }
 
             // Create account categories for this entity
