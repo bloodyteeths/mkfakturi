@@ -148,6 +148,11 @@ php artisan optimize || true
 echo "Running migrations..."
 php artisan migrate --force || echo "Some migrations failed, continuing..."
 
+# Ensure IFRS entity migrations are run (they might be skipped if earlier migrations fail)
+echo "Ensuring IFRS entity migrations are run..."
+php artisan migrate --path=database/migrations/2025_11_04_000000_add_ifrs_entity_id_to_companies_table.php --force 2>/dev/null || echo "Already migrated or failed"
+php artisan migrate --path=database/migrations/2025_11_04_000001_add_entity_id_to_users_table.php --force 2>/dev/null || echo "Already migrated or failed"
+
 # Force set profile_complete if RAILWAY_SKIP_INSTALL is true
 if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "RAILWAY_SKIP_INSTALL enabled - forcing installation complete..."
@@ -203,6 +208,12 @@ fi
 if [ "$RAILWAY_SEED_DB" = "true" ]; then
     echo "Seeding database..."
     php artisan db:seed --force || echo "Seeding failed or already seeded"
+fi
+
+# Always run IFRS seeder to ensure entities and chart of accounts exist
+if [ "$FEATURE_ACCOUNTING_BACKBONE" = "true" ]; then
+    echo "IFRS accounting feature enabled - ensuring chart of accounts..."
+    php artisan db:seed --class=MkIfrsSeeder --force 2>/dev/null || echo "IFRS seeder already run or failed"
 fi
 
 # Don't cache config in production - causes issues with environment variables
