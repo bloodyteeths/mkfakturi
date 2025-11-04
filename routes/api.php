@@ -461,9 +461,9 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::prefix('accounting')->group(function () {
-                Route::get('/trial-balance', [AccountingReportsController::class, 'trialBalance']);
-                Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
-                Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
+                Route::get('/{company}/trial-balance', [AccountingReportsController::class, 'trialBalance']);
+                Route::get('/{company}/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
+                Route::get('/{company}/income-statement', [AccountingReportsController::class, 'incomeStatement']);
             });
 
             // Migration Wizard (Laravel Excel)
