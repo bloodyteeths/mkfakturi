@@ -74,12 +74,17 @@ export default {
     }
   },
 
-  // Merge two objects but only existing properties
+  // Спојување на два објекти, само постоечки својства
+  // Прескокнување на null/undefined вредности за да не се препишат иницијализирани објекти
   mergeSettings(target, source) {
+    if (!source) return; // Заштита од null/undefined извор
+
     Object.keys(source).forEach(function (key) {
       if (key in target) {
-        // or target.hasOwnProperty(key)
-        target[key] = source[key]
+        // Прескокни ако изворната вредност е null или undefined
+        if (source[key] !== null && source[key] !== undefined) {
+          target[key] = source[key]
+        }
       }
     })
   },

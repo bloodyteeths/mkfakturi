@@ -1,5 +1,7 @@
 <?php
 
+use App\Jobs\SyncBankTransactions;
+use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\RecurringInvoice;
 use App\Space\InstallUtils;
@@ -20,6 +22,21 @@ if (InstallUtils::isDbCreated()) {
     Schedule::command('check:estimates:status')
         ->daily();
 
+    // Bank transaction sync - runs every 4 hours for all active companies
+    // Respects PSD2 rate limits (15 req/min for Stopanska)
+    Schedule::call(function () {
+        $companies = Company::whereHas('bankAccounts', function ($query) {
+            $query->where('is_active', true);
+        })->get();
+
+        foreach ($companies as $company) {
+            SyncBankTransactions::dispatch($company, 7)
+                ->onQueue('banking');
+        }
+    })->everyFourHours()
+        ->name('sync-bank-transactions')
+        ->withoutOverlapping();
+
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
     //     ->dailyAt('02:00')
@@ -38,3 +55,5 @@ if (InstallUtils::isDbCreated()) {
         }
     }
 }
+
+// CLAUDE-CHECKPOINT
