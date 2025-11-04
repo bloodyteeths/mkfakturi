@@ -240,6 +240,10 @@ if [ "$RAILWAY_SEED_DB" = "true" ]; then
     php artisan db:seed --force || echo "Seeding failed or already seeded"
 fi
 
+# Always run PartnerSeeder to ensure admin users have Partner records (fixes 403 on console/companies)
+echo "Running PartnerSeeder to ensure Partner records exist for admin users..."
+php artisan db:seed --class=PartnerSeeder --force 2>/dev/null || echo "PartnerSeeder already run or failed"
+
 # Always run IFRS seeder to ensure entities and chart of accounts exist
 if [ "$FEATURE_ACCOUNTING_BACKBONE" = "true" ]; then
     echo "IFRS accounting feature enabled - ensuring chart of accounts..."
