@@ -115,6 +115,13 @@ Route::prefix('/customer')->group(function () {
 // Requires: arquivei/laravel-prometheus-exporter, laravel/telescope
 use App\Http\Controllers\PrometheusController;
 
+// Simple test endpoint (always available)
+Route::get('/metrics/test', function() {
+    return response('# Test metrics endpoint working', 200, [
+        'Content-Type' => 'text/plain; charset=utf-8'
+    ]);
+});
+
 Route::middleware('feature:monitoring')->group(function () {
     Route::get('/metrics', [PrometheusController::class, 'metrics'])->name('metrics');
     Route::get('/metrics/health', [PrometheusController::class, 'health'])->name('prometheus.health');
