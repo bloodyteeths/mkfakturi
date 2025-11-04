@@ -45,9 +45,11 @@ class AiSummaryController extends Controller
             }
 
             // Call AI service financial-summary endpoint
+            // CLAUDE-CHECKPOINT: Pass company header from incoming request to AI-MCP
             $response = Http::timeout($this->timeoutSeconds)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
+                    'company' => $request->header('company'),
                     'X-Company-ID' => $companyId
                 ])
                 ->get("{$this->aiServiceUrl}/api/financial-summary", [
@@ -56,19 +58,30 @@ class AiSummaryController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Cache for 15 minutes
                 Cache::put($cacheKey, $data, 900);
-                
+
                 return response()->json($data);
             }
 
-            // Log error but return graceful fallback
-            Log::warning('AI Summary Service Error', [
-                'status' => $response->status(),
-                'company_id' => $companyId,
-                'response' => $response->body()
-            ]);
+            // CLAUDE-CHECKPOINT: Enhanced error handling for 403/404 responses
+            // Handle specific error codes gracefully
+            if (in_array($response->status(), [403, 404])) {
+                Log::info('AI Summary Service - Access/Resource Error', [
+                    'status' => $response->status(),
+                    'company_id' => $companyId,
+                    'message' => $response->status() === 403
+                        ? 'Forbidden - Check company permissions'
+                        : 'Not Found - Resource unavailable'
+                ]);
+            } else {
+                Log::warning('AI Summary Service Error', [
+                    'status' => $response->status(),
+                    'company_id' => $companyId,
+                    'response' => $response->body()
+                ]);
+            }
 
             // Return fallback data structure matching AI service
             return response()->json([
@@ -138,9 +151,11 @@ class AiSummaryController extends Controller
             }
 
             // Call AI service risk analysis endpoint
+            // CLAUDE-CHECKPOINT: Pass company header from incoming request to AI-MCP
             $response = Http::timeout($this->timeoutSeconds)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
+                    'company' => $request->header('company'),
                     'X-Company-ID' => $companyId
                 ])
                 ->get("{$this->aiServiceUrl}/api/risk-analysis", [
@@ -149,24 +164,35 @@ class AiSummaryController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Extract just the risk score to match spec
                 $riskData = [
                     'risk_score' => $data['overallRisk'] ?? 0.5
                 ];
-                
+
                 // Cache for 30 minutes
                 Cache::put($cacheKey, $riskData, 1800);
-                
+
                 return response()->json($riskData);
             }
 
-            // Log error but return graceful fallback
-            Log::warning('AI Risk Service Error', [
-                'status' => $response->status(),
-                'company_id' => $companyId,
-                'response' => $response->body()
-            ]);
+            // CLAUDE-CHECKPOINT: Enhanced error handling for 403/404 responses
+            // Handle specific error codes gracefully
+            if (in_array($response->status(), [403, 404])) {
+                Log::info('AI Risk Service - Access/Resource Error', [
+                    'status' => $response->status(),
+                    'company_id' => $companyId,
+                    'message' => $response->status() === 403
+                        ? 'Forbidden - Check company permissions'
+                        : 'Not Found - Resource unavailable'
+                ]);
+            } else {
+                Log::warning('AI Risk Service Error', [
+                    'status' => $response->status(),
+                    'company_id' => $companyId,
+                    'response' => $response->body()
+                ]);
+            }
 
             // Return fallback risk score
             return response()->json([

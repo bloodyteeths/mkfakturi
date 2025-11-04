@@ -61,14 +61,24 @@ class AccountingReportsController extends Controller
         }
 
         // Get company from header (set by company middleware)
-        $company = Company::find($request->header('company'));
+        $companyId = $request->header('company');
+
+        if (!$companyId) {
+            return response()->json([
+                'error' => 'Missing company header',
+                'message' => 'The company header is required for accounting reports'
+            ], 400);
+        }
+
+        $company = Company::find($companyId);
 
         if (!$company) {
             return response()->json([
                 'error' => 'Company not found',
-                'message' => 'Please provide a valid company header'
+                'message' => 'The specified company does not exist'
             ], 404);
         }
+        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -121,14 +131,24 @@ class AccountingReportsController extends Controller
         }
 
         // Get company from header (set by company middleware)
-        $company = Company::find($request->header('company'));
+        $companyId = $request->header('company');
+
+        if (!$companyId) {
+            return response()->json([
+                'error' => 'Missing company header',
+                'message' => 'The company header is required for accounting reports'
+            ], 400);
+        }
+
+        $company = Company::find($companyId);
 
         if (!$company) {
             return response()->json([
                 'error' => 'Company not found',
-                'message' => 'Please provide a valid company header'
+                'message' => 'The specified company does not exist'
             ], 404);
         }
+        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -188,14 +208,24 @@ class AccountingReportsController extends Controller
         }
 
         // Get company from header (set by company middleware)
-        $company = Company::find($request->header('company'));
+        $companyId = $request->header('company');
+
+        if (!$companyId) {
+            return response()->json([
+                'error' => 'Missing company header',
+                'message' => 'The company header is required for accounting reports'
+            ], 400);
+        }
+
+        $company = Company::find($companyId);
 
         if (!$company) {
             return response()->json([
                 'error' => 'Company not found',
-                'message' => 'Please provide a valid company header'
+                'message' => 'The specified company does not exist'
             ], 404);
         }
+        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);

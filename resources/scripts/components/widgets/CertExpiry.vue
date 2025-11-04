@@ -147,10 +147,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useUserStore } from '@/scripts/admin/stores/user'
 import axios from 'axios'
 
 // Components
@@ -173,6 +174,7 @@ import {
 const { t } = useI18n()
 const router = useRouter()
 const notificationStore = useNotificationStore()
+const userStore = useUserStore()
 
 // Reactive state
 const certificate = ref(null)
@@ -309,9 +311,22 @@ const stopAutoRefresh = () => {
 
 // Lifecycle
 onMounted(() => {
-  fetchCertificate()
-  startAutoRefresh()
+  if (userStore.currentUser) {
+    fetchCertificate()
+    startAutoRefresh()
+  }
 })
+
+// Watch for user authentication
+watch(
+  () => userStore.currentUser,
+  (newUser) => {
+    if (newUser && !certificate.value) {
+      fetchCertificate()
+      startAutoRefresh()
+    }
+  }
+)
 
 onUnmounted(() => {
   stopAutoRefresh()
@@ -338,4 +353,8 @@ onUnmounted(() => {
 }
 </style>
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT: Added authentication check before API calls
+// - Imported useUserStore and watch from Vue
+// - Added userStore to composables
+// - Modified onMounted to only call API if user is authenticated
+// - Added watcher to trigger fetch once user authentication is ready

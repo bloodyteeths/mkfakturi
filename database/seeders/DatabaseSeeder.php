@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CountriesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
         $this->call(MkVatSeeder::class);
-        $this->call(PartnerTablesSeeder::class);
+        $this->call(PartnerSeeder::class); // Create Partner records for admin users
+        $this->call(PartnerTablesSeeder::class); // Create sample partner data
     }
 }
