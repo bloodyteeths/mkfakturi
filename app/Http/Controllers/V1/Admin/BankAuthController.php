@@ -56,11 +56,10 @@ class BankAuthController extends Controller
             ], 400);
         }
 
-        $redirectUri = route('banking.callback', [
-            'company' => $companyId,
-            'bank' => $bankCode,
-        ]);
+        // Use static callback URL (no company ID in path for OAuth provider registration)
+        $redirectUri = route('banking.callback', ['bank' => $bankCode]);
 
+        // Company ID is automatically passed via OAuth state parameter in Psd2Client::getAuthUrl()
         $authUrl = $client->getAuthUrl($company, $redirectUri);
 
         return response()->json([
@@ -73,18 +72,28 @@ class BankAuthController extends Controller
     /**
      * Handle OAuth2 callback
      *
-     * GET /banking/callback/{company}/{bank}?code=xxx&state=xxx
+     * GET /banking/callback/{bank}?code=xxx&state=xxx
      *
      * @param Request $request
-     * @param int $companyId Company ID
      * @param string $bankCode Bank identifier
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function handleCallback(Request $request, int $companyId, string $bankCode)
+    public function handleCallback(Request $request, string $bankCode)
     {
         // Check feature flag
         if (!config('mk.features.psd2_banking', false)) {
             return redirect('/admin/settings/banking?error=feature_disabled');
+        }
+
+        // Extract company ID from OAuth state parameter
+        $state = $request->query('state');
+        $companyId = $state ? (int)$state : null;
+
+        if (!$companyId) {
+            Log::warning('OAuth callback missing state parameter', [
+                'bank' => $bankCode,
+            ]);
+            return redirect('/admin/settings/banking?error=missing_state');
         }
 
         $company = Company::findOrFail($companyId);
@@ -106,10 +115,8 @@ class BankAuthController extends Controller
         }
 
         try {
-            $redirectUri = route('banking.callback', [
-                'company' => $companyId,
-                'bank' => $bankCode,
-            ]);
+            // Use static callback URL (matching registered redirect URI)
+            $redirectUri = route('banking.callback', ['bank' => $bankCode]);
 
             $token = $client->exchangeCode($company, $code, $redirectUri);
 

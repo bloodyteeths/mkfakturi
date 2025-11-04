@@ -320,12 +320,15 @@ abstract class Psd2Client
     /**
      * Generate state parameter for OAuth flow
      *
+     * Simply return the company ID as the state parameter.
+     * OAuth providers return state unchanged, allowing us to extract company ID in callback.
+     *
      * @param int $companyId Company ID
-     * @return string Hashed state
+     * @return string Company ID as string
      */
     protected function generateState(int $companyId): string
     {
-        return hash_hmac('sha256', $companyId . '|' . time(), config('app.key'));
+        return (string)$companyId;
     }
 
     /**
