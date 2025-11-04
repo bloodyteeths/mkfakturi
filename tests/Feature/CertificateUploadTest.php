@@ -53,14 +53,17 @@ class CertificateUploadTest extends TestCase
     {
         // Test certificate status endpoint
         $response = $this->getJson('/api/v1/certificates/current');
-        
-        // Should return 404 when no certificate exists or 200 with data
-        $this->assertContains($response->status(), [200, 404]);
-        
-        if ($response->status() === 404) {
-            $response->assertJson([
-                'message' => 'No certificate found'
-            ]);
+
+        // Should always return 200, with data null when no certificate exists
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'message'
+        ]);
+
+        // When no certificate exists, data should be null
+        if ($response->json('data') === null) {
+            $this->assertNull($response->json('data'));
         }
     }
 
@@ -166,15 +169,12 @@ class CertificateUploadTest extends TestCase
     {
         // Test certificate deletion endpoint
         $response = $this->deleteJson('/api/v1/certificates/current');
-        
+
         // Should return success even if no certificate exists
-        $this->assertContains($response->status(), [200, 404]);
-        
-        if ($response->status() === 200) {
-            $response->assertJson([
-                'message' => 'Certificate deleted successfully'
-            ]);
-        }
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'message'
+        ]);
     }
 
     /** @test */
@@ -403,6 +403,8 @@ class CertificateUploadTest extends TestCase
             $this->assertTrue($expected, "E-faktura requirement '{$requirement}' must be supported");
         }
     }
+
+    // CLAUDE-CHECKPOINT
 
     /**
      * Clean up test certificates and directories

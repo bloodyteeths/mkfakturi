@@ -37,8 +37,9 @@ class CertUploadController extends Controller
 
             if (!File::exists($certificateInfoPath)) {
                 return response()->json([
+                    'data' => null,
                     'message' => __('certificates.no_certificate_found')
-                ], 404);
+                ], 200);
             }
 
             $certificateInfo = json_decode(File::get($certificateInfoPath), true);
@@ -50,10 +51,11 @@ class CertUploadController extends Controller
             if (!File::exists($privateKeyPath) || !File::exists($certificatePath)) {
                 // Clean up invalid info file
                 File::delete($certificateInfoPath);
-                
+
                 return response()->json([
+                    'data' => null,
                     'message' => __('certificates.certificate_files_missing')
-                ], 404);
+                ], 200);
             }
 
             // Verify certificate is still valid
@@ -71,10 +73,12 @@ class CertUploadController extends Controller
             ]);
 
             return response()->json([
+                'data' => null,
                 'message' => __('certificates.retrieval_error')
             ], 500);
         }
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Upload and process certificate

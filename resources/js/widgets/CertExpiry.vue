@@ -257,13 +257,17 @@ const formattedLastUpdate = computed(() => {
 const fetchCertificate = async () => {
   isLoading.value = true
   error.value = ''
-  
+
   try {
     const response = await axios.get('/api/v1/certificates/current')
-    certificate.value = response.data.data
+    // Handle both 200 with null data and actual certificate data
+    certificate.value = response.data.data || null
     lastUpdate.value = new Date()
   } catch (err) {
     if (err.response?.status === 404) {
+      certificate.value = null
+    } else if (err.response?.status === 401) {
+      // Not authenticated - don't show error, just no certificate
       certificate.value = null
     } else {
       console.error('Failed to fetch certificate:', err)

@@ -315,15 +315,19 @@ class IfrsAdapter
             $trialBalance = new TrialBalance((string)$date->year, $entity);
             $sections = $trialBalance->getSections();
 
+            // TrialBalance accumulates debits/credits in $balances property, not via methods
+            $totalDebits = $trialBalance->balances['debit'] ?? 0;
+            $totalCredits = $trialBalance->balances['credit'] ?? 0;
+
             return [
                 'date' => $date->toDateString(),
                 'year' => $date->year,
                 'sections' => $sections,
                 'accounts' => $sections['accounts'] ?? [],
                 'balances' => $sections['results'] ?? [],
-                'total_debits' => $trialBalance->totalDebits(),
-                'total_credits' => $trialBalance->totalCredits(),
-                'is_balanced' => $trialBalance->totalDebits() === $trialBalance->totalCredits(),
+                'total_debits' => $totalDebits,
+                'total_credits' => $totalCredits,
+                'is_balanced' => $totalDebits === $totalCredits,
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate trial balance", [
@@ -344,6 +348,8 @@ class IfrsAdapter
             return ['error' => $e->getMessage()];
         }
     }
+
+    // CLAUDE-CHECKPOINT: Fixed TrialBalance to use $balances property instead of non-existent methods
 
     /**
      * Get Balance Sheet for a company as of a specific date

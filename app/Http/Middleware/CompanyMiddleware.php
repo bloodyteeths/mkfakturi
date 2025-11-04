@@ -17,11 +17,23 @@ class CompanyMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip company middleware for console routes (partner-only routes)
+        // Partners have their own authorization via PartnerScopeMiddleware
+        if ($request->is('api/v1/console') || $request->is('api/v1/console/*')) {
+            return $next($request);
+        }
+
         if (Schema::hasTable('user_company')) {
             $user = $request->user();
 
+            // Only proceed if user has companies
+            $firstCompany = $user->companies()->first();
+            if (!$firstCompany) {
+                return $next($request);
+            }
+
             if ((! $request->header('company')) || (! $user->hasCompany($request->header('company')))) {
-                $request->headers->set('company', $user->companies()->first()->id);
+                $request->headers->set('company', $firstCompany->id);
             }
 
             // CLAUDE-CHECKPOINT: Hydrate user's IFRS entity from company
