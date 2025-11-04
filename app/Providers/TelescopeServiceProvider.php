@@ -4,11 +4,24 @@ namespace App\Providers;
 
 use App\Space\InstallUtils;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Telescope\IncomingEntry;
-use Laravel\Telescope\Telescope;
-use Laravel\Telescope\TelescopeApplicationServiceProvider;
+use Illuminate\Support\ServiceProvider;
 
-class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
+// Only load Telescope if it's installed (dev environment)
+if (class_exists(\Laravel\Telescope\TelescopeApplicationServiceProvider::class)) {
+    class TelescopeServiceProvider extends \Laravel\Telescope\TelescopeApplicationServiceProvider
+    {
+        use TelescopeServiceProviderTrait;
+    }
+} else {
+    // Dummy provider for production when Telescope is not installed
+    class TelescopeServiceProvider extends ServiceProvider
+    {
+        public function register(): void {}
+        public function boot(): void {}
+    }
+}
+
+trait TelescopeServiceProviderTrait
 {
     /**
      * Register any application services.
@@ -32,7 +45,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $isLocal = $this->app->environment('local');
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
+        \Laravel\Telescope\Telescope::filter(function (\Laravel\Telescope\IncomingEntry $entry) use ($isLocal) {
             return $isLocal ||
                    $entry->isReportableException() ||
                    $entry->isFailedRequest() ||
@@ -51,9 +64,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             return;
         }
 
-        Telescope::hideRequestParameters(['_token']);
+        \Laravel\Telescope\Telescope::hideRequestParameters(['_token']);
 
-        Telescope::hideRequestHeaders([
+        \Laravel\Telescope\Telescope::hideRequestHeaders([
             'cookie',
             'x-csrf-token',
             'x-xsrf-token',
@@ -83,3 +96,5 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         });
     }
 }
+
+// CLAUDE-CHECKPOINT
