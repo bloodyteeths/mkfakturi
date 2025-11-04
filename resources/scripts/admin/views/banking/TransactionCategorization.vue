@@ -144,7 +144,7 @@
             variant="primary"
             :disabled="!selectedCategory || isSaving"
             :loading="isSaving"
-            @click="saveCategorizati on"
+            @click="saveCategorization"
           >
             {{ $t('general.save') }}
           </BaseButton>
