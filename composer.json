@@ -9,6 +9,7 @@
     "type": "project",
     "require": {
         "php": "^8.2",
+        "arquivei/laravel-prometheus-exporter": "dev-add-laravel-12",
         "aws/aws-sdk-php": "^3.336",
         "barryvdh/laravel-dompdf": "^v3.0",
         "doctrine/dbal": "^4.2",

@@ -111,9 +111,14 @@ Route::prefix('/customer')->group(function () {
 
 // Monitoring Endpoints
 // ----------------------------------------------
+// Feature flag: FEATURE_MONITORING
+// Requires: arquivei/laravel-prometheus-exporter, laravel/telescope
+use App\Http\Controllers\PrometheusController;
 
-// Route::get('/metrics', [PrometheusController::class, 'metrics'])->name('metrics'); // Disabled - dependency not installed
-// Route::get('/metrics/health', [PrometheusController::class, 'health'])->name('prometheus.health'); // Disabled - dependency not installed
+Route::middleware('feature:monitoring')->group(function () {
+    Route::get('/metrics', [PrometheusController::class, 'metrics'])->name('metrics');
+    Route::get('/metrics/health', [PrometheusController::class, 'health'])->name('prometheus.health');
+});
 
 // Setup for installation of app
 // ----------------------------------------------
