@@ -10,17 +10,20 @@ use Symfony\Component\HttpFoundation\Response;
 class PdfMiddleware
 {
     /**
-     * Handle an incoming request.
+     * Рачка со дојдовен барање за PDF
+     * Проверка на автентикација преку различни guards
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Провери ако корисникот е автентициран преку било кој guard
         if (Auth::guard('web')->check() || Auth::guard('sanctum')->check() || Auth::guard('customer')->check()) {
             return $next($request);
         }
 
-        return redirect('/login');
+        // Ако не е автентициран, врати 401 (за iframe барања)
+        abort(401, 'Unauthorized');
     }
 }
