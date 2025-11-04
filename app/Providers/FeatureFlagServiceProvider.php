@@ -31,31 +31,31 @@ class FeatureFlagServiceProvider extends ServiceProvider
      */
     protected function defineFeatures(): void
     {
-        Feature::define('accounting-backbone', function () {
+        Feature::define('accounting_backbone', function () {
             return config('features.accounting_backbone.enabled', false);
         });
 
-        Feature::define('migration-wizard', function () {
+        Feature::define('migration_wizard', function () {
             return config('features.migration_wizard.enabled', false);
         });
 
-        Feature::define('psd2-banking', function () {
+        Feature::define('psd2_banking', function () {
             return config('features.psd2_banking.enabled', false);
         });
 
-        Feature::define('partner-portal', function () {
+        Feature::define('partner_portal', function () {
             return config('features.partner_portal.enabled', false);
         });
 
-        Feature::define('partner-mocked-data', function () {
+        Feature::define('partner_mocked_data', function () {
             return config('features.partner_mocked_data.enabled', true);  // SAFETY
         });
 
-        Feature::define('advanced-payments', function () {
+        Feature::define('advanced_payments', function () {
             return config('features.advanced_payments.enabled', false);
         });
 
-        Feature::define('mcp-ai-tools', function () {
+        Feature::define('mcp_ai_tools', function () {
             return config('features.mcp_ai_tools.enabled', false);
         });
 
