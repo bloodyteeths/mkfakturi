@@ -313,12 +313,14 @@ class IfrsAdapter
 
             // TrialBalance expects year string and entity
             $trialBalance = new TrialBalance((string)$date->year, $entity);
+            $sections = $trialBalance->getSections();
 
             return [
                 'date' => $date->toDateString(),
                 'year' => $date->year,
-                'accounts' => $trialBalance->accounts,
-                'balances' => $trialBalance->balances,
+                'sections' => $sections,
+                'accounts' => $sections['accounts'] ?? [],
+                'balances' => $sections['results'] ?? [],
                 'total_debits' => $trialBalance->totalDebits(),
                 'total_credits' => $trialBalance->totalCredits(),
                 'is_balanced' => $trialBalance->totalDebits() === $trialBalance->totalCredits(),
@@ -381,15 +383,16 @@ class IfrsAdapter
 
             // BalanceSheet expects endDate and entity
             $balanceSheet = new BalanceSheet($date->toDateString(), $entity);
+            $sections = $balanceSheet->getSections();
 
             return [
                 'date' => $date->toDateString(),
-                'assets' => $balanceSheet->assets,
-                'liabilities' => $balanceSheet->liabilities,
-                'equity' => $balanceSheet->equity,
-                'total_assets' => $balanceSheet->totalAssets(),
-                'total_liabilities' => $balanceSheet->totalLiabilities(),
-                'total_equity' => $balanceSheet->totalEquity(),
+                'sections' => $sections,
+                'assets' => $sections['accounts']['ASSETS'] ?? [],
+                'liabilities' => $sections['accounts']['LIABILITIES'] ?? [],
+                'equity' => $sections['accounts']['EQUITY'] ?? [],
+                'totals' => $sections['totals'] ?? [],
+                'results' => $sections['results'] ?? [],
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate balance sheet", [
@@ -451,15 +454,22 @@ class IfrsAdapter
 
             // IncomeStatement expects startDate, endDate, and entity
             $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), $entity);
+            $sections = $incomeStatement->getSections();
 
             return [
                 'start_date' => $start->toDateString(),
                 'end_date' => $end->toDateString(),
-                'revenues' => $incomeStatement->revenues,
-                'expenses' => $incomeStatement->expenses,
-                'total_revenue' => $incomeStatement->totalRevenue(),
-                'total_expenses' => $incomeStatement->totalExpenses(),
-                'net_income' => $incomeStatement->netIncome(),
+                'sections' => $sections,
+                'revenues' => array_merge(
+                    $sections['accounts']['OPERATING_REVENUES'] ?? [],
+                    $sections['accounts']['NON_OPERATING_REVENUES'] ?? []
+                ),
+                'expenses' => array_merge(
+                    $sections['accounts']['OPERATING_EXPENSES'] ?? [],
+                    $sections['accounts']['NON_OPERATING_EXPENSES'] ?? []
+                ),
+                'results' => $sections['results'] ?? [],
+                'totals' => $sections['totals'] ?? [],
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate income statement", [
