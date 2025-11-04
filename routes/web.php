@@ -122,6 +122,38 @@ Route::get('/metrics/test', function() {
     ]);
 });
 
+// Debug endpoint to test PrometheusExporter
+Route::get('/metrics/debug', function() {
+    try {
+        $output = "# Debug info\n";
+
+        // Test 1: Check if PrometheusExporter class exists
+        $output .= "# PrometheusExporter class exists: " . (class_exists(\Arquivei\LaravelPrometheusExporter\PrometheusExporter::class) ? 'YES' : 'NO') . "\n";
+
+        // Test 2: Try to resolve from container
+        try {
+            $prometheus = app(\Arquivei\LaravelPrometheusExporter\PrometheusExporter::class);
+            $output .= "# PrometheusExporter resolved: YES\n";
+            $output .= "# PrometheusExporter class: " . get_class($prometheus) . "\n";
+        } catch (\Exception $e) {
+            $output .= "# PrometheusExporter resolve FAILED: " . $e->getMessage() . "\n";
+            $output .= "# Error class: " . get_class($e) . "\n";
+        }
+
+        // Test 3: Check config
+        $output .= "# Config namespace: " . config('prometheus-exporter.namespace', 'NOT SET') . "\n";
+        $output .= "# Config storage: " . config('prometheus-exporter.storage_adapter', 'NOT SET') . "\n";
+
+        return response($output, 200, [
+            'Content-Type' => 'text/plain; charset=utf-8'
+        ]);
+    } catch (\Exception $e) {
+        return response("# Critical error: " . $e->getMessage() . "\n# File: " . $e->getFile() . ":" . $e->getLine(), 500, [
+            'Content-Type' => 'text/plain; charset=utf-8'
+        ]);
+    }
+});
+
 Route::middleware('feature:monitoring')->group(function () {
     Route::get('/metrics', [PrometheusController::class, 'metrics'])->name('metrics');
     Route::get('/metrics/health', [PrometheusController::class, 'health'])->name('prometheus.health');
