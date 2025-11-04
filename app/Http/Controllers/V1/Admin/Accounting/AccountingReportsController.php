@@ -31,15 +31,9 @@ class AccountingReportsController extends Controller
      * Get Trial Balance Report
      *
      * @OA\Get(
-     *   path="/api/v1/admin/{company}/accounting/trial-balance",
+     *   path="/api/v1/accounting/trial-balance",
      *   tags={"Accounting"},
      *   summary="Get trial balance report",
-     *   @OA\Parameter(
-     *     name="company",
-     *     in="path",
-     *     required=true,
-     *     @OA\Schema(type="integer")
-     *   ),
      *   @OA\Parameter(
      *     name="as_of_date",
      *     in="query",
@@ -51,13 +45,12 @@ class AccountingReportsController extends Controller
      *   @OA\Response(response=404, description="Company not found")
      * )
      *
-     * GET /api/v1/admin/{company}/accounting/trial-balance?as_of_date=2025-08-31
+     * GET /api/v1/accounting/trial-balance?as_of_date=2025-08-31
      *
      * @param Request $request
-     * @param Company $company
      * @return JsonResponse
      */
-    public function trialBalance(Request $request, Company $company): JsonResponse
+    public function trialBalance(Request $request): JsonResponse
     {
         // Check feature flag
         if (!$this->isFeatureEnabled()) {
@@ -65,6 +58,16 @@ class AccountingReportsController extends Controller
                 'error' => 'Accounting backbone feature is disabled',
                 'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports'
             ], 403);
+        }
+
+        // Get company from header (set by company middleware)
+        $company = Company::find($request->header('company'));
+
+        if (!$company) {
+            return response()->json([
+                'error' => 'Company not found',
+                'message' => 'Please provide a valid company header'
+            ], 404);
         }
 
         // Authorize user can access this company
@@ -88,15 +91,9 @@ class AccountingReportsController extends Controller
      * Get Balance Sheet Report
      *
      * @OA\Get(
-     *   path="/api/v1/admin/{company}/accounting/balance-sheet",
+     *   path="/api/v1/accounting/balance-sheet",
      *   tags={"Accounting"},
      *   summary="Get balance sheet report",
-     *   @OA\Parameter(
-     *     name="company",
-     *     in="path",
-     *     required=true,
-     *     @OA\Schema(type="integer")
-     *   ),
      *   @OA\Parameter(
      *     name="as_of_date",
      *     in="query",
@@ -108,13 +105,12 @@ class AccountingReportsController extends Controller
      *   @OA\Response(response=404, description="Company not found")
      * )
      *
-     * GET /api/v1/admin/{company}/accounting/balance-sheet?as_of_date=2025-08-31
+     * GET /api/v1/accounting/balance-sheet?as_of_date=2025-08-31
      *
      * @param Request $request
-     * @param Company $company
      * @return JsonResponse
      */
-    public function balanceSheet(Request $request, Company $company): JsonResponse
+    public function balanceSheet(Request $request): JsonResponse
     {
         // Check feature flag
         if (!$this->isFeatureEnabled()) {
@@ -122,6 +118,16 @@ class AccountingReportsController extends Controller
                 'error' => 'Accounting backbone feature is disabled',
                 'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports'
             ], 403);
+        }
+
+        // Get company from header (set by company middleware)
+        $company = Company::find($request->header('company'));
+
+        if (!$company) {
+            return response()->json([
+                'error' => 'Company not found',
+                'message' => 'Please provide a valid company header'
+            ], 404);
         }
 
         // Authorize user can access this company
@@ -145,15 +151,9 @@ class AccountingReportsController extends Controller
      * Get Income Statement Report
      *
      * @OA\Get(
-     *   path="/api/v1/admin/{company}/accounting/income-statement",
+     *   path="/api/v1/accounting/income-statement",
      *   tags={"Accounting"},
      *   summary="Get income statement report",
-     *   @OA\Parameter(
-     *     name="company",
-     *     in="path",
-     *     required=true,
-     *     @OA\Schema(type="integer")
-     *   ),
      *   @OA\Parameter(
      *     name="start",
      *     in="query",
@@ -172,13 +172,12 @@ class AccountingReportsController extends Controller
      *   @OA\Response(response=422, description="Validation error")
      * )
      *
-     * GET /api/v1/admin/{company}/accounting/income-statement?start=2025-01-01&end=2025-08-31
+     * GET /api/v1/accounting/income-statement?start=2025-01-01&end=2025-08-31
      *
      * @param Request $request
-     * @param Company $company
      * @return JsonResponse
      */
-    public function incomeStatement(Request $request, Company $company): JsonResponse
+    public function incomeStatement(Request $request): JsonResponse
     {
         // Check feature flag
         if (!$this->isFeatureEnabled()) {
@@ -186,6 +185,16 @@ class AccountingReportsController extends Controller
                 'error' => 'Accounting backbone feature is disabled',
                 'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports'
             ], 403);
+        }
+
+        // Get company from header (set by company middleware)
+        $company = Company::find($request->header('company'));
+
+        if (!$company) {
+            return response()->json([
+                'error' => 'Company not found',
+                'message' => 'Please provide a valid company header'
+            ], 404);
         }
 
         // Authorize user can access this company
