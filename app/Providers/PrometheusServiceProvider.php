@@ -2,35 +2,34 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Arquivei\LaravelPrometheusExporter\PrometheusExporter;
+use Illuminate\Support\ServiceProvider;
+use Prometheus\CollectorRegistry;
+use Prometheus\Storage\InMemory;
 
-/**
- * Prometheus Service Provider
- *
- * Registers the Prometheus exporter (arquivei package handles the setup)
- * CLAUDE-CHECKPOINT
- */
 class PrometheusServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Register services.
      */
     public function register(): void
     {
-        // The arquivei package handles registration automatically
+        $this->app->singleton(PrometheusExporter::class, function ($app) {
+            $namespace = config('prometheus-exporter.namespace', 'fakturino');
+            $adapter = new InMemory();
+            $registry = new CollectorRegistry($adapter);
+
+            return new PrometheusExporter($namespace, $registry);
+        });
     }
 
     /**
-     * Bootstrap any application services.
+     * Bootstrap services.
      */
     public function boot(): void
     {
-        // Publish configuration
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../../config/prometheus.php' => config_path('prometheus.php'),
-            ], 'prometheus-config');
-        }
+        //
     }
 }
+
+// CLAUDE-CHECKPOINT

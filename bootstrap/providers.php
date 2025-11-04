@@ -6,9 +6,10 @@ return [
     App\Providers\DropboxServiceProvider::class,
     App\Providers\FeatureFlagServiceProvider::class,
     App\Providers\PDFServiceProvider::class,
+    App\Providers\PrometheusServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
-    // Temporarily disabled during installation - causes database errors
-    // App\Providers\TelescopeServiceProvider::class,
+    // Enabled only when FEATURE_MONITORING is true (via service provider check)
+    App\Providers\TelescopeServiceProvider::class,
     App\Providers\ViewServiceProvider::class,
 ];
 // CLAUDE-CHECKPOINT

@@ -15,8 +15,14 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
-        // Don't enable Telescope during installation
-        if (!InstallUtils::isDbCreated() || !InstallUtils::isInstallationCompleted()) {
+        // Don't enable Telescope during installation or if monitoring feature is disabled
+        if (!InstallUtils::isDbCreated()) {
+            return;
+        }
+
+        // Check if monitoring feature is enabled
+        $monitoringEnabled = config('features.monitoring.enabled', false);
+        if (!$monitoringEnabled) {
             return;
         }
 
