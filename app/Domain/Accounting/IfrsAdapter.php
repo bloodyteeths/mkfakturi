@@ -269,6 +269,16 @@ class IfrsAdapter
         try {
             $date = $asOfDate ? Carbon::parse($asOfDate) : Carbon::now();
 
+            // Check if any accounts exist - if not, accounting system not initialized
+            $accountCount = Account::count();
+            if ($accountCount === 0) {
+                return [
+                    'error' => 'Accounting system not initialized',
+                    'message' => 'No chart of accounts found. The accounting backbone feature is enabled but no accounting data exists yet. Create invoices or payments to generate accounting transactions.',
+                    'status' => 'not_initialized',
+                ];
+            }
+
             // TrialBalance expects year string and entity (passing null for now - multi-tenancy needs proper Entity setup)
             $trialBalance = new TrialBalance((string)$date->year, null);
 
@@ -288,6 +298,16 @@ class IfrsAdapter
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // Return friendly error for common issues
+            if (str_contains($e->getMessage(), 'Attempt to read property')) {
+                return [
+                    'error' => 'Accounting system not properly configured',
+                    'message' => 'The IFRS accounting system requires proper Entity and ReportingPeriod setup. This feature is under development.',
+                    'status' => 'configuration_error',
+                ];
+            }
+
             return ['error' => $e->getMessage()];
         }
     }
@@ -308,6 +328,16 @@ class IfrsAdapter
         try {
             $date = $asOfDate ? Carbon::parse($asOfDate) : Carbon::now();
 
+            // Check if any accounts exist - if not, accounting system not initialized
+            $accountCount = Account::count();
+            if ($accountCount === 0) {
+                return [
+                    'error' => 'Accounting system not initialized',
+                    'message' => 'No chart of accounts found. The accounting backbone feature is enabled but no accounting data exists yet. Create invoices or payments to generate accounting transactions.',
+                    'status' => 'not_initialized',
+                ];
+            }
+
             // BalanceSheet expects endDate and entity (passing null for entity - multi-tenancy needs proper setup)
             $balanceSheet = new BalanceSheet($date->toDateString(), null);
 
@@ -327,6 +357,16 @@ class IfrsAdapter
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // Return friendly error for common issues
+            if (str_contains($e->getMessage(), 'Attempt to read property')) {
+                return [
+                    'error' => 'Accounting system not properly configured',
+                    'message' => 'The IFRS accounting system requires proper Entity and ReportingPeriod setup. This feature is under development.',
+                    'status' => 'configuration_error',
+                ];
+            }
+
             return ['error' => $e->getMessage()];
         }
     }
@@ -349,6 +389,16 @@ class IfrsAdapter
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
 
+            // Check if any accounts exist - if not, accounting system not initialized
+            $accountCount = Account::count();
+            if ($accountCount === 0) {
+                return [
+                    'error' => 'Accounting system not initialized',
+                    'message' => 'No chart of accounts found. The accounting backbone feature is enabled but no accounting data exists yet. Create invoices or payments to generate accounting transactions.',
+                    'status' => 'not_initialized',
+                ];
+            }
+
             // IncomeStatement expects startDate, endDate, and entity (passing null for entity - multi-tenancy needs proper setup)
             $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), null);
 
@@ -368,6 +418,16 @@ class IfrsAdapter
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // Return friendly error for common issues
+            if (str_contains($e->getMessage(), 'Attempt to read property')) {
+                return [
+                    'error' => 'Accounting system not properly configured',
+                    'message' => 'The IFRS accounting system requires proper Entity and ReportingPeriod setup. This feature is under development.',
+                    'status' => 'configuration_error',
+                ];
+            }
+
             return ['error' => $e->getMessage()];
         }
     }
