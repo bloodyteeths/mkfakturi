@@ -269,29 +269,24 @@ class IfrsAdapter
         try {
             $date = $asOfDate ? Carbon::parse($asOfDate) : Carbon::now();
 
-            // Get the reporting period
-            $period = ReportingPeriod::where('calendar_year', $date->year)
-                ->where('period_count', $date->month)
-                ->first();
-
-            if (!$period) {
-                return ['error' => 'No reporting period found for this date'];
-            }
-
-            $trialBalance = new TrialBalance($date->toDateString());
+            // TrialBalance expects year string and entity (passing null for now - multi-tenancy needs proper Entity setup)
+            $trialBalance = new TrialBalance((string)$date->year, null);
 
             return [
                 'date' => $date->toDateString(),
+                'year' => $date->year,
                 'accounts' => $trialBalance->accounts,
                 'balances' => $trialBalance->balances,
                 'total_debits' => $trialBalance->totalDebits(),
                 'total_credits' => $trialBalance->totalCredits(),
                 'is_balanced' => $trialBalance->totalDebits() === $trialBalance->totalCredits(),
+                'note' => 'Multi-company support requires IFRS Entity setup - currently showing all companies',
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate trial balance", [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return ['error' => $e->getMessage()];
         }
@@ -313,7 +308,8 @@ class IfrsAdapter
         try {
             $date = $asOfDate ? Carbon::parse($asOfDate) : Carbon::now();
 
-            $balanceSheet = new BalanceSheet($date->toDateString());
+            // BalanceSheet expects endDate and entity (passing null for entity - multi-tenancy needs proper setup)
+            $balanceSheet = new BalanceSheet($date->toDateString(), null);
 
             return [
                 'date' => $date->toDateString(),
@@ -323,11 +319,13 @@ class IfrsAdapter
                 'total_assets' => $balanceSheet->totalAssets(),
                 'total_liabilities' => $balanceSheet->totalLiabilities(),
                 'total_equity' => $balanceSheet->totalEquity(),
+                'note' => 'Multi-company support requires IFRS Entity setup - currently showing all companies',
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate balance sheet", [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return ['error' => $e->getMessage()];
         }
@@ -351,7 +349,8 @@ class IfrsAdapter
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
 
-            $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString());
+            // IncomeStatement expects startDate, endDate, and entity (passing null for entity - multi-tenancy needs proper setup)
+            $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), null);
 
             return [
                 'start_date' => $start->toDateString(),
@@ -361,11 +360,13 @@ class IfrsAdapter
                 'total_revenue' => $incomeStatement->totalRevenue(),
                 'total_expenses' => $incomeStatement->totalExpenses(),
                 'net_income' => $incomeStatement->netIncome(),
+                'note' => 'Multi-company support requires IFRS Entity setup - currently showing all companies',
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate income statement", [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return ['error' => $e->getMessage()];
         }
