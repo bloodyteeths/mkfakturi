@@ -26,18 +26,13 @@ use Modules\Mk\Services\CpayDriver;
 class CpayCallbackController extends Controller
 {
     /**
-     * The CPAY driver instance
+     * Get the CPAY driver instance (lazy-loaded)
      *
-     * @var CpayDriver
+     * @return CpayDriver
      */
-    protected $cpayDriver;
-
-    /**
-     * Create a new controller instance
-     */
-    public function __construct()
+    protected function getCpayDriver(): CpayDriver
     {
-        $this->cpayDriver = new CpayDriver();
+        return new CpayDriver();
     }
 
     /**
@@ -74,7 +69,7 @@ class CpayCallbackController extends Controller
             $this->validateCallbackRequest($request);
 
             // Process callback through driver
-            $this->cpayDriver->handleCallback($request);
+            $this->getCpayDriver()->handleCallback($request);
 
             // Return success response to CPAY
             Log::info('CPAY callback processed successfully', [
