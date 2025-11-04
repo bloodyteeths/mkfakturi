@@ -22,11 +22,12 @@ use Carbon\Carbon;
  */
 class PrometheusController extends Controller
 {
-    protected PrometheusExporter $prometheus;
-
-    public function __construct(PrometheusExporter $prometheus)
+    /**
+     * Get or create PrometheusExporter instance
+     */
+    protected function getPrometheus(): PrometheusExporter
     {
-        $this->prometheus = $prometheus;
+        return app(PrometheusExporter::class);
     }
 
     /**
@@ -35,23 +36,25 @@ class PrometheusController extends Controller
     public function metrics(Request $request): Response
     {
         try {
+            $prometheus = $this->getPrometheus();
+
             // Clear previous metrics to avoid duplicates
-            $this->prometheus->clear();
+            $prometheus->clear();
 
             // Collect business metrics
-            $this->collectBusinessMetrics();
-            
+            $this->collectBusinessMetrics($prometheus);
+
             // Collect system health metrics
-            $this->collectSystemHealthMetrics();
-            
+            $this->collectSystemHealthMetrics($prometheus);
+
             // Collect banking integration metrics
-            $this->collectBankingMetrics();
-            
+            $this->collectBankingMetrics($prometheus);
+
             // Collect performance metrics
-            $this->collectPerformanceMetrics();
+            $this->collectPerformanceMetrics($prometheus);
 
             // Export metrics
-            $metrics = $this->prometheus->export();
+            $metrics = $prometheus->export();
 
             return response($metrics, 200, [
                 'Content-Type' => 'text/plain; version=0.0.4; charset=utf-8'
@@ -72,7 +75,7 @@ class PrometheusController extends Controller
     /**
      * Collect business-related metrics
      */
-    protected function collectBusinessMetrics(): void
+    protected function collectBusinessMetrics(PrometheusExporter $prometheus): void
     {
         // Total invoices by status
         $invoicesByStatus = Invoice::select('status', DB::raw('count(*) as count'))
@@ -80,12 +83,12 @@ class PrometheusController extends Controller
             ->get();
 
         foreach ($invoicesByStatus as $stat) {
-            $this->prometheus->registerGauge(
+            $prometheus->registerGauge(
                 'invoiceshelf_invoices_total',
                 'Total number of invoices by status',
                 ['status']
             );
-            $this->prometheus->setGauge(
+            $prometheus->setGauge(
                 'invoiceshelf_invoices_total',
                 $stat->count,
                 [$stat->status]
@@ -101,11 +104,11 @@ class PrometheusController extends Controller
 
         $totalRevenue30Days = $revenueData->sum('daily_revenue');
         
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_revenue_30_days_total',
             'Total revenue in last 30 days'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_revenue_30_days_total',
             $totalRevenue30Days
         );
@@ -116,20 +119,20 @@ class PrometheusController extends Controller
             $query->where('created_at', '>=', Carbon::now()->subDays(90));
         })->count();
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_customers_total',
             'Total number of customers'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_customers_total',
             $totalCustomers
         );
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_customers_active',
             'Number of active customers (with invoices in last 90 days)'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_customers_active',
             $activeCustomers
         );
@@ -139,11 +142,11 @@ class PrometheusController extends Controller
             ->where('due_date', '<', Carbon::now())
             ->count();
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_invoices_overdue',
             'Number of overdue invoices'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_invoices_overdue',
             $overdueInvoices
         );
@@ -151,11 +154,11 @@ class PrometheusController extends Controller
         // Companies count
         $totalCompanies = Company::count();
         
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_companies_total',
             'Total number of companies'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_companies_total',
             $totalCompanies
         );
@@ -164,7 +167,7 @@ class PrometheusController extends Controller
     /**
      * Collect system health metrics
      */
-    protected function collectSystemHealthMetrics(): void
+    protected function collectSystemHealthMetrics(PrometheusExporter $prometheus): void
     {
         // Database connection check
         try {
@@ -174,11 +177,11 @@ class PrometheusController extends Controller
             $dbHealthy = 0;
         }
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_database_healthy',
             '1 if database is healthy, 0 otherwise'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_database_healthy',
             $dbHealthy
         );
@@ -192,11 +195,11 @@ class PrometheusController extends Controller
             $cacheHealthy = 0;
         }
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_cache_healthy',
             '1 if cache is healthy, 0 otherwise'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_cache_healthy',
             $cacheHealthy
         );
@@ -208,11 +211,11 @@ class PrometheusController extends Controller
         $usedSpace = $totalSpace - $freeSpace;
         $diskUsagePercent = ($totalSpace > 0) ? ($usedSpace / $totalSpace) * 100 : 0;
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_disk_usage_percent',
             'Disk usage percentage for storage'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_disk_usage_percent',
             $diskUsagePercent
         );
@@ -222,20 +225,20 @@ class PrometheusController extends Controller
         $memoryLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
         $memoryUsagePercent = ($memoryLimit > 0) ? ($memoryUsage / $memoryLimit) * 100 : 0;
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_memory_usage_bytes',
             'Current memory usage in bytes'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_memory_usage_bytes',
             $memoryUsage
         );
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_memory_usage_percent',
             'Memory usage percentage'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_memory_usage_percent',
             $memoryUsagePercent
         );
@@ -254,11 +257,11 @@ class PrometheusController extends Controller
 
             if (!$certPath || !file_exists($certPath)) {
                 // No certificate or file doesn't exist
-                $this->prometheus->registerGauge(
+                $prometheus->registerGauge(
                     'fakturino_signer_cert_expiry_days',
                     'Days until signer certificate expires'
                 );
-                $this->prometheus->setGauge(
+                $prometheus->setGauge(
                     'fakturino_signer_cert_expiry_days',
                     -1 // Indicate missing certificate
                 );
@@ -269,11 +272,11 @@ class PrometheusController extends Controller
             $cert = openssl_x509_read($certContent);
 
             if (!$cert) {
-                $this->prometheus->registerGauge(
+                $prometheus->registerGauge(
                     'fakturino_signer_cert_expiry_days',
                     'Days until signer certificate expires'
                 );
-                $this->prometheus->setGauge(
+                $prometheus->setGauge(
                     'fakturino_signer_cert_expiry_days',
                     -1 // Indicate invalid certificate
                 );
@@ -284,11 +287,11 @@ class PrometheusController extends Controller
             $expiryTimestamp = $certInfo['validTo_time_t'] ?? 0;
             $daysUntilExpiry = ($expiryTimestamp - time()) / 86400;
 
-            $this->prometheus->registerGauge(
+            $prometheus->registerGauge(
                 'fakturino_signer_cert_expiry_days',
                 'Days until signer certificate expires'
             );
-            $this->prometheus->setGauge(
+            $prometheus->setGauge(
                 'fakturino_signer_cert_expiry_days',
                 round($daysUntilExpiry, 2)
             );
@@ -296,11 +299,11 @@ class PrometheusController extends Controller
             // Also track certificate health (1 = healthy, 0 = expiring soon/expired)
             $certHealthy = $daysUntilExpiry > 7 ? 1 : 0;
 
-            $this->prometheus->registerGauge(
+            $prometheus->registerGauge(
                 'fakturino_signer_cert_healthy',
                 '1 if certificate is healthy (more than 7 days until expiry), 0 otherwise'
             );
-            $this->prometheus->setGauge(
+            $prometheus->setGauge(
                 'fakturino_signer_cert_healthy',
                 $certHealthy
             );
@@ -311,11 +314,11 @@ class PrometheusController extends Controller
             ]);
 
             // Set to -1 to indicate error
-            $this->prometheus->registerGauge(
+            $prometheus->registerGauge(
                 'fakturino_signer_cert_expiry_days',
                 'Days until signer certificate expires'
             );
-            $this->prometheus->setGauge(
+            $prometheus->setGauge(
                 'fakturino_signer_cert_expiry_days',
                 -1
             );
@@ -325,18 +328,18 @@ class PrometheusController extends Controller
     /**
      * Collect banking integration metrics
      */
-    protected function collectBankingMetrics(): void
+    protected function collectBankingMetrics(PrometheusExporter $prometheus): void
     {
         // Bank transactions (last 24 hours)
         $bankTransactions24h = DB::table('bank_transactions')
             ->where('created_at', '>=', Carbon::now()->subDays(1))
             ->count();
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_bank_transactions_24h',
             'Number of bank transactions synced in last 24 hours'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_bank_transactions_24h',
             $bankTransactions24h
         );
@@ -353,29 +356,29 @@ class PrometheusController extends Controller
         $totalTransactions = $matchedTransactions + $unmatchedTransactions;
         $matchRate = $totalTransactions > 0 ? ($matchedTransactions / $totalTransactions) * 100 : 0;
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_bank_transactions_matched',
             'Number of matched bank transactions'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_bank_transactions_matched',
             $matchedTransactions
         );
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_bank_transactions_unmatched',
             'Number of unmatched bank transactions'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_bank_transactions_unmatched',
             $unmatchedTransactions
         );
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_bank_match_rate_percent',
             'Percentage of bank transactions successfully matched'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_bank_match_rate_percent',
             $matchRate
         );
@@ -388,11 +391,11 @@ class PrometheusController extends Controller
             ->where('created_at', '>=', Carbon::now()->subDays(1))
             ->count();
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_bank_sync_errors_24h',
             'Number of bank sync errors in last 24 hours'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_bank_sync_errors_24h',
             $syncErrors
         );
@@ -401,7 +404,7 @@ class PrometheusController extends Controller
     /**
      * Collect performance metrics
      */
-    protected function collectPerformanceMetrics(): void
+    protected function collectPerformanceMetrics(PrometheusExporter $prometheus): void
     {
         // Average response time (from Telescope, last hour)
         $avgResponseTime = 0;
@@ -417,11 +420,11 @@ class PrometheusController extends Controller
             // Telescope might not be installed yet
         }
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_avg_response_time_ms',
             'Average response time in milliseconds (last hour)'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_avg_response_time_ms',
             $avgResponseTime
         );
@@ -429,11 +432,11 @@ class PrometheusController extends Controller
         // Queue jobs pending
         $pendingJobs = DB::table('jobs')->count();
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_queue_jobs_pending',
             'Number of pending queue jobs'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_queue_jobs_pending',
             $pendingJobs
         );
@@ -441,11 +444,11 @@ class PrometheusController extends Controller
         // Failed jobs
         $failedJobs = DB::table('failed_jobs')->count();
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_queue_jobs_failed',
             'Number of failed queue jobs'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_queue_jobs_failed',
             $failedJobs
         );
@@ -456,11 +459,11 @@ class PrometheusController extends Controller
         });
         $uptime = time() - $appStartTime;
 
-        $this->prometheus->registerGauge(
+        $prometheus->registerGauge(
             'invoiceshelf_uptime_seconds',
             'Application uptime in seconds'
         );
-        $this->prometheus->setGauge(
+        $prometheus->setGauge(
             'invoiceshelf_uptime_seconds',
             $uptime
         );
