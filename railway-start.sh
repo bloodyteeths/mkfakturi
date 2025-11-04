@@ -140,6 +140,10 @@ php artisan cache:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
+# Optimize application (rebuild routes, views, etc. without caching config)
+echo "Optimizing application..."
+php artisan optimize || true
+
 # Run migrations (continue even if some fail)
 echo "Running migrations..."
 php artisan migrate --force || echo "Some migrations failed, continuing..."
