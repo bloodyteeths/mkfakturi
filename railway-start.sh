@@ -146,6 +146,23 @@ php artisan optimize || true
 
 # Run migrations (continue even if some fail)
 echo "Running migrations..."
+
+# Mark problematic migrations as completed if their tables already exist
+echo "Checking for existing tables to skip duplicate migrations..."
+php artisan tinker --execute="
+    // Check if bank_tokens table exists and mark migration as done
+    if (Schema::hasTable('bank_tokens')) {
+        \$exists = DB::table('migrations')->where('migration', '2025_11_03_220239_create_bank_tokens_table')->exists();
+        if (!\$exists) {
+            DB::table('migrations')->insert([
+                'migration' => '2025_11_03_220239_create_bank_tokens_table',
+                'batch' => 1
+            ]);
+            echo 'Marked bank_tokens migration as completed' . PHP_EOL;
+        }
+    }
+" 2>/dev/null || echo "Could not check existing tables"
+
 php artisan migrate --force || echo "Some migrations failed, continuing..."
 
 # Ensure IFRS entity migrations are run (they might be skipped if earlier migrations fail)
