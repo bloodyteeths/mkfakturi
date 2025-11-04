@@ -150,8 +150,21 @@ php artisan migrate --force || echo "Some migrations failed, continuing..."
 
 # Ensure IFRS entity migrations are run (they might be skipped if earlier migrations fail)
 echo "Ensuring IFRS entity migrations are run..."
-php artisan migrate --path=database/migrations/2025_11_04_000000_add_ifrs_entity_id_to_companies_table.php --force 2>/dev/null || echo "Already migrated or failed"
-php artisan migrate --path=database/migrations/2025_11_04_000001_add_entity_id_to_users_table.php --force 2>/dev/null || echo "Already migrated or failed"
+
+if [ "$FORCE_IFRS_MIGRATIONS" = "true" ]; then
+    echo "FORCE_IFRS_MIGRATIONS enabled - resetting migration status for entity migrations..."
+    # Remove these specific migrations from the migrations table to force re-run
+    php artisan tinker --execute="
+        \$migrations = ['2025_11_04_000000_add_ifrs_entity_id_to_companies_table', '2025_11_04_000001_add_entity_id_to_users_table'];
+        foreach (\$migrations as \$m) {
+            DB::table('migrations')->where('migration', \$m)->delete();
+            echo 'Reset migration: ' . \$m . PHP_EOL;
+        }
+    " 2>/dev/null || echo "Could not reset migration status"
+fi
+
+php artisan migrate --path=database/migrations/2025_11_04_000000_add_ifrs_entity_id_to_companies_table.php --force || echo "Entity migration already applied"
+php artisan migrate --path=database/migrations/2025_11_04_000001_add_entity_id_to_users_table.php --force || echo "Entity migration already applied"
 
 # Force set profile_complete if RAILWAY_SKIP_INSTALL is true
 if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
