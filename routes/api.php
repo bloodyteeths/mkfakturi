@@ -72,6 +72,7 @@ use App\Http\Controllers\V1\Admin\Role\RolesController;
 use App\Http\Controllers\V1\Admin\Settings\CompanyController;
 use App\Http\Controllers\V1\Admin\Settings\CompanyCurrencyCheckTransactionsController;
 use App\Http\Controllers\V1\Admin\Settings\DiskController;
+use App\Http\Controllers\V1\Admin\Settings\FeatureFlagsController;
 use App\Http\Controllers\V1\Admin\Settings\GetCompanyMailConfigurationController;
 use App\Http\Controllers\V1\Admin\Settings\GetCompanySettingsController;
 use App\Http\Controllers\V1\Admin\Settings\GetSettingsController;
@@ -162,6 +163,11 @@ Route::prefix('/v1')->group(function () {
     // ----------------------------------
 
     Route::get('/countries', CountriesController::class);
+
+    // Banking OAuth Callback (public route - no auth required)
+    // ----------------------------------
+
+    Route::get('/banking/oauth/callback/{provider}', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'callback']);
 
     // Onboarding
     // ----------------------------------
@@ -273,6 +279,8 @@ Route::prefix('/v1')->group(function () {
             Route::post('/invoices/{invoice}/status', ChangeInvoiceStatusController::class);
 
             Route::post('/invoices/{invoice}/export-xml', [\App\Http\Controllers\V1\Admin\Invoice\ExportXmlController::class, 'export']);
+
+            Route::post('/invoices/{invoice}/payment/cpay', [InvoicesController::class, 'initiateCpayPayment']);
 
             Route::post('/invoices/delete', [InvoicesController::class, 'delete']);
 
@@ -388,6 +396,10 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/settings', UpdateSettingsController::class);
 
+            Route::get('/settings/feature-flags', [FeatureFlagsController::class, 'index']);
+
+            Route::post('/settings/feature-flags/{flag}/toggle', [FeatureFlagsController::class, 'toggle']);
+
             Route::get('/company/has-transactions', CompanyCurrencyCheckTransactionsController::class);
 
             // Certificates
@@ -480,15 +492,34 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{job}/errors', [MigrationController::class, 'errors']);
             });
 
-            // PSD2 Banking Integration (OAuth + MT940 Fallback)
+            // PSD2 Banking Integration (OAuth + Transaction Management)
             // Feature flag: FEATURE_PSD2_BANKING
             // ----------------------------------
 
             Route::prefix('banking')->group(function () {
-                Route::post('/{company}/auth/{bankCode}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'initiateOAuth']);
-                Route::get('/{company}/status/{bankCode}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'getStatus']);
-                Route::delete('/{company}/disconnect/{bankCode}', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'revoke']);
-                Route::post('/{company}/import-mt940', [\App\Http\Controllers\V1\Admin\BankAuthController::class, 'importCsv']);
+                // Bank account management
+                Route::get('/accounts', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'accounts']);
+                Route::get('/transactions', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'transactions']);
+                Route::post('/sync/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'syncAccount']);
+                Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
+                Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
+
+                // OAuth routes (these need to be accessible without full auth for callback)
+                Route::get('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'start']);
+            });
+
+            // AI Insights Integration
+            // Feature flag: FEATURE_MCP_AI_TOOLS
+            // ----------------------------------
+
+            Route::prefix('ai')->middleware(['feature:mcp-ai-tools'])->group(function () {
+                Route::get('/insights', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'index']);
+                Route::post('/insights/generate', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'generate']);
+                Route::post('/insights/refresh', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'refresh']);
+                Route::post('/insights/chat', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'chat']);
+                Route::get('/risks', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'risks']);
+                Route::get('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'getSettings']);
+                Route::post('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'updateSettings']);
             });
         });
 

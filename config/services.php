@@ -71,4 +71,12 @@ return [
         'price_id' => env('PADDLE_PRICE_ID'), // One-time payment price ID
     ],
 
+    'mcp' => [
+        'server_url' => env('MCP_SERVER_URL', 'http://localhost:3100'),
+        'token' => env('MCP_SERVER_TOKEN'),
+        'timeout' => env('MCP_TIMEOUT', 30),
+    ],
+
+    // CLAUDE-CHECKPOINT
+
 ];

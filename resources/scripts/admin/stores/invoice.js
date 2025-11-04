@@ -571,6 +571,25 @@ export const useInvoiceStore = (useWindow = false) => {
             })
         })
       },
+
+      initiateCpayCheckout(invoiceId) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/api/v1/invoices/${invoiceId}/payment/cpay`)
+            .then((response) => {
+              if (response.data.checkout_url) {
+                // Redirect to CPAY checkout
+                window.location.href = response.data.checkout_url
+              }
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
     },
   })()
 }
+// CLAUDE-CHECKPOINT

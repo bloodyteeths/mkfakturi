@@ -62,6 +62,8 @@ const PDFGenerationSettings = () =>
   import('@/scripts/admin/views/settings/PDFGenerationSetting.vue')
 const AiInsightsSetting = () =>
   import('@/scripts/admin/views/settings/AiInsightsSetting.vue')
+const FeatureFlagsSettings = () =>
+  import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -124,6 +126,9 @@ const InvoicePublicPage = () =>
 
 // Console
 const ConsoleHome = () => import('@/js/pages/console/ConsoleHome.vue')
+
+// Banking
+const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
 
 export default [
   {
@@ -356,6 +361,12 @@ export default [
             meta: { isOwner: true },
             component: PDFGenerationSettings,
           },
+          {
+            path: 'feature-flags',
+            name: 'settings.feature-flags',
+            meta: { isOwner: true },
+            component: FeatureFlagsSettings,
+          },
         ],
       },
 
@@ -524,6 +535,14 @@ export default [
         name: 'console.home',
         meta: { isOwner: true }, // Partner/accountant console requires owner access
         component: ConsoleHome,
+      },
+
+      // Banking
+      {
+        path: 'banking',
+        name: 'banking.dashboard',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT }, // Reuse financial report ability
+        component: BankingDashboard,
       },
 
       // Reports

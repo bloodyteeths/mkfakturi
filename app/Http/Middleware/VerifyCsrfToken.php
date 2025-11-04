@@ -21,6 +21,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'login',
         'webhooks/*', // All webhook routes are excluded from CSRF
+        'payment/cpay/callback', // CPAY payment callback
     ];
 }
 // CLAUDE-CHECKPOINT

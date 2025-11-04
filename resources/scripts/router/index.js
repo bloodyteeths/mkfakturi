@@ -6,10 +6,13 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 import AdminRoutes from '@/scripts/admin/admin-router'
 //  Customers routes
 import CustomerRoutes from '@/scripts/customer/customer-router'
+// Partner routes
+import PartnerRoutes from '@/scripts/partner/partner-router'
 //Payment Routes
 
 let routes = []
-routes = routes.concat(AdminRoutes, CustomerRoutes)
+routes = routes.concat(AdminRoutes, CustomerRoutes, PartnerRoutes)
+// CLAUDE-CHECKPOINT
 
 const router = createRouter({
   history: createWebHistory(),

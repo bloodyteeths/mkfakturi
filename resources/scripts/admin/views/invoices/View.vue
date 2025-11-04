@@ -26,6 +26,7 @@ const route = useRoute()
 
 const isMarkAsSent = ref(false)
 const isLoading = ref(false)
+const isCpayProcessing = ref(false)
 
 const invoiceList = ref(null)
 const currentPageNumber = ref(1)
@@ -103,6 +104,17 @@ async function onSendInvoice(id) {
     id: invoiceData.value.id,
     data: invoiceData.value,
   })
+}
+
+async function onPayWithCpay() {
+  isCpayProcessing.value = true
+  try {
+    await invoiceStore.initiateCpayCheckout(invoiceData.value.id)
+  } catch (error) {
+    console.error('CPAY checkout error:', error)
+  } finally {
+    isCpayProcessing.value = false
+  }
 }
 
 function hasActiveUrl(id) {
@@ -258,6 +270,25 @@ onSearched = debounce(onSearched, 500)
           @click="onSendInvoice"
         >
           {{ $t('invoices.send_invoice') }}
+        </BaseButton>
+
+        <!-- Pay with CPAY  -->
+        <BaseButton
+          v-if="
+            (invoiceData.status === 'SENT' || invoiceData.status === 'VIEWED') &&
+            invoiceData.status !== 'PAID' &&
+            userStore.hasAbilities(abilities.CREATE_PAYMENT)
+          "
+          variant="primary"
+          class="mr-3"
+          :disabled="isCpayProcessing"
+          @click="onPayWithCpay"
+        >
+          <LoadingIcon
+            v-if="isCpayProcessing"
+            class="h-5 w-5 mr-2 animate-spin"
+          />
+          {{ isCpayProcessing ? $t('payments.cpay.processing') : $t('payments.cpay.pay_now') }}
         </BaseButton>
 
         <!-- Record Payment  -->

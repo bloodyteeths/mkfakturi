@@ -245,16 +245,31 @@ const statusColor = computed(() => {
 async function loadAiSettings() {
   try {
     const response = await axios.get('/api/v1/ai/settings')
-    Object.assign(aiSettings.value, response.data.settings)
-    lastAnalysis.value = response.data.last_analysis
-    insightsCount.value = response.data.insights_count
-    systemStatus.value = response.data.system_status
+
+    // Update settings from API response
+    if (response.data.settings) {
+      Object.assign(aiSettings.value, response.data.settings)
+    }
+
+    // Update status information
+    lastAnalysis.value = response.data.last_analysis || null
+    insightsCount.value = response.data.insights_count || 0
+    systemStatus.value = response.data.system_status || 'inactive'
   } catch (error) {
     console.error('Failed to load AI settings:', error)
-    // Set default values if API is not available
-    lastAnalysis.value = new Date()
-    insightsCount.value = 42
-    systemStatus.value = 'active'
+
+    // Show coming soon message if API not implemented
+    if (error.response?.status === 404 || error.response?.status === 501) {
+      notificationStore.showNotification({
+        type: 'info',
+        message: t('ai.insights.api_not_implemented')
+      })
+    }
+
+    // Keep current values, don't set mock data
+    lastAnalysis.value = lastAnalysis.value || null
+    insightsCount.value = insightsCount.value || 0
+    systemStatus.value = systemStatus.value || 'inactive'
   }
 }
 
@@ -280,19 +295,31 @@ async function updateAiSettings() {
 async function runAnalysis() {
   isRunningAnalysis.value = true
   try {
-    await axios.post('/api/v1/ai/run-analysis')
-    await loadAiSettings() // Refresh status
-    
+    await axios.post('/api/v1/ai/insights/generate')
+
     notificationStore.showNotification({
       type: 'success',
       message: t('ai.insights.analysis_started')
     })
+
+    // Wait a moment then refresh status
+    setTimeout(async () => {
+      await loadAiSettings()
+    }, 2000)
   } catch (error) {
     console.error('Failed to run analysis:', error)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('ai.insights.analysis_failed')
-    })
+
+    if (error.response?.status === 404 || error.response?.status === 501) {
+      notificationStore.showNotification({
+        type: 'info',
+        message: t('ai.insights.api_not_implemented')
+      })
+    } else {
+      notificationStore.showNotification({
+        type: 'error',
+        message: t('ai.insights.analysis_failed')
+      })
+    }
   } finally {
     isRunningAnalysis.value = false
   }
@@ -308,4 +335,6 @@ onMounted(() => {
   loadAiSettings()
 })
 </script>
+
+// CLAUDE-CHECKPOINT
 

@@ -109,6 +109,11 @@ Route::prefix('/customer')->group(function () {
     Route::get('/payments/view/{email_log:token}', [CustomerPaymentPdfController::class, 'getPdf'])->name('payment');
 });
 
+// CPAY Payment Callback
+// ----------------------------------------------
+
+Route::post('/payment/cpay/callback', [App\Http\Controllers\CpayCallbackController::class, 'handle'])->name('payment.cpay.callback');
+
 // Monitoring Endpoints
 // ----------------------------------------------
 // Feature flag: FEATURE_MONITORING

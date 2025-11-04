@@ -139,4 +139,50 @@ class InvoicesController extends Controller
             'success' => true,
         ]);
     }
+
+    /**
+     * Initiate CPAY payment for an invoice
+     *
+     * @param  Invoice  $invoice
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function initiateCpayPayment(Invoice $invoice, Request $request)
+    {
+        $this->authorize('view', $invoice);
+
+        // Check if invoice is already paid
+        if ($invoice->status === Invoice::STATUS_PAID) {
+            return response()->json([
+                'error' => 'Invoice is already paid',
+            ], 400);
+        }
+
+        // Check if advanced payments feature is enabled
+        if (!config('mk.features.advanced_payments', false)) {
+            return response()->json([
+                'error' => 'Advanced payments feature is not enabled',
+            ], 403);
+        }
+
+        try {
+            $cpayDriver = app(\Modules\Mk\Services\CpayDriver::class);
+            $checkoutData = $cpayDriver->createCheckout($invoice);
+
+            return response()->json([
+                'checkout_url' => $checkoutData['checkout_url'],
+                'transaction_id' => $checkoutData['params']['order_id'] ?? null,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('CPAY checkout creation failed', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
+// CLAUDE-CHECKPOINT

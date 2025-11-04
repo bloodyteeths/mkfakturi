@@ -25,7 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
             // Partner Portal routes
             Route::middleware('web')
                 ->group(base_path('routes/partner.php'));
+
+            // MCP Internal API routes
+            Route::middleware('api')
+                ->group(base_path('routes/mcp.php'));
         },
+        // CLAUDE-CHECKPOINT
     )
     ->withCommands([
         \App\Console\Commands\RefreshTemplateCache::class,
@@ -71,6 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\FeatureMiddleware::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'install' => \App\Http\Middleware\InstallationMiddleware::class,
+            'mcp.token' => \App\Http\Middleware\VerifyMcpToken::class,
             'partner' => \App\Http\Middleware\PartnerScopeMiddleware::class,
             'partner-scope' => \App\Http\Middleware\PartnerScopeMiddleware::class,
             'pdf-auth' => \App\Http\Middleware\PdfMiddleware::class,
@@ -78,6 +84,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'redirect-if-installed' => \App\Http\Middleware\RedirectIfInstalled::class,
             'redirect-if-unauthenticated' => \App\Http\Middleware\RedirectIfUnauthorized::class,
         ]);
+        // CLAUDE-CHECKPOINT
 
         $middleware->priority([
             \Illuminate\Session\Middleware\StartSession::class,

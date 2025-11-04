@@ -2,7 +2,8 @@
 import DashboardStats from '../dashboard/DashboardStats.vue'
 import DashboardChart from '../dashboard/DashboardChart.vue'
 import DashboardTable from '../dashboard/DashboardTable.vue'
-import AiInsights from '@/components/AiInsights.vue'
+import AiInsightsWidget from './widgets/AiInsightsWidget.vue'
+import AiChatWidget from './widgets/AiChatWidget.vue'
 import BankStatus from '@/scripts/components/widgets/BankStatus.vue'
 import VatStatus from '@/scripts/components/widgets/VatStatus.vue'
 import CertExpiry from '@/scripts/components/widgets/CertExpiry.vue'
@@ -14,10 +15,16 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const userStore = useUserStore()
 const router = useRouter()
+const globalStore = useGlobalStore()
 
 // Check if AI Insights should be shown (default to true if setting doesn't exist)
 const showAiInsights = computed(() => {
   return userStore.currentUserSettings?.show_ai_insights !== false
+})
+
+// Check if MCP AI Tools feature flag is enabled
+const mcpAiToolsEnabled = computed(() => {
+  return globalStore.featureFlags?.['mcp-ai-tools'] === true
 })
 
 onMounted(() => {
@@ -41,22 +48,27 @@ onMounted(() => {
 <template>
   <BasePage>
     <DashboardStats />
-    <div :class="showAiInsights ? 'grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6' : 'mb-6'">
-      <div :class="showAiInsights ? 'lg:col-span-2' : ''">
-        <DashboardChart />
-      </div>
-      <div v-if="showAiInsights" class="lg:col-span-1">
-        <AiInsights />
-      </div>
+
+    <!-- Main Chart -->
+    <div class="mb-6">
+      <DashboardChart />
     </div>
-    
-    <!-- Widgets Section -->
+
+    <!-- AI Insights & Chat Widgets (if feature enabled and user setting enabled) -->
+    <div v-if="mcpAiToolsEnabled && showAiInsights" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <AiInsightsWidget />
+      <AiChatWidget />
+    </div>
+
+    <!-- Status Widgets Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
       <BankStatus />
       <VatStatus />
       <CertExpiry />
     </div>
-    
+
     <DashboardTable />
   </BasePage>
 </template>
+
+// CLAUDE-CHECKPOINT

@@ -296,6 +296,16 @@ return [
             'ability' => '',
             'model' => '',
         ],
+        [
+            'title' => 'settings.feature_flags.title',
+            'group' => '',
+            'name' => 'Feature Flags',
+            'link' => '/admin/settings/feature-flags',
+            'icon' => 'FlagIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
     ],
 
     /*
@@ -381,6 +391,16 @@ return [
             'owner_only' => false,
             'ability' => 'view-expense',
             'model' => Expense::class,
+        ],
+        [
+            'title' => 'navigation.banking',
+            'group' => 2,
+            'link' => '/admin/banking',
+            'icon' => 'BanknotesIcon',
+            'name' => 'Banking',
+            'owner_only' => false,
+            'ability' => 'view-report',
+            'model' => '',
         ],
         [
             'title' => 'navigation.modules',
