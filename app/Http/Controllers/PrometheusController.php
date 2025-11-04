@@ -66,8 +66,14 @@ class PrometheusController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return response('# Error collecting metrics', 500, [
-                'Content-Type' => 'text/plain'
+            // Return detailed error for debugging
+            $errorDetails = "# Error collecting metrics\n";
+            $errorDetails .= "# Message: " . $e->getMessage() . "\n";
+            $errorDetails .= "# File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+            $errorDetails .= "# Class: " . get_class($e) . "\n";
+
+            return response($errorDetails, 500, [
+                'Content-Type' => 'text/plain; charset=utf-8'
             ]);
         }
     }
