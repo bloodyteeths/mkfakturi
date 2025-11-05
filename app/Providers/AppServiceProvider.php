@@ -19,6 +19,8 @@ use App\Policies\ReportPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\SettingsPolicy;
 use App\Policies\UserPolicy;
+use App\Services\AiInsightsService;
+use App\Services\McpClient;
 use App\Space\InstallUtils;
 use Gate;
 use Illuminate\Support\Facades\Broadcast;
@@ -78,6 +80,20 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         BouncerModels::scope(new DefaultScope);
+
+        // Register AI services
+        $this->app->singleton(McpClient::class, function ($app) {
+            return new McpClient(
+                config('ai.mcp.url'),
+                config('ai.mcp.token')
+            );
+        });
+
+        $this->app->singleton(AiInsightsService::class, function ($app) {
+            return new AiInsightsService(
+                $app->make(McpClient::class)
+            );
+        });
     }
 
     public function addMenus()
