@@ -268,6 +268,19 @@ class AiInsightsService
         $overdueInvoices = $stats['overdue_invoices'] ?? 0;
         $draftInvoices = $stats['draft_invoices'] ?? 0;
 
+        // Payment reconciliation data
+        $paymentsReceived = number_format($stats['payments_received'] ?? 0, 2);
+        $paymentVariance = $stats['payment_variance'] ?? 0;
+        $varianceFormatted = number_format(abs($paymentVariance), 2);
+        $varianceStatus = $paymentVariance == 0
+            ? '✓ Совпаѓа'
+            : ($paymentVariance > 0 ? "⚠️ Разлика: +{$varianceFormatted} {$currency}" : "⚠️ Разлика: -{$varianceFormatted} {$currency}");
+
+        // Profit calculation
+        $profit = ($stats['revenue'] ?? 0) - ($stats['expenses'] ?? 0);
+        $profitFormatted = number_format($profit, 2);
+        $profitMargin = $revenue > 0 ? number_format(($profit / ($stats['revenue'] ?? 1)) * 100, 1) : '0.0';
+
         return <<<PROMPT
 Ти си македонски финансиски советник кој анализира финансиското здравје на компанијата.
 
@@ -282,15 +295,18 @@ class AiInsightsService
 - Вкупно фактури: {$invoicesCount} (Во изработка: {$draftInvoices}, Чекај наплата: {$pendingInvoices}, Задоцнети: {$overdueInvoices})
 - Вкупен приход: {$revenue} {$currency}
 - Вкупни трошоци: {$expenses} {$currency}
+- Нето профит: {$profitFormatted} {$currency} (маржа: {$profitMargin}%)
+- Наплатени плаќања: {$paymentsReceived} {$currency} {$varianceStatus}
 - Неплатени фактури (износ): {$outstanding} {$currency}
 - Број на клиенти: {$customers}
 
 Обезбеди 3-5 конкретни и корисни совети во македонски јазик, фокусирајќи се на:
-1. Трендови на паричен тек
-2. Однос помеѓу приходи и трошоци
-3. Проблеми со наплата
+1. Трендови на паричен тек и ликвидност
+2. Профитна маржа и однос помеѓу приходи и трошоци
+3. Проблеми со наплата и рекон�илијација на плаќања
 4. Можности за даночна оптимизација
 5. Деловни ризици или предупредувања
+6. Ако има разлика помеѓу приходи и плаќања, задолжително коментирај и објасни
 
 Форматирај го секој совет како JSON објект во следниот формат:
 {
@@ -359,7 +375,14 @@ PROMPT;
         $customers = $stats['customers'] ?? 0;
         $invoicesCount = $stats['invoices_count'] ?? 0;
         $pendingInvoices = $stats['pending_invoices'] ?? 0;
+        $overdueInvoices = $stats['overdue_invoices'] ?? 0;
         $draftInvoices = $stats['draft_invoices'] ?? 0;
+
+        // Payment and profit data
+        $paymentsReceived = number_format($stats['payments_received'] ?? 0, 2);
+        $paymentVariance = $stats['payment_variance'] ?? 0;
+        $profit = ($stats['revenue'] ?? 0) - ($stats['expenses'] ?? 0);
+        $profitFormatted = number_format($profit, 2);
 
         return <<<PROMPT
 Ти си македонски финансиски советник кој помага на корисниците со нивните финансиски прашања.
@@ -369,8 +392,11 @@ PROMPT;
 - Вкупно фактури: {$invoicesCount}
 - Фактури во изработка: {$draftInvoices}
 - Чекај на наплата: {$pendingInvoices}
+- Задоцнети фактури: {$overdueInvoices}
 - Приходи: {$revenue} {$currency}
 - Трошоци: {$expenses} {$currency}
+- Профит: {$profitFormatted} {$currency}
+- Наплатени плаќања: {$paymentsReceived} {$currency}
 - Неплатени фактури (износ): {$outstanding} {$currency}
 - Број на клиенти: {$customers}
 

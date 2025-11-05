@@ -60,8 +60,18 @@ class McpDataProvider
                 ->whereIn('status', ['SENT', 'COMPLETED'])
                 ->sum('due_amount');
 
-            // For now, expenses are 0 (TODO: integrate with expenses table if available)
-            $expenses = 0.0;
+            // Aggregate expenses
+            $expenses = (float) \App\Models\Expense::where('company_id', $company->id)
+                ->sum('amount');
+
+            // Aggregate payments received
+            $totalPayments = (float) \App\Models\Payment::where('company_id', $company->id)
+                ->sum('amount');
+
+            // Calculate payment reconciliation variance
+            // Positive = more revenue than payments (outstanding)
+            // Negative = more payments than revenue (overpayment/credit)
+            $paymentVariance = $totalRevenue - $totalPayments;
 
             $stats = [
                 'company_id' => $company->id,
@@ -72,6 +82,9 @@ class McpDataProvider
                 'outstanding' => $outstandingAmount,
                 'customers' => $customersCount,
                 'invoices_count' => $invoicesCount,
+                // Payment reconciliation data:
+                'payments_received' => $totalPayments,
+                'payment_variance' => $paymentVariance,
                 // Additional detail fields:
                 'pending_invoices' => $pendingInvoices,
                 'overdue_invoices' => $overdueInvoices,
@@ -96,6 +109,8 @@ class McpDataProvider
                 'outstanding' => 0,
                 'customers' => 0,
                 'invoices_count' => 0,
+                'payments_received' => 0,
+                'payment_variance' => 0,
                 'pending_invoices' => 0,
                 'overdue_invoices' => 0,
                 'draft_invoices' => 0,
@@ -210,7 +225,9 @@ class McpDataProvider
                         'invoice_number' => $invoice->invoice_number,
                         'customer_name' => $invoice->customer?->name ?? 'N/A',
                         'total' => (float) $invoice->total,
+                        'due_amount' => (float) $invoice->due_amount,
                         'status' => $invoice->status,
+                        'paid_status' => $invoice->paid_status,
                         'invoice_date' => $invoice->invoice_date,
                         'due_date' => $invoice->due_date,
                     ];
