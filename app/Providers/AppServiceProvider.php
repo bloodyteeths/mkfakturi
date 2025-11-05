@@ -83,10 +83,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register AI services
         $this->app->singleton(McpClient::class, function ($app) {
-            return new McpClient(
-                config('ai.mcp.url'),
-                config('ai.mcp.token')
-            );
+            return new McpClient();
         });
 
         $this->app->singleton(AiInsightsService::class, function ($app) {
