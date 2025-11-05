@@ -22,35 +22,78 @@ class McpDataProvider
     public function getCompanyStats(Company $company): array
     {
         try {
+            Log::info('[McpDataProvider] Fetching company stats', [
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+            ]);
+
+            // Get all invoices for debugging
+            $allInvoices = Invoice::where('company_id', $company->id)->get();
+            Log::info('[McpDataProvider] Raw invoices query result', [
+                'company_id' => $company->id,
+                'total_invoices' => $allInvoices->count(),
+                'invoice_statuses' => $allInvoices->pluck('status')->toArray(),
+                'invoice_ids' => $allInvoices->pluck('id')->toArray(),
+            ]);
+
+            $totalRevenue = (float) Invoice::where('company_id', $company->id)
+                ->where('status', 'PAID')
+                ->sum('total');
+
+            $invoicesCount = Invoice::where('company_id', $company->id)->count();
+            $customersCount = Customer::where('company_id', $company->id)->count();
+            $pendingInvoices = Invoice::where('company_id', $company->id)
+                ->where('status', 'SENT')
+                ->count();
+            $overdueInvoices = Invoice::where('company_id', $company->id)
+                ->where('status', 'SENT')
+                ->where('due_date', '<', now())
+                ->count();
+            $draftInvoices = Invoice::where('company_id', $company->id)
+                ->where('status', 'DRAFT')
+                ->count();
+
+            // Calculate outstanding amount (pending + overdue invoices total)
+            $outstandingAmount = (float) Invoice::where('company_id', $company->id)
+                ->where('status', 'SENT')
+                ->sum('due_amount');
+
+            // For now, expenses are 0 (TODO: integrate with expenses table if available)
+            $expenses = 0.0;
+
+            $stats = [
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+                // Keys that match what AI prompts expect:
+                'revenue' => $totalRevenue,
+                'expenses' => $expenses,
+                'outstanding' => $outstandingAmount,
+                'customers' => $customersCount,
+                'invoices_count' => $invoicesCount,
+                // Additional detail fields:
+                'pending_invoices' => $pendingInvoices,
+                'overdue_invoices' => $overdueInvoices,
+                'draft_invoices' => $draftInvoices,
+            ];
+
+            Log::info('[McpDataProvider] Company stats calculated', $stats);
+
+            return $stats;
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get company stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return [
                 'company_id' => $company->id,
                 'company_name' => $company->name,
-                'total_revenue' => (float) Invoice::where('company_id', $company->id)
-                    ->where('status', 'PAID')
-                    ->sum('total'),
-                'invoices_count' => Invoice::where('company_id', $company->id)->count(),
-                'customers_count' => Customer::where('company_id', $company->id)->count(),
-                'pending_invoices' => Invoice::where('company_id', $company->id)
-                    ->where('status', 'SENT')
-                    ->count(),
-                'overdue_invoices' => Invoice::where('company_id', $company->id)
-                    ->where('status', 'SENT')
-                    ->where('due_date', '<', now())
-                    ->count(),
-                'draft_invoices' => Invoice::where('company_id', $company->id)
-                    ->where('status', 'DRAFT')
-                    ->count(),
-            ];
-        } catch (\Exception $e) {
-            Log::error('Failed to get company stats', [
-                'company_id' => $company->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            return [
-                'total_revenue' => 0,
+                'revenue' => 0,
+                'expenses' => 0,
+                'outstanding' => 0,
+                'customers' => 0,
                 'invoices_count' => 0,
-                'customers_count' => 0,
                 'pending_invoices' => 0,
                 'overdue_invoices' => 0,
                 'draft_invoices' => 0,
@@ -64,26 +107,35 @@ class McpDataProvider
     public function getTrialBalance(Company $company): array
     {
         try {
+            Log::info('[McpDataProvider] Fetching trial balance', [
+                'company_id' => $company->id,
+            ]);
+
             // Simplified trial balance - can be expanded with actual accounting logic
             $totalDebits = (float) Invoice::where('company_id', $company->id)
                 ->whereIn('status', ['SENT', 'PAID'])
                 ->sum('total');
-                
+
             $totalCredits = (float) Invoice::where('company_id', $company->id)
                 ->where('status', 'PAID')
                 ->sum('total');
-                
-            return [
+
+            $balance = [
                 'debits' => $totalDebits,
                 'credits' => $totalCredits,
                 'balance' => $totalDebits - $totalCredits,
             ];
+
+            Log::info('[McpDataProvider] Trial balance calculated', $balance);
+
+            return $balance;
         } catch (\Exception $e) {
-            Log::error('Failed to get trial balance', [
+            Log::error('[McpDataProvider] Failed to get trial balance', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return [
                 'debits' => 0,
                 'credits' => 0,
@@ -172,3 +224,5 @@ class McpDataProvider
         }
     }
 }
+
+// CLAUDE-CHECKPOINT
