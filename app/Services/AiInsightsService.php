@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Company;
 use App\Services\AiProvider\AiProviderInterface;
 use App\Services\AiProvider\ClaudeProvider;
+use App\Services\AiProvider\GeminiProvider;
 use App\Services\AiProvider\OpenAiProvider;
 use App\Services\AiProvider\NullAiProvider;
 use Illuminate\Support\Facades\Cache;
@@ -427,12 +428,13 @@ PROMPT;
      */
     private function resolveAiProvider(): AiProviderInterface
     {
-        $provider = config('ai.default_provider', 'claude');
+        $provider = strtolower((string) config('ai.default_provider', 'claude'));
 
         try {
             return match($provider) {
                 'claude' => new ClaudeProvider(),
                 'openai' => new OpenAiProvider(),
+                'gemini' => new GeminiProvider(),
                 default => throw new \RuntimeException("Unsupported AI provider: {$provider}"),
             };
         } catch (\Throwable $e) {

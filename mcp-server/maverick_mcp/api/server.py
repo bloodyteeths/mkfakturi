@@ -115,6 +115,7 @@ from fastmcp import FastMCP
 # Import tool registry for direct registration
 # This avoids Claude Desktop's issue with mounted router tool names
 from maverick_mcp.api.routers.tool_registry import register_all_router_tools
+from maverick_mcp.api.routers.laravel_proxy import router as laravel_proxy_router
 from maverick_mcp.config.settings import settings
 from maverick_mcp.data.models import get_db
 from maverick_mcp.data.performance import (
@@ -356,6 +357,7 @@ from maverick_mcp.api.routers.monitoring import router as monitoring_router
 if hasattr(mcp, "fastapi_app") and mcp.fastapi_app:
     mcp.fastapi_app.include_router(monitoring_router, tags=["monitoring"])
     mcp.fastapi_app.include_router(health_router, tags=["health"])
+    mcp.fastapi_app.include_router(laravel_proxy_router, tags=["fakturino"])
     logger.info("Monitoring and health endpoints registered with FastAPI application")
 
 # Initialize enhanced health monitoring system
