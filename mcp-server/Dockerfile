@@ -39,6 +39,10 @@ COPY maverick_mcp ./maverick_mcp
 COPY alembic ./alembic
 COPY alembic.ini setup.py ./
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -52,5 +56,5 @@ USER maverick
 
 EXPOSE 8000
 
-# Start MCP server
-CMD ["uv", "run", "python", "-m", "maverick_mcp.api.server", "--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]
+# Start MCP server using entrypoint script
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
