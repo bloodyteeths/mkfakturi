@@ -29,18 +29,18 @@ RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-
   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
 
 # Copy dependency files first for better caching
-COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
+COPY pyproject.toml uv.lock README.md ./
 
 # Install Python dependencies
 RUN uv sync --frozen
 
 # Copy application code
-COPY mcp-server/maverick_mcp ./maverick_mcp
-COPY mcp-server/alembic ./alembic
-COPY mcp-server/alembic.ini mcp-server/setup.py ./
+COPY maverick_mcp ./maverick_mcp
+COPY alembic ./alembic
+COPY alembic.ini setup.py ./
 
 # Copy entrypoint script
-COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
+COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Set environment variables
