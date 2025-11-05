@@ -36,8 +36,9 @@ class McpDataProvider
                 'invoice_ids' => $allInvoices->pluck('id')->toArray(),
             ]);
 
+            // Revenue = invoices with paid_status = PAID (not status field!)
             $totalRevenue = (float) Invoice::where('company_id', $company->id)
-                ->where('status', 'PAID')
+                ->where('paid_status', 'PAID')
                 ->sum('total');
 
             $invoicesCount = Invoice::where('company_id', $company->id)->count();
@@ -53,9 +54,10 @@ class McpDataProvider
                 ->where('status', 'DRAFT')
                 ->count();
 
-            // Calculate outstanding amount (pending + overdue invoices total)
+            // Calculate outstanding amount (unpaid invoices - use paid_status)
             $outstandingAmount = (float) Invoice::where('company_id', $company->id)
-                ->where('status', 'SENT')
+                ->where('paid_status', '!=', 'PAID')
+                ->whereIn('status', ['SENT', 'COMPLETED'])
                 ->sum('due_amount');
 
             // For now, expenses are 0 (TODO: integrate with expenses table if available)
@@ -112,12 +114,14 @@ class McpDataProvider
             ]);
 
             // Simplified trial balance - can be expanded with actual accounting logic
+            // Debits = all billed invoices (SENT or COMPLETED)
             $totalDebits = (float) Invoice::where('company_id', $company->id)
-                ->whereIn('status', ['SENT', 'PAID'])
+                ->whereIn('status', ['SENT', 'COMPLETED'])
                 ->sum('total');
 
+            // Credits = all paid invoices (paid_status = PAID)
             $totalCredits = (float) Invoice::where('company_id', $company->id)
-                ->where('status', 'PAID')
+                ->where('paid_status', 'PAID')
                 ->sum('total');
 
             $balance = [
