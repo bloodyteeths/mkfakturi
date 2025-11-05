@@ -21,6 +21,7 @@ use App\Policies\SettingsPolicy;
 use App\Policies\UserPolicy;
 use App\Services\AiInsightsService;
 use App\Services\McpClient;
+use App\Services\McpDataProvider;
 use App\Space\InstallUtils;
 use Gate;
 use Illuminate\Support\Facades\Broadcast;
@@ -82,14 +83,19 @@ class AppServiceProvider extends ServiceProvider
         BouncerModels::scope(new DefaultScope);
 
         // Register AI services
-        $this->app->singleton(McpClient::class, function ($app) {
-            return new McpClient();
+        $this->app->singleton(McpDataProvider::class, function ($app) {
+            return new McpDataProvider();
         });
 
         $this->app->singleton(AiInsightsService::class, function ($app) {
             return new AiInsightsService(
-                $app->make(McpClient::class)
+                $app->make(McpDataProvider::class)
             );
+        });
+
+        // Keep McpClient for external integrations if needed
+        $this->app->singleton(McpClient::class, function ($app) {
+            return new McpClient();
         });
     }
 

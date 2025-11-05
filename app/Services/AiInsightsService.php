@@ -21,17 +21,17 @@ use Carbon\Carbon;
 class AiInsightsService
 {
     private AiProviderInterface $aiProvider;
-    private McpClient $mcpClient;
+    private McpDataProvider $dataProvider;
     private int $cacheTtl;
 
     /**
      * Create a new AI Insights service instance
      *
-     * @param McpClient $mcpClient The MCP client for fetching financial data
+     * @param McpDataProvider $dataProvider Direct data provider for financial data
      */
-    public function __construct(McpClient $mcpClient)
+    public function __construct(McpDataProvider $dataProvider)
     {
-        $this->mcpClient = $mcpClient;
+        $this->dataProvider = $dataProvider;
         $this->cacheTtl = config('ai.cache_ttl', 21600); // 6 hours
         $this->aiProvider = $this->resolveAiProvider();
     }
@@ -187,22 +187,7 @@ class AiInsightsService
      */
     private function fetchTrialBalance(Company $company): array
     {
-        try {
-            return $this->mcpClient->call('get_trial_balance', [
-                'company_id' => $company->id,
-            ]);
-        } catch (McpException $e) {
-            Log::warning('Failed to fetch trial balance, using empty data', [
-                'company_id' => $company->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'debits' => 0,
-                'credits' => 0,
-                'balance' => 0,
-            ];
-        }
+        return $this->dataProvider->getTrialBalance($company);
     }
 
     /**
@@ -213,23 +198,7 @@ class AiInsightsService
      */
     private function fetchCompanyStats(Company $company): array
     {
-        try {
-            return $this->mcpClient->call('get_company_stats', [
-                'company_id' => $company->id,
-            ]);
-        } catch (McpException $e) {
-            Log::warning('Failed to fetch company stats, using empty data', [
-                'company_id' => $company->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'revenue' => 0,
-                'expenses' => 0,
-                'outstanding' => 0,
-                'customers' => 0,
-            ];
-        }
+        return $this->dataProvider->getCompanyStats($company);
     }
 
     /**
