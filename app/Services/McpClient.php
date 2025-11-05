@@ -22,7 +22,8 @@ class McpClient
      */
     public function __construct()
     {
-        $this->mcpServerUrl = config('services.mcp.server_url', 'http://localhost:3100');
+        // Use Laravel's own base URL for internal MCP endpoints
+        $this->mcpServerUrl = config('app.url', 'http://localhost');
         $this->bearerToken = config('services.mcp.token', '');
         $this->timeout = config('services.mcp.timeout', 30);
 
