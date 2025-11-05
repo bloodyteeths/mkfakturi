@@ -3,8 +3,5 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build"
-  },
-  "deploy": {
-    "startCommand": "bash railway-start.sh"
   }
 }
