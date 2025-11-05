@@ -1,0 +1,156 @@
+2025-11-05T13:56:49.000000000Z [inf]  Starting Container
+2025-11-05T13:56:50.544347683Z [err]  Uninstalled 1 package in 96ms
+2025-11-05T13:56:50.544360756Z [err]  Installed 1 package in 1ms
+2025-11-05T13:56:50.544407696Z [inf]  Starting Maverick MCP server on port 8080...
+2025-11-05T13:56:50.544413942Z [err]     Building maverick-mcp @ file:///app
+2025-11-05T13:56:50.544421029Z [err]        Built maverick-mcp @ file:///app
+2025-11-05T13:56:58.818418869Z [err]  2025-11-05 13:56:58,814 - maverick_mcp.data.models - INFO - Using database URL: sqlite:///maverick_mcp.db
+2025-11-05T13:56:58.818424393Z [err]  2025-11-05 13:56:58,814 - maverick_mcp.data.models - INFO - Connection pooling: ENABLED
+2025-11-05T13:56:58.818430004Z [err]  2025-11-05 13:56:58,814 - maverick_mcp.data.models - INFO - Pool config: size=20, max_overflow=10, timeout=30s, recycle=3600s
+2025-11-05T13:57:01.752175378Z [err]  2025-11-05 13:57:01,629 - maverick_mcp.utils.yfinance_pool - INFO - YFinance connection pool initialized
+2025-11-05T13:57:01.752606454Z [err]  2025-11-05 13:57:01,631 - maverick_mcp.data.models - INFO - Creating missing database tables: mcp_backtest_portfolios, mcp_backtest_results, mcp_backtest_trades, mcp_maverick_bear_stocks, mcp_maverick_stocks, mcp_optimization_results, mcp_portfolio_positions, mcp_portfolios, mcp_price_cache, mcp_stocks, mcp_supply_demand_breakouts, mcp_technical_cache, mcp_walk_forward_tests
+2025-11-05T13:57:01.978533483Z [err]  2025-11-05 13:57:01,976 - maverick_mcp.stock_data - INFO - Database connection successful
+2025-11-05T13:57:02.737963163Z [err]  2025-11-05 13:57:02,448 - maverick_mcp.config.plotly_config - INFO - ✓ Plotly defaults configured successfully
+2025-11-05T13:57:02.737971308Z [err]  2025-11-05 13:57:02,448 - maverick_mcp.config.plotly_config - INFO - ✓ Plotly setup completed
+2025-11-05T13:57:02.737978785Z [err]  2025-11-05 13:57:02,457 - maverick_mcp.stock_data - INFO - Database connection successful
+2025-11-05T13:57:22.894496752Z [inf]  2025-11-05 13:57:16,031 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Portfolio tools registered successfully
+2025-11-05T13:57:22.894502893Z [inf]  
+2025-11-05T13:57:22.894510465Z [inf]  2025-11-05 13:57:16,071 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Data tools registered successfully
+2025-11-05T13:57:22.894513378Z [inf]  2025-11-05 13:57:15,815 - maverick_mcp.server - INFO - Monitoring and observability systems initialized
+2025-11-05T13:57:22.894520001Z [inf]  2025-11-05 13:57:16,102 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Performance tools registered successfully
+2025-11-05T13:57:22.894522647Z [inf]  2025-11-05 13:57:15,916 - maverick_mcp.server - INFO - Initializing enhanced connection management system...
+2025-11-05T13:57:22.894528757Z [inf]  2025-11-05 13:57:16,142 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Agent tools registered successfully
+2025-11-05T13:57:22.894537444Z [inf]  2025-11-05 13:57:19,137 - maverick_mcp.providers.llm_factory - WARNING - No LLM API keys found - using FakeListLLM for testing
+2025-11-05T13:57:22.894538522Z [inf]  2025-11-05 13:57:15,916 - maverick_mcp.api.routers.tool_registry - INFO - Starting tool registration process...
+2025-11-05T13:57:22.894547123Z [inf]  2025-11-05 13:57:15,970 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Technical tools registered successfully
+2025-11-05T13:57:22.894554447Z [inf]  2025-11-05 13:57:15,991 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Screening tools registered successfully
+2025-11-05T13:57:22.894564515Z [inf]  2025-11-05 13:57:19,195 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Research tools registered successfully
+2025-11-05T13:57:22.894572113Z [inf]  2025-11-05 13:57:19,226 - maverick_mcp.api.routers.health_tools - INFO - Health monitoring tools registered successfully
+2025-11-05T13:57:22.894580810Z [inf]  2025-11-05 13:57:19,226 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Health monitoring tools registered successfully
+2025-11-05T13:57:22.894894346Z [inf]  2025-11-05 13:57:14,761 - maverick_mcp.server - INFO - Initializing monitoring and observability systems...
+2025-11-05T13:57:22.894899331Z [inf]  2025-11-05 13:57:14,863 - maverick_mcp.utils.monitoring - INFO - Initializing monitoring systems...
+2025-11-05T13:57:22.894905358Z [inf]  2025-11-05 13:57:14,964 - maverick_mcp.utils.monitoring - INFO - Sentry error tracking disabled (no DSN configured)
+2025-11-05T13:57:22.894912000Z [inf]  2025-11-05 13:57:15,065 - maverick_mcp.utils.monitoring - INFO - Prometheus metrics initialized
+2025-11-05T13:57:22.894917164Z [inf]  2025-11-05 13:57:15,166 - maverick_mcp.utils.monitoring - INFO - Monitoring systems initialization complete
+2025-11-05T13:57:22.894924301Z [inf]  2025-11-05 13:57:15,267 - maverick_mcp.utils.tracing - INFO - Initializing distributed tracing...
+2025-11-05T13:57:22.894928462Z [inf]  2025-11-05 13:57:15,368 - maverick_mcp.utils.tracing - INFO - Distributed tracing disabled or unavailable
+2025-11-05T13:57:22.894933308Z [inf]  2025-11-05 13:57:15,469 - maverick_mcp.server - INFO - Initializing backtesting metrics system...
+2025-11-05T13:57:22.894937389Z [inf]  2025-11-05 13:57:15,612 - maverick_mcp.monitoring.metrics.BacktestingMetricsCollector - INFO - Backtesting metrics collector initialized
+2025-11-05T13:57:22.894941759Z [inf]  2025-11-05 13:57:15,713 - maverick_mcp.server - INFO - ✅ Backtesting metrics system initialized successfully
+2025-11-05T13:57:22.894948445Z [inf]  🎯 Enhanced Backtesting Metrics System Enabled
+2025-11-05T13:57:22.894954246Z [inf]     📊 Strategy performance tracking active
+2025-11-05T13:57:22.894960018Z [inf]     🔄 API rate limiting and failure monitoring enabled
+2025-11-05T13:57:22.894964788Z [inf]     💾 Resource usage monitoring configured
+2025-11-05T13:57:22.894969994Z [inf]     🚨 Anomaly detection and alerting ready
+2025-11-05T13:57:22.894975103Z [inf]     📈 Prometheus metrics available at /metrics
+2025-11-05T13:57:23.887925568Z [inf]  2025-11-05 13:57:23,882 - matplotlib.font_manager - INFO - generated new fontManager
+2025-11-05T13:57:27.946207895Z [inf]  2025-11-05 13:57:27,942 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Backtesting tools registered successfully
+2025-11-05T13:57:27.968824394Z [inf]  2025-11-05 13:57:27,961 - maverick_mcp.api.routers.tool_registry - INFO - ✓ MCP prompts registered successfully
+2025-11-05T13:57:27.983246260Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Portfolio analysis tools
+2025-11-05T13:57:27.983258795Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Data retrieval tools
+2025-11-05T13:57:27.983267259Z [inf]  2025-11-05 13:57:27,981 - maverick_mcp.api.routers.tool_registry - INFO - ✓ Introspection tools registered successfully
+2025-11-05T13:57:27.983279992Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO - Tool registration process completed
+2025-11-05T13:57:27.983290961Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO - 📋 All tools registered:
+2025-11-05T13:57:27.983303010Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Technical analysis tools
+2025-11-05T13:57:27.983310005Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Stock screening tools
+2025-11-05T13:57:27.986250639Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Performance monitoring tools
+2025-11-05T13:57:27.986256040Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Agent orchestration tools
+2025-11-05T13:57:27.986262713Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Research and analysis tools
+2025-11-05T13:57:27.986268439Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Health monitoring tools
+2025-11-05T13:57:27.986274310Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Backtesting system tools
+2025-11-05T13:57:27.986279342Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • MCP prompts for introspection
+2025-11-05T13:57:27.986284529Z [inf]  2025-11-05 13:57:27,982 - maverick_mcp.api.routers.tool_registry - INFO -    • Introspection and discovery tools
+2025-11-05T13:57:28.087769548Z [inf]  2025-11-05 13:57:28,083 - maverick_mcp.server - INFO - Tools registered successfully
+2025-11-05T13:57:28.793103677Z [inf]  🛡️  Enhanced Circuit Breaker Protection Enabled
+2025-11-05T13:57:28.793113406Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for openrouter
+2025-11-05T13:57:28.793125132Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for exa
+2025-11-05T13:57:28.793132505Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for news_api
+2025-11-05T13:57:28.793139451Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for finviz
+2025-11-05T13:57:28.793146907Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for external_api
+2025-11-05T13:57:28.793154685Z [inf]  2025-11-05 13:57:28,281 - maverick_mcp.utils.circuit_breaker - INFO - Initialized 8 circuit breakers
+2025-11-05T13:57:28.793161857Z [inf]  2025-11-05 13:57:28,281 - maverick_mcp.utils.circuit_breaker - INFO - Circuit breaker manager initialized successfully
+2025-11-05T13:57:28.793163633Z [inf]  2025-11-05 13:57:28,242 - maverick_mcp.server - INFO - Initializing enhanced health monitoring system...
+2025-11-05T13:57:28.793169949Z [inf]  2025-11-05 13:57:28,382 - maverick_mcp.server - INFO - ✅ Circuit breakers initialized for all external APIs
+2025-11-05T13:57:28.793171855Z [inf]  2025-11-05 13:57:28,279 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for yfinance
+2025-11-05T13:57:28.793180258Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for tiingo
+2025-11-05T13:57:28.793184527Z [inf]  2025-11-05 13:57:28,280 - maverick_mcp.utils.circuit_breaker - INFO - Initialized circuit breaker for fred_api
+2025-11-05T13:57:28.799255703Z [inf]     🔄 yfinance, Tiingo, FRED, OpenRouter, Exa APIs protected
+2025-11-05T13:57:28.799262608Z [inf]     📊 Failure detection and automatic recovery active
+2025-11-05T13:57:28.799268652Z [inf]     🚨 Circuit breaker monitoring and alerting enabled
+2025-11-05T13:57:28.799274977Z [inf]  2025-11-05 13:57:28,483 - maverick_mcp.server - INFO - ✅ Health monitoring system prepared
+2025-11-05T13:57:28.799280786Z [inf]  🏥 Comprehensive Health Monitoring System Ready
+2025-11-05T13:57:28.799287616Z [inf]     📈 Real-time component health tracking
+2025-11-05T13:57:28.799293884Z [inf]     🔍 Database, cache, and external API monitoring
+2025-11-05T13:57:28.799301018Z [inf]     💾 Resource usage monitoring (CPU, memory, disk)
+2025-11-05T13:57:28.799307959Z [inf]     📊 Status dashboard with historical metrics
+2025-11-05T13:57:28.799313548Z [inf]     🚨 Automated alerting and recovery actions
+2025-11-05T13:57:28.799319932Z [inf]     🩺 Health endpoints: /health, /health/detailed, /health/ready, /health/live
+2025-11-05T13:57:28.799326340Z [inf]  
+2025-11-05T13:57:28.799336283Z [inf]  2025-11-05 13:57:28,639 - maverick_mcp.server - INFO - Validating environment configuration...
+2025-11-05T13:57:28.799342230Z [inf]  2025-11-05 13:57:28,740 - maverick_mcp.config.validation - INFO - Starting environment validation...
+2025-11-05T13:57:28.847148720Z [inf]  2025-11-05 13:57:28,843 - maverick_mcp.config.validation - WARNING - Environment validation found 1 warnings:
+2025-11-05T13:57:28.947316757Z [inf]  2025-11-05 13:57:28,945 - maverick_mcp.config.validation - WARNING -   ⚠ Optional API keys not configured: FRED_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, CAPITAL_COMPANION_API_KEY. Some features may be limited.
+2025-11-05T13:57:29.050005565Z [inf]  2025-11-05 13:57:29,046 - maverick_mcp.config.validation - INFO - ✓ Environment validation passed with 1 warnings
+2025-11-05T13:57:29.157057709Z [inf]  2025-11-05 13:57:29,148 - maverick_mcp.server - INFO - Initializing performance optimization systems...
+2025-11-05T13:57:29.157067449Z [inf]  2025-11-05 13:57:29,149 - maverick_mcp.data.performance - INFO - Initializing performance optimization systems...
+2025-11-05T13:57:29.157077180Z [inf]  2025-11-05 13:57:29,154 - maverick_mcp.data.performance - ERROR - Failed to initialize Redis connection pool: Error Multiple exceptions: [Errno 111] Connect call failed ('::1', 6379, 0, 0), [Errno 111] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2025-11-05T13:57:29.157117185Z [inf]  2025-11-05 13:57:29,154 - maverick_mcp.data.performance - INFO - Performance systems initialized: Redis=✗
+2025-11-05T13:57:29.699248854Z [inf]  2025-11-05 13:57:29,255 - maverick_mcp.server - INFO - Performance systems initialized: {'redis_manager': False, 'request_cache': True, 'query_optimizer': True}
+2025-11-05T13:57:29.699254421Z [inf]  2025-11-05 13:57:29,356 - maverick_mcp.server - INFO - Starting background health monitoring...
+2025-11-05T13:57:29.699259401Z [inf]  2025-11-05 13:57:29,356 - maverick_mcp.monitoring.health_monitor - INFO - Starting health monitoring system...
+2025-11-05T13:57:29.699263827Z [inf]  2025-11-05 13:57:29,356 - maverick_mcp.monitoring.health_monitor - INFO - Started 4 monitoring tasks
+2025-11-05T13:57:29.699269007Z [inf]  2025-11-05 13:57:29,458 - maverick_mcp.server - INFO - ✅ Background health monitoring started
+2025-11-05T13:57:29.699273721Z [inf]  2025-11-05 13:57:29,458 - maverick_mcp.monitoring.health_monitor - INFO - Started health check monitoring loop
+2025-11-05T13:57:29.699279307Z [inf]  2025-11-05 13:57:29,458 - maverick_mcp.monitoring.health_monitor - INFO - Started circuit breaker monitoring loop
+2025-11-05T13:57:29.699285896Z [inf]  2025-11-05 13:57:29,459 - maverick_mcp.monitoring.health_monitor - INFO - Started resource monitoring loop
+2025-11-05T13:57:30.743682796Z [inf]  2025-11-05 13:57:30,566 - maverick_mcp.server - INFO - Starting MaverickMCP simple stock analysis server
+2025-11-05T13:57:30.743691307Z [inf]  2025-11-05 13:57:30,667 - maverick_mcp.server - INFO - Adding startup delay for connection stability...
+2025-11-05T13:57:30.743836322Z [inf]  2025-11-05 13:57:30,461 - maverick_mcp.monitoring.health_monitor - INFO - Started alert processing loop
+2025-11-05T13:57:30.743840951Z [inf]  2025-11-05 13:57:30,463 - maverick_mcp.monitoring.health_monitor - INFO - Circuit breaker monitoring loop stopped
+2025-11-05T13:57:30.743844978Z [inf]  2025-11-05 13:57:30,463 - maverick_mcp.monitoring.health_monitor - INFO - Resource monitoring loop stopped
+2025-11-05T13:57:30.743849907Z [inf]  2025-11-05 13:57:30,464 - maverick_mcp.monitoring.health_monitor - INFO - Health check monitoring loop stopped
+2025-11-05T13:57:30.743860358Z [inf]  2025-11-05 13:57:30,464 - maverick_mcp.monitoring.health_monitor - INFO - Alert processing loop stopped
+2025-11-05T13:57:33.810520564Z [inf]  2025-11-05 13:57:33,769 - maverick_mcp.server - INFO - Startup delay completed, server ready for connections
+2025-11-05T13:57:33.875158715Z [inf]  2025-11-05 13:57:33,870 - maverick_mcp.utils.shutdown - INFO - MaverickMCP-sse: Signal handlers installed
+2025-11-05T13:57:33.975089524Z [inf]  2025-11-05 13:57:33,971 - maverick_mcp.server - INFO - Server configuration
+2025-11-05T13:57:34.723081223Z [inf]  2025-11-05 13:57:34,476 - maverick_mcp.server - INFO - Starting MaverickMCP server with SSE transport on http://0.0.0.0:8080
+2025-11-05T13:57:34.723086759Z [err]  
+2025-11-05T13:57:34.723094125Z [err]  
+2025-11-05T13:57:34.723103282Z [err]  ╭─ FastMCP 2.0 ──────────────────────────────────────────────────────────────╮
+2025-11-05T13:57:34.723110379Z [err]  │                                                                            │
+2025-11-05T13:57:34.723116455Z [err]  │        _ __ ___ ______           __  __  _____________    ____    ____     │
+2025-11-05T13:57:34.723122030Z [err]  │       _ __ ___ / ____/___ ______/ /_/  |/  / ____/ __ \  |___ \  / __ \    │
+2025-11-05T13:57:34.723127173Z [err]  │      _ __ ___ / /_  / __ `/ ___/ __/ /|_/ / /   / /_/ /  ___/ / / / / /    │
+2025-11-05T13:57:34.723131466Z [err]  │     _ __ ___ / __/ / /_/ (__  ) /_/ /  / / /___/ ____/  /  __/_/ /_/ /     │
+2025-11-05T13:57:34.723136171Z [err]  │    _ __ ___ /_/    \__,_/____/\__/_/  /_/\____/_/      /_____(_)____/      │
+2025-11-05T13:57:34.723140876Z [err]  │                                                                            │
+2025-11-05T13:57:34.723146088Z [err]  │                                                                            │
+2025-11-05T13:57:34.723151579Z [err]  │                                                                            │
+2025-11-05T13:57:34.723156580Z [err]  │    🖥️  Server name:     MaverickMCP                                         │
+2025-11-05T13:57:34.723160931Z [err]  │    📦 Transport:       SSE                                                 │
+2025-11-05T13:57:34.723165234Z [err]  │    🔗 Server URL:      http://0.0.0.0:8080/sse                             │
+2025-11-05T13:57:34.723169564Z [err]  │                                                                            │
+2025-11-05T13:57:34.723282924Z [err]  │    📚 Docs:            https://gofastmcp.com                               │
+2025-11-05T13:57:34.723286870Z [err]  │    🚀 Deploy:          https://fastmcp.cloud                               │
+2025-11-05T13:57:34.723290421Z [err]  │                                                                            │
+2025-11-05T13:57:34.723294698Z [err]  │    🏎️  FastMCP version: 2.10.6                                              │
+2025-11-05T13:57:34.723301088Z [err]  │    🤝 MCP version:     1.15.0                                              │
+2025-11-05T13:57:34.723306524Z [err]  │                                                                            │
+2025-11-05T13:57:34.723311258Z [err]  ╰────────────────────────────────────────────────────────────────────────────╯
+2025-11-05T13:57:34.723315703Z [err]  
+2025-11-05T13:57:34.723320126Z [err]  
+2025-11-05T13:57:34.723325157Z [err]  [11/05/25 13:57:34] INFO     Starting MCP server 'MaverickMCP'    server.py:1448
+2025-11-05T13:57:34.723329228Z [err]                               with transport 'sse' on                            
+2025-11-05T13:57:34.723333566Z [err]                               http://0.0.0.0:8080/sse                            
+2025-11-05T13:57:34.810735461Z [err]  /app/.venv/lib/python3.12/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning:
+2025-11-05T13:57:34.810739932Z [err]  
+2025-11-05T13:57:34.810745817Z [err]  websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+2025-11-05T13:57:34.810751448Z [err]  
+2025-11-05T13:57:34.901366564Z [err]  /app/.venv/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py:17: DeprecationWarning:
+2025-11-05T13:57:34.901374286Z [err]  
+2025-11-05T13:57:34.901379763Z [err]  websockets.server.WebSocketServerProtocol is deprecated
+2025-11-05T13:57:34.901384437Z [err]  
+2025-11-05T13:57:34.906550988Z [err]  INFO:     Started server process [22]
+2025-11-05T13:57:34.906558051Z [err]  INFO:     Waiting for application startup.
+2025-11-05T13:57:34.909542162Z [err]  INFO:     Application startup complete.
+2025-11-05T13:57:34.909548314Z [err]  INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)

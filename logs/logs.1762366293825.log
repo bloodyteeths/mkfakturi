@@ -1,0 +1,59 @@
+2025-11-05T18:09:49.395529166Z [inf]  
+2025-11-05T18:09:55.032523936Z [inf]  [35m[Region: europe-west4][0m
+2025-11-05T18:09:55.063344867Z [inf]  [35m=========================
+2025-11-05T18:09:55.063374255Z [inf]  Using Detected Dockerfile
+2025-11-05T18:09:55.063378080Z [inf]  =========================
+2025-11-05T18:09:55.063381663Z [inf]  [0m
+2025-11-05T18:09:55.063393560Z [inf]  context: mk5l-Jlgy
+2025-11-05T18:09:55.216750159Z [inf]  [internal] load build definition from Dockerfile.mcp-server
+2025-11-05T18:09:55.216798617Z [inf]  [internal] load build definition from Dockerfile.mcp-server
+2025-11-05T18:09:55.216814156Z [inf]  [internal] load build definition from Dockerfile.mcp-server
+2025-11-05T18:09:55.231365224Z [inf]  [internal] load build definition from Dockerfile.mcp-server
+2025-11-05T18:09:55.233790760Z [inf]  [internal] load metadata for docker.io/library/python:3.12-slim
+2025-11-05T18:09:55.577539930Z [inf]  [internal] load metadata for docker.io/library/python:3.12-slim
+2025-11-05T18:09:55.577840544Z [inf]  [internal] load .dockerignore
+2025-11-05T18:09:55.577874259Z [inf]  [internal] load .dockerignore
+2025-11-05T18:09:55.577902397Z [inf]  [internal] load .dockerignore
+2025-11-05T18:09:55.592406834Z [inf]  [internal] load .dockerignore
+2025-11-05T18:09:55.597353123Z [inf]  [11/13] COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
+2025-11-05T18:09:55.597386448Z [inf]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
+2025-11-05T18:09:55.597395439Z [inf]  [ 9/13] COPY mcp-server/alembic ./alembic
+2025-11-05T18:09:55.597401333Z [inf]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
+2025-11-05T18:09:55.597407655Z [inf]  [ 7/13] RUN uv sync --frozen
+2025-11-05T18:09:55.597415738Z [inf]  [13/13] RUN groupadd -g 1000 maverick &&     useradd -u 1000 -g maverick -s /bin/sh -m maverick &&     chown -R maverick:maverick /app
+2025-11-05T18:09:55.597421530Z [inf]  [internal] load build context
+2025-11-05T18:09:55.597428653Z [inf]  [ 5/13] RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz   && tar -xzf ta-lib-0.6.4-src.tar.gz   && cd ta-lib-0.6.4/   && ./configure --prefix=/usr/local   && make -j$(nproc)   && make install   && cd ..   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
+2025-11-05T18:09:55.597440218Z [inf]  [ 4/13] RUN pip install --no-cache-dir uv
+2025-11-05T18:09:55.597445905Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
+2025-11-05T18:09:55.597451698Z [inf]  [ 2/13] WORKDIR /app
+2025-11-05T18:09:55.597457154Z [inf]  [12/13] RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+2025-11-05T18:09:55.597463560Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
+2025-11-05T18:09:55.597469433Z [inf]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
+2025-11-05T18:09:55.597489079Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
+2025-11-05T18:09:55.597505390Z [inf]  [internal] load build context
+2025-11-05T18:09:55.603119884Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
+2025-11-05T18:09:55.603806838Z [inf]  [internal] load build context
+2025-11-05T18:09:55.619791328Z [inf]  [internal] load build context
+2025-11-05T18:09:55.622457918Z [inf]  [ 2/13] WORKDIR /app
+2025-11-05T18:09:55.622496166Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
+2025-11-05T18:09:55.622507908Z [inf]  [ 4/13] RUN pip install --no-cache-dir uv
+2025-11-05T18:09:55.622523775Z [inf]  [ 5/13] RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz   && tar -xzf ta-lib-0.6.4-src.tar.gz   && cd ta-lib-0.6.4/   && ./configure --prefix=/usr/local   && make -j$(nproc)   && make install   && cd ..   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
+2025-11-05T18:09:55.622535765Z [inf]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
+2025-11-05T18:09:55.622546161Z [inf]  [ 7/13] RUN uv sync --frozen
+2025-11-05T18:09:55.622557162Z [inf]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
+2025-11-05T18:09:55.622571257Z [inf]  [ 9/13] COPY mcp-server/alembic ./alembic
+2025-11-05T18:09:55.622584853Z [inf]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
+2025-11-05T18:09:55.622607669Z [err]  [11/13] COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
+2025-11-05T18:09:55.622635015Z [err]  [ 9/13] COPY mcp-server/alembic ./alembic
+2025-11-05T18:09:55.622763606Z [err]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
+2025-11-05T18:09:55.622833727Z [err]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
+2025-11-05T18:09:55.623021951Z [err]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
+2025-11-05T18:09:55.639725526Z [err]  Dockerfile.mcp-server:43
+2025-11-05T18:09:55.639750419Z [err]  -------------------
+2025-11-05T18:09:55.639754723Z [err]  41 |
+2025-11-05T18:09:55.639758632Z [err]  42 |     # Copy entrypoint script
+2025-11-05T18:09:55.639762891Z [err]  43 | >>> COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
+2025-11-05T18:09:55.639766325Z [err]  44 |     RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+2025-11-05T18:09:55.639772139Z [err]  45 |
+2025-11-05T18:09:55.639775653Z [err]  -------------------
+2025-11-05T18:09:55.639779773Z [err]  ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref sfsa4guv9lrt8hlyh8uu0vwb4::ijxaf11nnqnzjvldw0pvtd0io: "/mcp-server/docker-entrypoint.sh": not found
