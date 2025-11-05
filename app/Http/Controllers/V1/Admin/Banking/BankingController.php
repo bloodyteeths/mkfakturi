@@ -21,6 +21,8 @@ use Carbon\Carbon;
  */
 class BankingController extends Controller
 {
+    private ?Company $currentCompany = null;
+
     /**
      * Get all connected bank accounts for the current company
      *
@@ -30,7 +32,7 @@ class BankingController extends Controller
     public function accounts(Request $request): JsonResponse
     {
         try {
-            $company = $request->user()->company;
+            $company = $this->resolveCompany($request);
 
             if (!$company) {
                 return response()->json([
@@ -83,7 +85,7 @@ class BankingController extends Controller
     public function transactions(Request $request): JsonResponse
     {
         try {
-            $company = $request->user()->company;
+            $company = $this->resolveCompany($request);
 
             if (!$company) {
                 return response()->json([
@@ -180,7 +182,7 @@ class BankingController extends Controller
     public function syncAccount(Request $request, BankAccount $account): JsonResponse
     {
         try {
-            $company = $request->user()->company;
+            $company = $this->resolveCompany($request);
 
             if (!$company || $account->company_id !== $company->id) {
                 return response()->json([
@@ -224,7 +226,7 @@ class BankingController extends Controller
     public function categorize(Request $request, BankTransaction $transaction): JsonResponse
     {
         try {
-            $company = $request->user()->company;
+            $company = $this->resolveCompany($request);
 
             if (!$company || $transaction->company_id !== $company->id) {
                 return response()->json([
@@ -298,11 +300,45 @@ class BankingController extends Controller
     private function getBankLogo(?string $bankCode): string
     {
         $logos = [
-            'stopanska' => '/images/banks/stopanska-logo.png',
-            'nlb' => '/images/banks/nlb-logo.png',
+            'stopanska' => 'images/banks/stopanska-logo.svg',
+            'nlb' => 'images/banks/nlb-logo.svg',
         ];
 
-        return $logos[$bankCode] ?? '/images/banks/default-bank.png';
+        return asset($logos[$bankCode] ?? 'images/banks/default-bank.svg');
+    }
+
+    /**
+     * Resolve the active company for the authenticated user
+     */
+    private function resolveCompany(Request $request): ?Company
+    {
+        if ($this->currentCompany instanceof Company) {
+            return $this->currentCompany;
+        }
+
+        $user = $request->user();
+
+        if (!$user) {
+            return null;
+        }
+
+        $companyIdHeader = $request->header('company');
+        $companyId = $companyIdHeader !== null ? (int) $companyIdHeader : null;
+        $company = null;
+
+        if ($companyId && $user->hasCompany($companyId)) {
+            $company = $user->companies()->where('companies.id', $companyId)->first();
+        }
+
+        if (!$company) {
+            $company = $user->companies()->first();
+        }
+
+        if ($company) {
+            $company->loadMissing('currency');
+        }
+
+        return $this->currentCompany = $company;
     }
 }
 

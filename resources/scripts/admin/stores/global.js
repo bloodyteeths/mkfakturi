@@ -17,6 +17,7 @@ export const useGlobalStore = (useWindow = false) => {
       // Global Configuration
       config: null,
       globalSettings: null,
+      featureFlags: {},
 
       // Global Lists
       timeZones: [],
@@ -66,6 +67,7 @@ export const useGlobalStore = (useWindow = false) => {
 
               this.config = response.data.config
               this.globalSettings = response.data.global_settings
+              this.featureFlags = response.data.feature_flags || {}
 
               // user store
               userStore.currentUser = response.data.current_user

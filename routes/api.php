@@ -512,7 +512,7 @@ Route::prefix('/v1')->group(function () {
             // Feature flag: FEATURE_MCP_AI_TOOLS
             // ----------------------------------
 
-            Route::prefix('ai')->middleware(['feature:mcp-ai-tools'])->group(function () {
+            Route::prefix('ai')->middleware(['feature:mcp_ai_tools'])->group(function () {
                 Route::get('/insights', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'index']);
                 Route::post('/insights/generate', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'generate']);
                 Route::post('/insights/refresh', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'refresh']);

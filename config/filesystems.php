@@ -2,6 +2,8 @@
 
 return [
 
+    'default' => env('FILESYSTEM_DISK', 'public'),
+
     'cloud' => env('FILESYSTEM_CLOUD', 's3'),
 
     'disks' => [
@@ -27,6 +29,15 @@ return [
         'media' => [
             'driver' => 'local',
             'root' => public_path('media'),
+        ],
+
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
         ],
 
         'doSpaces' => [
@@ -67,6 +78,10 @@ return [
             'throw' => false,
             'report' => false,
         ],
+    ],
+
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
     ],
 
 ];

@@ -86,6 +86,13 @@ class BootstrapController extends Controller
                 'copyright_text',
             ])->toArray();
 
+            // Get feature flags from config
+            $feature_flags = [];
+            $features_config = config('features', []);
+            foreach ($features_config as $key => $feature) {
+                $feature_flags[$key] = $feature['enabled'] ?? false;
+            }
+
             $userPayload = (new UserResource($current_user))->toArray(request());
             $companiesPayload = CompanyResource::collection($companies)->toArray(request());
             $currentCompanyPayload = (new CompanyResource($current_company))->toArray(request());
@@ -100,6 +107,7 @@ class BootstrapController extends Controller
                 'current_company_currency' => $current_company_currency,
                 'config' => config('invoiceshelf'),
                 'global_settings' => $global_settings,
+                'feature_flags' => $feature_flags,
                 'main_menu' => $main_menu,
                 'setting_menu' => $setting_menu,
                 'modules' => Module::where('enabled', true)->pluck('name')->toArray(),

@@ -21,6 +21,8 @@ use Modules\Mk\Services\NlbOAuth;
  */
 class BankingOAuthController extends Controller
 {
+    private ?Company $currentCompany = null;
+
     /**
      * Initiate OAuth2 authorization flow
      *
@@ -35,7 +37,7 @@ class BankingOAuthController extends Controller
             ]);
 
             $provider = $request->provider;
-            $company = $request->user()->company;
+            $company = $this->resolveCompany($request);
 
             if (!$company) {
                 return response()->json([
@@ -234,6 +236,36 @@ class BankingOAuthController extends Controller
                 'is_primary' => false, // User can set this manually later
             ]
         );
+    }
+
+    /**
+     * Resolve the active company for the authenticated user
+     */
+    private function resolveCompany(Request $request): ?Company
+    {
+        if ($this->currentCompany instanceof Company) {
+            return $this->currentCompany;
+        }
+
+        $user = $request->user();
+
+        if (!$user) {
+            return null;
+        }
+
+        $companyIdHeader = $request->header('company');
+        $companyId = $companyIdHeader !== null ? (int) $companyIdHeader : null;
+        $company = null;
+
+        if ($companyId && $user->hasCompany($companyId)) {
+            $company = $user->companies()->where('companies.id', $companyId)->first();
+        }
+
+        if (!$company) {
+            $company = $user->companies()->first();
+        }
+
+        return $this->currentCompany = $company;
     }
 }
 

@@ -24,7 +24,7 @@ const showAiInsights = computed(() => {
 
 // Check if MCP AI Tools feature flag is enabled
 const mcpAiToolsEnabled = computed(() => {
-  return globalStore.featureFlags?.['mcp-ai-tools'] === true
+  return globalStore.featureFlags?.['mcp_ai_tools'] === true
 })
 
 onMounted(() => {

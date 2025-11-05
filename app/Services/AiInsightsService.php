@@ -21,17 +21,17 @@ use Carbon\Carbon;
 class AiInsightsService
 {
     private AiProviderInterface $aiProvider;
-    private McpClient $mcpClient;
+    private McpDataProvider $dataProvider;
     private int $cacheTtl;
 
     /**
      * Create a new AI Insights service instance
      *
-     * @param McpClient $mcpClient The MCP client for fetching financial data
+     * @param McpDataProvider $dataProvider Direct data provider for financial data
      */
-    public function __construct(McpClient $mcpClient)
+    public function __construct(McpDataProvider $dataProvider)
     {
-        $this->mcpClient = $mcpClient;
+        $this->dataProvider = $dataProvider;
         $this->cacheTtl = config('ai.cache_ttl', 21600); // 6 hours
         $this->aiProvider = $this->resolveAiProvider();
     }
@@ -54,15 +54,38 @@ class AiInsightsService
         }
 
         try {
+            Log::info('[AiInsightsService] Starting financial analysis', [
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+            ]);
+
             // 1. Fetch financial data from MCP
             $trialBalance = $this->fetchTrialBalance($company);
             $companyStats = $this->fetchCompanyStats($company);
 
+            Log::info('[AiInsightsService] Data fetched from provider', [
+                'company_id' => $company->id,
+                'trial_balance' => $trialBalance,
+                'company_stats' => $companyStats,
+            ]);
+
             // 2. Build AI analysis prompt
             $prompt = $this->buildAnalysisPrompt($company, $trialBalance, $companyStats);
 
+            Log::info('[AiInsightsService] Prompt built', [
+                'company_id' => $company->id,
+                'prompt_length' => strlen($prompt),
+                'prompt_preview' => substr($prompt, 0, 200) . '...',
+            ]);
+
             // 3. Send to AI provider
             $response = $this->aiProvider->generate($prompt);
+
+            Log::info('[AiInsightsService] AI provider response received', [
+                'company_id' => $company->id,
+                'response_length' => strlen($response),
+                'response_preview' => substr($response, 0, 200) . '...',
+            ]);
 
             // 4. Parse AI response into structured insights
             $insights = $this->parseInsights($response);
@@ -149,21 +172,39 @@ class AiInsightsService
     public function answerQuestion(Company $company, string $question): string
     {
         try {
+            Log::info('[AiInsightsService] Chat question received', [
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+                'question' => $question,
+            ]);
+
             // Fetch relevant financial context
             $companyStats = $this->fetchCompanyStats($company);
 
+            Log::info('[AiInsightsService] Chat stats fetched', [
+                'company_id' => $company->id,
+                'stats' => $companyStats,
+            ]);
+
             // Build contextualized prompt
             $prompt = $this->buildChatPrompt($company, $companyStats, $question);
+
+            Log::info('[AiInsightsService] Chat prompt built', [
+                'company_id' => $company->id,
+                'prompt_length' => strlen($prompt),
+                'full_prompt' => $prompt,
+            ]);
 
             // Get AI response
             $response = $this->aiProvider->generate($prompt, [
                 'max_tokens' => 2048,
             ]);
 
-            Log::info('AI chat question answered', [
+            Log::info('[AiInsightsService] Chat response received', [
                 'company_id' => $company->id,
                 'question_length' => strlen($question),
                 'response_length' => strlen($response),
+                'response' => $response,
             ]);
 
             return $response;
@@ -187,22 +228,7 @@ class AiInsightsService
      */
     private function fetchTrialBalance(Company $company): array
     {
-        try {
-            return $this->mcpClient->call('get_trial_balance', [
-                'company_id' => $company->id,
-            ]);
-        } catch (McpException $e) {
-            Log::warning('Failed to fetch trial balance, using empty data', [
-                'company_id' => $company->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'debits' => 0,
-                'credits' => 0,
-                'balance' => 0,
-            ];
-        }
+        return $this->dataProvider->getTrialBalance($company);
     }
 
     /**
@@ -213,23 +239,7 @@ class AiInsightsService
      */
     private function fetchCompanyStats(Company $company): array
     {
-        try {
-            return $this->mcpClient->call('get_company_stats', [
-                'company_id' => $company->id,
-            ]);
-        } catch (McpException $e) {
-            Log::warning('Failed to fetch company stats, using empty data', [
-                'company_id' => $company->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'revenue' => 0,
-                'expenses' => 0,
-                'outstanding' => 0,
-                'customers' => 0,
-            ];
-        }
+        return $this->dataProvider->getCompanyStats($company);
     }
 
     /**
@@ -253,6 +263,10 @@ class AiInsightsService
         $expenses = number_format($stats['expenses'] ?? 0, 2);
         $outstanding = number_format($stats['outstanding'] ?? 0, 2);
         $customers = $stats['customers'] ?? 0;
+        $invoicesCount = $stats['invoices_count'] ?? 0;
+        $pendingInvoices = $stats['pending_invoices'] ?? 0;
+        $overdueInvoices = $stats['overdue_invoices'] ?? 0;
+        $draftInvoices = $stats['draft_invoices'] ?? 0;
 
         return <<<PROMPT
 Ти си македонски финансиски советник кој анализира финансиското здравје на компанијата.
@@ -265,9 +279,10 @@ class AiInsightsService
 - Биланс: {$balance} {$currency}
 
 Статистика на компанијата:
+- Вкупно фактури: {$invoicesCount} (Во изработка: {$draftInvoices}, Чекај наплата: {$pendingInvoices}, Задоцнети: {$overdueInvoices})
 - Вкупен приход: {$revenue} {$currency}
 - Вкупни трошоци: {$expenses} {$currency}
-- Неплатени фактури: {$outstanding} {$currency}
+- Неплатени фактури (износ): {$outstanding} {$currency}
 - Број на клиенти: {$customers}
 
 Обезбеди 3-5 конкретни и корисни совети во македонски јазик, фокусирајќи се на:
@@ -342,21 +357,27 @@ PROMPT;
         $expenses = number_format($stats['expenses'] ?? 0, 2);
         $outstanding = number_format($stats['outstanding'] ?? 0, 2);
         $customers = $stats['customers'] ?? 0;
+        $invoicesCount = $stats['invoices_count'] ?? 0;
+        $pendingInvoices = $stats['pending_invoices'] ?? 0;
+        $draftInvoices = $stats['draft_invoices'] ?? 0;
 
         return <<<PROMPT
 Ти си македонски финансиски советник кој помага на корисниците со нивните финансиски прашања.
 
 Контекст на компанијата:
 - Име: {$companyName}
+- Вкупно фактури: {$invoicesCount}
+- Фактури во изработка: {$draftInvoices}
+- Чекај на наплата: {$pendingInvoices}
 - Приходи: {$revenue} {$currency}
 - Трошоци: {$expenses} {$currency}
-- Неплатени фактури: {$outstanding} {$currency}
+- Неплатени фактури (износ): {$outstanding} {$currency}
 - Број на клиенти: {$customers}
 
 Прашање од корисникот:
 {$question}
 
-Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци.
+Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот.
 PROMPT;
     }
 
@@ -459,3 +480,5 @@ PROMPT;
         Log::info('AI insights cache cleared', ['company_id' => $company->id]);
     }
 }
+
+// CLAUDE-CHECKPOINT

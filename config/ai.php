@@ -99,4 +99,19 @@ return [
     */
     'log_api_calls' => env('AI_LOG_API_CALLS', true),
     'log_channel' => env('AI_LOG_CHANNEL', 'stack'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | MCP Server Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the Model Context Protocol server that provides
+    | financial data and tools to the AI.
+    |
+    */
+    'mcp' => [
+        'url' => env('MCP_SERVER_URL', 'http://localhost:8080'),
+        'token' => env('MCP_SERVER_TOKEN'),
+        'timeout' => env('MCP_TIMEOUT', 30),
+    ],
 ];
