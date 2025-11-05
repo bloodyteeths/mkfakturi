@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Services\AiProvider\AiProviderInterface;
 use App\Services\AiProvider\ClaudeProvider;
 use App\Services\AiProvider\OpenAiProvider;
+use App\Services\AiProvider\NullAiProvider;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -428,11 +429,20 @@ PROMPT;
     {
         $provider = config('ai.default_provider', 'claude');
 
-        return match($provider) {
-            'claude' => new ClaudeProvider(),
-            'openai' => new OpenAiProvider(),
-            default => throw new \RuntimeException("Unsupported AI provider: {$provider}"),
-        };
+        try {
+            return match($provider) {
+                'claude' => new ClaudeProvider(),
+                'openai' => new OpenAiProvider(),
+                default => throw new \RuntimeException("Unsupported AI provider: {$provider}"),
+            };
+        } catch (\Throwable $e) {
+            Log::warning('AI provider unavailable, using fallback', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+            ]);
+
+            return new NullAiProvider($provider, $e->getMessage());
+        }
     }
 
     /**

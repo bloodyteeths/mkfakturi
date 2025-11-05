@@ -33,7 +33,7 @@
         md:block
       "
     >
-      <img v-if="adminLogo" :src="adminLogo" class="h-6" />
+      <img v-if="adminLogo" :src="adminLogo" class="h-6" @error="onLogoError" />
       <MainLogo v-else class="h-6" light-color="white" dark-color="white" />
     </router-link>
 
@@ -264,7 +264,7 @@
 <script setup>
 import { useAuthStore } from '@/scripts/admin/stores/auth'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useI18n } from 'vue-i18n'
@@ -289,13 +289,26 @@ const previewAvatar = computed(() => {
     : getDefaultAvatar()
 })
 
+const logoLoadFailed = ref(false)
+
 const adminLogo = computed(() => {
+  if (logoLoadFailed.value) {
+    return false
+  }
+
   if (globalStore.globalSettings.admin_portal_logo) {
     return '/storage/' + globalStore.globalSettings.admin_portal_logo
   }
 
   return false
 })
+
+watch(
+  () => globalStore.globalSettings.admin_portal_logo,
+  () => {
+    logoLoadFailed.value = false
+  }
+)
 
 function getDefaultAvatar() {
   const imgUrl = new URL('$images/default-avatar.jpg', import.meta.url)
@@ -317,6 +330,10 @@ async function logout() {
 
 function onToggle() {
   globalStore.setSidebarVisibility(true)
+}
+
+function onLogoError() {
+  logoLoadFailed.value = true
 }
 
 function setLanguage(newLocale) {

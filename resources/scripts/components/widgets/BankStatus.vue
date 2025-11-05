@@ -210,7 +210,9 @@ const loadBankingData = async () => {
 
     // For now, using mock data since actual API endpoints would need to be implemented
     // In a real implementation, this would fetch from actual banking API endpoints
-    console.info('Banking status using mock data - API endpoints not yet implemented')
+    if (import.meta.env.DEV) {
+      console.info('Banking status using mock data - API endpoints not yet implemented')
+    }
     await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
 
     bankConnections.value = [

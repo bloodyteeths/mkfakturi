@@ -27,7 +27,7 @@ class McpClient
         $this->timeout = config('services.mcp.timeout', 30);
 
         if (empty($this->bearerToken)) {
-            throw new \RuntimeException('MCP server token is not configured');
+            Log::warning('MCP server token is not configured; MCP requests will use fallback responses');
         }
     }
 
@@ -48,6 +48,11 @@ class McpClient
         }
 
         $startTime = microtime(true);
+
+        if (empty($this->bearerToken)) {
+            $this->logMcpCall($tool, $params, null, 0, 0.0, 'Missing MCP token');
+            throw new McpException('MCP server token is not configured');
+        }
 
         try {
             $response = Http::withToken($this->bearerToken)
