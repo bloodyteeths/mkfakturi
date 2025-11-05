@@ -163,25 +163,85 @@ php artisan tinker --execute="
     }
 " 2>/dev/null || echo "Could not check existing tables"
 
-php artisan migrate --force || echo "Some migrations failed, continuing..."
+# Run main migrations with better error handling
+echo "Running main migrations batch..."
+if ! php artisan migrate --force 2>&1 | tee -a storage/logs/migrations.log; then
+    echo "WARNING: Some migrations failed. Check storage/logs/migrations.log for details"
+    echo "Attempting to continue with critical migrations..."
+fi
+
+# Force run critical banking migrations if tables don't exist
+echo "Ensuring banking tables exist..."
+php artisan tinker --execute="
+    if (!Schema::hasTable('bank_accounts')) {
+        echo 'bank_accounts table missing - need to run core migration' . PHP_EOL;
+    } else {
+        echo 'bank_accounts table exists' . PHP_EOL;
+    }
+    if (!Schema::hasTable('bank_transactions')) {
+        echo 'bank_transactions table missing' . PHP_EOL;
+    } else {
+        echo 'bank_transactions table exists' . PHP_EOL;
+    }
+" 2>/dev/null || echo "Could not verify banking tables"
+
+# Force run core migration if bank_accounts doesn't exist
+if ! php artisan tinker --execute="exit(Schema::hasTable('bank_accounts') ? 0 : 1);" 2>/dev/null; then
+    echo "Forcing core migration (contains bank_accounts table)..."
+    php artisan migrate --path=database/migrations/2025_07_24_core.php --force 2>&1 | tee -a storage/logs/migrations.log || echo "Core migration failed"
+fi
+
+# Force run bank_transactions migration if table doesn't exist
+if ! php artisan tinker --execute="exit(Schema::hasTable('bank_transactions') ? 0 : 1);" 2>/dev/null; then
+    echo "Forcing bank_transactions migration..."
+    php artisan migrate --path=database/migrations/2025_07_25_163932_create_bank_transactions_table.php --force 2>&1 | tee -a storage/logs/migrations.log || echo "Bank transactions migration failed"
+fi
 
 # Ensure IFRS entity migrations are run (they might be skipped if earlier migrations fail)
 echo "Ensuring IFRS entity migrations are run..."
 
-if [ "$FORCE_IFRS_MIGRATIONS" = "true" ]; then
-    echo "FORCE_IFRS_MIGRATIONS enabled - resetting migration status for entity migrations..."
-    # Remove these specific migrations from the migrations table to force re-run
-    php artisan tinker --execute="
-        \$migrations = ['2025_11_04_000000_add_ifrs_entity_id_to_companies_table', '2025_11_04_000001_add_entity_id_to_users_table'];
-        foreach (\$migrations as \$m) {
-            DB::table('migrations')->where('migration', \$m)->delete();
-            echo 'Reset migration: ' . \$m . PHP_EOL;
-        }
-    " 2>/dev/null || echo "Could not reset migration status"
-fi
+# Check if columns already exist before forcing re-run
+php artisan tinker --execute="
+    \$companiesHasColumn = Schema::hasColumn('companies', 'ifrs_entity_id');
+    \$usersHasColumn = Schema::hasColumn('users', 'entity_id');
 
-php artisan migrate --path=database/migrations/2025_11_04_000000_add_ifrs_entity_id_to_companies_table.php --force || echo "Entity migration already applied"
-php artisan migrate --path=database/migrations/2025_11_04_000001_add_entity_id_to_users_table.php --force || echo "Entity migration already applied"
+    if (\$companiesHasColumn && \$usersHasColumn) {
+        echo 'IFRS entity columns already exist - skipping migrations' . PHP_EOL;
+        exit(0);
+    }
+
+    echo 'IFRS entity columns missing - need to run migrations' . PHP_EOL;
+    exit(1);
+" 2>/dev/null
+
+COLUMNS_EXIST=$?
+
+if [ $COLUMNS_EXIST -eq 0 ]; then
+    echo "IFRS columns already exist in database, marking migrations as completed..."
+    # Mark migrations as completed without running them
+    php artisan tinker --execute="
+        \$migrations = [
+            '2025_11_04_000000_add_ifrs_entity_id_to_companies_table',
+            '2025_11_04_000001_add_entity_id_to_users_table'
+        ];
+        foreach (\$migrations as \$m) {
+            \$exists = DB::table('migrations')->where('migration', \$m)->exists();
+            if (!\$exists) {
+                DB::table('migrations')->insert([
+                    'migration' => \$m,
+                    'batch' => DB::table('migrations')->max('batch') + 1
+                ]);
+                echo 'Marked migration as completed: ' . \$m . PHP_EOL;
+            } else {
+                echo 'Migration already recorded: ' . \$m . PHP_EOL;
+            }
+        }
+    " 2>/dev/null || echo "Could not mark migrations as completed"
+else
+    echo "IFRS columns do not exist, running migrations..."
+    php artisan migrate --path=database/migrations/2025_11_04_000000_add_ifrs_entity_id_to_companies_table.php --force 2>&1 | tee -a storage/logs/migrations.log || echo "Entity migration already applied"
+    php artisan migrate --path=database/migrations/2025_11_04_000001_add_entity_id_to_users_table.php --force 2>&1 | tee -a storage/logs/migrations.log || echo "Entity migration already applied"
+fi
 
 # Force set profile_complete if RAILWAY_SKIP_INSTALL is true
 if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
@@ -288,3 +348,5 @@ export LOG_LEVEL=debug
 echo "Starting PHP server on port $PORT..."
 echo "Laravel logs will be written to storage/logs/laravel.log"
 php -S 0.0.0.0:$PORT -t public 2>&1 | tee -a storage/logs/server.log
+
+# CLAUDE-CHECKPOINT
