@@ -71,3 +71,4 @@ public/storage
 !mcp-server/setup.py
 !mcp-server/alembic/**
 !mcp-server/maverick_mcp/**
+!mcp-server/**
