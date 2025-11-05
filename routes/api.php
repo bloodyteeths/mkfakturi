@@ -520,6 +520,43 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/risks', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'risks']);
                 Route::get('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'getSettings']);
                 Route::post('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'updateSettings']);
+
+                // Debug endpoint to see raw data
+                Route::get('/debug/data', function(\Illuminate\Http\Request $request) {
+                    $company = \App\Models\Company::find($request->header('company'));
+                    if (!$company) {
+                        return response()->json(['error' => 'Company not found'], 404);
+                    }
+
+                    $dataProvider = app(\App\Services\McpDataProvider::class);
+
+                    // Get all invoices with details
+                    $allInvoices = \App\Models\Invoice::where('company_id', $company->id)
+                        ->get()
+                        ->map(function($inv) {
+                            return [
+                                'id' => $inv->id,
+                                'number' => $inv->invoice_number,
+                                'status' => $inv->status,
+                                'paid_status' => $inv->paid_status ?? null,
+                                'total' => $inv->total,
+                                'due_amount' => $inv->due_amount,
+                                'date' => $inv->invoice_date,
+                            ];
+                        });
+
+                    return response()->json([
+                        'company' => [
+                            'id' => $company->id,
+                            'name' => $company->name,
+                        ],
+                        'raw_data' => [
+                            'all_invoices' => $allInvoices,
+                            'company_stats' => $dataProvider->getCompanyStats($company),
+                            'trial_balance' => $dataProvider->getTrialBalance($company),
+                        ],
+                    ]);
+                });
             });
         });
 
