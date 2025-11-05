@@ -143,9 +143,11 @@ async function sendMessage() {
   // Send to API
   isLoading.value = true
   try {
+    console.log('[AI Chat] Sending message:', messageToSend)
     const response = await axios.post('/api/v1/ai/insights/chat', {
       message: messageToSend
     })
+    console.log('[AI Chat] Chat response:', response.data)
 
     const assistantMessage = {
       role: 'assistant',
