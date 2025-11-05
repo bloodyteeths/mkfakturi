@@ -60,3 +60,14 @@ public/storage
 # Backup files
 *.bak
 *.backup
+
+# MCP server Docker build context
+!Dockerfile.mcp-server
+!mcp-server/pyproject.toml
+!mcp-server/uv.lock
+!mcp-server/README.md
+!mcp-server/docker-entrypoint.sh
+!mcp-server/alembic.ini
+!mcp-server/setup.py
+!mcp-server/alembic/**
+!mcp-server/maverick_mcp/**
