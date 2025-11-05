@@ -1,4 +1,11 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
-  "deploy": {}
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "../Dockerfile.mcp-server"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyType": "ON_FAILURE"
+  }
 }
