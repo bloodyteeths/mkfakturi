@@ -31,8 +31,6 @@ export default {
       }
     }
 
-    amount = amount / 100
-
     let {
       precision,
       decimal_separator,
@@ -44,6 +42,14 @@ export default {
     try {
       precision = Math.abs(precision)
       precision = isNaN(precision) ? 2 : precision
+
+      // CRITICAL FIX: Only divide by 100 for currencies with decimal places (precision > 0)
+      // For zero-precision currencies like MKD, amount is already in the correct unit
+      // Example: MKD with amount=12000 stays as 12000 (12 thousand denars)
+      // USD with amount=12000 becomes 120.00 (120 dollars, stored as cents)
+      if (precision > 0) {
+        amount = amount / 100
+      }
 
       const negativeSign = amount < 0 ? '-' : ''
 
