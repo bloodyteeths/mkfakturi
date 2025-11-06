@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Geçersiz Telefon Numarası",
-    "invalid_url": "Geçersiz url (örn: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Geçersiz url (örn: invoiceshelf.com)",
+    "invalid_url": "Geçersiz url (örn: http://www.Facturino.com)",
+    "invalid_domain_url": "Geçersiz url (örn: Facturino.com)",
     "required": "Bu alan zorunludur",
     "email_incorrect": "Yanlış E-posta.",
     "email_already_taken": "Bu e-posta zaten alınmış.",

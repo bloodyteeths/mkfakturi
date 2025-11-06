@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Pogrešan Broj Telefona",
-    "invalid_url": "Nevažeći URL (primer: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Pogrešan URL (primjer: invoiceshelf.com)",
+    "invalid_url": "Nevažeći URL (primer: http://www.Facturino.com)",
+    "invalid_domain_url": "Pogrešan URL (primjer: Facturino.com)",
     "required": "Obavezno polje",
     "email_incorrect": "Pogrešan E-mail",
     "email_already_taken": "Navedeni E-mail je zauzet",

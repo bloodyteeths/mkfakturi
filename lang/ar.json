@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "رقم الهاتف غير صحيح",
-    "invalid_url": "عنوان انترنت غير صحيح (مثال: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "عنوان انترنت غير صحيح (مثال: invoiceshelf.com)",
+    "invalid_url": "عنوان انترنت غير صحيح (مثال: http://www.Facturino.com)",
+    "invalid_domain_url": "عنوان انترنت غير صحيح (مثال: Facturino.com)",
     "required": "حقل مطلوب",
     "email_incorrect": "بريد الكتروني غير صحيح.",
     "email_already_taken": "هذا البريد الالكتروني مستخدم مسبقاً",

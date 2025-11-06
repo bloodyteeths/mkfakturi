@@ -2,11 +2,12 @@
   <div class="flex flex-col items-center justify-between w-full pt-10">
 
     <img
-      id="logo-invoiceshelf"
+      id="logo-facturino"
       :src="getTickImage()"
       alt="Facturino Logo"
       class="h-12 mb-5 md:mb-10"
     />
+    <!-- CLAUDE-CHECKPOINT -->
 
     <BaseWizard
       :steps="9"
@@ -108,9 +109,10 @@ export default {
     function onNavClick(e) {}
 
     function getTickImage() {
-      const imgUrl = new URL('$images/logo.png', import.meta.url)
+      const imgUrl = new URL('$images/facturino_logo_clear.png', import.meta.url)
       return imgUrl
     }
+    // CLAUDE-CHECKPOINT
 
     return {
       stepComponent,

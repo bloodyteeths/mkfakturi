@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Ongeldig Telefoonnummer",
-    "invalid_url": "Ongeldige URL (bijvoorbeeld: http://www.invoiceshelf.com))",
-    "invalid_domain_url": "Ongeldige URL (bijvoorbeeld: invoiceshelf.com))",
+    "invalid_url": "Ongeldige URL (bijvoorbeeld: http://www.Facturino.com))",
+    "invalid_domain_url": "Ongeldige URL (bijvoorbeeld: Facturino.com))",
     "required": "Veld is verplicht",
     "email_incorrect": "Incorrecte Email.",
     "email_already_taken": "De email is al in gebruik.",

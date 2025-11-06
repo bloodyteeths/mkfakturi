@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Puhelinnumeron muoto ei ole oikea",
-    "invalid_url": "Väärä www osoite (esim.: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Väärä www osoite (ex: invoiceshelf.com)",
+    "invalid_url": "Väärä www osoite (esim.: http://www.Facturino.com)",
+    "invalid_domain_url": "Väärä www osoite (ex: Facturino.com)",
     "required": "Kenttä on pakollinen",
     "email_incorrect": "Väärä sähköpostin muoto.",
     "email_already_taken": "Tämä sähköposti on jo käytössä.",

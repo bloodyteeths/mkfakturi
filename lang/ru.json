@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Неправильный номер телефона",
-    "invalid_url": "Неправильный url (ex: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Неправильный домен (ex: invoiceshelf.com)",
+    "invalid_url": "Неправильный url (ex: http://www.Facturino.com)",
+    "invalid_domain_url": "Неправильный домен (ex: Facturino.com)",
     "required": "Обязательное поле",
     "email_incorrect": "Неправильный Email.",
     "email_already_taken": "Email уже существует.",

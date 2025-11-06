@@ -903,7 +903,7 @@
   },
   "validation": {
     "invalid_phone": "Número de telefone inválido",
-    "invalid_url": "url inválidas (ex: http://www.invoiceshelf.com)",
+    "invalid_url": "url inválidas (ex: http://www.Facturino.com)",
     "required": "Campo obrigatório",
     "email_incorrect": "E-mail incorreto",
     "email_already_taken": "O email já foi recebido.",

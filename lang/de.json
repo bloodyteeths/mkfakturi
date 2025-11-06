@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Ungültige Telefonnummer",
-    "invalid_url": "Ungültige URL (Bsp.: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Ungültige URL (Bsp.: invoiceshelf.com)",
+    "invalid_url": "Ungültige URL (Bsp.: http://www.Facturino.com)",
+    "invalid_domain_url": "Ungültige URL (Bsp.: Facturino.com)",
     "required": "Feld ist erforderlich",
     "email_incorrect": "Ungültige E-Mail.",
     "email_already_taken": "Die E-Mail ist bereits vergeben.",

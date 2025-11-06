@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Μη έγκυρος αριθμός τηλεφώνου",
-    "invalid_url": "Μη έγκυρη διεύθυνση url (π.χ. http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Μη έγκυρη διεύθυνση url (π.χ. invoiceshelf.com)",
+    "invalid_url": "Μη έγκυρη διεύθυνση url (π.χ. http://www.Facturino.com)",
+    "invalid_domain_url": "Μη έγκυρη διεύθυνση url (π.χ. Facturino.com)",
     "required": "Το πεδίο είναι υποχρεωτικό",
     "email_incorrect": "Λάθος μορφή e-mail;",
     "email_already_taken": "Το όνομα έχει ήδη ληφθεί.",

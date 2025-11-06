@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "無効な電話番号",
-    "invalid_url": "無効なURL（例: http://www.invoiceshelf.com）",
-    "invalid_domain_url": "無効なURL（例: invoiceshelf.com）",
+    "invalid_url": "無効なURL（例: http://www.Facturino.com）",
+    "invalid_domain_url": "無効なURL（例: Facturino.com）",
     "required": "フィールドは必須です",
     "email_incorrect": "メールが間違っています。",
     "email_already_taken": "このメールはすでに使用されています。",

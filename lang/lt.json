@@ -1137,9 +1137,9 @@
       "email": "Siųsti pranešimus",
       "description": "Which email notifications would you like to receive when something changes?",
       "invoice_viewed": "Invoice viewed",
-      "invoice_viewed_desc": "When your customer views the invoice sent via invoiceshelf dashboard.",
+      "invoice_viewed_desc": "When your customer views the invoice sent via Facturino dashboard.",
       "estimate_viewed": "Estimate viewed",
-      "estimate_viewed_desc": "When your customer views the estimate sent via invoiceshelf dashboard.",
+      "estimate_viewed_desc": "When your customer views the estimate sent via Facturino dashboard.",
       "save": "Išsaugoti",
       "email_save_message": "El. paštas išsaugotas sėkmingai",
       "please_enter_email": "Įveskite el. paštą"
@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Invalid Phone Number",
-    "invalid_url": "Invalid url (ex: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Invalid url (ex: invoiceshelf.com)",
+    "invalid_url": "Invalid url (ex: http://www.Facturino.com)",
+    "invalid_domain_url": "Invalid url (ex: Facturino.com)",
     "required": "Field is required",
     "email_incorrect": "Incorrect Email.",
     "email_already_taken": "The email has already been taken.",

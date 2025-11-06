@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Neplatné telefonní číslo",
-    "invalid_url": "Neplatná URL (např. http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Neplatná URL (např. invoiceshelf.com)",
+    "invalid_url": "Neplatná URL (např. http://www.Facturino.com)",
+    "invalid_domain_url": "Neplatná URL (např. Facturino.com)",
     "required": "Pole je povinné",
     "email_incorrect": "Nesprávný e-mail.",
     "email_already_taken": "Tento e-mail již byl použit.",

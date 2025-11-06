@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Số điện thoại không hợp lệ",
-    "invalid_url": "Url không hợp lệ (ví dụ: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Url không hợp lệ (ví dụ: invoiceshelf.com)",
+    "invalid_url": "Url không hợp lệ (ví dụ: http://www.Facturino.com)",
+    "invalid_domain_url": "Url không hợp lệ (ví dụ: Facturino.com)",
     "required": "Lĩnh vực được yêu cầu",
     "email_incorrect": "Email không chính xác.",
     "email_already_taken": "Lá thư đã được lấy đi.",

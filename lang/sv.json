@@ -1137,9 +1137,9 @@
       "email": "Skicka notifiering till",
       "description": "Vilka notifieringar vill du ha via epost när något ändras?",
       "invoice_viewed": "Faktura kollad",
-      "invoice_viewed_desc": "När din kund kollar fakturan via invoiceshelfs översikt.",
+      "invoice_viewed_desc": "När din kund kollar fakturan via Facturinos översikt.",
       "estimate_viewed": "Betalförslag kollad",
-      "estimate_viewed_desc": "När din kund kollar betalförslag via invoiceshelfs översikt.",
+      "estimate_viewed_desc": "När din kund kollar betalförslag via Facturinos översikt.",
       "save": "Spara",
       "email_save_message": "Epost sparades",
       "please_enter_email": "Ange e-postadress"
@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "Ogiltigt telefonnummer",
-    "invalid_url": "Felaktig url (ex: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "Felaktig url (ex: invoiceshelf.com)",
+    "invalid_url": "Felaktig url (ex: http://www.Facturino.com)",
+    "invalid_domain_url": "Felaktig url (ex: Facturino.com)",
     "required": "Fältet är tvingande",
     "email_incorrect": "Felaktig e-postadress.",
     "email_already_taken": "Denna epostadress finns redan.",

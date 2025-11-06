@@ -1524,8 +1524,8 @@
   },
   "validation": {
     "invalid_phone": "無效的電話號碼",
-    "invalid_url": "無較URL(ex: http://www.invoiceshelf.com)",
-    "invalid_domain_url": "無較URL(ex: invoiceshelf.com)",
+    "invalid_url": "無較URL(ex: http://www.Facturino.com)",
+    "invalid_domain_url": "無較URL(ex: Facturino.com)",
     "required": "此欄位為必需",
     "email_incorrect": "電郵錯誤",
     "email_already_taken": "此電郵已被使用",

@@ -1078,8 +1078,8 @@
   },
   "validation": {
     "invalid_phone": "유효하지 않은 전화 번호",
-    "invalid_url": "잘못된 URL (예 : http://www.invoiceshelf.com)",
-    "invalid_domain_url": "잘못된 URL (예 : invoiceshelf.com)",
+    "invalid_url": "잘못된 URL (예 : http://www.Facturino.com)",
+    "invalid_domain_url": "잘못된 URL (예 : Facturino.com)",
     "required": "필드는 필수입니다",
     "email_incorrect": "잘못된 이메일.",
     "email_already_taken": "이메일이 이미 사용되었습니다.",
