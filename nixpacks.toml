@@ -1,5 +1,14 @@
 [phases.setup]
-nixPkgs = ["php82", "php82Packages.composer", "nodejs_20"]
+nixPkgs = [
+  "php82",
+  "php82Packages.composer",
+  "nodejs_20",
+  # For PDF to Image conversion (AI vision features)
+  "imagemagick",
+  "ghostscript",
+  # PHP Imagick extension dependencies
+  "php82Extensions.imagick"
+]
 
 [phases.install]
 cmds = [
