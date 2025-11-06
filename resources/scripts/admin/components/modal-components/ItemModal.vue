@@ -156,9 +156,22 @@ const modalActive = computed(
 )
 
 const price = computed({
-  get: () => itemStore.currentItem.price / 100,
+  get: () => {
+    // FIXED: For zero-precision currencies (like MKD), don't divide by 100
+    const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
+    if (precision === 0) {
+      return itemStore.currentItem.price
+    }
+    return itemStore.currentItem.price / 100
+  },
   set: (value) => {
-    itemStore.currentItem.price = Math.round(value * 100)
+    // FIXED: For zero-precision currencies (like MKD), don't multiply by 100
+    const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
+    if (precision === 0) {
+      itemStore.currentItem.price = Math.round(value)
+    } else {
+      itemStore.currentItem.price = Math.round(value * 100)
+    }
   },
 })
 

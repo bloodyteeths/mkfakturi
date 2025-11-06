@@ -254,11 +254,15 @@ const quantity = computed({
 const price = computed({
   get: () => {
     const price = props.itemData.price
-    return price / 100
+    // FIXED: For zero-precision currencies (like MKD), don't divide by 100
+    const precision = parseInt(selectedCurrency.value.precision)
+    return precision === 0 ? price : price / 100
   },
 
   set: (newValue) => {
-    let price = Math.round(newValue * 100)
+    // FIXED: For zero-precision currencies (like MKD), don't multiply by 100
+    const precision = parseInt(selectedCurrency.value.precision)
+    let price = precision === 0 ? Math.round(newValue) : Math.round(newValue * 100)
     updateItemAttribute('price', price)
     setDiscount()
   },

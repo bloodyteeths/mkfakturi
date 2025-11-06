@@ -317,9 +317,19 @@ const PaymentFields = reactive([
 ])
 
 const amount = computed({
-  get: () => paymentStore.currentPayment.amount / 100,
+  get: () => {
+    // FIXED: For zero-precision currencies (like MKD), don't divide by 100
+    const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
+    return precision === 0
+      ? paymentStore.currentPayment.amount
+      : paymentStore.currentPayment.amount / 100
+  },
   set: (value) => {
-    paymentStore.currentPayment.amount = Math.round(value * 100)
+    // FIXED: For zero-precision currencies (like MKD), don't multiply by 100
+    const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
+    paymentStore.currentPayment.amount = precision === 0
+      ? Math.round(value)
+      : Math.round(value * 100)
   },
 })
 
