@@ -159,18 +159,23 @@ const price = computed({
   get: () => {
     // FIXED: For zero-precision currencies (like MKD), don't divide by 100
     const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
+    // Return 0 if price is null/undefined
+    const currentPrice = itemStore.currentItem.price ?? 0
     if (precision === 0) {
-      return itemStore.currentItem.price
+      return currentPrice
     }
-    return itemStore.currentItem.price / 100
+    return currentPrice / 100
   },
   set: (value) => {
     // FIXED: For zero-precision currencies (like MKD), don't multiply by 100
+    // CRITICAL: v-money3 with masked=true can emit null when field is empty
+    // Convert null/undefined to 0 to prevent validation errors
+    const safeValue = value ?? 0
     const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
     if (precision === 0) {
-      itemStore.currentItem.price = Math.round(value)
+      itemStore.currentItem.price = Math.round(safeValue)
     } else {
-      itemStore.currentItem.price = Math.round(value * 100)
+      itemStore.currentItem.price = Math.round(safeValue * 100)
     }
   },
 })
