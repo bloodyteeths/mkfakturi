@@ -52,8 +52,8 @@ class BankingController extends Controller
                 'company_id' => $company->id
             ]);
 
+            // Temporarily remove ->with(['currency']) to debug
             $accounts = BankAccount::where('company_id', $company->id)
-                ->with(['currency'])
                 ->active()
                 ->get()
                 ->map(function ($account) {
