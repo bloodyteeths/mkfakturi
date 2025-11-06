@@ -376,8 +376,24 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
                 $fixedExpenses++;
             }
 
+            // Fix payments
+            $payments = \App\Models\Payment::where('currency_id', $mkdCurrency->id)->get();
             $output[] = '';
-            $output[] = "🎉 Fixed {$fixedInvoices} invoices and {$fixedExpenses} expenses!";
+            $output[] = "Found {$payments->count()} payments with MKD currency";
+            $fixedPayments = 0;
+
+            foreach ($payments as $payment) {
+                $oldAmount = $payment->amount;
+                $payment->amount = $oldAmount / 100;
+                $payment->base_amount = $payment->base_amount / 100;
+                $payment->save();
+
+                $output[] = "  ✅ Payment #{$payment->payment_number}: {$oldAmount} → {$payment->amount} MKD";
+                $fixedPayments++;
+            }
+
+            $output[] = '';
+            $output[] = "🎉 Fixed {$fixedInvoices} invoices, {$fixedExpenses} expenses, and {$fixedPayments} payments!";
             $output[] = '';
             $output[] = 'Your amounts should now be correct.';
             $output[] = 'Please refresh the AI insights to see accurate numbers.';
