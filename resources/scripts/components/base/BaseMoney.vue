@@ -8,7 +8,7 @@
   </BaseContentPlaceholders>
   <money3
     v-else
-    v-model="money"
+    v-model.number="money"
     v-bind="currencyBindings"
     :class="[inputClass, invalidClass]"
     :disabled="disabled"
@@ -78,11 +78,13 @@ const currencyBindings = computed(() => {
     thousands: currency.thousand_separator,
     prefix: currency.symbol + ' ',
     precision: precision,
-    // CRITICAL FIX: Use masked=true for zero-precision currencies (like MKD)
-    // With masked=false, v-money3 treats the value as cents and divides by 100
-    // With masked=true, v-money3 uses the value as-is (no conversion)
-    // For MKD: User types "1200" → stored as 1200 (not 120000)
-    masked: precision === 0,
+    // FIXED: Always use masked=false with v-model.number modifier
+    // This forces numeric output instead of formatted strings (e.g., "ден 12.000")
+    // which prevents NaN/null conversion issues for zero-precision currencies like MKD
+    masked: false,
+    modelModifiers: {
+      number: true,
+    },
   }
 })
 
