@@ -524,4 +524,114 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
         return response('<pre>'.implode("\n", $output).'</pre>');
     })->middleware('auth');
+
+    // Debug storage configuration (Cloudflare R2, media uploads)
+    // ----------------------------------------------------------------
+    Route::get('/debug/storage-config', function () {
+        $output = [];
+        $output[] = "=== Storage Configuration Debug ===\n";
+
+        // Check filesystem configuration
+        $output[] = "\n--- Filesystem Config ---";
+        $output[] = "Default disk: ".config('filesystems.default');
+        $output[] = "Cloud disk: ".config('filesystems.cloud');
+        $output[] = "Media disk: ".config('media-library.disk_name');
+
+        // Check S3-compatible (R2) configuration
+        $output[] = "\n--- S3-Compatible (Cloudflare R2) Config ---";
+        $s3Config = config('filesystems.disks.s3compat');
+        if ($s3Config) {
+            $output[] = "Endpoint: ".($s3Config['endpoint'] ?? 'NOT SET');
+            $output[] = "Bucket: ".($s3Config['bucket'] ?? 'NOT SET');
+            $output[] = "Region: ".($s3Config['region'] ?? 'NOT SET');
+            $output[] = "Access Key exists: ".(!empty($s3Config['key']) ? 'YES' : 'NO');
+            $output[] = "Secret Key exists: ".(!empty($s3Config['secret']) ? 'YES' : 'NO');
+
+            // Test S3 connection
+            try {
+                $testFile = 'test-'.time().'.txt';
+                \Storage::disk('s3compat')->put($testFile, 'Test connection from facturino.mk');
+                $exists = \Storage::disk('s3compat')->exists($testFile);
+                $output[] = "✅ Test file upload: ".($exists ? 'SUCCESS' : 'FAILED');
+
+                if ($exists) {
+                    \Storage::disk('s3compat')->delete($testFile);
+                    $output[] = "✅ Test file cleanup: SUCCESS";
+                }
+            } catch (\Exception $e) {
+                $output[] = "❌ S3 Connection Error: ".$e->getMessage();
+            }
+        } else {
+            $output[] = "❌ S3-compatible disk not configured!";
+        }
+
+        // Check recent media uploads
+        $output[] = "\n--- Recent Media Uploads (Last 10) ---";
+        $recentMedia = \Spatie\MediaLibrary\MediaCollections\Models\Media::orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        if ($recentMedia->isEmpty()) {
+            $output[] = "No media uploads found.";
+        } else {
+            foreach ($recentMedia as $media) {
+                $output[] = "\nMedia ID: {$media->id}";
+                $output[] = "  File: {$media->file_name}";
+                $output[] = "  Disk: {$media->disk}";
+                $output[] = "  Collection: {$media->collection_name}";
+                $output[] = "  Model: {$media->model_type} (ID: {$media->model_id})";
+                $output[] = "  Created: {$media->created_at}";
+
+                // Check if file exists on its disk
+                try {
+                    $exists = \Storage::disk($media->disk)->exists($media->getPathRelativeToRoot());
+                    $output[] = "  Exists on disk: ".($exists ? 'YES ✅' : 'NO ❌');
+
+                    if ($exists && $media->disk === 's3compat') {
+                        $url = \Storage::disk('s3compat')->url($media->getPathRelativeToRoot());
+                        $output[] = "  R2 URL: {$url}";
+                    }
+                } catch (\Exception $e) {
+                    $output[] = "  Error checking file: ".$e->getMessage();
+                }
+            }
+        }
+
+        // Check company logos specifically
+        $output[] = "\n--- Company Logos ---";
+        $companies = \App\Models\Company::all();
+        foreach ($companies as $company) {
+            $output[] = "\nCompany: {$company->name}";
+            $logoMedia = $company->getMedia('logo')->first();
+            if ($logoMedia) {
+                $output[] = "  Logo file: {$logoMedia->file_name}";
+                $output[] = "  Stored on disk: {$logoMedia->disk}";
+                try {
+                    $exists = \Storage::disk($logoMedia->disk)->exists($logoMedia->getPathRelativeToRoot());
+                    $output[] = "  File exists: ".($exists ? 'YES ✅' : 'NO ❌');
+                } catch (\Exception $e) {
+                    $output[] = "  Error: ".$e->getMessage();
+                }
+            } else {
+                $output[] = "  No logo uploaded";
+            }
+        }
+
+        // Environment variables check
+        $output[] = "\n--- Environment Variables ---";
+        $envVars = [
+            'FILESYSTEM_DISK',
+            'S3_COMPAT_ENDPOINT',
+            'S3_COMPAT_BUCKET',
+            'S3_COMPAT_REGION',
+        ];
+        foreach ($envVars as $var) {
+            $value = env($var);
+            $output[] = "{$var}: ".($value ? $value : 'NOT SET ❌');
+        }
+        $output[] = "S3_COMPAT_KEY: ".(env('S3_COMPAT_KEY') ? 'SET ✅' : 'NOT SET ❌');
+        $output[] = "S3_COMPAT_SECRET: ".(env('S3_COMPAT_SECRET') ? 'SET ✅' : 'NOT SET ❌');
+
+        return response('<pre>'.implode("\n", $output).'</pre>');
+    })->middleware('auth');
 }
