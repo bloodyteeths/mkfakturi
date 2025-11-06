@@ -252,9 +252,11 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
             }
             $output[] = '';
 
-            $company = \App\Models\Company::first();
-            if ($company) {
-                $output[] = "Analyzing company: {$company->name}";
+            // Analyze ALL companies
+            foreach ($companies as $company) {
+                $output[] = "========================================";
+                $output[] = "COMPANY: {$company->name} (ID: {$company->id})";
+                $output[] = "========================================";
                 $output[] = '';
 
                 // Invoices
@@ -306,6 +308,7 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
                     $ifrsTxns = \IFRS\Models\Transaction::where('entity_id', $company->ifrs_entity_id)->count();
                     $output[] = "  - IFRS Transactions: {$ifrsTxns}";
                 }
+                $output[] = '';
             }
 
         } catch (\Exception $e) {
