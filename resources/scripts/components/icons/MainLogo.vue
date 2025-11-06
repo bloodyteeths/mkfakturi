@@ -4,6 +4,8 @@
 
 <script setup>
 import { computed } from 'vue'
+import clearLogo from '$images/facturino_logo_clear.png'
+import standardLogo from '$images/facturino_logo.png'
 
 const props = defineProps({
   darkColor: {
@@ -25,8 +27,7 @@ const props = defineProps({
 })
 
 const logoUrl = computed(() => {
-  const logoName = props.variant === 'clear' ? 'facturino_logo_clear.png' : 'facturino_logo.png'
-  return `/${logoName}`
+  return props.variant === 'clear' ? clearLogo : standardLogo
 })
 // CLAUDE-CHECKPOINT
 </script>

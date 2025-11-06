@@ -86,15 +86,13 @@ const props = defineProps({
 const invoiceStore = useInvoiceStore()
 const companyStore = useCompanyStore()
 
-const enableTime = computed(() => {
-  return (
-    companyStore.selectedCompanySettings.invoice_use_time === 'YES'
-  );
-})
+const selectedSettings = computed(() => companyStore.selectedCompanySettings || {})
+
+const enableTime = computed(() => selectedSettings.value?.invoice_use_time === 'YES')
+
 const time24h = computed(() => {
-  return (
-    companyStore.selectedCompanySettings.carbon_time_format.indexOf('H') > -1
-  );
+  const timeFormat = selectedSettings.value?.carbon_time_format
+  return typeof timeFormat === 'string' ? timeFormat.indexOf('H') > -1 : false
 })
 
 </script>
