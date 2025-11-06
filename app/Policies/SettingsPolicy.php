@@ -16,6 +16,10 @@ class SettingsPolicy
             return true;
         }
 
+        if ($user->isOwner()) {
+            return true;
+        }
+
         return false;
     }
 
