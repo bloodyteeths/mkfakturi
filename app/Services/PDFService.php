@@ -11,6 +11,7 @@ namespace App\Services;
 use App;
 use App\Services\PDFDrivers\GotenbergPDFDriver;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 interface ResponseStream
 {
@@ -42,6 +43,26 @@ class PDFService
     {
         $driver = config('pdf.driver');
 
-        return PDFDriverFactory::create($driver)->loadView($template);
+        try {
+            return PDFDriverFactory::create($driver)->loadView($template);
+        } catch (\Throwable $exception) {
+            Log::error('Primary PDF driver failed, attempting fallback.', [
+                'driver' => $driver,
+                'message' => $exception->getMessage(),
+            ]);
+
+            if ($driver !== 'dompdf') {
+                try {
+                    return PDFDriverFactory::create('dompdf')->loadView($template);
+                } catch (\Throwable $fallbackException) {
+                    Log::error('Fallback PDF driver also failed.', [
+                        'message' => $fallbackException->getMessage(),
+                    ]);
+                    throw $fallbackException;
+                }
+            }
+
+            throw $exception;
+        }
     }
 }
