@@ -39,10 +39,13 @@
 
     <script type="module">
         @if(!empty($customer_logo))
-        window.customer_logo = "{{ $customer_logo }}"
+        window.customer_logo = @json($customer_logo)
         @endif
         @if(!empty($login_page_logo))
-        window.login_page_logo = "{{ $login_page_logo }}"
+        window.login_page_logo = @json($login_page_logo)
+        @endif
+        @if(!empty($admin_logo))
+        window.admin_logo = @json($admin_logo)
         @endif
         @if(isset($login_page_heading))
 

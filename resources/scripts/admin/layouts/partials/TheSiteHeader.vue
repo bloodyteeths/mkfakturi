@@ -297,6 +297,11 @@ const adminLogo = computed(() => {
     return false
   }
 
+  const inlineLogo = typeof window !== 'undefined' ? window.admin_logo : null
+  if (inlineLogo) {
+    return inlineLogo
+  }
+
   const logo = globalStore.globalSettings?.admin_portal_logo
 
   return logo ? logo : false
