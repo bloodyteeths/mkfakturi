@@ -463,6 +463,12 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
     // Debug invoice PDF issues (logo 404, PDF 404)
     // ----------------------------------------------
     Route::get('/debug/fix-invoice-pdf', function () {
+        // Simple security: require secret parameter
+        $secret = request()->get('secret');
+        if ($secret !== 'facturino2025') {
+            return response('<h1>Access Denied</h1><p>Add ?secret=facturino2025 to the URL</p>', 403);
+        }
+
         $output = [];
         $output[] = "=== Invoice PDF Debug & Fix ===\n";
 
@@ -523,11 +529,17 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         }
 
         return response('<pre>'.implode("\n", $output).'</pre>');
-    })->middleware('auth');
+    });
 
     // Debug storage configuration (Cloudflare R2, media uploads)
     // ----------------------------------------------------------------
     Route::get('/debug/storage-config', function () {
+        // Simple security: require secret parameter
+        $secret = request()->get('secret');
+        if ($secret !== 'facturino2025') {
+            return response('<h1>Access Denied</h1><p>Add ?secret=facturino2025 to the URL</p>', 403);
+        }
+
         $output = [];
         $output[] = "=== Storage Configuration Debug ===\n";
 
@@ -633,5 +645,5 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         $output[] = "S3_COMPAT_SECRET: ".(env('S3_COMPAT_SECRET') ? 'SET ✅' : 'NOT SET ❌');
 
         return response('<pre>'.implode("\n", $output).'</pre>');
-    })->middleware('auth');
+    });
 }
