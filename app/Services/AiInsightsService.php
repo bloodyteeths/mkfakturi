@@ -178,16 +178,26 @@ class AiInsightsService
                 'question' => $question,
             ]);
 
-            // Fetch relevant financial context
-            $companyStats = $this->fetchCompanyStats($company);
+            // Detect query context and determine required data
+            $contextTypes = $this->detectQueryContext($question);
 
-            Log::info('[AiInsightsService] Chat stats fetched', [
+            Log::info('[AiInsightsService] Query context detected', [
                 'company_id' => $company->id,
-                'stats' => $companyStats,
+                'question' => $question,
+                'detected_contexts' => $contextTypes,
             ]);
 
-            // Build contextualized prompt
-            $prompt = $this->buildChatPrompt($company, $companyStats, $question);
+            // Fetch contextual data based on detected context types
+            $contextualData = $this->fetchContextualData($company, $contextTypes);
+
+            Log::info('[AiInsightsService] Contextual data fetched', [
+                'company_id' => $company->id,
+                'context_types' => $contextTypes,
+                'data_keys' => array_keys($contextualData),
+            ]);
+
+            // Build contextualized prompt with smart data inclusion
+            $prompt = $this->buildChatPrompt($company, $contextualData, $question);
 
             Log::info('[AiInsightsService] Chat prompt built', [
                 'company_id' => $company->id,
@@ -217,6 +227,286 @@ class AiInsightsService
             ]);
 
             throw $e;
+        }
+    }
+
+    /**
+     * Detect query context based on question patterns
+     *
+     * Analyzes the user's question to determine what type of data they need.
+     * Supports both English and Macedonian queries.
+     *
+     * @param string $question The user's question
+     * @return array<string> Array of context types detected
+     */
+    private function detectQueryContext(string $question): array
+    {
+        $contexts = [];
+        $questionLower = mb_strtolower($question, 'UTF-8');
+
+        Log::info('[AiInsightsService] Detecting query context', [
+            'question' => $question,
+            'question_lower' => $questionLower,
+        ]);
+
+        // Invoice queries - looking for specific invoices
+        $invoicePatterns = [
+            // English patterns
+            '/\b(show|list|get|find|search|view)\s+(invoices?|bills?)\b/iu',
+            '/\b(last|recent|latest|this)\s+(month|week|year|quarter)\'?s?\s+(invoices?|bills?)\b/iu',
+            '/\binvoices?\s+(from|in|for|during)\b/iu',
+            '/\bhow\s+many\s+invoices?\b/iu',
+            '/\boverdue\s+invoices?\b/iu',
+            '/\bunpaid\s+invoices?\b/iu',
+            '/\bpending\s+invoices?\b/iu',
+            // Macedonian patterns
+            '/\b(прикажи|покажи|листа|најди|пребарај)\s+(фактур[аие]|сметк[аие])\b/iu',
+            '/\b(минат[аие]|овој|оваа|последн[аие])\s+(месец|недела|година|квартал)\s+(фактур[аие]|сметк[аие])\b/iu',
+            '/\bфактур[аие]\s+(од|во|за|во текот на)\b/iu',
+            '/\bколку\s+фактур[аие]\b/iu',
+            '/\bзадоцнет[аие]\s+фактур[аие]\b/iu',
+            '/\bнеплатен[аие]\s+фактур[аие]\b/iu',
+        ];
+
+        foreach ($invoicePatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'invoices';
+                Log::info('[AiInsightsService] Invoice context detected', ['pattern' => $pattern]);
+                break;
+            }
+        }
+
+        // Customer queries - who owes money, customer details
+        $customerPatterns = [
+            // English patterns
+            '/\b(who|which)\s+(owes?|owing|customer|client)\b/iu',
+            '/\b(outstanding|unpaid)\s+(customer|client)s?\b/iu',
+            '/\b(customer|client)s?\s+(with|having)\s+(debt|balance|outstanding)\b/iu',
+            '/\b(top|best|biggest)\s+(customer|client)s?\b/iu',
+            '/\blist\s+(customers?|clients?)\b/iu',
+            // Macedonian patterns
+            '/\b(кој|која|кои)\s+(должи|клиент|купувач)\b/iu',
+            '/\b(неплатен[аие]|должи)\s+(клиент[аие]|купувач[аие])\b/iu',
+            '/\b(клиент[аие]|купувач[аие])\s+(со|кои имаат)\s+(долг|салдо|неплатено)\b/iu',
+            '/\b(топ|најдобр[аие]|најголем[аие])\s+(клиент[аие]|купувач[аие])\b/iu',
+            '/\bлиста\s+(клиент[аие]|купувач[аие])\b/iu',
+        ];
+
+        foreach ($customerPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'customers';
+                Log::info('[AiInsightsService] Customer context detected', ['pattern' => $pattern]);
+                break;
+            }
+        }
+
+        // Trend queries - cash flow, revenue trends
+        $trendPatterns = [
+            // English patterns
+            '/\b(cash\s*flow|revenue|sales|income)\s+(trend|pattern|over\s+time|history)\b/iu',
+            '/\b(monthly|quarterly|yearly|annual)\s+(revenue|sales|income|trend)\b/iu',
+            '/\bhow\s+(is|are|was|were)\s+(we|sales|revenue)\s+(doing|performing|trending)\b/iu',
+            '/\b(growth|decline|increase|decrease)\s+(in|of)\s+(revenue|sales)\b/iu',
+            '/\bcompare\s+(revenue|sales|income)\b/iu',
+            // Macedonian patterns
+            '/\b(паричен\s*тек|приход|продажба|заработка)\s+(тренд|образец|со текот на време|историја)\b/iu',
+            '/\b(месечн[аие]|квартални|годишни)\s+(приход|продажба|заработка|тренд)\b/iu',
+            '/\bкако\s+(се|беше|бевме|продажб[аие]|приход[аие])\s+(чувствува|изведува|трендира)\b/iu',
+            '/\b(раст|пад|зголемување|намалување)\s+(во|на)\s+(приход|продажба)\b/iu',
+            '/\bспореди\s+(приход|продажба|заработка)\b/iu',
+        ];
+
+        foreach ($trendPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'trends';
+                Log::info('[AiInsightsService] Trend context detected', ['pattern' => $pattern]);
+                break;
+            }
+        }
+
+        // Payment queries - late payments, payment behavior
+        $paymentPatterns = [
+            // English patterns
+            '/\b(late|overdue|delayed)\s+(payment|paying)\b/iu',
+            '/\b(payment|paying)\s+(behavior|pattern|timing|speed)\b/iu',
+            '/\bhow\s+(fast|slow|quick|long)\s+(do|are)\s+(customer|client)s?\s+pay\b/iu',
+            '/\baverage\s+(payment|pay)\s+(time|period|days)\b/iu',
+            '/\b(on\s*time|timely)\s+payment\b/iu',
+            // Macedonian patterns
+            '/\b(доцнет[аие]|задоцнет[аие])\s+(плаќањ[аие]|наплат[аие])\b/iu',
+            '/\b(плаќањ[аие]|наплат[аие])\s+(однесување|образец|навремност|брзина)\b/iu',
+            '/\bколку\s+(брзо|бавно|долго)\s+(клиент[аие]|купувач[аие])\s+плаќаат\b/iu',
+            '/\bпросечно\s+(плаќањ[аие]|наплат[аие])\s+(време|период|денови)\b/iu',
+            '/\b(навремен[аие]|навреме)\s+плаќањ[аие]\b/iu',
+        ];
+
+        foreach ($paymentPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'payment_timing';
+                Log::info('[AiInsightsService] Payment timing context detected', ['pattern' => $pattern]);
+                break;
+            }
+        }
+
+        // Customer ranking - top customers, best clients
+        $rankingPatterns = [
+            // English patterns
+            '/\b(top|best|biggest|largest|highest)\s+\d*\s*(customer|client)s?\b/iu',
+            '/\b(customer|client)s?\s+(ranking|by\s+revenue|by\s+sales)\b/iu',
+            '/\bwho\s+(are|is)\s+(my|our|the)\s+(top|best|biggest)\b/iu',
+            '/\brank\s+(customer|client)s?\b/iu',
+            // Macedonian patterns
+            '/\b(топ|најдобр[аие]|најголем[аие]|највисок[аие])\s+\d*\s*(клиент[аие]|купувач[аие])\b/iu',
+            '/\b(клиент[аие]|купувач[аие])\s+(рангирање|по\s+приход|по\s+продажба)\b/iu',
+            '/\bкои\s+се\s+(мои|наши|наш[аие])\s+(топ|најдобр[аие]|најголем[аие])\b/iu',
+            '/\bрангирај\s+(клиент[аие]|купувач[аие])\b/iu',
+        ];
+
+        foreach ($rankingPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'top_customers';
+                Log::info('[AiInsightsService] Top customers context detected', ['pattern' => $pattern]);
+                break;
+            }
+        }
+
+        // If no specific context detected, use basic stats
+        if (empty($contexts)) {
+            $contexts[] = 'basic';
+            Log::info('[AiInsightsService] No specific context detected, using basic');
+        }
+
+        Log::info('[AiInsightsService] Final detected contexts', [
+            'contexts' => $contexts,
+        ]);
+
+        return array_unique($contexts);
+    }
+
+    /**
+     * Fetch contextual data based on detected query context types
+     *
+     * @param Company $company
+     * @param array<string> $contextTypes Detected context types
+     * @return array<string, mixed> Contextual data for prompt building
+     */
+    private function fetchContextualData(Company $company, array $contextTypes): array
+    {
+        $data = [];
+
+        try {
+            // Always fetch basic company stats
+            $data['company_stats'] = $this->fetchCompanyStats($company);
+
+            Log::info('[AiInsightsService] Fetching data for contexts', [
+                'company_id' => $company->id,
+                'contexts' => $contextTypes,
+            ]);
+
+            // Fetch data based on detected contexts
+            foreach ($contextTypes as $context) {
+                switch ($context) {
+                    case 'invoices':
+                        // Fetch recent invoices with various statuses
+                        $data['recent_invoices'] = $this->dataProvider->searchInvoices($company, [
+                            'from_date' => now()->subMonths(3)->format('Y-m-d'),
+                        ]);
+
+                        // Also get overdue invoices specifically
+                        $data['overdue_invoices'] = $this->dataProvider->searchInvoices($company, [
+                            'status' => 'SENT',
+                        ]);
+
+                        Log::info('[AiInsightsService] Invoice data fetched', [
+                            'recent_count' => count($data['recent_invoices'] ?? []),
+                            'overdue_count' => count($data['overdue_invoices'] ?? []),
+                        ]);
+                        break;
+
+                    case 'customers':
+                        // Fetch invoices with customer details for outstanding analysis
+                        $data['customer_invoices'] = $this->dataProvider->searchInvoices($company, [
+                            'status' => 'SENT',
+                        ]);
+
+                        // Also get top customers for context
+                        $data['top_customers'] = $this->dataProvider->getTopCustomers($company, 10);
+
+                        Log::info('[AiInsightsService] Customer data fetched', [
+                            'customer_invoices_count' => count($data['customer_invoices'] ?? []),
+                            'top_customers_count' => count($data['top_customers'] ?? []),
+                        ]);
+                        break;
+
+                    case 'trends':
+                        // Fetch monthly trends
+                        $data['monthly_trends'] = $this->dataProvider->getMonthlyTrends($company, 12);
+
+                        // Also get customer growth for comprehensive trend analysis
+                        $data['customer_growth'] = $this->dataProvider->getCustomerGrowth($company, 12);
+
+                        Log::info('[AiInsightsService] Trend data fetched', [
+                            'monthly_trends_count' => count($data['monthly_trends'] ?? []),
+                            'customer_growth_count' => count($data['customer_growth'] ?? []),
+                        ]);
+                        break;
+
+                    case 'payment_timing':
+                        // Fetch payment timing analysis
+                        $data['payment_timing'] = $this->dataProvider->getPaymentTimingAnalysis($company);
+
+                        // Also get recent invoices to show specific examples
+                        $data['recent_invoices'] = $this->dataProvider->searchInvoices($company, [
+                            'from_date' => now()->subMonths(6)->format('Y-m-d'),
+                        ]);
+
+                        Log::info('[AiInsightsService] Payment timing data fetched', [
+                            'payment_timing' => $data['payment_timing'],
+                            'recent_invoices_count' => count($data['recent_invoices'] ?? []),
+                        ]);
+                        break;
+
+                    case 'top_customers':
+                        // Fetch top customers by revenue
+                        $data['top_customers'] = $this->dataProvider->getTopCustomers($company, 10);
+
+                        Log::info('[AiInsightsService] Top customers data fetched', [
+                            'top_customers_count' => count($data['top_customers'] ?? []),
+                        ]);
+                        break;
+
+                    case 'basic':
+                        // Basic stats already fetched above
+                        Log::info('[AiInsightsService] Using basic stats only');
+                        break;
+
+                    default:
+                        Log::warning('[AiInsightsService] Unknown context type', [
+                            'context' => $context,
+                        ]);
+                        break;
+                }
+            }
+
+            Log::info('[AiInsightsService] All contextual data fetched successfully', [
+                'company_id' => $company->id,
+                'data_keys' => array_keys($data),
+            ]);
+
+            return $data;
+
+        } catch (\Exception $e) {
+            Log::error('[AiInsightsService] Failed to fetch contextual data', [
+                'company_id' => $company->id,
+                'contexts' => $contextTypes,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Return at least basic stats on error
+            return [
+                'company_stats' => $data['company_stats'] ?? $this->fetchCompanyStats($company),
+            ];
         }
     }
 
@@ -379,15 +669,17 @@ PROMPT;
      * Build chat prompt in Macedonian with company context
      *
      * @param Company $company
-     * @param array<string, mixed> $stats
+     * @param array<string, mixed> $contextualData Data with 'company_stats' and optional contextual data
      * @param string $question
      * @return string
      */
-    private function buildChatPrompt(Company $company, array $stats, string $question): string
+    private function buildChatPrompt(Company $company, array $contextualData, string $question): string
     {
         $companyName = $company->name;
         $currency = $company->currency ?? 'MKD';
 
+        // Extract company stats
+        $stats = $contextualData['company_stats'] ?? [];
         $revenue = number_format($stats['revenue'] ?? 0, 2);
         $expenses = number_format($stats['expenses'] ?? 0, 2);
         $outstanding = number_format($stats['outstanding'] ?? 0, 2);
@@ -403,7 +695,8 @@ PROMPT;
         $profit = ($stats['revenue'] ?? 0) - ($stats['expenses'] ?? 0);
         $profitFormatted = number_format($profit, 2);
 
-        return <<<PROMPT
+        // Build base prompt
+        $prompt = <<<BASETEXT
 Ти си македонски финансиски советник кој помага на корисниците со нивните финансиски прашања.
 
 Контекст на компанијата:
@@ -419,11 +712,54 @@ PROMPT;
 - Неплатени фактури (износ): {$outstanding} {$currency}
 - Број на клиенти: {$customers}
 
+BASETEXT;
+
+        // Add contextual data sections based on what's available
+        if (!empty($contextualData['recent_invoices'])) {
+            $invoicesText = $this->formatInvoicesForPrompt($contextualData['recent_invoices'], $currency);
+            $prompt .= "\nПоследни фактури (последни 3 месеци):\n{$invoicesText}\n";
+        }
+
+        if (!empty($contextualData['overdue_invoices'])) {
+            $overdueText = $this->formatInvoicesForPrompt($contextualData['overdue_invoices'], $currency, true);
+            $prompt .= "\nЗадоцнети фактури:\n{$overdueText}\n";
+        }
+
+        if (!empty($contextualData['customer_invoices'])) {
+            $customerInvoicesText = $this->formatCustomerInvoicesForPrompt($contextualData['customer_invoices'], $currency);
+            $prompt .= "\nФактури по клиент (неплатени):\n{$customerInvoicesText}\n";
+        }
+
+        if (!empty($contextualData['monthly_trends'])) {
+            $trendsText = $this->formatMonthlyTrends($contextualData['monthly_trends'], $currency);
+            $prompt .= "\nМесечни трендови:\n{$trendsText}\n";
+        }
+
+        if (!empty($contextualData['customer_growth'])) {
+            $growthText = $this->formatCustomerGrowth($contextualData['customer_growth']);
+            $prompt .= "\nРаст на клиенти:\n{$growthText}\n";
+        }
+
+        if (!empty($contextualData['payment_timing'])) {
+            $paymentTimingText = $this->formatPaymentTiming($contextualData['payment_timing']);
+            $prompt .= "\nНавремност на наплата:\n{$paymentTimingText}\n";
+        }
+
+        if (!empty($contextualData['top_customers'])) {
+            $topCustomersText = $this->formatTopCustomers($contextualData['top_customers'], $currency);
+            $prompt .= "\nТоп клиенти:\n{$topCustomersText}\n";
+        }
+
+        // Add question and instructions
+        $prompt .= <<<INSTRUCTIONS
+
 Прашање од корисникот:
 {$question}
 
-Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот.
-PROMPT;
+Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот. Користи ги детаљните податоци погоре за да дадеш прецизен и релевантен одговор.
+INSTRUCTIONS;
+
+        return $prompt;
     }
 
     /**
@@ -595,6 +931,566 @@ TEXT;
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Format invoices list for AI prompt
+     *
+     * @param array<int, array> $invoices Array of invoice data
+     * @param string $currency
+     * @param bool $overdueOnly Whether to filter only overdue invoices
+     * @return string
+     */
+    private function formatInvoicesForPrompt(array $invoices, string $currency, bool $overdueOnly = false): string
+    {
+        if (empty($invoices)) {
+            return 'Нема фактури';
+        }
+
+        $lines = [];
+        $count = 0;
+        $maxDisplay = 10; // Limit to avoid excessive token usage
+
+        foreach ($invoices as $invoice) {
+            // Filter overdue if requested
+            if ($overdueOnly) {
+                $dueDate = isset($invoice['due_date']) ? \Carbon\Carbon::parse($invoice['due_date']) : null;
+                if (!$dueDate || $dueDate->isFuture()) {
+                    continue;
+                }
+            }
+
+            if ($count >= $maxDisplay) {
+                $remaining = count($invoices) - $count;
+                $lines[] = "  ... и уште {$remaining} фактури";
+                break;
+            }
+
+            $invoiceNumber = $invoice['invoice_number'] ?? 'N/A';
+            $customerName = $invoice['customer_name'] ?? 'Unknown';
+            $total = number_format($invoice['total'] ?? 0, 2);
+            $dueAmount = number_format($invoice['due_amount'] ?? 0, 2);
+            $status = $invoice['paid_status'] ?? $invoice['status'] ?? 'N/A';
+            $invoiceDate = $invoice['invoice_date'] ?? 'N/A';
+            $dueDate = $invoice['due_date'] ?? 'N/A';
+
+            $lines[] = "  - #{$invoiceNumber}: {$customerName}, {$total} {$currency} (должи: {$dueAmount} {$currency}), статус: {$status}, датум: {$invoiceDate}, рок: {$dueDate}";
+            $count++;
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Format customer invoices grouped by customer for AI prompt
+     *
+     * @param array<int, array> $invoices Array of invoice data
+     * @param string $currency
+     * @return string
+     */
+    private function formatCustomerInvoicesForPrompt(array $invoices, string $currency): string
+    {
+        if (empty($invoices)) {
+            return 'Нема неплатени фактури';
+        }
+
+        // Group invoices by customer
+        $byCustomer = [];
+        foreach ($invoices as $invoice) {
+            $customerName = $invoice['customer_name'] ?? 'Unknown';
+            if (!isset($byCustomer[$customerName])) {
+                $byCustomer[$customerName] = [
+                    'count' => 0,
+                    'total_due' => 0,
+                    'invoices' => [],
+                ];
+            }
+            $byCustomer[$customerName]['count']++;
+            $byCustomer[$customerName]['total_due'] += $invoice['due_amount'] ?? 0;
+            $byCustomer[$customerName]['invoices'][] = $invoice;
+        }
+
+        // Sort by total due (descending)
+        uasort($byCustomer, fn($a, $b) => $b['total_due'] <=> $a['total_due']);
+
+        $lines = [];
+        $maxCustomers = 10;
+        $count = 0;
+
+        foreach ($byCustomer as $customerName => $data) {
+            if ($count >= $maxCustomers) {
+                $remaining = count($byCustomer) - $count;
+                $lines[] = "  ... и уште {$remaining} клиенти";
+                break;
+            }
+
+            $totalDue = number_format($data['total_due'], 2);
+            $invoiceCount = $data['count'];
+            $lines[] = "  - {$customerName}: {$totalDue} {$currency} ({$invoiceCount} фактури)";
+
+            $count++;
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Format customer growth for AI prompt
+     *
+     * @param array<int, array{month: string, new_customers: int, total_customers: int}> $growth
+     * @return string
+     */
+    private function formatCustomerGrowth(array $growth): string
+    {
+        if (empty($growth)) {
+            return 'Нема доволно податоци за раст на клиенти';
+        }
+
+        $lines = [];
+        // Show only last 6 months to keep prompt concise
+        $recent = array_slice($growth, -6);
+
+        foreach ($recent as $monthData) {
+            $month = $monthData['month'];
+            $newCustomers = $monthData['new_customers'];
+            $totalCustomers = $monthData['total_customers'];
+
+            $lines[] = "  {$month}: +{$newCustomers} нови (вкупно: {$totalCustomers})";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Check if a specific AI feature is enabled
+     *
+     * @param string $featureName Feature name from config('ai.features')
+     * @return bool
+     */
+    private function checkFeatureFlag(string $featureName): bool
+    {
+        $enabled = config("ai.features.{$featureName}", false);
+
+        Log::debug('[AiInsightsService] Feature flag checked', [
+            'feature' => $featureName,
+            'enabled' => $enabled,
+        ]);
+
+        return (bool) $enabled;
+    }
+
+    /**
+     * Check if PDF analysis feature is enabled
+     *
+     * @return bool
+     */
+    public function isPdfAnalysisEnabled(): bool
+    {
+        return $this->checkFeatureFlag('pdf_analysis');
+    }
+
+    /**
+     * Check if receipt scanning feature is enabled
+     *
+     * @return bool
+     */
+    public function isReceiptScanningEnabled(): bool
+    {
+        return $this->checkFeatureFlag('receipt_scanning');
+    }
+
+    /**
+     * Check if invoice extraction feature is enabled
+     *
+     * @return bool
+     */
+    public function isInvoiceExtractionEnabled(): bool
+    {
+        return $this->checkFeatureFlag('invoice_extraction');
+    }
+
+    /**
+     * Get list of enabled AI features
+     *
+     * @return array<string, bool> Array of feature names and their enabled status
+     */
+    public function getEnabledFeatures(): array
+    {
+        $features = config('ai.features', []);
+        $enabled = [];
+
+        foreach ($features as $feature => $status) {
+            $enabled[$feature] = (bool) $status;
+        }
+
+        Log::debug('[AiInsightsService] Enabled features retrieved', [
+            'features' => $enabled,
+        ]);
+
+        return $enabled;
+    }
+
+    /**
+     * Ensure a feature is enabled, throw exception if not
+     *
+     * @param string $featureName Feature name from config
+     * @param string $macedonianName Macedonian name for error message
+     * @return void
+     * @throws \Exception If feature is disabled
+     */
+    private function requireFeature(string $featureName, string $macedonianName): void
+    {
+        if (!$this->checkFeatureFlag($featureName)) {
+            Log::warning('[AiInsightsService] Feature access blocked', [
+                'feature' => $featureName,
+                'reason' => 'Feature flag disabled',
+            ]);
+
+            throw new \Exception(
+                "Функцијата \"{$macedonianName}\" не е овозможена. " .
+                "Ве молиме контактирајте го администраторот за да ја активира."
+            );
+        }
+    }
+
+    /**
+     * Analyze PDF document using AI vision
+     *
+     * @param string $pdfPath Path to PDF file
+     * @param string $analysisType Type of analysis (receipt, invoice, general)
+     * @param array<string, mixed> $options Additional options
+     * @return array<string, mixed> Analysis results
+     * @throws \Exception If PDF analysis is disabled or fails
+     */
+    public function analyzePdf(string $pdfPath, string $analysisType = 'general', array $options = []): array
+    {
+        // Guard: Check if PDF analysis is enabled
+        $this->requireFeature('pdf_analysis', 'анализа на PDF документи');
+
+        try {
+            Log::info('[AiInsightsService] Starting PDF analysis', [
+                'path' => $pdfPath,
+                'type' => $analysisType,
+            ]);
+
+            // Convert PDF to images
+            $converter = new PdfImageConverter();
+            $images = $converter->convertToImages($pdfPath, $options);
+
+            // Build vision analysis prompt based on type
+            $prompt = $this->buildPdfAnalysisPrompt($analysisType);
+
+            // Send to AI provider with vision capabilities
+            $response = $this->aiProvider->generateWithVision($prompt, $images);
+
+            Log::info('[AiInsightsService] PDF analysis completed', [
+                'path' => $pdfPath,
+                'type' => $analysisType,
+                'pages_analyzed' => count($images),
+            ]);
+
+            return [
+                'analysis' => $response,
+                'pages' => count($images),
+                'type' => $analysisType,
+                'timestamp' => Carbon::now()->toDateTimeString(),
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[AiInsightsService] PDF analysis failed', [
+                'path' => $pdfPath,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Scan receipt image and extract data
+     *
+     * @param string $imagePath Path to receipt image
+     * @param array<string, mixed> $options Additional options
+     * @return array<string, mixed> Extracted receipt data
+     * @throws \Exception If receipt scanning is disabled or fails
+     */
+    public function scanReceipt(string $imagePath, array $options = []): array
+    {
+        // Guard: Check if receipt scanning is enabled
+        $this->requireFeature('receipt_scanning', 'скенирање на сметки');
+
+        try {
+            Log::info('[AiInsightsService] Starting receipt scan', [
+                'path' => $imagePath,
+            ]);
+
+            // Read image and encode
+            $imageData = base64_encode(file_get_contents($imagePath));
+            $mediaType = $this->detectImageMediaType($imagePath);
+
+            $images = [[
+                'data' => $imageData,
+                'media_type' => $mediaType,
+                'page' => 1,
+            ]];
+
+            // Build receipt scanning prompt
+            $prompt = $this->buildReceiptScanningPrompt();
+
+            // Send to AI provider
+            $response = $this->aiProvider->generateWithVision($prompt, $images);
+
+            // Parse structured data
+            $receiptData = $this->parseReceiptData($response);
+
+            Log::info('[AiInsightsService] Receipt scan completed', [
+                'path' => $imagePath,
+                'items_found' => count($receiptData['items'] ?? []),
+            ]);
+
+            return $receiptData;
+
+        } catch (\Exception $e) {
+            Log::error('[AiInsightsService] Receipt scanning failed', [
+                'path' => $imagePath,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Extract invoice data from document
+     *
+     * @param string $documentPath Path to invoice document (PDF or image)
+     * @param array<string, mixed> $options Additional options
+     * @return array<string, mixed> Extracted invoice data
+     * @throws \Exception If invoice extraction is disabled or fails
+     */
+    public function extractInvoiceData(string $documentPath, array $options = []): array
+    {
+        // Guard: Check if invoice extraction is enabled
+        $this->requireFeature('invoice_extraction', 'извлекување на податоци од фактури');
+
+        try {
+            Log::info('[AiInsightsService] Starting invoice extraction', [
+                'path' => $documentPath,
+            ]);
+
+            // Determine if PDF or image
+            $isPdf = strtolower(pathinfo($documentPath, PATHINFO_EXTENSION)) === 'pdf';
+
+            if ($isPdf) {
+                // Convert PDF to images
+                $converter = new PdfImageConverter();
+                $images = $converter->convertToImages($documentPath, $options);
+            } else {
+                // Direct image processing
+                $imageData = base64_encode(file_get_contents($documentPath));
+                $mediaType = $this->detectImageMediaType($documentPath);
+
+                $images = [[
+                    'data' => $imageData,
+                    'media_type' => $mediaType,
+                    'page' => 1,
+                ]];
+            }
+
+            // Build invoice extraction prompt
+            $prompt = $this->buildInvoiceExtractionPrompt();
+
+            // Send to AI provider
+            $response = $this->aiProvider->generateWithVision($prompt, $images);
+
+            // Parse structured invoice data
+            $invoiceData = $this->parseInvoiceData($response);
+
+            Log::info('[AiInsightsService] Invoice extraction completed', [
+                'path' => $documentPath,
+                'items_found' => count($invoiceData['items'] ?? []),
+            ]);
+
+            return $invoiceData;
+
+        } catch (\Exception $e) {
+            Log::error('[AiInsightsService] Invoice extraction failed', [
+                'path' => $documentPath,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Build PDF analysis prompt based on analysis type
+     *
+     * @param string $type Analysis type
+     * @return string
+     */
+    private function buildPdfAnalysisPrompt(string $type): string
+    {
+        return match($type) {
+            'receipt' => 'Анализирај ја оваа сметка и извлечи ги сите релевантни податоци (продавач, ставки, износи, данок, вкупно).',
+            'invoice' => 'Анализирај ја оваа фактура и извлечи ги сите релевантни податоци (издавач, примач, ставки, износи, датуми).',
+            default => 'Анализирај го овој документ и извлечи ги клучните финансиски информации.',
+        };
+    }
+
+    /**
+     * Build receipt scanning prompt in Macedonian
+     *
+     * @return string
+     */
+    private function buildReceiptScanningPrompt(): string
+    {
+        return <<<PROMPT
+Анализирај ја оваа сметка и извлечи ги следните податоци во JSON формат:
+{
+  "merchant_name": "Име на продавачот",
+  "merchant_address": "Адреса",
+  "merchant_tax_id": "Даночен број",
+  "date": "Датум (YYYY-MM-DD формат)",
+  "time": "Време",
+  "items": [
+    {
+      "name": "Опис на артикл",
+      "quantity": 1.0,
+      "price": 100.00,
+      "total": 100.00
+    }
+  ],
+  "subtotal": 100.00,
+  "tax": 18.00,
+  "total": 118.00,
+  "payment_method": "Готовина/Картичка",
+  "receipt_number": "Број на сметка"
+}
+
+Врати само валиден JSON без дополнителен текст.
+PROMPT;
+    }
+
+    /**
+     * Build invoice extraction prompt in Macedonian
+     *
+     * @return string
+     */
+    private function buildInvoiceExtractionPrompt(): string
+    {
+        return <<<PROMPT
+Анализирај ја оваа фактура и извлечи ги следните податоци во JSON формат:
+{
+  "invoice_number": "Број на фактура",
+  "invoice_date": "Датум (YYYY-MM-DD формат)",
+  "due_date": "Рок за плаќање (YYYY-MM-DD формат)",
+  "seller": {
+    "name": "Име на издавач",
+    "address": "Адреса",
+    "tax_id": "Даночен број",
+    "vat_number": "ДДВ број"
+  },
+  "buyer": {
+    "name": "Име на примач",
+    "address": "Адреса",
+    "tax_id": "Даночен број"
+  },
+  "items": [
+    {
+      "description": "Опис",
+      "quantity": 1.0,
+      "unit": "парче/кг/м",
+      "unit_price": 100.00,
+      "total": 100.00,
+      "tax_rate": 18.0
+    }
+  ],
+  "subtotal": 100.00,
+  "tax": 18.00,
+  "total": 118.00,
+  "currency": "MKD",
+  "payment_terms": "Услови за плаќање",
+  "notes": "Забелешки"
+}
+
+Врати само валиден JSON без дополнителен текст.
+PROMPT;
+    }
+
+    /**
+     * Parse receipt data from AI response
+     *
+     * @param string $response AI response
+     * @return array<string, mixed>
+     */
+    private function parseReceiptData(string $response): array
+    {
+        try {
+            // Extract JSON from response
+            $jsonMatch = [];
+            if (preg_match('/\{[\s\S]*\}/', $response, $jsonMatch)) {
+                $response = $jsonMatch[0];
+            }
+
+            return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+
+        } catch (\JsonException $e) {
+            Log::error('[AiInsightsService] Failed to parse receipt data', [
+                'error' => $e->getMessage(),
+                'response' => $response,
+            ]);
+
+            throw new \Exception('Не успеа парсирањето на податоците од сметката.');
+        }
+    }
+
+    /**
+     * Parse invoice data from AI response
+     *
+     * @param string $response AI response
+     * @return array<string, mixed>
+     */
+    private function parseInvoiceData(string $response): array
+    {
+        try {
+            // Extract JSON from response
+            $jsonMatch = [];
+            if (preg_match('/\{[\s\S]*\}/', $response, $jsonMatch)) {
+                $response = $jsonMatch[0];
+            }
+
+            return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+
+        } catch (\JsonException $e) {
+            Log::error('[AiInsightsService] Failed to parse invoice data', [
+                'error' => $e->getMessage(),
+                'response' => $response,
+            ]);
+
+            throw new \Exception('Не успеа парсирањето на податоците од фактурата.');
+        }
+    }
+
+    /**
+     * Detect image media type from file path
+     *
+     * @param string $path File path
+     * @return string Media type
+     */
+    private function detectImageMediaType(string $path): string
+    {
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        $types = [
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+        ];
+
+        return $types[$extension] ?? 'image/png';
     }
 }
 
