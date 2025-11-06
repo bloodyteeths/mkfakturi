@@ -579,7 +579,18 @@ class Invoice extends Model implements HasMedia
 
         App::setLocale($locale);
 
+        // FIXED: Verify logo file exists before using it
         $logo = $company->logo_path;
+
+        // If logo_path exists but file is not accessible, fall back to default
+        if ($logo && ! filter_var($logo, FILTER_VALIDATE_URL)) {
+            // It's a local path, check if file exists
+            if (! file_exists($logo)) {
+                $logo = null;
+            }
+        }
+
+        // If no logo or logo missing, use default
         if (! $logo) {
             $defaultLogo = base_path('logo/facturino_logo.png');
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;

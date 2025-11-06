@@ -459,4 +459,69 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
         return response('<pre>' . implode("\n", $output) . '</pre>');
     });
+
+    // Debug invoice PDF issues (logo 404, PDF 404)
+    // ----------------------------------------------
+    Route::get('/debug/fix-invoice-pdf', function () {
+        $output = [];
+        $output[] = "=== Invoice PDF Debug & Fix ===\n";
+
+        // Check invoices
+        $invoices = \App\Models\Invoice::all();
+        $output[] = "\nFound {$invoices->count()} invoices:";
+
+        foreach ($invoices as $invoice) {
+            $output[] = "  Invoice #{$invoice->invoice_number}:";
+            $output[] = "    - ID: {$invoice->id}";
+            $output[] = "    - unique_hash: ".($invoice->unique_hash ?? 'NULL - MISSING!');
+            $output[] = "    - company_id: {$invoice->company_id}";
+            $output[] = "    - status: {$invoice->status}";
+
+            // Fix missing unique_hash
+            if (! $invoice->unique_hash) {
+                $invoice->unique_hash = \Illuminate\Support\Str::random(20);
+                $invoice->save();
+                $output[] = "    ✅ Generated new unique_hash: {$invoice->unique_hash}";
+            }
+        }
+
+        // Check company logos
+        $output[] = "\n=== Company Logos ===";
+        $companies = \App\Models\Company::all();
+
+        foreach ($companies as $company) {
+            $output[] = "\nCompany: {$company->name} (ID: {$company->id})";
+            $output[] = "  logo_path: ".($company->logo_path ?? 'NULL');
+            $output[] = "  logo (URL): ".($company->logo ?? 'NULL');
+
+            // Check media
+            $logoMedia = $company->getMedia('logo')->first();
+            if ($logoMedia) {
+                $output[] = "  Media record exists:";
+                $output[] = "    - file_name: {$logoMedia->file_name}";
+                $output[] = "    - disk: {$logoMedia->disk}";
+                $output[] = "    - path: {$logoMedia->getPath()}";
+
+                // Check if file actually exists
+                try {
+                    $exists = \Storage::disk($logoMedia->disk)->exists($logoMedia->getPathRelativeToRoot());
+                    $output[] = "    - file_exists: ".($exists ? 'YES' : 'NO - MISSING!');
+
+                    if (! $exists) {
+                        $output[] = "    ⚠️  Logo file is missing from storage!";
+                    }
+                } catch (\Exception $e) {
+                    $output[] = "    - Error checking file: ".$e->getMessage();
+                }
+            } else {
+                $output[] = "  No logo media record";
+            }
+
+            // Check for default logo
+            $defaultLogo = base_path('logo/facturino_logo.png');
+            $output[] = "  Default logo exists: ".(file_exists($defaultLogo) ? 'YES' : 'NO');
+        }
+
+        return response('<pre>'.implode("\n", $output).'</pre>');
+    })->middleware('auth');
 }
