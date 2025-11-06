@@ -38,15 +38,11 @@
     @endforeach
 
     <script type="module">
-        @if(isset($customer_logo))
-
-        window.customer_logo = "/storage/{{$customer_logo}}"
-
+        @if(!empty($customer_logo))
+        window.customer_logo = "{{ $customer_logo }}"
         @endif
-        @if(isset($login_page_logo))
-
-        window.login_page_logo = "/storage/{{$login_page_logo}}"
-
+        @if(!empty($login_page_logo))
+        window.login_page_logo = "{{ $login_page_logo }}"
         @endif
         @if(isset($login_page_heading))
 
@@ -73,4 +69,3 @@
 </body>
 
 </html>
-

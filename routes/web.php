@@ -180,7 +180,7 @@ Route::get('/admin/{vue?}', function () {
 
 Route::get('{company:slug}/customer/{vue?}', function (Company $company) {
     return view('app')->with([
-        'customer_logo' => get_company_setting('customer_portal_logo', $company->id),
+        'customer_logo' => logo_asset_url(get_company_setting('customer_portal_logo', $company->id)),
         'current_theme' => get_company_setting('customer_portal_theme', $company->id),
         'customer_page_title' => get_company_setting('customer_portal_page_title', $company->id),
     ]);

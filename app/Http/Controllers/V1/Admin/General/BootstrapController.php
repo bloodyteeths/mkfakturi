@@ -86,6 +86,9 @@ class BootstrapController extends Controller
                 'copyright_text',
             ])->toArray();
 
+            $global_settings['admin_portal_logo'] = logo_asset_url($global_settings['admin_portal_logo'] ?? null);
+            $global_settings['login_page_logo'] = logo_asset_url($global_settings['login_page_logo'] ?? null);
+
             // Get feature flags from config
             $feature_flags = [];
             $features_config = config('features', []);

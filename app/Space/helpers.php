@@ -5,7 +5,9 @@ use App\Models\Currency;
 use App\Models\CustomField;
 use App\Models\Setting;
 use App\Space\InstallUtils;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Get company setting
@@ -120,6 +122,73 @@ function getCustomFieldValueKey(string $type)
         default:
             return 'string_answer';
     }
+}
+
+/**
+ * Resolve a logo reference ensuring it exists locally or is a valid remote URL.
+ */
+function resolve_logo_reference(?string $path): ?string
+{
+    if (! $path) {
+        return null;
+    }
+
+    if (Str::startsWith($path, ['http://', 'https://', '//', 'data:'])) {
+        return $path;
+    }
+
+    $disks = array_unique([config('filesystems.default', 'public'), 'public']);
+
+    foreach ($disks as $disk) {
+        if (! $disk || ! config("filesystems.disks.{$disk}")) {
+            continue;
+        }
+
+        try {
+            if (Storage::disk($disk)->exists($path)) {
+                return $path;
+            }
+        } catch (Throwable $exception) {
+            continue;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Return an absolute URL for a logo reference or null if it cannot be resolved.
+ */
+function logo_asset_url(?string $path): ?string
+{
+    $path = resolve_logo_reference($path);
+
+    if (! $path) {
+        return null;
+    }
+
+    if (Str::startsWith($path, ['http://', 'https://', '//', 'data:'])) {
+        return $path;
+    }
+
+    $disks = array_unique([config('filesystems.default', 'public'), 'public']);
+
+    foreach ($disks as $disk) {
+        if (! $disk || ! config("filesystems.disks.{$disk}")) {
+            continue;
+        }
+
+        try {
+            $url = Storage::disk($disk)->url($path);
+            if ($url) {
+                return $url;
+            }
+        } catch (Throwable $exception) {
+            continue;
+        }
+    }
+
+    return asset('storage/'.$path);
 }
 
 /**

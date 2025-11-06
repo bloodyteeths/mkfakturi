@@ -297,15 +297,13 @@ const adminLogo = computed(() => {
     return false
   }
 
-  if (globalStore.globalSettings.admin_portal_logo) {
-    return '/storage/' + globalStore.globalSettings.admin_portal_logo
-  }
+  const logo = globalStore.globalSettings?.admin_portal_logo
 
-  return false
+  return logo ? logo : false
 })
 
 watch(
-  () => globalStore.globalSettings.admin_portal_logo,
+  () => globalStore.globalSettings?.admin_portal_logo,
   () => {
     logoLoadFailed.value = false
   }
