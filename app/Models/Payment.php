@@ -401,6 +401,10 @@ class Payment extends Model implements HasMedia
         \App::setLocale($locale);
 
         $logo = $company->logo_path;
+        if (! $logo) {
+            $defaultLogo = base_path('logo/facturino_logo.png');
+            $logo = file_exists($defaultLogo) ? $defaultLogo : null;
+        }
 
         view()->share([
             'payment' => $this,
