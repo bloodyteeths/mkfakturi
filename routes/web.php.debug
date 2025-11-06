@@ -1,0 +1,23 @@
+<?php
+
+// TEMPORARY DEBUG ROUTE - Add this to routes/web.php
+Route::get('/debug-data', function () {
+    $company = \App\Models\Company::first();
+
+    $data = [
+        'company' => $company->name,
+        'invoices' => \App\Models\Invoice::where('company_id', $company->id)
+            ->select('id', 'invoice_number', 'total', 'status', 'paid_status', 'customer_id', 'created_at')
+            ->with('customer:id,name')
+            ->get(),
+        'expenses' => \App\Models\Expense::where('company_id', $company->id)
+            ->select('id', 'expense_number', 'amount', 'expense_category_id', 'created_at')
+            ->get(),
+        'ifrs_transactions' => \IFRS\Models\Transaction::where('entity_id', $company->ifrs_entity_id)
+            ->select('id', 'transaction_type', 'transaction_date', 'amount')
+            ->get(),
+        'stats' => app(\App\Services\McpDataProvider::class)->getCompanyStats($company),
+    ];
+
+    return response()->json($data, 200, [], JSON_PRETTY_PRINT);
+})->name('debug.data');

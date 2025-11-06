@@ -23,7 +23,9 @@
         <MainLogo
           v-if="!loginPageLogo"
           class="block w-48 h-auto max-w-full mb-32 text-primary-500"
+          variant="clear"
         />
+        <!-- CLAUDE-CHECKPOINT -->
 
         <img
           v-else
