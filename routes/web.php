@@ -237,6 +237,85 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         return response('No log file found');
     });
 
+    // TEMPORARY: Show actual database data
+    Route::get('/debug/show-data', function () {
+        $output = [];
+        $output[] = '📊 Production Database Contents';
+        $output[] = '=================================';
+        $output[] = '';
+
+        try {
+            $companies = \App\Models\Company::all();
+            $output[] = "Total companies: " . $companies->count();
+            foreach ($companies as $company) {
+                $output[] = "  - {$company->name} (ID: {$company->id}, slug: {$company->slug})";
+            }
+            $output[] = '';
+
+            $company = \App\Models\Company::first();
+            if ($company) {
+                $output[] = "Analyzing company: {$company->name}";
+                $output[] = '';
+
+                // Invoices
+                $invoices = \App\Models\Invoice::where('company_id', $company->id)->get();
+                $output[] = "INVOICES: " . $invoices->count();
+                foreach ($invoices as $inv) {
+                    $output[] = sprintf(
+                        "  - #%s: %s MKD (status=%s, paid_status=%s, customer=%s, date=%s)",
+                        $inv->invoice_number,
+                        number_format($inv->total, 2),
+                        $inv->status,
+                        $inv->paid_status,
+                        $inv->customer->name ?? 'N/A',
+                        $inv->invoice_date
+                    );
+                }
+                $output[] = '';
+
+                // Expenses
+                $expenses = \App\Models\Expense::where('company_id', $company->id)->get();
+                $output[] = "EXPENSES: " . $expenses->count();
+                $totalExpenses = 0;
+                foreach ($expenses as $exp) {
+                    $totalExpenses += $exp->amount;
+                    $output[] = sprintf(
+                        "  - #%s: %s MKD (date=%s)",
+                        $exp->expense_number ?? 'N/A',
+                        number_format($exp->amount, 2),
+                        $exp->expense_date
+                    );
+                }
+                $output[] = "Total expenses: " . number_format($totalExpenses, 2) . " MKD";
+                $output[] = '';
+
+                // MCP Stats
+                $dataProvider = app(\App\Services\McpDataProvider::class);
+                $stats = $dataProvider->getCompanyStats($company);
+                $output[] = "MCP DATA PROVIDER STATS:";
+                $output[] = "  - Revenue: " . number_format($stats['revenue'], 2) . " MKD";
+                $output[] = "  - Expenses: " . number_format($stats['expenses'], 2) . " MKD";
+                $output[] = "  - Outstanding: " . number_format($stats['outstanding'], 2) . " MKD";
+                $output[] = "  - Invoices count: " . $stats['invoices_count'];
+                $output[] = "  - Customers: " . $stats['customers'];
+                $output[] = '';
+
+                // IFRS data
+                if ($company->ifrs_entity_id) {
+                    $output[] = "IFRS ENTITY: ID {$company->ifrs_entity_id}";
+                    $ifrsTxns = \IFRS\Models\Transaction::where('entity_id', $company->ifrs_entity_id)->count();
+                    $output[] = "  - IFRS Transactions: {$ifrsTxns}";
+                }
+            }
+
+        } catch (\Exception $e) {
+            $output[] = '❌ ERROR: ' . $e->getMessage();
+            $output[] = $e->getTraceAsString();
+        }
+
+        return response('<pre>' . implode("\n", $output) . '</pre>');
+    });
+
     // TEMPORARY: Clean demo data via web endpoint
     Route::get('/debug/clean-demo-data', function () {
         $output = [];
