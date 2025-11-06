@@ -26,7 +26,7 @@ const props = defineProps({
 
 const logoUrl = computed(() => {
   const logoName = props.variant === 'clear' ? 'facturino_logo_clear.png' : 'facturino_logo.png'
-  return new URL(`../../static/img/${logoName}`, import.meta.url).href
+  return `/${logoName}`
 })
 // CLAUDE-CHECKPOINT
 </script>
