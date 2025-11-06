@@ -21,7 +21,13 @@ class RecurringInvoiceController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $recurringInvoices = RecurringInvoice::whereCompany()
+        $recurringInvoices = RecurringInvoice::query()
+            ->with([
+                'customer.currency',
+                'company',
+                'currency',
+            ])
+            ->whereCompany()
             ->applyFilters($request->all())
             ->paginateData($limit);
 
@@ -43,6 +49,17 @@ class RecurringInvoiceController extends Controller
 
         $recurringInvoice = RecurringInvoice::createFromRequest($request);
 
+        $recurringInvoice->load([
+            'customer.currency',
+            'company',
+            'currency',
+            'items.taxes',
+            'taxes',
+            'invoices.customer.currency',
+            'fields',
+            'creator',
+        ]);
+
         return new RecurringInvoiceResource($recurringInvoice);
     }
 
@@ -54,6 +71,17 @@ class RecurringInvoiceController extends Controller
     public function show(RecurringInvoice $recurringInvoice)
     {
         $this->authorize('view', $recurringInvoice);
+
+        $recurringInvoice->load([
+            'customer.currency',
+            'company',
+            'currency',
+            'items.taxes',
+            'taxes',
+            'invoices.customer.currency',
+            'fields',
+            'creator',
+        ]);
 
         return new RecurringInvoiceResource($recurringInvoice);
     }
@@ -69,6 +97,17 @@ class RecurringInvoiceController extends Controller
         $this->authorize('update', $recurringInvoice);
 
         $recurringInvoice->updateFromRequest($request);
+
+        $recurringInvoice->load([
+            'customer.currency',
+            'company',
+            'currency',
+            'items.taxes',
+            'taxes',
+            'invoices.customer.currency',
+            'fields',
+            'creator',
+        ]);
 
         return new RecurringInvoiceResource($recurringInvoice);
     }

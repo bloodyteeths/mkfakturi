@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 use Silber\Bouncer\BouncerFacade;
 use Silber\Bouncer\Database\Role;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Throwable;
 
 class Company extends Model implements HasMedia
 {
@@ -42,28 +45,39 @@ class Company extends Model implements HasMedia
     {
         $logo = $this->getMedia('logo')->first();
 
-        $isSystem = FileDisk::whereSetAsDefault(true)->first()->isSystem();
-
-        if ($logo) {
-            if ($isSystem) {
-                return $logo->getPath();
-            } else {
-                return $logo->getFullUrl();
-            }
+        if (! $logo || ! $this->logoFileExists($logo)) {
+            return null;
         }
 
-        return null;
+        $fileDisk = FileDisk::whereSetAsDefault(true)->first();
+
+        if ($fileDisk && $fileDisk->isSystem()) {
+            return $logo->getPath();
+        }
+
+        return $logo->getFullUrl();
     }
 
     public function getLogoAttribute()
     {
         $logo = $this->getMedia('logo')->first();
 
-        if ($logo) {
+        if ($logo && $this->logoFileExists($logo)) {
             return $logo->getFullUrl();
         }
 
         return null;
+    }
+
+    protected function logoFileExists(Media $logo): bool
+    {
+        $diskName = $logo->disk ?? config('filesystems.default');
+
+        try {
+            return Storage::disk($diskName)->exists($logo->getPathRelativeToRoot());
+        } catch (Throwable $exception) {
+            return false;
+        }
     }
 
     public function customers(): HasMany
