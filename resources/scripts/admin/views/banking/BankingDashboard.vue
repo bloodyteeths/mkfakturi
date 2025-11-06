@@ -63,6 +63,7 @@
                 :src="account.bank_logo"
                 :alt="account.bank_name"
                 class="h-10 w-auto mr-3"
+                @error="handleImageError"
               />
               <div>
                 <h3 class="text-lg font-semibold text-gray-900">
@@ -363,6 +364,11 @@ const formatMoney = (amount, currency) => {
 const formatDate = (date) => {
   if (!date) return t('banking.never')
   return new Date(date).toLocaleDateString()
+}
+
+const handleImageError = (event) => {
+  // Hide the image if it fails to load
+  event.target.style.display = 'none'
 }
 
 // Lifecycle
