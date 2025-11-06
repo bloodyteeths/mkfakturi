@@ -243,6 +243,30 @@ else
     php artisan migrate --path=database/migrations/2025_11_04_000001_add_entity_id_to_users_table.php --force 2>&1 | tee -a storage/logs/migrations.log || echo "Entity migration already applied"
 fi
 
+# CRITICAL: Force fix MKD currency precision (must be 0, not 2)
+echo "Ensuring MKD currency has correct precision..."
+php artisan tinker --execute="
+    \$mkd = DB::table('currencies')->where('code', 'MKD')->first();
+    if (\$mkd) {
+        echo 'Current MKD precision: ' . \$mkd->precision . PHP_EOL;
+        if (\$mkd->precision != 0) {
+            echo 'FIXING: Updating MKD currency to precision=0...' . PHP_EOL;
+            DB::table('currencies')
+                ->where('code', 'MKD')
+                ->update([
+                    'precision' => 0,
+                    'thousand_separator' => '.',
+                    'decimal_separator' => ',',
+                ]);
+            echo '✅ MKD currency fixed!' . PHP_EOL;
+        } else {
+            echo '✅ MKD precision already correct (0)' . PHP_EOL;
+        }
+    } else {
+        echo '⚠️ MKD currency not found in database' . PHP_EOL;
+    }
+" 2>/dev/null || echo "Could not check MKD currency"
+
 # Force set profile_complete if RAILWAY_SKIP_INSTALL is true
 if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "RAILWAY_SKIP_INSTALL enabled - forcing installation complete..."
