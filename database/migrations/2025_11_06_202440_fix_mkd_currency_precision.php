@@ -29,12 +29,6 @@ return new class extends Migration
                 'thousand_separator' => '.',
                 'decimal_separator' => ',',
             ]);
-
-        $this->command->info('✅ Fixed MKD currency precision to 0');
-
-        // Log affected records
-        $affected = DB::table('currencies')->where('code', 'MKD')->count();
-        $this->command->info("   Updated {$affected} MKD currency record(s)");
     }
 
     /**
@@ -44,6 +38,5 @@ return new class extends Migration
     {
         // Intentionally not reversing - precision=0 is the correct value
         // If needed to revert for testing: UPDATE currencies SET precision=2 WHERE code='MKD'
-        $this->command->warn('⚠️  Not reverting MKD precision change - precision=0 is correct');
     }
 };
