@@ -253,7 +253,7 @@ const quantity = computed({
 
 const price = computed({
   get: () => {
-    const price = props.itemData.price
+    const price = props.itemData.price ?? 0
     // FIXED: For zero-precision currencies (like MKD), don't divide by 100
     const precision = parseInt(selectedCurrency.value.precision)
     return precision === 0 ? price : price / 100
@@ -261,8 +261,10 @@ const price = computed({
 
   set: (newValue) => {
     // FIXED: For zero-precision currencies (like MKD), don't multiply by 100
+    // CRITICAL: v-money3 with masked=true can emit null when field is empty
+    const safeValue = newValue ?? 0
     const precision = parseInt(selectedCurrency.value.precision)
-    let price = precision === 0 ? Math.round(newValue) : Math.round(newValue * 100)
+    let price = precision === 0 ? Math.round(safeValue) : Math.round(safeValue * 100)
     updateItemAttribute('price', price)
     setDiscount()
   },
