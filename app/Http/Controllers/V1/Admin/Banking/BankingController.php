@@ -64,8 +64,14 @@ class BankingController extends Controller
             ]);
 
             // Query with proper error handling
-            $accounts = BankAccount::where('company_id', $company->id)
-                ->where('is_active', true)
+            $accountsQuery = BankAccount::where('company_id', $company->id);
+
+            // Some self-hosted deployments might still be on an older schema without the is_active column.
+            if (Schema::hasColumn('bank_accounts', 'is_active')) {
+                $accountsQuery->where('is_active', true);
+            }
+
+            $accounts = $accountsQuery
                 ->get()
                 ->map(function ($account) {
                     try {
@@ -75,7 +81,7 @@ class BankingController extends Controller
                             if ($account->currency_id && $account->currency) {
                                 $currencyCode = $account->currency->code;
                             }
-                        } catch (\Exception $e) {
+                        } catch (\Throwable $e) {
                             Log::warning('Failed to load currency for bank account', [
                                 'account_id' => $account->id,
                                 'error' => $e->getMessage()
@@ -95,7 +101,7 @@ class BankingController extends Controller
                             'sync_status' => 'connected',
                             'is_primary' => $account->is_primary ?? false,
                         ];
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         Log::error('Failed to map bank account', [
                             'account_id' => $account->id ?? 'unknown',
                             'error' => $e->getMessage()
@@ -114,7 +120,7 @@ class BankingController extends Controller
             return response()->json([
                 'data' => $accounts
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to fetch bank accounts', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -188,7 +194,7 @@ class BankingController extends Controller
             // Only eager load relationships if they exist
             try {
                 $query->with(['bankAccount', 'matchedInvoice', 'matchedPayment']);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::warning('Failed to eager load relationships', [
                     'error' => $e->getMessage()
                 ]);
@@ -202,7 +208,7 @@ class BankingController extends Controller
             if ($request->has('from_date') && $request->from_date) {
                 try {
                     $query->where('transaction_date', '>=', Carbon::parse($request->from_date));
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Log::warning('Invalid from_date format', ['from_date' => $request->from_date]);
                 }
             }
@@ -210,7 +216,7 @@ class BankingController extends Controller
             if ($request->has('to_date') && $request->to_date) {
                 try {
                     $query->where('transaction_date', '<=', Carbon::parse($request->to_date));
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Log::warning('Invalid to_date format', ['to_date' => $request->to_date]);
                 }
             }
@@ -261,7 +267,7 @@ class BankingController extends Controller
                         'match_confidence' => $transaction->match_confidence,
                         'category' => null,
                     ];
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Log::error('Failed to map transaction', [
                         'transaction_id' => $transaction->id ?? 'unknown',
                         'error' => $e->getMessage()
@@ -279,7 +285,7 @@ class BankingController extends Controller
                     'total' => $transactions->total(),
                 ]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to fetch transactions', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -332,7 +338,7 @@ class BankingController extends Controller
                 'message' => 'Sync started successfully',
                 'account_id' => $account->id
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to sync account', [
                 'error' => $e->getMessage(),
                 'account_id' => $account->id
@@ -407,7 +413,7 @@ class BankingController extends Controller
                 'message' => 'Transaction categorized successfully',
                 'transaction' => $transaction
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to categorize transaction', [
                 'error' => $e->getMessage(),
                 'transaction_id' => $transaction->id
@@ -450,7 +456,7 @@ class BankingController extends Controller
                 'message' => 'Bank account disconnected successfully',
                 'account_id' => $account->id
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to disconnect account', [
                 'error' => $e->getMessage(),
                 'account_id' => $account->id
