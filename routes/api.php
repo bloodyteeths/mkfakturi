@@ -521,6 +521,12 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'getSettings']);
                 Route::post('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'updateSettings']);
 
+                // Document analysis endpoints (require pdf_analysis feature flag)
+                Route::post('/analyze-document', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'analyzeDocument']);
+                Route::post('/analyze-receipt', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'analyzeReceipt']);
+                Route::post('/extract-invoice', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'extractInvoice']);
+                Route::get('/monthly-trends', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'monthlyTrends']);
+
                 // Debug endpoint to see raw data
                 Route::get('/debug/data', function(\Illuminate\Http\Request $request) {
                     $company = \App\Models\Company::find($request->header('company'));
