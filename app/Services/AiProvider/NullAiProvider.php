@@ -76,4 +76,33 @@ class NullAiProvider implements AiProviderInterface
     {
         return sprintf('unconfigured-%s', $this->sourceProvider);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function analyzeImage(string $imageData, string $mediaType, string $prompt, array $options = []): string
+    {
+        Log::notice('Returning fallback AI image analysis response', [
+            'provider' => $this->getProviderName(),
+            'reason' => $this->reason,
+        ]);
+
+        return 'Анализата на слики е моментално недостапна. Ве молиме конфигурирајте го AI провајдерот пред повторно да пробате.';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function analyzeDocument(array $images, string $prompt, array $options = []): string
+    {
+        Log::notice('Returning fallback AI document analysis response', [
+            'provider' => $this->getProviderName(),
+            'reason' => $this->reason,
+            'page_count' => count($images),
+        ]);
+
+        return 'Анализата на документи е моментално недостапна. Ве молиме конфигурирајте го AI провајдерот пред повторно да пробате.';
+    }
 }
+
+// CLAUDE-CHECKPOINT

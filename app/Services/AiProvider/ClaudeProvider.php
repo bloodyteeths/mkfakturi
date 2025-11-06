@@ -140,6 +140,158 @@ class ClaudeProvider implements AiProviderInterface
     }
 
     /**
+     * Analyze an image with optional text prompt
+     *
+     * @param string $imageData Base64 encoded image data
+     * @param string $mediaType MIME type (image/png, image/jpeg, image/webp, image/gif)
+     * @param string $prompt Text prompt/question about the image
+     * @param array<string, mixed> $options Additional options
+     * @return string The AI's response
+     * @throws \Exception If the API call fails
+     */
+    public function analyzeImage(string $imageData, string $mediaType, string $prompt, array $options = []): string
+    {
+        $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
+        $temperature = $options['temperature'] ?? $this->temperature;
+
+        $startTime = microtime(true);
+
+        try {
+            // Build multimodal content array
+            $content = [
+                [
+                    'type' => 'image',
+                    'source' => [
+                        'type' => 'base64',
+                        'media_type' => $mediaType,
+                        'data' => $imageData,
+                    ],
+                ],
+                [
+                    'type' => 'text',
+                    'text' => $prompt,
+                ],
+            ];
+
+            $response = Http::withHeaders([
+                'x-api-key' => $this->apiKey,
+                'anthropic-version' => $this->apiVersion,
+                'content-type' => 'application/json',
+            ])
+            ->timeout(60) // Longer timeout for image analysis
+            ->post($this->apiUrl, [
+                'model' => $this->model,
+                'max_tokens' => $maxTokens,
+                'temperature' => $temperature,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $content,
+                    ],
+                ],
+            ]);
+
+            if ($response->failed()) {
+                $this->logApiCall('analyzeImage', $prompt, null, $response->status(), microtime(true) - $startTime);
+                throw new \Exception('Claude API image analysis request failed: ' . $response->body());
+            }
+
+            $data = $response->json();
+            $text = $data['content'][0]['text'] ?? '';
+
+            $this->logApiCall('analyzeImage', $prompt, $text, 200, microtime(true) - $startTime, [
+                'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                'media_type' => $mediaType,
+                'image_size_bytes' => strlen($imageData),
+            ]);
+
+            return $text;
+
+        } catch (\Exception $e) {
+            $this->logApiCall('analyzeImage', $prompt, null, 0, microtime(true) - $startTime, ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Analyze a document (PDF converted to images) with optional text prompt
+     *
+     * @param array<int, array{data: string, media_type: string}> $images Array of image pages
+     * @param string $prompt Text prompt/question about the document
+     * @param array<string, mixed> $options Additional options
+     * @return string The AI's response
+     * @throws \Exception If the API call fails
+     */
+    public function analyzeDocument(array $images, string $prompt, array $options = []): string
+    {
+        $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
+        $temperature = $options['temperature'] ?? $this->temperature;
+
+        $startTime = microtime(true);
+
+        try {
+            // Build multimodal content array with multiple images
+            $content = [];
+
+            foreach ($images as $index => $image) {
+                $content[] = [
+                    'type' => 'image',
+                    'source' => [
+                        'type' => 'base64',
+                        'media_type' => $image['media_type'],
+                        'data' => $image['data'],
+                    ],
+                ];
+            }
+
+            // Add text prompt at the end
+            $content[] = [
+                'type' => 'text',
+                'text' => $prompt,
+            ];
+
+            $response = Http::withHeaders([
+                'x-api-key' => $this->apiKey,
+                'anthropic-version' => $this->apiVersion,
+                'content-type' => 'application/json',
+            ])
+            ->timeout(120) // Even longer timeout for multi-page documents
+            ->post($this->apiUrl, [
+                'model' => $this->model,
+                'max_tokens' => $maxTokens,
+                'temperature' => $temperature,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $content,
+                    ],
+                ],
+            ]);
+
+            if ($response->failed()) {
+                $this->logApiCall('analyzeDocument', $prompt, null, $response->status(), microtime(true) - $startTime);
+                throw new \Exception('Claude API document analysis request failed: ' . $response->body());
+            }
+
+            $data = $response->json();
+            $text = $data['content'][0]['text'] ?? '';
+
+            $this->logApiCall('analyzeDocument', $prompt, $text, 200, microtime(true) - $startTime, [
+                'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                'page_count' => count($images),
+            ]);
+
+            return $text;
+
+        } catch (\Exception $e) {
+            $this->logApiCall('analyzeDocument', $prompt, null, 0, microtime(true) - $startTime, ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
      * Get the provider name
      *
      * @return string
@@ -199,3 +351,5 @@ class ClaudeProvider implements AiProviderInterface
         Log::channel(config('ai.log_channel', 'stack'))->info('AI API Call', $logData);
     }
 }
+
+// CLAUDE-CHECKPOINT
