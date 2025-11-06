@@ -7,7 +7,6 @@ use App\Models\Setting;
 use App\Space\InstallUtils;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Throwable;
 
 /**
  * Get company setting
