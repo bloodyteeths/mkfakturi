@@ -236,4 +236,58 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         }
         return response('No log file found');
     });
+
+    // TEMPORARY: Clean demo data via web endpoint
+    Route::get('/debug/clean-demo-data', function () {
+        $output = [];
+        $output[] = '🧹 Cleaning demo data...';
+        $output[] = '';
+
+        try {
+            // Delete demo company
+            $demoCompany = \App\Models\Company::where('slug', 'makedonska-softver-doo')->first();
+            if ($demoCompany) {
+                $invoiceCount = \App\Models\Invoice::where('company_id', $demoCompany->id)->count();
+                $expenseCount = \App\Models\Expense::where('company_id', $demoCompany->id)->count();
+
+                $output[] = "Found demo company: {$demoCompany->name} (ID: {$demoCompany->id})";
+                $output[] = "  - {$invoiceCount} invoices";
+                $output[] = "  - {$expenseCount} expenses";
+
+                $demoCompany->delete();
+                $output[] = "✅ Deleted demo company and all related data";
+            } else {
+                $output[] = 'ℹ️  No demo company found (slug: makedonska-softver-doo)';
+            }
+
+            // Delete demo user
+            $demoUser = \App\Models\User::where('email', 'marko.petrovski@megasoft.mk')->first();
+            if ($demoUser) {
+                $output[] = "Found demo user: {$demoUser->email}";
+                $demoUser->delete();
+                $output[] = "✅ Deleted demo user";
+            } else {
+                $output[] = 'ℹ️  No demo user found';
+            }
+
+            // Clean demo pattern invoices
+            $demoInvoiceCount = \App\Models\Invoice::where('invoice_number', 'LIKE', 'ФАК-%')->count();
+            if ($demoInvoiceCount > 0) {
+                $deleted = \App\Models\Invoice::where('invoice_number', 'LIKE', 'ФАК-%')->delete();
+                $output[] = "✅ Deleted {$deleted} demo invoices (pattern: ФАК-xxxxxx)";
+            }
+
+            $output[] = '';
+            $output[] = '🎉 Demo data cleanup complete!';
+            $output[] = 'Your production data is now clean.';
+
+        } catch (\Exception $e) {
+            $output[] = '❌ ERROR: ' . $e->getMessage();
+            $output[] = '';
+            $output[] = 'Stack trace:';
+            $output[] = $e->getTraceAsString();
+        }
+
+        return response('<pre>' . implode("\n", $output) . '</pre>');
+    });
 }
