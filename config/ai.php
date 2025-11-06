@@ -114,4 +114,36 @@ return [
         'token' => env('MCP_SERVER_TOKEN'),
         'timeout' => env('MCP_TIMEOUT', 30),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF to Image Converter
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for converting PDF documents to images for AI vision analysis.
+    | Supported backends: 'imagick', 'external_api'
+    |
+    | Note: Imagick backend requires the Imagick PHP extension to be installed.
+    | Install with: pecl install imagick (requires ImageMagick and Ghostscript)
+    |
+    */
+    'pdf_converter_backend' => env('PDF_CONVERTER_BACKEND', 'imagick'),
+    'pdf_converter_dpi' => env('PDF_CONVERTER_DPI', 150), // Higher DPI = better quality, larger files
+    'pdf_converter_format' => env('PDF_CONVERTER_FORMAT', 'png'), // png, jpg, webp
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vision Analysis Features
+    |--------------------------------------------------------------------------
+    |
+    | Enable or disable specific vision-based AI features.
+    |
+    */
+    'features' => [
+        'pdf_analysis' => env('AI_FEATURE_PDF_ANALYSIS', false),
+        'receipt_scanning' => env('AI_FEATURE_RECEIPT_SCANNING', false),
+        'invoice_extraction' => env('AI_FEATURE_INVOICE_EXTRACTION', false),
+    ],
 ];
+
+// CLAUDE-CHECKPOINT
