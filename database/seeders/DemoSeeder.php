@@ -28,9 +28,21 @@ class DemoSeeder extends Seeder
     /**
      * Run the database seeds for staging environment with realistic Macedonia business data.
      * This seeder creates comprehensive demo data for partner bureau testing and evaluation.
+     *
+     * IMPORTANT: This seeder is DISABLED in production environments to prevent demo data
+     * from polluting real business data.
      */
     public function run(): void
     {
+        // GUARD: Never run demo data seeder in production
+        if (app()->environment('production')) {
+            $this->command->warn('⚠️  DemoSeeder is disabled in production environment');
+            $this->command->info('To seed demo data, run this seeder in local/staging environment only');
+            return;
+        }
+
+        $this->command->info('🎭 Seeding demo data for testing/staging environment...');
+
         // Get Macedonia currency (MKD)
         $mkdCurrency = Currency::where('code', 'MKD')->first();
         if (!$mkdCurrency) {

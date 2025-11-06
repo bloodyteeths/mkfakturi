@@ -72,9 +72,14 @@ class ResetApp extends Command
         $this->info('Running migrate:fresh');
         Artisan::call('migrate:fresh --seed --force');
 
-        // Seed demo data
-        $this->info('Seeding database');
-        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+        // Seed demo data (only in local/staging, not production)
+        if (! app()->environment('production')) {
+            $this->info('Seeding demo data (non-production environment)...');
+            Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+        } else {
+            $this->warn('⚠️  Skipping DemoSeeder in production environment');
+            $this->info('Demo data seeding is disabled in production to protect real business data');
+        }
 
         // Clear all application caches
         $this->info('Clearing cache...');
