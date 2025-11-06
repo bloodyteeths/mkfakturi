@@ -64,9 +64,9 @@
             </div>
           </TransitionChild>
           <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            <div class="flex items-center shrink-0 px-4 mb-10">
+            <div class="flex items-center shrink-0 px-4 mb-6">
               <MainLogo
-                class="block h-8 w-auto text-primary-400"
+                class="block h-12 w-auto"
                 variant="clear"
                 alt="Facturino Logo"
               />

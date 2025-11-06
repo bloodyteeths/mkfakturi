@@ -1,5 +1,5 @@
 <template>
-  <img :src="logoUrl" :alt="altText" class="block h-auto max-w-full" />
+  <img :src="logoUrl" :alt="altText" />
 </template>
 
 <script setup>

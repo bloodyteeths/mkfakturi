@@ -22,7 +22,7 @@
       <div class="w-full">
         <MainLogo
           v-if="!loginPageLogo"
-          class="block w-48 h-auto max-w-full mb-32 text-primary-500"
+          class="block h-32 w-auto mb-32"
           variant="clear"
         />
         <!-- CLAUDE-CHECKPOINT -->
