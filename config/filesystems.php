@@ -24,6 +24,9 @@ return [
             'secret' => env('S3_COMPAT_SECRET'),
             'region' => env('S3_COMPAT_REGION'),
             'bucket' => env('S3_COMPAT_BUCKET'),
+            // FIXED: Add public URL for Cloudflare R2 public access
+            // Set this in .env to your R2 public URL: AWS_URL=https://pub-xxxxx.r2.dev
+            'url' => env('AWS_URL'),
         ],
 
         'media' => [

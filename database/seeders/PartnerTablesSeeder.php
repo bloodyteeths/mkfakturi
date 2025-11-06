@@ -39,9 +39,9 @@ class PartnerTablesSeeder extends Seeder
                     'name' => 'Macedonian Denar',
                     'code' => 'MKD',
                     'symbol' => 'ден',
-                    'precision' => 2,
-                    'thousand_separator' => ',',
-                    'decimal_separator' => '.',
+                    'precision' => 0, // FIXED: MKD has no decimal places
+                    'thousand_separator' => '.', // FIXED: MKD uses dot for thousands (120.000)
+                    'decimal_separator' => ',',
                     'position' => 'right',
                 ]);
             }

@@ -50,7 +50,7 @@ class DemoSeeder extends Seeder
                 'name' => 'Macedonian Denar',
                 'code' => 'MKD',
                 'symbol' => 'ден',
-                'precision' => 2,
+                'precision' => 0, // FIXED: MKD has no decimal places
                 'thousand_separator' => '.',
                 'decimal_separator' => ',',
                 'swap_currency_symbol' => true,

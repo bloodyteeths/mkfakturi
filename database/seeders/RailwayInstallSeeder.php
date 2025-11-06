@@ -32,7 +32,7 @@ class RailwayInstallSeeder extends Seeder
             [
                 'name' => 'Macedonian Denar',
                 'symbol' => 'ден',
-                'precision' => 2,
+                'precision' => 0, // FIXED: MKD has no decimal places
                 'thousand_separator' => '.',
                 'decimal_separator' => ',',
             ]
