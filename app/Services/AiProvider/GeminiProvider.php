@@ -182,4 +182,37 @@ class GeminiProvider implements AiProviderInterface
 
         Log::channel(config('ai.log_channel', 'stack'))->info('AI API Call', $logData);
     }
+
+    /**
+     * Analyze an image with optional text prompt
+     *
+     * @param string $imageData Base64 encoded image data
+     * @param string $mediaType MIME type
+     * @param string $prompt Text prompt/question about the image
+     * @param array<string, mixed> $options Additional options
+     * @return string The AI's response
+     * @throws \Exception Vision support not implemented for Gemini yet
+     */
+    public function analyzeImage(string $imageData, string $mediaType, string $prompt, array $options = []): string
+    {
+        // TODO: Implement Gemini vision API support
+        throw new \Exception('Vision analysis is not yet implemented for Gemini provider. Please use Claude provider for document analysis.');
+    }
+
+    /**
+     * Analyze a document (PDF converted to images) with optional text prompt
+     *
+     * @param array<int, array{data: string, media_type: string}> $images Array of image pages
+     * @param string $prompt Text prompt/question about the document
+     * @param array<string, mixed> $options Additional options
+     * @return string The AI's response
+     * @throws \Exception Vision support not implemented for Gemini yet
+     */
+    public function analyzeDocument(array $images, string $prompt, array $options = []): string
+    {
+        // TODO: Implement Gemini vision API support
+        throw new \Exception('Document analysis is not yet implemented for Gemini provider. Please use Claude provider for document analysis.');
+    }
 }
+
+// CLAUDE-CHECKPOINT

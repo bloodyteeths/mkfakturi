@@ -281,6 +281,16 @@ class AiInsightsService
         $profitFormatted = number_format($profit, 2);
         $profitMargin = $revenue > 0 ? number_format(($profit / ($stats['revenue'] ?? 1)) * 100, 1) : '0.0';
 
+        // Fetch trend data for comprehensive analysis
+        $monthlyTrends = $this->dataProvider->getMonthlyTrends($company, 6); // Last 6 months
+        $paymentTiming = $this->dataProvider->getPaymentTimingAnalysis($company);
+        $topCustomers = $this->dataProvider->getTopCustomers($company, 5); // Top 5
+
+        // Format trend data for prompt
+        $trendsText = $this->formatMonthlyTrends($monthlyTrends, $currency);
+        $paymentTimingText = $this->formatPaymentTiming($paymentTiming);
+        $topCustomersText = $this->formatTopCustomers($topCustomers, $currency);
+
         return <<<PROMPT
 Ти си македонски финансиски советник кој анализира финансиското здравје на компанијата.
 
@@ -299,6 +309,15 @@ class AiInsightsService
 - Наплатени плаќања: {$paymentsReceived} {$currency} {$varianceStatus}
 - Неплатени фактури (износ): {$outstanding} {$currency}
 - Број на клиенти: {$customers}
+
+Трендови (последни 6 месеци):
+{$trendsText}
+
+Навреме на наплата:
+{$paymentTimingText}
+
+Топ клиенти:
+{$topCustomersText}
 
 Обезбеди 3-5 конкретни и корисни совети во македонски јазик, фокусирајќи се на:
 1. Трендови на паричен тек и ликвидност
@@ -504,6 +523,78 @@ PROMPT;
     {
         Cache::forget("insights:{$company->id}");
         Log::info('AI insights cache cleared', ['company_id' => $company->id]);
+    }
+
+    /**
+     * Format monthly trends for AI prompt
+     *
+     * @param array<int, array{month: string, revenue: float, expenses: float, profit: float, invoice_count: int}> $trends
+     * @param string $currency
+     * @return string
+     */
+    private function formatMonthlyTrends(array $trends, string $currency): string
+    {
+        if (empty($trends)) {
+            return 'Нема доволно податоци за трендови';
+        }
+
+        $lines = [];
+        foreach ($trends as $trend) {
+            $month = $trend['month'];
+            $revenue = number_format($trend['revenue'], 2);
+            $expenses = number_format($trend['expenses'], 2);
+            $profit = number_format($trend['profit'], 2);
+            $invoices = $trend['invoice_count'];
+
+            $lines[] = "  {$month}: Приход {$revenue} {$currency}, Трошоци {$expenses} {$currency}, Профит {$profit} {$currency} ({$invoices} фактури)";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Format payment timing analysis for AI prompt
+     *
+     * @param array{avg_days_to_payment: float, on_time_percentage: float, late_percentage: float} $timing
+     * @return string
+     */
+    private function formatPaymentTiming(array $timing): string
+    {
+        $avgDays = $timing['avg_days_to_payment'] ?? 0;
+        $onTime = $timing['on_time_percentage'] ?? 0;
+        $late = $timing['late_percentage'] ?? 0;
+
+        return <<<TEXT
+- Просечно време до наплата: {$avgDays} денови
+- Навремени наплати: {$onTime}%
+- Доцнети наплати: {$late}%
+TEXT;
+    }
+
+    /**
+     * Format top customers for AI prompt
+     *
+     * @param array<int, array{customer_name: string, revenue: float, invoice_count: int}> $customers
+     * @param string $currency
+     * @return string
+     */
+    private function formatTopCustomers(array $customers, string $currency): string
+    {
+        if (empty($customers)) {
+            return 'Нема доволно податоци за клиенти';
+        }
+
+        $lines = [];
+        foreach ($customers as $index => $customer) {
+            $rank = $index + 1;
+            $name = $customer['customer_name'];
+            $revenue = number_format($customer['revenue'], 2);
+            $invoices = $customer['invoice_count'];
+
+            $lines[] = "  {$rank}. {$name}: {$revenue} {$currency} ({$invoices} фактури)";
+        }
+
+        return implode("\n", $lines);
     }
 }
 

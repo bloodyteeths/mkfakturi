@@ -244,6 +244,246 @@ class McpDataProvider
             return [];
         }
     }
+
+    /**
+     * Get monthly revenue and expense trends for the past N months
+     *
+     * @param Company $company
+     * @param int $months Number of months to retrieve (default: 12)
+     * @return array<int, array{month: string, revenue: float, expenses: float, profit: float, invoice_count: int}>
+     */
+    public function getMonthlyTrends(Company $company, int $months = 12): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching monthly trends', [
+                'company_id' => $company->id,
+                'months' => $months,
+            ]);
+
+            $startDate = now()->subMonths($months)->startOfMonth();
+
+            // Get monthly revenue (paid invoices)
+            $monthlyRevenue = Invoice::where('company_id', $company->id)
+                ->where('paid_status', 'PAID')
+                ->where('invoice_date', '>=', $startDate)
+                ->selectRaw('DATE_FORMAT(invoice_date, "%Y-%m") as month')
+                ->selectRaw('SUM(total) as revenue')
+                ->selectRaw('COUNT(*) as invoice_count')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            // Get monthly expenses
+            $monthlyExpenses = \App\Models\Expense::where('company_id', $company->id)
+                ->where('expense_date', '>=', $startDate)
+                ->selectRaw('DATE_FORMAT(expense_date, "%Y-%m") as month')
+                ->selectRaw('SUM(amount) as expenses')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            // Build complete monthly array (fill gaps with zeros)
+            $trends = [];
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $month = now()->subMonths($i)->format('Y-m');
+
+                $revenue = isset($monthlyRevenue[$month]) ? (float) $monthlyRevenue[$month]->revenue : 0.0;
+                $expenses = isset($monthlyExpenses[$month]) ? (float) $monthlyExpenses[$month]->expenses : 0.0;
+                $invoiceCount = isset($monthlyRevenue[$month]) ? (int) $monthlyRevenue[$month]->invoice_count : 0;
+
+                $trends[] = [
+                    'month' => $month,
+                    'revenue' => $revenue,
+                    'expenses' => $expenses,
+                    'profit' => $revenue - $expenses,
+                    'invoice_count' => $invoiceCount,
+                ];
+            }
+
+            Log::info('[McpDataProvider] Monthly trends calculated', [
+                'months_returned' => count($trends),
+            ]);
+
+            return $trends;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get monthly trends', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Get customer growth trends
+     *
+     * @param Company $company
+     * @param int $months Number of months to retrieve
+     * @return array<int, array{month: string, new_customers: int, total_customers: int}>
+     */
+    public function getCustomerGrowth(Company $company, int $months = 12): array
+    {
+        try {
+            $startDate = now()->subMonths($months)->startOfMonth();
+
+            // Get monthly new customers
+            $monthlyCustomers = Customer::where('company_id', $company->id)
+                ->where('created_at', '>=', $startDate)
+                ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month')
+                ->selectRaw('COUNT(*) as new_customers')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            $growth = [];
+            $runningTotal = Customer::where('company_id', $company->id)
+                ->where('created_at', '<', $startDate)
+                ->count();
+
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $month = now()->subMonths($i)->format('Y-m');
+
+                $newCustomers = isset($monthlyCustomers[$month]) ? (int) $monthlyCustomers[$month]->new_customers : 0;
+                $runningTotal += $newCustomers;
+
+                $growth[] = [
+                    'month' => $month,
+                    'new_customers' => $newCustomers,
+                    'total_customers' => $runningTotal,
+                ];
+            }
+
+            return $growth;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get customer growth', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Get payment timing analysis
+     *
+     * @param Company $company
+     * @return array{avg_days_to_payment: float, on_time_percentage: float, late_percentage: float}
+     */
+    public function getPaymentTimingAnalysis(Company $company): array
+    {
+        try {
+            // Get paid invoices with due dates and payment dates
+            $paidInvoices = Invoice::where('company_id', $company->id)
+                ->where('paid_status', 'PAID')
+                ->whereNotNull('due_date')
+                ->whereHas('payments')
+                ->with('payments')
+                ->get();
+
+            if ($paidInvoices->isEmpty()) {
+                return [
+                    'avg_days_to_payment' => 0.0,
+                    'on_time_percentage' => 0.0,
+                    'late_percentage' => 0.0,
+                ];
+            }
+
+            $totalDays = 0;
+            $onTimeCount = 0;
+            $lateCount = 0;
+            $validCount = 0;
+
+            foreach ($paidInvoices as $invoice) {
+                $lastPayment = $invoice->payments->sortByDesc('payment_date')->first();
+                if (!$lastPayment || !$lastPayment->payment_date) {
+                    continue;
+                }
+
+                $validCount++;
+                $dueDate = \Carbon\Carbon::parse($invoice->due_date);
+                $paymentDate = \Carbon\Carbon::parse($lastPayment->payment_date);
+
+                $daysToPayment = $dueDate->diffInDays($paymentDate, false);
+                $totalDays += abs($daysToPayment);
+
+                if ($paymentDate->lte($dueDate)) {
+                    $onTimeCount++;
+                } else {
+                    $lateCount++;
+                }
+            }
+
+            $avgDays = $validCount > 0 ? $totalDays / $validCount : 0.0;
+            $onTimePercentage = $validCount > 0 ? ($onTimeCount / $validCount) * 100 : 0.0;
+            $latePercentage = $validCount > 0 ? ($lateCount / $validCount) * 100 : 0.0;
+
+            return [
+                'avg_days_to_payment' => round($avgDays, 1),
+                'on_time_percentage' => round($onTimePercentage, 1),
+                'late_percentage' => round($latePercentage, 1),
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get payment timing analysis', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'avg_days_to_payment' => 0.0,
+                'on_time_percentage' => 0.0,
+                'late_percentage' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get top customers by revenue
+     *
+     * @param Company $company
+     * @param int $limit Number of customers to return
+     * @return array<int, array{customer_name: string, revenue: float, invoice_count: int}>
+     */
+    public function getTopCustomers(Company $company, int $limit = 10): array
+    {
+        try {
+            $topCustomers = Invoice::where('company_id', $company->id)
+                ->where('paid_status', 'PAID')
+                ->select('customer_id')
+                ->selectRaw('SUM(total) as revenue')
+                ->selectRaw('COUNT(*) as invoice_count')
+                ->groupBy('customer_id')
+                ->orderByDesc('revenue')
+                ->limit($limit)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'customer_name' => $item->customer->name ?? 'Unknown',
+                        'revenue' => (float) $item->revenue,
+                        'invoice_count' => (int) $item->invoice_count,
+                    ];
+                })
+                ->toArray();
+
+            return $topCustomers;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get top customers', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
 }
 
 // CLAUDE-CHECKPOINT
