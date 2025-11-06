@@ -33,10 +33,23 @@ class PdfImageConverter
      * @param string $pdfPath Path to PDF file (can be storage path or full path)
      * @param array<string, mixed> $options Additional options
      * @return array<int, array{data: string, media_type: string, page: int}> Array of images
-     * @throws \Exception If conversion fails
+     * @throws \Exception If conversion fails or PDF analysis feature is disabled
      */
     public function convertToImages(string $pdfPath, array $options = []): array
     {
+        // Guard: Check if PDF analysis is enabled
+        if (!$this->isPdfAnalysisAllowed()) {
+            Log::warning('[PdfImageConverter] PDF conversion blocked', [
+                'path' => $pdfPath,
+                'reason' => 'PDF analysis feature is disabled',
+            ]);
+
+            throw new \Exception(
+                'Конверзијата на PDF документи не е овозможена. ' .
+                'Оваа функционалност бара активирање на функцијата за анализа на PDF документи.'
+            );
+        }
+
         $dpi = $options['dpi'] ?? $this->dpi;
         $format = $options['format'] ?? $this->format;
 
@@ -239,11 +252,47 @@ class PdfImageConverter
         return [
             'backend' => $this->backend,
             'available' => $this->isAvailable(),
+            'pdf_analysis_allowed' => $this->isPdfAnalysisAllowed(),
             'imagick_loaded' => extension_loaded('imagick'),
             'imagick_version' => extension_loaded('imagick') ? \Imagick::getVersion()['versionString'] : null,
             'dpi' => $this->dpi,
             'format' => $this->format,
         ];
+    }
+
+    /**
+     * Check if PDF analysis feature is allowed
+     *
+     * @return bool
+     */
+    private function isPdfAnalysisAllowed(): bool
+    {
+        // Check all PDF-related features - conversion is allowed if ANY of them is enabled
+        $pdfAnalysis = config('ai.features.pdf_analysis', false);
+        $receiptScanning = config('ai.features.receipt_scanning', false);
+        $invoiceExtraction = config('ai.features.invoice_extraction', false);
+
+        $allowed = $pdfAnalysis || $receiptScanning || $invoiceExtraction;
+
+        Log::debug('[PdfImageConverter] PDF analysis permission checked', [
+            'pdf_analysis' => $pdfAnalysis,
+            'receipt_scanning' => $receiptScanning,
+            'invoice_extraction' => $invoiceExtraction,
+            'allowed' => $allowed,
+        ]);
+
+        return $allowed;
+    }
+
+    /**
+     * Check if a specific feature requiring PDF conversion is enabled
+     *
+     * @param string $featureName Feature to check (pdf_analysis, receipt_scanning, invoice_extraction)
+     * @return bool
+     */
+    public function isFeatureEnabled(string $featureName): bool
+    {
+        return (bool) config("ai.features.{$featureName}", false);
     }
 }
 
