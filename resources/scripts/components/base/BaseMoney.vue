@@ -75,12 +75,19 @@ const currencyBindings = computed(() => {
     ? props.currency
     : companyStore.selectedCompanyCurrency
 
+  // Fix for currencies with precision=0 (like MKD)
+  // v-money3 with masked=false treats values incorrectly for zero precision
+  const precision = parseInt(currency.precision)
+
   return {
     decimal: currency.decimal_separator,
     thousands: currency.thousand_separator,
     prefix: currency.symbol + ' ',
-    precision: currency.precision,
-    masked: false,
+    precision: precision,
+    // CRITICAL FIX: Use masked=true for zero-precision currencies
+    // This prevents v-money3 from multiplying by 100
+    // For MKD (precision=0): 200 stays as 200, not 20000
+    masked: precision === 0 ? true : false,
   }
 })
 
