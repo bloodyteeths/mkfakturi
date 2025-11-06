@@ -319,6 +319,77 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         return response('<pre>' . implode("\n", $output) . '</pre>');
     });
 
+    // TEMPORARY: Fix currency multiplier bug in existing data
+    Route::get('/debug/fix-currency-bug', function () {
+        $output = [];
+        $output[] = '🔧 Fixing currency multiplier bug in existing data...';
+        $output[] = '';
+        $output[] = 'This will divide all MKD amounts by 100 (fixing the v-money3 bug)';
+        $output[] = '';
+
+        try {
+            $mkdCurrency = \App\Models\Currency::where('code', 'MKD')->first();
+            if (!$mkdCurrency) {
+                $output[] = '❌ MKD currency not found';
+                return response('<pre>' . implode("\n", $output) . '</pre>');
+            }
+
+            $output[] = "MKD Currency ID: {$mkdCurrency->id}, Precision: {$mkdCurrency->precision}";
+            $output[] = '';
+
+            // Fix invoices
+            $invoices = \App\Models\Invoice::where('currency_id', $mkdCurrency->id)->get();
+            $output[] = "Found {$invoices->count()} invoices with MKD currency";
+            $fixedInvoices = 0;
+
+            foreach ($invoices as $invoice) {
+                $oldTotal = $invoice->total;
+                $invoice->total = $oldTotal / 100;
+                $invoice->sub_total = $invoice->sub_total / 100;
+                $invoice->tax = $invoice->tax / 100;
+                $invoice->due_amount = $invoice->due_amount / 100;
+                $invoice->discount_val = $invoice->discount_val / 100;
+                $invoice->base_total = $invoice->base_total / 100;
+                $invoice->base_sub_total = $invoice->base_sub_total / 100;
+                $invoice->base_tax = $invoice->base_tax / 100;
+                $invoice->base_due_amount = $invoice->base_due_amount / 100;
+                $invoice->base_discount_val = $invoice->base_discount_val / 100;
+                $invoice->save();
+
+                $output[] = "  ✅ Invoice #{$invoice->invoice_number}: {$oldTotal} → {$invoice->total} MKD";
+                $fixedInvoices++;
+            }
+
+            // Fix expenses
+            $expenses = \App\Models\Expense::where('currency_id', $mkdCurrency->id)->get();
+            $output[] = '';
+            $output[] = "Found {$expenses->count()} expenses with MKD currency";
+            $fixedExpenses = 0;
+
+            foreach ($expenses as $expense) {
+                $oldAmount = $expense->amount;
+                $expense->amount = $oldAmount / 100;
+                $expense->base_amount = $expense->base_amount / 100;
+                $expense->save();
+
+                $output[] = "  ✅ Expense #{$expense->expense_number}: {$oldAmount} → {$expense->amount} MKD";
+                $fixedExpenses++;
+            }
+
+            $output[] = '';
+            $output[] = "🎉 Fixed {$fixedInvoices} invoices and {$fixedExpenses} expenses!";
+            $output[] = '';
+            $output[] = 'Your amounts should now be correct.';
+            $output[] = 'Please refresh the AI insights to see accurate numbers.';
+
+        } catch (\Exception $e) {
+            $output[] = '❌ ERROR: ' . $e->getMessage();
+            $output[] = $e->getTraceAsString();
+        }
+
+        return response('<pre>' . implode("\n", $output) . '</pre>');
+    });
+
     // TEMPORARY: Clean demo data via web endpoint
     Route::get('/debug/clean-demo-data', function () {
         $output = [];
