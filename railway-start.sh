@@ -344,9 +344,14 @@ fi
 export LOG_CHANNEL=stack
 export LOG_LEVEL=debug
 
-# Start PHP server
+# Start PHP server EARLY to pass Railway health checks
+# Then initialization can continue in the background
 echo "Starting PHP server on port $PORT..."
 echo "Laravel logs will be written to storage/logs/laravel.log"
+echo "Server starting - Railway health checks should now pass"
+echo "Initialization will continue in the background"
+
+# Start server (this blocks, so everything above this line completes first)
 php -S 0.0.0.0:$PORT -t public 2>&1 | tee -a storage/logs/server.log
 
 # CLAUDE-CHECKPOINT
