@@ -78,10 +78,11 @@ const currencyBindings = computed(() => {
     thousands: currency.thousand_separator,
     prefix: currency.symbol + ' ',
     precision: precision,
-    // FIXED: Keep masked=false for all currencies
-    // Precision=0 currencies (like MKD) are now handled correctly
-    // in parent components (ItemModal, etc.) by not multiplying by 100
-    masked: false,
+    // CRITICAL FIX: Use masked=true for zero-precision currencies (like MKD)
+    // With masked=false, v-money3 treats the value as cents and divides by 100
+    // With masked=true, v-money3 uses the value as-is (no conversion)
+    // For MKD: User types "1200" → stored as 1200 (not 120000)
+    masked: precision === 0,
   }
 })
 
