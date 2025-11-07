@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Estimate;
+use App\Models\Invoice;
+use App\Models\Payment;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -34,6 +37,42 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+
+        Route::bind('invoice', function ($value) {
+            $invoice = Invoice::withoutGlobalScopes()
+                ->where('unique_hash', $value)
+                ->firstOrFail();
+
+            if (! request()->header('company')) {
+                request()->headers->set('company', $invoice->company_id);
+            }
+
+            return $invoice;
+        });
+
+        Route::bind('estimate', function ($value) {
+            $estimate = Estimate::withoutGlobalScopes()
+                ->where('unique_hash', $value)
+                ->firstOrFail();
+
+            if (! request()->header('company')) {
+                request()->headers->set('company', $estimate->company_id);
+            }
+
+            return $estimate;
+        });
+
+        Route::bind('payment', function ($value) {
+            $payment = Payment::withoutGlobalScopes()
+                ->where('unique_hash', $value)
+                ->firstOrFail();
+
+            if (! request()->header('company')) {
+                request()->headers->set('company', $payment->company_id);
+            }
+
+            return $payment;
+        });
 
         $this->routes(function () {
             Route::prefix('api')
