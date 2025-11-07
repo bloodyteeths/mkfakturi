@@ -32,7 +32,14 @@ class ResolvePdfCompanyMiddleware
             if ($value instanceof $modelClass) {
                 $companyId = $value->company_id;
             } elseif ($value) {
-                $companyId = $modelClass::where('unique_hash', $value)->value('company_id');
+                // Decode Hashid to get the actual ID, then query by ID
+                $ids = \Vinkla\Hashids\Facades\Hashids::connection($modelClass)->decode($value);
+
+                if (!empty($ids)) {
+                    $companyId = $modelClass::where('id', $ids[0])->value('company_id');
+                } else {
+                    $companyId = null;
+                }
             } else {
                 $companyId = null;
             }
