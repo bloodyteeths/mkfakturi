@@ -80,7 +80,7 @@ Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
 // PDF Endpoints
 // ----------------------------------------------
 // ВАЖНО: web middleware е потребен за session/cookie поддршка во iframe
-Route::middleware(['web', 'company', 'pdf-auth'])->group(function () {
+Route::middleware(['web', 'pdf-company', 'company', 'pdf-auth'])->group(function () {
 
     //  invoice pdf
     // -------------------------------------------------

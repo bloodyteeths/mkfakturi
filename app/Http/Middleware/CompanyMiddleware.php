@@ -32,8 +32,10 @@ class CompanyMiddleware
                 return $next($request);
             }
 
-            if ((! $request->header('company')) || (! $user->hasCompany($request->header('company')))) {
+            if (! $request->header('company')) {
                 $request->headers->set('company', $firstCompany->id);
+            } elseif (! $user->hasCompany($request->header('company'))) {
+                abort(403, 'Unauthorized company context.');
             }
 
             // CLAUDE-CHECKPOINT: Hydrate user's IFRS entity from company

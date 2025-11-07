@@ -79,6 +79,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'mcp.token' => \App\Http\Middleware\VerifyMcpToken::class,
             'partner' => \App\Http\Middleware\PartnerScopeMiddleware::class,
             'partner-scope' => \App\Http\Middleware\PartnerScopeMiddleware::class,
+            'pdf-company' => \App\Http\Middleware\ResolvePdfCompanyMiddleware::class,
             'pdf-auth' => \App\Http\Middleware\PdfMiddleware::class,
             'performance' => \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
             'redirect-if-installed' => \App\Http\Middleware\RedirectIfInstalled::class,
