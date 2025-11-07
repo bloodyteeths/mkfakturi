@@ -70,14 +70,14 @@ class NlbGatewayTest extends TestCase
         
         // Verify production endpoints are real URLs (not placeholders)
         $endpoints = $endpointStatus['all_endpoints'];
-        $this->assertStringContains('https://api-ob.nlb.mk', $endpoints['token_production']);
-        $this->assertStringContains('https://api-ob.nlb.mk', $endpoints['accounts_production']);
-        $this->assertStringContains('https://api-ob.nlb.mk', $endpoints['transactions_production']);
+        $this->assertStringContains('https://auth.mk.open-bank.io', $endpoints['token_production']);
+        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['accounts_production']);
+        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['transactions_production']);
         
         // Verify sandbox endpoints
-        $this->assertStringContains('https://sandbox-api-ob.nlb.mk', $endpoints['token_sandbox']);
-        $this->assertStringContains('https://sandbox-api-ob.nlb.mk', $endpoints['accounts_sandbox']);
-        $this->assertStringContains('https://sandbox-api-ob.nlb.mk', $endpoints['transactions_sandbox']);
+        $this->assertStringContains('https://auth.sandbox.mk.open-bank.io', $endpoints['token_sandbox']);
+        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['accounts_sandbox']);
+        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['transactions_sandbox']);
         
         // Verify bank information
         $this->assertEquals('NLB Banka AD Skopje', $endpointStatus['bank_info']['name']);
@@ -497,4 +497,3 @@ class NlbGatewayTest extends TestCase
         parent::tearDown();
     }
 }
-

@@ -49,6 +49,30 @@ abstract class Psd2Client
     abstract protected function getClientSecret(): string;
 
     /**
+     * Get the base URL used for OAuth flows (defaults to API base)
+     */
+    protected function getAuthBaseUrl(): string
+    {
+        return $this->getBaseUrl();
+    }
+
+    /**
+     * Get the authorize endpoint path
+     */
+    protected function getAuthorizePath(): string
+    {
+        return '/oauth/authorize';
+    }
+
+    /**
+     * Get the token endpoint path
+     */
+    protected function getTokenPath(): string
+    {
+        return '/oauth/token';
+    }
+
+    /**
      * Generate OAuth2 authorization URL
      *
      * @param Company $company Company requesting authorization
@@ -65,7 +89,7 @@ abstract class Psd2Client
             'state' => $this->generateState($company->id),
         ];
 
-        return $this->getBaseUrl() . '/oauth/authorize?' . http_build_query($params);
+        return rtrim($this->getAuthBaseUrl(), '/') . $this->getAuthorizePath() . '?' . http_build_query($params);
     }
 
     /**
@@ -80,7 +104,9 @@ abstract class Psd2Client
     public function exchangeCode(Company $company, string $code, string $redirectUri): BankToken
     {
         try {
-            $response = Http::asForm()->post($this->getBaseUrl() . '/oauth/token', [
+            $tokenUrl = rtrim($this->getAuthBaseUrl(), '/') . $this->getTokenPath();
+
+            $response = Http::asForm()->post($tokenUrl, [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
                 'client_id' => $this->getClientId(),
@@ -156,7 +182,9 @@ abstract class Psd2Client
         }
 
         try {
-            $response = Http::asForm()->post($this->getBaseUrl() . '/oauth/token', [
+            $tokenUrl = rtrim($this->getAuthBaseUrl(), '/') . $this->getTokenPath();
+
+            $response = Http::asForm()->post($tokenUrl, [
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $token->refresh_token,
                 'client_id' => $this->getClientId(),

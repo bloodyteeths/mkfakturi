@@ -37,10 +37,10 @@ class NlbOAuth extends Psd2Client
         $environment = config('mk.nlb.environment', 'sandbox');
 
         if ($environment === 'production') {
-            return config('mk.nlb.production_base_url', 'https://api-ob.nlb.mk/xs2a/v1');
+            return config('mk.nlb.production_base_url', 'https://developer-ob.nlb.mk/apis/xs2a/v1');
         }
 
-        return config('mk.nlb.sandbox_base_url', 'https://sandbox-api-ob.nlb.mk/xs2a/v1');
+        return config('mk.nlb.sandbox_base_url', 'https://developer-ob.nlb.mk/apis/xs2a/v1');
     }
 
     /**
@@ -61,6 +61,33 @@ class NlbOAuth extends Psd2Client
     protected function getClientSecret(): string
     {
         return config('mk.nlb.client_secret', env('NLB_CLIENT_SECRET', ''));
+    }
+
+    /**
+     * OAuth flows for NLB are hosted on auth.mk.open-bank.io
+     */
+    protected function getAuthBaseUrl(): string
+    {
+        $environment = config('mk.nlb.environment', 'sandbox');
+
+        if ($environment === 'production') {
+            return config(
+                'mk.nlb.auth_production_base_url',
+                config('mk.nlb.auth_sandbox_base_url', 'https://auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb')
+            );
+        }
+
+        return config('mk.nlb.auth_sandbox_base_url', 'https://auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb');
+    }
+
+    protected function getAuthorizePath(): string
+    {
+        return '/connect/authorize';
+    }
+
+    protected function getTokenPath(): string
+    {
+        return '/connect/token';
     }
 
     /**

@@ -10,8 +10,8 @@ use App\Services\Banking\Psd2Client;
  * PSD2 OAuth implementation for Stopanska Banka AD Skopje
  * Macedonia's largest bank with Berlin Group NextGenPSD2 API
  *
- * Developer Portal: https://developer.stopanska.com.mk/
- * API Documentation: https://api.stopanska.com.mk/docs
+ * Developer Portal: https://ob.stb.kibs.mk/docs/getting-started
+ * API Documentation: https://ob.stb.kibs.mk/docs/getting-started
  *
  * Rate Limit: 15 requests per minute (4 second intervals)
  */
@@ -37,10 +37,10 @@ class StopanskaOAuth extends Psd2Client
         $environment = config('mk.stopanska.environment', 'sandbox');
 
         if ($environment === 'production') {
-            return config('mk.stopanska.production_base_url', 'https://api.stopanska.com.mk/psd2/v1');
+            return config('mk.stopanska.production_base_url', 'https://api.ob.stb.kibs.mk/xs2a/v1');
         }
 
-        return config('mk.stopanska.sandbox_base_url', 'https://sandbox-api.stopanska.com.mk/psd2/v1');
+        return config('mk.stopanska.sandbox_base_url', 'https://sandbox-api.ob.stb.kibs.mk/xs2a/v1');
     }
 
     /**
@@ -61,6 +61,19 @@ class StopanskaOAuth extends Psd2Client
     protected function getClientSecret(): string
     {
         return config('mk.stopanska.client_secret', env('STOPANSKA_CLIENT_SECRET', ''));
+    }
+
+    /**
+     * Stopanska hosts OAuth endpoints under /oauth2 on the same domain
+     */
+    protected function getAuthorizePath(): string
+    {
+        return '/oauth2/authorize';
+    }
+
+    protected function getTokenPath(): string
+    {
+        return '/oauth2/token';
     }
 
     /**

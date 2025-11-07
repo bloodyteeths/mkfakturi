@@ -259,8 +259,8 @@ return [
         'client_id' => env('STOPANSKA_CLIENT_ID', ''),
         'client_secret' => env('STOPANSKA_CLIENT_SECRET', ''),
         'environment' => env('STOPANSKA_ENVIRONMENT', 'sandbox'),
-        'sandbox_base_url' => env('STOPANSKA_SANDBOX_BASE_URL', 'https://sandbox-api.stopanska.com.mk/psd2/v1'),
-        'production_base_url' => env('STOPANSKA_PRODUCTION_BASE_URL', 'https://api.stopanska.com.mk/psd2/v1'),
+        'sandbox_base_url' => env('STOPANSKA_SANDBOX_BASE_URL', 'https://sandbox-api.ob.stb.kibs.mk/xs2a/v1'),
+        'production_base_url' => env('STOPANSKA_PRODUCTION_BASE_URL', 'https://api.ob.stb.kibs.mk/xs2a/v1'),
         'rate_limit_enabled' => env('STOPANSKA_RATE_LIMIT_ENABLED', true),
         'max_transactions_per_request' => env('STOPANSKA_MAX_TRANSACTIONS_PER_REQUEST', 200),
     ],
@@ -277,8 +277,10 @@ return [
         'client_id' => env('NLB_CLIENT_ID', ''),
         'client_secret' => env('NLB_CLIENT_SECRET', ''),
         'environment' => env('NLB_ENVIRONMENT', 'sandbox'),
-        'sandbox_base_url' => env('NLB_SANDBOX_BASE_URL', 'https://sandbox-api-ob.nlb.mk/xs2a/v1'),
-        'production_base_url' => env('NLB_PRODUCTION_BASE_URL', 'https://api-ob.nlb.mk/xs2a/v1'),
+        'sandbox_base_url' => env('NLB_SANDBOX_BASE_URL', 'https://developer-ob.nlb.mk/apis/xs2a/v1'),
+        'production_base_url' => env('NLB_PRODUCTION_BASE_URL', 'https://developer-ob.nlb.mk/apis/xs2a/v1'),
+        'auth_sandbox_base_url' => env('NLB_AUTH_SANDBOX_BASE_URL', 'https://auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb'),
+        'auth_production_base_url' => env('NLB_AUTH_PRODUCTION_BASE_URL', 'https://auth.mk.open-bank.io/v1/authentication/tenants/nlb'),
     ],
 
     /*

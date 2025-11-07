@@ -60,12 +60,12 @@ class BankingIntegrationTest extends TestCase
         // Configure test banking credentials
         Config::set('mk.banking.stopanska.client_id', 'test_client_id');
         Config::set('mk.banking.stopanska.client_secret', 'test_client_secret');
-        Config::set('mk.banking.stopanska.api_url', 'https://api-test.stb.com.mk');
+        Config::set('mk.banking.stopanska.api_url', 'https://sandbox-api.ob.stb.kibs.mk/xs2a/v1');
         Config::set('mk.banking.stopanska.sandbox', true);
         
         Config::set('mk.banking.nlb.client_id', 'test_nlb_client');
         Config::set('mk.banking.nlb.client_secret', 'test_nlb_secret');
-        Config::set('mk.banking.nlb.api_url', 'https://sandbox.nlb.mk/api');
+        Config::set('mk.banking.nlb.api_url', 'https://developer-ob.nlb.mk/apis/xs2a/v1');
         Config::set('mk.banking.nlb.sandbox', true);
         
         Config::set('mk.banking.komer.client_id', 'test_komer_client');
@@ -162,7 +162,7 @@ class BankingIntegrationTest extends TestCase
     {
         // Mock successful authentication response
         Http::fake([
-            'api-test.stb.com.mk/oauth/token' => Http::response([
+            'sandbox-api.ob.stb.kibs.mk/xs2a/v1/oauth2/token' => Http::response([
                 'access_token' => 'test_access_token_123',
                 'token_type' => 'Bearer',
                 'expires_in' => 3600,
@@ -179,7 +179,7 @@ class BankingIntegrationTest extends TestCase
 
         // Verify HTTP request was made correctly
         Http::assertSent(function ($request) {
-            return $request->url() === 'https://api-test.stb.com.mk/oauth/token' &&
+            return $request->url() === 'https://sandbox-api.ob.stb.kibs.mk/xs2a/v1/oauth2/token' &&
                    $request->method() === 'POST' &&
                    $request->data()['grant_type'] === 'client_credentials';
         });
@@ -193,7 +193,7 @@ class BankingIntegrationTest extends TestCase
 
         // Mock account balance response
         Http::fake([
-            'api-test.stb.com.mk/api/v1/accounts/*/balance' => Http::response([
+            'sandbox-api.ob.stb.kibs.mk/xs2a/v1/accounts/*/balance' => Http::response([
                 'account_number' => '1001234567890123',
                 'iban' => 'MK07200000000012345678',
                 'currency' => 'MKD',
@@ -221,7 +221,7 @@ class BankingIntegrationTest extends TestCase
 
         // Mock transaction response
         Http::fake([
-            'sandbox.nlb.mk/api/psd2/accounts/*/transactions*' => Http::response([
+            'developer-ob.nlb.mk/apis/xs2a/v1/accounts/*/transactions*' => Http::response([
                 'transactions' => [
                     [
                         'transaction_id' => 'NLB-TXN-001',
@@ -414,7 +414,7 @@ class BankingIntegrationTest extends TestCase
 
         // Mock responses for all banks
         Http::fake([
-            'api-test.stb.com.mk/api/v1/accounts/*/transactions*' => Http::response([
+            'sandbox-api.ob.stb.kibs.mk/xs2a/v1/accounts/*/transactions*' => Http::response([
                 'transactions' => [
                     [
                         'transaction_id' => 'STB-001',
@@ -425,7 +425,7 @@ class BankingIntegrationTest extends TestCase
                     ]
                 ]
             ], 200),
-            'sandbox.nlb.mk/api/psd2/accounts/*/transactions*' => Http::response([
+            'developer-ob.nlb.mk/apis/xs2a/v1/accounts/*/transactions*' => Http::response([
                 'transactions' => [
                     [
                         'transaction_id' => 'NLB-001',
@@ -536,7 +536,7 @@ class BankingIntegrationTest extends TestCase
         }
 
         Http::fake([
-            'api-test.stb.com.mk/api/v1/accounts/*/transactions*' => Http::response([
+            'sandbox-api.ob.stb.kibs.mk/xs2a/v1/accounts/*/transactions*' => Http::response([
                 'transactions' => $transactions
             ], 200)
         ]);
@@ -603,7 +603,7 @@ class BankingIntegrationTest extends TestCase
     {
         // Test network timeout
         Http::fake([
-            'api-test.stb.com.mk/*' => Http::response('', 408) // Request timeout
+            'sandbox-api.ob.stb.kibs.mk/**' => Http::response('', 408) // Request timeout
         ]);
 
         $result = $this->stopanskaGateway->getAccountBalance($this->stopanskaAccount);
@@ -614,7 +614,7 @@ class BankingIntegrationTest extends TestCase
 
         // Test invalid credentials
         Http::fake([
-            'api-test.stb.com.mk/oauth/token' => Http::response([
+            'sandbox-api.ob.stb.kibs.mk/xs2a/v1/oauth2/token' => Http::response([
                 'error' => 'invalid_client',
                 'error_description' => 'Client authentication failed'
             ], 401)
@@ -627,7 +627,7 @@ class BankingIntegrationTest extends TestCase
 
         // Test service unavailable
         Http::fake([
-            'sandbox.nlb.mk/api/*' => Http::response([
+            'developer-ob.nlb.mk/apis/xs2a/v1/**' => Http::response([
                 'error' => 'service_unavailable',
                 'message' => 'Banking service temporarily unavailable'
             ], 503)
@@ -643,7 +643,7 @@ class BankingIntegrationTest extends TestCase
     protected function mockStopanskaAuth(): void
     {
         Http::fake([
-            'api-test.stb.com.mk/oauth/token' => Http::response([
+            'sandbox-api.ob.stb.kibs.mk/xs2a/v1/oauth2/token' => Http::response([
                 'access_token' => 'stopanska_test_token',
                 'expires_in' => 3600
             ], 200)
@@ -653,7 +653,7 @@ class BankingIntegrationTest extends TestCase
     protected function mockNlbAuth(): void
     {
         Http::fake([
-            'sandbox.nlb.mk/api/oauth/token' => Http::response([
+            'auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb/connect/token' => Http::response([
                 'access_token' => 'nlb_test_token',
                 'expires_in' => 3600
             ], 200)
@@ -677,4 +677,3 @@ class BankingIntegrationTest extends TestCase
         parent::tearDown();
     }
 }
-
