@@ -39,9 +39,15 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         Route::bind('invoice', function ($value) {
+            // Decode Hashid to get the actual invoice ID
+            $ids = \Vinkla\Hashids\Facades\Hashids::connection(Invoice::class)->decode($value);
+
+            if (empty($ids)) {
+                abort(404);
+            }
+
             $invoice = Invoice::withoutGlobalScopes()
-                ->where('unique_hash', $value)
-                ->firstOrFail();
+                ->findOrFail($ids[0]);
 
             if (! request()->header('company')) {
                 request()->headers->set('company', $invoice->company_id);
@@ -51,9 +57,15 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::bind('estimate', function ($value) {
+            // Decode Hashid to get the actual estimate ID
+            $ids = \Vinkla\Hashids\Facades\Hashids::connection(Estimate::class)->decode($value);
+
+            if (empty($ids)) {
+                abort(404);
+            }
+
             $estimate = Estimate::withoutGlobalScopes()
-                ->where('unique_hash', $value)
-                ->firstOrFail();
+                ->findOrFail($ids[0]);
 
             if (! request()->header('company')) {
                 request()->headers->set('company', $estimate->company_id);
@@ -63,9 +75,15 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::bind('payment', function ($value) {
+            // Decode Hashid to get the actual payment ID
+            $ids = \Vinkla\Hashids\Facades\Hashids::connection(Payment::class)->decode($value);
+
+            if (empty($ids)) {
+                abort(404);
+            }
+
             $payment = Payment::withoutGlobalScopes()
-                ->where('unique_hash', $value)
-                ->firstOrFail();
+                ->findOrFail($ids[0]);
 
             if (! request()->header('company')) {
                 request()->headers->set('company', $payment->company_id);
