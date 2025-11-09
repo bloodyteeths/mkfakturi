@@ -30,16 +30,11 @@ class ResolvePdfCompanyMiddleware
             $value = $request->route($parameter);
 
             if ($value instanceof $modelClass) {
+                // Route model binding already resolved - just get company_id
                 $companyId = $value->company_id;
             } elseif ($value) {
-                // Decode Hashid to get the actual ID, then query by ID
-                $ids = \Vinkla\Hashids\Facades\Hashids::connection($modelClass)->decode($value);
-
-                if (!empty($ids)) {
-                    $companyId = $modelClass::where('id', $ids[0])->value('company_id');
-                } else {
-                    $companyId = null;
-                }
+                // Value is the unique_hash string, query by it
+                $companyId = $modelClass::where('unique_hash', $value)->value('company_id');
             } else {
                 $companyId = null;
             }

@@ -84,15 +84,15 @@ Route::middleware(['web', 'pdf-company', 'company', 'pdf-auth'])->group(function
 
     //  invoice pdf
     // -------------------------------------------------
-    Route::get('/invoices/pdf/{invoice}', InvoicePdfController::class);
+    Route::get('/invoices/pdf/{invoice:unique_hash}', InvoicePdfController::class);
 
     // estimate pdf
     // -------------------------------------------------
-    Route::get('/estimates/pdf/{estimate}', EstimatePdfController::class);
+    Route::get('/estimates/pdf/{estimate:unique_hash}', EstimatePdfController::class);
 
     // payment pdf
     // -------------------------------------------------
-    Route::get('/payments/pdf/{payment}', PaymentPdfController::class);
+    Route::get('/payments/pdf/{payment:unique_hash}', PaymentPdfController::class);
 });
 
 // customer pdf endpoints for invoice, estimate and Payment

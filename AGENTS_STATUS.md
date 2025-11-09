@@ -24,9 +24,10 @@
 ### Stage B: Advanced Features (Parallel)
 | Agent | Step | Status | Branch | PR | Started | Merged |
 |-------|------|--------|--------|-----|---------|--------|
-| Banking | 5 | ✅ Completed | feat/banking-psd2 | Merged to main | 2025-11-03 | 2025-11-03 |
-| PartnerPortal | 6 | ✅ Completed | feat/partner-portal | Merged to main | 2025-11-03 | 2025-11-03 |
-| MCP | 7 | ✅ Completed | feat/mcp-ai-tools | Merged to main | 2025-11-03 | 2025-11-03 |
+| Banking | 5 | ⏸️ Waiting for Stage A | - | - | - | - |
+| PartnerPortal | 6 | ⏸️ Waiting for 
+Stage A | - | - | - | - |
+| MCP | 7 | ⏸️ Waiting for Stage A | - | - | - | - |
 
 ### Coordination
 | Agent | Responsibility | Status |
@@ -70,16 +71,10 @@
 ---
 
 ### STEP 4: CPAY Payment Integration
-**Status:** ✅ Completed
+**Status:** ⏸️ Waiting for Stage 0
 **Agent:** CPAY
-**Merged:** 2025-11-03
 
-**Mini Audit:**
-- CpayDriver service implemented in Modules/Mk/Services/
-- Webhook routes registered with signature verification
-- Payment checkout URL generation working
-- Idempotency checks via cache implemented
-- 16 passing tests, 8 failing due to database seeding issues (not code issues)
+(Mini audit will be appended here after merge)
 
 ---
 
@@ -100,17 +95,10 @@
 ---
 
 ### STEP 7: MCP AI Tools Server
-**Status:** ✅ Completed
+**Status:** ⏸️ Waiting for Stage A
 **Agent:** MCP
-**Merged:** 2025-11-03
 
-**Mini Audit:**
-- MCP tools controller implemented with 7 financial AI tools
-- Routes registered under /api/v1/mcp/ prefix
-- McpService integrated with external TypeScript server
-- Feature flag protection working correctly
-- Audit logging for all MCP tool usage
-- 11 tests created (all failing due to database setup issues, not code logic)
+(Mini audit will be appended here after merge)
 
 ---
 
@@ -126,34 +114,20 @@
 
 | Metric | Value |
 |--------|-------|
-| **Steps Completed** | 9 / 9 |
+| **Steps Completed** | 6 / 9 |
 | **Steps In Progress** | 0 |
-| **Steps Not Started** | 0 |
-| **Total PRs Merged** | 9 |
-| **Total LOC Changed** | ~4,200 |
-| **Tests Added** | ~120 |
-| **Estimated Hours Remaining** | 0 |
-| **Actual Hours Spent** | ~140 |
+| **Steps Not Started** | 3 |
+| **Total PRs Merged** | 6 |
+| **Total LOC Changed** | ~2,500 |
+| **Tests Added** | ~50 |
+| **Estimated Hours Remaining** | 72 |
+| **Actual Hours Spent** | ~68 |
 
 ---
 
 ## 🚨 BLOCKERS AND ISSUES
 
-### Current Issues (Non-Critical)
-1. **Test Database Seeding**: Many tests fail due to missing Currency seeding in test setup
-   - Impact: Tests fail, but code logic is correct
-   - Fix needed: Add proper database seeding to TestCase base class
-   - Severity: Medium (does not block deployment)
-
-2. **IFRS Library Deprecation Warnings**: PHP 8.3 nullable parameter deprecations
-   - Impact: Warning noise in test output
-   - Fix needed: Upstream package update from ekmungai/eloquent-ifrs
-   - Severity: Low (warnings only, no functional impact)
-
-3. **CpayDriver Import Issue**: Test imports class but namespace may need autoload refresh
-   - Impact: Some CPAY tests fail with "Class not found"
-   - Fix needed: Run `composer dump-autoload`
-   - Severity: Low (temporary autoloader cache issue)
+*None yet. This section will be updated by agents if they encounter blockers.*
 
 ---
 
@@ -180,17 +154,12 @@ Step 0 (Foundation)
 ### ReleaseManager Notes
 - ✅ Stage 0 (Foundation) completed and merged
 - ✅ Stage A (5 parallel agents) completed and merged
-- ✅ Stage B (3 parallel agents) completed and merged
-- ALL 9 ROADMAP STEPS COMPLETED
+- Ready to launch Stage B (Banking, PartnerPortal, MCP)
 - Feature flags will default to safe values (mocked data ON)
-- .env.example fully updated with all configuration variables
-- Ready for staging validation and Railway deployment
 
-### Known Issues (Non-Blocking)
-- Test database seeding needs improvement (Currency factory setup)
-- IFRS library has PHP 8.3 deprecation warnings (upstream issue)
-- Some autoloader cache issues requiring `composer dump-autoload`
-- Core functionality is solid, issues are test infrastructure only
+### Known Issues
+- Accounting integration tests need IFRS entity context setup
+- Some pre-existing test infrastructure issues being addressed
 
 ### Safety Checklist
 - [x] `FEATURE_PARTNER_MOCKED_DATA=true` by default
