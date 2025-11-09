@@ -351,22 +351,35 @@
 
     <div class="content-wrapper">
         <div style="padding-top: 30px">
-            <div class="company-address-container company-address">
-                {!! $company_address !!}
+            <div class="company-address-container">
+                <h1 style="font-size: 13px; margin-bottom: 8px;">ИЗДАВАЧ НА ФАКТУРА</h1>
+                <div class="company-address">
+                    {!! $company_address !!}
+                </div>
+                @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
+                    <div style="margin-top: 5px; font-size: 11px;"><strong>ЕДБ за ДДВ:</strong> {{ $invoice->company->vat_id }}</div>
+                @endif
+                @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
+                    <div style="margin-top: 3px; font-size: 11px;"><strong>Даночен број:</strong> {{ $invoice->company->tax_id }}</div>
+                @endif
             </div>
 
             <div class="invoice-details-container">
                 <table>
                     <tr>
-                        <td class="attribute-label">@lang('pdf_invoice_number')</td>
+                        <td class="attribute-label">Број на фактура</td>
                         <td class="attribute-value"> &nbsp;{{ $invoice->invoice_number }}</td>
                     </tr>
                     <tr>
-                        <td class="attribute-label">@lang('pdf_invoice_date')</td>
+                        <td class="attribute-label">Датум на издавање</td>
                         <td class="attribute-value"> &nbsp;{{ $invoice->formattedInvoiceDate }}</td>
                     </tr>
                     <tr>
-                        <td class="attribute-label">@lang('pdf_invoice_due_date')</td>
+                        <td class="attribute-label">Ден на промет</td>
+                        <td class="attribute-value"> &nbsp;{{ $invoice->formattedInvoiceDate }}</td>
+                    </tr>
+                    <tr>
+                        <td class="attribute-label">Рок на плаќање</td>
                         <td class="attribute-value"> &nbsp;{{ $invoice->formattedDueDate }}</td>
                     </tr>
                 </table>
@@ -375,11 +388,15 @@
             <div style="clear: both;"></div>
         </div>
 
-        <div class="billing-address-container billing-address">
+        <div class="billing-address-container">
             @if ($billing_address)
-                <b>@lang('pdf_bill_to')</b> <br>
-
-                {!! $billing_address !!}
+                <h1 style="font-size: 13px; margin-bottom: 8px;">ПРИМАТЕЛ НА ФАКТУРА</h1>
+                <div class="billing-address">
+                    {!! $billing_address !!}
+                </div>
+                @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
+                    <div style="margin-top: 5px; font-size: 11px; padding-left: 30px;"><strong>Даночен број:</strong> {{ $invoice->customer->vat_number }}</div>
+                @endif
             @endif
         </div>
 
