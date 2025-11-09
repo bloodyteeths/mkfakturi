@@ -24,8 +24,8 @@ class RolesController extends Controller
         $roles = Role::when($request->has('orderByField'), function ($query) use ($request) {
             return $query->orderBy($request['orderByField'], $request['orderBy']);
         })
-            ->when($request->company_id, function ($query) use ($request) {
-                return $query->where('scope', $request->company_id);
+            ->when($request->header('company'), function ($query) use ($request) {
+                return $query->where('scope', $request->header('company'));
             })
             ->get();
 
