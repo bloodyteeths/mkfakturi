@@ -43,15 +43,17 @@
         {{-- Issuer (Supplier) Block --}}
         <div class="info-col" style="border-right: 1px solid #ccc;">
             <div class="section-title">ИЗДАВАЧ НА ФАКТУРА</div>
-            <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->company->name }}</span></div>
-            <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $company_address) !!}</span></div>
-            @if($invoice->company->vat_id)
+            <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->company->name ?? '' }}</span></div>
+            @if($company_address)
+                <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $company_address) !!}</span></div>
+            @endif
+            @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
                 <div><span class="field-label">ЕДБ за ДДВ:</span> <span class="field-value">{{ $invoice->company->vat_id }}</span></div>
             @endif
-            @if($invoice->company->tax_id)
+            @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
                 <div><span class="field-label">Даночен број (ЕМБС):</span> <span class="field-value">{{ $invoice->company->tax_id }}</span></div>
             @endif
-            <div><span class="field-label">Место на издавање:</span> <span class="field-value">{{ $invoice->company->address->city ?? 'Скопје' }}</span></div>
+            <div><span class="field-label">Место на издавање:</span> <span class="field-value">{{ optional($invoice->company->address)->city ?? 'Скопје' }}</span></div>
         </div>
 
         {{-- Buyer Block --}}
@@ -210,7 +212,7 @@
     <div style="margin-top: 15px; padding: 10px; border: 1px solid #ccc;">
         <div style="font-weight: bold; margin-bottom: 5px;">Детали за плаќање:</div>
         <div><strong>Валута:</strong> МКД (Македонски денар)</div>
-        @if($invoice->company->address && $invoice->company->address->zip)
+        @if(optional($invoice->company->address)->zip)
             <div><strong>Трансакциска сметка:</strong> {{ $invoice->company->address->zip }}</div>
         @endif
         <div><strong>Начин на плаќање:</strong> Банкарски трансфер</div>
