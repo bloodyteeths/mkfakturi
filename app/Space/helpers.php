@@ -195,10 +195,16 @@ function logo_asset_url(?string $path): ?string
  */
 function format_money_pdf($money, $currency = null)
 {
-    $money = $money / 100;
-
     if (! $currency) {
         $currency = Currency::findOrFail(CompanySetting::getSetting('currency', 1));
+    }
+
+    // CRITICAL FIX: Only divide by 100 for currencies with decimal places (precision > 0)
+    // For zero-precision currencies like MKD, amount is already in the correct unit
+    // Example: MKD with amount=12000 stays as 12000 (12 thousand denars)
+    // USD with amount=12000 becomes 120.00 (120 dollars, stored as cents)
+    if ($currency->precision > 0) {
+        $money = $money / 100;
     }
 
     $format_money = number_format(
