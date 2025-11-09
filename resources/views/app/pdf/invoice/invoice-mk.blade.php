@@ -152,19 +152,23 @@
                         foreach ($item->taxes as $tax) {
                             $rate = $tax->percent ?? 0;
                             if (!$taxesByRate->has($rate)) {
-                                $taxesByRate[$rate] = ['base' => 0, 'tax' => 0];
+                                $taxesByRate->put($rate, ['base' => 0, 'tax' => 0]);
                             }
-                            $taxesByRate[$rate]['base'] += $item->total;
-                            $taxesByRate[$rate]['tax'] += $tax->amount;
+
+                            // Get existing values, modify, and put back
+                            $existing = $taxesByRate->get($rate);
+                            $existing['base'] += $item->total;
+                            $existing['tax'] += $tax->amount;
+                            $taxesByRate->put($rate, $existing);
                         }
                     }
                 } else {
                     foreach ($invoice->taxes as $tax) {
                         $rate = $tax->percent ?? 0;
-                        $taxesByRate[$rate] = [
+                        $taxesByRate->put($rate, [
                             'base' => $invoice->sub_total,
                             'tax' => $tax->amount
-                        ];
+                        ]);
                     }
                 }
             @endphp
