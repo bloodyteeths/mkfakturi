@@ -21,11 +21,17 @@ class RolesController extends Controller
     {
         $this->authorize('viewAny', Role::class);
 
+        // Set Bouncer scope to current company
+        $companyId = $request->header('company');
+        if ($companyId) {
+            BouncerFacade::scope()->to($companyId);
+        }
+
         $roles = Role::when($request->has('orderByField'), function ($query) use ($request) {
             return $query->orderBy($request['orderByField'], $request['orderBy']);
         })
-            ->when($request->header('company'), function ($query) use ($request) {
-                return $query->where('scope', $request->header('company'));
+            ->when($companyId, function ($query) use ($companyId) {
+                return $query->where('scope', $companyId);
             })
             ->get();
 
@@ -41,6 +47,12 @@ class RolesController extends Controller
     public function store(RoleRequest $request)
     {
         $this->authorize('create', Role::class);
+
+        // Set Bouncer scope to current company before creating role
+        $companyId = $request->header('company');
+        if ($companyId) {
+            BouncerFacade::scope()->to($companyId);
+        }
 
         $role = Role::create($request->getRolePayload());
 
@@ -59,6 +71,12 @@ class RolesController extends Controller
     {
         $this->authorize('view', $role);
 
+        // Set Bouncer scope to current company
+        $companyId = request()->header('company');
+        if ($companyId) {
+            BouncerFacade::scope()->to($companyId);
+        }
+
         return new RoleResource($role);
     }
 
@@ -72,6 +90,12 @@ class RolesController extends Controller
     public function update(RoleRequest $request, Role $role)
     {
         $this->authorize('update', $role);
+
+        // Set Bouncer scope to current company
+        $companyId = $request->header('company');
+        if ($companyId) {
+            BouncerFacade::scope()->to($companyId);
+        }
 
         $role->update($request->getRolePayload());
 
@@ -89,6 +113,12 @@ class RolesController extends Controller
     public function destroy(Role $role)
     {
         $this->authorize('delete', $role);
+
+        // Set Bouncer scope to current company
+        $companyId = request()->header('company');
+        if ($companyId) {
+            BouncerFacade::scope()->to($companyId);
+        }
 
         $users = User::whereIs($role->name)->get()->toArray();
 
