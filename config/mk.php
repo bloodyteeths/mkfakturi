@@ -283,6 +283,7 @@ return [
         'auth_sandbox_base_url' => env('NLB_AUTH_SANDBOX_BASE_URL', 'https://auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb'),
         'auth_production_base_url' => env('NLB_AUTH_PRODUCTION_BASE_URL', 'https://auth.mk.open-bank.io/v1/authentication/tenants/nlb'),
         'redirect_uri' => env('NLB_REDIRECT_URI', null), // Must be registered in NLB developer portal
+        'scopes' => env('NLB_SCOPES', 'openid offline_access AccountsAccess TransactionsAccess'), // OAuth scopes
     ],
 
     /*

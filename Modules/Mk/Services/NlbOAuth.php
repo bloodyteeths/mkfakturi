@@ -129,6 +129,25 @@ class NlbOAuth extends Psd2Client
     {
         return true;
     }
+
+    /**
+     * Get the OAuth scopes for NLB Bank PSD2 API
+     *
+     * NLB uses OpenID Connect with specific PSD2 scopes:
+     * - openid: Required for OIDC authentication
+     * - offline_access: For refresh tokens
+     * - AccountsAccess: PSD2 account information access
+     * - TransactionsAccess: PSD2 transaction information access
+     *
+     * Can be overridden via NLB_SCOPES environment variable
+     *
+     * @return string Space-separated list of scopes
+     */
+    protected function getScopes(): string
+    {
+        // Check config first, allows override via environment variable
+        return config('mk.nlb.scopes', 'openid offline_access AccountsAccess TransactionsAccess');
+    }
 }
 
 // CLAUDE-CHECKPOINT

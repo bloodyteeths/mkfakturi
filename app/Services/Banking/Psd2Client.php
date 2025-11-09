@@ -73,6 +73,18 @@ abstract class Psd2Client
     }
 
     /**
+     * Get the OAuth scopes to request
+     *
+     * Override in bank-specific implementations if different scopes are needed
+     *
+     * @return string Space-separated list of scopes
+     */
+    protected function getScopes(): string
+    {
+        return 'accounts transactions';
+    }
+
+    /**
      * Generate OAuth2 authorization URL
      *
      * @param Company $company Company requesting authorization
@@ -87,7 +99,7 @@ abstract class Psd2Client
             'client_id' => $this->getClientId(),
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
-            'scope' => 'accounts transactions',
+            'scope' => $this->getScopes(),
             'state' => $state,
         ];
 

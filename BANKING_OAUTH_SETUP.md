@@ -90,6 +90,37 @@ php artisan config:cache
    - Register a localhost redirect URI (if bank allows)
    - Example: `http://localhost:8000/api/v1/banking/oauth/callback/nlb`
 
+## Common OAuth Errors
+
+### Error: "Invalid scope"
+
+This means the scopes requested don't match what's configured in the developer portal.
+
+**For NLB Bank**, the correct scopes are:
+```
+openid offline_access AccountsAccess TransactionsAccess
+```
+
+**To fix:**
+1. Check your OAuth application settings in NLB Developer Portal
+2. Verify the following scopes are enabled:
+   - `openid` - Required for OpenID Connect
+   - `offline_access` - Allows refresh tokens
+   - `AccountsAccess` - PSD2 account information
+   - `TransactionsAccess` - PSD2 transaction data
+3. Save changes and wait a few minutes for propagation
+
+**For Stopanska Bank**, the default scopes are:
+```
+accounts transactions
+```
+
+### Error: "Code challenge required"
+
+This means the bank requires PKCE (Proof Key for Code Exchange) for security.
+
+**Solution**: This is now automatically handled for NLB Bank. No action needed.
+
 ## Troubleshooting
 
 ### Still Getting "Invalid redirect_uri" Error?
