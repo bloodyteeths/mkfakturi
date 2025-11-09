@@ -96,19 +96,50 @@ php artisan config:cache
 
 This means the scopes requested don't match what's configured in the developer portal.
 
-**For NLB Bank**, the correct scopes are:
+**For NLB Bank**, the scopes depend on your application configuration:
+
+**Default scope (recommended):**
 ```
-openid offline_access AccountsAccess TransactionsAccess
+openid
 ```
 
-**To fix:**
-1. Check your OAuth application settings in NLB Developer Portal
-2. Verify the following scopes are enabled:
-   - `openid` - Required for OpenID Connect
-   - `offline_access` - Allows refresh tokens
-   - `AccountsAccess` - PSD2 account information
-   - `TransactionsAccess` - PSD2 transaction data
-3. Save changes and wait a few minutes for propagation
+NLB Bank automatically grants PSD2 scopes based on your application type in the developer portal.
+The developer portal doesn't expose scope configuration, so scopes are pre-defined by NLB.
+
+**If still getting invalid_scope error, try these alternatives:**
+
+Add to Railway environment variables and test each:
+
+1. **Option 1: Just OpenID (default)**
+   ```bash
+   NLB_SCOPES="openid"
+   ```
+
+2. **Option 2: OpenID with offline access**
+   ```bash
+   NLB_SCOPES="openid offline_access"
+   ```
+
+3. **Option 3: PSD2-specific scopes**
+   ```bash
+   NLB_SCOPES="AIS"
+   ```
+
+4. **Option 4: Multiple PSD2 scopes**
+   ```bash
+   NLB_SCOPES="AIS PIS"
+   ```
+
+5. **Option 5: Empty/no scope**
+   ```bash
+   NLB_SCOPES=""
+   ```
+
+After changing the scope, clear config cache:
+```bash
+php artisan config:clear
+php artisan config:cache
+```
 
 **For Stopanska Bank**, the default scopes are:
 ```
