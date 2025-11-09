@@ -11,7 +11,7 @@ class Unit extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'company_id'];
+    protected $fillable = ['name', 'code', 'company_id'];
 
     public function items(): HasMany
     {
@@ -25,7 +25,11 @@ class Unit extends Model
 
     public function scopeWhereCompany($query)
     {
-        $query->where('company_id', request()->header('company'));
+        // Include both company-specific units AND global units (company_id = null)
+        $query->where(function ($q) {
+            $q->where('company_id', request()->header('company'))
+              ->orWhereNull('company_id');
+        });
     }
 
     public function scopeWhereUnit($query, $unit_id)
