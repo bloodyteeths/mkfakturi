@@ -7,8 +7,8 @@
         body { font-family: "DejaVu Sans"; font-size: 11px; margin: 15px; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
         .header h1 { margin: 0; font-size: 20px; }
-        .info-grid { display: table; width: 100%; margin-bottom: 15px; }
-        .info-col { display: table-cell; width: 50%; vertical-align: top; padding: 5px; }
+        .info-grid { width: 100%; margin-bottom: 15px; }
+        .info-col { float: left; width: 48%; vertical-align: top; padding: 5px; }
         .section-title { font-weight: bold; font-size: 12px; margin-bottom: 5px; border-bottom: 1px solid #ccc; }
         .field-label { font-weight: bold; display: inline-block; width: 140px; }
         .field-value { display: inline; }
@@ -59,15 +59,16 @@
         {{-- Buyer Block --}}
         <div class="info-col">
             <div class="section-title">ПРИМАТЕЛ НА ФАКТУРА</div>
-            <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->name }}</span></div>
+            <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->name ?? '' }}</span></div>
             @if($billing_address)
                 <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $billing_address) !!}</span></div>
             @endif
-            @if($invoice->customer->vat_number)
+            @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
                 <div><span class="field-label">Даночен број:</span> <span class="field-value">{{ $invoice->customer->vat_number }}</span></div>
             @endif
         </div>
     </div>
+    <div style="clear: both;"></div>
 
     {{-- Invoice Metadata --}}
     <table style="width:100%; margin-bottom:15px; border-collapse:collapse;">
@@ -230,9 +231,6 @@
     <div class="footer" style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;">
         <div style="text-align: center;">
             <p><strong>Фактурата е валидна без печат и потпис согласно Законот за даночна постапка.</strong></p>
-            @if($taxesByRate->has(0) || $taxesByRate->isEmpty())
-                <p style="font-size:9px;">Ослободено од ДДВ согласно ЗДДВ, член ___</p>
-            @endif
         </div>
     </div>
 </body>
