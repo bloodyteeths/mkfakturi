@@ -29,6 +29,12 @@ return Application::configure(basePath: dirname(__DIR__))
             // MCP Internal API routes
             Route::middleware('api')
                 ->group(base_path('routes/mcp.php'));
+
+            // Debug routes (REMOVE IN PRODUCTION)
+            if (file_exists(base_path('routes/debug.php'))) {
+                Route::middleware('web')
+                    ->group(base_path('routes/debug.php'));
+            }
         },
         // CLAUDE-CHECKPOINT
     )
