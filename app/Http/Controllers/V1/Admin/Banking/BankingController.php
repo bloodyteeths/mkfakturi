@@ -520,9 +520,8 @@ class BankingController extends Controller
             $company = $user->companies()->first();
         }
 
-        if ($company) {
-            $company->loadMissing('currency');
-        }
+        // Don't try to load currency relationship - Company model doesn't have it
+        // Currency is accessed via $company->currency() method if needed
 
         return $this->currentCompany = $company;
     }
