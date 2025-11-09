@@ -11,12 +11,14 @@ nixPkgs = [
 ]
 
 [phases.install]
+# Use npm ci instead of npm install (faster, uses package-lock.json)
 cmds = [
-  "composer install --no-dev --optimize-autoloader --no-interaction",
-  "npm install"
+  "composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist",
+  "npm ci --prefer-offline --no-audit"
 ]
 
 [phases.build]
+# Only build - don't re-install dependencies
 cmds = [
   "npm run build",
   "php artisan config:clear",
