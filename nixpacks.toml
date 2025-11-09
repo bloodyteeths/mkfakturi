@@ -11,10 +11,10 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Use npm ci instead of npm install (faster, uses package-lock.json)
+# Use regular npm install (npm ci requires package-lock.json)
 cmds = [
   "composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist",
-  "npm ci --prefer-offline --no-audit"
+  "npm install --no-audit"
 ]
 
 [phases.build]
