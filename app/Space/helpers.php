@@ -196,7 +196,21 @@ function logo_asset_url(?string $path): ?string
 function format_money_pdf($money, $currency = null)
 {
     if (! $currency) {
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', 1));
+        // Get company from request header (set by ResolvePdfCompanyMiddleware)
+        $companyId = request()->header('company', 1);
+        $currencyId = CompanySetting::getSetting('currency', $companyId);
+
+        if (!$currencyId) {
+            // Fallback: try to get first available currency
+            $currency = Currency::first();
+        } else {
+            $currency = Currency::find($currencyId);
+        }
+
+        // If still no currency found, throw a more helpful error
+        if (!$currency) {
+            throw new \Exception('No currency configured for company ID: ' . $companyId . '. Please configure a default currency in company settings.');
+        }
     }
 
     // CRITICAL FIX: Only divide by 100 for currencies with decimal places (precision > 0)

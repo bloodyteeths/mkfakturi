@@ -1,60 +1,200 @@
-2025-11-05T18:24:25.177845143Z [inf]  
-2025-11-05T18:24:30.397531572Z [inf]  [35m[Region: europe-west4][0m
-2025-11-05T18:24:30.441222384Z [inf]  [35m=========================
-2025-11-05T18:24:30.441258115Z [inf]  Using Detected Dockerfile
-2025-11-05T18:24:30.441266128Z [inf]  =========================
-2025-11-05T18:24:30.441272777Z [inf]  [0m
-2025-11-05T18:24:30.441299541Z [inf]  context: 738k-lL0T
-2025-11-05T18:24:30.683725772Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T18:24:30.683824386Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T18:24:30.683859629Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T18:24:30.702384812Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T18:24:30.706612821Z [inf]  [internal] load metadata for docker.io/library/python:3.12-slim
-2025-11-05T18:24:30.847736252Z [inf]  [internal] load metadata for docker.io/library/python:3.12-slim
-2025-11-05T18:24:30.848333100Z [inf]  [internal] load .dockerignore
-2025-11-05T18:24:30.848379118Z [inf]  [internal] load .dockerignore
-2025-11-05T18:24:30.849168837Z [inf]  [internal] load .dockerignore
-2025-11-05T18:24:30.867466229Z [inf]  [internal] load .dockerignore
-2025-11-05T18:24:30.875926304Z [inf]  [11/13] COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
-2025-11-05T18:24:30.876021377Z [inf]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
-2025-11-05T18:24:30.876039437Z [inf]  [ 9/13] COPY mcp-server/alembic ./alembic
-2025-11-05T18:24:30.876057008Z [inf]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
-2025-11-05T18:24:30.876075417Z [inf]  [ 7/13] RUN uv sync --frozen
-2025-11-05T18:24:30.876102649Z [inf]  [13/13] RUN groupadd -g 1000 maverick &&     useradd -u 1000 -g maverick -s /bin/sh -m maverick &&     chown -R maverick:maverick /app
-2025-11-05T18:24:30.876118877Z [inf]  [internal] load build context
-2025-11-05T18:24:30.876146762Z [inf]  [ 5/13] RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz   && tar -xzf ta-lib-0.6.4-src.tar.gz   && cd ta-lib-0.6.4/   && ./configure --prefix=/usr/local   && make -j$(nproc)   && make install   && cd ..   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
-2025-11-05T18:24:30.876171354Z [inf]  [ 4/13] RUN pip install --no-cache-dir uv
-2025-11-05T18:24:30.876184552Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
-2025-11-05T18:24:30.876199087Z [inf]  [ 2/13] WORKDIR /app
-2025-11-05T18:24:30.876211707Z [inf]  [12/13] RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-2025-11-05T18:24:30.876222834Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
-2025-11-05T18:24:30.876236475Z [inf]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
-2025-11-05T18:24:30.876281797Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
-2025-11-05T18:24:30.876684527Z [inf]  [internal] load build context
-2025-11-05T18:24:30.887714530Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
-2025-11-05T18:24:30.887782135Z [inf]  [internal] load build context
-2025-11-05T18:24:30.888774845Z [inf]  [ 2/13] WORKDIR /app
-2025-11-05T18:24:30.923852674Z [inf]  [internal] load build context
-2025-11-05T18:24:30.930094573Z [inf]  [ 2/13] WORKDIR /app
-2025-11-05T18:24:30.930213846Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
-2025-11-05T18:24:30.930242805Z [inf]  [ 4/13] RUN pip install --no-cache-dir uv
-2025-11-05T18:24:30.930260720Z [inf]  [ 5/13] RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz   && tar -xzf ta-lib-0.6.4-src.tar.gz   && cd ta-lib-0.6.4/   && ./configure --prefix=/usr/local   && make -j$(nproc)   && make install   && cd ..   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
-2025-11-05T18:24:30.930271587Z [inf]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
-2025-11-05T18:24:30.930281075Z [inf]  [ 7/13] RUN uv sync --frozen
-2025-11-05T18:24:30.930297040Z [err]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
-2025-11-05T18:24:30.930341046Z [err]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
-2025-11-05T18:24:30.930407226Z [inf]  [ 9/13] COPY mcp-server/alembic ./alembic
-2025-11-05T18:24:30.930437869Z [inf]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
-2025-11-05T18:24:30.930460490Z [err]  [11/13] COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
-2025-11-05T18:24:30.930487595Z [err]  [ 9/13] COPY mcp-server/alembic ./alembic
-2025-11-05T18:24:30.930507083Z [err]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
-2025-11-05T18:24:31.427300700Z [inf]  [ 2/13] WORKDIR /app
-2025-11-05T18:24:31.471489757Z [err]  Dockerfile.mcp-server:43
-2025-11-05T18:24:31.471585901Z [err]  -------------------
-2025-11-05T18:24:31.471595864Z [err]  41 |
-2025-11-05T18:24:31.471632108Z [err]  42 |     # Copy entrypoint script
-2025-11-05T18:24:31.471642824Z [err]  43 | >>> COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
-2025-11-05T18:24:31.471650113Z [err]  44 |     RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-2025-11-05T18:24:31.471657833Z [err]  45 |
-2025-11-05T18:24:31.471664742Z [err]  -------------------
-2025-11-05T18:24:31.471672567Z [err]  ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref q7fmmi5h8x16izmhl7ad539pe::0gzftc9sclrt7bi0pwxhowhhf: "/mcp-server/docker-entrypoint.sh": not found
+#50 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#67 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#68 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#69 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#71 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#72 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#73 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#74 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#75 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#76 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#77 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#78 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#79 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#80 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#81 {main}
+"} 
+[2025-11-09 22:37:53] production.ERROR: Primary PDF driver failed, attempting fallback. {"driver":"dompdf","message":"No query results for model [App\\Models\\Currency]."} 
+[2025-11-09 22:37:53] production.ERROR: Route [dashboard] not defined. (View: /app/resources/views/errors/404.blade.php) {"userId":2,"exception":"[object] (Illuminate\\View\\ViewException(code: 0): Route [dashboard] not defined. (View: /app/resources/views/errors/404.blade.php) at /app/vendor/laravel/framework/src/Illuminate/Routing/UrlGenerator.php:526)
+[stacktrace]
+#0 /app/vendor/laravel/framework/src/Illuminate/View/Engines/PhpEngine.php(59): Illuminate\\View\\Engines\\CompilerEngine->handleViewException(Object(Symfony\\Component\\Routing\\Exception\\RouteNotFoundException), 0)
+#1 /app/vendor/laravel/framework/src/Illuminate/View/Engines/CompilerEngine.php(74): Illuminate\\View\\Engines\\PhpEngine->evaluatePath('/app/storage/fr...', Array)
+#2 /app/vendor/laravel/framework/src/Illuminate/View/View.php(208): Illuminate\\View\\Engines\\CompilerEngine->get('/app/resources/...', Array)
+#3 /app/vendor/laravel/framework/src/Illuminate/View/View.php(191): Illuminate\\View\\View->getContents()
+#4 /app/vendor/laravel/framework/src/Illuminate/View/View.php(160): Illuminate\\View\\View->renderContents()
+#5 /app/vendor/laravel/framework/src/Illuminate/Http/Response.php(78): Illuminate\\View\\View->render()
+#6 /app/vendor/laravel/framework/src/Illuminate/Http/Response.php(34): Illuminate\\Http\\Response->setContent(Object(Illuminate\\View\\View))
+#7 /app/vendor/laravel/framework/src/Illuminate/Routing/ResponseFactory.php(60): Illuminate\\Http\\Response->__construct(Object(Illuminate\\View\\View), 404, Array)
+#8 /app/vendor/laravel/framework/src/Illuminate/Routing/ResponseFactory.php(90): Illuminate\\Routing\\ResponseFactory->make(Object(Illuminate\\View\\View), 404, Array)
+#9 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(897): Illuminate\\Routing\\ResponseFactory->view('errors::404', Array, 404, Array)
+#10 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(818): Illuminate\\Foundation\\Exceptions\\Handler->renderHttpException(Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#11 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(709): Illuminate\\Foundation\\Exceptions\\Handler->prepareResponse(Object(Illuminate\\Http\\Request), Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#12 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(597): Illuminate\\Foundation\\Exceptions\\Handler->renderExceptionResponse(Object(Illuminate\\Http\\Request), Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#13 /app/vendor/laravel/framework/src/Illuminate/Routing/Pipeline.php(51): Illuminate\\Foundation\\Exceptions\\Handler->render(Object(Illuminate\\Http\\Request), Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#14 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(171): Illuminate\\Routing\\Pipeline->handleException(Object(Illuminate\\Http\\Request), Object(Illuminate\\Database\\Eloquent\\ModelNotFoundException))
+#15 /app/app/Http/Middleware/PdfMiddleware.php(23): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#16 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PdfMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#17 /app/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#19 /app/app/Http/Middleware/ResolvePdfCompanyMiddleware.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ResolvePdfCompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#25 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /app/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#31 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#33 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#35 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#37 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#38 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#39 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#40 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#41 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#42 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#43 /app/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 /app/app/Http/Middleware/LocaleMiddleware.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#52 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#53 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#61 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#67 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#68 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#69 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#71 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#72 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#73 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#74 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#75 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#76 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#77 {main}
+
+[previous exception] [object] (Symfony\\Component\\Routing\\Exception\\RouteNotFoundException(code: 0): Route [dashboard] not defined. at /app/vendor/laravel/framework/src/Illuminate/Routing/UrlGenerator.php:526)
+[stacktrace]
+#0 /app/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(856): Illuminate\\Routing\\UrlGenerator->route('dashboard', Array, true)
+#1 /app/storage/framework/views/b12b5e557f6e9db6f9646dd84f1a326b.php(57): route('dashboard')
+#2 /app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php(123): require('/app/storage/fr...')
+#3 /app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php(124): Illuminate\\Filesystem\\Filesystem::Illuminate\\Filesystem\\{closure}()
+#4 /app/vendor/laravel/framework/src/Illuminate/View/Engines/PhpEngine.php(57): Illuminate\\Filesystem\\Filesystem->getRequire('/app/storage/fr...', Array)
+#5 /app/vendor/laravel/framework/src/Illuminate/View/Engines/CompilerEngine.php(74): Illuminate\\View\\Engines\\PhpEngine->evaluatePath('/app/storage/fr...', Array)
+#6 /app/vendor/laravel/framework/src/Illuminate/View/View.php(208): Illuminate\\View\\Engines\\CompilerEngine->get('/app/resources/...', Array)
+#7 /app/vendor/laravel/framework/src/Illuminate/View/View.php(191): Illuminate\\View\\View->getContents()
+#8 /app/vendor/laravel/framework/src/Illuminate/View/View.php(160): Illuminate\\View\\View->renderContents()
+#9 /app/vendor/laravel/framework/src/Illuminate/Http/Response.php(78): Illuminate\\View\\View->render()
+#10 /app/vendor/laravel/framework/src/Illuminate/Http/Response.php(34): Illuminate\\Http\\Response->setContent(Object(Illuminate\\View\\View))
+#11 /app/vendor/laravel/framework/src/Illuminate/Routing/ResponseFactory.php(60): Illuminate\\Http\\Response->__construct(Object(Illuminate\\View\\View), 404, Array)
+#12 /app/vendor/laravel/framework/src/Illuminate/Routing/ResponseFactory.php(90): Illuminate\\Routing\\ResponseFactory->make(Object(Illuminate\\View\\View), 404, Array)
+#13 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(897): Illuminate\\Routing\\ResponseFactory->view('errors::404', Array, 404, Array)
+#14 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(818): Illuminate\\Foundation\\Exceptions\\Handler->renderHttpException(Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#15 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(709): Illuminate\\Foundation\\Exceptions\\Handler->prepareResponse(Object(Illuminate\\Http\\Request), Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#16 /app/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(597): Illuminate\\Foundation\\Exceptions\\Handler->renderExceptionResponse(Object(Illuminate\\Http\\Request), Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#17 /app/vendor/laravel/framework/src/Illuminate/Routing/Pipeline.php(51): Illuminate\\Foundation\\Exceptions\\Handler->render(Object(Illuminate\\Http\\Request), Object(Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException))
+#18 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(171): Illuminate\\Routing\\Pipeline->handleException(Object(Illuminate\\Http\\Request), Object(Illuminate\\Database\\Eloquent\\ModelNotFoundException))
+#19 /app/app/Http/Middleware/PdfMiddleware.php(23): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PdfMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /app/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 /app/app/Http/Middleware/ResolvePdfCompanyMiddleware.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ResolvePdfCompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#25 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /app/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#35 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#37 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#42 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#43 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#44 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#45 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /app/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /app/app/Http/Middleware/LocaleMiddleware.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#67 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#68 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#69 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#71 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#72 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#73 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#74 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#75 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#76 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#77 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#78 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#79 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#80 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#81 {main}
+"} 
