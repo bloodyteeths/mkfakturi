@@ -145,24 +145,64 @@ class BankingOAuthController extends Controller
 
             // Fetch bank accounts from PSD2 API
             try {
+                Log::info('Attempting to fetch bank accounts from PSD2 API', [
+                    'company_id' => $company->id,
+                    'provider' => $provider,
+                    'token_id' => $token->id
+                ]);
+
                 $accounts = $oauthService->getAccounts($company);
 
-                // Create BankAccount records for each account
-                foreach ($accounts as $accountData) {
-                    $this->createBankAccount($company, $provider, $accountData);
+                Log::info('Accounts fetched from PSD2 API', [
+                    'company_id' => $company->id,
+                    'provider' => $provider,
+                    'count' => count($accounts),
+                    'accounts' => $accounts
+                ]);
+
+                if (empty($accounts)) {
+                    Log::warning('No accounts returned from PSD2 API', [
+                        'company_id' => $company->id,
+                        'provider' => $provider
+                    ]);
+
+                    return redirect('/admin/banking')->with('warning', 'Bank connected but no accounts found. This may be normal for sandbox. Check logs for details.');
                 }
 
-                Log::info('Bank accounts created', [
+                // Create BankAccount records for each account
+                $createdCount = 0;
+                foreach ($accounts as $accountData) {
+                    try {
+                        $this->createBankAccount($company, $provider, $accountData);
+                        $createdCount++;
+                    } catch (\Exception $e) {
+                        Log::error('Failed to create bank account', [
+                            'company_id' => $company->id,
+                            'provider' => $provider,
+                            'account_data' => $accountData,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                }
+
+                Log::info('Bank accounts created in database', [
                     'company_id' => $company->id,
                     'provider' => $provider,
-                    'count' => count($accounts)
+                    'fetched' => count($accounts),
+                    'created' => $createdCount
                 ]);
+
+                return redirect('/admin/banking')->with('success', "Bank connected successfully! {$createdCount} account(s) added.");
             } catch (\Exception $e) {
-                Log::warning('Failed to fetch initial accounts, will sync later', [
+                Log::error('Failed to fetch accounts from PSD2 API', [
                     'company_id' => $company->id,
                     'provider' => $provider,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
                 ]);
+
+                return redirect('/admin/banking')->with('error', 'Bank connected but failed to fetch accounts: ' . $e->getMessage());
             }
 
             // TODO: Dispatch job to sync transactions

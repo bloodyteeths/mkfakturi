@@ -344,21 +344,54 @@ abstract class Psd2Client
         $token = $this->getValidToken($company);
 
         try {
+            $url = $this->getBaseUrl() . '/accounts';
+
+            Log::info('Fetching accounts from PSD2 API', [
+                'bank' => $this->getBankCode(),
+                'company_id' => $company->id,
+                'url' => $url,
+                'has_token' => !empty($token->access_token)
+            ]);
+
             $response = Http::withToken($token->access_token)
-                ->get($this->getBaseUrl() . '/accounts');
+                ->get($url);
+
+            Log::info('PSD2 API response received', [
+                'bank' => $this->getBankCode(),
+                'company_id' => $company->id,
+                'status' => $response->status(),
+                'body_length' => strlen($response->body()),
+                'body_preview' => substr($response->body(), 0, 500)
+            ]);
 
             if (!$response->successful()) {
-                throw new \Exception('Failed to fetch accounts: ' . $response->body());
+                Log::error('PSD2 API returned error', [
+                    'bank' => $this->getBankCode(),
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers()
+                ]);
+                throw new \Exception('Failed to fetch accounts (HTTP ' . $response->status() . '): ' . $response->body());
             }
 
             $data = $response->json();
 
-            return $data['accounts'] ?? [];
+            $accounts = $data['accounts'] ?? [];
+
+            Log::info('Accounts extracted from response', [
+                'bank' => $this->getBankCode(),
+                'company_id' => $company->id,
+                'count' => count($accounts),
+                'response_keys' => array_keys($data)
+            ]);
+
+            return $accounts;
         } catch (\Exception $e) {
             Log::error('PSD2 account fetch failed', [
                 'bank' => $this->getBankCode(),
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             throw $e;
