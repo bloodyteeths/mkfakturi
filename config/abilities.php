@@ -1,16 +1,25 @@
 <?php
 
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
+use App\Models\Commission;
 use App\Models\Customer;
 use App\Models\CustomField;
 use App\Models\Estimate;
 use App\Models\ExchangeRateProvider;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
+use App\Models\ImportJob;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Note;
+use App\Models\Partner;
 use App\Models\Payment;
+use App\Models\PaymentMethod;
 use App\Models\RecurringInvoice;
 use App\Models\TaxType;
+use App\Models\Unit;
+use App\Models\User;
 
 return [
     'abilities' => [
@@ -414,6 +423,274 @@ return [
             'model' => Note::class,
             'depends_on' => [
                 'view-all-notes',
+            ],
+        ],
+
+        // User Management
+        [
+            'name' => 'view user',
+            'ability' => 'view-user',
+            'model' => User::class,
+        ],
+        [
+            'name' => 'create user',
+            'ability' => 'create-user',
+            'model' => User::class,
+            'depends_on' => [
+                'view-user',
+            ],
+        ],
+        [
+            'name' => 'edit user',
+            'ability' => 'edit-user',
+            'model' => User::class,
+            'depends_on' => [
+                'view-user',
+            ],
+        ],
+        [
+            'name' => 'delete user',
+            'ability' => 'delete-user',
+            'model' => User::class,
+            'depends_on' => [
+                'view-user',
+            ],
+        ],
+
+        // Bank Accounts
+        [
+            'name' => 'view bank account',
+            'ability' => 'view-bank-account',
+            'model' => BankAccount::class,
+        ],
+        [
+            'name' => 'create bank account',
+            'ability' => 'create-bank-account',
+            'model' => BankAccount::class,
+            'depends_on' => [
+                'view-bank-account',
+            ],
+        ],
+        [
+            'name' => 'edit bank account',
+            'ability' => 'edit-bank-account',
+            'model' => BankAccount::class,
+            'depends_on' => [
+                'view-bank-account',
+            ],
+        ],
+        [
+            'name' => 'delete bank account',
+            'ability' => 'delete-bank-account',
+            'model' => BankAccount::class,
+            'depends_on' => [
+                'view-bank-account',
+            ],
+        ],
+
+        // Bank Transactions
+        [
+            'name' => 'view bank transaction',
+            'ability' => 'view-bank-transaction',
+            'model' => BankTransaction::class,
+        ],
+        [
+            'name' => 'sync bank transactions',
+            'ability' => 'sync-bank-transaction',
+            'model' => BankTransaction::class,
+            'depends_on' => [
+                'view-bank-transaction',
+                'view-bank-account',
+            ],
+        ],
+        [
+            'name' => 'match bank transaction',
+            'ability' => 'match-bank-transaction',
+            'model' => BankTransaction::class,
+            'depends_on' => [
+                'view-bank-transaction',
+                'view-invoice',
+                'view-expense',
+            ],
+        ],
+
+        // Partners (Affiliates)
+        [
+            'name' => 'view partner',
+            'ability' => 'view-partner',
+            'model' => Partner::class,
+        ],
+        [
+            'name' => 'create partner',
+            'ability' => 'create-partner',
+            'model' => Partner::class,
+            'depends_on' => [
+                'view-partner',
+            ],
+        ],
+        [
+            'name' => 'edit partner',
+            'ability' => 'edit-partner',
+            'model' => Partner::class,
+            'depends_on' => [
+                'view-partner',
+            ],
+        ],
+        [
+            'name' => 'delete partner',
+            'ability' => 'delete-partner',
+            'model' => Partner::class,
+            'depends_on' => [
+                'view-partner',
+            ],
+        ],
+
+        // Commissions
+        [
+            'name' => 'view commission',
+            'ability' => 'view-commission',
+            'model' => Commission::class,
+        ],
+        [
+            'name' => 'create commission',
+            'ability' => 'create-commission',
+            'model' => Commission::class,
+            'depends_on' => [
+                'view-commission',
+                'view-partner',
+            ],
+        ],
+        [
+            'name' => 'approve commission',
+            'ability' => 'approve-commission',
+            'model' => Commission::class,
+            'depends_on' => [
+                'view-commission',
+            ],
+        ],
+        [
+            'name' => 'pay commission',
+            'ability' => 'pay-commission',
+            'model' => Commission::class,
+            'depends_on' => [
+                'view-commission',
+                'approve-commission',
+            ],
+        ],
+
+        // Expense Categories
+        [
+            'name' => 'view expense category',
+            'ability' => 'view-expense-category',
+            'model' => ExpenseCategory::class,
+        ],
+        [
+            'name' => 'create expense category',
+            'ability' => 'create-expense-category',
+            'model' => ExpenseCategory::class,
+            'depends_on' => [
+                'view-expense-category',
+            ],
+        ],
+        [
+            'name' => 'edit expense category',
+            'ability' => 'edit-expense-category',
+            'model' => ExpenseCategory::class,
+            'depends_on' => [
+                'view-expense-category',
+            ],
+        ],
+        [
+            'name' => 'delete expense category',
+            'ability' => 'delete-expense-category',
+            'model' => ExpenseCategory::class,
+            'depends_on' => [
+                'view-expense-category',
+            ],
+        ],
+
+        // Payment Methods
+        [
+            'name' => 'view payment method',
+            'ability' => 'view-payment-method',
+            'model' => PaymentMethod::class,
+        ],
+        [
+            'name' => 'create payment method',
+            'ability' => 'create-payment-method',
+            'model' => PaymentMethod::class,
+            'depends_on' => [
+                'view-payment-method',
+            ],
+        ],
+        [
+            'name' => 'edit payment method',
+            'ability' => 'edit-payment-method',
+            'model' => PaymentMethod::class,
+            'depends_on' => [
+                'view-payment-method',
+            ],
+        ],
+        [
+            'name' => 'delete payment method',
+            'ability' => 'delete-payment-method',
+            'model' => PaymentMethod::class,
+            'depends_on' => [
+                'view-payment-method',
+            ],
+        ],
+
+        // Units
+        [
+            'name' => 'view unit',
+            'ability' => 'view-unit',
+            'model' => Unit::class,
+        ],
+        [
+            'name' => 'create unit',
+            'ability' => 'create-unit',
+            'model' => Unit::class,
+            'depends_on' => [
+                'view-unit',
+            ],
+        ],
+        [
+            'name' => 'edit unit',
+            'ability' => 'edit-unit',
+            'model' => Unit::class,
+            'depends_on' => [
+                'view-unit',
+            ],
+        ],
+        [
+            'name' => 'delete unit',
+            'ability' => 'delete-unit',
+            'model' => Unit::class,
+            'depends_on' => [
+                'view-unit',
+            ],
+        ],
+
+        // Import/Migration
+        [
+            'name' => 'view import',
+            'ability' => 'view-import',
+            'model' => ImportJob::class,
+        ],
+        [
+            'name' => 'create import',
+            'ability' => 'create-import',
+            'model' => ImportJob::class,
+            'depends_on' => [
+                'view-import',
+            ],
+        ],
+        [
+            'name' => 'delete import',
+            'ability' => 'delete-import',
+            'model' => ImportJob::class,
+            'depends_on' => [
+                'view-import',
             ],
         ],
     ],
