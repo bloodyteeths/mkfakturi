@@ -1,0 +1,176 @@
+2025-11-09T21:06:21.000000000Z [inf]  Starting Container
+2025-11-09T21:06:21.998987524Z [inf]  MYSQLUSER=root
+2025-11-09T21:06:21.998997296Z [inf]  MYSQL_DATABASE=railway
+2025-11-09T21:06:21.999003027Z [inf]  MYSQL_PUBLIC_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@switchback.proxy.rlwy.net:31829/railway
+2025-11-09T21:06:21.999008550Z [inf]  MYSQL_ROOT_PASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
+2025-11-09T21:06:21.999016889Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
+2025-11-09T21:06:21.999023148Z [inf]  
+2025-11-09T21:06:21.999028326Z [inf]  Checking specific variables:
+2025-11-09T21:06:21.999033803Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
+2025-11-09T21:06:21.999040919Z [inf]  DATABASE_URL=NOT SET
+2025-11-09T21:06:21.999047122Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
+2025-11-09T21:06:21.999052520Z [inf]  MYSQLPORT=3306
+2025-11-09T21:06:21.999058123Z [inf]  MYSQLUSER=root
+2025-11-09T21:06:21.999063327Z [inf]  MYSQLDATABASE=railway
+2025-11-09T21:06:21.999068931Z [inf]  Using Railway MYSQL_URL to parse connection...
+2025-11-09T21:06:21.999074685Z [inf]  Parsed from MYSQL_URL:
+2025-11-09T21:06:21.999078441Z [inf]  === Railway Startup Script ===
+2025-11-09T21:06:21.999083469Z [inf]  DB_HOST: mysql-y5el.railway.internal
+2025-11-09T21:06:21.999085755Z [inf]  Environment variables check:
+2025-11-09T21:06:21.999092761Z [inf]  All environment variables (searching for MySQL related):
+2025-11-09T21:06:21.999093588Z [inf]  DB_PORT: 3306
+2025-11-09T21:06:21.999101156Z [inf]  MYSQLDATABASE=railway
+2025-11-09T21:06:21.999102899Z [inf]  DB_DATABASE: railway
+2025-11-09T21:06:21.999108037Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
+2025-11-09T21:06:21.999111208Z [inf]  Final DB config:
+2025-11-09T21:06:21.999117175Z [inf]  MYSQLPASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
+2025-11-09T21:06:21.999119487Z [inf]  DB_CONNECTION: mysql
+2025-11-09T21:06:21.999124573Z [inf]  MYSQLPORT=3306
+2025-11-09T21:06:21.999127276Z [inf]  DB_HOST: mysql-y5el.railway.internal
+2025-11-09T21:06:21.999131990Z [inf]  DB_PORT: 3306
+2025-11-09T21:06:21.999136531Z [inf]  DB_DATABASE: railway
+2025-11-09T21:06:21.999141138Z [inf]  DB_USERNAME: root
+2025-11-09T21:06:21.999145247Z [inf]  Creating minimal .env file for installation wizard...
+2025-11-09T21:06:21.999151101Z [inf]  Checking if auto-install needed...
+2025-11-09T21:06:22.356667433Z [inf]  Profile status: COMPLETED
+2025-11-09T21:06:22.356672187Z [inf]  Already installed (profile_complete = COMPLETED), skipping...
+2025-11-09T21:06:22.356678029Z [inf]  Creating storage directories...
+2025-11-09T21:06:22.356683492Z [inf]  Configuring session for Railway domain: www.facturino.mk
+2025-11-09T21:06:22.356688898Z [inf]  Clearing caches...
+2025-11-09T21:06:22.506535017Z [inf]  
+2025-11-09T21:06:22.506547090Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-09T21:06:22.506554122Z [inf]  
+2025-11-09T21:06:22.654382896Z [inf]  
+2025-11-09T21:06:22.654388394Z [inf]     INFO  Application cache cleared successfully.  
+2025-11-09T21:06:22.654392509Z [inf]  
+2025-11-09T21:06:22.802682330Z [inf]  
+2025-11-09T21:06:22.802689176Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-09T21:06:22.802692646Z [inf]  
+2025-11-09T21:06:23.004781216Z [inf]  
+2025-11-09T21:06:23.004788477Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-09T21:06:23.004793811Z [inf]  
+2025-11-09T21:06:23.004799832Z [inf]  Optimizing application...
+2025-11-09T21:06:23.154076395Z [inf]  
+2025-11-09T21:06:23.154080797Z [inf]     INFO  Caching framework bootstrap, configuration, and metadata.  
+2025-11-09T21:06:23.154084411Z [inf]  
+2025-11-09T21:06:23.154087804Z [inf]    config ........................................................ 15.27ms DONE
+2025-11-09T21:06:23.154091644Z [inf]    events ......................................................... 0.83ms DONE
+2025-11-09T21:06:23.176308660Z [inf]    routes ........................................................ 32.44ms DONE
+2025-11-09T21:06:23.217535148Z [inf]    views ......................................................... 24.86ms DONE
+2025-11-09T21:06:23.217540085Z [inf]  
+2025-11-09T21:06:23.217545795Z [inf]  Running migrations...
+2025-11-09T21:06:23.217549288Z [inf]  Checking for existing tables to skip duplicate migrations...
+2025-11-09T21:06:23.490566169Z [inf]  Running main migrations batch...
+2025-11-09T21:06:23.667937303Z [inf]  
+2025-11-09T21:06:23.667944346Z [inf]     INFO  Nothing to migrate.  
+2025-11-09T21:06:23.667950023Z [inf]  
+2025-11-09T21:06:23.667954920Z [inf]  Ensuring banking tables exist...
+2025-11-09T21:06:23.896080322Z [inf]  bank_accounts table exists
+2025-11-09T21:06:23.896086090Z [inf]  bank_transactions table exists
+2025-11-09T21:06:24.068952089Z [inf]  
+2025-11-09T21:06:24.068959280Z [inf]     INFO  Goodbye.
+2025-11-09T21:06:24.068965272Z [inf]  
+2025-11-09T21:06:24.272080836Z [inf]  
+2025-11-09T21:06:24.272088121Z [inf]     INFO  Goodbye.
+2025-11-09T21:06:24.272094057Z [inf]  
+2025-11-09T21:06:24.284475311Z [inf]  Ensuring IFRS entity migrations are run...
+2025-11-09T21:06:24.618123573Z [inf]  IFRS entity columns already exist - skipping migrations
+2025-11-09T21:06:24.618128991Z [inf]  
+2025-11-09T21:06:24.618133403Z [inf]     INFO  Goodbye.
+2025-11-09T21:06:24.618136939Z [inf]  
+2025-11-09T21:06:24.629657111Z [inf]  IFRS columns already exist in database, marking migrations as completed...
+2025-11-09T21:06:24.904450477Z [inf]  Migration already recorded: 2025_11_04_000000_add_ifrs_entity_id_to_companies_table
+2025-11-09T21:06:24.904458581Z [inf]  Migration already recorded: 2025_11_04_000001_add_entity_id_to_users_table
+2025-11-09T21:06:24.904464530Z [inf]  Ensuring MKD currency has correct precision...
+2025-11-09T21:06:25.011997285Z [inf]  Current MKD precision: 0
+2025-11-09T21:06:25.012003603Z [inf]  ✅ MKD precision already correct (0)
+2025-11-09T21:06:25.022178309Z [inf]  RAILWAY_SKIP_INSTALL enabled - forcing installation complete...
+2025-11-09T21:06:25.022186819Z [inf]  Creating database_created marker file...
+2025-11-09T21:06:25.027513820Z [inf]  Checking existing users in database...
+2025-11-09T21:06:25.269811841Z [inf]  admin@invoiceshelf.com - Jane Doe
+2025-11-09T21:06:25.269821403Z [inf]  your-email@example.com - Администратор
+2025-11-09T21:06:25.269829105Z [inf]  Creating/resetting admin user with email: your-email@example.com
+2025-11-09T21:06:25.544307766Z [inf]  Looking for existing admin user with email: your-email@example.com
+2025-11-09T21:06:25.544315890Z [inf]  Found existing user. Resetting password and settings...
+2025-11-09T21:06:25.683748064Z [inf]  Password and settings updated for user: your-email@example.com
+2025-11-09T21:06:25.683755757Z [inf]  
+2025-11-09T21:06:25.683761582Z [inf]  =================================
+2025-11-09T21:06:25.683766848Z [inf]  Admin credentials:
+2025-11-09T21:06:25.683773001Z [inf]  Email: your-email@example.com
+2025-11-09T21:06:25.683783530Z [inf]  Password: your-secure-password
+2025-11-09T21:06:25.683788355Z [inf]  =================================
+2025-11-09T21:06:25.683793675Z [inf]  Verifying user settings...
+2025-11-09T21:06:25.934863068Z [inf]  User has 2 settingslanguage: mk
+2025-11-09T21:06:25.934867988Z [inf]  currency: 74
+2025-11-09T21:06:26.447724836Z [inf]  Verification - profile_complete is now: COMPLETED
+2025-11-09T21:06:26.730138886Z [inf]  Number of users in database: 2
+2025-11-09T21:06:26.730142765Z [inf]  Database marker file created successfully
+2025-11-09T21:06:26.730147460Z [inf]  =================================
+2025-11-09T21:06:26.730151656Z [inf]  Installation bypass complete!
+2025-11-09T21:06:26.730155364Z [inf]  Login credentials:
+2025-11-09T21:06:26.730161987Z [inf]    Email: your-email@example.com
+2025-11-09T21:06:26.730166934Z [inf]    Password: your-secure-password
+2025-11-09T21:06:26.730172785Z [inf]  =================================
+2025-11-09T21:06:26.730177866Z [inf]  Running PartnerSeeder to ensure Partner records exist for admin users...
+2025-11-09T21:06:27.067780821Z [inf]  
+2025-11-09T21:06:27.067786072Z [inf]     INFO  Seeding database.  
+2025-11-09T21:06:27.067790815Z [inf]  
+2025-11-09T21:06:27.067795272Z [inf]  Starting Partner creation for admin/accountant users...
+2025-11-09T21:06:27.067799899Z [inf]  Partner already exists for user admin@invoiceshelf.com (ID: 1)
+2025-11-09T21:06:27.067805768Z [inf]  Partner already exists for user your-email@example.com (ID: 2)
+2025-11-09T21:06:27.067811479Z [inf]  Partner seeding completed!
+2025-11-09T21:06:27.067816240Z [inf]  Total users processed: 2
+2025-11-09T21:06:27.067819986Z [inf]  Partners created: 0
+2025-11-09T21:06:27.067824034Z [inf]  Partners skipped (already exist): 2
+2025-11-09T21:06:27.067827997Z [inf]  IFRS accounting feature enabled - ensuring chart of accounts...
+2025-11-09T21:06:27.180351897Z [inf]  
+2025-11-09T21:06:27.180356424Z [inf]     INFO  Seeding database.  
+2025-11-09T21:06:27.180360091Z [inf]  
+2025-11-09T21:06:27.180363921Z [inf]  Seeding Macedonian Chart of Accounts...
+2025-11-09T21:06:27.188857088Z [inf]  Seeding chart of accounts for company: xyz
+2025-11-09T21:06:27.192893926Z [inf]    → 2025 reporting period already exists
+2025-11-09T21:06:27.237831208Z [inf]  Asset accounts seeded (1000-1999)
+2025-11-09T21:06:27.259163451Z [inf]  Liability accounts seeded (2000-2999)
+2025-11-09T21:06:27.264194370Z [inf]  Equity accounts seeded (3000-3999)
+2025-11-09T21:06:27.275855996Z [inf]  Revenue accounts seeded (4000-4999)
+2025-11-09T21:06:27.317093076Z [inf]  Expense accounts seeded (5000-5999)
+2025-11-09T21:06:27.317099944Z [inf]  Seeding chart of accounts for company: Teknomed DOO
+2025-11-09T21:06:27.317104157Z [inf]    → 2025 reporting period already exists
+2025-11-09T21:06:27.390408350Z [inf]  Asset accounts seeded (1000-1999)
+2025-11-09T21:06:27.390415581Z [inf]  Liability accounts seeded (2000-2999)
+2025-11-09T21:06:27.395526172Z [inf]  Equity accounts seeded (3000-3999)
+2025-11-09T21:06:27.408156001Z [inf]  Revenue accounts seeded (4000-4999)
+2025-11-09T21:06:27.436303133Z [inf]  Expense accounts seeded (5000-5999)
+2025-11-09T21:06:27.436306984Z [inf]  Macedonian Chart of Accounts seeded successfully!
+2025-11-09T21:06:27.448607636Z [inf]  Skipping config cache to allow dynamic environment variables...
+2025-11-09T21:06:27.448611827Z [inf]  Creating storage link...
+2025-11-09T21:06:27.663156538Z [inf]  
+2025-11-09T21:06:27.663164438Z [inf]     INFO  The [public/storage] link has been connected to [storagepublic].  
+2025-11-09T21:06:27.663168652Z [inf]  
+2025-11-09T21:06:27.668027631Z [inf]  === Final Environment Check ===
+2025-11-09T21:06:27.668034725Z [inf]  CACHE_STORE: file
+2025-11-09T21:06:27.668040147Z [inf]  CACHE_DRIVER: file
+2025-11-09T21:06:27.668044401Z [inf]  QUEUE_CONNECTION: sync
+2025-11-09T21:06:27.668049819Z [inf]  SESSION_DRIVER: file
+2025-11-09T21:06:27.668054856Z [inf]  REDIS_CLIENT: 
+2025-11-09T21:06:27.668059978Z [inf]  BROADCAST_DRIVER: log
+2025-11-09T21:06:27.668064730Z [inf]  Checking frontend build assets...
+2025-11-09T21:06:27.668069292Z [inf]  Build assets directory exists with 168 files
+2025-11-09T21:06:27.673029071Z [inf]  total 7.8M
+2025-11-09T21:06:27.673035099Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  9 21:05 BaseEditor-FtAAJv83.css
+2025-11-09T21:06:27.673038477Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  9 21:05 404-DGaigOSE.js
+2025-11-09T21:06:27.673045825Z [inf]  -rw-r--r-- 1 root root 4.3K Nov  9 21:05 AccountSetting-DfgRCz87.js
+2025-11-09T21:06:27.673048778Z [inf]  Starting PHP server on port 8080...
+2025-11-09T21:06:27.673053146Z [inf]  -rw-r--r-- 1 root root 7.3K Nov  9 21:05 AddressInformation-mBhFf2Qc.js
+2025-11-09T21:06:27.673059814Z [inf]  Laravel logs will be written to storage/logs/laravel.log
+2025-11-09T21:06:27.673062823Z [inf]  -rw-r--r-- 1 root root 7.2K Nov  9 21:05 AiInsightsSetting-D2usqNXz.js
+2025-11-09T21:06:27.673070651Z [inf]  Server starting - Railway health checks should now pass
+2025-11-09T21:06:27.673072265Z [inf]  -rw-r--r-- 1 root root 5.9K Nov  9 21:05 AstronautIcon-EwdELI8R.js
+2025-11-09T21:06:27.673081118Z [inf]  Initialization will continue in the background
+2025-11-09T21:06:27.673081275Z [inf]  -rw-r--r-- 1 root root 7.6K Nov  9 21:05 BackupSetting-pi6rGeuo.js
+2025-11-09T21:06:27.673087263Z [inf]  -rw-r--r-- 1 root root  25K Nov  9 21:05 BankingDashboard-DHnRwFXQ.js
+2025-11-09T21:06:27.673092329Z [inf]  -rw-r--r-- 1 root root 324K Nov  9 21:05 BaseEditor-CwxQk5mu.js
+2025-11-09T21:06:27.695344610Z [inf]  [Sun Nov  9 21:06:27 2025] PHP 8.2.27 Development Server (http://0.0.0.0:8080) started
+2025-11-09T21:06:27.829330499Z [inf]  [Sun Nov  9 21:06:27 2025] 100.64.0.2:41583 Accepted
+2025-11-09T21:06:28.159017542Z [inf]  [Sun Nov  9 21:06:28 2025] 100.64.0.2:41583 [200]: GET /
+2025-11-09T21:06:28.159021536Z [inf]  [Sun Nov  9 21:06:28 2025] 100.64.0.2:41583 Closing

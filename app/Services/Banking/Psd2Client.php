@@ -300,13 +300,21 @@ abstract class Psd2Client
         $token = $this->getValidToken($company);
 
         try {
-            $response = Http::withToken($token->access_token)
-                ->get($this->getBaseUrl() . "/accounts/{$accountId}/transactions", [
-                    'dateFrom' => $from->format('Y-m-d'),
-                    'dateTo' => $to->format('Y-m-d'),
-                ]);
+            // Build HTTP request with optional mTLS certificate
+            $request = Http::withToken($token->access_token);
+            $request = $this->addMtlsCertificate($request);
+
+            $response = $request->get($this->getBaseUrl() . "/accounts/{$accountId}/transactions", [
+                'dateFrom' => $from->format('Y-m-d'),
+                'dateTo' => $to->format('Y-m-d'),
+            ]);
 
             if (!$response->successful()) {
+                // Special handling for mTLS errors
+                if ($response->status() === 401 && str_contains($response->body(), 'mTLS')) {
+                    throw new \Exception('mTLS authentication failed. Please ensure you have configured valid PSD2 certificates. See BANK_CERTIFICATES.md for instructions.');
+                }
+
                 throw new \Exception('Failed to fetch transactions: ' . $response->body());
             }
 
@@ -350,11 +358,17 @@ abstract class Psd2Client
                 'bank' => $this->getBankCode(),
                 'company_id' => $company->id,
                 'url' => $url,
-                'has_token' => !empty($token->access_token)
+                'has_token' => !empty($token->access_token),
+                'has_mtls_cert' => $this->hasMtlsCertificate()
             ]);
 
-            $response = Http::withToken($token->access_token)
-                ->get($url);
+            // Build HTTP request with optional mTLS certificate
+            $request = Http::withToken($token->access_token);
+
+            // Add mTLS certificate if configured
+            $request = $this->addMtlsCertificate($request);
+
+            $response = $request->get($url);
 
             Log::info('PSD2 API response received', [
                 'bank' => $this->getBankCode(),
@@ -371,6 +385,12 @@ abstract class Psd2Client
                     'body' => $response->body(),
                     'headers' => $response->headers()
                 ]);
+
+                // Special handling for mTLS errors
+                if ($response->status() === 401 && str_contains($response->body(), 'mTLS')) {
+                    throw new \Exception('mTLS authentication failed. Please ensure you have configured valid PSD2 certificates in your NLB developer portal and added them to your .env file. See BANK_CERTIFICATES.md for instructions.');
+                }
+
                 throw new \Exception('Failed to fetch accounts (HTTP ' . $response->status() . '): ' . $response->body());
             }
 
@@ -503,6 +523,97 @@ abstract class Psd2Client
     {
         $hash = hash('sha256', $codeVerifier, true);
         return rtrim(strtr(base64_encode($hash), '+/', '-_'), '=');
+    }
+
+    /**
+     * Get the path to the client certificate file
+     *
+     * Override in bank-specific implementations if mTLS is required
+     *
+     * @return string|null Path to certificate file (.pem or .crt)
+     */
+    protected function getCertificatePath(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Get the path to the client certificate key file
+     *
+     * Override in bank-specific implementations if mTLS is required
+     *
+     * @return string|null Path to private key file (.key)
+     */
+    protected function getCertificateKeyPath(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Get the password for the certificate key (if encrypted)
+     *
+     * Override in bank-specific implementations if needed
+     *
+     * @return string|null Certificate key password
+     */
+    protected function getCertificateKeyPassword(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Check if mTLS certificate is configured
+     *
+     * @return bool True if certificate paths are configured and files exist
+     */
+    protected function hasMtlsCertificate(): bool
+    {
+        $certPath = $this->getCertificatePath();
+        $keyPath = $this->getCertificateKeyPath();
+
+        if (!$certPath || !$keyPath) {
+            return false;
+        }
+
+        return file_exists($certPath) && file_exists($keyPath);
+    }
+
+    /**
+     * Add mTLS certificate to HTTP request if configured
+     *
+     * @param \Illuminate\Http\Client\PendingRequest $request HTTP request builder
+     * @return \Illuminate\Http\Client\PendingRequest Modified request with certificate options
+     */
+    protected function addMtlsCertificate($request)
+    {
+        if (!$this->hasMtlsCertificate()) {
+            Log::debug('No mTLS certificate configured', [
+                'bank' => $this->getBankCode(),
+                'cert_path' => $this->getCertificatePath(),
+                'key_path' => $this->getCertificateKeyPath()
+            ]);
+            return $request;
+        }
+
+        $certPath = $this->getCertificatePath();
+        $keyPath = $this->getCertificateKeyPath();
+        $keyPassword = $this->getCertificateKeyPassword();
+
+        Log::info('Adding mTLS certificate to request', [
+            'bank' => $this->getBankCode(),
+            'cert_path' => $certPath,
+            'key_path' => $keyPath,
+            'has_password' => !empty($keyPassword)
+        ]);
+
+        // Add certificate to Guzzle options
+        $options = [
+            'cert' => $certPath,
+            'ssl_key' => $keyPassword ? [$keyPath, $keyPassword] : $keyPath,
+            'verify' => true, // Verify server certificate
+        ];
+
+        return $request->withOptions($options);
     }
 }
 

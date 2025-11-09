@@ -126,6 +126,60 @@ class StopanskaOAuth extends Psd2Client
     {
         return 4; // 15 requests per minute
     }
+
+    /**
+     * Get the path to the client certificate file for mTLS
+     *
+     * Stopanska Bank may require mTLS for PSD2 API access.
+     *
+     * @return string|null Path to certificate file (.pem or .crt)
+     */
+    protected function getCertificatePath(): ?string
+    {
+        $certPath = config('mk.stopanska.mtls_cert_path', env('STOPANSKA_MTLS_CERT_PATH'));
+
+        if (!$certPath) {
+            return null;
+        }
+
+        // If relative path, resolve from storage directory
+        if (!str_starts_with($certPath, '/')) {
+            return storage_path('certificates/' . $certPath);
+        }
+
+        return $certPath;
+    }
+
+    /**
+     * Get the path to the client certificate key file for mTLS
+     *
+     * @return string|null Path to private key file (.key)
+     */
+    protected function getCertificateKeyPath(): ?string
+    {
+        $keyPath = config('mk.stopanska.mtls_key_path', env('STOPANSKA_MTLS_KEY_PATH'));
+
+        if (!$keyPath) {
+            return null;
+        }
+
+        // If relative path, resolve from storage directory
+        if (!str_starts_with($keyPath, '/')) {
+            return storage_path('certificates/' . $keyPath);
+        }
+
+        return $keyPath;
+    }
+
+    /**
+     * Get the password for the certificate key (if encrypted)
+     *
+     * @return string|null Certificate key password
+     */
+    protected function getCertificateKeyPassword(): ?string
+    {
+        return config('mk.stopanska.mtls_key_password', env('STOPANSKA_MTLS_KEY_PASSWORD'));
+    }
 }
 
 // CLAUDE-CHECKPOINT

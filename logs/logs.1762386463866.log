@@ -1,171 +1,142 @@
-2025-11-05T23:41:21.000000000Z [inf]  Starting Container
-2025-11-05T23:41:22.277422920Z [inf]  === Railway Startup Script ===
-2025-11-05T23:41:22.277430566Z [inf]  Environment variables check:
-2025-11-05T23:41:22.277437333Z [inf]  All environment variables (searching for MySQL related):
-2025-11-05T23:41:22.277443048Z [inf]  MYSQLDATABASE=railway
-2025-11-05T23:41:22.277448924Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
-2025-11-05T23:41:22.277454794Z [inf]  MYSQLPASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-11-05T23:41:22.277461487Z [inf]  MYSQLPORT=3306
-2025-11-05T23:41:22.277466583Z [inf]  MYSQLUSER=root
-2025-11-05T23:41:22.277471896Z [inf]  MYSQL_DATABASE=railway
-2025-11-05T23:41:22.277478135Z [inf]  MYSQL_PUBLIC_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@switchback.proxy.rlwy.net:31829/railway
-2025-11-05T23:41:22.277484274Z [inf]  MYSQL_ROOT_PASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-11-05T23:41:22.277490363Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
-2025-11-05T23:41:22.277502637Z [inf]  
-2025-11-05T23:41:22.277508863Z [inf]  Checking specific variables:
-2025-11-05T23:41:22.277515736Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
-2025-11-05T23:41:22.277522807Z [inf]  DATABASE_URL=NOT SET
-2025-11-05T23:41:22.277529647Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
-2025-11-05T23:41:22.277601509Z [inf]  MYSQLPORT=3306
-2025-11-05T23:41:22.277608396Z [inf]  MYSQLUSER=root
-2025-11-05T23:41:22.277615788Z [inf]  MYSQLDATABASE=railway
-2025-11-05T23:41:22.277623743Z [inf]  Using Railway MYSQL_URL to parse connection...
-2025-11-05T23:41:22.277633429Z [inf]  Parsed from MYSQL_URL:
-2025-11-05T23:41:22.277640939Z [inf]  DB_HOST: mysql-y5el.railway.internal
-2025-11-05T23:41:22.277654440Z [inf]  DB_PORT: 3306
-2025-11-05T23:41:22.277662210Z [inf]  DB_DATABASE: railway
-2025-11-05T23:41:22.277669301Z [inf]  Final DB config:
-2025-11-05T23:41:22.281202353Z [inf]  DB_CONNECTION: mysql
-2025-11-05T23:41:22.281211090Z [inf]  DB_HOST: mysql-y5el.railway.internal
-2025-11-05T23:41:22.281218751Z [inf]  DB_PORT: 3306
-2025-11-05T23:41:22.281226466Z [inf]  DB_DATABASE: railway
-2025-11-05T23:41:22.281233103Z [inf]  DB_USERNAME: root
-2025-11-05T23:41:22.281240402Z [inf]  Creating minimal .env file for installation wizard...
-2025-11-05T23:41:22.281247324Z [inf]  Checking if auto-install needed...
-2025-11-05T23:41:22.281254671Z [inf]  Profile status: COMPLETED
-2025-11-05T23:41:22.281260970Z [inf]  Already installed (profile_complete = COMPLETED), skipping...
-2025-11-05T23:41:22.281266703Z [inf]  Creating storage directories...
-2025-11-05T23:41:22.281276154Z [inf]  Configuring session for Railway domain: www.facturino.mk
-2025-11-05T23:41:22.281288016Z [inf]  Clearing caches...
-2025-11-05T23:41:22.281294093Z [inf]  
-2025-11-05T23:41:22.281301085Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-05T23:41:22.281306427Z [inf]  
-2025-11-05T23:41:23.309305379Z [inf]  
-2025-11-05T23:41:23.309311875Z [inf]     INFO  Application cache cleared successfully.  
-2025-11-05T23:41:23.309318310Z [inf]  
-2025-11-05T23:41:23.309322987Z [inf]  
-2025-11-05T23:41:23.309328807Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-05T23:41:23.309334509Z [inf]  
-2025-11-05T23:41:23.309341858Z [inf]  
-2025-11-05T23:41:23.309347398Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-05T23:41:23.309352760Z [inf]  
-2025-11-05T23:41:23.309359061Z [inf]  Optimizing application...
-2025-11-05T23:41:24.200897396Z [inf]  
-2025-11-05T23:41:24.200912657Z [inf]  Running migrations...
-2025-11-05T23:41:24.200921466Z [inf]  Checking for existing tables to skip duplicate migrations...
-2025-11-05T23:41:24.201031739Z [inf]  
-2025-11-05T23:41:24.201037890Z [inf]     INFO  Caching framework bootstrap, configuration, and metadata.  
-2025-11-05T23:41:24.201043785Z [inf]  
-2025-11-05T23:41:24.201050470Z [inf]    config ........................................................ 24.12ms DONE
-2025-11-05T23:41:24.201058695Z [inf]    events ......................................................... 1.59ms DONE
-2025-11-05T23:41:24.201066002Z [inf]    routes ........................................................ 49.18ms DONE
-2025-11-05T23:41:24.201077262Z [inf]    views ......................................................... 45.51ms DONE
-2025-11-05T23:41:24.258499247Z [inf]  Running main migrations batch...
-2025-11-05T23:41:25.113022110Z [inf]  
-2025-11-05T23:41:25.113029034Z [inf]     INFO  Nothing to migrate.  
-2025-11-05T23:41:25.113035949Z [inf]  
-2025-11-05T23:41:25.113042635Z [inf]  Ensuring banking tables exist...
-2025-11-05T23:41:25.113049257Z [inf]  bank_accounts table exists
-2025-11-05T23:41:25.113056015Z [inf]  bank_transactions table exists
-2025-11-05T23:41:25.290635509Z [inf]  
-2025-11-05T23:41:25.290649141Z [inf]     INFO  Goodbye.
-2025-11-05T23:41:25.290663642Z [inf]  
-2025-11-05T23:41:26.394334699Z [inf]     INFO  Goodbye.
-2025-11-05T23:41:26.394345946Z [inf]  
-2025-11-05T23:41:26.394354235Z [inf]  IFRS columns already exist in database, marking migrations as completed...
-2025-11-05T23:41:26.394370619Z [inf]  
-2025-11-05T23:41:26.394382632Z [inf]  Ensuring IFRS entity migrations are run...
-2025-11-05T23:41:26.394391427Z [inf]  IFRS entity columns already exist - skipping migrations
-2025-11-05T23:41:26.394394628Z [inf]  
-2025-11-05T23:41:26.394400749Z [inf]  
-2025-11-05T23:41:26.394405711Z [inf]     INFO  Goodbye.
-2025-11-05T23:41:27.124317222Z [inf]  Migration already recorded: 2025_11_04_000000_add_ifrs_entity_id_to_companies_table
-2025-11-05T23:41:27.124324900Z [inf]  Migration already recorded: 2025_11_04_000001_add_entity_id_to_users_table
-2025-11-05T23:41:27.124331206Z [inf]  RAILWAY_SKIP_INSTALL enabled - forcing installation complete...
-2025-11-05T23:41:27.124338757Z [inf]  Creating database_created marker file...
-2025-11-05T23:41:27.124349940Z [inf]  Checking existing users in database...
-2025-11-05T23:41:27.124364453Z [inf]  admin@invoiceshelf.com - Jane Doe
-2025-11-05T23:41:27.124374507Z [inf]  your-email@example.com - Администратор
-2025-11-05T23:41:27.124382101Z [inf]  Creating/resetting admin user with email: your-email@example.com
-2025-11-05T23:41:27.315488266Z [inf]  Looking for existing admin user with email: your-email@example.com
-2025-11-05T23:41:27.315493581Z [inf]  Found existing user. Resetting password and settings...
-2025-11-05T23:41:28.344299646Z [inf]  Password and settings updated for user: your-email@example.com
-2025-11-05T23:41:28.344307320Z [inf]  
-2025-11-05T23:41:28.344314371Z [inf]  =================================
-2025-11-05T23:41:28.344320833Z [inf]  Admin credentials:
-2025-11-05T23:41:28.344332317Z [inf]  Email: your-email@example.com
-2025-11-05T23:41:28.344339394Z [inf]  Password: your-secure-password
-2025-11-05T23:41:28.344346855Z [inf]  =================================
-2025-11-05T23:41:28.344353562Z [inf]  Verifying user settings...
-2025-11-05T23:41:28.344365352Z [inf]  User has 2 settingslanguage: mk
-2025-11-05T23:41:28.344416772Z [inf]  currency: 74
-2025-11-05T23:41:29.343227418Z [inf]  Verification - profile_complete is now: COMPLETED
-2025-11-05T23:41:30.464215801Z [inf]  =================================
-2025-11-05T23:41:30.464229369Z [inf]  Running PartnerSeeder to ensure Partner records exist for admin users...
-2025-11-05T23:41:30.464238601Z [inf]  
-2025-11-05T23:41:30.464245129Z [inf]     INFO  Seeding database.  
-2025-11-05T23:41:30.464252620Z [inf]  
-2025-11-05T23:41:30.464272052Z [inf]  Starting Partner creation for admin/accountant users...
-2025-11-05T23:41:30.464280031Z [inf]  Partner already exists for user admin@invoiceshelf.com (ID: 1)
-2025-11-05T23:41:30.464287159Z [inf]  Partner already exists for user your-email@example.com (ID: 2)
-2025-11-05T23:41:30.464293990Z [inf]  Partner seeding completed!
-2025-11-05T23:41:30.464300770Z [inf]  Total users processed: 2
-2025-11-05T23:41:30.464310903Z [inf]  Partners created: 0
-2025-11-05T23:41:30.464318054Z [inf]  Partners skipped (already exist): 2
-2025-11-05T23:41:30.464325620Z [inf]  IFRS accounting feature enabled - ensuring chart of accounts...
-2025-11-05T23:41:30.464333361Z [inf]  
-2025-11-05T23:41:30.464340390Z [inf]     INFO  Seeding database.  
-2025-11-05T23:41:30.464351372Z [inf]  
-2025-11-05T23:41:30.464359650Z [inf]  Number of users in database: 2
-2025-11-05T23:41:30.464359949Z [inf]  Seeding Macedonian Chart of Accounts...
-2025-11-05T23:41:30.464367067Z [inf]  Database marker file created successfully
-2025-11-05T23:41:30.464369967Z [inf]  Seeding chart of accounts for company: xyz
-2025-11-05T23:41:30.464374403Z [inf]  =================================
-2025-11-05T23:41:30.464380237Z [inf]    → 2025 reporting period already exists
-2025-11-05T23:41:30.464383111Z [inf]  Installation bypass complete!
-2025-11-05T23:41:30.464389592Z [inf]  Asset accounts seeded (1000-1999)
-2025-11-05T23:41:30.464390783Z [inf]  Login credentials:
-2025-11-05T23:41:30.464911150Z [inf]    Email: your-email@example.com
-2025-11-05T23:41:30.464919895Z [inf]    Password: your-secure-password
-2025-11-05T23:41:30.468823829Z [inf]  Liability accounts seeded (2000-2999)
-2025-11-05T23:41:30.468839935Z [inf]  Equity accounts seeded (3000-3999)
-2025-11-05T23:41:30.468848154Z [inf]  Revenue accounts seeded (4000-4999)
-2025-11-05T23:41:30.473850870Z [inf]  Expense accounts seeded (5000-5999)
-2025-11-05T23:41:30.473860435Z [inf]  Seeding chart of accounts for company: Teknomed DOO
-2025-11-05T23:41:30.476888662Z [inf]    → 2025 reporting period already exists
-2025-11-05T23:41:31.522410760Z [inf]  -rw-r--r-- 1 root root 7.6K Nov  5 23:39 BackupSetting-XBi8tXGX.js
-2025-11-05T23:41:31.522418077Z [inf]  -rw-r--r-- 1 root root  24K Nov  5 23:39 BankingDashboard-7LNjfvsl.js
-2025-11-05T23:41:31.522428924Z [inf]  -rw-r--r-- 1 root root 324K Nov  5 23:39 BaseEditor-Ccf5uP4b.js
-2025-11-05T23:41:31.522436791Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  5 23:39 BaseEditor-FtAAJv83.css
-2025-11-05T23:41:31.522443782Z [inf]  Starting PHP server on port 8080...
-2025-11-05T23:41:31.522451116Z [inf]  Laravel logs will be written to storage/logs/laravel.log
-2025-11-05T23:41:31.522457606Z [inf]  [Wed Nov  5 23:41:31 2025] PHP 8.2.27 Development Server (http://0.0.0.0:8080) started
-2025-11-05T23:41:31.522918342Z [inf]  Asset accounts seeded (1000-1999)
-2025-11-05T23:41:31.522923914Z [inf]  Liability accounts seeded (2000-2999)
-2025-11-05T23:41:31.522930484Z [inf]  Equity accounts seeded (3000-3999)
-2025-11-05T23:41:31.522936481Z [inf]  Revenue accounts seeded (4000-4999)
-2025-11-05T23:41:31.522942728Z [inf]  Expense accounts seeded (5000-5999)
-2025-11-05T23:41:31.522950119Z [inf]  Macedonian Chart of Accounts seeded successfully!
-2025-11-05T23:41:31.522956566Z [inf]  Skipping config cache to allow dynamic environment variables...
-2025-11-05T23:41:31.522963898Z [inf]  Creating storage link...
-2025-11-05T23:41:31.522970904Z [inf]  
-2025-11-05T23:41:31.522976810Z [inf]     INFO  The [public/storage] link has been connected to [storagepublic].  
-2025-11-05T23:41:31.522982646Z [inf]  
-2025-11-05T23:41:31.522991606Z [inf]  === Final Environment Check ===
-2025-11-05T23:41:31.522998720Z [inf]  CACHE_STORE: file
-2025-11-05T23:41:31.523010305Z [inf]  CACHE_DRIVER: file
-2025-11-05T23:41:31.523016697Z [inf]  QUEUE_CONNECTION: sync
-2025-11-05T23:41:31.523023968Z [inf]  SESSION_DRIVER: file
-2025-11-05T23:41:31.523030134Z [inf]  REDIS_CLIENT: 
-2025-11-05T23:41:31.523035797Z [inf]  BROADCAST_DRIVER: log
-2025-11-05T23:41:31.523043308Z [inf]  Checking frontend build assets...
-2025-11-05T23:41:31.523051403Z [inf]  Build assets directory exists with 167 files
-2025-11-05T23:41:31.523057395Z [inf]  total 7.6M
-2025-11-05T23:41:31.523063175Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  5 23:39 404-DPm2Jn1o.js
-2025-11-05T23:41:31.523068716Z [inf]  -rw-r--r-- 1 root root 4.3K Nov  5 23:39 AccountSetting-H-kQo482.js
-2025-11-05T23:41:31.523077658Z [inf]  -rw-r--r-- 1 root root 7.3K Nov  5 23:39 AddressInformation-BbRZkxPR.js
-2025-11-05T23:41:31.523084279Z [inf]  -rw-r--r-- 1 root root 7.2K Nov  5 23:39 AiInsightsSetting-CF7ye6E_.js
-2025-11-05T23:41:31.523090086Z [inf]  -rw-r--r-- 1 root root 5.9K Nov  5 23:39 AstronautIcon-Bpc9NjYb.js
-2025-11-05T23:46:18.131169509Z [inf]  [Wed Nov  5 23:46:15 2025] 100.64.0.2:38692 Accepted
-2025-11-05T23:46:18.131175297Z [inf]  [Wed Nov  5 23:46:16 2025] 100.64.0.2:38692 [401]: GET /api/v1/certificates/current
-2025-11-05T23:46:18.131181324Z [inf]  [Wed Nov  5 23:46:16 2025] 100.64.0.2:38692 Closing
+[2025-11-09 21:18:49] production.WARNING: Slow operation detected {"operation":"req_6911053843b11","execution_time_ms":718.44,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-09 21:18:49] production.WARNING: Slow request detected {"operation":"req_6911053843b11","execution_time_ms":718.44,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":"generated::Qjqt64rKTPHUq66Z","user_id":2,"company_id":"2","ip":"46.217.81.124","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-09 21:18:51] production.INFO: Banking transactions endpoint called {"user_id":2,"company_header":"2","filters":[]} 
+[2025-11-09 21:18:51] production.INFO: Querying bank transactions {"company_id":2} 
+[2025-11-09 21:18:51] production.INFO: Bank transactions queried successfully {"company_id":2,"count":0,"total":0} 
+[2025-11-09 21:18:51] production.INFO: Banking accounts endpoint called {"user_id":2,"company_header":"2"} 
+[2025-11-09 21:18:51] production.INFO: Querying bank accounts {"company_id":2} 
+[2025-11-09 21:18:51] production.INFO: Bank accounts fetched successfully {"company_id":2,"count":0} 
+[2025-11-09 21:18:54] production.INFO: PKCE enabled for OAuth flow {"bank":"nlb","company_id":2,"state":"2","cache_key":"pkce_verifier_nlb_2"} 
+[2025-11-09 21:18:54] production.INFO: OAuth flow started {"company_id":2,"provider":"nlb","redirect_uri":"https://www.facturino.mk/api/v1/banking/oauth/callback/nlb"} 
+[2025-11-09 21:19:12] production.INFO: Using PKCE code verifier for token exchange {"bank":"nlb","company_id":2,"cache_key":"pkce_verifier_nlb_2"} 
+[2025-11-09 21:19:12] production.INFO: OAuth token exchanged successfully {"company_id":2,"provider":"nlb","token_id":1} 
+[2025-11-09 21:19:12] production.INFO: Attempting to fetch bank accounts from PSD2 API {"company_id":2,"provider":"nlb","token_id":1} 
+[2025-11-09 21:19:12] production.INFO: Fetching accounts from PSD2 API {"bank":"nlb","company_id":2,"url":"https://developer-ob.nlb.mk/apis/xs2a/v1/accounts","has_token":true} 
+[2025-11-09 21:19:13] production.INFO: PSD2 API response received {"bank":"nlb","company_id":2,"status":401,"body_length":25,"body_preview":"mTLS verification failed."} 
+[2025-11-09 21:19:13] production.ERROR: PSD2 API returned error {"bank":"nlb","status":401,"body":"mTLS verification failed.","headers":{"Server":["nginx"],"Date":["Sun, 09 Nov 2025 21:19:13 GMT"],"Content-Type":["text/html"],"Content-Length":["25"],"Connection":["keep-alive"],"X-Frame-Options":["SAMEORIGIN"],"X-XSS-Protection":["1; mode=block"],"X-Content-Type-Options":["nosniff"],"Referrer-Policy":["no-referrer-when-downgrade"],"Strict-Transport-Security":["max-age=31536000"],"Permissions-Policy":["sync-xhr=(self)"]}} 
+[2025-11-09 21:19:13] production.ERROR: PSD2 account fetch failed {"bank":"nlb","company_id":2,"error":"Failed to fetch accounts (HTTP 401): mTLS verification failed.","trace":"#0 /app/app/Http/Controllers/V1/Admin/Banking/BankingOAuthController.php(154): App\\Services\\Banking\\Psd2Client->getAccounts(Object(App\\Models\\Company))
+#1 /app/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingOAuthController->callback('nlb', Object(Illuminate\\Http\\Request))
+#2 /app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('callback', Array)
+#3 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingOAuthController), 'callback')
+#4 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#5 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#6 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#7 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#8 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#9 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#10 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#11 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#12 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#14 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#16 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#17 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#19 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#20 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#21 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#22 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#23 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /app/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#26 /app/app/Http/Middleware/LocaleMiddleware.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#27 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#28 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#35 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#36 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#55 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#56 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#57 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#58 {main}"} 
+[2025-11-09 21:19:13] production.ERROR: Failed to fetch accounts from PSD2 API {"company_id":2,"provider":"nlb","error":"Failed to fetch accounts (HTTP 401): mTLS verification failed.","trace":"#0 /app/app/Http/Controllers/V1/Admin/Banking/BankingOAuthController.php(154): App\\Services\\Banking\\Psd2Client->getAccounts(Object(App\\Models\\Company))
+#1 /app/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingOAuthController->callback('nlb', Object(Illuminate\\Http\\Request))
+#2 /app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('callback', Array)
+#3 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingOAuthController), 'callback')
+#4 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#5 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#6 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#7 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#8 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#9 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#10 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#11 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#12 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#14 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#16 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#17 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#19 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#20 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#21 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#22 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#23 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /app/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#26 /app/app/Http/Middleware/LocaleMiddleware.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#27 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#28 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#35 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#36 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#55 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#56 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#57 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#58 {main}"} 
+[2025-11-09 21:19:13] production.WARNING: Slow operation detected {"operation":"req_6911055049494","execution_time_ms":832.55,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-09 21:19:13] production.WARNING: Slow request detected {"operation":"req_6911055049494","execution_time_ms":832.55,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/banking/oauth/callback/nlb","route":"generated::QpeZOp19h31Qzjkb","user_id":null,"company_id":null,"ip":"46.217.81.124","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","response_status":302} 
+[2025-11-09 21:19:14] production.INFO: Banking accounts endpoint called {"user_id":2,"company_header":"2"} 
+[2025-11-09 21:19:14] production.INFO: Querying bank accounts {"company_id":2} 
+[2025-11-09 21:19:14] production.INFO: Bank accounts fetched successfully {"company_id":2,"count":0} 
+[2025-11-09 21:19:14] production.INFO: Banking transactions endpoint called {"user_id":2,"company_header":"2","filters":[]} 
+[2025-11-09 21:19:14] production.INFO: Querying bank transactions {"company_id":2} 
+[2025-11-09 21:19:14] production.INFO: Bank transactions queried successfully {"company_id":2,"count":0,"total":0} 

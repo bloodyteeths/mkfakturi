@@ -147,6 +147,61 @@ class NlbOAuth extends Psd2Client
         // Try just 'openid' as NLB may auto-grant PSD2 scopes
         return config('mk.nlb.scopes', 'openid');
     }
+
+    /**
+     * Get the path to the client certificate file for mTLS
+     *
+     * NLB Bank requires mTLS (Mutual TLS) for PSD2 API access.
+     * Certificate must be obtained from NLB developer portal.
+     *
+     * @return string|null Path to certificate file (.pem or .crt)
+     */
+    protected function getCertificatePath(): ?string
+    {
+        $certPath = config('mk.nlb.mtls_cert_path', env('NLB_MTLS_CERT_PATH'));
+
+        if (!$certPath) {
+            return null;
+        }
+
+        // If relative path, resolve from storage directory
+        if (!str_starts_with($certPath, '/')) {
+            return storage_path('certificates/' . $certPath);
+        }
+
+        return $certPath;
+    }
+
+    /**
+     * Get the path to the client certificate key file for mTLS
+     *
+     * @return string|null Path to private key file (.key)
+     */
+    protected function getCertificateKeyPath(): ?string
+    {
+        $keyPath = config('mk.nlb.mtls_key_path', env('NLB_MTLS_KEY_PATH'));
+
+        if (!$keyPath) {
+            return null;
+        }
+
+        // If relative path, resolve from storage directory
+        if (!str_starts_with($keyPath, '/')) {
+            return storage_path('certificates/' . $keyPath);
+        }
+
+        return $keyPath;
+    }
+
+    /**
+     * Get the password for the certificate key (if encrypted)
+     *
+     * @return string|null Certificate key password
+     */
+    protected function getCertificateKeyPassword(): ?string
+    {
+        return config('mk.nlb.mtls_key_password', env('NLB_MTLS_KEY_PASSWORD'));
+    }
 }
 
 // CLAUDE-CHECKPOINT

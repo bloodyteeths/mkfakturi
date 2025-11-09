@@ -264,6 +264,11 @@ return [
         'rate_limit_enabled' => env('STOPANSKA_RATE_LIMIT_ENABLED', true),
         'max_transactions_per_request' => env('STOPANSKA_MAX_TRANSACTIONS_PER_REQUEST', 200),
         'redirect_uri' => env('STOPANSKA_REDIRECT_URI', null), // Must be registered in Stopanska developer portal
+
+        // mTLS Certificate Configuration (may be required for PSD2 API access)
+        'mtls_cert_path' => env('STOPANSKA_MTLS_CERT_PATH', null),
+        'mtls_key_path' => env('STOPANSKA_MTLS_KEY_PATH', null),
+        'mtls_key_password' => env('STOPANSKA_MTLS_KEY_PASSWORD', null),
     ],
 
     /*
@@ -284,6 +289,13 @@ return [
         'auth_production_base_url' => env('NLB_AUTH_PRODUCTION_BASE_URL', 'https://auth.mk.open-bank.io/v1/authentication/tenants/nlb'),
         'redirect_uri' => env('NLB_REDIRECT_URI', null), // Must be registered in NLB developer portal
         'scopes' => env('NLB_SCOPES', 'openid'), // OAuth scopes - NLB auto-grants PSD2 scopes
+
+        // mTLS Certificate Configuration (required for PSD2 API access)
+        // Certificates must be obtained from NLB developer portal
+        // Paths can be absolute or relative to storage/certificates/ directory
+        'mtls_cert_path' => env('NLB_MTLS_CERT_PATH', null), // Path to client certificate (.pem or .crt)
+        'mtls_key_path' => env('NLB_MTLS_KEY_PATH', null),   // Path to private key (.key)
+        'mtls_key_password' => env('NLB_MTLS_KEY_PASSWORD', null), // Password for encrypted key (optional)
     ],
 
     /*

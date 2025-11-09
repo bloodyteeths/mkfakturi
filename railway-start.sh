@@ -114,8 +114,43 @@ fi
 echo "Creating storage directories..."
 mkdir -p storage/framework/{sessions,views,cache}
 mkdir -p storage/logs
+mkdir -p storage/certificates
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
+
+# Decode PSD2 certificates from base64 environment variables (for Railway)
+echo "Checking for PSD2 certificates in environment..."
+if [ ! -z "$NLB_MTLS_CERT_BASE64" ]; then
+    echo "Decoding NLB certificate from environment variable..."
+    echo "$NLB_MTLS_CERT_BASE64" | base64 -d > storage/certificates/nlb.pem
+    chmod 644 storage/certificates/nlb.pem
+    export NLB_MTLS_CERT_PATH=nlb.pem
+    echo "✅ NLB certificate decoded successfully"
+fi
+
+if [ ! -z "$NLB_MTLS_KEY_BASE64" ]; then
+    echo "Decoding NLB private key from environment variable..."
+    echo "$NLB_MTLS_KEY_BASE64" | base64 -d > storage/certificates/nlb.key
+    chmod 600 storage/certificates/nlb.key
+    export NLB_MTLS_KEY_PATH=nlb.key
+    echo "✅ NLB private key decoded successfully"
+fi
+
+if [ ! -z "$STOPANSKA_MTLS_CERT_BASE64" ]; then
+    echo "Decoding Stopanska certificate from environment variable..."
+    echo "$STOPANSKA_MTLS_CERT_BASE64" | base64 -d > storage/certificates/stopanska.pem
+    chmod 644 storage/certificates/stopanska.pem
+    export STOPANSKA_MTLS_CERT_PATH=stopanska.pem
+    echo "✅ Stopanska certificate decoded successfully"
+fi
+
+if [ ! -z "$STOPANSKA_MTLS_KEY_BASE64" ]; then
+    echo "Decoding Stopanska private key from environment variable..."
+    echo "$STOPANSKA_MTLS_KEY_BASE64" | base64 -d > storage/certificates/stopanska.key
+    chmod 600 storage/certificates/stopanska.key
+    export STOPANSKA_MTLS_KEY_PATH=stopanska.key
+    echo "✅ Stopanska private key decoded successfully"
+fi
 
 # Force cache/queue to file-based (override any defaults)
 export CACHE_STORE=file

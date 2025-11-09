@@ -1,390 +1,200 @@
-2025-11-06T00:10:42.000000000Z [inf]  Starting Container
-2025-11-06T00:10:42.458629607Z [inf]  
-2025-11-06T00:10:42.458637621Z [inf]  Checking specific variables:
-2025-11-06T00:10:42.458642994Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
-2025-11-06T00:10:42.458648492Z [inf]  Creating minimal .env file for installation wizard...
-2025-11-06T00:10:42.458649084Z [inf]  DATABASE_URL=NOT SET
-2025-11-06T00:10:42.458655709Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
-2025-11-06T00:10:42.458659786Z [inf]  Checking if auto-install needed...
-2025-11-06T00:10:42.458660701Z [inf]  === Railway Startup Script ===
-2025-11-06T00:10:42.458663488Z [inf]  MYSQLPORT=3306
-2025-11-06T00:10:42.458667053Z [inf]  Final DB config:
-2025-11-06T00:10:42.458670327Z [inf]  Environment variables check:
-2025-11-06T00:10:42.458672668Z [inf]  DB_CONNECTION: mysql
-2025-11-06T00:10:42.458673404Z [inf]  MYSQLUSER=root
-2025-11-06T00:10:42.458679814Z [inf]  All environment variables (searching for MySQL related):
-2025-11-06T00:10:42.458681235Z [inf]  DB_HOST: mysql-y5el.railway.internal
-2025-11-06T00:10:42.458683935Z [inf]  MYSQLDATABASE=railway
-2025-11-06T00:10:42.458689434Z [inf]  MYSQLDATABASE=railway
-2025-11-06T00:10:42.458693721Z [inf]  DB_PORT: 3306
-2025-11-06T00:10:42.458694004Z [inf]  Using Railway MYSQL_URL to parse connection...
-2025-11-06T00:10:42.458698555Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
-2025-11-06T00:10:42.458702926Z [inf]  Parsed from MYSQL_URL:
-2025-11-06T00:10:42.458706492Z [inf]  DB_DATABASE: railway
-2025-11-06T00:10:42.458708927Z [inf]  MYSQLPASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-11-06T00:10:42.458713068Z [inf]  DB_HOST: mysql-y5el.railway.internal
-2025-11-06T00:10:42.458715234Z [inf]  DB_USERNAME: root
-2025-11-06T00:10:42.458722197Z [inf]  MYSQLPORT=3306
-2025-11-06T00:10:42.458723453Z [inf]  DB_PORT: 3306
-2025-11-06T00:10:42.458730789Z [inf]  DB_DATABASE: railway
-2025-11-06T00:10:42.458731625Z [inf]  MYSQLUSER=root
-2025-11-06T00:10:42.458739773Z [inf]  MYSQL_DATABASE=railway
-2025-11-06T00:10:42.458746772Z [inf]  MYSQL_PUBLIC_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@switchback.proxy.rlwy.net:31829/railway
-2025-11-06T00:10:42.458753699Z [inf]  MYSQL_ROOT_PASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-11-06T00:10:42.458761015Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
-2025-11-06T00:10:43.054071631Z [inf]  Profile status: COMPLETED
-2025-11-06T00:10:43.054079705Z [inf]  Already installed (profile_complete = COMPLETED), skipping...
-2025-11-06T00:10:43.054088132Z [inf]  Creating storage directories...
-2025-11-06T00:10:44.621583126Z [inf]  Clearing caches...
-2025-11-06T00:10:44.621656075Z [inf]  Configuring session for Railway domain: www.facturino.mk
-2025-11-06T00:10:45.037570062Z [inf]  
-2025-11-06T00:10:45.037573878Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-06T00:10:45.037578077Z [inf]  
-2025-11-06T00:10:45.089912057Z [inf]  
-2025-11-06T00:10:45.089969430Z [inf]  
-2025-11-06T00:10:45.089977007Z [inf]     INFO  Application cache cleared successfully.  
-2025-11-06T00:10:45.286174452Z [inf]  
-2025-11-06T00:10:45.286183581Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-06T00:10:45.286190206Z [inf]  
-2025-11-06T00:10:45.540923487Z [inf]  
-2025-11-06T00:10:45.540933105Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-06T00:10:45.540940380Z [inf]  
-2025-11-06T00:10:45.540947517Z [inf]  Optimizing application...
-2025-11-06T00:10:45.684237397Z [inf]  
-2025-11-06T00:10:45.684247296Z [inf]     INFO  Caching framework bootstrap, configuration, and metadata.  
-2025-11-06T00:10:45.684255154Z [inf]  
-2025-11-06T00:10:45.707306662Z [inf]    config ........................................................ 17.26ms DONE
-2025-11-06T00:10:45.707313804Z [inf]    events ......................................................... 1.01ms DONE
-2025-11-06T00:10:45.753581377Z [inf]    routes ........................................................ 37.75ms DONE
-2025-11-06T00:10:45.777762392Z [inf]    views ......................................................... 36.34ms DONE
-2025-11-06T00:10:45.777769238Z [inf]  
-2025-11-06T00:10:45.793569379Z [inf]  Running migrations...
-2025-11-06T00:10:45.793575088Z [inf]  Checking for existing tables to skip duplicate migrations...
-2025-11-06T00:10:46.213486530Z [inf]  Running main migrations batch...
-2025-11-06T00:10:46.544661488Z [inf]  
-2025-11-06T00:10:46.544665319Z [inf]     INFO  Nothing to migrate.  
-2025-11-06T00:10:46.544671661Z [inf]  
-2025-11-06T00:10:46.544675832Z [inf]  Ensuring banking tables exist...
-2025-11-06T00:10:46.754698561Z [inf]  bank_accounts table exists
-2025-11-06T00:10:46.766798840Z [inf]  bank_transactions table exists
-2025-11-06T00:10:46.999571085Z [inf]  
-2025-11-06T00:10:46.999576902Z [inf]     INFO  Goodbye.
-2025-11-06T00:10:46.999581515Z [inf]  
-2025-11-06T00:10:47.226969820Z [inf]  
-2025-11-06T00:10:47.226978403Z [inf]     INFO  Goodbye.
-2025-11-06T00:10:47.226985220Z [inf]  
-2025-11-06T00:10:47.235642914Z [inf]  Ensuring IFRS entity migrations are run...
-2025-11-06T00:10:47.545957143Z [inf]  IFRS entity columns already exist - skipping migrations
-2025-11-06T00:10:47.545971333Z [inf]  
-2025-11-06T00:10:47.545977435Z [inf]     INFO  Goodbye.
-2025-11-06T00:10:47.545983260Z [inf]  
-2025-11-06T00:10:47.545989272Z [inf]  IFRS columns already exist in database, marking migrations as completed...
-2025-11-06T00:10:47.789077620Z [inf]  Migration already recorded: 2025_11_04_000000_add_ifrs_entity_id_to_companies_table
-2025-11-06T00:10:47.801047534Z [inf]  Migration already recorded: 2025_11_04_000001_add_entity_id_to_users_table
-2025-11-06T00:10:47.813157150Z [inf]  RAILWAY_SKIP_INSTALL enabled - forcing installation complete...
-2025-11-06T00:10:47.813165414Z [inf]  Creating database_created marker file...
-2025-11-06T00:10:47.973206445Z [inf]  Checking existing users in database...
-2025-11-06T00:10:48.563534108Z [inf]  admin@invoiceshelf.com - Jane Doe
-2025-11-06T00:10:48.563541992Z [inf]  your-email@example.com - Администратор
-2025-11-06T00:10:48.563547528Z [inf]  Creating/resetting admin user with email: your-email@example.com
-2025-11-06T00:10:48.992104146Z [inf]  Looking for existing admin user with email: your-email@example.com
-2025-11-06T00:10:49.003822620Z [inf]  Found existing user. Resetting password and settings...
-2025-11-06T00:10:49.301152301Z [inf]  Password and settings updated for user: your-email@example.com
-2025-11-06T00:10:49.301157761Z [inf]  
-2025-11-06T00:10:49.301161994Z [inf]  =================================
-2025-11-06T00:10:49.301166593Z [inf]  Admin credentials:
-2025-11-06T00:10:49.301171389Z [inf]  Email: your-email@example.com
-2025-11-06T00:10:49.301177786Z [inf]  Password: your-secure-password
-2025-11-06T00:10:49.301183911Z [inf]  =================================
-2025-11-06T00:10:49.347703491Z [inf]  Verifying user settings...
-2025-11-06T00:10:50.031697508Z [inf]  User has 2 settingslanguage: mk
-2025-11-06T00:10:50.031708462Z [inf]  currency: 74
-2025-11-06T00:10:50.779996681Z [inf]  Verification - profile_complete is now: COMPLETED
-2025-11-06T00:10:51.299184630Z [inf]  Number of users in database: 2
-2025-11-06T00:10:51.299189747Z [inf]  Database marker file created successfully
-2025-11-06T00:10:51.299193335Z [inf]  =================================
-2025-11-06T00:10:51.299197717Z [inf]  Installation bypass complete!
-2025-11-06T00:10:51.299201704Z [inf]  Login credentials:
-2025-11-06T00:10:51.299205933Z [inf]    Email: your-email@example.com
-2025-11-06T00:10:51.299210034Z [inf]    Password: your-secure-password
-2025-11-06T00:10:51.299214003Z [inf]  =================================
-2025-11-06T00:10:51.299217834Z [inf]  Running PartnerSeeder to ensure Partner records exist for admin users...
-2025-11-06T00:10:51.606534047Z [inf]  
-2025-11-06T00:10:51.606542396Z [inf]     INFO  Seeding database.  
-2025-11-06T00:10:51.606549463Z [inf]  
-2025-11-06T00:10:51.606556395Z [inf]  Starting Partner creation for admin/accountant users...
-2025-11-06T00:10:51.628973596Z [inf]  Partner already exists for user admin@invoiceshelf.com (ID: 1)
-2025-11-06T00:10:51.640782959Z [inf]  Partner already exists for user your-email@example.com (ID: 2)
-2025-11-06T00:10:51.640786794Z [inf]  Partner seeding completed!
-2025-11-06T00:10:51.640790581Z [inf]  Total users processed: 2
-2025-11-06T00:10:51.640794641Z [inf]  Partners created: 0
-2025-11-06T00:10:51.640798523Z [inf]  Partners skipped (already exist): 2
-2025-11-06T00:10:51.652439288Z [inf]  IFRS accounting feature enabled - ensuring chart of accounts...
-2025-11-06T00:10:51.976363631Z [inf]     INFO  Seeding database.  
-2025-11-06T00:10:51.976372401Z [inf]  
-2025-11-06T00:10:51.976380794Z [inf]  Seeding Macedonian Chart of Accounts...
-2025-11-06T00:10:51.976451267Z [inf]  
-2025-11-06T00:10:52.016968453Z [inf]  Seeding chart of accounts for company: xyz
-2025-11-06T00:10:52.028730866Z [inf]    → 2025 reporting period already exists
-2025-11-06T00:10:52.408490827Z [inf]  Asset accounts seeded (1000-1999)
-2025-11-06T00:10:52.566778892Z [inf]  Liability accounts seeded (2000-2999)
-2025-11-06T00:10:52.578930154Z [inf]  Equity accounts seeded (3000-3999)
-2025-11-06T00:10:52.658487174Z [inf]  Revenue accounts seeded (4000-4999)
-2025-11-06T00:10:52.823503323Z [inf]  Expense accounts seeded (5000-5999)
-2025-11-06T00:10:52.823511830Z [inf]  Seeding chart of accounts for company: Teknomed DOO
-2025-11-06T00:10:52.862707664Z [inf]    → 2025 reporting period already exists
-2025-11-06T00:10:53.212939924Z [inf]  Asset accounts seeded (1000-1999)
-2025-11-06T00:10:53.381965007Z [inf]  Liability accounts seeded (2000-2999)
-2025-11-06T00:10:53.403082440Z [inf]  Equity accounts seeded (3000-3999)
-2025-11-06T00:10:53.570204050Z [inf]  Revenue accounts seeded (4000-4999)
-2025-11-06T00:10:53.646491235Z [inf]  Expense accounts seeded (5000-5999)
-2025-11-06T00:10:53.646496897Z [inf]  Macedonian Chart of Accounts seeded successfully!
-2025-11-06T00:10:53.658990270Z [inf]  Skipping config cache to allow dynamic environment variables...
-2025-11-06T00:10:53.658997695Z [inf]  Creating storage link...
-2025-11-06T00:10:54.097148591Z [inf]  
-2025-11-06T00:10:54.097158297Z [inf]     INFO  The [public/storage] link has been connected to [storagepublic].  
-2025-11-06T00:10:54.097165254Z [inf]  
-2025-11-06T00:10:54.108735082Z [inf]  === Final Environment Check ===
-2025-11-06T00:10:54.108742294Z [inf]  CACHE_STORE: file
-2025-11-06T00:10:54.108747441Z [inf]  CACHE_DRIVER: file
-2025-11-06T00:10:54.108751467Z [inf]  QUEUE_CONNECTION: sync
-2025-11-06T00:10:54.108755692Z [inf]  SESSION_DRIVER: file
-2025-11-06T00:10:54.108760854Z [inf]  REDIS_CLIENT: 
-2025-11-06T00:10:54.108765394Z [inf]  BROADCAST_DRIVER: log
-2025-11-06T00:10:54.108769324Z [inf]  Checking frontend build assets...
-2025-11-06T00:10:54.131382690Z [inf]  Build assets directory exists with 167 files
-2025-11-06T00:10:54.131386885Z [inf]  total 7.6M
-2025-11-06T00:10:54.131391574Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  6 00:09 404-DPm2Jn1o.js
-2025-11-06T00:10:54.131395641Z [inf]  -rw-r--r-- 1 root root 4.3K Nov  6 00:09 AccountSetting-H-kQo482.js
-2025-11-06T00:10:54.131400385Z [inf]  -rw-r--r-- 1 root root 7.3K Nov  6 00:09 AddressInformation-BbRZkxPR.js
-2025-11-06T00:10:54.131404227Z [inf]  -rw-r--r-- 1 root root 7.2K Nov  6 00:09 AiInsightsSetting-CF7ye6E_.js
-2025-11-06T00:10:54.131408284Z [inf]  -rw-r--r-- 1 root root 5.9K Nov  6 00:09 AstronautIcon-Bpc9NjYb.js
-2025-11-06T00:10:54.131412681Z [inf]  -rw-r--r-- 1 root root 7.6K Nov  6 00:09 BackupSetting-XBi8tXGX.js
-2025-11-06T00:10:54.131416395Z [inf]  -rw-r--r-- 1 root root  24K Nov  6 00:09 BankingDashboard-7LNjfvsl.js
-2025-11-06T00:10:54.131420122Z [inf]  -rw-r--r-- 1 root root 324K Nov  6 00:09 BaseEditor-Ccf5uP4b.js
-2025-11-06T00:10:54.131423964Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  6 00:09 BaseEditor-FtAAJv83.css
-2025-11-06T00:10:54.131428481Z [inf]  Starting PHP server on port 8080...
-2025-11-06T00:10:54.131432314Z [inf]  Laravel logs will be written to storage/logs/laravel.log
-2025-11-06T00:10:54.154174773Z [inf]  [Thu Nov  6 00:10:54 2025] PHP 8.2.27 Development Server (http://0.0.0.0:8080) started
-2025-11-06T00:11:24.161751755Z [inf]  [Thu Nov  6 00:11:15 2025] 100.64.0.2:39126 Accepted
-2025-11-06T00:11:24.161760384Z [inf]  [Thu Nov  6 00:11:16 2025] 100.64.0.2:39126 [401]: GET /api/v1/certificates/current
-2025-11-06T00:11:24.161767661Z [inf]  [Thu Nov  6 00:11:16 2025] 100.64.0.2:39126 Closing
-2025-11-06T00:15:05.005883243Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48400 Closing
-2025-11-06T00:15:05.005885536Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48370 Accepted
-2025-11-06T00:15:05.005895423Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48332 Closing
-2025-11-06T00:15:05.005900032Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48378 Accepted
-2025-11-06T00:15:05.005914137Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48382 Accepted
-2025-11-06T00:15:05.005917288Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48370 Closing
-2025-11-06T00:15:05.005923761Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48364 Closing
-2025-11-06T00:15:05.005924552Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48378 Closing
-2025-11-06T00:15:05.005926844Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48332 [200]: GET /build/assets/Dashboard-CDDtyMpd.js
-2025-11-06T00:15:05.005927227Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48384 Accepted
-2025-11-06T00:15:05.005927449Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48384 Closing
-2025-11-06T00:15:05.005933380Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48412 Accepted
-2025-11-06T00:15:05.005936865Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48382 Closing
-2025-11-06T00:15:05.005940953Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48364 [200]: GET /build/assets/LineChart-UED2FGm_.js
-2025-11-06T00:15:05.005941725Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48412 [404]: GET /storage/1/03b06af31c2f6c8458353ed31820af36d230eeb42f7542ea7f78329bcd6ecaca.png - No such file or directory
-2025-11-06T00:15:05.005943088Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48400 Accepted
-2025-11-06T00:15:05.005951322Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48412 Closing
-2025-11-06T00:15:05.005952726Z [inf]  [Thu Nov  6 00:14:56 2025] 100.64.0.3:48308 Accepted
-2025-11-06T00:15:05.005956162Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48378 [200]: GET /build/assets/InvoiceIndexDropdown-C-YdpT6t.js
-2025-11-06T00:15:05.005958116Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48346 [200]: GET /build/assets/CustomerIcon-DKWXuJv-.js
-2025-11-06T00:15:05.005961758Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48418 Accepted
-2025-11-06T00:15:05.005968803Z [inf]  [Thu Nov  6 00:14:56 2025] 100.64.0.3:48308 [204]: GET /sanctum/csrf-cookie
-2025-11-06T00:15:05.005971017Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48418 [200]: GET /api/v1/dashboard
-2025-11-06T00:15:05.005971580Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48382 [200]: GET /build/assets/InvoiceIndexDropdown-BQxs-pwy.css
-2025-11-06T00:15:05.005972709Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48370 [200]: GET /build/assets/EstimateIcon-BJiuTvHF.js
-2025-11-06T00:15:05.005984207Z [inf]  [Thu Nov  6 00:14:56 2025] 100.64.0.3:48308 Closing
-2025-11-06T00:15:05.005985775Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48384 [200]: GET /build/assets/Dashboard-B3OJxeCm.css
-2025-11-06T00:15:05.005987057Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48400 [200]: GET /build/assets/EstimateIndexDropdown-NHnNHHl9.js
-2025-11-06T00:15:05.005995906Z [inf]  [Thu Nov  6 00:14:56 2025] 100.64.0.3:48312 Accepted
-2025-11-06T00:15:05.006003485Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48346 Closing
-2025-11-06T00:15:05.006005486Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48312 [302]: POST /login
-2025-11-06T00:15:05.006014022Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48312 Closing
-2025-11-06T00:15:05.006026824Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48330 Accepted
-2025-11-06T00:15:05.006035205Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48330 [200]: GET /admin/dashboard
-2025-11-06T00:15:05.006043036Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48330 Closing
-2025-11-06T00:15:05.006050958Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48332 Accepted
-2025-11-06T00:15:05.006058918Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48346 Accepted
-2025-11-06T00:15:05.006068084Z [inf]  [Thu Nov  6 00:14:57 2025] 100.64.0.3:48364 Accepted
-2025-11-06T00:15:05.010047845Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48418 Closing
-2025-11-06T00:15:05.010053510Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48436 Accepted
-2025-11-06T00:15:05.010057813Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48450 Accepted
-2025-11-06T00:15:05.010062132Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48436 [200]: GET /api/v1/console/companies
-2025-11-06T00:15:05.010066441Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48436 Closing
-2025-11-06T00:15:05.010070968Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48458 Accepted
-2025-11-06T00:15:05.010074940Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48450 [200]: GET /api/v1/ai/insights
-2025-11-06T00:15:05.010078732Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48450 Closing
-2025-11-06T00:15:05.010083034Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48476 Accepted
-2025-11-06T00:15:05.010087035Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48458 [200]: GET /favicons/favicon.ico
-2025-11-06T00:15:05.010091541Z [inf]  [Thu Nov  6 00:14:58 2025] 100.64.0.3:48490 Accepted
-2025-11-06T00:15:05.010095884Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48476 [200]: GET /api/v1/bootstrap
-2025-11-06T00:15:05.010099563Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48476 Closing
-2025-11-06T00:15:05.010104622Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48492 Accepted
-2025-11-06T00:15:05.010108433Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48490 [200]: GET /api/v1/tax/vat-status/2
-2025-11-06T00:15:05.010112510Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48490 Closing
-2025-11-06T00:15:05.010117238Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48506 Accepted
-2025-11-06T00:15:05.010120986Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48458 Closing
-2025-11-06T00:15:05.010125486Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48492 [200]: GET /api/v1/certificates/current
-2025-11-06T00:15:05.010129222Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48492 Closing
-2025-11-06T00:15:05.010132946Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48506 [200]: GET /build/assets/BaseMultiselect-o7b386zT.js
-2025-11-06T00:15:05.010136655Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48506 Closing
-2025-11-06T00:15:05.010140893Z [inf]  [Thu Nov  6 00:14:59 2025] 100.64.0.3:48514 Accepted
-2025-11-06T00:15:05.010144587Z [inf]  [Thu Nov  6 00:15:00 2025] 100.64.0.3:48514 [200]: GET /api/v1/certificates/current
-2025-11-06T00:15:05.010148382Z [inf]  [Thu Nov  6 00:15:00 2025] 100.64.0.3:48514 Closing
-2025-11-06T00:15:05.010152092Z [inf]  [Thu Nov  6 00:15:00 2025] 100.64.0.3:48516 Accepted
-2025-11-06T00:15:05.010155605Z [inf]  [Thu Nov  6 00:15:00 2025] 100.64.0.3:48528 Accepted
-2025-11-06T00:15:05.010159270Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48516 [500]: GET /api/v1/banking/transactions?page=1&orderByField=transaction_date&orderBy=desc
-2025-11-06T00:15:05.010162995Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48516 Closing
-2025-11-06T00:15:05.010166470Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48530 Accepted
-2025-11-06T00:15:05.010170186Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48528 [500]: GET /api/v1/banking/accounts
-2025-11-06T00:15:05.010174400Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48528 Closing
-2025-11-06T00:15:05.010178340Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48530 [200]: GET /favicons/favicon.ico
-2025-11-06T00:15:05.010182921Z [inf]  [Thu Nov  6 00:15:01 2025] 100.64.0.3:48530 Closing
-2025-11-06T00:15:06.340494825Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39778 Accepted
-2025-11-06T00:15:06.340500758Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39790 Accepted
-2025-11-06T00:15:06.340506356Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39778 [200]: GET /build/assets/main-CQdylHSo.css
-2025-11-06T00:15:06.340511861Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39798 Accepted
-2025-11-06T00:15:06.340518398Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39790 [200]: GET /build/assets/Dashboard-B3OJxeCm.css
-2025-11-06T00:15:06.340524079Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39798 [200]: GET /build/assets/InvoiceIndexDropdown-BQxs-pwy.css
-2025-11-06T00:15:06.340528697Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39790 Closing
-2025-11-06T00:15:06.340533573Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39798 Closing
-2025-11-06T00:15:06.352861337Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.3:39778 Closing
-2025-11-06T00:15:06.554966184Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.4:18266 Accepted
-2025-11-06T00:15:06.554971924Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.4:18266 [200]: GET /favicons/site.webmanifest
-2025-11-06T00:15:06.554976588Z [inf]  [Thu Nov  6 00:15:06 2025] 100.64.0.4:18266 Closing
-2025-11-06T00:15:09.495937191Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39808 Accepted
-2025-11-06T00:15:09.815399920Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39808 [200]: GET /admin/banking
-2025-11-06T00:15:09.815406144Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39808 Closing
-2025-11-06T00:15:09.878532626Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39816 Accepted
-2025-11-06T00:15:09.878537146Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39816 [200]: GET /build/assets/main-CQdylHSo.css
-2025-11-06T00:15:09.878542914Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39834 Accepted
-2025-11-06T00:15:09.878550096Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39834 [200]: GET /build/assets/main-DxCsLyc8.js
-2025-11-06T00:15:10.031663854Z [inf]  [Thu Nov  6 00:15:09 2025] 100.64.0.3:39816 Closing
-2025-11-06T00:15:10.092061858Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39834 Closing
-2025-11-06T00:15:10.327640027Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39900 Accepted
-2025-11-06T00:15:10.327645138Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39836 Accepted
-2025-11-06T00:15:10.327650956Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39900 [200]: GET /build/assets/index-Dy1EY1XF.js
-2025-11-06T00:15:10.327652491Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39836 [200]: GET /build/assets/LayoutBasic-ClN8NHGk.js
-2025-11-06T00:15:10.327657988Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39840 Accepted
-2025-11-06T00:15:10.327659470Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39900 Closing
-2025-11-06T00:15:10.327663381Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39852 Accepted
-2025-11-06T00:15:10.327667427Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39840 [200]: GET /build/assets/users-BkG3b9hD.js
-2025-11-06T00:15:10.327671653Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39840 Closing
-2025-11-06T00:15:10.327675536Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39852 [200]: GET /build/assets/exchange-rate-ComdM4A6.js
-2025-11-06T00:15:10.327679534Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39866 Accepted
-2025-11-06T00:15:10.327683726Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39852 Closing
-2025-11-06T00:15:10.327688558Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39866 [200]: GET /build/assets/console-CKj21jdR.js
-2025-11-06T00:15:10.327692735Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39886 Accepted
-2025-11-06T00:15:10.327696629Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39866 Closing
-2025-11-06T00:15:10.327700311Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39886 [200]: GET /build/assets/NotificationRoot-CMK4rkPF.js
-2025-11-06T00:15:10.327706480Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39896 Accepted
-2025-11-06T00:15:10.327710886Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39886 Closing
-2025-11-06T00:15:10.327715223Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39896 [200]: GET /build/assets/BankingDashboard-7LNjfvsl.js
-2025-11-06T00:15:10.332852674Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39916 Accepted
-2025-11-06T00:15:10.332861897Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39916 [200]: GET /favicons/favicon.ico
-2025-11-06T00:15:10.332868238Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39930 Accepted
-2025-11-06T00:15:10.332874675Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39930 [200]: GET /build/assets/Poppins-Regular-CDE4z94E.ttf
-2025-11-06T00:15:10.332881510Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39836 Closing
-2025-11-06T00:15:10.332888671Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39896 Closing
-2025-11-06T00:15:10.332895708Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39916 Closing
-2025-11-06T00:15:10.334651334Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39930 Closing
-2025-11-06T00:15:10.380055060Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39944 Accepted
-2025-11-06T00:15:10.661765704Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39944 [200]: GET /api/v1/bootstrap
-2025-11-06T00:15:10.661772221Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39944 Closing
-2025-11-06T00:15:10.750510115Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39956 Accepted
-2025-11-06T00:15:10.750515385Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39956 [404]: GET /storage/1/03b06af31c2f6c8458353ed31820af36d230eeb42f7542ea7f78329bcd6ecaca.png - No such file or directory
-2025-11-06T00:15:10.750519649Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39956 Closing
-2025-11-06T00:15:10.750524515Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39960 Accepted
-2025-11-06T00:15:10.750528367Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39960 [200]: GET /build/assets/BaseTable-DuhLmeIK.js
-2025-11-06T00:15:10.750535245Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39960 Closing
-2025-11-06T00:15:10.751760159Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39964 Accepted
-2025-11-06T00:15:11.060920470Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39964 [200]: GET /api/v1/console/companies
-2025-11-06T00:15:11.060927811Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39964 Closing
-2025-11-06T00:15:11.060953190Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39980 Accepted
-2025-11-06T00:15:11.060966537Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:40006 Accepted
-2025-11-06T00:15:11.060970486Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39992 Accepted
-2025-11-06T00:15:11.060979532Z [inf]  [Thu Nov  6 00:15:10 2025] 100.64.0.3:39980 [200]: GET /build/assets/Poppins-Medium-DwAlJ_UI.ttf
-2025-11-06T00:15:11.211417875Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40026 Accepted
-2025-11-06T00:15:11.211426587Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40020 [200]: GET /build/assets/Poppins-Black-C2LIqLFT.ttf
-2025-11-06T00:15:11.211433716Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40032 Accepted
-2025-11-06T00:15:11.211434964Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:39992 [500]: GET /api/v1/banking/accounts
-2025-11-06T00:15:11.211442279Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:39992 Closing
-2025-11-06T00:15:11.211450289Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40020 Accepted
-2025-11-06T00:15:11.211457177Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40006 [200]: GET /build/assets/Poppins-SemiBold-DGSR8tC8.ttf
-2025-11-06T00:15:11.460564974Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40026 [500]: GET /api/v1/banking/transactions?page=1&orderByField=transaction_date&orderBy=desc
-2025-11-06T00:15:11.460570329Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40026 Closing
-2025-11-06T00:15:11.460574477Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40032 [200]: GET /build/assets/Poppins-Light-ChBmluwM.ttf
-2025-11-06T00:15:11.473065395Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:39980 Closing
-2025-11-06T00:15:11.473072066Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40006 Closing
-2025-11-06T00:15:11.474123930Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40020 Closing
-2025-11-06T00:15:11.474129674Z [inf]  [Thu Nov  6 00:15:11 2025] 100.64.0.3:40032 Closing
-2025-11-06T00:15:41.475902572Z [inf]  [Thu Nov  6 00:15:37 2025] 100.64.0.3:46666 Accepted
-2025-11-06T00:15:41.475912680Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46666 [200]: GET /admin/banking
-2025-11-06T00:15:41.475920492Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46666 Closing
-2025-11-06T00:15:41.475933184Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46680 Accepted
-2025-11-06T00:15:41.475937555Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46680 [200]: GET /build/assets/main-CQdylHSo.css
-2025-11-06T00:15:41.475942139Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46694 Accepted
-2025-11-06T00:15:41.475946686Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46694 [200]: GET /build/assets/main-DxCsLyc8.js
-2025-11-06T00:15:41.475951353Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46680 Closing
-2025-11-06T00:15:41.475957338Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46694 Closing
-2025-11-06T00:15:41.475961802Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46704 Accepted
-2025-11-06T00:15:41.475968178Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46714 Accepted
-2025-11-06T00:15:41.475973082Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46704 [200]: GET /build/assets/LayoutBasic-ClN8NHGk.js
-2025-11-06T00:15:41.475979613Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46718 Accepted
-2025-11-06T00:15:41.475983743Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46730 Accepted
-2025-11-06T00:15:41.475988045Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46714 [200]: GET /build/assets/exchange-rate-ComdM4A6.js
-2025-11-06T00:15:41.475992910Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46734 Accepted
-2025-11-06T00:15:41.475996724Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46718 [200]: GET /build/assets/console-CKj21jdR.js
-2025-11-06T00:15:41.476003445Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46730 [200]: GET /build/assets/NotificationRoot-CMK4rkPF.js
-2025-11-06T00:15:41.476007985Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46736 Accepted
-2025-11-06T00:15:41.476926836Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46734 [200]: GET /build/assets/users-BkG3b9hD.js
-2025-11-06T00:15:41.476935369Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46746 Accepted
-2025-11-06T00:15:41.476943566Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46714 Closing
-2025-11-06T00:15:41.476952835Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46736 [200]: GET /build/assets/BankingDashboard-7LNjfvsl.js
-2025-11-06T00:15:41.476962005Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46718 Closing
-2025-11-06T00:15:41.476970628Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46730 Closing
-2025-11-06T00:15:41.476980803Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46746 [200]: GET /build/assets/index-Dy1EY1XF.js
-2025-11-06T00:15:41.476987387Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46734 Closing
-2025-11-06T00:15:41.476993864Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46746 Closing
-2025-11-06T00:15:41.477000249Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46762 Accepted
-2025-11-06T00:15:41.477006417Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46762 [200]: GET /favicons/favicon.ico
-2025-11-06T00:15:41.477012797Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46772 Accepted
-2025-11-06T00:15:41.477017840Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46772 [200]: GET /build/assets/Poppins-Regular-CDE4z94E.ttf
-2025-11-06T00:15:41.477023460Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46704 Closing
-2025-11-06T00:15:41.477028719Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46736 Closing
-2025-11-06T00:15:41.477033649Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46762 Closing
-2025-11-06T00:15:41.477038155Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46772 Closing
-2025-11-06T00:15:41.477043103Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46788 Accepted
-2025-11-06T00:15:41.477047356Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46788 [200]: GET /api/v1/bootstrap
-2025-11-06T00:15:41.477052022Z [inf]  [Thu Nov  6 00:15:38 2025] 100.64.0.3:46788 Closing
-2025-11-06T00:15:41.481144351Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46802 Accepted
-2025-11-06T00:15:41.481151238Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46808 Accepted
-2025-11-06T00:15:41.481157452Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46802 [200]: GET /build/assets/BaseTable-DuhLmeIK.js
-2025-11-06T00:15:41.481163005Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46802 Closing
-2025-11-06T00:15:41.481168015Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46808 [404]: GET /storage/1/03b06af31c2f6c8458353ed31820af36d230eeb42f7542ea7f78329bcd6ecaca.png - No such file or directory
-2025-11-06T00:15:41.481173309Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46808 Closing
-2025-11-06T00:15:41.481178844Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46816 Accepted
-2025-11-06T00:15:41.481184105Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46816 [200]: GET /api/v1/console/companies
-2025-11-06T00:15:41.481189230Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46816 Closing
-2025-11-06T00:15:41.481193304Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46828 Accepted
-2025-11-06T00:15:41.481197988Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46838 Accepted
-2025-11-06T00:15:41.481202575Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46828 [200]: GET /build/assets/Poppins-SemiBold-DGSR8tC8.ttf
-2025-11-06T00:15:41.481208529Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46842 Accepted
-2025-11-06T00:15:41.481212659Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46838 [200]: GET /build/assets/Poppins-Black-C2LIqLFT.ttf
-2025-11-06T00:15:41.481217055Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46866 Accepted
-2025-11-06T00:15:41.481221802Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46842 [500]: GET /api/v1/banking/accounts
-2025-11-06T00:15:41.481227237Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46842 Closing
-2025-11-06T00:15:41.481232449Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46878 Accepted
-2025-11-06T00:15:41.481237935Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46866 [200]: GET /build/assets/Poppins-Medium-DwAlJ_UI.ttf
-2025-11-06T00:15:41.481242557Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46886 Accepted
-2025-11-06T00:15:41.481247692Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46878 [500]: GET /api/v1/banking/transactions?page=1&orderByField=transaction_date&orderBy=desc
-2025-11-06T00:15:41.481252028Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46878 Closing
-2025-11-06T00:15:41.481256731Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46886 [200]: GET /build/assets/Poppins-Light-ChBmluwM.ttf
-2025-11-06T00:15:41.481261001Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46828 Closing
-2025-11-06T00:15:41.481265819Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46838 Closing
-2025-11-06T00:15:41.481270553Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46866 Closing
-2025-11-06T00:15:41.481275606Z [inf]  [Thu Nov  6 00:15:39 2025] 100.64.0.3:46886 Closing
-2025-11-06T00:15:47.504500597Z [inf]  [Thu Nov  6 00:15:47 2025] 100.64.0.5:45692 Accepted
-2025-11-06T00:15:47.783068922Z [inf]  [Thu Nov  6 00:15:47 2025] 100.64.0.5:45692 [401]: GET /api/v1/certificates/current
-2025-11-06T00:15:47.783074174Z [inf]  [Thu Nov  6 00:15:47 2025] 100.64.0.5:45692 Closing
+#39 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#55 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#56 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#57 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#58 {main}"} 
+[2025-11-09 21:08:33] production.WARNING: Slow operation detected {"operation":"req_691102d091c96","execution_time_ms":974.39,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-09 21:08:33] production.WARNING: Slow request detected {"operation":"req_691102d091c96","execution_time_ms":974.39,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/banking/oauth/callback/nlb","route":"generated::qPzUkxtzaPkWzAfO","user_id":null,"company_id":null,"ip":"46.217.81.124","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","response_status":302} 
+[2025-11-09 21:08:34] production.INFO: Banking accounts endpoint called {"user_id":2,"company_header":"2"} 
+[2025-11-09 21:08:34] production.ERROR: Failed to fetch bank accounts {"error":"Call to undefined relationship [currency] on model [App\\Models\\Company].","trace":"#0 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(938): Illuminate\\Database\\Eloquent\\RelationNotFoundException::make(Object(App\\Models\\Company), 'currency')
+#1 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Relations/Relation.php(119): Illuminate\\Database\\Eloquent\\Builder->Illuminate\\Database\\Eloquent\\{closure}()
+#2 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(934): Illuminate\\Database\\Eloquent\\Relations\\Relation::noConstraints(Object(Closure))
+#3 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(908): Illuminate\\Database\\Eloquent\\Builder->getRelation('currency')
+#4 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(888): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelation(Array, 'currency', Object(Closure))
+#5 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(99): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelations(Array)
+#6 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(297): Illuminate\\Database\\Eloquent\\Collection->load(Array)
+#7 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(245): Illuminate\\Database\\Eloquent\\Collection->loadMissingRelation(Object(Illuminate\\Database\\Eloquent\\Collection), Array)
+#8 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(807): Illuminate\\Database\\Eloquent\\Collection->loadMissing(Array)
+#9 /app/app/Http/Controllers/V1/Admin/Banking/BankingController.php(524): Illuminate\\Database\\Eloquent\\Model->loadMissing(Array)
+#10 /app/app/Http/Controllers/V1/Admin/Banking/BankingController.php(50): App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingController->resolveCompany(Object(Illuminate\\Http\\Request))
+#11 /app/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingController->accounts(Object(Illuminate\\Http\\Request))
+#12 /app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('accounts', Array)
+#13 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingController), 'accounts')
+#14 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#15 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#16 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /app/app/Http/Middleware/ScopeBouncer.php(53): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ScopeBouncer->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#19 /app/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 /app/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#25 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#27 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#28 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /app/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#33 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#35 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#36 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#38 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#39 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#40 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#45 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#48 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#49 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#50 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#51 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#53 /app/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /app/app/Http/Middleware/LocaleMiddleware.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#56 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#71 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#72 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#73 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#74 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#75 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#76 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#77 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#78 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#79 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#80 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#81 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#82 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#83 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#84 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#85 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#86 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#87 {main}","user_id":2,"file":"/app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/RelationNotFoundException.php","line":35} 
+[2025-11-09 21:08:34] production.INFO: Banking transactions endpoint called {"user_id":2,"company_header":"2","filters":[]} 
+[2025-11-09 21:08:34] production.ERROR: Failed to fetch transactions {"error":"Call to undefined relationship [currency] on model [App\\Models\\Company].","trace":"#0 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(938): Illuminate\\Database\\Eloquent\\RelationNotFoundException::make(Object(App\\Models\\Company), 'currency')
+#1 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Relations/Relation.php(119): Illuminate\\Database\\Eloquent\\Builder->Illuminate\\Database\\Eloquent\\{closure}()
+#2 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(934): Illuminate\\Database\\Eloquent\\Relations\\Relation::noConstraints(Object(Closure))
+#3 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(908): Illuminate\\Database\\Eloquent\\Builder->getRelation('currency')
+#4 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(888): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelation(Array, 'currency', Object(Closure))
+#5 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(99): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelations(Array)
+#6 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(297): Illuminate\\Database\\Eloquent\\Collection->load(Array)
+#7 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(245): Illuminate\\Database\\Eloquent\\Collection->loadMissingRelation(Object(Illuminate\\Database\\Eloquent\\Collection), Array)
+#8 /app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(807): Illuminate\\Database\\Eloquent\\Collection->loadMissing(Array)
+#9 /app/app/Http/Controllers/V1/Admin/Banking/BankingController.php(524): Illuminate\\Database\\Eloquent\\Model->loadMissing(Array)
+#10 /app/app/Http/Controllers/V1/Admin/Banking/BankingController.php(170): App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingController->resolveCompany(Object(Illuminate\\Http\\Request))
+#11 /app/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingController->transactions(Object(Illuminate\\Http\\Request))
+#12 /app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('transactions', Array)
+#13 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Banking\\BankingController), 'transactions')
+#14 /app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#15 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#16 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /app/app/Http/Middleware/ScopeBouncer.php(53): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ScopeBouncer->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#19 /app/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 /app/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#25 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 /app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#27 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#28 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /app/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#33 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#35 /app/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#36 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#38 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#39 /app/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#40 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /app/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#45 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#48 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#49 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#50 /app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#51 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#52 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#53 /app/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /app/app/Http/Middleware/LocaleMiddleware.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#56 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /app/app/Http/Middleware/ConfigMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#71 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#72 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#73 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#74 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#75 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#76 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#77 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#78 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#79 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#80 /app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#81 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#82 /app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#83 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#84 /app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#85 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#86 /app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#87 {main}","file":"/app/vendor/laravel/framework/src/Illuminate/Database/Eloquent/RelationNotFoundException.php","line":35} 

@@ -1,0 +1,17 @@
+# Ignore all certificate files
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.der
+
+# Allow README
+!README.md
+!.gitignore
+
+# Exception: Allow sandbox/test certificates (optional)
+# Uncomment to allow committing sandbox certificates:
+# !*sandbox*
+# !*test*
