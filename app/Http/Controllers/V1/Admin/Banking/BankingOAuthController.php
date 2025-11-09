@@ -54,8 +54,8 @@ class BankingOAuthController extends Controller
                 ], 400);
             }
 
-            // Generate redirect URI for OAuth callback
-            $redirectUri = url("/api/v1/banking/oauth/callback/{$provider}");
+            // Get redirect URI from config or generate default
+            $redirectUri = $this->getRedirectUri($provider);
 
             // Get authorization URL
             $authUrl = $oauthService->getAuthUrl($company, $redirectUri);
@@ -134,7 +134,7 @@ class BankingOAuthController extends Controller
             }
 
             // Exchange authorization code for access token
-            $redirectUri = url("/api/v1/banking/oauth/callback/{$provider}");
+            $redirectUri = $this->getRedirectUri($provider);
             $token = $oauthService->exchangeCode($company, $code, $redirectUri);
 
             Log::info('OAuth token exchanged successfully', [
@@ -236,6 +236,25 @@ class BankingOAuthController extends Controller
                 'is_primary' => false, // User can set this manually later
             ]
         );
+    }
+
+    /**
+     * Get the redirect URI for OAuth callback
+     *
+     * @param string $provider Bank provider code
+     * @return string Redirect URI
+     */
+    private function getRedirectUri(string $provider): string
+    {
+        // Try to get configured redirect URI first
+        $configuredUri = config("mk.{$provider}.redirect_uri");
+
+        if ($configuredUri) {
+            return $configuredUri;
+        }
+
+        // Fall back to auto-generated redirect URI
+        return url("/api/v1/banking/oauth/callback/{$provider}");
     }
 
     /**
