@@ -135,7 +135,7 @@ class BankingOAuthController extends Controller
 
             // Exchange authorization code for access token
             $redirectUri = $this->getRedirectUri($provider);
-            $token = $oauthService->exchangeCode($company, $code, $redirectUri);
+            $token = $oauthService->exchangeCode($company, $code, $redirectUri, $state);
 
             Log::info('OAuth token exchanged successfully', [
                 'company_id' => $company->id,

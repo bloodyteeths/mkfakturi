@@ -81,13 +81,36 @@ abstract class Psd2Client
      */
     public function getAuthUrl(Company $company, string $redirectUri): string
     {
+        $state = $this->generateState($company->id);
+
         $params = [
             'client_id' => $this->getClientId(),
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
             'scope' => 'accounts transactions',
-            'state' => $this->generateState($company->id),
+            'state' => $state,
         ];
+
+        // Add PKCE parameters if required by the bank
+        if ($this->requiresPkce()) {
+            $codeVerifier = $this->generateCodeVerifier();
+            $codeChallenge = $this->generateCodeChallenge($codeVerifier);
+
+            // Store code verifier in cache for later use in token exchange
+            // Key format: pkce_verifier_{bank_code}_{state}
+            $cacheKey = "pkce_verifier_{$this->getBankCode()}_{$state}";
+            cache()->put($cacheKey, $codeVerifier, now()->addMinutes(10));
+
+            $params['code_challenge'] = $codeChallenge;
+            $params['code_challenge_method'] = 'S256';
+
+            Log::info('PKCE enabled for OAuth flow', [
+                'bank' => $this->getBankCode(),
+                'company_id' => $company->id,
+                'state' => $state,
+                'cache_key' => $cacheKey
+            ]);
+        }
 
         return rtrim($this->getAuthBaseUrl(), '/') . $this->getAuthorizePath() . '?' . http_build_query($params);
     }
@@ -98,23 +121,52 @@ abstract class Psd2Client
      * @param Company $company Company receiving the token
      * @param string $code Authorization code from OAuth callback
      * @param string $redirectUri Same redirect URI used in authorization
+     * @param string|null $state State parameter from callback (needed for PKCE)
      * @return BankToken Created or updated token
      * @throws \Exception If token exchange fails
      */
-    public function exchangeCode(Company $company, string $code, string $redirectUri): BankToken
+    public function exchangeCode(Company $company, string $code, string $redirectUri, ?string $state = null): BankToken
     {
         try {
             $tokenUrl = rtrim($this->getAuthBaseUrl(), '/') . $this->getTokenPath();
 
-            $response = Http::asForm()->post($tokenUrl, [
+            $params = [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
                 'client_id' => $this->getClientId(),
                 'client_secret' => $this->getClientSecret(),
                 'redirect_uri' => $redirectUri,
-            ]);
+            ];
+
+            // Add code_verifier for PKCE if required
+            if ($this->requiresPkce() && $state) {
+                $cacheKey = "pkce_verifier_{$this->getBankCode()}_{$state}";
+                $codeVerifier = cache()->pull($cacheKey); // Get and remove from cache
+
+                if ($codeVerifier) {
+                    $params['code_verifier'] = $codeVerifier;
+                    Log::info('Using PKCE code verifier for token exchange', [
+                        'bank' => $this->getBankCode(),
+                        'company_id' => $company->id,
+                        'cache_key' => $cacheKey
+                    ]);
+                } else {
+                    Log::warning('PKCE code verifier not found in cache', [
+                        'bank' => $this->getBankCode(),
+                        'company_id' => $company->id,
+                        'cache_key' => $cacheKey
+                    ]);
+                }
+            }
+
+            $response = Http::asForm()->post($tokenUrl, $params);
 
             if (!$response->successful()) {
+                Log::error('Token exchange HTTP error', [
+                    'bank' => $this->getBankCode(),
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
                 throw new \Exception('Token exchange failed: ' . $response->body());
             }
 
@@ -371,6 +423,41 @@ abstract class Psd2Client
         // Note: For production, should store state in session/cache
         // This is a simplified implementation
         return !empty($state);
+    }
+
+    /**
+     * Check if this bank requires PKCE (Proof Key for Code Exchange)
+     *
+     * Override in bank-specific implementations if PKCE is required
+     *
+     * @return bool True if PKCE is required
+     */
+    protected function requiresPkce(): bool
+    {
+        return false; // Default: PKCE not required
+    }
+
+    /**
+     * Generate a random code verifier for PKCE
+     *
+     * @return string Base64url-encoded random string (43-128 characters)
+     */
+    protected function generateCodeVerifier(): string
+    {
+        $randomBytes = random_bytes(32); // 32 bytes = 43 chars when base64url encoded
+        return rtrim(strtr(base64_encode($randomBytes), '+/', '-_'), '=');
+    }
+
+    /**
+     * Generate code challenge from code verifier for PKCE
+     *
+     * @param string $codeVerifier The code verifier
+     * @return string Base64url-encoded SHA256 hash of the verifier
+     */
+    protected function generateCodeChallenge(string $codeVerifier): string
+    {
+        $hash = hash('sha256', $codeVerifier, true);
+        return rtrim(strtr(base64_encode($hash), '+/', '-_'), '=');
     }
 }
 

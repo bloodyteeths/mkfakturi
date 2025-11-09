@@ -119,6 +119,16 @@ class NlbOAuth extends Psd2Client
     {
         return '/images/banks/nlb-logo.png';
     }
+
+    /**
+     * NLB Bank requires PKCE for OAuth
+     *
+     * @return bool
+     */
+    protected function requiresPkce(): bool
+    {
+        return true;
+    }
 }
 
 // CLAUDE-CHECKPOINT
