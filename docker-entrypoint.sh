@@ -107,6 +107,31 @@ fi
 # Create storage symlink
 php artisan storage:link || true
 
-# Start supervisor
+# Start supervisor in background to start nginx and php-fpm
 echo "Starting application services..."
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &
+
+# Wait for PHP-FPM and nginx to be ready
+sleep 5
+
+# Test if Laravel is working
+echo "Testing Laravel application..."
+if php artisan --version 2>/dev/null; then
+    echo "✅ Laravel is ready"
+
+    # Test database connection
+    if php artisan db:show 2>/dev/null | grep -q "Connection"; then
+        echo "✅ Database connection working"
+
+        # Start queue workers via supervisorctl
+        echo "Starting queue workers..."
+        supervisorctl -c /etc/supervisor/conf.d/supervisord.conf start queue-worker:* 2>/dev/null || echo "Queue workers already running or failed to start"
+    else
+        echo "⚠️  Database connection not ready, queue workers will not start"
+    fi
+else
+    echo "⚠️  Laravel not ready, queue workers will not start"
+fi
+
+# Keep supervisor running in foreground
+wait
