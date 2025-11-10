@@ -315,13 +315,23 @@ php artisan tinker --execute="
 
 # Force set profile_complete if RAILWAY_SKIP_INSTALL is true
 if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
+    echo "========================================="
     echo "RAILWAY_SKIP_INSTALL enabled - forcing installation complete..."
+    echo "========================================="
 
     # Create database marker file (required by InstallUtils::isDbCreated())
     echo "Creating database_created marker file..."
     mkdir -p storage/app
     echo "$(date +%s)" > storage/app/database_created
     chmod 664 storage/app/database_created
+
+    # Verify marker file was created
+    if [ -f "storage/app/database_created" ]; then
+        echo "✅ Database marker file created: storage/app/database_created"
+        ls -la storage/app/database_created
+    else
+        echo "❌ ERROR: Failed to create database marker file!"
+    fi
 
     # First, list all existing users
     echo "Checking existing users in database..."
@@ -348,11 +358,17 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     php artisan tinker --execute="\$user = \App\Models\User::where('email', '$ADMIN_EMAIL')->first(); \$settings = \$user->settings; echo 'User has ' . \$settings->count() . ' settings'; foreach(\$settings as \$s) { echo \$s->key . ': ' . \$s->value . PHP_EOL; }" 2>/dev/null || echo "Could not verify settings"
 
     # Ensure profile_complete is set
-    php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED');" 2>/dev/null || echo "Could not set profile_complete"
+    echo "Setting profile_complete to 'COMPLETED'..."
+    php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED');" 2>&1 | grep -v "Psy Shell" || echo "Could not set profile_complete"
 
-    # Verify it worked
+    # Verify it worked with detailed output
+    echo "Verifying profile_complete setting..."
     VERIFY=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
-    echo "Verification - profile_complete is now: $VERIFY"
+    echo "✅ profile_complete is now: $VERIFY"
+
+    # Double-check by querying database directly
+    echo "Double-checking settings table..."
+    php artisan tinker --execute="\$setting = \App\Models\Setting::where('option', 'profile_complete')->first(); if (\$setting) { echo 'Found: option=' . \$setting->option . ', value=' . \$setting->value . PHP_EOL; } else { echo 'NOT FOUND in database!' . PHP_EOL; }" 2>/dev/null
 
     # Check if admin user exists
     USER_CHECK=$(php artisan tinker --execute="echo \App\Models\User::count();" 2>/dev/null | tail -1)
@@ -365,12 +381,18 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
         echo "WARNING: Failed to create database marker file!"
     fi
 
-    echo "================================="
-    echo "Installation bypass complete!"
+    echo "========================================="
+    echo "✅ Installation bypass complete!"
+    echo "========================================="
     echo "Login credentials:"
     echo "  Email: $ADMIN_EMAIL"
-    echo "  Password: $ADMIN_PASSWORD"
-    echo "================================="
+    echo "  Password: [configured]"
+    echo "========================================="
+    echo ""
+    echo "Installation checks that should pass:"
+    echo "  - InstallUtils::isDbCreated() → should find storage/app/database_created"
+    echo "  - Setting::getSetting('profile_complete') → should return 'COMPLETED'"
+    echo "========================================="
 fi
 
 # Seed database if RAILWAY_SEED_DB is set
