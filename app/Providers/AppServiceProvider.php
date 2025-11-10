@@ -55,6 +55,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Skip database checks for health endpoints and console commands
+        if ($this->isHealthCheckRequest() || $this->app->runningInConsole()) {
+            return;
+        }
 
         if (InstallUtils::isDbCreated()) {
             $this->addMenus();
@@ -234,6 +238,23 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\RecurringExpense::observe(\App\Observers\AuditObserver::class);
         \App\Models\ExportJob::observe(\App\Observers\AuditObserver::class);
         \App\Models\GatewayWebhookEvent::observe(\App\Observers\AuditObserver::class);
+    }
+
+    /**
+     * Check if current request is a health check endpoint
+     *
+     * @return bool
+     */
+    protected function isHealthCheckRequest(): bool
+    {
+        if (!$this->app->bound('request')) {
+            return false;
+        }
+
+        $request = $this->app->make('request');
+        $healthCheckPaths = ['/health', '/up', '/ping', '/ready'];
+
+        return in_array($request->path(), $healthCheckPaths);
     }
 }
 
