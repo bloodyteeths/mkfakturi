@@ -966,6 +966,96 @@ return [
             'ability' => 'view-audit-logs',
             'model' => AuditLog::class,
         ],
+
+        // Phase 3: Bank Connections
+        [
+            'name' => 'connect bank',
+            'ability' => 'connect-bank',
+            'model' => \App\Models\BankConnection::class,
+        ],
+        [
+            'name' => 'view bank transactions',
+            'ability' => 'view-bank-transactions',
+            'model' => \App\Models\BankConnection::class,
+            'depends_on' => [
+                'connect-bank',
+            ],
+        ],
+
+        // Phase 3: Reconciliation
+        [
+            'name' => 'view reconciliation',
+            'ability' => 'view-reconciliation',
+            'model' => null,
+            'depends_on' => [
+                'view-invoice',
+                'view-bank-transactions',
+            ],
+        ],
+        [
+            'name' => 'approve reconciliation',
+            'ability' => 'approve-reconciliation',
+            'model' => null,
+            'depends_on' => [
+                'view-reconciliation',
+            ],
+        ],
+
+        // Phase 4: Approvals
+        [
+            'name' => 'request approval',
+            'ability' => 'request-approval',
+            'model' => \App\Models\ApprovalRequest::class,
+        ],
+        [
+            'name' => 'approve document',
+            'ability' => 'approve-document',
+            'model' => \App\Models\ApprovalRequest::class,
+        ],
+        [
+            'name' => 'view all approvals',
+            'ability' => 'view-all-approvals',
+            'model' => \App\Models\ApprovalRequest::class,
+        ],
+
+        // Phase 4: Exports
+        [
+            'name' => 'create export',
+            'ability' => 'create-export',
+            'model' => \App\Models\ExportJob::class,
+        ],
+
+        // Phase 4: Recurring Expenses
+        [
+            'name' => 'view recurring expense',
+            'ability' => 'view-recurring-expense',
+            'model' => \App\Models\RecurringExpense::class,
+        ],
+        [
+            'name' => 'create recurring expense',
+            'ability' => 'create-recurring-expense',
+            'model' => \App\Models\RecurringExpense::class,
+            'depends_on' => [
+                'view-recurring-expense',
+                'view-expense-category',
+            ],
+        ],
+        [
+            'name' => 'edit recurring expense',
+            'ability' => 'edit-recurring-expense',
+            'model' => \App\Models\RecurringExpense::class,
+            'depends_on' => [
+                'view-recurring-expense',
+            ],
+        ],
+        [
+            'name' => 'delete recurring expense',
+            'ability' => 'delete-recurring-expense',
+            'model' => \App\Models\RecurringExpense::class,
+            'depends_on' => [
+                'view-recurring-expense',
+            ],
+        ],
     ],
 ];
 // CLAUDE-CHECKPOINT

@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # Open Banking Gateway - adorsys implementation
+  # Supports Berlin Group XS2A protocol for PSD2 compliance
+  open-banking-gateway:
+    image: adorsys/open-banking-gateway:latest
+    container_name: psd2-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      # Database connection
+      SPRING_DATASOURCE_URL: jdbc:postgresql://psd2-postgres:5432/open_banking
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-psd2_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-psd2_password}
+
+      # JPA/Hibernate settings
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
+
+      # Server configuration
+      SERVER_PORT: 8080
+
+      # Berlin Group XS2A protocol settings
+      XS2A_PROTOCOL: berlin-group
+      XS2A_VERSION: 1.3.6
+
+      # AIS-only mode (Account Information Service)
+      # Disable PIS (Payment Initiation Service) for initial implementation
+      XS2A_SERVICES_SUPPORTED: AIS
+
+      # Logging
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_DE_ADORSYS: ${LOG_LEVEL:-DEBUG}
+
+      # Security
+      # In production, use proper JWT signing keys
+      JWT_SECRET: ${JWT_SECRET:-changeme-random-secret-key-for-dev}
+
+      # CORS settings (adjust for your domain)
+      CORS_ALLOWED_ORIGINS: ${CORS_ORIGINS:-http://localhost:*,https://localhost:*}
+
+      # Rate limiting
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_REQUESTS_PER_MINUTE: ${RATE_LIMIT_RPM:-15}
+
+      # Bank-specific adapter configuration
+      # These will be loaded from environment or bank profiles
+      ADAPTER_CONFIG_FILE: /app/config/bank-adapters.yml
+
+    volumes:
+      # Mount bank adapter configuration
+      - ./config:/app/config:ro
+      # Logs
+      - ./logs:/app/logs
+
+    depends_on:
+      psd2-postgres:
+        condition: service_healthy
+
+    networks:
+      - psd2-network
+
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    restart: unless-stopped
+
+  # PostgreSQL database for Open Banking Gateway
+  psd2-postgres:
+    image: postgres:15-alpine
+    container_name: psd2-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-open_banking}
+      POSTGRES_USER: ${POSTGRES_USER:-psd2_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-psd2_password}
+
+    volumes:
+      - psd2-db-data:/var/lib/postgresql/data
+      # Optional: Custom initialization scripts
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+
+    ports:
+      - "5433:5432"  # Map to 5433 to avoid conflicts with main app DB
+
+    networks:
+      - psd2-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-psd2_user} -d ${POSTGRES_DB:-open_banking}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+
+networks:
+  psd2-network:
+    driver: bridge
+
+volumes:
+  psd2-db-data:
+    driver: local
+
+# CLAUDE-CHECKPOINT

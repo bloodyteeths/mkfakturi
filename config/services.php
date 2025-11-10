@@ -77,6 +77,49 @@ return [
         'timeout' => env('MCP_TIMEOUT', 30),
     ],
 
+    'psd2_gateway' => [
+        'base_url' => env('PSD2_GATEWAY_BASE_URL', 'http://localhost:8080'),
+        'redirect_uri' => env('PSD2_REDIRECT_URI'),
+        'timeout' => env('PSD2_TIMEOUT', 30),
+
+        // Bank-specific configuration
+        'banks' => [
+            'nlb' => [
+                'client_id' => env('NLB_CLIENT_ID'),
+                'client_secret' => env('NLB_CLIENT_SECRET'),
+                'environment' => env('NLB_ENVIRONMENT', 'sandbox'),
+                'base_url' => env('NLB_BASE_URL', 'https://sandbox-ob-api.nlb.mk'),
+                'redirect_uri' => env('NLB_REDIRECT_URI'),
+                'scopes' => env('NLB_SCOPES', 'openid'),
+                'requires_pkce' => true,
+                // Optional mTLS certificate paths
+                'cert_path' => env('NLB_CERT_PATH'),
+                'key_path' => env('NLB_KEY_PATH'),
+                'key_password' => env('NLB_KEY_PASSWORD'),
+            ],
+
+            'stopanska' => [
+                'client_id' => env('STOPANSKA_CLIENT_ID'),
+                'client_secret' => env('STOPANSKA_CLIENT_SECRET'),
+                'environment' => env('STOPANSKA_ENVIRONMENT', 'sandbox'),
+                'base_url' => env('STOPANSKA_BASE_URL', 'https://sandbox-api.stopanska.mk'),
+                'redirect_uri' => env('STOPANSKA_REDIRECT_URI'),
+                'scopes' => env('STOPANSKA_SCOPES', 'accounts transactions'),
+                'requires_pkce' => false,
+            ],
+
+            'komercijalna' => [
+                'client_id' => env('KOMERCIJALNA_CLIENT_ID'),
+                'client_secret' => env('KOMERCIJALNA_CLIENT_SECRET'),
+                'environment' => env('KOMERCIJALNA_ENVIRONMENT', 'sandbox'),
+                'base_url' => env('KOMERCIJALNA_BASE_URL', 'https://sandbox-api.kbm.mk'),
+                'redirect_uri' => env('KOMERCIJALNA_REDIRECT_URI'),
+                'scopes' => env('KOMERCIJALNA_SCOPES', 'accounts transactions'),
+                'requires_pkce' => false,
+            ],
+        ],
+    ],
+
     // CLAUDE-CHECKPOINT
 
 ];

@@ -68,6 +68,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(\App\Models\ProformaInvoice::class, \App\Policies\ProformaInvoicePolicy::class);
         Gate::policy(\App\Models\AuditLog::class, \App\Policies\AuditLogPolicy::class);
 
+        // Phase 3-4 Policies
+        Gate::policy(\App\Models\BankConnection::class, \App\Policies\BankConnectionPolicy::class);
+        Gate::policy(\App\Models\ApprovalRequest::class, \App\Policies\ApprovalPolicy::class);
+        Gate::policy(\App\Models\ExportJob::class, \App\Policies\ExportJobPolicy::class);
+        Gate::policy(\App\Models\RecurringExpense::class, \App\Policies\RecurringExpensePolicy::class);
+
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
         $this->bootAuth();
@@ -221,6 +227,13 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\BillPayment::observe(\App\Observers\AuditObserver::class);
         \App\Models\ProformaInvoice::observe(\App\Observers\AuditObserver::class);
         \App\Models\ProformaInvoiceItem::observe(\App\Observers\AuditObserver::class);
+
+        // Phase 3-4 Observers (audit trail)
+        \App\Models\BankConnection::observe(\App\Observers\AuditObserver::class);
+        \App\Models\ApprovalRequest::observe(\App\Observers\AuditObserver::class);
+        \App\Models\RecurringExpense::observe(\App\Observers\AuditObserver::class);
+        \App\Models\ExportJob::observe(\App\Observers\AuditObserver::class);
+        \App\Models\GatewayWebhookEvent::observe(\App\Observers\AuditObserver::class);
     }
 }
 

@@ -37,6 +37,12 @@ if (InstallUtils::isDbCreated()) {
         ->name('sync-bank-transactions')
         ->withoutOverlapping();
 
+    // Process recurring expenses daily at 6:00 AM
+    Schedule::command('recurring-expenses:process')
+        ->dailyAt('06:00')
+        ->runInBackground()
+        ->withoutOverlapping();
+
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
     //     ->dailyAt('02:00')

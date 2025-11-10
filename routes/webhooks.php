@@ -75,12 +75,28 @@ Route::post('/webhooks/paddle', [PaddleWebhookController::class, 'handle'])
 
 /*
 |--------------------------------------------------------------------------
-| Future Webhook Routes
+| Gateway Webhook Event Log Routes
 |--------------------------------------------------------------------------
 |
-| Additional webhook routes for other payment gateways can be added below:
-| - Bank PSD2 notifications: /webhooks/bank/notification
+| These routes handle webhooks from payment gateways and banks,
+| storing them in gateway_webhook_events table for async processing.
 |
 */
+
+use App\Http\Controllers\Webhooks\WebhookController;
+
+// Payment Gateway Webhooks (using new unified controller)
+Route::post('/webhooks/paddle', [WebhookController::class, 'paddle'])
+    ->name('webhooks.paddle');
+
+Route::post('/webhooks/cpay', [WebhookController::class, 'cpay'])
+    ->name('webhooks.cpay');
+
+// Bank Webhooks
+Route::post('/webhooks/bank/nlb', [WebhookController::class, 'bankNlb'])
+    ->name('webhooks.bank.nlb');
+
+Route::post('/webhooks/bank/stopanska', [WebhookController::class, 'bankStopanska'])
+    ->name('webhooks.bank.stopanska');
 
 // CLAUDE-CHECKPOINT

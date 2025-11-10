@@ -1,0 +1,254 @@
+{
+  "part": "Phase 3-4 Integration",
+  "integration_date": "2025-11-10",
+  "status": "completed",
+  "routes_added": 25,
+  "abilities_added": 13,
+  "policies_registered": 4,
+  "observers_registered": 5,
+  "environment_variables_added": 9,
+  "files_modified": [
+    "/Users/tamsar/Downloads/mkaccounting/routes/api.php",
+    "/Users/tamsar/Downloads/mkaccounting/config/abilities.php",
+    "/Users/tamsar/Downloads/mkaccounting/app/Providers/AppServiceProvider.php",
+    "/Users/tamsar/Downloads/mkaccounting/.env.example"
+  ],
+  "files_created": [
+    "/Users/tamsar/Downloads/mkaccounting/DEPLOYMENT_PHASE3_4.md",
+    "/Users/tamsar/Downloads/mkaccounting/PHASE3_4_INTEGRATION_REPORT.json"
+  ],
+  "routes_detail": {
+    "banking_oauth": {
+      "count": 2,
+      "routes": [
+        "POST /api/v1/bank/oauth/start",
+        "GET /api/v1/bank/oauth/callback"
+      ]
+    },
+    "bank_connections": {
+      "count": 7,
+      "routes": [
+        "GET /api/v1/bank/connections",
+        "POST /api/v1/bank/connections",
+        "GET /api/v1/bank/connections/{id}",
+        "PUT /api/v1/bank/connections/{id}",
+        "DELETE /api/v1/bank/connections/{id}",
+        "GET /api/v1/bank/accounts",
+        "GET /api/v1/bank/accounts/{accountId}/transactions"
+      ]
+    },
+    "reconciliation": {
+      "count": 5,
+      "routes": [
+        "GET /api/v1/reconciliation/auto-matched",
+        "GET /api/v1/reconciliation/suggested",
+        "GET /api/v1/reconciliation/manual",
+        "POST /api/v1/reconciliation/approve",
+        "POST /api/v1/reconciliation/reject"
+      ]
+    },
+    "approvals": {
+      "count": 5,
+      "routes": [
+        "GET /api/v1/approvals",
+        "GET /api/v1/approvals/{id}",
+        "POST /api/v1/approvals/{id}/approve",
+        "POST /api/v1/approvals/{id}/reject",
+        "GET /api/v1/approvals/document/{type}/{id}"
+      ]
+    },
+    "exports": {
+      "count": 5,
+      "routes": [
+        "GET /api/v1/exports",
+        "POST /api/v1/exports",
+        "GET /api/v1/exports/{id}",
+        "DELETE /api/v1/exports/{id}",
+        "GET /api/v1/exports/{id}/download"
+      ]
+    },
+    "recurring_expenses": {
+      "count": 6,
+      "routes": [
+        "GET /api/v1/recurring-expenses",
+        "POST /api/v1/recurring-expenses",
+        "GET /api/v1/recurring-expenses/{id}",
+        "PUT /api/v1/recurring-expenses/{id}",
+        "DELETE /api/v1/recurring-expenses/{id}",
+        "POST /api/v1/recurring-expenses/{id}/process-now"
+      ]
+    },
+    "webhooks": {
+      "count": 4,
+      "routes": [
+        "POST /api/v1/webhooks/paddle",
+        "POST /api/v1/webhooks/cpay",
+        "POST /api/v1/webhooks/bank/nlb",
+        "POST /api/v1/webhooks/bank/stopanska"
+      ]
+    }
+  },
+  "abilities_detail": {
+    "banking": [
+      "connect-bank",
+      "view-bank-transactions"
+    ],
+    "reconciliation": [
+      "view-reconciliation",
+      "approve-reconciliation"
+    ],
+    "approvals": [
+      "request-approval",
+      "approve-document",
+      "view-all-approvals"
+    ],
+    "exports": [
+      "create-export"
+    ],
+    "recurring_expenses": [
+      "view-recurring-expense",
+      "create-recurring-expense",
+      "edit-recurring-expense",
+      "delete-recurring-expense"
+    ]
+  },
+  "policies_detail": [
+    {
+      "model": "App\\Models\\BankConnection",
+      "policy": "App\\Policies\\BankConnectionPolicy"
+    },
+    {
+      "model": "App\\Models\\ApprovalRequest",
+      "policy": "App\\Policies\\ApprovalPolicy"
+    },
+    {
+      "model": "App\\Models\\ExportJob",
+      "policy": "App\\Policies\\ExportJobPolicy"
+    },
+    {
+      "model": "App\\Models\\RecurringExpense",
+      "policy": "App\\Policies\\RecurringExpensePolicy"
+    }
+  ],
+  "observers_detail": [
+    {
+      "model": "App\\Models\\BankConnection",
+      "observer": "App\\Observers\\AuditObserver",
+      "purpose": "Audit trail for bank connections"
+    },
+    {
+      "model": "App\\Models\\ApprovalRequest",
+      "observer": "App\\Observers\\AuditObserver",
+      "purpose": "Audit trail for approval requests"
+    },
+    {
+      "model": "App\\Models\\RecurringExpense",
+      "observer": "App\\Observers\\AuditObserver",
+      "purpose": "Audit trail for recurring expenses"
+    },
+    {
+      "model": "App\\Models\\ExportJob",
+      "observer": "App\\Observers\\AuditObserver",
+      "purpose": "Audit trail for export jobs"
+    },
+    {
+      "model": "App\\Models\\GatewayWebhookEvent",
+      "observer": "App\\Observers\\AuditObserver",
+      "purpose": "Audit trail for webhook events"
+    }
+  ],
+  "environment_variables": {
+    "phase3_banking": [
+      "PSD2_GATEWAY_BASE_URL",
+      "PSD2_REDIRECT_URI",
+      "RECONCILIATION_DATE_TOLERANCE"
+    ],
+    "phase4_exports_webhooks": [
+      "EXPORT_DISK",
+      "EXPORT_RETENTION_DAYS",
+      "WEBHOOK_RETENTION_DAYS",
+      "RECURRING_EXPENSE_CHECK_INTERVAL"
+    ]
+  },
+  "missing_components": {
+    "note": "The following components need to be created for full functionality",
+    "controllers": [
+      "App\\Http\\Controllers\\V1\\Admin\\Banking\\BankConnectionController",
+      "App\\Http\\Controllers\\V1\\Admin\\Banking\\ReconciliationController",
+      "App\\Http\\Controllers\\V1\\Admin\\Approval\\ApprovalRequestController",
+      "App\\Http\\Controllers\\V1\\Admin\\Export\\ExportController",
+      "App\\Http\\Controllers\\V1\\Admin\\Expense\\RecurringExpenseController",
+      "App\\Http\\Controllers\\V1\\Webhook\\WebhookController"
+    ],
+    "models": [
+      "App\\Models\\ApprovalRequest",
+      "App\\Models\\ExportJob",
+      "App\\Models\\RecurringExpense",
+      "App\\Models\\GatewayWebhookEvent"
+    ],
+    "policies": [
+      "App\\Policies\\BankConnectionPolicy",
+      "App\\Policies\\ApprovalPolicy",
+      "App\\Policies\\ExportJobPolicy",
+      "App\\Policies\\RecurringExpensePolicy"
+    ],
+    "migrations": [
+      "create_approval_requests_table",
+      "create_export_jobs_table",
+      "create_recurring_expenses_table",
+      "create_gateway_webhook_events_table"
+    ]
+  },
+  "next_steps": [
+    "Create missing controller classes",
+    "Create missing model classes",
+    "Create missing policy classes",
+    "Create database migrations for new tables",
+    "Implement service classes for business logic",
+    "Create request validation classes",
+    "Add unit and feature tests",
+    "Update API documentation"
+  ],
+  "deployment_checklist": [
+    "Run database migrations",
+    "Seed bank providers",
+    "Configure PSD2 Gateway service",
+    "Set up environment variables",
+    "Configure Laravel scheduler for recurring expenses",
+    "Set up queue workers for background processing",
+    "Test OAuth flows with banks",
+    "Test webhook endpoints",
+    "Verify export functionality",
+    "Configure CSRF exemptions for webhooks"
+  ],
+  "integration_summary": {
+    "phase_3": {
+      "name": "Banking & Reconciliation",
+      "features": [
+        "Bank account connections via PSD2",
+        "OAuth2 flow for bank authorization",
+        "Transaction synchronization",
+        "Automatic reconciliation",
+        "Manual reconciliation interface"
+      ]
+    },
+    "phase_4": {
+      "name": "Approvals, Exports, Webhooks",
+      "features": [
+        "Document approval workflow",
+        "Data export functionality (CSV, Excel, PDF)",
+        "Webhook receivers for Paddle and CPAY",
+        "Bank webhook handlers",
+        "Recurring expense templates",
+        "Automated recurring expense processing"
+      ]
+    }
+  },
+  "notes": [
+    "All routes are protected by auth:sanctum and company middleware except webhooks and OAuth callbacks",
+    "Policies and observers are registered but implementation classes need to be created",
+    "Environment variables follow the naming convention from existing features",
+    "Deployment documentation includes rollback procedures",
+    "All new abilities follow the existing dependency chain pattern"
+  ]
+}

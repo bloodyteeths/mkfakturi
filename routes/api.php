@@ -170,6 +170,7 @@ Route::prefix('/v1')->group(function () {
     // ----------------------------------
 
     Route::get('/banking/oauth/callback/{provider}', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'callback']);
+    Route::get('/bank/oauth/callback', [\App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class, 'callback']);
 
     // Onboarding
     // ----------------------------------
@@ -343,6 +344,25 @@ Route::prefix('/v1')->group(function () {
             Route::apiResource('expenses', ExpensesController::class);
 
             Route::apiResource('categories', ExpenseCategoriesController::class);
+
+            // Recurring Expenses (Phase 4)
+            // ----------------------------------
+
+            Route::post('/recurring-expenses/{recurringExpense}/process-now', [\App\Http\Controllers\V1\Admin\RecurringExpenseController::class, 'processNow']);
+
+            Route::apiResource('recurring-expenses', \App\Http\Controllers\V1\Admin\RecurringExpenseController::class);
+
+            // Exports (Phase 4)
+            // ----------------------------------
+
+            Route::get('/exports', [\App\Http\Controllers\V1\Admin\ExportController::class, 'index']);
+
+            Route::post('/exports', [\App\Http\Controllers\V1\Admin\ExportController::class, 'store']);
+
+            Route::get('/exports/{exportJob}/download', [\App\Http\Controllers\V1\Admin\ExportController::class, 'download'])
+                ->name('exports.download');
+
+            Route::delete('/exports/{exportJob}', [\App\Http\Controllers\V1\Admin\ExportController::class, 'destroy']);
 
             // Payments
             // ----------------------------------
@@ -611,6 +631,60 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'start']);
             });
 
+            // Bank Connections (Phase 3)
+            // ----------------------------------
+
+            Route::prefix('bank')->group(function () {
+                // OAuth flow
+                Route::post('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class, 'start']);
+
+                // Bank connections management
+                Route::apiResource('connections', \App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class);
+
+                // Bank accounts & transactions
+                Route::get('/accounts', [\App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class, 'accounts']);
+                Route::get('/accounts/{accountId}/transactions', [\App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class, 'transactions']);
+            });
+
+            // Reconciliation (Phase 3)
+            // ----------------------------------
+
+            Route::prefix('reconciliation')->group(function () {
+                Route::get('/auto-matched', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'autoMatched']);
+                Route::get('/suggested', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'suggested']);
+                Route::get('/manual', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'manual']);
+                Route::post('/approve', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'approve']);
+                Route::post('/reject', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'reject']);
+            });
+
+            // Approvals (Phase 4)
+            // ----------------------------------
+
+            Route::prefix('approvals')->group(function () {
+                Route::get('/', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'index']);
+                Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'show']);
+                Route::post('/{id}/approve', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'approve']);
+                Route::post('/{id}/reject', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'reject']);
+                Route::get('/document/{type}/{id}', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'forDocument']);
+            });
+
+            // Exports (Phase 4)
+            // ----------------------------------
+
+            Route::prefix('exports')->group(function () {
+                Route::get('/', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'index']);
+                Route::post('/', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'store']);
+                Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'show']);
+                Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'destroy']);
+                Route::get('/{id}/download', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'download']);
+            });
+
+            // Recurring Expenses (Phase 4)
+            // ----------------------------------
+
+            Route::apiResource('recurring-expenses', \App\Http\Controllers\V1\Admin\Expense\RecurringExpenseController::class);
+            Route::post('recurring-expenses/{id}/process-now', [\App\Http\Controllers\V1\Admin\Expense\RecurringExpenseController::class, 'processNow']);
+
             // AI Insights Integration
             // Feature flag: FEATURE_MCP_AI_TOOLS
             // ----------------------------------
@@ -792,6 +866,15 @@ Route::prefix('/v1')->group(function () {
 });
 
 Route::get('/cron', CronJobController::class)->middleware('cron-job');
+
+// Webhook Routes (Phase 4 - no auth required)
+// ----------------------------------
+Route::prefix('webhooks')->group(function () {
+    Route::post('paddle', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'paddle']);
+    Route::post('cpay', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'cpay']);
+    Route::post('bank/nlb', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'nlbBank']);
+    Route::post('bank/stopanska', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'stopanskaBank']);
+});
 
 // AI Financial Assistant Routes
 Route::middleware(['auth:sanctum'])->prefix('ai')->group(function () {

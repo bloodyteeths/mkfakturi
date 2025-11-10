@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\CacheableTrait;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
+use App\Traits\RequiresApproval;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,7 @@ class Bill extends Model implements HasMedia
     use HasCustomFieldsTrait;
     use HasFactory;
     use InteractsWithMedia;
+    use RequiresApproval;
     use SoftDeletes;
 
     // Status constants
