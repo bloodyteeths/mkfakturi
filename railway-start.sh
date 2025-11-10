@@ -79,6 +79,17 @@ echo "DB_PORT: $DB_PORT"
 echo "DB_DATABASE: $DB_DATABASE"
 echo "DB_USERNAME: $DB_USERNAME"
 
+# Auto-enable installation skip on Railway if not explicitly set
+if [ ! -z "$RAILWAY_ENVIRONMENT" ] && [ -z "$RAILWAY_SKIP_INSTALL" ]; then
+    echo "Railway detected - auto-enabling RAILWAY_SKIP_INSTALL"
+    export RAILWAY_SKIP_INSTALL=true
+    export ADMIN_EMAIL="${ADMIN_EMAIL:-admin@facturino.mk}"
+    export ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin123}"
+    echo "Admin credentials:"
+    echo "  Email: $ADMIN_EMAIL"
+    echo "  Password: [set from env or default]"
+fi
+
 # Create a minimal .env file if it doesn't exist (installation wizard needs it)
 if [ ! -f ".env" ]; then
     echo "Creating minimal .env file for installation wizard..."
