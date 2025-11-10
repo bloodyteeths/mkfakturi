@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('unique_hash')->nullable();
 
             // Relationships
-            $table->unsignedBigInteger('bill_id')->nullable();
+            $table->unsignedInteger('bill_id')->nullable();
             $table->foreign('bill_id')->references('id')->on('bills')->onDelete('cascade');
             $table->integer('company_id')->unsigned()->nullable();
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('restrict');
