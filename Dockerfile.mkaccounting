@@ -96,8 +96,8 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# Copy package files for caching
-COPY package.json package-lock.json ./
+# Copy package files for caching (lock file optional)
+COPY package*.json ./
 
 # Install all dependencies (needed for build) with Cypress skip
 ENV CYPRESS_INSTALL_BINARY=0
