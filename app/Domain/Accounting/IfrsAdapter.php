@@ -984,6 +984,249 @@ class IfrsAdapter
         // Default general expense
         return '5000';
     }
+
+    /**
+     * Post a Bill to the general ledger
+     * Creates: DR Expense Account (5XXX based on bill items), CR Accounts Payable, DR VAT Receivable
+     *
+     * @param \App\Models\Bill $bill
+     * @return void
+     * @throws \Exception
+     */
+    public function postBill($bill): void
+    {
+        // Skip if feature is disabled
+        if (!$this->isEnabled()) {
+            return;
+        }
+
+        // Idempotency check: don't re-post if already posted
+        if ($bill->ifrs_transaction_id) {
+            Log::info("Bill already posted to ledger, skipping", [
+                'bill_id' => $bill->id,
+                'ifrs_transaction_id' => $bill->ifrs_transaction_id,
+            ]);
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($bill->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
+            // Get or create accounts
+            $apAccount = $this->getAccountsPayableAccount($bill->company_id, $entity->id);
+            $expenseAccount = $this->getExpenseAccount($bill->company_id, $entity->id);
+
+            // Build narration
+            $narration = "Bill #{$bill->bill_number} - {$bill->supplier->name}";
+
+            // Create IFRS Transaction (Supplier Bill)
+            $transaction = Transaction::create([
+                'account_id' => $expenseAccount->id,
+                'transaction_date' => $bill->bill_date ?? Carbon::now(),
+                'narration' => $narration,
+                'transaction_type' => Transaction::BL, // Supplier Bill
+                'currency_id' => $this->getCurrencyId($bill->company_id),
+                'entity_id' => $entity->id,
+            ]);
+
+            // Line Item: Debit Expense Account
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $expenseAccount->id,
+                'amount' => $bill->sub_total / 100, // Convert cents to dollars
+                'quantity' => 1,
+                'entry_type' => LineItem::DEBIT,
+            ]);
+
+            // If there's input VAT, debit VAT Receivable (input VAT is an asset)
+            if ($bill->tax > 0) {
+                $vatReceivableAccount = $this->getVatReceivableAccount($bill->company_id, $entity->id);
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $vatReceivableAccount->id,
+                    'amount' => $bill->tax / 100,
+                    'quantity' => 1,
+                    'entry_type' => LineItem::DEBIT,
+                ]);
+            }
+
+            // Line Item: Credit Accounts Payable
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $apAccount->id,
+                'amount' => $bill->total / 100, // Total includes tax
+                'quantity' => 1,
+                'entry_type' => LineItem::CREDIT,
+            ]);
+
+            // Post the transaction to the ledger
+            $transaction->post();
+
+            // Store the IFRS transaction ID on the bill for reference
+            $bill->update(['ifrs_transaction_id' => $transaction->id, 'posted_to_ifrs' => true]);
+
+            DB::commit();
+
+            Log::info("Bill posted to ledger", [
+                'bill_id' => $bill->id,
+                'bill_number' => $bill->bill_number,
+                'ifrs_transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to post bill to ledger", [
+                'bill_id' => $bill->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Post a BillPayment to the general ledger
+     * Creates: DR Accounts Payable, CR Cash and Bank
+     *
+     * @param \App\Models\BillPayment $billPayment
+     * @return void
+     * @throws \Exception
+     */
+    public function postBillPayment($billPayment): void
+    {
+        // Skip if feature is disabled
+        if (!$this->isEnabled()) {
+            return;
+        }
+
+        // Idempotency check: don't re-post if already posted
+        if ($billPayment->ifrs_transaction_id) {
+            Log::info("Bill payment already posted to ledger, skipping", [
+                'bill_payment_id' => $billPayment->id,
+                'ifrs_transaction_id' => $billPayment->ifrs_transaction_id,
+            ]);
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($billPayment->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
+            // Get accounts
+            $cashAccount = $this->getCashAccount($billPayment->company_id, $entity->id);
+            $apAccount = $this->getAccountsPayableAccount($billPayment->company_id, $entity->id);
+
+            // Build narration
+            $supplierName = $billPayment->bill && $billPayment->bill->supplier
+                ? $billPayment->bill->supplier->name
+                : 'Supplier';
+            $narration = "Bill Payment #{$billPayment->payment_number} - {$supplierName}";
+
+            // Create IFRS Transaction (Supplier Payment)
+            $transaction = Transaction::create([
+                'account_id' => $apAccount->id,
+                'transaction_date' => $billPayment->payment_date ?? Carbon::now(),
+                'narration' => $narration,
+                'transaction_type' => Transaction::PY, // Supplier Payment
+                'currency_id' => $this->getCurrencyId($billPayment->company_id),
+                'entity_id' => $entity->id,
+            ]);
+
+            // Line Item: Debit Accounts Payable (reduce liability)
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $apAccount->id,
+                'amount' => $billPayment->amount / 100, // Convert cents to dollars
+                'quantity' => 1,
+                'entry_type' => LineItem::DEBIT,
+            ]);
+
+            // Line Item: Credit Cash and Bank (reduce asset)
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $cashAccount->id,
+                'amount' => $billPayment->amount / 100,
+                'quantity' => 1,
+                'entry_type' => LineItem::CREDIT,
+            ]);
+
+            // Post the transaction to the ledger
+            $transaction->post();
+
+            // Store the IFRS transaction ID on the bill payment for reference
+            $billPayment->update(['ifrs_transaction_id' => $transaction->id, 'posted_to_ifrs' => true]);
+
+            DB::commit();
+
+            Log::info("Bill payment posted to ledger", [
+                'bill_payment_id' => $billPayment->id,
+                'payment_number' => $billPayment->payment_number,
+                'ifrs_transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to post bill payment to ledger", [
+                'bill_payment_id' => $billPayment->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Get or create Accounts Payable account
+     *
+     * @param int $companyId
+     * @param int $entityId
+     * @return Account
+     */
+    protected function getAccountsPayableAccount(int $companyId, int $entityId): Account
+    {
+        return Account::firstOrCreate(
+            [
+                'account_type' => Account::PAYABLE,
+                'category_id' => null,
+                'name' => 'Accounts Payable',
+                'entity_id' => $entityId,
+            ],
+            [
+                'code' => '2000',
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
+
+    /**
+     * Get or create VAT Receivable account (for input VAT on purchases)
+     *
+     * @param int $companyId
+     * @param int $entityId
+     * @return Account
+     */
+    protected function getVatReceivableAccount(int $companyId, int $entityId): Account
+    {
+        return Account::firstOrCreate(
+            [
+                'account_type' => Account::CURRENT_ASSET,
+                'category_id' => null,
+                'name' => 'VAT Receivable',
+                'entity_id' => $entityId,
+            ],
+            [
+                'code' => '1100',
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
 }
 
-// CLAUDE-CHECKPOINT: Added postExpense() method for expense accounting
+// CLAUDE-CHECKPOINT: Added postBill() and postBillPayment() methods for accounts payable accounting

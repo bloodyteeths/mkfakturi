@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\AuditLog;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
+use App\Models\Bill;
 use App\Models\Certificate;
 use App\Models\Commission;
 use App\Models\CreditNote;
@@ -19,7 +21,9 @@ use App\Models\Note;
 use App\Models\Partner;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\ProformaInvoice;
 use App\Models\RecurringInvoice;
+use App\Models\Supplier;
 use App\Models\TaxReturn;
 use App\Models\TaxType;
 use App\Models\Unit;
@@ -818,6 +822,149 @@ return [
             'depends_on' => [
                 'upload-certificate',
             ],
+        ],
+
+        // Supplier (Accounts Payable)
+        [
+            'name' => 'view supplier',
+            'ability' => 'view-supplier',
+            'model' => Supplier::class,
+        ],
+        [
+            'name' => 'create supplier',
+            'ability' => 'create-supplier',
+            'model' => Supplier::class,
+            'depends_on' => [
+                'view-supplier',
+                'view-all-notes',
+                'view-custom-field',
+            ],
+        ],
+        [
+            'name' => 'edit supplier',
+            'ability' => 'edit-supplier',
+            'model' => Supplier::class,
+            'depends_on' => [
+                'view-supplier',
+                'view-all-notes',
+                'view-custom-field',
+            ],
+        ],
+        [
+            'name' => 'delete supplier',
+            'ability' => 'delete-supplier',
+            'model' => Supplier::class,
+            'depends_on' => [
+                'view-supplier',
+            ],
+        ],
+
+        // Bill (Accounts Payable)
+        [
+            'name' => 'view bill',
+            'ability' => 'view-bill',
+            'model' => Bill::class,
+        ],
+        [
+            'name' => 'create bill',
+            'ability' => 'create-bill',
+            'model' => Bill::class,
+            'depends_on' => [
+                'view-bill',
+                'view-supplier',
+                'view-item',
+                'view-tax-type',
+                'view-custom-field',
+                'view-all-notes',
+            ],
+        ],
+        [
+            'name' => 'edit bill',
+            'ability' => 'edit-bill',
+            'model' => Bill::class,
+            'depends_on' => [
+                'view-bill',
+                'view-supplier',
+                'view-item',
+                'view-tax-type',
+                'view-custom-field',
+                'view-all-notes',
+            ],
+        ],
+        [
+            'name' => 'delete bill',
+            'ability' => 'delete-bill',
+            'model' => Bill::class,
+            'depends_on' => [
+                'view-bill',
+            ],
+        ],
+        [
+            'name' => 'send bill',
+            'ability' => 'send-bill',
+            'model' => Bill::class,
+        ],
+
+        // Proforma Invoice
+        [
+            'name' => 'view proforma invoice',
+            'ability' => 'view-proforma-invoice',
+            'model' => ProformaInvoice::class,
+        ],
+        [
+            'name' => 'create proforma invoice',
+            'ability' => 'create-proforma-invoice',
+            'model' => ProformaInvoice::class,
+            'depends_on' => [
+                'view-proforma-invoice',
+                'view-customer',
+                'view-item',
+                'view-tax-type',
+                'view-custom-field',
+                'view-all-notes',
+            ],
+        ],
+        [
+            'name' => 'edit proforma invoice',
+            'ability' => 'edit-proforma-invoice',
+            'model' => ProformaInvoice::class,
+            'depends_on' => [
+                'view-proforma-invoice',
+                'view-customer',
+                'view-item',
+                'view-tax-type',
+                'view-custom-field',
+                'view-all-notes',
+            ],
+        ],
+        [
+            'name' => 'delete proforma invoice',
+            'ability' => 'delete-proforma-invoice',
+            'model' => ProformaInvoice::class,
+            'depends_on' => [
+                'view-proforma-invoice',
+            ],
+        ],
+        [
+            'name' => 'send proforma invoice',
+            'ability' => 'send-proforma-invoice',
+            'model' => ProformaInvoice::class,
+        ],
+        [
+            'name' => 'convert proforma invoice',
+            'ability' => 'convert-proforma-invoice',
+            'model' => ProformaInvoice::class,
+            'depends_on' => [
+                'view-proforma-invoice',
+                'create-invoice',
+            ],
+        ],
+
+        // Audit Logs
+        [
+            'name' => 'view audit logs',
+            'ability' => 'view-audit-logs',
+            'model' => AuditLog::class,
         ],
     ],
 ];
