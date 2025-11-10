@@ -1158,11 +1158,22 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 - `services/psd2-gateway/README.md` (422 lines) - PSD2 Gateway setup guide
 - `DEPLOYMENT_PHASE3_4.md` - Phase 3-4 deployment instructions
 - `PHASE3_4_INTEGRATION_REPORT.json` - Detailed integration report
+- `tools/sanity-check.sh` (164 lines) - Automated verification script for Phase 1-4 implementation
 
 **Git Commits:**
+- Commit 42c17f15: Phase 3-4 implementation (routes, abilities, observers, policies, documentation)
+- Commit ec81fe6f: Fixed Phase 2 trait errors and registered observers/policies
 - Commit f6124508: Railway build fix (NIXPACKS → DOCKERFILE)
 - Commit 77d64a3e: Dockerfile heredoc fix (separate config files)
-- Commit [PENDING]: Phase 3-4 implementation (routes, abilities, observers, policies, documentation)
+- Commit 46d3cb84: .dockerignore explicit includes attempt 1
+- Commit 75110393: .dockerignore minimal rewrite
+- Commit 5934d339: Added package-lock.json to git (was in .gitignore)
+- Commit f63e3c0e: .dockerignore explicit includes attempt 2
+- Commit a8d98331: Removed invalid // comments from .env.example
+- Commit 7588f174: Removed invalid ENGINE syntax from Phase 2 migrations
+- Commit 419cd009: Renamed Phase 2 migrations to avoid timestamp conflicts
+- Commit fb1c8125: Added idempotency checks to all Phase 1-4 migrations
+- Commit da0961bc: Added sanity check script for Phase 1-4 verification
 
 **Status**: ✅ Phase 3-4 production-ready, awaiting Railway deployment success and testing
 
