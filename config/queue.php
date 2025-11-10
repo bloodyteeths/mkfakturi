@@ -96,6 +96,16 @@ return [
             'block_for' => null,
             'after_commit' => false,
         ],
+
+        // E-invoice submission queue for tax authority submissions
+        'einvoice' => [
+            'driver' => 'redis',
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'default'),
+            'queue' => 'einvoice',
+            'retry_after' => 150, // 2.5 minutes (longer than job timeout)
+            'block_for' => null,
+            'after_commit' => false,
+        ],
     ],
 
     /*
@@ -160,3 +170,5 @@ return [
         'backoff' => [10, 30, 60],
     ],
 ];
+
+// CLAUDE-CHECKPOINT

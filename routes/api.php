@@ -8,10 +8,12 @@ use App\Http\Controllers\V1\Admin\Backup\BackupsController;
 use App\Http\Controllers\V1\Admin\Backup\DownloadBackupController;
 use App\Http\Controllers\V1\Admin\Company\CompaniesController;
 use App\Http\Controllers\V1\Admin\Company\CompanyController as AdminCompanyController;
+use App\Http\Controllers\V1\Admin\CreditNotes\CreditNoteController;
 use App\Http\Controllers\V1\Admin\Customer\CustomersController;
 use App\Http\Controllers\V1\Admin\Customer\CustomerStatsController;
 use App\Http\Controllers\V1\Admin\CustomField\CustomFieldsController;
 use App\Http\Controllers\V1\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\V1\Admin\EInvoice\EInvoiceController;
 use App\Http\Controllers\V1\Admin\Estimate\ChangeEstimateStatusController;
 use App\Http\Controllers\V1\Admin\Estimate\CloneEstimateController;
 use App\Http\Controllers\V1\Admin\Estimate\ConvertEstimateController;
@@ -288,6 +290,19 @@ Route::prefix('/v1')->group(function () {
 
             Route::apiResource('invoices', InvoicesController::class);
 
+            // Credit Notes
+            // -------------------------------------------------
+
+            Route::post('/credit-notes/{creditNote}/send', [CreditNoteController::class, 'send']);
+
+            Route::post('/credit-notes/{creditNote}/mark-as-viewed', [CreditNoteController::class, 'markAsViewed']);
+
+            Route::post('/credit-notes/{creditNote}/mark-as-completed', [CreditNoteController::class, 'markAsCompleted']);
+
+            Route::post('/credit-notes/delete', [CreditNoteController::class, 'delete']);
+
+            Route::apiResource('credit-notes', CreditNoteController::class);
+
             // Recurring Invoice
             // -------------------------------------------------
 
@@ -406,7 +421,8 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
             Route::get('/certificates/current', [CertUploadController::class, 'current']);
             Route::post('/certificates/upload', [CertUploadController::class, 'upload']);
-            Route::delete('/certificates/current', [CertUploadController::class, 'delete']);
+            Route::post('/certificates/{id}/verify', [CertUploadController::class, 'verify']);
+            Route::delete('/certificates/{id}', [CertUploadController::class, 'delete']);
 
             // Mails
             // ----------------------------------
@@ -437,14 +453,38 @@ Route::prefix('/v1')->group(function () {
 
             Route::apiResource('tax-types', TaxTypesController::class);
 
+            // E-Invoices
+            // ----------------------------------
+
+            Route::prefix('e-invoices')->group(function () {
+                Route::get('/', [EInvoiceController::class, 'index']);
+                Route::get('/portal-status', [EInvoiceController::class, 'checkPortalStatus']);
+                Route::get('/submission-queue', [EInvoiceController::class, 'getSubmissionQueue']);
+                Route::get('/{id}', [EInvoiceController::class, 'show']);
+                Route::post('/generate/{invoiceId}', [EInvoiceController::class, 'generate']);
+                Route::post('/{id}/sign', [EInvoiceController::class, 'sign']);
+                Route::post('/{id}/submit', [EInvoiceController::class, 'submit']);
+                Route::post('/{id}/simulate', [EInvoiceController::class, 'simulate']);
+                Route::get('/{id}/download-xml', [EInvoiceController::class, 'downloadXml']);
+                Route::post('/{submissionId}/resubmit', [EInvoiceController::class, 'resubmit']);
+            });
+
             // VAT Returns
             // ----------------------------------
 
             Route::prefix('tax')->group(function () {
                 Route::post('vat-return/preview', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'preview']);
                 Route::post('vat-return', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'generate']);
+                Route::post('vat-return/file', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'file']);
+                Route::get('vat-return/periods', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'getPeriods']);
+                Route::get('vat-return/periods/{periodId}/returns', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'getReturns']);
+                Route::post('vat-return/periods/{periodId}/close', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'closePeriod']);
+                Route::post('vat-return/periods/{periodId}/reopen', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'reopenPeriod']);
+                Route::get('vat-return/{id}/download-xml', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'downloadXml']);
                 Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
             });
+
+// CLAUDE-CHECKPOINT
 
             // Roles
             // ----------------------------------

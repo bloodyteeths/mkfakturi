@@ -2,9 +2,12 @@
 
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
+use App\Models\Certificate;
 use App\Models\Commission;
+use App\Models\CreditNote;
 use App\Models\Customer;
 use App\Models\CustomField;
+use App\Models\EInvoice;
 use App\Models\Estimate;
 use App\Models\ExchangeRateProvider;
 use App\Models\Expense;
@@ -17,6 +20,7 @@ use App\Models\Partner;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\RecurringInvoice;
+use App\Models\TaxReturn;
 use App\Models\TaxType;
 use App\Models\Unit;
 use App\Models\User;
@@ -211,6 +215,54 @@ return [
             'name' => 'send invoice',
             'ability' => 'send-invoice',
             'model' => Invoice::class,
+        ],
+
+        // Credit Note
+        [
+            'name' => 'view credit note',
+            'ability' => 'view-credit-note',
+            'model' => CreditNote::class,
+        ],
+        [
+            'name' => 'create credit note',
+            'ability' => 'create-credit-note',
+            'model' => CreditNote::class,
+            'depends_on' => [
+                'view-credit-note',
+                'view-item',
+                'view-invoice',
+                'view-tax-type',
+                'view-customer',
+                'view-custom-field',
+                'view-all-notes',
+            ],
+        ],
+        [
+            'name' => 'edit credit note',
+            'ability' => 'edit-credit-note',
+            'model' => CreditNote::class,
+            'depends_on' => [
+                'view-credit-note',
+                'view-item',
+                'view-invoice',
+                'view-tax-type',
+                'view-customer',
+                'view-custom-field',
+                'view-all-notes',
+            ],
+        ],
+        [
+            'name' => 'delete credit note',
+            'ability' => 'delete-credit-note',
+            'model' => CreditNote::class,
+            'depends_on' => [
+                'view-credit-note',
+            ],
+        ],
+        [
+            'name' => 'send credit note',
+            'ability' => 'send-credit-note',
+            'model' => CreditNote::class,
         ],
 
         // Recurring Invoice
@@ -693,5 +745,80 @@ return [
                 'view-import',
             ],
         ],
+
+        // E-Invoice
+        [
+            'name' => 'view e-invoice',
+            'ability' => 'view-e-invoice',
+            'model' => EInvoice::class,
+        ],
+        [
+            'name' => 'create e-invoice',
+            'ability' => 'create-e-invoice',
+            'model' => EInvoice::class,
+            'depends_on' => [
+                'view-e-invoice',
+                'view-invoice',
+            ],
+        ],
+        [
+            'name' => 'submit e-invoice',
+            'ability' => 'submit-e-invoice',
+            'model' => EInvoice::class,
+            'depends_on' => [
+                'view-e-invoice',
+                'sign-e-invoice',
+            ],
+        ],
+        [
+            'name' => 'sign e-invoice',
+            'ability' => 'sign-e-invoice',
+            'model' => EInvoice::class,
+            'depends_on' => [
+                'view-e-invoice',
+                'manage-certificates',
+            ],
+        ],
+
+        // Tax Return
+        [
+            'name' => 'view tax return',
+            'ability' => 'view-tax-return',
+            'model' => TaxReturn::class,
+        ],
+        [
+            'name' => 'file tax return',
+            'ability' => 'file-tax-return',
+            'model' => TaxReturn::class,
+            'depends_on' => [
+                'view-tax-return',
+                'view-invoice',
+                'view-expense',
+            ],
+        ],
+        [
+            'name' => 'manage tax periods',
+            'ability' => 'manage-tax-periods',
+            'model' => TaxReturn::class,
+            'depends_on' => [
+                'view-tax-return',
+            ],
+        ],
+
+        // Certificate (QES for e-invoice signing)
+        [
+            'name' => 'upload certificate',
+            'ability' => 'upload-certificate',
+            'model' => Certificate::class,
+        ],
+        [
+            'name' => 'manage certificates',
+            'ability' => 'manage-certificates',
+            'model' => Certificate::class,
+            'depends_on' => [
+                'upload-certificate',
+            ],
+        ],
     ],
 ];
+// CLAUDE-CHECKPOINT
