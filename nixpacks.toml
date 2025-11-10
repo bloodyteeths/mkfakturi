@@ -11,16 +11,18 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Use regular npm install (npm ci requires package-lock.json)
+# Install PHP deps and run npm ci while skipping heavy test binaries
 cmds = [
   "composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist",
-  "npm install --no-audit"
+  "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CYPRESS_INSTALL_BINARY=0 npm ci --no-audit"
 ]
 
 [phases.build]
 # Only build - don't re-install dependencies
 cmds = [
   "npm run build",
+  "rm -rf node_modules",
+  "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache",
   "php artisan config:clear",
   "php artisan cache:clear"
 ]
