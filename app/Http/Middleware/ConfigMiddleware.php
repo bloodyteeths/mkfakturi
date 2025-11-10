@@ -17,6 +17,12 @@ class ConfigMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip health check endpoints to avoid database dependency
+        $healthCheckPaths = ['/health', '/up', '/ping', '/ready'];
+        if (in_array($request->path(), $healthCheckPaths)) {
+            return $next($request);
+        }
+
         if (InstallUtils::isDbCreated() && InstallUtils::tableExists('file_disks')) {
             if ($request->has('file_disk_id')) {
                 $file_disk = FileDisk::find($request->file_disk_id);
