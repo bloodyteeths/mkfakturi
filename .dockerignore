@@ -1,49 +1,60 @@
-# Minimal .dockerignore - only exclude what's absolutely necessary
+# .dockerignore - Exclude what's not needed, explicitly include build inputs
 
-# Exclude node_modules (will be installed during build)
+# === Exclude directories that will be rebuilt ===
 node_modules
-
-# Exclude vendor (will be installed during build)
 vendor
 
-# Exclude .git (don't need version control in image)
+# === Exclude VCS ===
 .git
 
-# Exclude development files
+# === Exclude development files ===
 .vscode
 .idea
 *.swp
 .DS_Store
 
-# Exclude logs
+# === Exclude logs ===
 *.log
 logs/
-storage/logs/*
 
-# Exclude test output
+# === Exclude test output ===
 tests/_output
 cypress/screenshots
 cypress/videos
 .phpunit.result.cache
 
-# Exclude temporary storage
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
-
-# Exclude docker compose files (not needed in image)
+# === Exclude docker compose ===
 docker-compose*.yml
 
-# Exclude docs
+# === Exclude docs ===
 docs/
 
-# Exclude environment files (will be created at runtime)
+# === Exclude environment files ===
 .env
 .env.*
 !.env.example
 
-# Exclude build artifacts (will be built during Docker build)
+# === Explicitly INCLUDE required build files ===
+# These negations ensure files are in build context even if Docker caches are stale
+!composer.json
+!composer.lock
+!package.json
+!package-lock.json
+!vite.config.js
+!postcss.config.cjs
+!tailwind.config.js
+
+# === Explicitly INCLUDE source directories ===
+!resources/
+!lang/
+!public/
+
+# === But exclude these public subdirectories ===
 public/build
 public/storage
 
-# Everything else is INCLUDED by default
+# === Exclude storage subdirectories ===
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
