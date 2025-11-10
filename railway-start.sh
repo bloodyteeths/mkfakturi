@@ -319,19 +319,29 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     echo "RAILWAY_SKIP_INSTALL enabled - forcing installation complete..."
     echo "========================================="
 
-    # Create database marker file (required by InstallUtils::isDbCreated())
-    echo "Creating database_created marker file..."
-    mkdir -p storage/app
-    echo "$(date +%s)" > storage/app/database_created
-    chmod 664 storage/app/database_created
+    # Create database marker file using Laravel Storage (required by InstallUtils::isDbCreated())
+    echo "Creating database_created marker file via Laravel Storage..."
+    php artisan tinker --execute="\Storage::disk('local')->put('database_created', time()); echo 'Marker created via Storage::disk(local)' . PHP_EOL;" 2>/dev/null || echo "Could not create marker via Storage"
 
-    # Verify marker file was created
+    # Verify marker file was created (check both ways)
+    echo "Verifying database marker file..."
+
+    # Check 1: Direct file check
     if [ -f "storage/app/database_created" ]; then
-        echo "✅ Database marker file created: storage/app/database_created"
+        echo "✅ File exists: storage/app/database_created"
         ls -la storage/app/database_created
     else
-        echo "❌ ERROR: Failed to create database marker file!"
+        echo "❌ File not found: storage/app/database_created"
     fi
+
+    # Check 2: Laravel Storage check (same method InstallUtils uses)
+    php artisan tinker --execute="echo 'Storage::disk(local)->has(database_created): ' . (\Storage::disk('local')->has('database_created') ? 'TRUE' : 'FALSE') . PHP_EOL;" 2>/dev/null || echo "Could not check via Storage"
+
+    # Check 3: Call InstallUtils directly
+    php artisan tinker --execute="echo 'InstallUtils::dbMarkerExists(): ' . (\App\Space\InstallUtils::dbMarkerExists() ? 'TRUE' : 'FALSE') . PHP_EOL;" 2>/dev/null || echo "Could not check via InstallUtils"
+
+    # Check 4: Full isDbCreated check
+    php artisan tinker --execute="echo 'InstallUtils::isDbCreated(): ' . (\App\Space\InstallUtils::isDbCreated() ? 'TRUE' : 'FALSE') . PHP_EOL;" 2>/dev/null || echo "Could not check isDbCreated"
 
     # First, list all existing users
     echo "Checking existing users in database..."

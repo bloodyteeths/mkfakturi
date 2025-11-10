@@ -256,6 +256,63 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         return response('No log file found');
     });
 
+    // Debug route to check installation status
+    Route::get('/debug/installation-status', function () {
+        $output = [];
+        $output[] = '🔍 Installation Status Check';
+        $output[] = '============================';
+        $output[] = '';
+
+        // Check 1: isDbCreated()
+        $output[] = '1. InstallUtils::isDbCreated() check:';
+        $dbCreated = \App\Space\InstallUtils::isDbCreated();
+        $output[] = '   Result: ' . ($dbCreated ? '✅ TRUE' : '❌ FALSE');
+
+        $markerFile = storage_path('app/database_created');
+        $output[] = '   Marker file: ' . $markerFile;
+        $output[] = '   File exists: ' . (file_exists($markerFile) ? '✅ YES' : '❌ NO');
+        if (file_exists($markerFile)) {
+            $output[] = '   File contents: ' . file_get_contents($markerFile);
+            $output[] = '   File permissions: ' . substr(sprintf('%o', fileperms($markerFile)), -4);
+        }
+        $output[] = '';
+
+        // Check 2: profile_complete setting
+        $output[] = '2. Setting::getSetting(\'profile_complete\') check:';
+        try {
+            $profileComplete = \App\Models\Setting::getSetting('profile_complete');
+            $output[] = '   Result: ' . ($profileComplete ?? 'NULL');
+            $output[] = '   Expected: COMPLETED';
+            $output[] = '   Match: ' . ($profileComplete === 'COMPLETED' ? '✅ YES' : '❌ NO');
+
+            // Query database directly
+            $setting = \App\Models\Setting::where('option', 'profile_complete')->first();
+            if ($setting) {
+                $output[] = '   Database row: option=' . $setting->option . ', value=' . $setting->value;
+            } else {
+                $output[] = '   ❌ Row not found in settings table!';
+            }
+        } catch (\Exception $e) {
+            $output[] = '   ❌ ERROR: ' . $e->getMessage();
+        }
+        $output[] = '';
+
+        // Check 3: Middleware logic
+        $output[] = '3. InstallationMiddleware logic:';
+        $shouldRedirect = (!$dbCreated || $profileComplete !== 'COMPLETED');
+        $output[] = '   Should redirect to /installation: ' . ($shouldRedirect ? '❌ YES' : '✅ NO');
+        $output[] = '';
+
+        // Check 4: Environment variables
+        $output[] = '4. Environment Variables:';
+        $output[] = '   APP_ENV: ' . env('APP_ENV');
+        $output[] = '   RAILWAY_ENVIRONMENT: ' . (env('RAILWAY_ENVIRONMENT') ?? 'NOT SET');
+        $output[] = '   RAILWAY_SKIP_INSTALL: ' . (env('RAILWAY_SKIP_INSTALL') ?? 'NOT SET');
+        $output[] = '';
+
+        return response('<pre>' . implode("\n", $output) . '</pre>');
+    });
+
     // TEMPORARY: Show actual database data
     Route::get('/debug/show-data', function () {
         $output = [];
