@@ -84,6 +84,10 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
     echo "Profile status: $PROFILE_STATUS"
 
+    # Check if database marker exists
+    MARKER_EXISTS=$(php artisan tinker --execute="echo \Storage::disk('local')->exists('database_created') ? 'YES' : 'NO';" 2>/dev/null | tail -1)
+    echo "Database marker exists: $MARKER_EXISTS"
+
     if [ "$PROFILE_STATUS" != "COMPLETED" ]; then
         echo "========================================="
         echo "Setting up installation skip for Railway"
@@ -100,7 +104,19 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
         echo "✅ profile_complete set to: $VERIFY"
         echo "========================================="
     else
-        echo "Already installed (profile_complete = COMPLETED), skipping setup"
+        echo "Already installed (profile_complete = COMPLETED)"
+
+        # Ensure database marker exists even if profile_complete is already set
+        if [ "$MARKER_EXISTS" != "YES" ]; then
+            echo "⚠️  Database marker missing, creating it now..."
+            php artisan tinker --execute="\Storage::disk('local')->put('database_created', time());" 2>/dev/null || echo "Could not create marker"
+
+            # Verify marker creation
+            VERIFY_MARKER=$(php artisan tinker --execute="echo \Storage::disk('local')->exists('database_created') ? 'YES' : 'NO';" 2>/dev/null | tail -1)
+            echo "✅ Database marker created: $VERIFY_MARKER"
+        else
+            echo "✅ Installation complete, all markers in place"
+        fi
     fi
 fi
 
