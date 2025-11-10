@@ -204,6 +204,11 @@ class Company extends Model implements HasMedia
         return $this->hasMany(MiniMaxToken::class);
     }
 
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(BankAccount::class);
+    }
+
     /**
      * Company's IFRS Entity relationship
      *

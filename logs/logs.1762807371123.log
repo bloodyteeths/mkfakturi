@@ -1,0 +1,88 @@
+2025-11-10T20:36:49.000000000Z [inf]  Starting Container
+2025-11-10T20:36:50.186072718Z [inf]  === Application Startup ===
+2025-11-10T20:36:50.186080999Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-10T20:36:50.186087226Z [inf]  DB configured from MYSQL_URL
+2025-11-10T20:36:50.186095210Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-10T20:36:50.186104683Z [inf]  Waiting for database... (1/30)
+2025-11-10T20:36:52.213781781Z [inf]  Waiting for database... (2/30)
+2025-11-10T20:36:54.390378517Z [inf]  Waiting for database... (3/30)
+2025-11-10T20:36:57.075125068Z [inf]  Waiting for database... (4/30)
+2025-11-10T20:36:59.084283404Z [inf]  Waiting for database... (5/30)
+2025-11-10T20:37:01.141920741Z [inf]  Waiting for database... (6/30)
+2025-11-10T20:37:03.103783183Z [inf]  Waiting for database... (7/30)
+2025-11-10T20:37:05.276511599Z [inf]  Waiting for database... (8/30)
+2025-11-10T20:37:07.448929655Z [inf]  Waiting for database... (9/30)
+2025-11-10T20:37:10.067699422Z [inf]  Waiting for database... (10/30)
+2025-11-10T20:37:12.168605377Z [inf]  Waiting for database... (11/30)
+2025-11-10T20:37:14.064343310Z [inf]  Waiting for database... (12/30)
+2025-11-10T20:37:16.141019092Z [inf]  Waiting for database... (13/30)
+2025-11-10T20:37:18.310768460Z [inf]  Waiting for database... (14/30)
+2025-11-10T20:37:20.483906452Z [inf]  Waiting for database... (15/30)
+2025-11-10T20:37:23.052866860Z [inf]  Waiting for database... (16/30)
+2025-11-10T20:37:25.172382802Z [inf]  Waiting for database... (17/30)
+2025-11-10T20:37:27.093340840Z [inf]  Waiting for database... (18/30)
+2025-11-10T20:37:29.197818156Z [inf]  Waiting for database... (19/30)
+2025-11-10T20:37:31.326313742Z [inf]  Waiting for database... (20/30)
+2025-11-10T20:37:33.502430373Z [inf]  Waiting for database... (21/30)
+2025-11-10T20:37:35.678364042Z [inf]  Waiting for database... (22/30)
+2025-11-10T20:37:38.104208462Z [inf]  Waiting for database... (23/30)
+2025-11-10T20:37:40.268826267Z [inf]  Waiting for database... (24/30)
+2025-11-10T20:37:42.251089928Z [inf]  Waiting for database... (25/30)
+2025-11-10T20:37:44.347597897Z [inf]  Waiting for database... (26/30)
+2025-11-10T20:37:46.511972312Z [inf]  Waiting for database... (27/30)
+2025-11-10T20:37:48.681434306Z [inf]  Waiting for database... (28/30)
+2025-11-10T20:37:51.232603676Z [inf]  Waiting for database... (29/30)
+2025-11-10T20:37:53.222931496Z [inf]  Waiting for database... (30/30)
+2025-11-10T20:37:55.272975829Z [inf]  Configuring nginx to listen on port 8080
+2025-11-10T20:37:55.272980858Z [inf]  Clearing caches...
+2025-11-10T20:37:55.390015053Z [inf]  
+2025-11-10T20:37:55.390022623Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-10T20:37:55.390029069Z [inf]  
+2025-11-10T20:37:55.677480752Z [inf]  
+2025-11-10T20:37:55.677490016Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
+2025-11-10T20:37:55.677502741Z [inf]  
+2025-11-10T20:37:56.360478200Z [inf]  
+2025-11-10T20:37:56.360486644Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-10T20:37:56.360492009Z [inf]  
+2025-11-10T20:37:56.360497415Z [inf]  
+2025-11-10T20:37:56.360503521Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-10T20:37:56.360509535Z [inf]  
+2025-11-10T20:37:56.360517113Z [inf]  Running migrations...
+2025-11-10T20:37:56.738360320Z [inf]  
+2025-11-10T20:37:56.738365429Z [inf]     INFO  Nothing to migrate.  
+2025-11-10T20:37:56.738369596Z [inf]  
+2025-11-10T20:37:57.339522337Z [inf]  Profile status: COMPLETED
+2025-11-10T20:37:57.584987090Z [inf]  Database marker exists: NO
+2025-11-10T20:37:57.584993647Z [inf]  Already installed (profile_complete = COMPLETED)
+2025-11-10T20:37:57.584999549Z [inf]  ⚠️  Database marker missing, creating it now...
+2025-11-10T20:37:58.328296561Z [inf]  ✅ Database marker created: YES
+2025-11-10T20:37:58.679541408Z [inf]  
+2025-11-10T20:37:58.679547536Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-10T20:37:58.679552674Z [inf]  
+2025-11-10T20:37:58.694476752Z [inf]  Starting application services...
+2025-11-10T20:37:59.394896121Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-10T20:37:59.394900240Z [err]    import pkg_resources
+2025-11-10T20:37:59.394905289Z [inf]  2025-11-10 20:37:59,090 INFO Set uid to user 0 succeeded
+2025-11-10T20:37:59.394912321Z [inf]  2025-11-10 20:37:59,096 INFO supervisord started with pid 104
+2025-11-10T20:38:00.336580325Z [inf]  2025-11-10 20:38:00,099 INFO spawned: 'nginx' with pid 106
+2025-11-10T20:38:00.336587147Z [inf]  2025-11-10 20:38:00,102 INFO spawned: 'php-fpm' with pid 107
+2025-11-10T20:38:00.336594280Z [inf]  2025-11-10 20:38:00,104 INFO spawned: 'scheduler' with pid 108
+2025-11-10T20:38:00.336624504Z [err]  [10-Nov-2025 20:38:00] NOTICE: fpm is running, pid 107
+2025-11-10T20:38:00.336629340Z [err]  [10-Nov-2025 20:38:00] NOTICE: ready to handle connections
+2025-11-10T20:38:01.534524580Z [inf]  2025-11-10 20:38:01,533 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T20:38:01.534530550Z [inf]  2025-11-10 20:38:01,533 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T20:38:01.534535929Z [inf]  2025-11-10 20:38:01,533 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T20:38:03.699151293Z [inf]  Testing Laravel application...
+2025-11-10T20:38:04.447325981Z [inf]  Laravel Framework 12.12.0
+2025-11-10T20:38:04.447332989Z [inf]  ✅ Laravel is ready
+2025-11-10T20:38:04.682412090Z [inf]  ✅ Database connection working
+2025-11-10T20:38:04.682421433Z [inf]  Starting queue workers...
+2025-11-10T20:38:05.469980565Z [inf]  Queue workers already running or failed to start
+2025-11-10T20:38:14.383030349Z [err]  127.0.0.1 -  10/Nov/2025:20:38:13 +0000 "GET /index.php" 500
+2025-11-10T20:38:54.063128741Z [err]  127.0.0.1 -  10/Nov/2025:20:38:44 +0000 "GET /index.php" 500
+2025-11-10T20:39:24.066578025Z [err]  127.0.0.1 -  10/Nov/2025:20:39:14 +0000 "GET /index.php" 500
+2025-11-10T20:39:54.038478879Z [err]  127.0.0.1 -  10/Nov/2025:20:39:44 +0000 "GET /index.php" 500
+2025-11-10T20:40:23.492716580Z [err]  127.0.0.1 -  10/Nov/2025:20:40:15 +0000 "GET /index.php" 500
+2025-11-10T20:40:53.506254871Z [err]  127.0.0.1 -  10/Nov/2025:20:40:45 +0000 "GET /index.php" 500
+2025-11-10T20:41:23.507899646Z [err]  127.0.0.1 -  10/Nov/2025:20:41:16 +0000 "GET /index.php" 500
+2025-11-10T20:41:53.758788391Z [err]  127.0.0.1 -  10/Nov/2025:20:41:47 +0000 "GET /index.php" 500

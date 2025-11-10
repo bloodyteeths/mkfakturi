@@ -1,0 +1,97 @@
+2025-11-10T15:24:49.000000000Z [inf]  Starting Container
+2025-11-10T15:24:50.421986605Z [inf]  === Application Startup ===
+2025-11-10T15:24:50.421993130Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-10T15:24:50.421999690Z [inf]  DB configured from MYSQL_URL
+2025-11-10T15:24:50.422008035Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-10T15:24:50.422016319Z [inf]  Waiting for database... (1/30)
+2025-11-10T15:24:52.368880309Z [inf]  Waiting for database... (2/30)
+2025-11-10T15:24:54.307151191Z [inf]  Waiting for database... (3/30)
+2025-11-10T15:24:56.355683305Z [inf]  Waiting for database... (4/30)
+2025-11-10T15:24:58.522512449Z [inf]  Waiting for database... (5/30)
+2025-11-10T15:25:00.706923765Z [inf]  Waiting for database... (6/30)
+2025-11-10T15:25:03.630596030Z [inf]  Waiting for database... (7/30)
+2025-11-10T15:25:05.706972932Z [inf]  Waiting for database... (8/30)
+2025-11-10T15:25:07.744797590Z [inf]  Waiting for database... (9/30)
+2025-11-10T15:25:09.555868942Z [inf]  Waiting for database... (10/30)
+2025-11-10T15:25:11.628500988Z [inf]  Waiting for database... (11/30)
+2025-11-10T15:25:13.774852518Z [inf]  Waiting for database... (12/30)
+2025-11-10T15:25:15.947365115Z [inf]  Waiting for database... (13/30)
+2025-11-10T15:25:18.697184510Z [inf]  Waiting for database... (14/30)
+2025-11-10T15:25:20.650639453Z [inf]  Waiting for database... (15/30)
+2025-11-10T15:25:22.552374752Z [inf]  Waiting for database... (16/30)
+2025-11-10T15:25:24.700386784Z [inf]  Waiting for database... (17/30)
+2025-11-10T15:25:26.827396100Z [inf]  Waiting for database... (18/30)
+2025-11-10T15:25:29.018626628Z [inf]  Waiting for database... (19/30)
+2025-11-10T15:25:31.848988862Z [inf]  Waiting for database... (20/30)
+2025-11-10T15:25:33.708866456Z [inf]  Waiting for database... (21/30)
+2025-11-10T15:25:35.717773165Z [inf]  Waiting for database... (22/30)
+2025-11-10T15:25:37.720353964Z [inf]  Waiting for database... (23/30)
+2025-11-10T15:25:39.882364752Z [inf]  Waiting for database... (24/30)
+2025-11-10T15:25:42.054846336Z [inf]  Waiting for database... (25/30)
+2025-11-10T15:25:44.628207166Z [inf]  Waiting for database... (26/30)
+2025-11-10T15:25:46.748640216Z [inf]  Waiting for database... (27/30)
+2025-11-10T15:25:48.745228453Z [inf]  Waiting for database... (28/30)
+2025-11-10T15:25:50.741718576Z [inf]  Waiting for database... (29/30)
+2025-11-10T15:25:52.918249970Z [inf]  Waiting for database... (30/30)
+2025-11-10T15:25:54.988708828Z [inf]  Clearing caches...
+2025-11-10T15:25:55.803162066Z [inf]  
+2025-11-10T15:25:55.803169589Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-10T15:25:55.803179507Z [inf]  
+2025-11-10T15:25:55.823542287Z [inf]  
+2025-11-10T15:25:55.823550115Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
+2025-11-10T15:25:55.823558698Z [inf]  
+2025-11-10T15:25:56.765218372Z [inf]  
+2025-11-10T15:25:56.765226976Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-10T15:25:56.765235061Z [inf]  
+2025-11-10T15:25:56.765242602Z [inf]  
+2025-11-10T15:25:56.765249957Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-10T15:25:56.765257297Z [inf]  
+2025-11-10T15:25:56.765265522Z [inf]  Running migrations...
+2025-11-10T15:25:57.705837734Z [inf]                                                                                 
+2025-11-10T15:25:57.705849074Z [inf]    SQLSTATE[HY000]: General error: 3780 Referencing column 'submitted_by' and   
+2025-11-10T15:25:57.705856477Z [inf]    referenced column 'id' in foreign key constraint 'e_invoice_submissions_sub  
+2025-11-10T15:25:57.705875779Z [inf]    2025_11_11_100002_create_e_invoice_submissions_table ......... 111.34ms FAIL
+2025-11-10T15:25:57.705882513Z [inf]  
+2025-11-10T15:25:57.705889720Z [inf]  In Connection.php line 822:
+2025-11-10T15:25:57.705929480Z [inf]    mitted_by_foreign' are incompatible. (Connection: mysql, SQL: alter table `  
+2025-11-10T15:25:57.705936933Z [inf]    e_invoice_submissions` add constraint `e_invoice_submissions_submitted_by_f  
+2025-11-10T15:25:57.705944326Z [inf]    oreign` foreign key (`submitted_by`) references `users` (`id`) on delete se  
+2025-11-10T15:25:57.705950964Z [inf]    t null)                                                                      
+2025-11-10T15:25:57.705961964Z [inf]                                                                                 
+2025-11-10T15:25:57.705970443Z [inf]  
+2025-11-10T15:25:57.705979462Z [inf]  In Connection.php line 568:
+2025-11-10T15:25:57.705990455Z [inf]                                                                                 
+2025-11-10T15:25:57.706288288Z [inf]  
+2025-11-10T15:25:57.706348509Z [inf]     INFO  Running migrations.  
+2025-11-10T15:25:57.706358984Z [inf]  
+2025-11-10T15:25:57.706368422Z [inf]    2025_11_11_000001_create_audit_logs_table ...................... 2.85ms DONE
+2025-11-10T15:25:57.706376752Z [inf]    2025_11_11_100001_create_e_invoices_table .................... 337.68ms DONE
+2025-11-10T15:25:57.706507791Z [inf]    referenced column 'id' in foreign key constraint 'e_invoice_submissions_sub  
+2025-11-10T15:25:57.706515051Z [inf]    mitted_by_foreign' are incompatible.                                         
+2025-11-10T15:25:57.706524279Z [inf]                                                                                 
+2025-11-10T15:25:57.706534224Z [inf]  
+2025-11-10T15:25:57.706549904Z [inf]    SQLSTATE[HY000]: General error: 3780 Referencing column 'submitted_by' and   
+2025-11-10T15:25:57.713337920Z [inf]  Migrations failed or already applied
+2025-11-10T15:25:58.077127896Z [inf]  
+2025-11-10T15:25:58.077138371Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-10T15:25:58.077145841Z [inf]  
+2025-11-10T15:25:58.107769712Z [inf]  Starting application services...
+2025-11-10T15:25:58.765218267Z [inf]  2025-11-10 15:25:58,355 INFO supervisord started with pid 1
+2025-11-10T15:25:58.765317851Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-10T15:25:58.765325332Z [err]    import pkg_resources
+2025-11-10T15:25:58.765331366Z [inf]  2025-11-10 15:25:58,352 INFO Set uid to user 0 succeeded
+2025-11-10T15:25:59.961368899Z [inf]  2025-11-10 15:25:59,360 INFO spawned: 'nginx' with pid 85
+2025-11-10T15:25:59.961376277Z [inf]  2025-11-10 15:25:59,364 INFO spawned: 'php-fpm' with pid 86
+2025-11-10T15:25:59.961382674Z [inf]  2025-11-10 15:25:59,367 INFO spawned: 'queue-worker_00' with pid 87
+2025-11-10T15:25:59.961389278Z [inf]  2025-11-10 15:25:59,370 INFO spawned: 'queue-worker_01' with pid 88
+2025-11-10T15:25:59.961395853Z [inf]  2025-11-10 15:25:59,373 INFO spawned: 'scheduler' with pid 89
+2025-11-10T15:25:59.961402671Z [err]  [10-Nov-2025 15:25:59] NOTICE: fpm is running, pid 86
+2025-11-10T15:25:59.961409300Z [err]  [10-Nov-2025 15:25:59] NOTICE: ready to handle connections
+2025-11-10T15:26:01.026208370Z [inf]  2025-11-10 15:26:00,755 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:26:01.026568788Z [inf]  2025-11-10 15:26:00,755 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:26:01.026582685Z [inf]  2025-11-10 15:26:00,755 INFO success: queue-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:26:01.026593088Z [inf]  2025-11-10 15:26:00,755 INFO success: queue-worker_01 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:26:01.026601198Z [inf]  2025-11-10 15:26:00,755 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:26:01.026609755Z [inf]  2025-11-10 15:26:00,755 INFO reaped unknown pid 91 (exit status 0)
+2025-11-10T15:27:01.485100748Z [inf]  2025-11-10 15:27:00,701 INFO reaped unknown pid 155 (exit status 0)
+2025-11-10T15:28:01.612747889Z [inf]  2025-11-10 15:28:00,692 INFO reaped unknown pid 160 (exit status 0)

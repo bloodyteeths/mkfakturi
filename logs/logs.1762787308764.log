@@ -1,0 +1,100 @@
+2025-11-10T14:54:10.000000000Z [inf]  Starting Container
+2025-11-10T14:54:11.936957589Z [inf]  Waiting for database... (1/30)
+2025-11-10T14:54:11.937023699Z [inf]  === Application Startup ===
+2025-11-10T14:54:11.937039084Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-10T14:54:11.937048858Z [inf]  DB configured from MYSQL_URL
+2025-11-10T14:54:11.937057821Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-10T14:54:13.190001825Z [inf]  Waiting for database... (2/30)
+2025-11-10T14:54:15.362407695Z [inf]  Waiting for database... (3/30)
+2025-11-10T14:54:18.057734655Z [inf]  Waiting for database... (4/30)
+2025-11-10T14:54:20.145810701Z [inf]  Waiting for database... (5/30)
+2025-11-10T14:54:22.177736046Z [inf]  Waiting for database... (6/30)
+2025-11-10T14:54:24.113501688Z [inf]  Waiting for database... (7/30)
+2025-11-10T14:54:26.212417137Z [inf]  Waiting for database... (8/30)
+2025-11-10T14:54:28.393820346Z [inf]  Waiting for database... (9/30)
+2025-11-10T14:54:30.568808805Z [inf]  Waiting for database... (10/30)
+2025-11-10T14:54:33.207332317Z [inf]  Waiting for database... (11/30)
+2025-11-10T14:54:35.112014182Z [inf]  Waiting for database... (12/30)
+2025-11-10T14:54:37.120309193Z [inf]  Waiting for database... (13/30)
+2025-11-10T14:54:39.248307734Z [inf]  Waiting for database... (14/30)
+2025-11-10T14:54:41.419798603Z [inf]  Waiting for database... (15/30)
+2025-11-10T14:54:43.592541620Z [inf]  Waiting for database... (16/30)
+2025-11-10T14:54:46.183671553Z [inf]  Waiting for database... (17/30)
+2025-11-10T14:54:48.150580645Z [inf]  Waiting for database... (18/30)
+2025-11-10T14:54:50.212109739Z [inf]  Waiting for database... (19/30)
+2025-11-10T14:54:52.286036505Z [inf]  Waiting for database... (20/30)
+2025-11-10T14:54:54.442967873Z [inf]  Waiting for database... (21/30)
+2025-11-10T14:54:56.611412640Z [inf]  Waiting for database... (22/30)
+2025-11-10T14:54:58.776273537Z [inf]  Waiting for database... (23/30)
+2025-11-10T14:55:01.350669983Z [inf]  Waiting for database... (24/30)
+2025-11-10T14:55:03.374256811Z [inf]  Waiting for database... (25/30)
+2025-11-10T14:55:05.319453486Z [inf]  Waiting for database... (26/30)
+2025-11-10T14:55:07.512289871Z [inf]  Waiting for database... (27/30)
+2025-11-10T14:55:09.655467152Z [inf]  Waiting for database... (28/30)
+2025-11-10T14:55:11.842880223Z [inf]  Waiting for database... (29/30)
+2025-11-10T14:55:14.374301327Z [inf]  Waiting for database... (30/30)
+2025-11-10T14:55:16.416616652Z [inf]  Clearing caches...
+2025-11-10T14:55:16.416623034Z [inf]  
+2025-11-10T14:55:16.416629082Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-10T14:55:16.416636074Z [inf]  
+2025-11-10T14:55:16.676464987Z [inf]  
+2025-11-10T14:55:16.676474070Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
+2025-11-10T14:55:16.676480828Z [inf]  
+2025-11-10T14:55:17.391181050Z [inf]  Running migrations...
+2025-11-10T14:55:17.391233119Z [inf]  
+2025-11-10T14:55:17.391239628Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-10T14:55:17.391248873Z [inf]  
+2025-11-10T14:55:17.391256125Z [inf]  
+2025-11-10T14:55:17.391264132Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-10T14:55:17.391270575Z [inf]  
+2025-11-10T14:55:17.744791959Z [inf]  
+2025-11-10T14:55:17.744803337Z [inf]     INFO  Running migrations.  
+2025-11-10T14:55:17.744809811Z [inf]  
+2025-11-10T14:55:17.754442137Z [inf]    2025_11_11_000001_create_audit_logs_table ...................... 5.81ms FAIL
+2025-11-10T14:55:17.764108271Z [inf]  
+2025-11-10T14:55:17.769138813Z [inf]    s` json null, `new_values` json null, `changed_fields` json null, `ip_addre  
+2025-11-10T14:55:17.769154688Z [inf]    ss` varchar(45) null, `user_agent` text null, `url` varchar(255) null, `htt  
+2025-11-10T14:55:17.769163503Z [inf]    p_method` varchar(10) null, `batch_id` char(36) null, `tags` json null, `cr  
+2025-11-10T14:55:17.769181634Z [inf]    eated_at` timestamp null, `updated_at` timestamp null) default character se  
+2025-11-10T14:55:17.769189830Z [inf]    t utf8 collate 'utf8_unicode_ci')                                            
+2025-11-10T14:55:17.769196949Z [inf]                                                                                 
+2025-11-10T14:55:17.769204379Z [inf]  
+2025-11-10T14:55:17.769218656Z [inf]  In Connection.php line 568:
+2025-11-10T14:55:17.769218767Z [inf]  In Connection.php line 822:
+2025-11-10T14:55:17.769232225Z [inf]                                                                                 
+2025-11-10T14:55:17.769233887Z [inf]                                                                                 
+2025-11-10T14:55:17.769246090Z [inf]    SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'audit_logs'  
+2025-11-10T14:55:17.769248113Z [inf]    SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'audit_logs'  
+2025-11-10T14:55:17.769258350Z [inf]     already exists (Connection: mysql, SQL: create table `audit_logs` (`id` bi  
+2025-11-10T14:55:17.769265265Z [inf]    gint unsigned not null auto_increment primary key, `company_id` bigint unsi  
+2025-11-10T14:55:17.769271222Z [inf]    gned not null, `auditable_type` varchar(255) not null, `auditable_id` bigin  
+2025-11-10T14:55:17.769276928Z [inf]    t unsigned not null, `user_id` bigint unsigned null, `user_name` varchar(25  
+2025-11-10T14:55:17.769283211Z [inf]    5) null, `event` varchar(255) not null, `description` text null, `old_value  
+2025-11-10T14:55:17.770956646Z [inf]     already exists                                                              
+2025-11-10T14:55:17.770966993Z [inf]                                                                                 
+2025-11-10T14:55:17.770973531Z [inf]  
+2025-11-10T14:55:17.788291667Z [inf]  Migrations failed or already applied
+2025-11-10T14:55:18.480783872Z [inf]  
+2025-11-10T14:55:18.480791530Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-10T14:55:18.480799846Z [inf]  
+2025-11-10T14:55:18.480807227Z [inf]  Starting application services...
+2025-11-10T14:55:18.480818060Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-10T14:55:18.480823450Z [err]    import pkg_resources
+2025-11-10T14:55:18.480829061Z [inf]  2025-11-10 14:55:18,312 INFO Set uid to user 0 succeeded
+2025-11-10T14:55:18.480834350Z [inf]  2025-11-10 14:55:18,314 INFO supervisord started with pid 1
+2025-11-10T14:55:19.529328625Z [inf]  2025-11-10 14:55:19,317 INFO spawned: 'nginx' with pid 85
+2025-11-10T14:55:19.529339567Z [inf]  2025-11-10 14:55:19,319 INFO spawned: 'php-fpm' with pid 86
+2025-11-10T14:55:19.529351436Z [inf]  2025-11-10 14:55:19,322 INFO spawned: 'queue-worker_00' with pid 87
+2025-11-10T14:55:19.529359643Z [inf]  2025-11-10 14:55:19,326 INFO spawned: 'queue-worker_01' with pid 88
+2025-11-10T14:55:19.529374568Z [inf]  2025-11-10 14:55:19,328 INFO spawned: 'scheduler' with pid 89
+2025-11-10T14:55:19.529388031Z [err]  [10-Nov-2025 14:55:19] NOTICE: fpm is running, pid 86
+2025-11-10T14:55:19.529395613Z [err]  [10-Nov-2025 14:55:19] NOTICE: ready to handle connections
+2025-11-10T14:55:20.656430759Z [inf]  2025-11-10 14:55:20,653 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:55:20.656438073Z [inf]  2025-11-10 14:55:20,654 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:55:20.656443535Z [inf]  2025-11-10 14:55:20,654 INFO success: queue-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:55:20.656448765Z [inf]  2025-11-10 14:55:20,654 INFO success: queue-worker_01 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:55:20.656454216Z [inf]  2025-11-10 14:55:20,654 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:55:20.656459766Z [inf]  2025-11-10 14:55:20,654 INFO reaped unknown pid 109 (exit status 0)
+2025-11-10T14:56:21.067903983Z [inf]  2025-11-10 14:56:20,642 INFO reaped unknown pid 155 (exit status 0)
+2025-11-10T14:57:21.336287741Z [inf]  2025-11-10 14:57:20,642 INFO reaped unknown pid 160 (exit status 0)
+2025-11-10T14:58:21.611237056Z [inf]  2025-11-10 14:58:20,651 INFO reaped unknown pid 165 (exit status 0)

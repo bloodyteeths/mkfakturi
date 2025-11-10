@@ -1,0 +1,85 @@
+2025-11-10T14:19:26.000000000Z [inf]  Starting Container
+2025-11-10T14:19:27.141738571Z [inf]  === Application Startup ===
+2025-11-10T14:19:27.141744081Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-10T14:19:27.141749233Z [inf]  DB configured from MYSQL_URL
+2025-11-10T14:19:27.141755594Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-10T14:19:27.141760827Z [inf]  Waiting for database... (1/30)
+2025-11-10T14:19:28.413703929Z [inf]  Waiting for database... (2/30)
+2025-11-10T14:19:31.090956780Z [inf]  Waiting for database... (3/30)
+2025-11-10T14:19:33.193757718Z [inf]  Waiting for database... (4/30)
+2025-11-10T14:19:35.108833742Z [inf]  Waiting for database... (5/30)
+2025-11-10T14:19:37.184588260Z [inf]  Waiting for database... (6/30)
+2025-11-10T14:19:39.258707115Z [inf]  Waiting for database... (7/30)
+2025-11-10T14:19:41.427183940Z [inf]  Waiting for database... (8/30)
+2025-11-10T14:19:44.275961422Z [inf]  Waiting for database... (9/30)
+2025-11-10T14:19:46.083710377Z [inf]  Waiting for database... (10/30)
+2025-11-10T14:19:48.207328406Z [inf]  Waiting for database... (11/30)
+2025-11-10T14:19:50.104937703Z [inf]  Waiting for database... (12/30)
+2025-11-10T14:19:52.392930994Z [inf]  Waiting for database... (13/30)
+2025-11-10T14:19:54.440747049Z [inf]  Waiting for database... (14/30)
+2025-11-10T14:19:57.161802539Z [inf]  Waiting for database... (15/30)
+2025-11-10T14:19:59.129590301Z [inf]  Waiting for database... (16/30)
+2025-11-10T14:20:01.204499801Z [inf]  Waiting for database... (17/30)
+2025-11-10T14:20:03.266375257Z [inf]  Waiting for database... (18/30)
+2025-11-10T14:20:05.289915785Z [inf]  Waiting for database... (19/30)
+2025-11-10T14:20:07.467251649Z [inf]  Waiting for database... (20/30)
+2025-11-10T14:20:10.333364799Z [inf]  Waiting for database... (21/30)
+2025-11-10T14:20:12.268518846Z [inf]  Waiting for database... (22/30)
+2025-11-10T14:20:14.347577665Z [inf]  Waiting for database... (23/30)
+2025-11-10T14:20:16.434259682Z [inf]  Waiting for database... (24/30)
+2025-11-10T14:20:18.316144962Z [inf]  Waiting for database... (25/30)
+2025-11-10T14:20:20.482903141Z [inf]  Waiting for database... (26/30)
+2025-11-10T14:20:22.663013644Z [inf]  Waiting for database... (27/30)
+2025-11-10T14:20:25.251297226Z [inf]  Waiting for database... (28/30)
+2025-11-10T14:20:27.347498073Z [inf]  Waiting for database... (29/30)
+2025-11-10T14:20:29.416044770Z [inf]  Waiting for database... (30/30)
+2025-11-10T14:20:31.356039810Z [inf]  Clearing caches...
+2025-11-10T14:20:31.356044798Z [err]  The environment file is invalid!
+2025-11-10T14:20:31.356049464Z [err]  Failed to parse dotenv file. Encountered an invalid name at [// LLM-CHECKPOINT].
+2025-11-10T14:20:31.411130074Z [err]  The environment file is invalid!
+2025-11-10T14:20:31.411137985Z [err]  Failed to parse dotenv file. Encountered an invalid name at [// LLM-CHECKPOINT].
+2025-11-10T14:20:31.510179132Z [err]  The environment file is invalid!
+2025-11-10T14:20:31.510185183Z [err]  Failed to parse dotenv file. Encountered an invalid name at [// LLM-CHECKPOINT].
+2025-11-10T14:20:31.612945311Z [err]  The environment file is invalid!
+2025-11-10T14:20:31.612950090Z [err]  Failed to parse dotenv file. Encountered an invalid name at [// LLM-CHECKPOINT].
+2025-11-10T14:20:31.612953826Z [inf]  Running migrations...
+2025-11-10T14:20:32.317008057Z [err]  The environment file is invalid!
+2025-11-10T14:20:32.317013368Z [err]  Failed to parse dotenv file. Encountered an invalid name at [// LLM-CHECKPOINT].
+2025-11-10T14:20:32.317023952Z [inf]  Migrations failed or already applied
+2025-11-10T14:20:32.317030593Z [err]  The environment file is invalid!
+2025-11-10T14:20:32.317036279Z [err]  Failed to parse dotenv file. Encountered an invalid name at [// LLM-CHECKPOINT].
+2025-11-10T14:20:32.317041864Z [inf]  Starting application services...
+2025-11-10T14:20:32.317048040Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-10T14:20:32.317054495Z [err]    import pkg_resources
+2025-11-10T14:20:32.317062399Z [inf]  2025-11-10 14:20:32,018 INFO Set uid to user 0 succeeded
+2025-11-10T14:20:32.317070416Z [inf]  2025-11-10 14:20:32,021 INFO supervisord started with pid 1
+2025-11-10T14:20:33.270784686Z [inf]  2025-11-10 14:20:33,024 INFO spawned: 'nginx' with pid 73
+2025-11-10T14:20:33.270790077Z [inf]  2025-11-10 14:20:33,027 INFO spawned: 'php-fpm' with pid 74
+2025-11-10T14:20:33.270793900Z [inf]  2025-11-10 14:20:33,029 INFO spawned: 'queue-worker_00' with pid 75
+2025-11-10T14:20:33.270797910Z [inf]  2025-11-10 14:20:33,030 INFO spawned: 'queue-worker_01' with pid 76
+2025-11-10T14:20:33.270802323Z [inf]  2025-11-10 14:20:33,033 INFO spawned: 'scheduler' with pid 77
+2025-11-10T14:20:33.270806172Z [err]  [10-Nov-2025 14:20:33] NOTICE: fpm is running, pid 74
+2025-11-10T14:20:33.270809940Z [err]  [10-Nov-2025 14:20:33] NOTICE: ready to handle connections
+2025-11-10T14:20:33.270813630Z [inf]  2025-11-10 14:20:33,148 INFO reaped unknown pid 79 (exit status 1)
+2025-11-10T14:20:33.270817674Z [inf]  2025-11-10 14:20:33,156 WARN exited: queue-worker_00 (exit status 1; not expected)
+2025-11-10T14:20:33.270822224Z [inf]  2025-11-10 14:20:33,156 WARN exited: queue-worker_01 (exit status 1; not expected)
+2025-11-10T14:20:34.384123214Z [inf]  2025-11-10 14:20:34,157 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:20:34.384127595Z [inf]  2025-11-10 14:20:34,157 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:20:34.384131853Z [inf]  2025-11-10 14:20:34,161 INFO spawned: 'queue-worker_00' with pid 134
+2025-11-10T14:20:34.384136438Z [inf]  2025-11-10 14:20:34,164 INFO spawned: 'queue-worker_01' with pid 135
+2025-11-10T14:20:34.384141104Z [inf]  2025-11-10 14:20:34,164 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T14:20:34.384145537Z [inf]  2025-11-10 14:20:34,265 WARN exited: queue-worker_00 (exit status 1; not expected)
+2025-11-10T14:20:34.384149639Z [inf]  2025-11-10 14:20:34,291 WARN exited: queue-worker_01 (exit status 1; not expected)
+2025-11-10T14:20:36.299617636Z [inf]  2025-11-10 14:20:36,295 INFO spawned: 'queue-worker_00' with pid 136
+2025-11-10T14:20:36.299623435Z [inf]  2025-11-10 14:20:36,297 INFO spawned: 'queue-worker_01' with pid 137
+2025-11-10T14:20:36.399415648Z [inf]  2025-11-10 14:20:36,394 WARN exited: queue-worker_01 (exit status 1; not expected)
+2025-11-10T14:20:36.399421118Z [inf]  2025-11-10 14:20:36,396 WARN exited: queue-worker_00 (exit status 1; not expected)
+2025-11-10T14:20:39.717246740Z [inf]  2025-11-10 14:20:39,400 INFO spawned: 'queue-worker_00' with pid 138
+2025-11-10T14:20:39.717252449Z [inf]  2025-11-10 14:20:39,402 INFO spawned: 'queue-worker_01' with pid 139
+2025-11-10T14:20:39.729957864Z [inf]  2025-11-10 14:20:39,497 WARN exited: queue-worker_00 (exit status 1; not expected)
+2025-11-10T14:20:39.730123475Z [inf]  2025-11-10 14:20:39,502 INFO gave up: queue-worker_00 entered FATAL state, too many start retries too quickly
+2025-11-10T14:20:39.730129099Z [inf]  2025-11-10 14:20:39,502 WARN exited: queue-worker_01 (exit status 1; not expected)
+2025-11-10T14:20:40.507959158Z [inf]  2025-11-10 14:20:40,503 INFO gave up: queue-worker_01 entered FATAL state, too many start retries too quickly
+2025-11-10T14:21:40.539980304Z [inf]  2025-11-10 14:21:34,137 INFO reaped unknown pid 141 (exit status 1)
+2025-11-10T14:22:40.018918200Z [inf]  2025-11-10 14:22:34,146 INFO reaped unknown pid 144 (exit status 1)
+2025-11-10T14:23:40.589738635Z [inf]  2025-11-10 14:23:34,153 INFO reaped unknown pid 147 (exit status 1)

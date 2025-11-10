@@ -1,0 +1,362 @@
+2025-11-10T13:57:57.373370939Z [inf]  [snapshot] receiving snapshot, in progress 5.0 MB
+2025-11-10T13:57:57.935483209Z [inf]  scheduling build on Metal builder "builder-sgprfo"
+2025-11-10T13:57:59.374101672Z [inf]  [snapshot] receiving snapshot, in progress 10 MB
+2025-11-10T13:58:01.374589611Z [inf]  [snapshot] receiving snapshot, in progress 14 MB
+2025-11-10T13:58:03.374662558Z [inf]  [snapshot] receiving snapshot, in progress 19 MB
+2025-11-10T13:58:05.375254853Z [inf]  [snapshot] receiving snapshot, in progress 24 MB
+2025-11-10T13:58:07.375608491Z [inf]  [snapshot] receiving snapshot, in progress 28 MB
+2025-11-10T13:58:09.375858032Z [inf]  [snapshot] receiving snapshot, in progress 33 MB
+2025-11-10T13:58:11.376296977Z [inf]  [snapshot] receiving snapshot, in progress 38 MB
+2025-11-10T13:58:13.376401631Z [inf]  [snapshot] receiving snapshot, in progress 41 MB
+2025-11-10T13:58:15.377124202Z [inf]  [snapshot] receiving snapshot, in progress 45 MB
+2025-11-10T13:58:17.377285721Z [inf]  [snapshot] receiving snapshot, in progress 50 MB
+2025-11-10T13:58:19.377357836Z [inf]  [snapshot] receiving snapshot, in progress 54 MB
+2025-11-10T13:58:21.377662360Z [inf]  [snapshot] receiving snapshot, in progress 58 MB
+2025-11-10T13:58:23.377746413Z [inf]  [snapshot] receiving snapshot, in progress 64 MB
+2025-11-10T13:58:25.458602386Z [inf]  [snapshot] receiving snapshot, in progress 68 MB
+2025-11-10T13:58:27.458724336Z [inf]  [snapshot] receiving snapshot, in progress 72 MB
+2025-11-10T13:58:29.459322750Z [inf]  [snapshot] receiving snapshot, in progress 76 MB
+2025-11-10T13:58:31.459404009Z [inf]  [snapshot] receiving snapshot, in progress 80 MB
+2025-11-10T13:58:33.459589214Z [inf]  [snapshot] receiving snapshot, in progress 85 MB
+2025-11-10T13:58:35.459899907Z [inf]  [snapshot] receiving snapshot, in progress 89 MB
+2025-11-10T13:58:37.460080555Z [inf]  [snapshot] receiving snapshot, in progress 93 MB
+2025-11-10T13:58:39.153324597Z [inf]  [snapshot] received sha256:abadce87b4fa982c04f1b921d97d15850950e742117a0124dd6398bf1ef0e22b md5:6be85af4e55517f6a379d23182365956
+2025-11-10T13:58:39.153365439Z [inf]  [snapshot] receiving snapshot, complete 97 MB [took 44.366033085s]
+2025-11-10T13:58:40.256422828Z [inf]  [snapshot] analyzing snapshot, complete 97 MB [took 630.751566ms]
+2025-11-10T13:58:42.280540712Z [inf]  [snapshot] uploading snapshot, in progress 77 MB
+2025-11-10T13:58:42.820322817Z [inf]  [snapshot] uploading snapshot, complete 97 MB [took 2.563976704s]
+2025-11-10T13:58:56.044910852Z [inf]  [snapshot] fetching snapshot, in progress 96 MB
+2025-11-10T13:58:56.079799739Z [inf]  fetched snapshot sha256:abadce87b4fa982c04f1b921d97d15850950e742117a0124dd6398bf1ef0e22b (97 MB bytes)
+2025-11-10T13:58:56.079906399Z [inf]  [snapshot] fetching snapshot, complete 97 MB [took 2.265403797s]
+2025-11-10T13:58:56.509035630Z [inf]  scheduling build on Metal builder "builder-sgprfo"
+2025-11-10T13:58:57.894171781Z [inf]  [snapshot] unpacking archive, complete 126 MB [took 1.000756939s]
+2025-11-10T13:58:59.801045492Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T13:58:59.801056148Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T13:58:59.855693956Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T13:59:01.082952076Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T13:59:01.172666453Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
+2025-11-10T13:59:01.172677310Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-11-10T13:59:01.172678121Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-11-10T13:59:01.820889323Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-11-10T13:59:01.839063291Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
+2025-11-10T13:59:01.856645180Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-11-10T13:59:01.857092482Z [inf]  [internal] load .dockerignore
+2025-11-10T13:59:01.857103488Z [inf]  [internal] load .dockerignore
+2025-11-10T13:59:01.857113002Z [inf]  [internal] load .dockerignore
+2025-11-10T13:59:01.857435546Z [inf]  [internal] load .dockerignore
+2025-11-10T13:59:02.322338523Z [inf]  [internal] load .dockerignore
+2025-11-10T13:59:02.369275788Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T13:59:02.369349629Z [inf]  [frontend-builder  5/10] RUN npm ci --prefer-offline --no-audit
+2025-11-10T13:59:02.369350320Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+2025-11-10T13:59:02.369350900Z [inf]  [composer-deps 4/4] RUN composer dump-autoload --optimize --no-dev
+2025-11-10T13:59:02.369351481Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
+2025-11-10T13:59:02.369351802Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-11-10T13:59:02.369352233Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-10T13:59:02.369352703Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-11-10T13:59:02.369353735Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+2025-11-10T13:59:02.369354506Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
+2025-11-10T13:59:02.369354846Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-11-10T13:59:02.369355297Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-11-10T13:59:02.369355898Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
+2025-11-10T13:59:02.369356930Z [inf]  [composer-deps 1/4] COPY composer.json composer.lock ./
+2025-11-10T13:59:02.369357400Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T13:59:02.369358332Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T13:59:02.369358913Z [inf]  [production  7/16] WORKDIR /var/www/html
+2025-11-10T13:59:02.369359263Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-10T13:59:02.369359574Z [inf]  [composer-deps 3/4] COPY . .
+2025-11-10T13:59:02.369359894Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-11-10T13:59:02.369360205Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-11-10T13:59:02.369360515Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+2025-11-10T13:59:02.369360815Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-11-10T13:59:02.369361456Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-11-10T13:59:02.369361767Z [inf]  [frontend-builder  4/10] COPY package.json package-lock.json ./
+2025-11-10T13:59:02.369362088Z [inf]  [internal] load build context
+2025-11-10T13:59:02.369428096Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
+2025-11-10T13:59:02.369429348Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
+2025-11-10T13:59:02.369430029Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+2025-11-10T13:59:02.369430520Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+2025-11-10T13:59:02.369431001Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
+2025-11-10T13:59:02.369431642Z [inf]  [production 11/16] RUN cp .env.example .env
+2025-11-10T13:59:02.369436789Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache     storage/framework/sessions     storage/framework/views     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
+2025-11-10T13:59:02.369437310Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+2025-11-10T13:59:02.369437821Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-11-10T13:59:02.369438122Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-11-10T13:59:02.369495397Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T13:59:02.369495978Z [inf]  [internal] load build context
+2025-11-10T13:59:02.369496589Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T13:59:02.369497060Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T13:59:02.458957105Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T13:59:02.480086297Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T13:59:02.480870544Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T13:59:02.670457479Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-11-10T13:59:02.670480133Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-11-10T13:59:02.670759542Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T13:59:02.670857349Z [inf]  [internal] load build context
+2025-11-10T13:59:02.670869287Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T13:59:02.670869797Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T13:59:02.670877890Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T13:59:02.671129938Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T13:59:02.671676558Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T13:59:02.671684190Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-10T13:59:02.671720604Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-10T13:59:03.117524335Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
+
+2025-11-10T13:59:03.175961313Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
+
+2025-11-10T13:59:03.209389239Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
+
+2025-11-10T13:59:03.252115144Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
+
+2025-11-10T13:59:03.549997886Z [inf]  (1/108) Installing m4 (1.4.19-r4)
+
+2025-11-10T13:59:03.577674411Z [inf]  (2/108) Installing libbz2 (1.0.8-r6)
+
+2025-11-10T13:59:03.583156997Z [inf]  (3/108) Installing perl (5.40.3-r0)
+
+2025-11-10T13:59:03.603994472Z [inf]  (1/29) Installing libstdc++-dev (14.2.0-r6)
+
+2025-11-10T13:59:03.876223582Z [inf]  (2/29) Installing jansson (2.14.1-r0)
+
+2025-11-10T13:59:03.898502229Z [inf]  (3/29) Installing zstd-libs (1.5.7-r0)
+
+2025-11-10T13:59:03.910583596Z [inf]  (4/29) Installing binutils (2.44-r3)
+
+2025-11-10T13:59:04.168840633Z [inf]  (5/29) Installing libgomp (14.2.0-r6)
+
+2025-11-10T13:59:04.178411243Z [inf]  (6/29) Installing libatomic (14.2.0-r6)
+
+2025-11-10T13:59:04.182158064Z [inf]  (7/29) Installing gmp (6.3.0-r3)
+
+2025-11-10T13:59:04.190522134Z [inf]  (8/29) Installing isl26 (0.26-r1)
+
+2025-11-10T13:59:04.212923255Z [inf]  (9/29) Installing mpfr4 (4.2.1_p1-r0)
+
+2025-11-10T13:59:04.224155207Z [inf]  (10/29) Installing mpc1 (1.3.1-r1)
+
+2025-11-10T13:59:04.230433487Z [inf]  (11/29) Installing gcc (14.2.0-r6)
+
+2025-11-10T13:59:04.321670018Z [inf]  (4/108) Installing autoconf (2.72-r1)
+
+2025-11-10T13:59:04.339528973Z [inf]  (5/108) Installing bash (5.2.37-r0)
+
+2025-11-10T13:59:04.449609737Z [inf]  Executing bash-5.2.37-r0.post-install
+
+2025-11-10T13:59:04.499279011Z [inf]  (6/108) Installing brotli (1.1.0-r2)
+
+2025-11-10T13:59:04.503372643Z [inf]  (7/108) Installing pkgconf (2.4.3-r0)
+
+2025-11-10T13:59:04.510895119Z [inf]  (8/108) Installing brotli-dev (1.1.0-r2)
+
+2025-11-10T13:59:04.518637756Z [inf]  (9/108) Installing c-ares-dev (1.34.5-r0)
+
+2025-11-10T13:59:04.534793476Z [inf]  (10/108) Installing libidn2-dev (2.3.7-r0)
+
+2025-11-10T13:59:04.537276352Z [inf]  (11/108) Installing libpsl-utils (0.21.5-r3)
+
+2025-11-10T13:59:04.540904115Z [inf]  (12/108) Installing libpsl-dev (0.21.5-r3)
+
+2025-11-10T13:59:04.545502184Z [inf]  (13/108) Installing nghttp2-dev (1.65.0-r0)
+
+2025-11-10T13:59:04.550507714Z [inf]  (14/108) Installing openssl-dev (3.5.4-r0)
+
+2025-11-10T13:59:04.57282555Z [inf]  (15/108) Installing zlib-dev (1.3.1-r2)
+
+2025-11-10T13:59:04.576825761Z [inf]  (16/108) Installing libstdc++ (14.2.0-r6)
+
+2025-11-10T13:59:04.59512006Z [inf]  (17/108) Installing zstd (1.5.7-r0)
+
+2025-11-10T13:59:04.60073858Z [inf]  (18/108) Installing zstd-dev (1.5.7-r0)
+
+2025-11-10T13:59:04.604958572Z [inf]  (19/108) Installing curl-dev (8.14.1-r2)
+
+2025-11-10T13:59:04.61178883Z [inf]  (20/108) Installing libmd (1.1.0-r0)
+
+2025-11-10T13:59:04.614833488Z [inf]  (21/108) Installing dpkg (1.22.15-r0)
+
+2025-11-10T13:59:04.702083778Z [inf]  (22/108) Installing dpkg-dev (1.22.15-r0)
+
+2025-11-10T13:59:04.726455925Z [inf]  (23/108) Installing libmagic (5.46-r2)
+
+2025-11-10T13:59:04.788927317Z [inf]  (24/108) Installing file (5.46-r2)
+
+2025-11-10T13:59:04.791869061Z [inf]  (25/108) Installing libpng (1.6.47-r0)
+
+2025-11-10T13:59:04.796905357Z [inf]  (26/108) Installing freetype (2.13.3-r0)
+
+2025-11-10T13:59:04.814071874Z [inf]  (27/108) Installing bzip2-dev (1.0.8-r6)
+
+2025-11-10T13:59:04.81863434Z [inf]  (28/108) Installing libpng-dev (1.6.47-r0)
+
+2025-11-10T13:59:04.825405459Z [inf]  (29/108) Installing freetype-dev (2.13.3-r0)
+
+2025-11-10T13:59:04.84628054Z [inf]  (30/108) Installing libstdc++-dev (14.2.0-r6)
+
+2025-11-10T13:59:05.002088353Z [inf]  (31/108) Installing jansson (2.14.1-r0)
+
+2025-11-10T13:59:05.005044378Z [inf]  (32/108) Installing binutils (2.44-r3)
+
+2025-11-10T13:59:05.080512139Z [inf]  (33/108) Installing libgomp (14.2.0-r6)
+
+2025-11-10T13:59:05.085606773Z [inf]  (12/29) Installing musl-dev (1.2.5-r10)
+
+2025-11-10T13:59:05.086827495Z [inf]  (34/108) Installing libatomic (14.2.0-r6)
+
+2025-11-10T13:59:05.092611643Z [inf]  (35/108) Installing gmp (6.3.0-r3)
+
+2025-11-10T13:59:05.100062142Z [inf]  (36/108) Installing isl26 (0.26-r1)
+
+2025-11-10T13:59:05.116275478Z [inf]  (37/108) Installing mpfr4 (4.2.1_p1-r0)
+
+2025-11-10T13:59:05.125806519Z [inf]  (38/108) Installing mpc1 (1.3.1-r1)
+
+2025-11-10T13:59:05.128875223Z [inf]  (39/108) Installing gcc (14.2.0-r6)
+
+2025-11-10T13:59:05.146041779Z [inf]  (13/29) Installing g++ (14.2.0-r6)
+
+2025-11-10T13:59:05.394561457Z [inf]  (14/29) Installing make (4.4.1-r3)
+
+2025-11-10T13:59:05.39894932Z [inf]  (15/29) Installing libbz2 (1.0.8-r6)
+
+2025-11-10T13:59:05.402755992Z [inf]  (16/29) Installing libexpat (2.7.3-r0)
+
+2025-11-10T13:59:05.407588663Z [inf]  (17/29) Installing libffi (3.4.8-r0)
+
+2025-11-10T13:59:05.410987502Z [inf]  (18/29) Installing gdbm (1.24-r0)
+
+2025-11-10T13:59:05.414897389Z [inf]  (19/29) Installing xz-libs (5.8.1-r0)
+
+2025-11-10T13:59:05.419905903Z [inf]  (20/29) Installing mpdecimal (4.0.1-r0)
+
+2025-11-10T13:59:05.426189922Z [inf]  (21/29) Installing ncurses-terminfo-base (6.5_p20250503-r0)
+
+2025-11-10T13:59:05.433476685Z [inf]  (22/29) Installing libncursesw (6.5_p20250503-r0)
+
+2025-11-10T13:59:05.438183427Z [inf]  (23/29) Installing libpanelw (6.5_p20250503-r0)
+
+2025-11-10T13:59:05.440399482Z [inf]  (24/29) Installing readline (8.2.13-r1)
+
+2025-11-10T13:59:05.445225162Z [inf]  (25/29) Installing sqlite-libs (3.49.2-r1)
+
+2025-11-10T13:59:05.473030561Z [inf]  (26/29) Installing python3 (3.12.12-r0)
+
+2025-11-10T13:59:05.652007938Z [inf]  (27/29) Installing python3-pycache-pyc0 (3.12.12-r0)
+
+2025-11-10T13:59:05.757506457Z [inf]  (28/29) Installing pyc (3.12.12-r0)
+(29/29) Installing python3-pyc (3.12.12-r0)
+
+2025-11-10T13:59:05.758089401Z [inf]  Executing busybox-1.37.0-r19.trigger
+
+2025-11-10T13:59:06.003103770Z [inf]  [internal] load build context
+2025-11-10T13:59:06.014148531Z [inf]  (40/108) Installing musl-dev (1.2.5-r10)
+
+2025-11-10T13:59:06.078183298Z [inf]  (41/108) Installing g++ (14.2.0-r6)
+
+2025-11-10T13:59:06.119771487Z [inf]  OK: 270 MiB in 47 packages
+
+2025-11-10T13:59:06.324502935Z [inf]  (42/108) Installing libxau (1.0.12-r0)
+
+2025-11-10T13:59:06.327121293Z [inf]  (43/108) Installing libbsd (0.12.2-r0)
+
+2025-11-10T13:59:06.333358612Z [inf]  (44/108) Installing libxdmcp (1.1.5-r1)
+
+2025-11-10T13:59:06.335663971Z [inf]  (45/108) Installing libxcb (1.17.0-r0)
+
+2025-11-10T13:59:06.347424046Z [inf]  (46/108) Installing libx11 (1.8.11-r0)
+
+2025-11-10T13:59:06.377534804Z [inf]  (47/108) Installing gifsicle (1.96-r0)
+
+2025-11-10T13:59:06.386245393Z [inf]  (48/108) Installing libexpat (2.7.3-r0)
+
+2025-11-10T13:59:06.390380177Z [inf]  (49/108) Installing pcre2 (10.46-r0)
+
+2025-11-10T13:59:06.399116064Z [inf]  (50/108) Installing git (2.49.1-r0)
+
+2025-11-10T13:59:06.463217351Z [inf]  (51/108) Installing git-init-template (2.49.1-r0)
+
+2025-11-10T13:59:06.467127798Z [inf]  (52/108) Installing perl-error (0.17030-r0)
+
+2025-11-10T13:59:06.469754389Z [inf]  (53/108) Installing perl-git (2.49.1-r0)
+
+2025-11-10T13:59:06.473549403Z [inf]  (54/108) Installing git-perl (2.49.1-r0)
+
+2025-11-10T13:59:06.476355023Z [inf]  (55/108) Installing icu-data-en (76.1-r1)
+
+2025-11-10T13:59:06.494195921Z [inf]  Executing icu-data-en-76.1-r1.post-install
+
+2025-11-10T13:59:06.500343345Z [inf]  *
+* If you need ICU with non-English locales and legacy charset support, install
+* package icu-data-full.
+*
+
+2025-11-10T13:59:06.500703395Z [inf]  (56/108) Installing icu-libs (76.1-r1)
+
+2025-11-10T13:59:06.531635375Z [inf]  (57/108) Installing icu (76.1-r1)
+
+2025-11-10T13:59:06.537022568Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-10T13:59:06.537026364Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-11-10T13:59:06.537026874Z [err]  [frontend-builder  4/10] COPY package.json package-lock.json ./
+2025-11-10T13:59:06.601137476Z [inf]  (58/108) Installing icu-dev (76.1-r1)
+
+2025-11-10T13:59:06.641641978Z [inf]  (59/108) Installing libxext (1.3.6-r2)
+
+2025-11-10T13:59:06.644565895Z [inf]  (60/108) Installing fftw-double-libs (3.3.10-r6)
+
+2025-11-10T13:59:06.674947149Z [inf]  (61/108) Installing fontconfig (2.15.0-r3)
+
+2025-11-10T13:59:06.785770458Z [inf]  (62/108) Installing lcms2 (2.16-r0)
+
+2025-11-10T13:59:06.792828487Z [inf]  (63/108) Installing libltdl (2.5.4-r1)
+
+2025-11-10T13:59:06.795386465Z [inf]  (64/108) Upgrading libxml2 (2.13.8-r0 -> 2.13.9-r0)
+
+2025-11-10T13:59:06.808328363Z [inf]  (65/108) Installing imagemagick-libs (7.1.2.3-r0)
+
+2025-11-10T13:59:06.8376519Z [inf]  (66/108) Installing imagemagick (7.1.2.3-r0)
+
+2025-11-10T13:59:06.879617705Z [inf]  (67/108) Installing imagemagick-c++ (7.1.2.3-r0)
+
+2025-11-10T13:59:06.886609526Z [inf]  (68/108) Installing imagemagick-dev (7.1.2.3-r0)
+
+2025-11-10T13:59:06.904526729Z [inf]  (69/108) Installing libjpeg-turbo (3.1.0-r0)
+
+2025-11-10T13:59:06.912755645Z [inf]  (70/108) Installing imagemagick-jpeg (7.1.2.3-r0)
+
+2025-11-10T13:59:06.916598621Z [inf]  (71/108) Installing jpegoptim (1.5.5-r0)
+
+2025-11-10T13:59:06.9206566Z [inf]  (72/108) Installing libturbojpeg (3.1.0-r0)
+
+2025-11-10T13:59:06.930551636Z [inf]  (73/108) Installing libjpeg-turbo-dev (3.1.0-r0)
+
+2025-11-10T13:59:06.93513998Z [inf]  (74/108) Installing xz-dev (5.8.1-r0)
+
+2025-11-10T13:59:06.943730269Z [inf]  (75/108) Installing libxml2-utils (2.13.9-r0)
+
+2025-11-10T13:59:06.948134017Z [inf]  (76/108) Installing libxml2-dev (2.13.9-r0)
+
+2025-11-10T13:59:06.963690497Z [inf]  (77/108) Installing libzip (1.11.4-r0)
+
+2025-11-10T13:59:06.968840795Z [inf]  (78/108) Installing libzip-tools (1.11.4-r0)
+
+2025-11-10T13:59:06.972814577Z [inf]  (79/108) Installing libzip-dev (1.11.4-r0)
+
+2025-11-10T13:59:06.978436863Z [inf]  (80/108) Installing make (4.4.1-r3)
+
+2025-11-10T13:59:06.986591668Z [inf]  (81/108) Installing mariadb-common (11.4.8-r0)
+
+2025-11-10T13:59:07.018075426Z [inf]  (82/108) Installing mariadb-client (11.4.8-r0)
+
+2025-11-10T13:59:07.171421315Z [inf]  (83/108) Installing mariadb-client-perl (11.4.8-r0)
+
+2025-11-10T13:59:07.176557522Z [inf]  (84/108) Installing mysql-client (11.4.8-r0)
+(85/108) Installing oniguruma-dev (6.9.10-r0)
+
+2025-11-10T13:59:07.185427881Z [inf]  (86/108) Installing optipng (0.7.8-r0)
+
+2025-11-10T13:59:07.189201272Z [inf]  (87/108) Installing pngquant (3.0.3-r0)
+
+2025-11-10T13:59:07.197932392Z [inf]  (88/108) Installing postgresql-common (1.2-r1)
+
+2025-11-10T13:59:07.200860256Z [inf]  Executing postgresql-common-1.2-r1.pre-install
+
+2025-11-10T13:59:07.314242474Z [err]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-10T13:59:07.427517651Z [err]  Build Failed: bc.Build: failed to solve: failed to compute cache key: failed to calculate checksum of ref mxdlxwfloeqckic0h1r128g89::ya0og5ke3lziezuk5x4hsd3fh: "/package-lock.json": not found

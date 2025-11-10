@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Space\InstallUtils;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Pennant\Feature;
 
@@ -35,6 +36,11 @@ class FeatureFlagServiceProvider extends ServiceProvider
     protected function defineFeatures(): void
     {
         Feature::define('accounting-backbone', function () {
+            // Skip database query if database not ready
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.accounting_backbone.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.accounting_backbone');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -42,6 +48,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('migration-wizard', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.migration_wizard.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.migration_wizard');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -49,6 +59,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('psd2-banking', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.psd2_banking.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.psd2_banking');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -56,6 +70,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('partner-portal', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.partner_portal.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.partner_portal');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -63,6 +81,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('partner-mocked-data', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.partner_mocked_data.enabled', true);  // SAFETY DEFAULT
+            }
+
             $dbValue = Setting::getSetting('feature_flag.partner_mocked_data');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -70,6 +92,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('advanced-payments', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.advanced_payments.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.advanced_payments');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -77,6 +103,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('mcp-ai-tools', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.mcp_ai_tools.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.mcp_ai_tools');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
@@ -84,6 +114,10 @@ class FeatureFlagServiceProvider extends ServiceProvider
         });
 
         Feature::define('monitoring', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.monitoring.enabled', false);
+            }
+
             $dbValue = Setting::getSetting('feature_flag.monitoring');
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)

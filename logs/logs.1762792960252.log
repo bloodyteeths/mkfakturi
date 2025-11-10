@@ -1,0 +1,76 @@
+2025-11-10T16:36:47.000000000Z [inf]  Starting Container
+2025-11-10T16:36:48.728350375Z [inf]  === Application Startup ===
+2025-11-10T16:36:48.728357417Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-10T16:36:48.728364222Z [inf]  DB configured from MYSQL_URL
+2025-11-10T16:36:48.728371301Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-10T16:36:48.728377740Z [inf]  Waiting for database... (1/30)
+2025-11-10T16:36:49.971785906Z [inf]  Waiting for database... (2/30)
+2025-11-10T16:36:53.555740353Z [inf]  Waiting for database... (3/30)
+2025-11-10T16:36:54.789688394Z [inf]  Waiting for database... (4/30)
+2025-11-10T16:36:57.254230958Z [inf]  Waiting for database... (5/30)
+2025-11-10T16:36:58.713791684Z [inf]  Waiting for database... (6/30)
+2025-11-10T16:37:02.372214511Z [inf]  Waiting for database... (7/30)
+2025-11-10T16:37:03.500202392Z [inf]  Waiting for database... (8/30)
+2025-11-10T16:37:05.292579419Z [inf]  Waiting for database... (9/30)
+2025-11-10T16:37:08.389327695Z [inf]  Waiting for database... (10/30)
+2025-11-10T16:37:10.552292459Z [inf]  Waiting for database... (11/30)
+2025-11-10T16:37:12.252497853Z [inf]  Waiting for database... (12/30)
+2025-11-10T16:37:14.945322257Z [inf]  Waiting for database... (13/30)
+2025-11-10T16:37:16.341608005Z [inf]  Waiting for database... (14/30)
+2025-11-10T16:37:18.635486590Z [inf]  Waiting for database... (15/30)
+2025-11-10T16:37:20.553941533Z [inf]  Waiting for database... (16/30)
+2025-11-10T16:37:23.362610327Z [inf]  Waiting for database... (17/30)
+2025-11-10T16:37:25.366560961Z [inf]  Waiting for database... (18/30)
+2025-11-10T16:37:27.503853912Z [inf]  Waiting for database... (19/30)
+2025-11-10T16:37:29.854527615Z [inf]  Waiting for database... (20/30)
+2025-11-10T16:37:31.676026410Z [inf]  Waiting for database... (21/30)
+2025-11-10T16:37:33.737663662Z [inf]  Waiting for database... (22/30)
+2025-11-10T16:37:36.189660412Z [inf]  Waiting for database... (23/30)
+2025-11-10T16:37:38.876523446Z [inf]  Waiting for database... (24/30)
+2025-11-10T16:37:40.255790572Z [inf]  Waiting for database... (25/30)
+2025-11-10T16:37:43.110370238Z [inf]  Waiting for database... (26/30)
+2025-11-10T16:37:44.589015156Z [inf]  Waiting for database... (27/30)
+2025-11-10T16:37:47.732899659Z [inf]  Waiting for database... (28/30)
+2025-11-10T16:37:49.792756588Z [inf]  Waiting for database... (29/30)
+2025-11-10T16:37:51.594257141Z [inf]  Waiting for database... (30/30)
+2025-11-10T16:37:53.749962896Z [inf]  Clearing caches...
+2025-11-10T16:37:53.749972952Z [inf]  
+2025-11-10T16:37:53.749981720Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-10T16:37:53.749989426Z [inf]  
+2025-11-10T16:37:54.852331578Z [inf]  
+2025-11-10T16:37:54.852337687Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
+2025-11-10T16:37:54.852344587Z [inf]  
+2025-11-10T16:37:54.852350924Z [inf]  
+2025-11-10T16:37:54.852357048Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-10T16:37:54.852366395Z [inf]  
+2025-11-10T16:37:55.606822341Z [inf]  
+2025-11-10T16:37:55.606834438Z [inf]     INFO  Nothing to migrate.  
+2025-11-10T16:37:55.606841603Z [inf]  
+2025-11-10T16:37:55.607005255Z [inf]  
+2025-11-10T16:37:55.607012920Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-10T16:37:55.607018915Z [inf]  
+2025-11-10T16:37:55.607024950Z [inf]  Running migrations...
+2025-11-10T16:37:56.681925366Z [inf]  
+2025-11-10T16:37:56.681939487Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-10T16:37:56.681948251Z [inf]  
+2025-11-10T16:37:56.681956070Z [inf]  Starting application services...
+2025-11-10T16:37:56.681964145Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-10T16:37:56.681973804Z [err]    import pkg_resources
+2025-11-10T16:37:56.681981683Z [inf]  2025-11-10 16:37:56,275 INFO Set uid to user 0 succeeded
+2025-11-10T16:37:56.681989638Z [inf]  2025-11-10 16:37:56,278 INFO supervisord started with pid 1
+2025-11-10T16:37:57.861575740Z [inf]  2025-11-10 16:37:57,283 INFO spawned: 'nginx' with pid 85
+2025-11-10T16:37:57.861580304Z [inf]  2025-11-10 16:37:57,286 INFO spawned: 'php-fpm' with pid 86
+2025-11-10T16:37:57.861585102Z [inf]  2025-11-10 16:37:57,289 INFO spawned: 'queue-worker_00' with pid 87
+2025-11-10T16:37:57.861590682Z [inf]  2025-11-10 16:37:57,291 INFO spawned: 'queue-worker_01' with pid 88
+2025-11-10T16:37:57.861595556Z [inf]  2025-11-10 16:37:57,294 INFO spawned: 'scheduler' with pid 89
+2025-11-10T16:37:57.861601152Z [err]  [10-Nov-2025 16:37:57] NOTICE: fpm is running, pid 86
+2025-11-10T16:37:57.861605458Z [err]  [10-Nov-2025 16:37:57] NOTICE: ready to handle connections
+2025-11-10T16:37:58.918656336Z [inf]  2025-11-10 16:37:58,754 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T16:37:58.918703369Z [inf]  2025-11-10 16:37:58,754 INFO reaped unknown pid 91 (exit status 0)
+2025-11-10T16:37:58.918788207Z [inf]  2025-11-10 16:37:58,754 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T16:37:58.918795525Z [inf]  2025-11-10 16:37:58,754 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T16:37:58.918801414Z [inf]  2025-11-10 16:37:58,754 INFO success: queue-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T16:37:58.918807912Z [inf]  2025-11-10 16:37:58,754 INFO success: queue-worker_01 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T16:39:00.503742146Z [inf]  2025-11-10 16:38:58,695 INFO reaped unknown pid 155 (exit status 0)
+2025-11-10T16:40:03.111295506Z [inf]  2025-11-10 16:39:58,692 INFO reaped unknown pid 160 (exit status 0)
+2025-11-10T16:41:04.351305236Z [inf]  2025-11-10 16:40:58,747 INFO reaped unknown pid 165 (exit status 0)

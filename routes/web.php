@@ -230,13 +230,6 @@ Route::get('/ping', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()->toISOString()], 200);
 });
 
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now()->toIso8601String(),
-    ]);
-});
-
 Route::get('/ready', function () {
     return response()->json([
         'status' => 'ok',

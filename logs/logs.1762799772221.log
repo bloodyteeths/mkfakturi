@@ -1,0 +1,114 @@
+2025-11-10T18:29:50.698163705Z [inf]  [snapshot] receiving snapshot, in progress 4.8 MB
+2025-11-10T18:29:51.428159430Z [inf]  scheduling build on Metal builder "builder-sgprfo"
+2025-11-10T18:29:52.698616681Z [inf]  [snapshot] receiving snapshot, in progress 10 MB
+2025-11-10T18:29:54.699001906Z [inf]  [snapshot] receiving snapshot, in progress 14 MB
+2025-11-10T18:29:56.699077466Z [inf]  [snapshot] receiving snapshot, in progress 20 MB
+2025-11-10T18:29:58.699448590Z [inf]  [snapshot] receiving snapshot, in progress 24 MB
+2025-11-10T18:30:00.700377951Z [inf]  [snapshot] receiving snapshot, in progress 28 MB
+2025-11-10T18:30:02.700437658Z [inf]  [snapshot] receiving snapshot, in progress 33 MB
+2025-11-10T18:30:04.701112938Z [inf]  [snapshot] receiving snapshot, in progress 37 MB
+2025-11-10T18:30:06.701342780Z [inf]  [snapshot] receiving snapshot, in progress 43 MB
+2025-11-10T18:30:08.701778400Z [inf]  [snapshot] receiving snapshot, in progress 47 MB
+2025-11-10T18:30:10.701876143Z [inf]  [snapshot] receiving snapshot, in progress 52 MB
+2025-11-10T18:30:12.702291924Z [inf]  [snapshot] receiving snapshot, in progress 56 MB
+2025-11-10T18:30:14.702527284Z [inf]  [snapshot] receiving snapshot, in progress 60 MB
+2025-11-10T18:30:16.702829044Z [inf]  [snapshot] receiving snapshot, in progress 66 MB
+2025-11-10T18:30:18.703095961Z [inf]  [snapshot] receiving snapshot, in progress 70 MB
+2025-11-10T18:30:20.703459584Z [inf]  [snapshot] receiving snapshot, in progress 75 MB
+2025-11-10T18:30:22.703645159Z [inf]  [snapshot] receiving snapshot, in progress 79 MB
+2025-11-10T18:30:24.703798175Z [inf]  [snapshot] receiving snapshot, in progress 84 MB
+2025-11-10T18:30:26.704543801Z [inf]  [snapshot] receiving snapshot, in progress 89 MB
+2025-11-10T18:30:28.704856617Z [inf]  [snapshot] receiving snapshot, in progress 93 MB
+2025-11-10T18:30:30.705102873Z [inf]  [snapshot] receiving snapshot, in progress 96 MB
+2025-11-10T18:30:31.094962036Z [inf]  [snapshot] received sha256:3c5ddb4a2544ee59baec8faebf76a628db39a4ef7e133dfba28ba939bd982735 md5:6dda2a98df43c49655ccc09ea4b585a4
+2025-11-10T18:30:31.095015246Z [inf]  [snapshot] receiving snapshot, complete 97 MB [took 42.993226054s]
+2025-11-10T18:30:31.839657972Z [inf]  [snapshot] analyzing snapshot, complete 97 MB [took 668.055145ms]
+2025-11-10T18:30:33.987056635Z [inf]  [snapshot] uploading snapshot, in progress 8.0 MB
+2025-11-10T18:30:35.987439146Z [inf]  [snapshot] uploading snapshot, in progress 8.0 MB
+2025-11-10T18:30:37.987789108Z [inf]  [snapshot] uploading snapshot, in progress 13 MB
+2025-11-10T18:30:39.885411088Z [inf]  [snapshot] uploading snapshot, complete 97 MB [took 8.045932925s]
+2025-11-10T18:30:52.078732117Z [inf]  [snapshot] fetching snapshot, in progress 1.3 MB
+2025-11-10T18:30:52.935392788Z [inf]  scheduling build on Metal builder "builder-sgprfo"
+2025-11-10T18:30:54.078898783Z [inf]  [snapshot] fetching snapshot, in progress 2.9 MB
+2025-11-10T18:30:56.079213462Z [inf]  [snapshot] fetching snapshot, in progress 5.4 MB
+2025-11-10T18:30:58.079353700Z [inf]  [snapshot] fetching snapshot, in progress 5.8 MB
+2025-11-10T18:31:00.079480336Z [inf]  [snapshot] fetching snapshot, in progress 6.5 MB
+2025-11-10T18:31:02.079694715Z [inf]  [snapshot] fetching snapshot, in progress 7.0 MB
+2025-11-10T18:31:04.080134131Z [inf]  [snapshot] fetching snapshot, in progress 7.4 MB
+2025-11-10T18:31:06.080608320Z [inf]  [snapshot] fetching snapshot, in progress 7.5 MB
+2025-11-10T18:31:08.081072884Z [inf]  [snapshot] fetching snapshot, in progress 7.8 MB
+2025-11-10T18:31:10.081479400Z [inf]  [snapshot] fetching snapshot, in progress 8.3 MB
+2025-11-10T18:31:12.081722742Z [inf]  [snapshot] fetching snapshot, in progress 8.9 MB
+2025-11-10T18:31:14.082039535Z [inf]  [snapshot] fetching snapshot, in progress 45 MB
+2025-11-10T18:31:14.924223742Z [inf]  fetched snapshot sha256:3c5ddb4a2544ee59baec8faebf76a628db39a4ef7e133dfba28ba939bd982735 (97 MB bytes)
+2025-11-10T18:31:14.924342961Z [inf]  [snapshot] fetching snapshot, complete 97 MB [took 24.982468121s]
+2025-11-10T18:31:16.600315068Z [inf]  [snapshot] unpacking archive, complete 126 MB [took 951.699604ms]
+2025-11-10T18:31:18.681523750Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T18:31:18.681528858Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T18:31:18.681529499Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T18:31:20.968934867Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-10T18:31:21.138735274Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
+2025-11-10T18:31:21.138739010Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-11-10T18:31:21.138741304Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-11-10T18:31:21.970484225Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
+2025-11-10T18:31:22.006958841Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-11-10T18:31:22.061169959Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-11-10T18:31:22.062006094Z [inf]  [internal] load .dockerignore
+2025-11-10T18:31:22.062021407Z [inf]  [internal] load .dockerignore
+2025-11-10T18:31:22.126251207Z [inf]  [internal] load .dockerignore
+2025-11-10T18:31:23.251151820Z [inf]  [internal] load .dockerignore
+2025-11-10T18:31:23.307125273Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
+2025-11-10T18:31:23.307132373Z [inf]  [frontend-builder  4/10] COPY package.json package-lock.json ./
+2025-11-10T18:31:23.307132864Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
+2025-11-10T18:31:23.307133114Z [inf]  [composer-deps 1/4] COPY composer.json composer.lock ./
+2025-11-10T18:31:23.307133285Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-11-10T18:31:23.307133445Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+2025-11-10T18:31:23.307133725Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-10T18:31:23.307133865Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T18:31:23.307134146Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-11-10T18:31:23.307134276Z [inf]  [production  7/16] WORKDIR /var/www/html
+2025-11-10T18:31:23.307134446Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-11-10T18:31:23.307134687Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-11-10T18:31:23.307134847Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
+2025-11-10T18:31:23.307134977Z [inf]  [internal] load build context
+2025-11-10T18:31:23.307135117Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-10T18:31:23.307135428Z [inf]  [production 11/16] RUN cp .env.example .env
+2025-11-10T18:31:23.307135668Z [inf]  [composer-deps 4/4] RUN composer dump-autoload --optimize --no-dev
+2025-11-10T18:31:23.307135808Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+2025-11-10T18:31:23.307136059Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T18:31:23.307136199Z [inf]  [frontend-builder  5/10] RUN npm ci --prefer-offline --no-audit
+2025-11-10T18:31:23.307136329Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
+2025-11-10T18:31:23.307136469Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-11-10T18:31:23.307136599Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+2025-11-10T18:31:23.307136750Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+2025-11-10T18:31:23.307136990Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-11-10T18:31:23.307137130Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-11-10T18:31:23.307137260Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-11-10T18:31:23.307137411Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache     storage/framework/sessions     storage/framework/views     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
+2025-11-10T18:31:23.307137551Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
+2025-11-10T18:31:23.307137701Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-11-10T18:31:23.307137901Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+2025-11-10T18:31:23.307138052Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+2025-11-10T18:31:23.307138182Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-11-10T18:31:23.307138322Z [inf]  [composer-deps 3/4] COPY . .
+2025-11-10T18:31:23.307138723Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
+2025-11-10T18:31:23.307138953Z [inf]  [build 1/6] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T18:31:23.307139093Z [inf]  [build 1/6] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-10T18:31:23.307141266Z [inf]  [internal] load build context
+2025-11-10T18:31:23.307463720Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T18:31:23.307583560Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T18:31:23.331425683Z [inf]  [internal] load build context
+2025-11-10T18:31:25.407575424Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-10T18:31:25.410997118Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-10T18:31:27.111304037Z [inf]  [internal] load build context
+2025-11-10T18:31:28.537835846Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-10T18:31:28.537840333Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-11-10T18:31:28.537840804Z [err]  [frontend-builder  4/10] COPY package.json package-lock.json ./
+2025-11-10T18:31:29.539217002Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-10T18:31:29.539226296Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+2025-11-10T18:31:29.539226837Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-11-10T18:31:29.539227007Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-11-10T18:31:29.539227287Z [inf]  [composer-deps 1/4] COPY composer.json composer.lock ./
+2025-11-10T18:31:29.539227438Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-11-10T18:31:29.694139056Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-11-10T18:31:29.774375102Z [err]  Build Failed: bc.Build: failed to solve: failed to compute cache key: failed to calculate checksum of ref mxdlxwfloeqckic0h1r128g89::t3fqh37ncf377d28wa8wia8jd: "/package-lock.json": not found

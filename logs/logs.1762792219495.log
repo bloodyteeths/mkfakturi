@@ -1,0 +1,106 @@
+2025-11-10T15:38:50.000000000Z [inf]  Starting Container
+2025-11-10T15:38:50.778231932Z [inf]  === Application Startup ===
+2025-11-10T15:38:50.778239201Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-10T15:38:50.778247718Z [inf]  DB configured from MYSQL_URL
+2025-11-10T15:38:50.778258065Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-10T15:38:50.778270130Z [inf]  Waiting for database... (1/30)
+2025-11-10T15:38:52.794825935Z [inf]  Waiting for database... (2/30)
+2025-11-10T15:38:54.890382861Z [inf]  Waiting for database... (3/30)
+2025-11-10T15:38:56.982351778Z [inf]  Waiting for database... (4/30)
+2025-11-10T15:38:59.114968059Z [inf]  Waiting for database... (5/30)
+2025-11-10T15:39:01.282897054Z [inf]  Waiting for database... (6/30)
+2025-11-10T15:39:03.455939650Z [inf]  Waiting for database... (7/30)
+2025-11-10T15:39:05.963392603Z [inf]  Waiting for database... (8/30)
+2025-11-10T15:39:07.968033267Z [inf]  Waiting for database... (9/30)
+2025-11-10T15:39:10.157914239Z [inf]  Waiting for database... (10/30)
+2025-11-10T15:39:12.127179364Z [inf]  Waiting for database... (11/30)
+2025-11-10T15:39:14.289729442Z [inf]  Waiting for database... (12/30)
+2025-11-10T15:39:16.466188077Z [inf]  Waiting for database... (13/30)
+2025-11-10T15:39:18.638427832Z [inf]  Waiting for database... (14/30)
+2025-11-10T15:39:20.788539273Z [inf]  Waiting for database... (15/30)
+2025-11-10T15:39:23.308030667Z [inf]  Waiting for database... (16/30)
+2025-11-10T15:39:25.327677825Z [inf]  Waiting for database... (17/30)
+2025-11-10T15:39:27.409975286Z [inf]  Waiting for database... (18/30)
+2025-11-10T15:39:29.464979427Z [inf]  Waiting for database... (19/30)
+2025-11-10T15:39:31.638442976Z [inf]  Waiting for database... (20/30)
+2025-11-10T15:39:33.805652845Z [inf]  Waiting for database... (21/30)
+2025-11-10T15:39:36.448304443Z [inf]  Waiting for database... (22/30)
+2025-11-10T15:39:38.402269263Z [inf]  Waiting for database... (23/30)
+2025-11-10T15:39:40.465001675Z [inf]  Waiting for database... (24/30)
+2025-11-10T15:39:42.474609275Z [inf]  Waiting for database... (25/30)
+2025-11-10T15:39:44.642666992Z [inf]  Waiting for database... (26/30)
+2025-11-10T15:39:46.809022559Z [inf]  Waiting for database... (27/30)
+2025-11-10T15:39:48.971360463Z [inf]  Waiting for database... (28/30)
+2025-11-10T15:39:51.506038142Z [inf]  Waiting for database... (29/30)
+2025-11-10T15:39:53.565318495Z [inf]  Waiting for database... (30/30)
+2025-11-10T15:39:55.655357022Z [inf]  Clearing caches...
+2025-11-10T15:39:55.655363403Z [inf]  
+2025-11-10T15:39:55.655372770Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-10T15:39:55.655379028Z [inf]  
+2025-11-10T15:39:55.960351185Z [inf]  
+2025-11-10T15:39:55.960358392Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
+2025-11-10T15:39:55.960364633Z [inf]  
+2025-11-10T15:39:56.579571118Z [inf]  
+2025-11-10T15:39:56.579577719Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-10T15:39:56.579584816Z [inf]  
+2025-11-10T15:39:56.579591551Z [inf]  
+2025-11-10T15:39:56.579598433Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-10T15:39:56.579605154Z [inf]  
+2025-11-10T15:39:56.579844254Z [inf]  Running migrations...
+2025-11-10T15:39:56.941722691Z [inf]  
+2025-11-10T15:39:56.941728658Z [inf]     INFO  Running migrations.  
+2025-11-10T15:39:56.941732619Z [inf]  
+2025-11-10T15:39:56.941736838Z [inf]    2025_11_11_110002_create_tax_returns_table ..................... 3.26ms DONE
+2025-11-10T15:39:57.690771134Z [inf]    2025_11_11_120001_create_credit_notes_table .................. 637.12ms DONE
+2025-11-10T15:39:58.769912370Z [inf]    2025_11_11_130001_create_bank_providers_table ................ 120.75ms DONE
+2025-11-10T15:39:58.769960368Z [inf]    2025_11_11_120002_create_credit_note_items_table ............. 651.21ms DONE
+2025-11-10T15:39:58.950317767Z [inf]    2025_11_11_130002_create_bank_connections_table .............. 554.85ms DONE
+2025-11-10T15:39:59.213440186Z [inf]    2025_11_11_130003_create_bank_consents_table ................. 258.28ms DONE
+2025-11-10T15:40:00.105853693Z [inf]    2025_11_11_140001_create_proforma_invoices_table ............. 901.89ms DONE
+2025-11-10T15:40:00.697762860Z [inf]    2025_11_11_140002_create_proforma_invoice_items_table ........ 563.23ms DONE
+2025-11-10T15:40:01.722651948Z [inf]    2025_11_11_150001_create_suppliers_table ..................... 630.77ms DONE
+2025-11-10T15:40:02.118178815Z [inf]    2025_11_11_150002_create_bills_table ......................... 799.02ms DONE
+2025-11-10T15:40:02.754391979Z [inf]  
+2025-11-10T15:40:02.754400593Z [inf]                                                                                 
+2025-11-10T15:40:02.754403515Z [inf]  In Connection.php line 822:
+2025-11-10T15:40:02.754422487Z [inf]                                                                                 
+2025-11-10T15:40:02.754425513Z [inf]    2025_11_11_150003_create_bill_items_table .................... 467.42ms DONE
+2025-11-10T15:40:02.754432123Z [inf]    SQLSTATE[HY000]: General error: 3780 Referencing column 'bill_id' and refer  
+2025-11-10T15:40:02.754435364Z [inf]    2025_11_11_150004_create_bill_payments_table .................. 32.40ms FAIL
+2025-11-10T15:40:02.754445297Z [inf]    enced column 'id' in foreign key constraint 'bill_payments_bill_id_foreign'  
+2025-11-10T15:40:02.754459390Z [inf]     are incompatible. (Connection: mysql, SQL: alter table `bill_payments` add  
+2025-11-10T15:40:02.754461671Z [inf]  
+2025-11-10T15:40:02.754465430Z [inf]    ces `bills` (`id`) on delete cascade)                                        
+2025-11-10T15:40:02.754471137Z [inf]     constraint `bill_payments_bill_id_foreign` foreign key (`bill_id`) referen  
+2025-11-10T15:40:02.754472794Z [inf]    enced column 'id' in foreign key constraint 'bill_payments_bill_id_foreign'  
+2025-11-10T15:40:02.754475283Z [inf]                                                                                 
+2025-11-10T15:40:02.754485434Z [inf]     are incompatible.                                                           
+2025-11-10T15:40:02.754500209Z [inf]  In Connection.php line 568:
+2025-11-10T15:40:02.754512698Z [inf]                                                                                 
+2025-11-10T15:40:02.754522175Z [inf]    SQLSTATE[HY000]: General error: 3780 Referencing column 'bill_id' and refer  
+2025-11-10T15:40:02.756996384Z [inf]  Migrations failed or already applied
+2025-11-10T15:40:02.757047980Z [inf]  
+2025-11-10T15:40:02.919211066Z [inf]  
+2025-11-10T15:40:02.919218134Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-10T15:40:02.919224095Z [inf]  
+2025-11-10T15:40:02.928375743Z [inf]  Starting application services...
+2025-11-10T15:40:03.100468143Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-10T15:40:03.100476804Z [err]    import pkg_resources
+2025-11-10T15:40:03.130684797Z [inf]  2025-11-10 15:40:03,126 INFO Set uid to user 0 succeeded
+2025-11-10T15:40:03.130691376Z [inf]  2025-11-10 15:40:03,129 INFO supervisord started with pid 1
+2025-11-10T15:40:04.139041071Z [inf]  2025-11-10 15:40:04,132 INFO spawned: 'nginx' with pid 85
+2025-11-10T15:40:04.139049212Z [inf]  2025-11-10 15:40:04,133 INFO spawned: 'php-fpm' with pid 86
+2025-11-10T15:40:04.139055181Z [inf]  2025-11-10 15:40:04,135 INFO spawned: 'queue-worker_00' with pid 87
+2025-11-10T15:40:04.139060456Z [inf]  2025-11-10 15:40:04,137 INFO spawned: 'queue-worker_01' with pid 88
+2025-11-10T15:40:04.141462502Z [inf]  2025-11-10 15:40:04,139 INFO spawned: 'scheduler' with pid 89
+2025-11-10T15:40:04.193319769Z [err]  [10-Nov-2025 15:40:04] NOTICE: fpm is running, pid 86
+2025-11-10T15:40:04.193327488Z [err]  [10-Nov-2025 15:40:04] NOTICE: ready to handle connections
+2025-11-10T15:40:05.817415763Z [inf]  2025-11-10 15:40:05,459 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:40:05.817420799Z [inf]  2025-11-10 15:40:05,459 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:40:05.817427996Z [inf]  2025-11-10 15:40:05,459 INFO success: queue-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:40:05.817433116Z [inf]  2025-11-10 15:40:05,459 INFO success: queue-worker_01 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:40:05.817438245Z [inf]  2025-11-10 15:40:05,459 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-10T15:40:05.817442995Z [inf]  2025-11-10 15:40:05,459 INFO reaped unknown pid 91 (exit status 0)
+2025-11-10T15:41:05.441697449Z [inf]  2025-11-10 15:41:05,418 INFO reaped unknown pid 155 (exit status 0)
+2025-11-10T15:42:05.818431777Z [inf]  2025-11-10 15:42:05,424 INFO reaped unknown pid 160 (exit status 0)
+2025-11-10T15:43:05.652837172Z [inf]  2025-11-10 15:43:05,428 INFO reaped unknown pid 165 (exit status 0)
