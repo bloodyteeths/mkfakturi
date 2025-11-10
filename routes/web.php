@@ -230,8 +230,19 @@ Route::get('/ping', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()->toISOString()], 200);
 });
 
-Route::get('/health', [App\Http\Controllers\HealthController::class, 'health']);
-Route::get('/ready', [App\Http\Controllers\HealthController::class, 'ready']);
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
+Route::get('/ready', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
 
 // Debug route to view Laravel logs (only in production for Railway debugging)
 if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
