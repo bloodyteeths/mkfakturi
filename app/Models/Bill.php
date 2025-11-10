@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Traits\HasAuditing;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Bill extends Model implements Auditable, HasMedia
+class Bill extends Model implements HasMedia
 {
-    use \OwenIt\Auditing\Auditable;
+    use HasAuditing;
     use CacheableTrait;
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;

@@ -62,6 +62,12 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Role::class, RolePolicy::class);
 
+        // Phase 2 Policies
+        Gate::policy(\App\Models\Supplier::class, \App\Policies\SupplierPolicy::class);
+        Gate::policy(\App\Models\Bill::class, \App\Policies\BillPolicy::class);
+        Gate::policy(\App\Models\ProformaInvoice::class, \App\Policies\ProformaInvoicePolicy::class);
+        Gate::policy(\App\Models\AuditLog::class, \App\Policies\AuditLogPolicy::class);
+
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
         $this->bootAuth();
@@ -199,7 +205,22 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
             \App\Models\CreditNote::observe(\App\Observers\CreditNoteObserver::class);
             \App\Models\Expense::observe(\App\Observers\ExpenseObserver::class);
+
+            // Phase 2: Accounts Payable observers
+            \App\Models\Bill::observe(\App\Observers\BillObserver::class);
+            \App\Models\BillPayment::observe(\App\Observers\BillPaymentObserver::class);
+
+            // Phase 2: Proforma Invoice observer
+            \App\Models\ProformaInvoice::observe(\App\Observers\ProformaInvoiceObserver::class);
         }
+
+        // Audit trail observers (always enabled)
+        \App\Models\Supplier::observe(\App\Observers\AuditObserver::class);
+        \App\Models\Bill::observe(\App\Observers\AuditObserver::class);
+        \App\Models\BillItem::observe(\App\Observers\AuditObserver::class);
+        \App\Models\BillPayment::observe(\App\Observers\AuditObserver::class);
+        \App\Models\ProformaInvoice::observe(\App\Observers\AuditObserver::class);
+        \App\Models\ProformaInvoiceItem::observe(\App\Observers\AuditObserver::class);
     }
 }
 

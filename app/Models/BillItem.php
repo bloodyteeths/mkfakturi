@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Traits\HasAuditing;
 
-class BillItem extends Model implements Auditable
+class BillItem extends Model 
 {
-    use \OwenIt\Auditing\Auditable;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
 

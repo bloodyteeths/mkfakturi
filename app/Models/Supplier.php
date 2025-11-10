@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Traits\HasAuditing;
 
-class Supplier extends Model implements Auditable
+class Supplier extends Model 
 {
-    use \OwenIt\Auditing\Auditable;
+    use HasAuditing;
     use CacheableTrait;
     use HasCustomFieldsTrait;
     use HasFactory;
