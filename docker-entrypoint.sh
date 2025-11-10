@@ -59,6 +59,15 @@ mkdir -p storage/logs
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Configure nginx to listen on Railway's assigned PORT
+NGINX_PORT=${PORT:-80}
+if [ "$NGINX_PORT" != "80" ]; then
+    echo "Configuring nginx to listen on port $NGINX_PORT"
+    sed -i "s/listen 80;/listen ${NGINX_PORT};/" /etc/nginx/nginx.conf
+else
+    echo "Using default nginx port 80"
+fi
+
 # Clear caches
 echo "Clearing caches..."
 php artisan config:clear || true
