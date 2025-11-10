@@ -28,7 +28,7 @@ return new class extends Migration
 
             // Submission tracking
             $table->timestamp('submitted_at')->nullable()->comment('When the return was submitted to tax authority');
-            $table->unsignedBigInteger('submitted_by')->nullable()->comment('User who submitted the return');
+            $table->unsignedInteger('submitted_by')->nullable()->comment('User who submitted the return');
             $table->foreign('submitted_by')->references('id')->on('users')->onDelete('restrict');
 
             // Status tracking

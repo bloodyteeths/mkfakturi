@@ -23,7 +23,7 @@ return new class extends Migration
             // Expense details
             $table->unsignedBigInteger('expense_category_id');
             $table->foreign('expense_category_id')->references('id')->on('expense_categories')->onDelete('restrict');
-            $table->unsignedInteger('vendor_id')->nullable();
+            $table->unsignedBigInteger('vendor_id')->nullable();
             $table->foreign('vendor_id')->references('id')->on('customers')->onDelete('set null'); // Vendors are stored in customers table
             $table->unsignedInteger('currency_id');
             $table->foreign('currency_id')->references('id')->on('currencies')->onDelete('restrict');
@@ -39,7 +39,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
 
             // Metadata
-            $table->unsignedBigInteger('created_by');
+            $table->unsignedInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
 
             $table->timestamps();

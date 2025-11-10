@@ -17,14 +17,14 @@ return new class extends Migration
 
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id')->index();
+            $table->unsignedInteger('company_id')->index();
 
             // Polymorphic relationship to auditable models
             $table->string('auditable_type')->index();
             $table->unsignedBigInteger('auditable_id')->index();
 
             // Who did it
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedInteger('user_id')->nullable()->index();
             $table->string('user_name')->nullable(); // Denormalized for historical accuracy
 
             // What happened

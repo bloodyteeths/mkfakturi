@@ -21,12 +21,12 @@ return new class extends Migration
 
         Schema::create('reconciliations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id');
             $table->unsignedBigInteger('bank_transaction_id');
-            $table->unsignedBigInteger('invoice_id');
+            $table->unsignedInteger('invoice_id');
             $table->decimal('confidence_score', 5, 4)->default(0.0000); // 0.0000 to 1.0000
             $table->enum('status', ['pending', 'approved', 'rejected', 'auto_matched'])->default('pending');
-            $table->unsignedBigInteger('reconciled_by')->nullable(); // User who approved/rejected
+            $table->unsignedInteger('reconciled_by')->nullable(); // User who approved/rejected
             $table->timestamp('reconciled_at')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->text('notes')->nullable();

@@ -34,7 +34,7 @@ return new class extends Migration
             $table->unsignedBigInteger('signable_id')->nullable();
 
             // User and context information
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedInteger('user_id')->nullable()->index();
             $table->foreign('user_id')
                   ->references('id')
                   ->on('users')

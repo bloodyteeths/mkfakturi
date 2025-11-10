@@ -36,11 +36,11 @@ return new class extends Migration
 
             // Lock/unlock audit trail
             $table->timestamp('locked_at')->nullable()->comment('When the period was locked/closed');
-            $table->unsignedBigInteger('locked_by')->nullable()->comment('User who locked the period');
+            $table->unsignedInteger('locked_by')->nullable()->comment('User who locked the period');
             $table->foreign('locked_by')->references('id')->on('users')->onDelete('restrict');
 
             $table->timestamp('reopened_at')->nullable()->comment('When the period was last reopened');
-            $table->unsignedBigInteger('reopened_by')->nullable()->comment('User who reopened the period');
+            $table->unsignedInteger('reopened_by')->nullable()->comment('User who reopened the period');
             $table->foreign('reopened_by')->references('id')->on('users')->onDelete('restrict');
 
             $table->text('reopen_reason')->nullable()->comment('Explanation for reopening the period');

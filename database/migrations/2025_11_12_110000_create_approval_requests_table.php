@@ -23,12 +23,12 @@ return new class extends Migration
 
         Schema::create('approval_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id');
             $table->string('approvable_type'); // Invoice, Estimate, Expense, Bill, CreditNote
             $table->unsignedBigInteger('approvable_id');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->unsignedBigInteger('requested_by')->nullable(); // User who requested approval
-            $table->unsignedBigInteger('approved_by')->nullable(); // User who approved/rejected
+            $table->unsignedInteger('requested_by')->nullable(); // User who requested approval
+            $table->unsignedInteger('approved_by')->nullable(); // User who approved/rejected
             $table->text('approval_note')->nullable(); // Reason for approval/rejection
             $table->text('request_note')->nullable(); // Note from requester
             $table->timestamp('approved_at')->nullable();

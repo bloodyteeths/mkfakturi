@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('restrict');
             $table->foreignId('bank_provider_id')->constrained('bank_providers')->onDelete('restrict');
             $table->enum('status', ['pending', 'active', 'expired', 'revoked', 'error'])->default('pending');
-            $table->unsignedBigInteger('created_by')->comment('User who created the connection');
+            $table->unsignedInteger('created_by')->comment('User who created the connection');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->timestamp('expires_at')->nullable()->comment('Connection expiration timestamp');
             $table->timestamp('last_synced_at')->nullable()->comment('Last successful sync timestamp');

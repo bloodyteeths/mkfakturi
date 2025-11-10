@@ -28,7 +28,7 @@ return new class extends Migration
             // Submission tracking
             $table->timestamp('submitted_at')->nullable(); // When submission was initiated
 
-            $table->unsignedBigInteger('submitted_by')->nullable(); // User who submitted
+            $table->unsignedInteger('submitted_by')->nullable(); // User who submitted
             $table->foreign('submitted_by')
                   ->references('id')
                   ->on('users')
