@@ -878,8 +878,14 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 **What Was Done (Part B - Laravel Banking):**
 - **5 Migrations** (already existed): bank_providers, bank_connections, bank_consents, bank_tokens, bank_transactions
 - **3 Models** (591 lines, already existed): BankProvider, BankConnection, BankConsent with encrypted tokens
-- **Psd2GatewayClient** (498 lines, NEW): Unified service for OAuth, account sync, transaction fetching across all 3 banks
-- **BankConnectionController** (459 lines, NEW): 7 API endpoints - OAuth start/callback, connections CRUD, accounts/transactions fetching
+- **3 Services**:
+  - Psd2Client.php (620 lines, already existed) - Abstract base class with OAuth flow, PKCE, mTLS
+  - Mt940Parser.php (332 lines, already existed) - CSV/MT940 fallback parser
+  - Psd2GatewayClient.php (498 lines, NEW) - Unified service for OAuth, account sync, transaction fetching across all 3 banks
+- **3 Controllers**:
+  - BankConnectionController.php (459 lines, NEW) - 7 API endpoints for connections management
+  - BankingController.php (already existed) - Legacy banking controller
+  - BankingOAuthController.php (already existed) - OAuth flow controller
 - **2 Tests** (626 lines): BankConnectionTest (13 tests), BankAccountTest (11 tests) covering OAuth, multi-tenancy, sync
 
 **Deliverables:**
@@ -1014,10 +1020,13 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 **What Was Done:**
 - **1 Migration** (create_gateway_webhook_events_table): company_id, provider (paddle, cpay, nlb, stopanska), event_type, event_id (for idempotency), payload (JSON), signature, status (pending, processed, failed), processed_at, error_message, retry_count, UNIQUE constraint on provider+event_id
 - **GatewayWebhookEvent Model** (185 lines): scopeWhereProvider, scopeWherePending, markAsProcessed()/markAsFailed(), canRetry(), TenantScope + HasAuditing
-- **WebhookController** (246 lines): 4 endpoints - paddle, cpay, nlb bank, stopanska bank webhooks, signature storage, company ID validation, async job dispatch
-- **ProcessWebhookEvent Job** (242 lines): Provider-specific routing, idempotent processing via unique event_id, creates Payment/BankTransaction records, retry logic (3 attempts), comprehensive error handling
+- **3 Webhook Controllers**:
+  - WebhookController.php (246 lines, NEW) - 4 endpoints for paddle, cpay, nlb, stopanska webhooks
+  - PaddleWebhookController.php (already existed) - Paddle-specific webhook handler
+  - CpayCallbackController.php (already existed) - CPAY-specific webhook handler
+- **ProcessWebhookEvent Job** (242 lines, NEW): Provider-specific routing, idempotent processing via unique event_id, creates Payment/BankTransaction records, retry logic (3 attempts), comprehensive error handling
 - **CSRF Exemption**: Added /webhooks/* to VerifyCsrfToken middleware
-- **WebhookIngestionTest** (125 lines): 3 tests covering webhook storage, company validation
+- **WebhookIngestionTest** (125 lines, NEW): 3 tests covering webhook storage, company validation
 
 **Deliverables:**
 - ✅ Webhook event audit trail for 4 providers
@@ -1105,9 +1114,24 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 ### Phase 3-4 Summary ✅ ALL MILESTONES COMPLETED
 
 **Total Implementation:**
-- **32 New Files**: 8 migrations, 10 models, 5 controllers, 4 jobs, 1 command, 4 tests
-- **Total Lines**: ~7,200 lines of new code
-- **25 API Routes**: Banking (12), Reconciliation (6), Approvals (6), Webhooks (4), Exports (5), Recurring Expenses (7)
+- **18 NEW Files Created by Multi-Agents**:
+  - 5 migrations (reconciliations, approval_requests, gateway_webhook_events, export_jobs, recurring_expenses)
+  - 5 models (Reconciliation, ApprovalRequest, GatewayWebhookEvent, ExportJob, RecurringExpense)
+  - 2 controllers (ReconciliationController, ApprovalRequestController)
+  - 2 jobs (ProcessWebhookEvent, ProcessExportJob)
+  - 1 command (ProcessRecurringExpenses)
+  - 1 policy (ApprovalPolicy)
+  - 1 trait (RequiresApproval)
+  - 1 test file (WebhookIngestionTest)
+- **Additional NEW Files**:
+  - 3 PSD2 Gateway files (docker-compose, README, env template)
+  - 1 service (Psd2GatewayClient)
+  - 1 controller (BankConnectionController)
+  - 5 test files (BankConnectionTest, BankAccountTest, ReconciliationTest, ApprovalRequestTest, ExportJobTest, RecurringExpenseTest)
+  - 2 deployment docs (DEPLOYMENT_PHASE3_4.md, PHASE3_4_INTEGRATION_REPORT.json)
+- **Files Modified**: .env.example, routes/api.php, routes/webhooks.php, routes/console.php, config/abilities.php, config/services.php, app/Providers/AppServiceProvider.php, 5 document models (Invoice, Estimate, Expense, Bill, CreditNote with RequiresApproval trait)
+- **Total NEW Lines**: ~7,200 lines of code
+- **25 API Routes**: Banking (7), Reconciliation (6), Approvals (6), Webhooks (4), Exports (4), Recurring Expenses (7)
 - **13 Bouncer Abilities**: Banking (2), Reconciliation (2), Approvals (3), Exports (1), Recurring Expenses (4), with proper dependencies
 - **4 Policies Registered**: BankConnectionPolicy, ApprovalPolicy, ExportJobPolicy, RecurringExpensePolicy
 - **9 Observers Registered**: All Phase 3-4 models registered with AuditObserver
