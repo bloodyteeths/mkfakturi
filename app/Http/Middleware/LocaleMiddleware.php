@@ -20,13 +20,19 @@ class LocaleMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip health check endpoints to avoid database dependency
+        $healthCheckPaths = ['/health', '/up', '/ping', '/ready'];
+        if (in_array($request->path(), $healthCheckPaths)) {
+            return $next($request);
+        }
+
         // Check if user is authenticated and has a company
         if (Auth::check() && $request->header('company')) {
             $companyId = $request->header('company');
-            
+
             // Get the language setting for the company
             $locale = CompanySetting::getSetting('language', $companyId);
-            
+
             if ($locale) {
                 // Set the Laravel application locale
                 App::setLocale($locale);
