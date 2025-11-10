@@ -23,3 +23,4 @@ Homestead.yaml
 /storage/fonts*
 /.dev/docker-compose.yml
 /.dev/docker-compose.yaml
+package-lock.json
