@@ -56,11 +56,17 @@ fi
 # Railway environment variables take precedence over .env
 # DB_* variables are already exported at the top of this script
 
-# Create required directories
+# Create required directories and fix permissions
 mkdir -p storage/framework/{sessions,views,cache}
 mkdir -p storage/logs
 mkdir -p bootstrap/cache
+
+# Ensure www user owns all application files
+chown -R www:www /var/www/html/storage
+chown -R www:www /var/www/html/bootstrap/cache
 chmod -R 775 storage bootstrap/cache
+
+echo "✅ Permissions set for www user"
 
 # Configure nginx to listen on Railway's assigned PORT
 NGINX_PORT=${PORT:-80}
