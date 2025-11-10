@@ -256,6 +256,29 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         return response('No log file found');
     });
 
+    // Debug route to check PHP-FPM errors
+    Route::get('/debug/php-errors', function () {
+        $output = "=== PHP-FPM Error Log ===\n\n";
+
+        $phpFpmLog = storage_path('logs/php-fpm-error.log');
+        if (file_exists($phpFpmLog)) {
+            $logs = file_get_contents($phpFpmLog);
+            $lastLines = implode("\n", array_slice(explode("\n", $logs), -100));
+            $output .= "PHP-FPM Errors:\n" . $lastLines . "\n\n";
+        } else {
+            $output .= "PHP-FPM error log not found at: $phpFpmLog\n\n";
+        }
+
+        $laravelLog = storage_path('logs/laravel.log');
+        if (file_exists($laravelLog)) {
+            $logs = file_get_contents($laravelLog);
+            $lastLines = implode("\n", array_slice(explode("\n", $logs), -100));
+            $output .= "=== Laravel Log (last 100 lines) ===\n" . $lastLines;
+        }
+
+        return response('<pre>' . htmlspecialchars($output) . '</pre>');
+    });
+
     // Debug route to check installation status
     Route::get('/debug/installation-status', function () {
         $output = [];
