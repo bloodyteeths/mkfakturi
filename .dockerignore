@@ -1,97 +1,49 @@
-# Dependencies
+# Minimal .dockerignore - only exclude what's absolutely necessary
+
+# Exclude node_modules (will be installed during build)
 node_modules
+
+# Exclude vendor (will be installed during build)
 vendor
-.npm
 
-# But include package files (needed for Docker build)
-!package.json
-!package-lock.json
-!composer.json
-!composer.lock
-
-# Development files
+# Exclude .git (don't need version control in image)
 .git
+
+# Exclude development files
 .vscode
 .idea
 *.swp
-*.swo
-*~
 .DS_Store
-Thumbs.db
 
-# Logs and temp files
+# Exclude logs
 *.log
-storage/logs/*
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
 logs/
+storage/logs/*
 
-# Test output
+# Exclude test output
 tests/_output
 cypress/screenshots
 cypress/videos
 .phpunit.result.cache
 
-# Docker files
+# Exclude temporary storage
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Exclude docker compose files (not needed in image)
 docker-compose*.yml
-Dockerfile.mcp-server
-.dockerignore
 
-# Include our production Dockerfile and configs
-!Dockerfile.mkaccounting
-!docker-entrypoint.sh
-!docker-nginx.conf
-!docker-php-fpm.conf
-!docker-supervisord.conf
-
-# Documentation
-*.md
+# Exclude docs
 docs/
-roadmaps/
 
-# Environment files (will be mounted or provided at runtime)
+# Exclude environment files (will be created at runtime)
 .env
-.env.local
-.env.production
-.env.testing
-.env.backup
+.env.*
+!.env.example
 
-# Build artifacts (will be built during Docker build)
+# Exclude build artifacts (will be built during Docker build)
 public/build
 public/storage
 
-# But include source files needed for build
-!resources/
-!public/*.php
-!public/*.html
-!public/*.ico
-!lang/
-!vite.config.js
-!postcss.config.cjs
-!tailwind.config.js
-
-# IDE files
-*.code-workspace
-
-# Screenshots and temporary files
-*.png
-*.jpg
-*.jpeg
-*.gif
-
-# Backup files
-*.bak
-*.backup
-
-# MCP server Docker build context
-!Dockerfile.mcp-server
-!mcp-server/pyproject.toml
-!mcp-server/uv.lock
-!mcp-server/README.md
-!mcp-server/docker-entrypoint.sh
-!mcp-server/alembic.ini
-!mcp-server/setup.py
-!mcp-server/alembic/**
-!mcp-server/maverick_mcp/**
-!mcp-server/**
+# Everything else is INCLUDED by default
