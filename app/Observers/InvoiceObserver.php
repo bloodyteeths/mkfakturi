@@ -49,6 +49,24 @@ class InvoiceObserver
     }
 
     /**
+     * Handle the Invoice "updating" event.
+     *
+     * Prevent updates if the invoice falls within a locked tax period.
+     *
+     * @param Invoice $invoice
+     * @return bool|null
+     */
+    public function updating(Invoice $invoice): ?bool
+    {
+        // Check if invoice date falls within a locked tax period
+        if ($this->isInLockedPeriod($invoice)) {
+            throw new \Exception('Cannot edit invoice. Tax period is locked.');
+        }
+
+        return true;
+    }
+
+    /**
      * Handle the Invoice "updated" event.
      *
      * If status changes from DRAFT to SENT/VIEWED/COMPLETED, post to ledger.
@@ -74,6 +92,24 @@ class InvoiceObserver
                 ]);
             }
         }
+    }
+
+    /**
+     * Handle the Invoice "deleting" event.
+     *
+     * Prevent deletion if the invoice falls within a locked tax period.
+     *
+     * @param Invoice $invoice
+     * @return bool|null
+     */
+    public function deleting(Invoice $invoice): ?bool
+    {
+        // Check if invoice date falls within a locked tax period
+        if ($this->isInLockedPeriod($invoice)) {
+            throw new \Exception('Cannot delete invoice. Tax period is locked.');
+        }
+
+        return true;
     }
 
     /**
@@ -116,6 +152,33 @@ class InvoiceObserver
 
         return config('ifrs.enabled', false) ||
                env('FEATURE_ACCOUNTING_BACKBONE', false);
+    }
+
+    /**
+     * Check if invoice falls within a locked tax period.
+     *
+     * @param Invoice $invoice
+     * @return bool
+     */
+    protected function isInLockedPeriod(Invoice $invoice): bool
+    {
+        // Check if tax period locking is enabled
+        if (!config('tax.period_locking_enabled', true)) {
+            return false;
+        }
+
+        // Find locked periods that contain this invoice date
+        $lockedPeriod = \App\Models\TaxReportPeriod::where('company_id', $invoice->company_id)
+            ->where('start_date', '<=', $invoice->invoice_date)
+            ->where('end_date', '>=', $invoice->invoice_date)
+            ->where(function ($query) {
+                $query->where('status', \App\Models\TaxReportPeriod::STATUS_CLOSED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_FILED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_AMENDED);
+            })
+            ->exists();
+
+        return $lockedPeriod;
     }
 }
 

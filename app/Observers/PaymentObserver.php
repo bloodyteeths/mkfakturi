@@ -53,6 +53,24 @@ class PaymentObserver
     }
 
     /**
+     * Handle the Payment "updating" event.
+     *
+     * Prevent updates if the payment falls within a locked tax period.
+     *
+     * @param Payment $payment
+     * @return bool|null
+     */
+    public function updating(Payment $payment): ?bool
+    {
+        // Check if payment date falls within a locked tax period
+        if ($this->isInLockedPeriod($payment)) {
+            throw new \Exception('Cannot edit payment. Tax period is locked.');
+        }
+
+        return true;
+    }
+
+    /**
      * Handle the Payment "updated" event.
      *
      * If status changes to COMPLETED, post to ledger (idempotent).
@@ -83,6 +101,24 @@ class PaymentObserver
                 ]);
             }
         }
+    }
+
+    /**
+     * Handle the Payment "deleting" event.
+     *
+     * Prevent deletion if the payment falls within a locked tax period.
+     *
+     * @param Payment $payment
+     * @return bool|null
+     */
+    public function deleting(Payment $payment): ?bool
+    {
+        // Check if payment date falls within a locked tax period
+        if ($this->isInLockedPeriod($payment)) {
+            throw new \Exception('Cannot delete payment. Tax period is locked.');
+        }
+
+        return true;
     }
 
     /**
@@ -164,6 +200,33 @@ class PaymentObserver
 
         return config('ifrs.enabled', false) ||
                env('FEATURE_ACCOUNTING_BACKBONE', false);
+    }
+
+    /**
+     * Check if payment falls within a locked tax period.
+     *
+     * @param Payment $payment
+     * @return bool
+     */
+    protected function isInLockedPeriod(Payment $payment): bool
+    {
+        // Check if tax period locking is enabled
+        if (!config('tax.period_locking_enabled', true)) {
+            return false;
+        }
+
+        // Find locked periods that contain this payment date
+        $lockedPeriod = \App\Models\TaxReportPeriod::where('company_id', $payment->company_id)
+            ->where('start_date', '<=', $payment->payment_date)
+            ->where('end_date', '>=', $payment->payment_date)
+            ->where(function ($query) {
+                $query->where('status', \App\Models\TaxReportPeriod::STATUS_CLOSED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_FILED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_AMENDED);
+            })
+            ->exists();
+
+        return $lockedPeriod;
     }
 }
 

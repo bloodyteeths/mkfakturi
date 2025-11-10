@@ -276,6 +276,120 @@ class IfrsAdapter
     }
 
     /**
+     * Post a Credit Note to the general ledger
+     * Reverses the original invoice transaction:
+     * - CR 1200 Accounts Receivable (reduce)
+     * - DR 4000 Sales Revenue (reduce)
+     * - DR 2100 Tax Payable (reduce)
+     *
+     * @param \App\Models\CreditNote $creditNote
+     * @return void
+     * @throws \Exception
+     */
+    public function postCreditNote($creditNote): void
+    {
+        // Skip if feature is disabled
+        if (!$this->isEnabled()) {
+            return;
+        }
+
+        // Idempotency check: don't re-post if already posted
+        if ($creditNote->ifrs_transaction_id) {
+            Log::info("Credit note already posted to ledger, skipping", [
+                'credit_note_id' => $creditNote->id,
+                'ifrs_transaction_id' => $creditNote->ifrs_transaction_id,
+            ]);
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($creditNote->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
+            // Get or create accounts
+            $arAccount = $this->getAccountsReceivableAccount($creditNote->company_id, $entity->id);
+            $revenueAccount = $this->getRevenueAccount($creditNote->company_id, $entity->id);
+
+            // Build narration with reference to original invoice
+            $narration = "Credit Note #{$creditNote->credit_note_number} - {$creditNote->customer->name}";
+            if ($creditNote->invoice) {
+                $narration .= " (reverses Invoice #{$creditNote->invoice->invoice_number})";
+            }
+            if ($creditNote->invoice && $creditNote->invoice->ifrs_transaction_id) {
+                $narration .= " [Ref Txn: {$creditNote->invoice->ifrs_transaction_id}]";
+            }
+
+            // Create IFRS Transaction (Credit Note as Journal Entry)
+            $transaction = Transaction::create([
+                'account_id' => $arAccount->id,
+                'transaction_date' => $creditNote->credit_note_date ?? Carbon::now(),
+                'narration' => $narration,
+                'transaction_type' => Transaction::CN, // Credit Note
+                'currency_id' => $this->getCurrencyId($creditNote->company_id),
+                'entity_id' => $entity->id,
+            ]);
+
+            // Line Item: Credit Accounts Receivable (reduce asset)
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $arAccount->id,
+                'amount' => $creditNote->total / 100, // Convert cents to dollars
+                'quantity' => 1,
+                'entry_type' => LineItem::CREDIT,
+            ]);
+
+            // Line Item: Debit Revenue (reduce revenue)
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $revenueAccount->id,
+                'amount' => $creditNote->sub_total / 100, // Convert cents to dollars
+                'quantity' => 1,
+                'entry_type' => LineItem::DEBIT,
+            ]);
+
+            // If there's tax, create a line to reduce tax payable
+            if ($creditNote->tax > 0) {
+                $taxPayableAccount = $this->getTaxPayableAccount($creditNote->company_id, $entity->id);
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $taxPayableAccount->id,
+                    'amount' => $creditNote->tax / 100,
+                    'quantity' => 1,
+                    'entry_type' => LineItem::DEBIT, // Debit to reduce liability
+                ]);
+            }
+
+            // Post the transaction to the ledger
+            $transaction->post();
+
+            // Store the IFRS transaction ID on the credit note for reference
+            $creditNote->update(['ifrs_transaction_id' => $transaction->id]);
+
+            DB::commit();
+
+            Log::info("Credit note posted to ledger", [
+                'credit_note_id' => $creditNote->id,
+                'credit_note_number' => $creditNote->credit_note_number,
+                'ifrs_transaction_id' => $transaction->id,
+                'original_invoice_id' => $creditNote->invoice_id,
+                'original_invoice_txn_id' => $creditNote->invoice?->ifrs_transaction_id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to post credit note to ledger", [
+                'credit_note_id' => $creditNote->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Get Trial Balance for a company as of a specific date
      *
      * @param Company $company
@@ -695,4 +809,4 @@ class IfrsAdapter
     }
 }
 
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: Added postCreditNote() method for credit note accounting

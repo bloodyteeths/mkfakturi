@@ -480,61 +480,142 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 
 ## IMPLEMENTATION ROADMAP
 
-### PHASE 1: CRITICAL COMPLIANCE (Weeks 1-3)
+### PHASE 1: CRITICAL COMPLIANCE (Weeks 1-4) ⚠️ REVISED
 
-**Priority:** Fix VAT compliance and e-invoice tracking
+**Priority:** Audit trail from day 1, VAT compliance, e-invoice tracking with safety guards
 
-#### Milestone 1.1: E-Invoice Database Layer (Week 1)
+#### Milestone 1.1: Audit Logging + Entity Guards (Week 1) 🔒 NEW
+**Tasks:**
+- [ ] Create `audit_logs` migration with before/after snapshots
+- [ ] Create AuditLog model with polymorphic relationships
+- [ ] Create HasAuditing trait (auto-log created_by/updated_by)
+- [ ] Create AuditObserver for Invoice, Payment, Estimate, Expense
+- [ ] Create EntityGuard domain service (throws if no IFRS entity resolved)
+- [ ] Add TenantScope trait to all new models
+- [ ] Add entity null checks to IfrsAdapter methods
+- [ ] Add unit tests for entity guard failures
+- [ ] Add feature test: cross-tenant audit log isolation
+- [ ] Add PII encryption for VAT IDs, IBANs in audit logs
+- [ ] Write tests
+
+**Deliverables:**
+- Immutable audit trail for all document changes
+- Entity null guards prevent multi-tenant leakage
+- Who/when/what-changed tracking from day 1
+
+**Acceptance Criteria:**
+- ✅ Every change to invoice/payment/certificate has audit row
+- ✅ Attempting to post without entity throws DomainException
+- ✅ Audit logs encrypted for PII fields (VAT IDs, IBANs)
+- ✅ Cross-tenant audit log query returns 0 results
+
+#### Milestone 1.2: E-Invoice Database Layer (Week 2)
 **Tasks:**
 - [ ] Create `e_invoices` migration
-- [ ] Create `e_invoice_submissions` migration
-- [ ] Create `certificates` migration (db-backed)
+- [ ] Create `e_invoice_submissions` migration with retry logic
+- [ ] Create `certificates` migration (db-backed, encrypted blob storage)
 - [ ] Create `signature_logs` migration
-- [ ] Create EInvoice model with relationships
-- [ ] Create EInvoiceSubmission model
-- [ ] Create Certificate model
+- [ ] Create EInvoice model with relationships + TenantScope
+- [ ] Create EInvoiceSubmission model with idempotency keys
+- [ ] Create Certificate model (encrypted, no raw keys in DB)
 - [ ] Create SignatureLog model
 - [ ] Refactor CertUploadController to use Certificate model
+- [ ] Add certificate expiry alerts (30-day warning)
+- [ ] Add dry-run verify endpoint (validate chain before enabling)
+- [ ] Add queued SubmitEInvoiceJob with retry + backoff
+- [ ] Add health ping for e-ujp portal with warning banner
+- [ ] Add "simulate submission" endpoint (sign + validate, no submit)
 - [ ] Update Invoice model with `eInvoice()` relationship
 - [ ] Write tests
 
 **Deliverables:**
 - Database persistence for e-invoice workflow
-- Multi-company certificate management
-- Submission tracking and retry logic
+- Multi-company certificate management (encrypted)
+- Submission tracking with automatic retry
+- Queued background submission jobs
 
-#### Milestone 1.2: Tax Return Tracking (Week 2)
+**Acceptance Criteria:**
+- ✅ 10 sample invoices each have EInvoice + EInvoiceSubmission with final status
+- ✅ Failed submissions auto-retry with exponential backoff
+- ✅ Certificate private key encrypted at rest, never logged
+- ✅ Expired certificates disabled automatically
+- ✅ Stored signed XML and receipt number for each submission
+
+#### Milestone 1.3: Tax Return Tracking with Period Locking (Week 3)
 **Tasks:**
-- [ ] Create `tax_report_periods` migration
-- [ ] Create `tax_returns` migration
-- [ ] Create TaxReportPeriod model
-- [ ] Create TaxReturn model
-- [ ] Extend VatReturnController to save filed returns
+- [ ] Create `tax_report_periods` migration with lock_status
+- [ ] Create `tax_returns` migration with exact_xml_submitted
+- [ ] Create TaxReportPeriod model + TenantScope
+- [ ] Create TaxReturn model + TenantScope
+- [ ] Add period close job (locks all source docs in window)
+- [ ] Add "reopen period with reason" workflow
+- [ ] Extend VatReturnController to save exact XML + receipt
+- [ ] Add double-filing prevention (check existing TaxReturn for period)
 - [ ] Add period management UI
 - [ ] Add tax return history view
+- [ ] Add "amend return" workflow
 - [ ] Write tests
 
 **Deliverables:**
-- Track filed DDV returns
-- Prevent duplicate submissions
-- Audit trail for tax filings
+- Track filed DDV returns with exact XML
+- Period locking prevents backdated changes
+- Double-filing prevention
 
-#### Milestone 1.3: Credit Notes (Week 3)
+**Acceptance Criteria:**
+- ✅ Period can be opened/closed; closed periods block invoice edits
+- ✅ Submitting persists exact XML and receipt number
+- ✅ Attempting to re-file same period is blocked without explicit "amend"
+- ✅ Reopening period requires reason and creates audit log
+
+#### Milestone 1.4: Credit Notes as First-Class Documents (Week 4)
 **Tasks:**
-- [ ] Create `credit_notes` migration
+- [ ] Create `credit_notes` migration with separate number series
 - [ ] Create `credit_note_items` migration
-- [ ] Create CreditNote model
+- [ ] Create CreditNote model + TenantScope
 - [ ] Create CreditNoteItem model
 - [ ] Create CreditNoteController
 - [ ] Create PDF templates (3 variants)
-- [ ] Add to IFRS posting (reverse original journal entries)
-- [ ] Add to VAT calculations (reduce output VAT)
+- [ ] Create UBL CreditNote mapper (separate from Invoice)
+- [ ] Add to IFRS posting (reference original transaction_id, reverse entries)
+- [ ] Add CreditNoteObserver for auto-posting
+- [ ] Add to VAT calculations (reduce output VAT in correct buckets)
+- [ ] Add immutability: once posted, only void via new credit note
+- [ ] Add MK-specific credit note template with legal footer
 - [ ] Write tests
 
 **Deliverables:**
 - Issue credit notes for returns/cancellations
-- VAT-compliant corrections
-- IFRS journal reversal
+- VAT-compliant corrections with UBL export
+- IFRS journal reversal with audit trail
+
+**Acceptance Criteria:**
+- ✅ Credit note has own number series (CN-2025-0001)
+- ✅ UBL CreditNote XML validates against schema
+- ✅ VAT totals reduce correct DDV buckets (18%, 5%)
+- ✅ Reports reflect negative amounts correctly
+- ✅ Posted credit notes are immutable (can only void)
+
+#### Milestone 1.5: Backfill & Observer Parity (Week 4)
+**Tasks:**
+- [ ] Create ExpenseObserver for IFRS posting
+- [ ] Create backfill job: generate EInvoice records for existing invoices
+- [ ] Create backfill job: generate TaxReturn records from existing DDV XMLs
+- [ ] Add number series immutability guards (no renumber in closed period)
+- [ ] Add concurrency tests for duplicate number prevention
+- [ ] Add cross-tenant number leakage tests
+- [ ] Review MK invoice layout with accountant (required fields, VAT notes, Cyrillic)
+- [ ] Write tests
+
+**Deliverables:**
+- Existing data migrated to new tracking tables
+- Observer parity for all document types
+- Number series safety guardrails
+
+**Acceptance Criteria:**
+- ✅ All existing invoices have EInvoice records with correct state
+- ✅ Expenses auto-post to IFRS ledger
+- ✅ Sent invoices cannot be renumbered
+- ✅ Concurrent invoice creation never generates duplicate numbers
 
 ---
 
@@ -596,41 +677,60 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 
 ### PHASE 3: BANKING AUTOMATION (Weeks 7-9)
 
-#### Milestone 3.1: PSD2 Integration (Week 7-8)
+#### Milestone 3.1: PSD2 Thin AIS Slice (Week 7-8) ⚠️ REVISED
 **Tasks:**
 - [ ] Install `oak-labs-io/psd2` package
-- [ ] Create `bank_providers` migration
+- [ ] Create `bank_providers` migration (seed ONE bank: NLB or Stopanska)
 - [ ] Create `bank_connections` migration
 - [ ] Create `bank_consents` migration
-- [ ] Create BankProvider model (seed NLB, Stopanska, Komercijalna)
-- [ ] Create BankConnection model
-- [ ] Create BankConsent model
-- [ ] Implement OAuth flow (consent → redirect → callback)
-- [ ] Create PSD2 service wrapper
+- [ ] Create BankProvider model + TenantScope
+- [ ] Create BankConnection model + TenantScope
+- [ ] Create BankConsent model + TenantScope
+- [ ] Implement OAuth flow for ONE bank (consent → redirect → callback)
+- [ ] Create PSD2 service wrapper (single bank, AIS only)
+- [ ] Add "fetch accounts + last 90 days transactions" endpoint
 - [ ] Create BankConnectionController
-- [ ] Add consent management UI
+- [ ] Add consent management UI (single bank)
+- [ ] Keep MT940/CSV importer as fallback
 - [ ] Write tests
 
 **Deliverables:**
-- OAuth consent with Macedonian banks
+- OAuth consent with ONE Macedonian bank (NLB or Stopanska)
 - Automatic account discovery
-- Balance checking API
+- 90-day transaction fetch (AIS only, NO PIS)
 
-#### Milestone 3.2: Transaction Sync & Reconciliation (Week 8-9)
+**Acceptance Criteria:**
+- ✅ Single bank OAuth flow works end-to-end
+- ✅ Accounts fetched and stored
+- ✅ Last 90 days transactions synced
+- ✅ MT940 import still works as fallback
+
+**DEFERRED to Phase 4:**
+- ❌ PIS (payment initiation) - too risky for Phase 3
+- ❌ Additional banks (Komercijalna) - add incrementally after NLB works
+
+#### Milestone 3.2: Transaction Reconciliation with Confidence Scoring (Week 8-9)
 **Tasks:**
-- [ ] Extend SyncStopanska/SyncNlb/SyncKomer jobs to use PSD2
-- [ ] Create scheduled job for daily sync
 - [ ] Enhance Matcher service for auto-reconciliation
+- [ ] Add confidence scoring (exact match, partial match, fuzzy)
 - [ ] Create ReconciliationController
-- [ ] Create reconciliation UI
+- [ ] Create reconciliation UI with three buckets: auto-matched, suggested, manual
 - [ ] Add manual match interface
+- [ ] Add manual override queue for low-confidence matches
 - [ ] Add bulk match operations
+- [ ] Add daily scheduled sync job (rate-limited to avoid PSD2 throttling)
 - [ ] Write tests
 
 **Deliverables:**
+- Smart payment matching with confidence scores
+- Reconciliation dashboard with manual override
 - Daily automatic transaction import
-- Smart payment matching
-- Reconciliation dashboard
+
+**Acceptance Criteria:**
+- ✅ High-confidence matches (>90%) auto-reconcile
+- ✅ Medium-confidence (50-90%) go to suggestion queue
+- ✅ Low-confidence (<50%) go to manual queue
+- ✅ Manual override preserves audit trail
 
 ---
 
@@ -902,6 +1002,111 @@ User → subscribes to Plan → Paddle recurring billing → Subscription record
 
 ---
 
-**Document Version:** 1.0
+## ROADMAP REVISION NOTES (Based on Stakeholder Feedback)
+
+### Key Changes from Original Plan
+
+**1. Audit Logging Moved to Phase 1, Week 1** 🔒
+- **Rationale:** Need immutable audit trail from day 1 for compliance
+- **Impact:** Phase 1 extended from 3 to 4 weeks
+- **Benefit:** If anything misfiled in Week 2-4, we have logs immediately
+
+**2. Entity Null Guards Added Throughout**
+- **Rationale:** Prevent multi-tenant leakage bugs seen in other projects
+- **Implementation:** EntityGuard domain service throws on null entity
+- **Testing:** Unit tests for guard failures + cross-tenant isolation tests
+
+**3. Certificate Storage Encrypted, No Raw Keys**
+- **Rationale:** Security best practice - private keys never in plaintext DB
+- **Implementation:** Encrypted blob storage, password per-session
+- **Rotation:** Expiry alerts (30-day), dry-run verify endpoint
+
+**4. Credit Notes as First-Class Documents**
+- **Rationale:** Not just flag on Invoice - needs own UBL CreditNote XML
+- **Implementation:** Separate number series, own PDF templates, UBL mapper
+- **IFRS:** Reference original transaction_id, reverse entries properly
+
+**5. Tax Return Period Locking**
+- **Rationale:** Prevent backdated changes after filing
+- **Implementation:** Close period locks all source docs, reopen requires reason
+- **Double-Filing:** Prevention via TaxReturn duplicate check
+
+**6. PSD2: Thin AIS Slice Only**
+- **Rationale:** Start with ONE bank, defer PIS to reduce risk
+- **Implementation:** NLB or Stopanska OAuth, 90-day fetch, keep MT940 fallback
+- **Incremental:** Add other banks after first one works
+
+**7. Backfill Jobs for Existing Data**
+- **Rationale:** Migrate existing invoices to new EInvoice tracking
+- **Implementation:** Week 4 backfill jobs for EInvoice + TaxReturn
+- **Safety:** Dry-run mode, rollback capability
+
+**8. Number Series Immutability**
+- **Rationale:** Prevent renumbering sent invoices, ensure uniqueness
+- **Implementation:** Guards check document status before allowing number change
+- **Concurrency:** Tests for duplicate prevention under load
+
+**9. Observer Parity**
+- **Rationale:** All document types must auto-post to IFRS
+- **Implementation:** ExpenseObserver, CreditNoteObserver added in Phase 1
+
+**10. PII Encryption**
+- **Rationale:** VAT IDs, IBANs are sensitive
+- **Implementation:** Encrypt at rest, mask in logs, decrypt in memory only
+
+### Phase 1 Acceptance Criteria (All Must Pass)
+
+**Week 1 (Audit + Guards):**
+- [ ] Every document change creates audit log entry
+- [ ] Null entity throws DomainException
+- [ ] Cross-tenant queries return 0 results
+- [ ] PII fields encrypted in audit logs
+
+**Week 2 (E-Invoice):**
+- [ ] 10 invoices tracked end-to-end (draft → signed → submitted → accepted)
+- [ ] Failed submissions retry automatically
+- [ ] Certificate private key encrypted
+- [ ] Signed XML + receipt stored
+
+**Week 3 (Tax Returns):**
+- [ ] Period close blocks invoice edits
+- [ ] Exact XML persisted on submission
+- [ ] Double-filing prevented
+- [ ] Reopen period requires reason + audit log
+
+**Week 4 (Credit Notes + Backfill):**
+- [ ] Credit note reduces VAT correctly
+- [ ] UBL CreditNote validates against schema
+- [ ] Posted credit notes immutable
+- [ ] Existing invoices have EInvoice records
+
+### Additional Safety Measures
+
+**Security:**
+- API tokens per company (prevent cross-tenant API access)
+- Certificate key storage uses OS keychain or KMS
+- All PII fields encrypted at rest
+- Signature logs include IP address + user agent
+
+**Performance:**
+- Queued jobs for UBL generation + signing + submission
+- Idempotency keys prevent duplicate submissions
+- Ops dashboard: queue depth, failed jobs, last sync per company
+
+**UX:**
+- Health ping for e-ujp portal with warning banner
+- "Simulate submission" (validate without submitting)
+- Print preview with sample MK data for accountant review
+
+**Testing:**
+- 80% minimum code coverage for Phase 1
+- Multi-tenant isolation tests for all new models
+- Concurrency tests for number series
+- Entity guard failure tests
+
+---
+
+**Document Version:** 2.0 (Revised based on stakeholder feedback)
 **Last Updated:** 2025-11-10
+**Revision Date:** 2025-11-10
 **Next Review:** 2025-11-17 (after Phase 1.1 kickoff)
