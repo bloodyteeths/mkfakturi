@@ -3,6 +3,12 @@ node_modules
 vendor
 .npm
 
+# But include package files (needed for Docker build)
+!package.json
+!package-lock.json
+!composer.json
+!composer.lock
+
 # Development files
 .git
 .vscode
@@ -51,9 +57,19 @@ roadmaps/
 .env.testing
 .env.backup
 
-# Build artifacts
+# Build artifacts (will be built during Docker build)
 public/build
 public/storage
+
+# But include source files needed for build
+!resources/
+!public/*.php
+!public/*.html
+!public/*.ico
+!lang/
+!vite.config.js
+!postcss.config.cjs
+!tailwind.config.js
 
 # IDE files
 *.code-workspace
