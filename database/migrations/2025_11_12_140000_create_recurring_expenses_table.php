@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('recurring_expenses')) {
+            return;
+        }
+
         Schema::create('recurring_expenses', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('company_id');

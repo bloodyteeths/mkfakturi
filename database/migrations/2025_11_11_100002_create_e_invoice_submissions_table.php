@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('e_invoice_submissions')) {
+            return;
+        }
+
         Schema::create('e_invoice_submissions', function (Blueprint $table) {
             $table->id();
 

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('proforma_invoice_items')) {
+            return;
+        }
+
         Schema::create('proforma_invoice_items', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');

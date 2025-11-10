@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('bank_consents')) {
+            return;
+        }
+
         Schema::create('bank_consents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('bank_connection_id')->constrained('bank_connections')->onDelete('restrict');

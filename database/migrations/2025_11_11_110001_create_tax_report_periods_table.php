@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('tax_report_periods')) {
+            return;
+        }
+
         Schema::create('tax_report_periods', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('company_id');

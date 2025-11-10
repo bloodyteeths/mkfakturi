@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('gateway_webhook_events')) {
+            return;
+        }
+
         Schema::create('gateway_webhook_events', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('company_id');

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('bank_providers')) {
+            return;
+        }
+
         Schema::create('bank_providers', function (Blueprint $table) {
             $table->id();
             $table->string('key', 50)->unique()->comment('Bank identifier: nlb, stopanska, komercijalna');

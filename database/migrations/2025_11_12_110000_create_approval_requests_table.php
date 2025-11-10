@@ -17,6 +17,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('approval_requests')) {
+            return;
+        }
+
         Schema::create('approval_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('company_id');
