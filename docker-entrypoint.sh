@@ -47,28 +47,14 @@ if [ ! -f "/var/www/html/.env" ]; then
     cp /var/www/html/.env.example /var/www/html/.env
 fi
 
-# Update .env for Railway environment
-if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
-    echo "Configuring .env for Railway..."
-
-    # Set production environment
-    sed -i 's/APP_ENV=.*/APP_ENV=production/' /var/www/html/.env
-    sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' /var/www/html/.env
-
-    # Set database connection to mysql
-    sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' /var/www/html/.env
-
-    # Set queue connection to database
-    sed -i 's/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/' /var/www/html/.env
-
-    echo "✅ .env configured for production"
-fi
-
 # Generate application key if missing
 if ! grep -q "APP_KEY=base64:" /var/www/html/.env; then
     echo "Generating application key..."
     php artisan key:generate --force
 fi
+
+# Railway environment variables take precedence over .env
+# DB_* variables are already exported at the top of this script
 
 # Create required directories
 mkdir -p storage/framework/{sessions,views,cache}
