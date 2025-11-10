@@ -99,9 +99,16 @@ WORKDIR /app
 # Copy package files for caching (lock file optional)
 COPY package*.json ./
 
-# Install all dependencies (needed for build) with Cypress skip
-ENV CYPRESS_INSTALL_BINARY=0
-RUN npm ci --prefer-offline --no-audit
+# Install all dependencies (needed for build) while skipping heavy binaries.
+# Log which strategy we use so build logs stay clear.
+ENV CYPRESS_INSTALL_BINARY=0 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+RUN if [ -f package-lock.json ]; then \
+        echo "package-lock.json detected -> running npm ci"; \
+        npm ci --prefer-offline --no-audit; \
+    else \
+        echo "package-lock.json missing -> running npm install"; \
+        npm install --prefer-offline --no-audit; \
+    fi
 
 # Copy frontend source files
 COPY vite.config.js postcss.config.cjs tailwind.config.js ./
