@@ -80,39 +80,28 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Running migrations..."
     php artisan migrate --force || echo "Migrations failed or already applied"
 
-    # Auto-enable installation skip on Railway
-    echo "========================================="
-    echo "Railway detected - setting up installation skip"
-    echo "========================================="
+    # Check if installation already complete (like commit 09c2afc)
+    PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
+    echo "Profile status: $PROFILE_STATUS"
 
-    # Create database marker using Laravel Storage
-    echo "Creating database marker via Laravel Storage..."
-    php artisan tinker --execute="\Storage::disk('local')->put('database_created', time()); echo 'Marker created' . PHP_EOL;" 2>/dev/null || echo "Could not create marker"
+    if [ "$PROFILE_STATUS" != "COMPLETED" ]; then
+        echo "========================================="
+        echo "Setting up installation skip for Railway"
+        echo "========================================="
 
-    # Verify marker
-    php artisan tinker --execute="echo 'InstallUtils::isDbCreated(): ' . (\App\Space\InstallUtils::isDbCreated() ? 'TRUE' : 'FALSE') . PHP_EOL;" 2>/dev/null || echo "Could not check"
+        # Create database marker using Laravel Storage
+        php artisan tinker --execute="\Storage::disk('local')->put('database_created', time());" 2>/dev/null || echo "Could not create marker"
 
-    # Check if admin user exists
-    ADMIN_EMAIL="${ADMIN_EMAIL:-your-email@example.com}"
-    ADMIN_PASSWORD="${ADMIN_PASSWORD:-your-secure-password}"
+        # Set profile_complete to COMPLETED
+        php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED');" 2>/dev/null || echo "Could not set profile_complete"
 
-    USER_EXISTS=$(php artisan tinker --execute="echo \App\Models\User::where('email', '$ADMIN_EMAIL')->exists() ? 'yes' : 'no';" 2>/dev/null | tail -1)
-
-    if [ "$USER_EXISTS" != "yes" ]; then
-        echo "Creating admin user: $ADMIN_EMAIL"
-        php artisan admin:reset --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" 2>/dev/null || echo "Could not create admin"
+        # Verify
+        VERIFY=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
+        echo "✅ profile_complete set to: $VERIFY"
+        echo "========================================="
     else
-        echo "Admin user already exists: $ADMIN_EMAIL"
+        echo "Already installed (profile_complete = COMPLETED), skipping setup"
     fi
-
-    # Set profile_complete
-    echo "Setting profile_complete to COMPLETED..."
-    php artisan tinker --execute="\App\Models\Setting::setSetting('profile_complete', 'COMPLETED'); echo 'Set to COMPLETED' . PHP_EOL;" 2>/dev/null || echo "Could not set"
-
-    # Verify
-    VERIFY=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
-    echo "✅ profile_complete: $VERIFY"
-    echo "========================================="
 fi
 
 # Create storage symlink
