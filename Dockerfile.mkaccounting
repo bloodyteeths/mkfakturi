@@ -61,12 +61,10 @@ RUN apk add --no-cache \
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # Configure PHP
-COPY <<EOF /usr/local/etc/php/conf.d/custom.ini
-memory_limit = 512M
-upload_max_filesize = 50M
-post_max_size = 50M
-max_execution_time = 600
-EOF
+RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini && \
+    echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini && \
+    echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini && \
+    echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
 
 WORKDIR /var/www/html
 
@@ -178,198 +176,13 @@ RUN mkdir -p storage/app/public \
 # Set up .env template for installation
 RUN cp .env.example .env
 
-# Configure Nginx
-COPY <<'EOF' /etc/nginx/nginx.conf
-user www;
-worker_processes auto;
-error_log /var/log/nginx/error.log warn;
-pid /run/nginx/nginx.pid;
+# Copy configuration files
+COPY docker-nginx.conf /etc/nginx/nginx.conf
+COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-events {
-    worker_connections 1024;
-}
-
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-    
-    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
-                    '$status $body_bytes_sent "$http_referer" '
-                    '"$http_user_agent" "$http_x_forwarded_for"';
-    
-    access_log /var/log/nginx/access.log main;
-    
-    sendfile on;
-    tcp_nopush on;
-    keepalive_timeout 65;
-    gzip on;
-    
-    server {
-        listen 80;
-        server_name _;
-        root /var/www/html/public;
-        index index.php;
-        
-        location / {
-            try_files $uri $uri/ /index.php?$query_string;
-        }
-        
-        location ~ \.php$ {
-            fastcgi_pass 127.0.0.1:9000;
-            fastcgi_index index.php;
-            fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-            include fastcgi_params;
-        }
-        
-        location ~ /\.(?!well-known).* {
-            deny all;
-        }
-    }
-}
-EOF
-
-# Configure PHP-FPM
-COPY <<'EOF' /usr/local/etc/php-fpm.d/www.conf
-[www]
-user = www
-group = www
-listen = 127.0.0.1:9000
-pm = dynamic
-pm.max_children = 50
-pm.start_servers = 5
-pm.min_spare_servers = 5
-pm.max_spare_servers = 35
-pm.max_requests = 500
-EOF
-
-# Configure Supervisor
-COPY <<'EOF' /etc/supervisor/conf.d/supervisord.conf
-[supervisord]
-nodaemon=true
-user=root
-
-[program:php-fpm]
-command=/usr/local/sbin/php-fpm -F
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-autorestart=true
-
-[program:nginx]
-command=/usr/sbin/nginx -g "daemon off;"
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-autorestart=true
-
-[program:queue-worker]
-process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --max-time=3600
-autostart=true
-autorestart=true
-stopasgroup=true
-killasgroup=true
-user=www
-numprocs=2
-redirect_stderr=true
-stdout_logfile=/var/www/html/storage/logs/queue.log
-stopwaitsecs=3600
-
-[program:scheduler]
-command=/bin/sh -c "while [ true ]; do (php /var/www/html/artisan schedule:run --verbose --no-interaction &); sleep 60; done"
-autostart=true
-autorestart=true
-user=www
-stdout_logfile=/var/www/html/storage/logs/scheduler.log
-stderr_logfile=/var/www/html/storage/logs/scheduler.log
-EOF
-
-# Create entrypoint script
-COPY <<'EOF' /entrypoint.sh
-#!/bin/bash
-set -e
-
-echo "=== Application Startup ==="
-
-# Railway-specific: Parse MySQL connection from environment
-if [ ! -z "$MYSQL_URL" ]; then
-    echo "Railway detected: Parsing MYSQL_URL..."
-    temp="${MYSQL_URL#*://}"
-    userpass="${temp%%@*}"
-    export DB_USERNAME="${userpass%%:*}"
-    export DB_PASSWORD="${userpass#*:}"
-    temp="${temp#*@}"
-    hostport="${temp%%/*}"
-    export DB_HOST="${hostport%%:*}"
-    export DB_PORT="${hostport#*:}"
-    export DB_DATABASE="${temp#*/}"
-    export DB_CONNECTION=mysql
-    echo "DB configured from MYSQL_URL"
-elif [ ! -z "$MYSQLHOST" ]; then
-    echo "Railway detected: Using individual MySQL variables..."
-    export DB_HOST="${MYSQLHOST}"
-    export DB_PORT="${MYSQLPORT:-3306}"
-    export DB_DATABASE="${MYSQLDATABASE}"
-    export DB_USERNAME="${MYSQLUSER:-root}"
-    export DB_PASSWORD="${MYSQLPASSWORD}"
-    export DB_CONNECTION=mysql
-    echo "DB configured from Railway variables"
-fi
-
-# Wait for database to be ready (Railway)
-if [ ! -z "$DB_HOST" ]; then
-    echo "Waiting for database at $DB_HOST:$DB_PORT..."
-    for i in {1..30}; do
-        if mysqladmin ping -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" --silent; then
-            echo "Database is ready!"
-            break
-        fi
-        echo "Waiting for database... ($i/30)"
-        sleep 2
-    done
-fi
-
-# Ensure proper .env setup
-if [ ! -f "/var/www/html/.env" ]; then
-    echo "Creating .env from example..."
-    cp /var/www/html/.env.example /var/www/html/.env
-fi
-
-# Generate application key if missing
-if ! grep -q "APP_KEY=base64:" /var/www/html/.env; then
-    echo "Generating application key..."
-    php artisan key:generate --force
-fi
-
-# Create required directories
-mkdir -p storage/framework/{sessions,views,cache}
-mkdir -p storage/logs
-mkdir -p bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-
-# Clear caches
-echo "Clearing caches..."
-php artisan config:clear || true
-php artisan cache:clear || true
-php artisan route:clear || true
-php artisan view:clear || true
-
-# Run migrations (Railway)
-if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
-    echo "Running migrations..."
-    php artisan migrate --force || echo "Migrations failed or already applied"
-fi
-
-# Create storage symlink
-php artisan storage:link || true
-
-# Start supervisor
-echo "Starting application services..."
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-EOF
-
+# Copy and set up entrypoint
+COPY docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Expose port

@@ -29,8 +29,15 @@ cypress/videos
 
 # Docker files
 docker-compose*.yml
-Dockerfile*
+Dockerfile.mcp-server
 .dockerignore
+
+# Include our production Dockerfile and configs
+!Dockerfile.mkaccounting
+!docker-entrypoint.sh
+!docker-nginx.conf
+!docker-php-fpm.conf
+!docker-supervisord.conf
 
 # Documentation
 *.md
