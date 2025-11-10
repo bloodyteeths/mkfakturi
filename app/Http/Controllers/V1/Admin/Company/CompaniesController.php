@@ -80,6 +80,12 @@ class CompaniesController extends Controller
     {
         $companies = $request->user()->companies;
 
+        // Load roles for each company with proper Bouncer scope
+        $companies->each(function ($company) {
+            BouncerFacade::scope()->to($company->id);
+            $company->load('roles');
+        });
+
         return CompanyResource::collection($companies);
     }
 }
