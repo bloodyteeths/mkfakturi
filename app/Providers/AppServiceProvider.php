@@ -197,6 +197,8 @@ class AppServiceProvider extends ServiceProvider
         if ($isEnabled) {
             \App\Models\Invoice::observe(\App\Observers\InvoiceObserver::class);
             \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
+            \App\Models\CreditNote::observe(\App\Observers\CreditNoteObserver::class);
+            \App\Models\Expense::observe(\App\Observers\ExpenseObserver::class);
         }
     }
 }

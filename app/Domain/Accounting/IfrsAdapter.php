@@ -781,6 +781,105 @@ class IfrsAdapter
     }
 
     /**
+     * Post an Expense to the general ledger
+     * Creates: DR Expense Account (5XXX based on category), CR Cash/Bank
+     *
+     * @param \App\Models\Expense $expense
+     * @return void
+     * @throws \Exception
+     */
+    public function postExpense($expense): void
+    {
+        // Skip if feature is disabled
+        if (!$this->isEnabled()) {
+            return;
+        }
+
+        // Idempotency check: don't re-post if already posted
+        if ($expense->ifrs_transaction_id) {
+            Log::info("Expense already posted to ledger, skipping", [
+                'expense_id' => $expense->id,
+                'ifrs_transaction_id' => $expense->ifrs_transaction_id,
+            ]);
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($expense->company);
+            if (!$entity) {
+                throw new \Exception("Failed to get or create IFRS Entity for company");
+            }
+
+            // EntityGuard check
+            \App\Domain\Guards\EntityGuard::ensureEntityExists($expense->company);
+
+            // Get or create accounts
+            $expenseAccount = $this->getExpenseAccount($expense->company_id, $entity->id, $expense->category);
+            $cashAccount = $this->getCashAccount($expense->company_id, $entity->id);
+
+            // Build narration
+            $categoryName = $expense->category ? $expense->category->name : 'General Expense';
+            $narration = "Expense: {$categoryName}";
+            if ($expense->notes) {
+                $narration .= " - " . substr($expense->notes, 0, 100);
+            }
+
+            // Create IFRS Transaction (Cash Purchase)
+            $transaction = Transaction::create([
+                'account_id' => $expenseAccount->id,
+                'transaction_date' => $expense->expense_date ?? Carbon::now(),
+                'narration' => $narration,
+                'transaction_type' => Transaction::CP, // Cash Purchase
+                'currency_id' => $this->getCurrencyId($expense->company_id),
+                'entity_id' => $entity->id,
+            ]);
+
+            // Line Item: Debit Expense Account
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $expenseAccount->id,
+                'amount' => $expense->amount / 100, // Convert cents to dollars
+                'quantity' => 1,
+                'entry_type' => LineItem::DEBIT,
+            ]);
+
+            // Line Item: Credit Cash/Bank
+            LineItem::create([
+                'transaction_id' => $transaction->id,
+                'account_id' => $cashAccount->id,
+                'amount' => $expense->amount / 100,
+                'quantity' => 1,
+                'entry_type' => LineItem::CREDIT,
+            ]);
+
+            // Post the transaction to the ledger
+            $transaction->post();
+
+            // Store the IFRS transaction ID on the expense for reference
+            $expense->ifrs_transaction_id = $transaction->id;
+            $expense->saveQuietly();
+
+            DB::commit();
+
+            Log::info("Expense posted to ledger", [
+                'expense_id' => $expense->id,
+                'category' => $categoryName,
+                'ifrs_transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to post expense to ledger", [
+                'expense_id' => $expense->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Get currency ID for company (defaults to first currency)
      *
      * @param int $companyId
@@ -807,6 +906,84 @@ class IfrsAdapter
 
         return $currency->id;
     }
+
+    /**
+     * Get or create Expense account based on category
+     *
+     * @param int $companyId
+     * @param int $entityId
+     * @param \App\Models\ExpenseCategory|null $category
+     * @return Account
+     */
+    protected function getExpenseAccount(int $companyId, int $entityId, $category = null): Account
+    {
+        // Use category name if available, otherwise default
+        $categoryName = $category ? $category->name : 'General Expenses';
+
+        // Map to appropriate expense account code based on category
+        // Default to 5000 range (Operating Expenses)
+        $accountCode = $this->mapCategoryToAccountCode($categoryName);
+
+        return Account::firstOrCreate(
+            [
+                'account_type' => Account::OPERATING_EXPENSE,
+                'category_id' => null,
+                'name' => $categoryName,
+                'entity_id' => $entityId,
+            ],
+            [
+                'code' => $accountCode,
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
+
+    /**
+     * Map expense category to appropriate chart of accounts code
+     *
+     * @param string $categoryName
+     * @return string
+     */
+    protected function mapCategoryToAccountCode(string $categoryName): string
+    {
+        // Basic mapping - can be extended based on business needs
+        $categoryLower = strtolower($categoryName);
+
+        if (str_contains($categoryLower, 'salary') || str_contains($categoryLower, 'wage')) {
+            return '5200'; // Salaries and Wages
+        }
+
+        if (str_contains($categoryLower, 'rent')) {
+            return '5300'; // Rent Expense
+        }
+
+        if (str_contains($categoryLower, 'utility') || str_contains($categoryLower, 'utilities')) {
+            return '5400'; // Utilities
+        }
+
+        if (str_contains($categoryLower, 'marketing') || str_contains($categoryLower, 'advertising')) {
+            return '5500'; // Marketing and Advertising
+        }
+
+        if (str_contains($categoryLower, 'travel')) {
+            return '5600'; // Travel Expenses
+        }
+
+        if (str_contains($categoryLower, 'office') || str_contains($categoryLower, 'supplies')) {
+            return '5700'; // Office Supplies
+        }
+
+        if (str_contains($categoryLower, 'insurance')) {
+            return '5800'; // Insurance
+        }
+
+        if (str_contains($categoryLower, 'legal') || str_contains($categoryLower, 'professional')) {
+            return '5900'; // Professional Fees
+        }
+
+        // Default general expense
+        return '5000';
+    }
 }
 
-// CLAUDE-CHECKPOINT: Added postCreditNote() method for credit note accounting
+// CLAUDE-CHECKPOINT: Added postExpense() method for expense accounting

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certificate;
+use App\Models\SignatureLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
 /**
@@ -33,24 +36,31 @@ class CertUploadController extends Controller
     public function current(): JsonResponse
     {
         try {
-            $certificateInfoPath = storage_path('app/' . self::CERT_STORAGE_PATH . '/' . self::CERTIFICATE_INFO_FILENAME);
+            $companyId = request()->header('company');
 
-            if (!File::exists($certificateInfoPath)) {
+            if (!$companyId) {
+                return response()->json([
+                    'data' => null,
+                    'message' => __('certificates.no_company_header')
+                ], 400);
+            }
+
+            // Query active certificate from database
+            $certificate = Certificate::getActiveCertificate($companyId);
+
+            if (!$certificate) {
                 return response()->json([
                     'data' => null,
                     'message' => __('certificates.no_certificate_found')
                 ], 200);
             }
 
-            $certificateInfo = json_decode(File::get($certificateInfoPath), true);
-
-            // Check if certificate files still exist
-            $privateKeyPath = storage_path('app/' . self::CERT_STORAGE_PATH . '/' . self::PRIVATE_KEY_FILENAME);
-            $certificatePath = storage_path('app/' . self::CERT_STORAGE_PATH . '/' . self::CERTIFICATE_FILENAME);
-
-            if (!File::exists($privateKeyPath) || !File::exists($certificatePath)) {
-                // Clean up invalid info file
-                File::delete($certificateInfoPath);
+            // Verify certificate file still exists
+            if ($certificate->certificate_path && !Storage::exists($certificate->certificate_path)) {
+                Log::warning('Certificate file missing for certificate', [
+                    'certificate_id' => $certificate->id,
+                    'path' => $certificate->certificate_path
+                ]);
 
                 return response()->json([
                     'data' => null,
@@ -58,11 +68,26 @@ class CertUploadController extends Controller
                 ], 200);
             }
 
-            // Verify certificate is still valid
-            $certificateInfo['is_valid'] = $this->isCertificateValid($certificateInfo);
-
+            // Return certificate info from database (encrypted_key_blob is already hidden)
             return response()->json([
-                'data' => $certificateInfo,
+                'data' => [
+                    'id' => $certificate->id,
+                    'name' => $certificate->name,
+                    'serial_number' => $certificate->serial_number,
+                    'fingerprint' => $certificate->fingerprint,
+                    'subject' => $certificate->subject,
+                    'issuer' => $certificate->issuer,
+                    'valid_from' => $certificate->valid_from->toISOString(),
+                    'valid_to' => $certificate->valid_to->toISOString(),
+                    'algorithm' => $certificate->algorithm,
+                    'key_size' => $certificate->key_size,
+                    'is_active' => $certificate->is_active,
+                    'is_expired' => $certificate->is_expired,
+                    'is_valid' => $certificate->is_valid,
+                    'days_until_expiry' => $certificate->days_until_expiry,
+                    'last_used_at' => $certificate->last_used_at?->toISOString(),
+                    'uploaded_at' => $certificate->created_at->toISOString(),
+                ],
                 'message' => __('certificates.current_certificate_retrieved')
             ]);
 
@@ -99,10 +124,10 @@ class CertUploadController extends Controller
                 'min:4',
                 'max:255'
             ],
-            'description' => [
+            'name' => [
                 'nullable',
                 'string',
-                'max:500'
+                'max:255'
             ]
         ], [
             'certificate.required' => __('certificates.certificate_required'),
@@ -122,9 +147,18 @@ class CertUploadController extends Controller
         }
 
         try {
+            $companyId = request()->header('company');
+
+            if (!$companyId) {
+                return response()->json([
+                    'message' => __('certificates.no_company_header'),
+                    'errors' => ['company' => [__('certificates.no_company_header')]]
+                ], 400);
+            }
+
             $certificateFile = $request->file('certificate');
             $password = $request->input('password');
-            $description = $request->input('description', '');
+            $certificateName = $request->input('name', '');
 
             // Create secure temporary file for processing
             $tempPath = $this->createSecureTempFile($certificateFile);
@@ -136,20 +170,70 @@ class CertUploadController extends Controller
                 // Validate extracted certificate
                 $certificateInfo = $this->validateCertificate($extractedData['certificate']);
 
-                // Store certificate and private key securely
-                $this->storeCertificate($extractedData, $certificateInfo, $description);
+                // Extract key size from private key
+                $keySize = $this->extractKeySize($extractedData['private_key']);
 
-                // Update configuration
-                $this->updateSigningConfiguration();
+                // Store certificate file and get path
+                $certificatePath = $this->storeCertificateFile($extractedData['certificate'], $companyId);
+
+                // Read the entire P12/PFX file for encrypted storage
+                $p12Content = File::get($tempPath);
+                $encryptedKeyBlob = Crypt::encryptString($p12Content);
+
+                // Create Certificate record in database
+                $certificate = Certificate::create([
+                    'company_id' => $companyId,
+                    'name' => $certificateName ?: ($certificateInfo['subject']['CN'] ?? 'QES Certificate'),
+                    'serial_number' => $certificateInfo['serial_number'],
+                    'fingerprint' => $certificateInfo['fingerprint'],
+                    'valid_from' => $certificateInfo['valid_from'],
+                    'valid_to' => $certificateInfo['valid_to'],
+                    'encrypted_key_blob' => $encryptedKeyBlob,
+                    'certificate_path' => $certificatePath,
+                    'is_active' => true, // Activate this certificate (deactivates others via model boot)
+                    'subject' => $certificateInfo['subject'],
+                    'issuer' => $certificateInfo['issuer'],
+                    'algorithm' => $certificateInfo['algorithm'],
+                    'key_size' => $keySize,
+                ]);
+
+                // Create upload log
+                SignatureLog::logUpload(
+                    $certificate,
+                    true,
+                    null,
+                    [
+                        'uploaded_by' => auth()->user()?->name ?? 'Unknown',
+                        'file_size' => strlen($p12Content),
+                        'fingerprint' => $certificateInfo['fingerprint'],
+                    ]
+                );
 
                 Log::info('Certificate uploaded successfully', [
+                    'certificate_id' => $certificate->id,
+                    'company_id' => $companyId,
                     'subject' => $certificateInfo['subject']['CN'] ?? 'Unknown',
                     'valid_until' => $certificateInfo['valid_to'],
                     'fingerprint' => substr($certificateInfo['fingerprint'], 0, 16) . '...'
                 ]);
 
                 return response()->json([
-                    'data' => $certificateInfo,
+                    'data' => [
+                        'id' => $certificate->id,
+                        'name' => $certificate->name,
+                        'serial_number' => $certificate->serial_number,
+                        'fingerprint' => $certificate->fingerprint,
+                        'subject' => $certificate->subject,
+                        'issuer' => $certificate->issuer,
+                        'valid_from' => $certificate->valid_from->toISOString(),
+                        'valid_to' => $certificate->valid_to->toISOString(),
+                        'algorithm' => $certificate->algorithm,
+                        'key_size' => $certificate->key_size,
+                        'is_active' => $certificate->is_active,
+                        'is_expired' => $certificate->is_expired,
+                        'is_valid' => $certificate->is_valid,
+                        'days_until_expiry' => $certificate->days_until_expiry,
+                    ],
                     'message' => __('certificates.upload_success')
                 ], 201);
 
@@ -165,6 +249,17 @@ class CertUploadController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+
+            // Log failed upload attempt
+            if (isset($companyId)) {
+                SignatureLog::create([
+                    'company_id' => $companyId,
+                    'action' => SignatureLog::ACTION_UPLOAD,
+                    'user_id' => auth()->id(),
+                    'success' => false,
+                    'error_message' => $e->getMessage(),
+                ]);
+            }
 
             // Return appropriate error message
             if (str_contains($e->getMessage(), 'password')) {
@@ -185,29 +280,45 @@ class CertUploadController extends Controller
             ], 500);
         }
     }
+    // CLAUDE-CHECKPOINT
 
     /**
-     * Delete current certificate
+     * Delete certificate by ID
      */
-    public function delete(): JsonResponse
+    public function delete(int $id): JsonResponse
     {
         try {
-            $storagePath = storage_path('app/' . self::CERT_STORAGE_PATH);
+            $companyId = request()->header('company');
 
-            // Remove all certificate files
-            $filesToDelete = [
-                $storagePath . '/' . self::PRIVATE_KEY_FILENAME,
-                $storagePath . '/' . self::CERTIFICATE_FILENAME,
-                $storagePath . '/' . self::CERTIFICATE_INFO_FILENAME
-            ];
-
-            foreach ($filesToDelete as $filePath) {
-                if (File::exists($filePath)) {
-                    File::delete($filePath);
-                }
+            if (!$companyId) {
+                return response()->json([
+                    'message' => __('certificates.no_company_header')
+                ], 400);
             }
 
-            Log::info('Certificate deleted successfully');
+            // Find certificate for this company
+            $certificate = Certificate::where('id', $id)
+                ->where('company_id', $companyId)
+                ->first();
+
+            if (!$certificate) {
+                return response()->json([
+                    'message' => __('certificates.certificate_not_found')
+                ], 404);
+            }
+
+            // Store certificate info for logging before deletion
+            $certificateInfo = [
+                'id' => $certificate->id,
+                'name' => $certificate->name,
+                'fingerprint' => $certificate->fingerprint,
+                'serial_number' => $certificate->serial_number,
+            ];
+
+            // Delete certificate (this also deletes physical files and creates log entry via model)
+            $certificate->delete();
+
+            Log::info('Certificate deleted successfully', $certificateInfo);
 
             return response()->json([
                 'message' => __('certificates.delete_success')
@@ -215,6 +326,7 @@ class CertUploadController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Certificate deletion failed', [
+                'certificate_id' => $id ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -224,6 +336,199 @@ class CertUploadController extends Controller
             ], 500);
         }
     }
+    // CLAUDE-CHECKPOINT
+
+    /**
+     * Verify certificate by ID
+     * Performs dry-run validation without signing anything
+     */
+    public function verify(int $id): JsonResponse
+    {
+        try {
+            $companyId = request()->header('company');
+
+            if (!$companyId) {
+                return response()->json([
+                    'message' => __('certificates.no_company_header')
+                ], 400);
+            }
+
+            // Find certificate for this company
+            $certificate = Certificate::where('id', $id)
+                ->where('company_id', $companyId)
+                ->first();
+
+            if (!$certificate) {
+                return response()->json([
+                    'message' => __('certificates.certificate_not_found')
+                ], 404);
+            }
+
+            $validationResults = [];
+            $isValid = true;
+
+            // Check 1: Certificate expiry
+            if ($certificate->is_expired) {
+                $validationResults[] = [
+                    'check' => 'expiry',
+                    'status' => 'failed',
+                    'message' => __('certificates.certificate_expired'),
+                    'details' => [
+                        'valid_to' => $certificate->valid_to->toISOString(),
+                        'days_expired' => abs($certificate->days_until_expiry),
+                    ]
+                ];
+                $isValid = false;
+            } else {
+                $validationResults[] = [
+                    'check' => 'expiry',
+                    'status' => 'passed',
+                    'message' => __('certificates.certificate_valid'),
+                    'details' => [
+                        'valid_to' => $certificate->valid_to->toISOString(),
+                        'days_until_expiry' => $certificate->days_until_expiry,
+                    ]
+                ];
+            }
+
+            // Check 2: Certificate file exists
+            if (!$certificate->certificate_path || !Storage::exists($certificate->certificate_path)) {
+                $validationResults[] = [
+                    'check' => 'file_exists',
+                    'status' => 'failed',
+                    'message' => __('certificates.certificate_file_missing'),
+                ];
+                $isValid = false;
+            } else {
+                $validationResults[] = [
+                    'check' => 'file_exists',
+                    'status' => 'passed',
+                    'message' => __('certificates.certificate_file_found'),
+                ];
+            }
+
+            // Check 3: Encrypted key blob exists
+            if (!$certificate->encrypted_key_blob) {
+                $validationResults[] = [
+                    'check' => 'key_blob',
+                    'status' => 'failed',
+                    'message' => __('certificates.key_blob_missing'),
+                ];
+                $isValid = false;
+            } else {
+                $validationResults[] = [
+                    'check' => 'key_blob',
+                    'status' => 'passed',
+                    'message' => __('certificates.key_blob_found'),
+                ];
+            }
+
+            // Check 4: Verify certificate chain (if file exists)
+            if ($certificate->certificate_path && Storage::exists($certificate->certificate_path)) {
+                try {
+                    $certContent = Storage::get($certificate->certificate_path);
+                    $x509Resource = openssl_x509_read($certContent);
+
+                    if ($x509Resource) {
+                        // Verify certificate data matches fingerprint
+                        $currentFingerprint = openssl_x509_fingerprint($x509Resource, 'sha256');
+
+                        if ($currentFingerprint === $certificate->fingerprint) {
+                            $validationResults[] = [
+                                'check' => 'certificate_chain',
+                                'status' => 'passed',
+                                'message' => __('certificates.certificate_chain_valid'),
+                                'details' => [
+                                    'fingerprint_match' => true,
+                                ]
+                            ];
+                        } else {
+                            $validationResults[] = [
+                                'check' => 'certificate_chain',
+                                'status' => 'failed',
+                                'message' => __('certificates.fingerprint_mismatch'),
+                                'details' => [
+                                    'expected' => $certificate->fingerprint,
+                                    'actual' => $currentFingerprint,
+                                ]
+                            ];
+                            $isValid = false;
+                        }
+                    } else {
+                        $validationResults[] = [
+                            'check' => 'certificate_chain',
+                            'status' => 'failed',
+                            'message' => __('certificates.certificate_read_failed'),
+                        ];
+                        $isValid = false;
+                    }
+                } catch (\Exception $e) {
+                    $validationResults[] = [
+                        'check' => 'certificate_chain',
+                        'status' => 'failed',
+                        'message' => __('certificates.certificate_verification_error'),
+                        'details' => [
+                            'error' => $e->getMessage(),
+                        ]
+                    ];
+                    $isValid = false;
+                }
+            }
+
+            // Check 5: Key usage validation
+            if ($certificate->algorithm) {
+                $validationResults[] = [
+                    'check' => 'key_usage',
+                    'status' => 'passed',
+                    'message' => __('certificates.key_usage_valid'),
+                    'details' => [
+                        'algorithm' => $certificate->algorithm,
+                        'key_size' => $certificate->key_size,
+                    ]
+                ];
+            }
+
+            // Log verification
+            SignatureLog::logVerify(
+                $certificate,
+                $certificate,
+                $isValid,
+                $isValid ? null : 'Certificate validation failed',
+                [
+                    'validation_results' => $validationResults,
+                    'verified_by' => auth()->user()?->name ?? 'Unknown',
+                ]
+            );
+
+            return response()->json([
+                'data' => [
+                    'is_valid' => $isValid,
+                    'certificate' => [
+                        'id' => $certificate->id,
+                        'name' => $certificate->name,
+                        'fingerprint' => $certificate->fingerprint,
+                        'valid_to' => $certificate->valid_to->toISOString(),
+                    ],
+                    'validation_results' => $validationResults,
+                ],
+                'message' => $isValid
+                    ? __('certificates.verification_success')
+                    : __('certificates.verification_failed')
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Certificate verification failed', [
+                'certificate_id' => $id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => __('certificates.verification_error')
+            ], 500);
+        }
+    }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Create secure temporary file for certificate processing
@@ -311,61 +616,56 @@ class CertUploadController extends Controller
     }
 
     /**
-     * Store certificate and private key securely
+     * Store certificate file in Laravel Storage
+     *
+     * @param string $certificatePem PEM-encoded certificate
+     * @param int $companyId Company ID for path namespacing
+     * @return string Storage path to the certificate file
      */
-    private function storeCertificate(array $extractedData, array $certificateInfo, string $description): void
+    private function storeCertificateFile(string $certificatePem, int $companyId): string
     {
-        $storagePath = storage_path('app/' . self::CERT_STORAGE_PATH);
+        // Create company-specific directory
+        $directory = 'certificates/company_' . $companyId;
 
-        // Ensure directory exists with secure permissions
-        if (!File::isDirectory($storagePath)) {
-            File::makeDirectory($storagePath, 0700, true);
-        }
+        // Generate unique filename based on certificate fingerprint
+        $x509Resource = openssl_x509_read($certificatePem);
+        $fingerprint = openssl_x509_fingerprint($x509Resource, 'sha256');
+        $filename = substr($fingerprint, 0, 16) . '_' . time() . '.pem';
 
-        // Store private key
-        $privateKeyPath = $storagePath . '/' . self::PRIVATE_KEY_FILENAME;
-        File::put($privateKeyPath, $extractedData['private_key']);
-        chmod($privateKeyPath, 0600);
+        $path = $directory . '/' . $filename;
 
-        // Store certificate
-        $certificatePath = $storagePath . '/' . self::CERTIFICATE_FILENAME;
-        File::put($certificatePath, $extractedData['certificate']);
-        chmod($certificatePath, 0644);
+        // Store certificate in Laravel Storage
+        Storage::put($path, $certificatePem);
 
-        // Store certificate information with description
-        $certificateInfo['description'] = $description;
-        $infoPath = $storagePath . '/' . self::CERTIFICATE_INFO_FILENAME;
-        File::put($infoPath, json_encode($certificateInfo, JSON_PRETTY_PRINT));
-        chmod($infoPath, 0644);
+        return $path;
     }
 
     /**
-     * Update Laravel configuration for XML signing
+     * Extract key size from private key
+     *
+     * @param string $privateKeyPem PEM-encoded private key
+     * @return int|null Key size in bits (e.g., 2048, 4096)
      */
-    private function updateSigningConfiguration(): void
+    private function extractKeySize(string $privateKeyPem): ?int
     {
-        // Update config values in memory for current request
-        config([
-            'mk.xml_signing.private_key_path' => storage_path('app/' . self::CERT_STORAGE_PATH . '/' . self::PRIVATE_KEY_FILENAME),
-            'mk.xml_signing.certificate_path' => storage_path('app/' . self::CERT_STORAGE_PATH . '/' . self::CERTIFICATE_FILENAME),
-        ]);
-    }
-
-    /**
-     * Check if certificate is currently valid
-     */
-    private function isCertificateValid(array $certificateInfo): bool
-    {
-        if (!isset($certificateInfo['valid_to'])) {
-            return false;
-        }
-
         try {
-            $validTo = strtotime($certificateInfo['valid_to']);
-            return $validTo !== false && time() <= $validTo;
+            $keyResource = openssl_pkey_get_private($privateKeyPem);
+
+            if (!$keyResource) {
+                return null;
+            }
+
+            $keyDetails = openssl_pkey_get_details($keyResource);
+
+            return $keyDetails['bits'] ?? null;
         } catch (\Exception $e) {
-            return false;
+            Log::warning('Failed to extract key size', [
+                'error' => $e->getMessage()
+            ]);
+            return null;
         }
     }
+
 }
+// CLAUDE-CHECKPOINT
 

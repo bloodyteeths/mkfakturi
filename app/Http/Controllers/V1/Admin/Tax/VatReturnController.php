@@ -4,12 +4,16 @@ namespace App\Http\Controllers\V1\Admin\Tax;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\TaxReportPeriod;
+use App\Models\TaxReturn;
 use App\Services\VatXmlService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -223,7 +227,7 @@ class VatReturnController extends Controller
 
     /**
      * Get VAT compliance status for a company
-     * 
+     *
      * @param Company $company
      * @return JsonResponse
      */
@@ -253,5 +257,373 @@ class VatReturnController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * File a tax return
+     *
+     * Creates or finds the tax report period, creates a tax return record,
+     * files it, and locks the period.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function file(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:companies,id',
+            'period_start' => 'required|date',
+            'period_end' => 'required|date|after_or_equal:period_start',
+            'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
+            'xml_content' => 'required|string',
+            'receipt_number' => 'nullable|string',
+            'response_data' => 'nullable|array',
+        ]);
+
+        // Get company and authorize access
+        $company = Company::findOrFail($validated['company_id']);
+        Gate::authorize('manage', $company);
+
+        try {
+            // Parse dates
+            $periodStart = Carbon::parse($validated['period_start']);
+            $periodEnd = Carbon::parse($validated['period_end']);
+            $periodType = $validated['period_type'];
+
+            // Validate period length
+            $this->validatePeriodLength($periodStart, $periodEnd, $periodType);
+
+            // Find or create tax report period
+            $period = TaxReportPeriod::firstOrCreate(
+                [
+                    'company_id' => $company->id,
+                    'period_type' => $periodType,
+                    'year' => $periodStart->year,
+                    'month' => $periodType === 'MONTHLY' ? $periodStart->month : null,
+                    'quarter' => $periodType === 'QUARTERLY' ? $periodStart->quarter : null,
+                ],
+                [
+                    'start_date' => $periodStart,
+                    'end_date' => $periodEnd,
+                    'status' => TaxReportPeriod::STATUS_OPEN,
+                ]
+            );
+
+            // Create tax return with XML content
+            $taxReturn = TaxReturn::create([
+                'company_id' => $company->id,
+                'period_id' => $period->id,
+                'return_type' => TaxReturn::TYPE_VAT,
+                'status' => TaxReturn::STATUS_DRAFT,
+                'return_data' => [
+                    'xml_content' => $validated['xml_content'],
+                    'period_start' => $periodStart->toDateString(),
+                    'period_end' => $periodEnd->toDateString(),
+                    'period_type' => $periodType,
+                ],
+            ]);
+
+            // File the tax return
+            $taxReturn->file(
+                Auth::id(),
+                $validated['receipt_number'] ?? null,
+                $validated['response_data'] ?? null
+            );
+
+            // Lock the period if this is the first filing
+            if ($period->status === TaxReportPeriod::STATUS_OPEN) {
+                $period->status = TaxReportPeriod::STATUS_CLOSED;
+                $period->closed_at = now();
+                $period->closed_by_id = Auth::id();
+                $period->save();
+            }
+
+            return response()->json([
+                'message' => 'Tax return filed successfully',
+                'data' => [
+                    'tax_return_id' => $taxReturn->id,
+                    'period_id' => $period->id,
+                    'submission_reference' => $taxReturn->submission_reference,
+                    'submitted_at' => $taxReturn->submitted_at,
+                ]
+            ], 201);
+
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to file tax return',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * List tax report periods
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getPeriods(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|integer|exists:companies,id',
+            'status' => 'nullable|string|in:OPEN,CLOSED,FILED,AMENDED',
+            'period_type' => 'nullable|string|in:MONTHLY,QUARTERLY,ANNUAL',
+            'year' => 'nullable|integer',
+            'limit' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        // Get company and authorize access
+        $company = Company::findOrFail($validated['company_id']);
+        Gate::authorize('view', $company);
+
+        try {
+            $query = TaxReportPeriod::where('company_id', $company->id)
+                ->withCount(['taxReturns as filed_returns_count' => function ($query) {
+                    $query->whereIn('status', [TaxReturn::STATUS_FILED, TaxReturn::STATUS_ACCEPTED]);
+                }]);
+
+            // Apply filters
+            if (!empty($validated['status'])) {
+                $query->where('status', $validated['status']);
+            }
+
+            if (!empty($validated['period_type'])) {
+                $query->where('period_type', $validated['period_type']);
+            }
+
+            if (!empty($validated['year'])) {
+                $query->where('year', $validated['year']);
+            }
+
+            // Order by period date descending
+            $periods = $query->orderByPeriod('desc')
+                ->paginateData($validated['limit'] ?? 15);
+
+            return response()->json([
+                'data' => $periods
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch tax periods',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get tax returns for a specific period
+     *
+     * Includes all returns for the period, including amendments.
+     * Provides XML download links for each return.
+     *
+     * @param Request $request
+     * @param int $periodId
+     * @return JsonResponse
+     */
+    public function getReturns(Request $request, int $periodId): JsonResponse
+    {
+        // Find the period and authorize access
+        $period = TaxReportPeriod::findOrFail($periodId);
+        Gate::authorize('view', $period->company);
+
+        try {
+            $returns = TaxReturn::forPeriod($periodId)
+                ->with(['submittedBy:id,name,email', 'amendmentOf:id,submission_reference'])
+                ->orderBySubmission('desc')
+                ->get()
+                ->map(function ($return) {
+                    return [
+                        'id' => $return->id,
+                        'return_type' => $return->return_type,
+                        'status' => $return->status,
+                        'status_label' => $return->status_label,
+                        'submission_reference' => $return->submission_reference,
+                        'submitted_at' => $return->submitted_at,
+                        'submitted_by' => $return->submittedBy ? [
+                            'id' => $return->submittedBy->id,
+                            'name' => $return->submittedBy->name,
+                        ] : null,
+                        'accepted_at' => $return->accepted_at,
+                        'rejected_at' => $return->rejected_at,
+                        'rejection_reason' => $return->rejection_reason,
+                        'is_amendment' => $return->amendment_of_id !== null,
+                        'amendment_of' => $return->amendmentOf ? [
+                            'id' => $return->amendmentOf->id,
+                            'submission_reference' => $return->amendmentOf->submission_reference,
+                        ] : null,
+                        'xml_download_url' => route('api.v1.tax.vat-returns.download-xml', ['id' => $return->id]),
+                        'created_at' => $return->created_at,
+                    ];
+                });
+
+            return response()->json([
+                'data' => [
+                    'period' => [
+                        'id' => $period->id,
+                        'period_name' => $period->period_name,
+                        'start_date' => $period->start_date,
+                        'end_date' => $period->end_date,
+                        'status' => $period->status,
+                    ],
+                    'returns' => $returns,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch tax returns',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Close a tax period
+     *
+     * Validates that all returns have been filed, then closes the period
+     * and locks all documents within that period.
+     *
+     * @param Request $request
+     * @param int $periodId
+     * @return JsonResponse
+     */
+    public function closePeriod(Request $request, int $periodId): JsonResponse
+    {
+        // Find the period and authorize access
+        $period = TaxReportPeriod::findOrFail($periodId);
+        Gate::authorize('manage', $period->company);
+
+        try {
+            // Validate all returns are filed
+            if ($period->hasUnfiledReturns()) {
+                return response()->json([
+                    'error' => 'Cannot close period',
+                    'message' => 'All tax returns must be filed before closing the period'
+                ], 422);
+            }
+
+            // Close the period
+            $period->close(Auth::id());
+
+            return response()->json([
+                'message' => 'Tax period closed successfully',
+                'data' => [
+                    'period_id' => $period->id,
+                    'status' => $period->status,
+                    'closed_at' => $period->closed_at,
+                    'closed_by_id' => $period->closed_by_id,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to close tax period',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reopen a closed tax period
+     *
+     * Allows reopening a closed period for amendments or corrections.
+     * Requires a reason for audit trail purposes.
+     *
+     * @param Request $request
+     * @param int $periodId
+     * @return JsonResponse
+     */
+    public function reopenPeriod(Request $request, int $periodId): JsonResponse
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|min:10|max:500',
+        ]);
+
+        // Find the period and authorize access
+        $period = TaxReportPeriod::findOrFail($periodId);
+        Gate::authorize('manage', $period->company);
+
+        try {
+            // Reopen the period
+            $period->reopen(Auth::id(), $validated['reason']);
+
+            return response()->json([
+                'message' => 'Tax period reopened successfully',
+                'data' => [
+                    'period_id' => $period->id,
+                    'status' => $period->status,
+                    'reopened_at' => $period->reopened_at,
+                    'reopened_by_id' => $period->reopened_by_id,
+                    'reopen_reason' => $period->reopen_reason,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to reopen tax period',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Download XML for a specific tax return
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function downloadXml(int $id): Response
+    {
+        // Find the tax return
+        $taxReturn = TaxReturn::findOrFail($id);
+
+        // Authorize access
+        Gate::authorize('view', $taxReturn->company);
+
+        try {
+            // Get XML content from return_data
+            $xmlContent = $taxReturn->return_data['xml_content'] ?? null;
+
+            if (!$xmlContent) {
+                return response()->json([
+                    'error' => 'XML content not found for this tax return'
+                ], 404);
+            }
+
+            // Generate filename
+            $period = $taxReturn->period;
+            $companyName = preg_replace('/[^a-zA-Z0-9]/', '_', $taxReturn->company->name);
+            $filename = sprintf(
+                'DDV04_%s_%s_%s.xml',
+                $companyName,
+                $period->start_date->format('Y-m-d'),
+                $period->end_date->format('Y-m-d')
+            );
+
+            // Add amendment suffix if applicable
+            if ($taxReturn->amendment_of_id) {
+                $filename = str_replace('.xml', '_AMENDMENT.xml', $filename);
+            }
+
+            // Return XML file as download
+            return response($xmlContent, 200, [
+                'Content-Type' => 'application/xml',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to download XML',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
+
+// CLAUDE-CHECKPOINT
 

@@ -133,6 +133,31 @@ class Invoice extends Model implements HasMedia
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    // CLAUDE-CHECKPOINT
+    /**
+     * Get the e-invoice associated with this invoice
+     */
+    public function eInvoice()
+    {
+        return $this->hasOne(EInvoice::class);
+    }
+
+    /**
+     * Get all credit notes issued for this invoice
+     */
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(CreditNote::class);
+    }
+
+    /**
+     * Get the tax report period this invoice belongs to
+     */
+    public function taxReportPeriod(): BelongsTo
+    {
+        return $this->belongsTo(TaxReportPeriod::class, 'tax_report_period_id');
+    }
+
     public function getInvoicePdfUrlAttribute()
     {
         return url('/invoices/pdf/'.$this->unique_hash);
@@ -762,5 +787,50 @@ class Invoice extends Model implements HasMedia
         }
 
         return true;
+    }
+
+    // CLAUDE-CHECKPOINT
+    /**
+     * Check if invoice has an associated e-invoice
+     *
+     * @return bool
+     */
+    public function hasEInvoice(): bool
+    {
+        return $this->eInvoice()->exists();
+    }
+
+    /**
+     * Check if invoice date is within a locked tax report period
+     *
+     * @return bool
+     */
+    public function isInLockedPeriod(): bool
+    {
+        if (!$this->taxReportPeriod) {
+            return false;
+        }
+
+        return $this->taxReportPeriod->is_locked ?? false;
+    }
+
+    /**
+     * Check if any credit notes have been issued for this invoice
+     *
+     * @return bool
+     */
+    public function hasCreditNotes(): bool
+    {
+        return $this->creditNotes()->exists();
+    }
+
+    /**
+     * Get the total amount credited through credit notes
+     *
+     * @return int
+     */
+    public function getTotalCredited(): int
+    {
+        return $this->creditNotes()->sum('total') ?? 0;
     }
 }

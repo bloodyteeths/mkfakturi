@@ -23,6 +23,20 @@ class Expense extends Model implements HasMedia
 
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'expense_date',
+        'attachment_receipt',
+        'amount',
+        'notes',
+        'expense_category_id',
+        'company_id',
+        'customer_id',
+        'payment_method_id',
+        'currency_id',
+        'creator_id',
+        'ifrs_transaction_id',
+    ];
+
     protected $appends = [
         'formattedExpenseDate',
         'formattedCreatedAt',
