@@ -40,7 +40,7 @@ return new class extends Migration
             // Indexes
             $table->index('company_id');
             $table->index('name');
-        }) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        });
     }
 
     /**

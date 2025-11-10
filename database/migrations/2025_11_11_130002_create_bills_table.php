@@ -67,7 +67,7 @@ return new class extends Migration
             $table->index('status');
             $table->index('paid_status');
             $table->index('bill_number');
-        }) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        });
     }
 
     /**

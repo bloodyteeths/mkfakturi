@@ -44,7 +44,7 @@ return new class extends Migration
             $table->index('bill_id');
             $table->index('company_id');
             $table->index('payment_date');
-        }) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        });
     }
 
     /**
