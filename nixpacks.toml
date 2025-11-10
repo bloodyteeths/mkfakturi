@@ -11,10 +11,10 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Install PHP deps and run npm ci while skipping heavy test binaries
+# Install PHP deps and run npm install while skipping heavy test binaries
 cmds = [
   "composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist",
-  "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CYPRESS_INSTALL_BINARY=0 npm ci --no-audit"
+  "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CYPRESS_INSTALL_BINARY=0 npm install --no-audit"
 ]
 
 [phases.build]
