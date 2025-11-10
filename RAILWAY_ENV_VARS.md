@@ -9,8 +9,8 @@ When deploying to Railway, these are automatically configured:
 | Variable | Default Value | Description |
 |----------|---------------|-------------|
 | `RAILWAY_SKIP_INSTALL` | `true` | Auto-enabled on Railway - skips installation wizard |
-| `ADMIN_EMAIL` | `admin@facturino.mk` | Default admin email (can be overridden) |
-| `ADMIN_PASSWORD` | `admin123` | Default admin password (can be overridden) |
+| `ADMIN_EMAIL` | `your-email@example.com` | Default admin email (can be overridden) |
+| `ADMIN_PASSWORD` | `your-secure-password` | Default admin password (can be overridden) |
 
 ## Required (Set by Railway MySQL Service)
 
@@ -108,10 +108,10 @@ STOPANSKA_MTLS_KEY_BASE64=...
 2. Deploy the application
 3. Access at your Railway URL
 4. Login with:
-   - Email: `admin@facturino.mk` (or your ADMIN_EMAIL)
-   - Password: `admin123` (or your ADMIN_PASSWORD)
+   - Email: `your-email@example.com` (or your ADMIN_EMAIL)
+   - Password: `your-secure-password` (or your ADMIN_PASSWORD)
 
-**⚠️ Important**: Change the default password immediately after first login!
+**Note**: If the admin user already exists in the database, the script will skip creation and use the existing credentials.
 
 ## Troubleshooting
 

@@ -83,11 +83,11 @@ echo "DB_USERNAME: $DB_USERNAME"
 if [ ! -z "$RAILWAY_ENVIRONMENT" ] && [ -z "$RAILWAY_SKIP_INSTALL" ]; then
     echo "Railway detected - auto-enabling RAILWAY_SKIP_INSTALL"
     export RAILWAY_SKIP_INSTALL=true
-    export ADMIN_EMAIL="${ADMIN_EMAIL:-admin@facturino.mk}"
-    export ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin123}"
-    echo "Admin credentials:"
+    export ADMIN_EMAIL="${ADMIN_EMAIL:-your-email@example.com}"
+    export ADMIN_PASSWORD="${ADMIN_PASSWORD:-your-secure-password}"
+    echo "Admin credentials will be set to:"
     echo "  Email: $ADMIN_EMAIL"
-    echo "  Password: [set from env or default]"
+    echo "  Password: [configured]"
 fi
 
 # Create a minimal .env file if it doesn't exist (installation wizard needs it)
@@ -328,11 +328,20 @@ if [ "$RAILWAY_SKIP_INSTALL" = "true" ]; then
     php artisan tinker --execute="\$users = \App\Models\User::all(['email', 'name']); foreach(\$users as \$u) { echo \$u->email . ' - ' . \$u->name . PHP_EOL; }" 2>/dev/null || echo "Could not list users"
 
     # Create/reset admin user with environment variables or defaults
-    ADMIN_EMAIL="${ADMIN_EMAIL:-admin@facturino.mk}"
-    ADMIN_PASSWORD="${ADMIN_PASSWORD:-password}"
+    ADMIN_EMAIL="${ADMIN_EMAIL:-your-email@example.com}"
+    ADMIN_PASSWORD="${ADMIN_PASSWORD:-your-secure-password}"
 
     echo "Creating/resetting admin user with email: $ADMIN_EMAIL"
-    php artisan admin:reset --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD"
+
+    # Check if user already exists before resetting
+    USER_EXISTS=$(php artisan tinker --execute="echo \App\Models\User::where('email', '$ADMIN_EMAIL')->exists() ? 'yes' : 'no';" 2>/dev/null | tail -1)
+
+    if [ "$USER_EXISTS" = "yes" ]; then
+        echo "Admin user already exists - skipping creation"
+    else
+        echo "Creating admin user..."
+        php artisan admin:reset --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD"
+    fi
 
     # Verify user settings were created
     echo "Verifying user settings..."
