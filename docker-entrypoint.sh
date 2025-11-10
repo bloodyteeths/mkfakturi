@@ -47,6 +47,23 @@ if [ ! -f "/var/www/html/.env" ]; then
     cp /var/www/html/.env.example /var/www/html/.env
 fi
 
+# Update .env for Railway environment
+if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
+    echo "Configuring .env for Railway..."
+
+    # Set production environment
+    sed -i 's/APP_ENV=.*/APP_ENV=production/' /var/www/html/.env
+    sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' /var/www/html/.env
+
+    # Set database connection to mysql
+    sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' /var/www/html/.env
+
+    # Set queue connection to database
+    sed -i 's/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/' /var/www/html/.env
+
+    echo "✅ .env configured for production"
+fi
+
 # Generate application key if missing
 if ! grep -q "APP_KEY=base64:" /var/www/html/.env; then
     echo "Generating application key..."
@@ -123,31 +140,11 @@ fi
 # Create storage symlink
 php artisan storage:link || true
 
-# Start supervisor in background to start nginx and php-fpm
+# Verify Laravel is ready before starting services
+echo "Verifying Laravel application..."
+php artisan --version || echo "Warning: Laravel not responding"
+
+# Start supervisor (nginx, php-fpm, scheduler)
+# Queue workers are disabled by default in supervisord.conf
 echo "Starting application services..."
-/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &
-
-# Wait for PHP-FPM and nginx to be ready
-sleep 5
-
-# Test if Laravel is working
-echo "Testing Laravel application..."
-if php artisan --version 2>/dev/null; then
-    echo "✅ Laravel is ready"
-
-    # Test database connection
-    if php artisan db:show 2>/dev/null | grep -q "Connection"; then
-        echo "✅ Database connection working"
-
-        # Start queue workers via supervisorctl
-        echo "Starting queue workers..."
-        supervisorctl -c /etc/supervisor/conf.d/supervisord.conf start queue-worker:* 2>/dev/null || echo "Queue workers already running or failed to start"
-    else
-        echo "⚠️  Database connection not ready, queue workers will not start"
-    fi
-else
-    echo "⚠️  Laravel not ready, queue workers will not start"
-fi
-
-# Keep supervisor running in foreground
-wait
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
