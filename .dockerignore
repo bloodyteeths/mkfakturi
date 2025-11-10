@@ -3,6 +3,16 @@
 # === Exclude directories that will be rebuilt ===
 node_modules
 vendor
+facturino/
+mcp-server/
+ai-service/
+cypress/
+playwright-report/
+tests/
+docs/
+roadmaps/
+samples/
+screenshots/
 
 # === Exclude VCS ===
 .git
@@ -25,9 +35,6 @@ cypress/videos
 
 # === Exclude docker compose ===
 docker-compose*.yml
-
-# === Exclude docs ===
-docs/
 
 # === Exclude environment files ===
 .env
