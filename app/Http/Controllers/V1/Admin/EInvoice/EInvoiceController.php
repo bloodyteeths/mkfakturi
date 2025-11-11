@@ -198,13 +198,17 @@ class EInvoiceController extends Controller
                 ]);
             }
 
+            // Refresh and load relationships
+            $eInvoice->load([
+                'invoice.customer',
+                'invoice.currency',
+                'invoice.items.taxes',
+            ]);
+
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'e_invoice_id' => $eInvoice->id,
-                    'ubl_xml' => $ublXml,
-                    'preview' => $this->formatXmlPreview($ublXml),
-                ],
+                'data' => $eInvoice,
+                'message' => 'E-invoice generated successfully',
             ]);
         } catch (Exception $e) {
             Log::error('E-invoice generation failed', [
