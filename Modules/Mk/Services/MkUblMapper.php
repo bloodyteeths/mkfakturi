@@ -255,19 +255,24 @@ class MkUblMapper
         $taxSubTotals = [];
         
         foreach ($item->taxes as $tax) {
+            // Skip if tax_type is not loaded
+            if (!$tax->tax_type) {
+                continue;
+            }
+
             $taxScheme = new TaxScheme();
             $taxScheme->setId('VAT'); // Standard VAT
-            
+
             $taxCategory = new TaxCategory();
             $taxCategory->setId('S'); // Standard rate
             $taxCategory->setPercent($tax->tax_type->percent);
             $taxCategory->setTaxScheme($taxScheme);
-            
+
             $taxSubTotal = new TaxSubTotal();
             $taxSubTotal->setTaxableAmount($item->quantity * $item->price);
             $taxSubTotal->setTaxAmount($tax->amount);
             $taxSubTotal->setTaxCategory($taxCategory);
-            
+
             $taxSubTotals[] = $taxSubTotal;
         }
         
@@ -298,25 +303,31 @@ class MkUblMapper
         
         foreach ($taxGroups as $taxTypeId => $taxes) {
             $taxType = $taxes->first()->tax_type;
+
+            // Skip if tax_type is not loaded
+            if (!$taxType) {
+                continue;
+            }
+
             $groupTaxAmount = $taxes->sum('amount');
             $groupTaxableAmount = $taxes->sum(function ($tax) {
-                return $tax->tax_type->percent > 0 ? ($tax->amount / $tax->tax_type->percent * 100) : 0;
+                return $tax->tax_type && $tax->tax_type->percent > 0 ? ($tax->amount / $tax->tax_type->percent * 100) : 0;
             });
-            
+
             $taxScheme = new TaxScheme();
             $taxScheme->setId('VAT');
             $taxScheme->setName('ДДВ'); // VAT in Macedonian
-            
+
             $taxCategory = new TaxCategory();
             $taxCategory->setId($this->getTaxCategoryId($taxType->percent));
             $taxCategory->setPercent($taxType->percent);
             $taxCategory->setTaxScheme($taxScheme);
-            
+
             $taxSubTotal = new TaxSubTotal();
             $taxSubTotal->setTaxableAmount($groupTaxableAmount);
             $taxSubTotal->setTaxAmount($groupTaxAmount);
             $taxSubTotal->setTaxCategory($taxCategory);
-            
+
             $taxSubTotals[] = $taxSubTotal;
             $totalTaxAmount += $groupTaxAmount;
         }

@@ -160,8 +160,10 @@ class EInvoiceController extends Controller
                 ->with([
                     'customer',
                     'company',
-                    'items.taxes',
-                    'taxes',
+                    'company.bankAccounts',
+                    'items.taxes.tax_type',
+                    'taxes.tax_type',
+                    'currency',
                 ])
                 ->findOrFail($invoiceId);
 
