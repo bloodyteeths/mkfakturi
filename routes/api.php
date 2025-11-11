@@ -504,68 +504,58 @@ Route::prefix('/v1')->group(function () {
                 Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
             });
 
-            // Suppliers (Accounts Payable)
+            // Suppliers, Bills, Bill Payments (Accounts Payable) - DISABLED
+            // Controllers not yet implemented - uncomment when ready
             // ----------------------------------
-
-            Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
-
-            Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
-
-            // Bills (Accounts Payable)
+            // TODO: Implement AccountsPayable controllers:
+            //   - app/Http/Controllers/V1/Admin/AccountsPayable/SuppliersController.php
+            //   - app/Http/Controllers/V1/Admin/AccountsPayable/BillsController.php
+            //   - app/Http/Controllers/V1/Admin/AccountsPayable/BillPaymentsController.php
+            // Models exist and are ready (Bill, Supplier, BillPayment, BillItem)
             // ----------------------------------
-
-            Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
-
-            Route::post('/bills/{bill}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsViewed']);
-
-            Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
-
-            Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);
-
-            Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
-
-            Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
-
-            // Bill Payments (Accounts Payable)
-            // ----------------------------------
-
-            Route::get('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'index']);
-
-            Route::post('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'store']);
-
-            Route::get('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'show']);
-
-            Route::put('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'update']);
-
-            Route::delete('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'destroy']);
+            // Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
+            // Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
+            //
+            // Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
+            // Route::post('/bills/{bill}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsViewed']);
+            // Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
+            // Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);
+            // Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
+            // Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
+            //
+            // Route::get('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'index']);
+            // Route::post('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'store']);
+            // Route::get('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'show']);
+            // Route::put('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'update']);
+            // Route::delete('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'destroy']);
 
             // Proforma Invoices
             // ----------------------------------
 
-            Route::post('/proforma-invoices/{proformaInvoice}/send', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'send']);
+            Route::post('/proforma-invoices/{proformaInvoice}/send', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'send']);
 
-            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'markAsViewed']);
+            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsViewed']);
 
-            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-expired', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'markAsExpired']);
+            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-expired', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsExpired']);
 
-            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-rejected', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'markAsRejected']);
+            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-rejected', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsRejected']);
 
-            Route::post('/proforma-invoices/{proformaInvoice}/convert-to-invoice', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'convertToInvoice']);
+            Route::post('/proforma-invoices/{proformaInvoice}/convert-to-invoice', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'convertToInvoice']);
 
-            Route::get('/proforma-invoices/{proformaInvoice}/download-pdf', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'downloadPdf']);
+            Route::get('/proforma-invoices/{proformaInvoice}/download-pdf', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'downloadPdf']);
 
-            Route::post('/proforma-invoices/delete', [\App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class, 'delete']);
+            Route::post('/proforma-invoices/delete', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'delete']);
 
-            Route::apiResource('proforma-invoices', \App\Http\Controllers\V1\Admin\ProformaInvoice\ProformaInvoicesController::class);
+            Route::apiResource('proforma-invoices', \App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class);
 
             // Audit Logs
             // ----------------------------------
 
-            Route::get('/audit-logs/document/{type}/{id}', [\App\Http\Controllers\V1\Admin\AuditLog\AuditLogController::class, 'forDocument']);
+            Route::get('/audit-logs/document/{type}/{id}', [\App\Http\Controllers\V1\Admin\AuditLogs\AuditLogController::class, 'forDocument']);
 
-            Route::get('/audit-logs/user/{user}', [\App\Http\Controllers\V1\Admin\AuditLog\AuditLogController::class, 'forUser']);
+            Route::get('/audit-logs/user/{user}', [\App\Http\Controllers\V1\Admin\AuditLogs\AuditLogController::class, 'forUser']);
 
-            Route::apiResource('audit-logs', \App\Http\Controllers\V1\Admin\AuditLog\AuditLogController::class)->only(['index', 'show']);
+            Route::apiResource('audit-logs', \App\Http\Controllers\V1\Admin\AuditLogs\AuditLogController::class)->only(['index', 'show']);
 
 // CLAUDE-CHECKPOINT
 
@@ -661,22 +651,11 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::prefix('approvals')->group(function () {
-                Route::get('/', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'index']);
-                Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'show']);
-                Route::post('/{id}/approve', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'approve']);
-                Route::post('/{id}/reject', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'reject']);
-                Route::get('/document/{type}/{id}', [\App\Http\Controllers\V1\Admin\Approval\ApprovalRequestController::class, 'forDocument']);
-            });
-
-            // Exports (Phase 4)
-            // ----------------------------------
-
-            Route::prefix('exports')->group(function () {
-                Route::get('/', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'index']);
-                Route::post('/', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'store']);
-                Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'show']);
-                Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'destroy']);
-                Route::get('/{id}/download', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'download']);
+                Route::get('/', [\App\Http\Controllers\ApprovalRequestController::class, 'index']);
+                Route::get('/{id}', [\App\Http\Controllers\ApprovalRequestController::class, 'show']);
+                Route::post('/{id}/approve', [\App\Http\Controllers\ApprovalRequestController::class, 'approve']);
+                Route::post('/{id}/reject', [\App\Http\Controllers\ApprovalRequestController::class, 'reject']);
+                Route::get('/document/{type}/{id}', [\App\Http\Controllers\ApprovalRequestController::class, 'forDocument']);
             });
 
             // AI Insights Integration
