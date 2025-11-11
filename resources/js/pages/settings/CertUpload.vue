@@ -416,10 +416,18 @@ const uploadCertificate = async () => {
 }
 
 const deleteCertificate = async () => {
+  if (!currentCertificate.value?.id) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('certificates.no_certificate')
+    })
+    return
+  }
+
   isDeleting.value = true
 
   try {
-    await axios.delete('/api/v1/certificates/current')
+    await axios.delete(`/api/v1/certificates/${currentCertificate.value.id}`)
 
     notificationStore.showNotification({
       type: 'success',
