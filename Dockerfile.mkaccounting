@@ -85,6 +85,10 @@ RUN composer install \
 # Copy rest of application
 COPY . .
 
+# Clear any local dev caches before generating autoloader
+# This prevents dev-only packages (like debugbar) from being cached in production
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize --no-dev
 
