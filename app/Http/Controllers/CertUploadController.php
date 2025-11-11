@@ -110,6 +110,13 @@ class CertUploadController extends Controller
      */
     public function upload(Request $request): JsonResponse
     {
+        // Check if OpenSSL extension is loaded
+        if (!extension_loaded('openssl')) {
+            return response()->json([
+                'message' => 'OpenSSL PHP extension is not enabled'
+            ], 500);
+        }
+
         // Validate request
         $validator = Validator::make($request->all(), [
             'certificate' => [
@@ -257,18 +264,25 @@ class CertUploadController extends Controller
         } catch (\Exception $e) {
             Log::error('Certificate upload failed', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             // Log failed upload attempt
             if (isset($companyId)) {
-                SignatureLog::create([
-                    'company_id' => $companyId,
-                    'action' => SignatureLog::ACTION_UPLOAD,
-                    'user_id' => auth()->id(),
-                    'success' => false,
-                    'error_message' => $e->getMessage(),
-                ]);
+                try {
+                    SignatureLog::create([
+                        'company_id' => $companyId,
+                        'action' => SignatureLog::ACTION_UPLOAD,
+                        'user_id' => auth()->id(),
+                        'success' => false,
+                        'error_message' => $e->getMessage(),
+                    ]);
+                } catch (\Exception $logError) {
+                    // Logging failure shouldn't break error response
+                    Log::warning('Failed to create signature log', ['error' => $logError->getMessage()]);
+                }
             }
 
             // Return appropriate error message
@@ -285,8 +299,10 @@ class CertUploadController extends Controller
                 ], 422);
             }
 
+            // Return error with useful message
             return response()->json([
-                'message' => __('certificates.upload_error')
+                'message' => $e->getMessage(), // Always return actual error for better debugging
+                'error' => __('certificates.upload_error')
             ], 500);
         }
     }
