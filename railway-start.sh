@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Railway startup script - uses Railway MySQL service variables
+# Version: 2025-11-11-v2 (with certificate fixes)
 set -e
 
 echo "=== Railway Startup Script ==="
