@@ -192,6 +192,10 @@ php artisan view:clear || true
 echo "Optimizing application..."
 php artisan optimize || true
 
+# Regenerate Composer autoloader (critical for Modules directory)
+echo "Regenerating autoloader..."
+composer dump-autoload --optimize --no-dev || composer dump-autoload --optimize || true
+
 # Run migrations (continue even if some fail)
 echo "Running migrations..."
 
