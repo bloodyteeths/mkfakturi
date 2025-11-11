@@ -120,7 +120,7 @@ class MkUblMapper
 
         // Add company tax information
         if ($this->company->vat_number) {
-            $supplierParty->setCompanyId($this->company->vat_number);
+            $supplierParty->setPartyIdentificationId($this->company->vat_number);
         }
 
         $ublInvoice->setAccountingSupplierParty($supplierParty);
@@ -167,7 +167,7 @@ class MkUblMapper
 
         // Add customer tax ID if available
         if ($customer->tax_id) {
-            $customerParty->setCompanyId($customer->tax_id);
+            $customerParty->setPartyIdentificationId($customer->tax_id);
         }
 
         $ublInvoice->setAccountingCustomerParty($customerParty);
