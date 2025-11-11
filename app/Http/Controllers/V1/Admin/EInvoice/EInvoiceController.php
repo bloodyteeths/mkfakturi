@@ -45,7 +45,7 @@ class EInvoiceController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('view-einvoice');
+        $this->authorize('viewAny', EInvoice::class);
 
         $limit = $request->input('limit', 10);
 
@@ -102,7 +102,7 @@ class EInvoiceController extends Controller
         ]);
 
         try {
-            $this->authorize('view-einvoice');
+            $this->authorize('viewAny', EInvoice::class);
             Log::info('[EInvoiceController::show] Authorization PASSED');
         } catch (\Exception $e) {
             Log::error('[EInvoiceController::show] Authorization FAILED', [
@@ -145,7 +145,7 @@ class EInvoiceController extends Controller
         ]);
 
         try {
-            $this->authorize('generate-einvoice');
+            $this->authorize('create', EInvoice::class);
             Log::info('[EInvoiceController::generate] Authorization PASSED');
         } catch (\Exception $e) {
             Log::error('[EInvoiceController::generate] Authorization FAILED', [
@@ -225,7 +225,7 @@ class EInvoiceController extends Controller
      */
     public function sign(int $id, Request $request): JsonResponse
     {
-        $this->authorize('generate-einvoice');
+        $this->authorize('create', EInvoice::class);
 
         try {
             $eInvoice = EInvoice::whereCompany()->findOrFail($id);
@@ -337,7 +337,7 @@ class EInvoiceController extends Controller
      */
     public function submit(int $id): JsonResponse
     {
-        $this->authorize('submit-einvoice');
+        $this->authorize('update', EInvoice::class);
 
         try {
             $eInvoice = EInvoice::whereCompany()->findOrFail($id);
@@ -415,7 +415,7 @@ class EInvoiceController extends Controller
      */
     public function simulate(int $id): JsonResponse
     {
-        $this->authorize('generate-einvoice');
+        $this->authorize('create', EInvoice::class);
 
         try {
             $eInvoice = EInvoice::whereCompany()->findOrFail($id);
@@ -478,7 +478,7 @@ class EInvoiceController extends Controller
      */
     public function downloadXml(int $id)
     {
-        $this->authorize('view-einvoice');
+        $this->authorize('viewAny', EInvoice::class);
 
         $eInvoice = EInvoice::whereCompany()->findOrFail($id);
 
@@ -505,7 +505,7 @@ class EInvoiceController extends Controller
      */
     public function resubmit(int $submissionId): JsonResponse
     {
-        $this->authorize('submit-einvoice');
+        $this->authorize('update', EInvoice::class);
 
         try {
             $submission = EInvoiceSubmission::whereCompany()
@@ -556,7 +556,7 @@ class EInvoiceController extends Controller
      */
     public function checkPortalStatus(): JsonResponse
     {
-        $this->authorize('view-einvoice');
+        $this->authorize('viewAny', EInvoice::class);
 
         try {
             $startTime = microtime(true);
@@ -599,7 +599,7 @@ class EInvoiceController extends Controller
      */
     public function getSubmissionQueue(Request $request): JsonResponse
     {
-        $this->authorize('view-einvoice');
+        $this->authorize('viewAny', EInvoice::class);
 
         $limit = $request->input('limit', 20);
 
