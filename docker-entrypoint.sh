@@ -169,7 +169,68 @@ try {
 }
 " 2>&1 | grep -A 20 "HOME ROUTE ERROR" || echo "Home route test passed"
 
-# Start supervisor (nginx, php-fpm, scheduler)
+# Validate configurations before starting services
+echo "Validating nginx configuration..."
+nginx -t 2>&1 || echo "Warning: nginx config validation failed"
+
+echo "Validating PHP-FPM configuration..."
+php-fpm -t 2>&1 || echo "Warning: PHP-FPM config validation failed"
+
+# Start supervisor in background (nginx, php-fpm, scheduler)
 # Queue workers are disabled by default in supervisord.conf
-echo "Starting application services..."
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+echo "Starting application services in background..."
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &
+SUPERVISOR_PID=$!
+
+# Wait for services to start
+echo "Waiting for services to be ready..."
+sleep 5
+
+# Test if php-fpm is listening
+echo "Checking if PHP-FPM is listening on port 9000..."
+netstat -ln | grep :9000 || echo "Warning: PHP-FPM not listening on port 9000"
+
+# Test if nginx is listening
+echo "Checking if nginx is listening on port ${PORT:-80}..."
+netstat -ln | grep :${PORT:-80} || echo "Warning: nginx not listening"
+
+# Test actual HTTP request through nginx/php-fpm stack
+echo "Testing HTTP request through nginx/php-fpm..."
+HTTP_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" http://127.0.0.1:${PORT:-80}/health 2>&1)
+HTTP_CODE=$(echo "$HTTP_RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
+
+if [ "$HTTP_CODE" = "200" ]; then
+    echo "✅ Health check passed (HTTP $HTTP_CODE)"
+else
+    echo "❌ Health check failed (HTTP $HTTP_CODE)"
+    echo "Response: $HTTP_RESPONSE"
+
+    # Show recent PHP-FPM error logs
+    echo "=== PHP-FPM Error Logs ==="
+    tail -50 /var/www/html/storage/logs/php-fpm-error.log 2>/dev/null || echo "No php-fpm error log found"
+
+    # Show recent Laravel logs
+    echo "=== Laravel Error Logs ==="
+    tail -50 /var/www/html/storage/logs/laravel.log 2>/dev/null || echo "No laravel log found"
+
+    # Show nginx error logs
+    echo "=== Nginx Error Logs ==="
+    tail -50 /var/log/nginx/error.log 2>/dev/null || echo "No nginx error log found"
+fi
+
+# Test home route as well
+echo "Testing home route through HTTP..."
+HOME_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" http://127.0.0.1:${PORT:-80}/ 2>&1)
+HOME_CODE=$(echo "$HOME_RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
+
+if [ "$HOME_CODE" = "200" ] || [ "$HOME_CODE" = "302" ]; then
+    echo "✅ Home route accessible (HTTP $HOME_CODE)"
+else
+    echo "❌ Home route failed (HTTP $HOME_CODE)"
+    echo "Response: $HOME_RESPONSE"
+fi
+
+# Bring supervisor to foreground
+echo "All startup checks complete. Supervisor running with PID $SUPERVISOR_PID"
+echo "Application ready to serve requests."
+wait $SUPERVISOR_PID
