@@ -45,8 +45,10 @@ class BootstrapController extends Controller
             BouncerFacade::refreshFor($current_user);
             $current_user_abilities = $current_user->getCachedPermissions();
 
-            if ($current_user->isOwner() && empty($current_user_abilities)) {
-                $current_user_abilities = [['name' => '*', 'title' => 'All Abilities']];
+            // Fix: Use isEmpty() instead of empty() on Collections
+            // empty() always returns false for Collection objects regardless of contents
+            if ($current_user->isOwner() && $current_user_abilities->isEmpty()) {
+                $current_user_abilities = collect([['name' => '*', 'title' => 'All Abilities']]);
             }
 
             $main_menu = $this->generateMenu('main_menu', $current_user);
