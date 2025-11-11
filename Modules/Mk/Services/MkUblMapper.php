@@ -255,8 +255,8 @@ class MkUblMapper
         $taxSubTotals = [];
         
         foreach ($item->taxes as $tax) {
-            // Skip if tax_type is not loaded
-            if (!$tax->tax_type) {
+            // Skip if taxType is not loaded
+            if (!$tax->taxType) {
                 continue;
             }
 
@@ -265,7 +265,7 @@ class MkUblMapper
 
             $taxCategory = new TaxCategory();
             $taxCategory->setId('S'); // Standard rate
-            $taxCategory->setPercent($tax->tax_type->percent);
+            $taxCategory->setPercent($tax->taxType->percent);
             $taxCategory->setTaxScheme($taxScheme);
 
             $taxSubTotal = new TaxSubTotal();
@@ -302,16 +302,16 @@ class MkUblMapper
         $taxGroups = $this->invoice->taxes->groupBy('tax_type_id');
         
         foreach ($taxGroups as $taxTypeId => $taxes) {
-            $taxType = $taxes->first()->tax_type;
+            $taxType = $taxes->first()->taxType;
 
-            // Skip if tax_type is not loaded
+            // Skip if taxType is not loaded
             if (!$taxType) {
                 continue;
             }
 
             $groupTaxAmount = $taxes->sum('amount');
             $groupTaxableAmount = $taxes->sum(function ($tax) {
-                return $tax->tax_type && $tax->tax_type->percent > 0 ? ($tax->amount / $tax->tax_type->percent * 100) : 0;
+                return $tax->taxType && $tax->taxType->percent > 0 ? ($tax->amount / $tax->taxType->percent * 100) : 0;
             });
 
             $taxScheme = new TaxScheme();

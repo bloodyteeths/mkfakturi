@@ -159,10 +159,12 @@ class EInvoiceController extends Controller
             $invoice = Invoice::whereCompany()
                 ->with([
                     'customer',
+                    'customer.addresses',
                     'company',
+                    'company.address',
                     'company.bankAccounts',
-                    'items.taxes.tax_type',
-                    'taxes.tax_type',
+                    'items.taxes.taxType',
+                    'taxes.taxType',
                     'currency',
                 ])
                 ->findOrFail($invoiceId);
