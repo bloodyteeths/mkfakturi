@@ -13,11 +13,17 @@ class InstallUtils
     /**
      * Check if database is created
      *
+     * During bootstrap, we only check the file marker to avoid
+     * querying the database before it's ready. The marker is created
+     * by migrations/installation process when DB is fully set up.
+     *
      * @return bool
      */
     public static function isDbCreated()
     {
-        return self::dbMarkerExists() && self::tableExists('users');
+        // Only check file marker - do NOT query database during bootstrap
+        // This prevents circular dependency where checking if DB exists requires querying DB
+        return self::dbMarkerExists();
     }
 
     /**

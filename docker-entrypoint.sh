@@ -77,12 +77,16 @@ else
     echo "Using default nginx port 80"
 fi
 
-# Clear caches (run as www user to avoid permission issues)
+# Clear caches
 echo "Clearing caches..."
-su-exec www php artisan config:clear || true
-su-exec www php artisan cache:clear || true
-su-exec www php artisan route:clear || true
-su-exec www php artisan view:clear || true
+php artisan config:clear || true
+php artisan cache:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+
+# Fix cache file permissions after cache operations
+chown -R www:www /var/www/html/storage/framework/cache 2>/dev/null || true
+chown -R www:www /var/www/html/bootstrap/cache 2>/dev/null || true
 
 # Run migrations (Railway)
 if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
