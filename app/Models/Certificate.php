@@ -282,14 +282,16 @@ class Certificate extends Model
             Storage::delete($this->certificate_path);
         }
 
-        // Log deletion
+        // Log deletion (certificate_id is null since we're deleting it)
+        // The metadata contains fingerprint and serial_number for audit trail
         SignatureLog::create([
-            'certificate_id' => $this->id,
+            'certificate_id' => null, // Set to null to avoid foreign key constraint
             'company_id' => $this->company_id,
             'action' => SignatureLog::ACTION_DELETE,
             'user_id' => auth()->id(),
             'success' => true,
             'metadata' => [
+                'certificate_id' => $this->id, // Store in metadata for reference
                 'fingerprint' => $this->fingerprint,
                 'serial_number' => $this->serial_number,
                 'name' => $this->name,
