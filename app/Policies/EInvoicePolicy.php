@@ -24,16 +24,32 @@ class EInvoicePolicy
      */
     public function viewAny(User $user): bool
     {
+        \Log::info('[EInvoicePolicy::viewAny] Authorization check', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'is_owner' => $user->isOwner(),
+            'company_id' => auth()->user()->company->id ?? 'N/A',
+        ]);
+
         // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
+            \Log::info('[EInvoicePolicy::viewAny] User is owner - AUTHORIZED');
             return true;
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-einvoice', EInvoice::class)) {
+        $canView = $user->can('view-einvoice', EInvoice::class);
+        \Log::info('[EInvoicePolicy::viewAny] Ability check result', [
+            'can_view_einvoice' => $canView,
+            'abilities' => $user->getAbilities()->pluck('name')->toArray(),
+        ]);
+
+        if ($canView) {
+            \Log::info('[EInvoicePolicy::viewAny] User has view-einvoice ability - AUTHORIZED');
             return true;
         }
 
+        \Log::warning('[EInvoicePolicy::viewAny] User DENIED - no permissions');
         return false;
     }
 
@@ -66,14 +82,30 @@ class EInvoicePolicy
      */
     public function create(User $user): bool
     {
+        \Log::info('[EInvoicePolicy::create] Authorization check for generate', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'is_owner' => $user->isOwner(),
+            'company_id' => auth()->user()->company->id ?? 'N/A',
+        ]);
+
         if ($user->isOwner()) {
+            \Log::info('[EInvoicePolicy::create] User is owner - AUTHORIZED');
             return true;
         }
 
-        if ($user->can('generate-einvoice', EInvoice::class)) {
+        $canGenerate = $user->can('generate-einvoice', EInvoice::class);
+        \Log::info('[EInvoicePolicy::create] Ability check result', [
+            'can_generate_einvoice' => $canGenerate,
+            'all_abilities' => $user->getAbilities()->pluck('name')->toArray(),
+        ]);
+
+        if ($canGenerate) {
+            \Log::info('[EInvoicePolicy::create] User has generate-einvoice ability - AUTHORIZED');
             return true;
         }
 
+        \Log::warning('[EInvoicePolicy::create] User DENIED - no generate permissions');
         return false;
     }
 

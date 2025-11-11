@@ -93,7 +93,24 @@ class EInvoiceController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $this->authorize('view-einvoice');
+        Log::info('[EInvoiceController::show] Request received', [
+            'e_invoice_id' => $id,
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()->email,
+            'company_id' => auth()->user()->company_id ?? 'N/A',
+            'is_owner' => auth()->user()->isOwner(),
+        ]);
+
+        try {
+            $this->authorize('view-einvoice');
+            Log::info('[EInvoiceController::show] Authorization PASSED');
+        } catch (\Exception $e) {
+            Log::error('[EInvoiceController::show] Authorization FAILED', [
+                'error' => $e->getMessage(),
+                'user_abilities' => auth()->user()->getAbilities()->pluck('name')->toArray(),
+            ]);
+            throw $e;
+        }
 
         $eInvoice = EInvoice::whereCompany()
             ->with([
@@ -118,7 +135,25 @@ class EInvoiceController extends Controller
      */
     public function generate(int $invoiceId): JsonResponse
     {
-        $this->authorize('generate-einvoice');
+        Log::info('[EInvoiceController::generate] Request received', [
+            'invoice_id' => $invoiceId,
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()->email,
+            'company_id' => auth()->user()->company_id ?? 'N/A',
+            'is_owner' => auth()->user()->isOwner(),
+            'request_headers' => request()->headers->all(),
+        ]);
+
+        try {
+            $this->authorize('generate-einvoice');
+            Log::info('[EInvoiceController::generate] Authorization PASSED');
+        } catch (\Exception $e) {
+            Log::error('[EInvoiceController::generate] Authorization FAILED', [
+                'error' => $e->getMessage(),
+                'user_abilities' => auth()->user()->getAbilities()->pluck('name')->toArray(),
+            ]);
+            throw $e;
+        }
 
         try {
             $invoice = Invoice::whereCompany()
