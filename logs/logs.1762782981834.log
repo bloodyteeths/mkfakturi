@@ -1,144 +1,97 @@
-2025-11-10T13:54:13.314209585Z [inf]  [snapshot] receiving snapshot, in progress 4.4 MB
-2025-11-10T13:54:13.693001311Z [inf]  scheduling build on Metal builder "builder-sgprfo"
-2025-11-10T13:54:15.314538906Z [inf]  [snapshot] receiving snapshot, in progress 7.5 MB
-2025-11-10T13:54:17.314802889Z [inf]  [snapshot] receiving snapshot, in progress 12 MB
-2025-11-10T13:54:19.314993392Z [inf]  [snapshot] receiving snapshot, in progress 16 MB
-2025-11-10T13:54:21.315072567Z [inf]  [snapshot] receiving snapshot, in progress 21 MB
-2025-11-10T13:54:23.315522159Z [inf]  [snapshot] receiving snapshot, in progress 25 MB
-2025-11-10T13:54:25.315941375Z [inf]  [snapshot] receiving snapshot, in progress 30 MB
-2025-11-10T13:54:27.316034411Z [inf]  [snapshot] receiving snapshot, in progress 34 MB
-2025-11-10T13:54:29.316483422Z [inf]  [snapshot] receiving snapshot, in progress 38 MB
-2025-11-10T13:54:31.316588386Z [inf]  [snapshot] receiving snapshot, in progress 42 MB
-2025-11-10T13:54:33.317148423Z [inf]  [snapshot] receiving snapshot, in progress 46 MB
-2025-11-10T13:54:35.317228750Z [inf]  [snapshot] receiving snapshot, in progress 52 MB
-2025-11-10T13:54:37.317679333Z [inf]  [snapshot] receiving snapshot, in progress 56 MB
-2025-11-10T13:54:39.318015795Z [inf]  [snapshot] receiving snapshot, in progress 60 MB
-2025-11-10T13:54:41.318302793Z [inf]  [snapshot] receiving snapshot, in progress 64 MB
-2025-11-10T13:54:43.318397501Z [inf]  [snapshot] receiving snapshot, in progress 68 MB
-2025-11-10T13:54:45.318772872Z [inf]  [snapshot] receiving snapshot, in progress 73 MB
-2025-11-10T13:54:47.319496985Z [inf]  [snapshot] receiving snapshot, in progress 77 MB
-2025-11-10T13:54:49.319706616Z [inf]  [snapshot] receiving snapshot, in progress 81 MB
-2025-11-10T13:54:52.025403205Z [inf]  [snapshot] receiving snapshot, in progress 86 MB
-2025-11-10T13:54:54.025749823Z [inf]  [snapshot] receiving snapshot, in progress 95 MB
-2025-11-10T13:54:54.533513628Z [inf]  [snapshot] received sha256:9a310e4e19775a51f30056fc12001ba879810785bfd230edf34ba936eca208a9 md5:e4e32ba617b8909967ef231aa4792f60
-2025-11-10T13:54:54.533607369Z [inf]  [snapshot] receiving snapshot, complete 97 MB [took 43.806634897s]
-2025-11-10T13:54:55.178779341Z [inf]  [snapshot] analyzing snapshot, complete 97 MB [took 638.74543ms]
-2025-11-10T13:54:57.194552784Z [inf]  [snapshot] uploading snapshot, in progress 54 MB
-2025-11-10T13:54:59.161607049Z [inf]  [snapshot] uploading snapshot, complete 97 MB [took 3.982993127s]
-2025-11-10T13:55:08.966899014Z [inf]  fetched snapshot sha256:9a310e4e19775a51f30056fc12001ba879810785bfd230edf34ba936eca208a9 (97 MB bytes)
-2025-11-10T13:55:08.966949070Z [inf]  [snapshot] fetching snapshot, complete 97 MB [took 2.212214612s]
-2025-11-10T13:55:09.540978778Z [inf]  scheduling build on Metal builder "builder-sgprfo"
-2025-11-10T13:55:10.748683422Z [inf]  [snapshot] unpacking archive, complete 126 MB [took 1.114159558s]
-2025-11-10T13:55:12.816190857Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T13:55:12.816208563Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T13:55:12.816221483Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T13:55:13.004678182Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T13:55:13.097162966Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
-2025-11-10T13:55:13.097175585Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
-2025-11-10T13:55:13.097176656Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
-2025-11-10T13:55:13.110217763Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
-2025-11-10T13:55:13.113591475Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
-2025-11-10T13:55:13.116217154Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
-2025-11-10T13:55:13.116956364Z [inf]  [internal] load .dockerignore
-2025-11-10T13:55:13.116961821Z [inf]  [internal] load .dockerignore
-2025-11-10T13:55:13.117121692Z [inf]  [internal] load .dockerignore
-2025-11-10T13:55:13.395461240Z [inf]  [internal] load .dockerignore
-2025-11-10T13:55:13.450080921Z [inf]  [composer-deps 1/4] COPY composer.json composer.lock ./
-2025-11-10T13:55:13.450085248Z [inf]  [internal] load build context
-2025-11-10T13:55:13.450085999Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T13:55:13.450086750Z [inf]  [composer-deps 4/4] RUN composer dump-autoload --optimize --no-dev
-2025-11-10T13:55:13.450087251Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
-2025-11-10T13:55:13.450087712Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
-2025-11-10T13:55:13.450088322Z [inf]  [frontend-builder  3/10] WORKDIR /app
-2025-11-10T13:55:13.450088823Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-2025-11-10T13:55:13.450090405Z [inf]  [production  7/16] WORKDIR /var/www/html
-2025-11-10T13:55:13.450090816Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
-2025-11-10T13:55:13.450091227Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache     storage/framework/sessions     storage/framework/views     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
-2025-11-10T13:55:13.450091557Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
-2025-11-10T13:55:13.450091918Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-2025-11-10T13:55:13.450092308Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
-2025-11-10T13:55:13.450092589Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
-2025-11-10T13:55:13.450092819Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T13:55:13.450093060Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
-2025-11-10T13:55:13.450093340Z [inf]  [frontend-builder 10/10] RUN npm run build
-2025-11-10T13:55:13.450093570Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
-2025-11-10T13:55:13.450093941Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
-2025-11-10T13:55:13.450094181Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
-2025-11-10T13:55:13.450096104Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-10T13:55:13.450096505Z [inf]  [php-base 5/5] WORKDIR /var/www/html
-2025-11-10T13:55:13.450096745Z [inf]  [frontend-builder  4/10] COPY package.json package-lock.json ./
-2025-11-10T13:55:13.450097015Z [inf]  [composer-deps 3/4] COPY . .
-2025-11-10T13:55:13.450097256Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
-2025-11-10T13:55:13.450097496Z [inf]  [frontend-builder  5/10] RUN npm ci --prefer-offline --no-audit
-2025-11-10T13:55:13.450097827Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T13:55:13.450098067Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-10T13:55:13.450098307Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
-2025-11-10T13:55:13.450110295Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
-2025-11-10T13:55:13.450111297Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
-2025-11-10T13:55:13.450111557Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-2025-11-10T13:55:13.450111798Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
-2025-11-10T13:55:13.450112048Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
-2025-11-10T13:55:13.450112418Z [inf]  [production 11/16] RUN cp .env.example .env
-2025-11-10T13:55:13.450137286Z [inf]  [internal] load build context
-2025-11-10T13:55:13.450137967Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T13:55:13.450275884Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T13:55:13.450277146Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T13:55:13.501867792Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T13:55:13.511423870Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T13:55:13.511425723Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-10T13:55:13.511623459Z [inf]  [internal] load build context
-2025-11-10T13:55:13.513528007Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T13:55:13.515012504Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T13:55:13.686619252Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
-2025-11-10T13:55:13.686667144Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T13:55:13.686824359Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
-2025-11-10T13:55:13.686828917Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T13:55:13.687045591Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T13:55:13.687207234Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T13:55:13.687394746Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-10T13:55:13.956673399Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
-
-2025-11-10T13:55:13.994929409Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
-
-2025-11-10T13:55:14.043102517Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
-
-2025-11-10T13:55:14.062350827Z [inf]  fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
-
-2025-11-10T13:55:14.365444597Z [inf]  (1/29) Installing libstdc++-dev (14.2.0-r6)
-
-2025-11-10T13:55:14.414802914Z [inf]  (1/108) Installing m4 (1.4.19-r4)
-
-2025-11-10T13:55:14.501382387Z [inf]  (2/108) Installing libbz2 (1.0.8-r6)
-
-2025-11-10T13:55:14.515391236Z [inf]  (3/108) Installing perl (5.40.3-r0)
-
-2025-11-10T13:55:14.522856767Z [inf]  [internal] load build context
-2025-11-10T13:55:14.653709638Z [inf]  (2/29) Installing jansson (2.14.1-r0)
-
-2025-11-10T13:55:14.657259915Z [inf]  (3/29) Installing zstd-libs (1.5.7-r0)
-
-2025-11-10T13:55:14.667445136Z [inf]  (4/29) Installing binutils (2.44-r3)
-
-2025-11-10T13:55:14.710105915Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-10T13:55:14.710109340Z [inf]  [frontend-builder  3/10] WORKDIR /app
-2025-11-10T13:55:14.710109790Z [err]  [frontend-builder  4/10] COPY package.json package-lock.json ./
-2025-11-10T13:55:14.784373625Z [inf]  (5/29) Installing libgomp (14.2.0-r6)
-
-2025-11-10T13:55:14.79158142Z [inf]  (6/29) Installing libatomic (14.2.0-r6)
-
-2025-11-10T13:55:14.794525046Z [inf]  (7/29) Installing gmp (6.3.0-r3)
-
-2025-11-10T13:55:14.802203417Z [inf]  (8/29) Installing isl26 (0.26-r1)
-
-2025-11-10T13:55:14.823150386Z [inf]  (9/29) Installing mpfr4 (4.2.1_p1-r0)
-
-2025-11-10T13:55:14.833484591Z [inf]  (4/108) Installing autoconf (2.72-r1)
-
-2025-11-10T13:55:14.842586337Z [inf]  (10/29) Installing mpc1 (1.3.1-r1)
-
-2025-11-10T13:55:14.846783174Z [inf]  (11/29) Installing gcc (14.2.0-r6)
-
-2025-11-10T13:55:14.858695738Z [inf]  (5/108) Installing bash (5.2.37-r0)
-
-2025-11-10T13:55:14.903302575Z [err]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-10T13:55:16.306455808Z [err]  Build Failed: bc.Build: failed to solve: failed to compute cache key: failed to calculate checksum of ref mxdlxwfloeqckic0h1r128g89::vg4nez0oj10zixlyiotf13tv1: "/package-lock.json": not found
+[2025-11-11 13:47:54] production.WARNING: Slow operation detected {"operation":"req_69133e8952043","execution_time_ms":869.3,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
+[2025-11-11 13:47:54] production.WARNING: Slow request detected {"operation":"req_69133e8952043","execution_time_ms":869.3,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.30.237","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 13:47:54] production.WARNING: Certificate file missing for certificate {"certificate_id":1,"path":"certificates/company_2/931f2fb58ea0200b_1762867643.pem"} 
+[2025-11-11 13:47:58] production.WARNING: Certificate file missing for certificate {"certificate_id":1,"path":"certificates/company_2/931f2fb58ea0200b_1762867643.pem"} 
+[2025-11-11 13:48:08] production.ERROR: Certificate upload failed {"error":"SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '931f2fb58ea0200b52651eb04d52228d494085f1fe1b7796ea253b7c720d766d' for key 'certificates.certificates_fingerprint_unique' (Connection: mysql, SQL: insert into `certificates` (`company_id`, `name`, `serial_number`, `fingerprint`, `valid_from`, `valid_to`, `encrypted_key_blob`, `certificate_path`, `is_active`, `subject`, `issuer`, `algorithm`, `key_size`, `updated_at`, `created_at`) values (2, Facturino Test QES (DEV ONLY), 0x2FF740B059F3306B98F66A9A87D38F9D795908CC, 931f2fb58ea0200b52651eb04d52228d494085f1fe1b7796ea253b7c720d766d, 2025-11-11 13:00:34, 2026-11-11 13:00:34, eyJpdiI6ImpFYmJ2eXNWU05HQ0x4ZkE0d0tmMkE9PSIsInZhbHVlIjoiWjBHdkRZWXpvQzhRWDExNUJ5dUZlZUg0N0VZUHRIZnhCYnNQU3FiRDFCcUJ1cExPa3RvVjQvaTBvdmZSMmthaW5HY1g3SC8yVi9HVit4cXJac3RMcXNiQVA2TUR6dDl0ckkycEFJcEtmcE5ES3VKMGJKMWlpbDdXL3dnK3lvcnJTSWR4YkRMMndmWUNlcW1TY2pwc0l0N01Ha042SkF1WmQ5UlhweCs5U2hhYUlpK2g1dHp5R2xGT0NvRW9XbVJGeFVwTE9wS2FwV29sVHZJM1FuNXFONDU2SlNvTmQzZ2lNTVhtTVN5aTZ2bjR2VjdzMTZKQld1b0NoUHJFbGRlZWxld0lqR0RaRTRYYXhkZ2ZnSVFBS3llZm5GOFhUQnQ4Ym45dGFTcEpIaTZXQk1tS0o0K3pXWlIzK2k0TFlRMnRNeGdESWF5ZXFqRU56WTU2L1NoL0d1dVRtcUZDb3F4Y2NsVlJtNXJmK2pTQS93dWxYUnd0QUpNYUJmYXl1czNOVGhoUDdiR1ZISlM1RGhQU0VxaUZkRDc4aFJOQkg5SlJXNFRJeXRmcE5WeXlaMjNWTUNNdjA0c1ZTSFUrczY0cUdabEdpQktJK3NTNnZoQ1NidVRNU0hFbFJ0cTNOOVNvejUwYWk2M0xmVGVXaEFxVjdua1E2aFVTRVpocTh1Ynozc2pkTEYvMURycjFJTFdiRHBvS2djVVVuSU1BVVlzRyszSXNEYnpNOHR6ZEd3SFdyTDlhVHZPUTRyalJkU0tpZ1gxclpXOUR4bXFTblhKSGRWTWdpL251bEgyVGNYUWhsRkNzWXhpbGJFSXNFTlNpbExYR1FSektWNmdJUVJGRUtGN3BiMW9SNVlhWk15bmRSQWF1WldaOElyMWhWbU1vcEtYTG5lTzJlOHhSK2ZxUW1yVkxjN3prcGxIQ2tyZ3Q2ZnBBSWd6TlBqTURVaU5SQ3JYdHMxUkZjYnFpN1NGNUdtV0hkMVUzUndxYXlCenFHNVlaVGE3eWpGdVBzaHU1TEdmMUxMRWFENll6eUZaTzhYc3pxSnU3Ukt4czFMa2dGUTBYU2N4RGNwMlpkN21BS3gzREVaN2R1aUJkM1NGYnU5MU5RR3JnNjVzSjl3UzM2QnNoa1B4N1VHN24xSThBdzlmLzJ3a0FubFRZVmc5Z2dLSlc4dzdETXVDOWptc3JsQkRYRkhLNVByQlpaNk5rVGIrZVI0d1lNbW95ckkxUWxIYUI2M2o2bnVJYnk1TFIxMlVlejhPVXBJOW9oZmJEODM1ams5dkg1NFNLancvck1PT0hoMG5lNFMrY3F0dzRvTzNSNmhFc2x2am40bzF1V0xrajFqbzdvRzRLbEZuQWNIOXpiMDdyY1RicEZvOE5IZkdnZ0VOV2h4SW1NVzlRMDRTMlJCemU1bStqMzVhaStaaXlNeW5HZENOa1hhUkxvcFNJeVVua0dES01zNDVLT0d2QlZWcmd5eVQrdVNucHR2NUc4NmxSOXpHYjRTTjlHVlR3VWpwL2F6UzEydXowdjkwc1FXNFpQcDdkOEZTWUJyUVNlaFVzZ2p3cDV2OFUrc29nSC90ZlBpM1cyNEgxbkthMXRMUHVJRzZUUHNkY2xMc3JrSUNwWHRnQStBTVM5NCt3KzJ4RDhaT1RCbFhnUm5ma3diUHVLbWhmTEVuQWI0bEcvVkRTSDBZb3c0d2ZsYStJTTVUekswaStCek5CS29mNkc4UW1SY0l1clE1QTVzSHQ2c2hpQnhyQy9TS0lrVi9wNHoxVTQ1VElXVGhkQWIyNklleUp0WVdLczliYUxrZ3BORnlNeUdYc0VXMUdZQkx4MXhkVG95blM1bThWMThqNVJ4eUZQOW92KzZXWnJBZVV5S1NGd0xQOVRHSktuTGR1RjBFazhXSXR5WUdkeUZBay9EN05aUXZvSkZXSkpXd3d2RllMVytqa2JhMEQyM05yTDU4MlZtZ3o0ZlVhYldEYUVwa2Z3cXBaS3BhUkxNWUZIT1VySHk3WmlneTRSOUg5VEpRc2ZweVdTOUJJa1VxcHpsRkZreWozc3FJNkhoNFdEK29nL1FpS2xjUWVmZEFmK0gyK3pDelZMR281bERySG03Zmh4SEFTNlArN2RDOVN2ek9IUlo2aDJRQzZGT25UWGNLcEZHRUdsSFA0emZnNWk1cGErYllpQ1ZjRk1RRHJ1ektCaGppcDZ5N2x4RWZWL1NqREtUdytib0ZBNk5zYzhvMWVVNFE4RkxWdlQvaWhxRE9HTzVTWG1Zd0o1VVVaMnkvbENCeEc0U0hZK1lnKytEVFFrVXlTRHJzdGVIbm9lTTFTeGdvTVJyblRURFdLb3VESHpibDVZWmVmbFN3bWJiVnMvSTkxMEI2bElOemRIWjhvWktRWk9jbFJUMDRINFJ4NnJKV3FKMTN3QVhRbklFa3o1UGg3M2VOdXlTTzRmTDNpendiMWZjdzJiOGJlNDluT2tMUUt5cElYVzNYdElrOWFYYnJYSkFpK3pWYVZyUFRHQ05qRGY1UUdEd2dncHRoazFDczJkUHlNZjl5cmkvQ2pmSUt5L1V1eTRJTno2RWdBNUxMT3F2QktTeHdRTmV0dVNSWWdESmg1SnFGdlBrKy9tdGZBQmo3M0owT3daaytBL0NJR0puMW9scW9TYUlmNUFLT1FrRCtMYXlVOGtDRDd1NmozeGFIa0ZYLy9NMXh0SUxBcFQ4SjE3Ulo2TjJWMUpWaDIvRzY1RGU2c1NQbDFReHJlRVdpNXlNQ2hsaTdLSmhjK3BNbHg4ZFd5d2hUY2RBUVc1eThHUERMcm92ek1yZWJ5eTFCc1MrejYwNTZrTWhXaWVWak5Mb1FDWkl3QUhoQ3NNUVg5UjBkZWtxRkFUcXVsL1BSK1NMV010RllnRkJXdlc4MGl4alV4b0NJSFhqQS9yeFl1a0k4S1VRdnJkd1NQa1VINzRXQi9GUUhWVlZWVTZJdnBQSHEyOFlKMkJuT0VQZ3N4OThWMHJEdk1HUVJtMVhFckkrTFpEbFI5TVBwOEF5TmF1TUFTUXNGVStJU1UrdWkzY3lKc2thWWVMRmlyWUlLUkVyU3o3TUhuVzlZMTZnWDBYbUpnN3FRTGR2YnBEZzNldzdhSFc1eVE1a1hLbEl5Zit0NHQ3ODBsaSt4c2dxaDgydG8rVE9nNDVEVlJuNWVKWkp6WmY2NnQ0bXZ5ZjZvcjAwMGxodVNBRGplT01QaDNkVS9nUHh0ekM0di9XNlFxNFl3S0J1bkJVV0FETVlGZ01aOUZtbEc4alRlUmY1VXh3aU5QTlVKcW9RUXJQajlOY2VjWXdwTEFnQ1VhWlE4ZmtPMlFnSUY2eEtVRlUvdXUwd2RhY1l6eVpDQkM1eFdac1pxN3FYUVVSQzhUQ2RtVkJyQVR3dURWd1Q0OVZCL1M2WHJudmlHd0VEa0NUM1JKS2FSRDRkYm92ck5wL1J5RE9hWU9LZWIyaEduQWtnZnNMV3N1UFBobkF0b2o3eG82eDIvK3ZpUTcxLzd4UERvZElzQnYrYnRPdlFCaDUwUVpCdEhXNVROek1BenJjRjdvTWk0S0dMSTNWK01kRkVFOGNBRnEyNmNiMUw1Z2REWmQrYkY2VjVQR2dQSzN3V2VBQzZyT05RR3FINkNDN3dBME5GdUg5MmdkdG4yOTdZcUJ2ZkdhQ09oV0lwZ012bFJOLzdCeWhzZTNjWG9pOUZwNDY4VGRLUDdMd2t2THBFeTczTWdoQ1RGRllRcFpRNWkyY3BmVitXcy9iZXV1U29QNU1iM0hqamJYSTBjVmI1Z0hFZHBPN2l6NEs5bTEwc0hUbVBvOW53bCsyOXJzaTJYTmZabjZETGU0cFRubzcrOFUxSFp4SWJLb1I3aHprRXh5S0gxY2ZPQVA4TkV5V3hyNEU3dXRaTG1ldUdOUVVjQjJyR2wwOXdqTXFydFFsS2RJbTZuWHJzYkRIV3cwWmY1OHYrU1A2T3FOL1hQU3JLcWR2VkxUUmV5TmdFV3N4eCtWTTlXSS91eENLSTZtTmNkdjVDK1YyWW8xTUZiQzl2YnU3Um1LVlMrcFIybEpwUnVlSVc5OU9LZkVDMFE1S2UvdVcvY0IzTkRPRlo2SWo4cHZ0LzJ4VWJHei94M0xnUUlUK05oMjFqL2c0bFdQbGRxVnl0ZlljSDF3bnhZSmFrLytVVFNrUDBnbXdERUJhSDZKSlNCaGtjWjg4MlVCNUR5TTRQQlhTV0RuaU82dmhOcDhpMzFtU1dYUW5IU0ZKV1JVMjZsZmtVeFlEelFYam5oZGZ5VXUyUHd6SCthTkpjL0lwMG4rM3FHS0tXY0d2RUtnbmd3aVNjMTAvOXJUTnpaeGRRbmdhcHdyYS95NVhKaEFFQXZ6VzQxRy92bTFZREppcHdKN1QvSmNmN0JBV0RHWWRDa1ZDRWVUUEgwVzlhbmxMVW8wMmI0NDk3WXFqTER6THl2eHkzanNuS0ZBTHZVMmdVZUhCb0FXVzFodnJpWVBNQnkzOWVoaGNBQnVFSXVrMjcvSTU3UXhCSS9DU0pnZi96V3cvSmN0eTVLcFVYN1M5c2lyTDVTdkFQemVZYXpmbW5VL2xDdHBmVWxxZ1lxbjNuTjVodW14UjZiMDFQbDB1ZnJ2MkVTMzQrRGRkVy84MG1wNUhIOVpkZFNWOHQyOFJCdTdYOWRGdnpSMUtWVFRuTFFQaDVHZWxEWXhMVnVTSVNmVzhOUmc1d0NtcEpDRTdqaHpwNmh0VHIzS1NLeERYVk9kSnZpaU9OVFZkMVk5NWdjTUVuRUpsY0g3WDNqRFVCNlFPN21WUWZEZnppelJqdU9GTXhBd2U2L0VFVys1V2Z0dDU2MXBzbFRsVnBqYlo5QkpOUDg5SmtMOHF6YXo1RFFaY3ZjT004aVlFdjhYZGRvbGxPUzdDNnZLcUtXWEw2clNna2dra3NvT2w1UjdScTZCcGJLWGdTZXI3T29WZDBsSkVwVmdrSE5XYVhrZ0VGNDBoZXlVNDNjcWsrSXMiLCJtYWMiOiIzMjQ3ODNkMTZlYmJiNmQwNGUyMjJjMDllMDMxYjVkMjVhMjQ2ZDhlZGEzYzRiYjAxYjdiOTc3YjExMmFmZWE4IiwidGFnIjoiIn0=, certificates/company_2/931f2fb58ea0200b_1762868888.pem, 1, {\"C\":\"MK\",\"O\":\"Facturino\",\"CN\":\"Facturino Test QES (DEV ONLY)\"}, {\"C\":\"MK\",\"O\":\"Facturino\",\"CN\":\"Facturino Test QES (DEV ONLY)\"}, RSA-SHA256, 2048, 2025-11-11 13:48:08, 2025-11-11 13:48:08))","file":"/var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php","line":817,"trace":"#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('insert into `ce...', Array, Object(Closure))
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/MySqlConnection.php(42): Illuminate\\Database\\Connection->run('insert into `ce...', Array, Object(Closure))
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Processors/MySqlProcessor.php(35): Illuminate\\Database\\MySqlConnection->insert('insert into `ce...', Array, 'id')
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3779): Illuminate\\Database\\Query\\Processors\\MySqlProcessor->processInsertGetId(Object(Illuminate\\Database\\Query\\Builder), 'insert into `ce...', Array, 'id')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(2204): Illuminate\\Database\\Query\\Builder->insertGetId(Array, 'id')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(1408): Illuminate\\Database\\Eloquent\\Builder->__call('insertGetId', Array)
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(1373): Illuminate\\Database\\Eloquent\\Model->insertAndSetId(Object(Illuminate\\Database\\Eloquent\\Builder), Array)
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(1212): Illuminate\\Database\\Eloquent\\Model->performInsert(Object(Illuminate\\Database\\Eloquent\\Builder))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(1188): Illuminate\\Database\\Eloquent\\Model->save()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/helpers.php(399): Illuminate\\Database\\Eloquent\\Builder->Illuminate\\Database\\Eloquent\\{closure}(Object(App\\Models\\Certificate))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(1187): tap(Object(App\\Models\\Certificate), Object(Closure))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php(23): Illuminate\\Database\\Eloquent\\Builder->create(Array)
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(2449): Illuminate\\Database\\Eloquent\\Model->forwardCallTo(Object(Illuminate\\Database\\Eloquent\\Builder), 'create', Array)
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(2465): Illuminate\\Database\\Eloquent\\Model->__call('create', Array)
+#14 /var/www/html/app/Http/Controllers/CertUploadController.php(204): Illuminate\\Database\\Eloquent\\Model::__callStatic('create', Array)
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\CertUploadController->upload(Object(Illuminate\\Http\\Request))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('upload', Array)
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\CertUploadController), 'upload')
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#21 /var/www/html/app/Http/Middleware/ScopeBouncer.php(53): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ScopeBouncer->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 /var/www/html/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#32 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#73 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#74 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#75 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#76 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#77 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#78 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#79 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#80 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#81 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#82 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#83 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#84 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#85 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#86 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#87 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#88 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#89 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#90 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#91 {main}"} 
+[2025-11-11 13:48:08] production.WARNING: Failed to create signature log {"error":"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'field list' (Connection: mysql, SQL: insert into `signature_logs` (`company_id`, `action`, `user_id`, `success`, `error_message`, `updated_at`, `created_at`) values (2, UPLOAD, 2, 0, SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '931f2fb58ea0200b52651eb04d52228d494085f1fe1b7796ea253b7c720d766d' for key 'certificates.certificates_fingerprint_unique' (Connection: mysql, SQL: insert into `certificates` (`company_id`, `name`, `serial_number`, `fingerprint`, `valid_from`, `valid_to`, `encrypted_key_blob`, `certificate_path`, `is_active`, `subject`, `issuer`, `algorithm`, `key_size`, `updated_at`, `created_at`) values (2, Facturino Test QES (DEV ONLY), 0x2FF740B059F3306B98F66A9A87D38F9D795908CC, 931f2fb58ea0200b52651eb04d52228d494085f1fe1b7796ea253b7c720d766d, 2025-11-11 13:00:34, 2026-11-11 13:00:34, eyJpdiI6ImpFYmJ2eXNWU05HQ0x4ZkE0d0tmMkE9PSIsInZhbHVlIjoiWjBHdkRZWXpvQzhRWDExNUJ5dUZlZUg0N0VZUHRIZnhCYnNQU3FiRDFCcUJ1cExPa3RvVjQvaTBvdmZSMmthaW5HY1g3SC8yVi9HVit4cXJac3RMcXNiQVA2TUR6dDl0ckkycEFJcEtmcE5ES3VKMGJKMWlpbDdXL3dnK3lvcnJTSWR4YkRMMndmWUNlcW1TY2pwc0l0N01Ha042SkF1WmQ5UlhweCs5U2hhYUlpK2g1dHp5R2xGT0NvRW9XbVJGeFVwTE9wS2FwV29sVHZJM1FuNXFONDU2SlNvTmQzZ2lNTVhtTVN5aTZ2bjR2VjdzMTZKQld1b0NoUHJFbGRlZWxld0lqR0RaRTRYYXhkZ2ZnSVFBS3llZm5GOFhUQnQ4Ym45dGFTcEpIaTZXQk1tS0o0K3pXWlIzK2k0TFlRMnRNeGdESWF5ZXFqRU56WTU2L1NoL0d1dVRtcUZDb3F4Y2NsVlJtNXJmK2pTQS93dWxYUnd0QUpNYUJmYXl1czNOVGhoUDdiR1ZISlM1RGhQU0VxaUZkRDc4aFJOQkg5SlJXNFRJeXRmcE5WeXlaMjNWTUNNdjA0c1ZTSFUrczY0cUdabEdpQktJK3NTNnZoQ1NidVRNU0hFbFJ0cTNOOVNvejUwYWk2M0xmVGVXaEFxVjdua1E2aFVTRVpocTh1Ynozc2pkTEYvMURycjFJTFdiRHBvS2djVVVuSU1BVVlzRyszSXNEYnpNOHR6ZEd3SFdyTDlhVHZPUTRyalJkU0tpZ1gxclpXOUR4bXFTblhKSGRWTWdpL251bEgyVGNYUWhsRkNzWXhpbGJFSXNFTlNpbExYR1FSektWNmdJUVJGRUtGN3BiMW9SNVlhWk15bmRSQWF1WldaOElyMWhWbU1vcEtYTG5lTzJlOHhSK2ZxUW1yVkxjN3prcGxIQ2tyZ3Q2ZnBBSWd6TlBqTURVaU5SQ3JYdHMxUkZjYnFpN1NGNUdtV0hkMVUzUndxYXlCenFHNVlaVGE3eWpGdVBzaHU1TEdmMUxMRWFENll6eUZaTzhYc3pxSnU3Ukt4czFMa2dGUTBYU2N4RGNwMlpkN21BS3gzREVaN2R1aUJkM1NGYnU5MU5RR3JnNjVzSjl3UzM2QnNoa1B4N1VHN24xSThBdzlmLzJ3a0FubFRZVmc5Z2dLSlc4dzdETXVDOWptc3JsQkRYRkhLNVByQlpaNk5rVGIrZVI0d1lNbW95ckkxUWxIYUI2M2o2bnVJYnk1TFIxMlVlejhPVXBJOW9oZmJEODM1ams5dkg1NFNLancvck1PT0hoMG5lNFMrY3F0dzRvTzNSNmhFc2x2am40bzF1V0xrajFqbzdvRzRLbEZuQWNIOXpiMDdyY1RicEZvOE5IZkdnZ0VOV2h4SW1NVzlRMDRTMlJCemU1bStqMzVhaStaaXlNeW5HZENOa1hhUkxvcFNJeVVua0dES01zNDVLT0d2QlZWcmd5eVQrdVNucHR2NUc4NmxSOXpHYjRTTjlHVlR3VWpwL2F6UzEydXowdjkwc1FXNFpQcDdkOEZTWUJyUVNlaFVzZ2p3cDV2OFUrc29nSC90ZlBpM1cyNEgxbkthMXRMUHVJRzZUUHNkY2xMc3JrSUNwWHRnQStBTVM5NCt3KzJ4RDhaT1RCbFhnUm5ma3diUHVLbWhmTEVuQWI0bEcvVkRTSDBZb3c0d2ZsYStJTTVUekswaStCek5CS29mNkc4UW1SY0l1clE1QTVzSHQ2c2hpQnhyQy9TS0lrVi9wNHoxVTQ1VElXVGhkQWIyNklleUp0WVdLczliYUxrZ3BORnlNeUdYc0VXMUdZQkx4MXhkVG95blM1bThWMThqNVJ4eUZQOW92KzZXWnJBZVV5S1NGd0xQOVRHSktuTGR1RjBFazhXSXR5WUdkeUZBay9EN05aUXZvSkZXSkpXd3d2RllMVytqa2JhMEQyM05yTDU4MlZtZ3o0ZlVhYldEYUVwa2Z3cXBaS3BhUkxNWUZIT1VySHk3WmlneTRSOUg5VEpRc2ZweVdTOUJJa1VxcHpsRkZreWozc3FJNkhoNFdEK29nL1FpS2xjUWVmZEFmK0gyK3pDelZMR281bERySG03Zmh4SEFTNlArN2RDOVN2ek9IUlo2aDJRQzZGT25UWGNLcEZHRUdsSFA0emZnNWk1cGErYllpQ1ZjRk1RRHJ1ektCaGppcDZ5N2x4RWZWL1NqREtUdytib0ZBNk5zYzhvMWVVNFE4RkxWdlQvaWhxRE9HTzVTWG1Zd0o1VVVaMnkvbENCeEc0U0hZK1lnKytEVFFrVXlTRHJzdGVIbm9lTTFTeGdvTVJyblRURFdLb3VESHpibDVZWmVmbFN3bWJiVnMvSTkxMEI2bElOemRIWjhvWktRWk9jbFJUMDRINFJ4NnJKV3FKMTN3QVhRbklFa3o1UGg3M2VOdXlTTzRmTDNpendiMWZjdzJiOGJlNDluT2tMUUt5cElYVzNYdElrOWFYYnJYSkFpK3pWYVZyUFRHQ05qRGY1UUdEd2dncHRoazFDczJkUHlNZjl5cmkvQ2pmSUt5L1V1eTRJTno2RWdBNUxMT3F2QktTeHdRTmV0dVNSWWdESmg1SnFGdlBrKy9tdGZBQmo3M0owT3daaytBL0NJR0puMW9scW9TYUlmNUFLT1FrRCtMYXlVOGtDRDd1NmozeGFIa0ZYLy9NMXh0SUxBcFQ4SjE3Ulo2TjJWMUpWaDIvRzY1RGU2c1NQbDFReHJlRVdpNXlNQ2hsaTdLSmhjK3BNbHg4ZFd5d2hUY2RBUVc1eThHUERMcm92ek1yZWJ5eTFCc1MrejYwNTZrTWhXaWVWak5Mb1FDWkl3QUhoQ3NNUVg5UjBkZWtxRkFUcXVsL1BSK1NMV010RllnRkJXdlc4MGl4alV4b0NJSFhqQS9yeFl1a0k4S1VRdnJkd1NQa1VINzRXQi9GUUhWVlZWVTZJdnBQSHEyOFlKMkJuT0VQZ3N4OThWMHJEdk1HUVJtMVhFckkrTFpEbFI5TVBwOEF5TmF1TUFTUXNGVStJU1UrdWkzY3lKc2thWWVMRmlyWUlLUkVyU3o3TUhuVzlZMTZnWDBYbUpnN3FRTGR2YnBEZzNldzdhSFc1eVE1a1hLbEl5Zit0NHQ3ODBsaSt4c2dxaDgydG8rVE9nNDVEVlJuNWVKWkp6WmY2NnQ0bXZ5ZjZvcjAwMGxodVNBRGplT01QaDNkVS9nUHh0ekM0di9XNlFxNFl3S0J1bkJVV0FETVlGZ01aOUZtbEc4alRlUmY1VXh3aU5QTlVKcW9RUXJQajlOY2VjWXdwTEFnQ1VhWlE4ZmtPMlFnSUY2eEtVRlUvdXUwd2RhY1l6eVpDQkM1eFdac1pxN3FYUVVSQzhUQ2RtVkJyQVR3dURWd1Q0OVZCL1M2WHJudmlHd0VEa0NUM1JKS2FSRDRkYm92ck5wL1J5RE9hWU9LZWIyaEduQWtnZnNMV3N1UFBobkF0b2o3eG82eDIvK3ZpUTcxLzd4UERvZElzQnYrYnRPdlFCaDUwUVpCdEhXNVROek1BenJjRjdvTWk0S0dMSTNWK01kRkVFOGNBRnEyNmNiMUw1Z2REWmQrYkY2VjVQR2dQSzN3V2VBQzZyT05RR3FINkNDN3dBME5GdUg5MmdkdG4yOTdZcUJ2ZkdhQ09oV0lwZ012bFJOLzdCeWhzZTNjWG9pOUZwNDY4VGRLUDdMd2t2THBFeTczTWdoQ1RGRllRcFpRNWkyY3BmVitXcy9iZXV1U29QNU1iM0hqamJYSTBjVmI1Z0hFZHBPN2l6NEs5bTEwc0hUbVBvOW53bCsyOXJzaTJYTmZabjZETGU0cFRubzcrOFUxSFp4SWJLb1I3aHprRXh5S0gxY2ZPQVA4TkV5V3hyNEU3dXRaTG1ldUdOUVVjQjJyR2wwOXdqTXFydFFsS2RJbTZuWHJzYkRIV3cwWmY1OHYrU1A2T3FOL1hQU3JLcWR2VkxUUmV5TmdFV3N4eCtWTTlXSS91eENLSTZtTmNkdjVDK1YyWW8xTUZiQzl2YnU3Um1LVlMrcFIybEpwUnVlSVc5OU9LZkVDMFE1S2UvdVcvY0IzTkRPRlo2SWo4cHZ0LzJ4VWJHei94M0xnUUlUK05oMjFqL2c0bFdQbGRxVnl0ZlljSDF3bnhZSmFrLytVVFNrUDBnbXdERUJhSDZKSlNCaGtjWjg4MlVCNUR5TTRQQlhTV0RuaU82dmhOcDhpMzFtU1dYUW5IU0ZKV1JVMjZsZmtVeFlEelFYam5oZGZ5VXUyUHd6SCthTkpjL0lwMG4rM3FHS0tXY0d2RUtnbmd3aVNjMTAvOXJUTnpaeGRRbmdhcHdyYS95NVhKaEFFQXZ6VzQxRy92bTFZREppcHdKN1QvSmNmN0JBV0RHWWRDa1ZDRWVUUEgwVzlhbmxMVW8wMmI0NDk3WXFqTER6THl2eHkzanNuS0ZBTHZVMmdVZUhCb0FXVzFodnJpWVBNQnkzOWVoaGNBQnVFSXVrMjcvSTU3UXhCSS9DU0pnZi96V3cvSmN0eTVLcFVYN1M5c2lyTDVTdkFQemVZYXpmbW5VL2xDdHBmVWxxZ1lxbjNuTjVodW14UjZiMDFQbDB1ZnJ2MkVTMzQrRGRkVy84MG1wNUhIOVpkZFNWOHQyOFJCdTdYOWRGdnpSMUtWVFRuTFFQaDVHZWxEWXhMVnVTSVNmVzhOUmc1d0NtcEpDRTdqaHpwNmh0VHIzS1NLeERYVk9kSnZpaU9OVFZkMVk5NWdjTUVuRUpsY0g3WDNqRFVCNlFPN21WUWZEZnppelJqdU9GTXhBd2U2L0VFVys1V2Z0dDU2MXBzbFRsVnBqYlo5QkpOUDg5SmtMOHF6YXo1RFFaY3ZjT004aVlFdjhYZGRvbGxPUzdDNnZLcUtXWEw2clNna2dra3NvT2w1UjdScTZCcGJLWGdTZXI3T29WZDBsSkVwVmdrSE5XYVhrZ0VGNDBoZXlVNDNjcWsrSXMiLCJtYWMiOiIzMjQ3ODNkMTZlYmJiNmQwNGUyMjJjMDllMDMxYjVkMjVhMjQ2ZDhlZGEzYzRiYjAxYjdiOTc3YjExMmFmZWE4IiwidGFnIjoiIn0=, certificates/company_2/931f2fb58ea0200b_1762868888.pem, 1, {\"C\":\"MK\",\"O\":\"Facturino\",\"CN\":\"Facturino Test QES (DEV ONLY)\"}, {\"C\":\"MK\",\"O\":\"Facturino\",\"CN\":\"Facturino Test QES (DEV ONLY)\"}, RSA-SHA256, 2048, 2025-11-11 13:48:08, 2025-11-11 13:48:08)), 2025-11-11 13:48:08, 2025-11-11 13:48:08))"} 

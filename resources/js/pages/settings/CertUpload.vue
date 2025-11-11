@@ -444,6 +444,14 @@ const fetchCurrentCertificate = async () => {
   try {
     const response = await axios.get('/api/v1/certificates/current')
     currentCertificate.value = response.data.data
+
+    // Show warning if certificate files are missing
+    if (response.data.warning && response.data.message) {
+      notificationStore.showNotification({
+        type: 'warning',
+        message: response.data.message
+      })
+    }
   } catch (error) {
     if (error.response?.status !== 404) {
       console.error('Failed to fetch certificate:', error)
