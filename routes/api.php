@@ -679,12 +679,6 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/download', [\App\Http\Controllers\V1\Admin\Export\ExportController::class, 'download']);
             });
 
-            // Recurring Expenses (Phase 4)
-            // ----------------------------------
-
-            Route::apiResource('recurring-expenses', \App\Http\Controllers\V1\Admin\Expense\RecurringExpenseController::class);
-            Route::post('recurring-expenses/{id}/process-now', [\App\Http\Controllers\V1\Admin\Expense\RecurringExpenseController::class, 'processNow']);
-
             // AI Insights Integration
             // Feature flag: FEATURE_MCP_AI_TOOLS
             // ----------------------------------
