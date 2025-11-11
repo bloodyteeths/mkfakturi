@@ -199,9 +199,9 @@ class MkUblMapper
             $paymentTerms = new PaymentTerms();
             $daysUntilDue = Carbon::parse($this->invoice->invoice_date)
                 ->diffInDays(Carbon::parse($this->invoice->due_date));
-            
+
             $paymentTerms->setNote("Рок за плаќање: {$daysUntilDue} дена"); // Payment term: X days
-            $ublInvoice->setPaymentTerms([$paymentTerms]);
+            $ublInvoice->setPaymentTerms($paymentTerms);
         }
     }
 
