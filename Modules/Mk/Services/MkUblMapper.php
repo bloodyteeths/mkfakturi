@@ -19,6 +19,7 @@ use NumNum\UBL\TaxScheme;
 use NumNum\UBL\LegalMonetaryTotal;
 use NumNum\UBL\PaymentMeans;
 use NumNum\UBL\PaymentTerms;
+use NumNum\UBL\PayeeFinancialAccount;
 use NumNum\UBL\Generator;
 use Carbon\Carbon;
 
@@ -184,11 +185,13 @@ class MkUblMapper
         
         // Add bank account information if available
         if ($this->company->bankAccounts->count() > 0) {
-            $bankAccount = $this->company->bankAccounts->where('is_primary', true)->first() 
+            $bankAccount = $this->company->bankAccounts->where('is_primary', true)->first()
                         ?? $this->company->bankAccounts->first();
-            
+
             if ($bankAccount->iban) {
-                $paymentMeans->setPayeeFinancialAccount($bankAccount->iban);
+                $payeeAccount = new PayeeFinancialAccount();
+                $payeeAccount->setId($bankAccount->iban);
+                $paymentMeans->setPayeeFinancialAccount($payeeAccount);
             }
         }
 
@@ -271,14 +274,14 @@ class MkUblMapper
         if (!empty($taxSubTotals)) {
             $taxTotal = new TaxTotal();
             $taxTotal->setTaxSubtotals($taxSubTotals);
-            
+
             // Calculate total tax amount for this line
             $totalTaxAmount = collect($taxSubTotals)->sum(function ($subTotal) {
                 return $subTotal->getTaxAmount();
             });
             $taxTotal->setTaxAmount($totalTaxAmount);
-            
-            $invoiceLine->setTaxTotal([$taxTotal]);
+
+            $invoiceLine->setTaxTotal($taxTotal);
         }
     }
 
@@ -322,8 +325,8 @@ class MkUblMapper
             $taxTotal = new TaxTotal();
             $taxTotal->setTaxAmount($totalTaxAmount);
             $taxTotal->setTaxSubtotals($taxSubTotals);
-            
-            $ublInvoice->setTaxTotal([$taxTotal]);
+
+            $ublInvoice->setTaxTotal($taxTotal);
         }
     }
 
