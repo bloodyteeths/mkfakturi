@@ -316,18 +316,18 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useNotificationStore } from '@/scripts/admin/stores/notification'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
 // Icons
 import {
   KeyIcon,
-  UploadIcon,
+  ArrowUpTrayIcon as UploadIcon,
   CheckCircleIcon,
   ShieldCheckIcon,
   ShieldExclamationIcon,
   TrashIcon,
-  InfoIcon,
+  InformationCircleIcon as InfoIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 

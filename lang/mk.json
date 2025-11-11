@@ -905,6 +905,7 @@
             "exchange_rate": "Exchange Rate",
             "address_information": "Address Information",
             "pdf_generation": "PDF Generation",
+            "certificates": "Сертификати",
             "dashboard": "Dashboard"
         },
         "address_information": {

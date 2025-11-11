@@ -367,6 +367,12 @@ export default [
             meta: { isOwner: true },
             component: FeatureFlagsSettings,
           },
+          {
+            path: 'certificates',
+            name: 'settings.certificates',
+            meta: { isOwner: true },
+            component: () => import('@/js/pages/settings/CertUpload.vue'),
+          },
         ],
       },
 

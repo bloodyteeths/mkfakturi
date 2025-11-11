@@ -306,6 +306,16 @@ return [
             'ability' => '',
             'model' => '',
         ],
+        [
+            'title' => 'settings.menu_title.certificates',
+            'group' => '',
+            'name' => 'Certificates',
+            'link' => '/admin/settings/certificates',
+            'icon' => 'ShieldCheckIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
     ],
 
     /*

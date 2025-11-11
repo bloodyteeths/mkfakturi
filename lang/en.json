@@ -881,7 +881,8 @@
       "notes": "Notes",
       "exchange_rate": "Exchange Rate",
       "address_information": "Address Information",
-      "pdf_generation": "PDF Generation"
+      "pdf_generation": "PDF Generation",
+      "certificates": "Certificates"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
