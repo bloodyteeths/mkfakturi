@@ -102,6 +102,18 @@
     <!-- Export XML (UBL) -->
     <ExportXml v-if="canExportXml(row)" :invoice="row" />
 
+    <!-- Download E-Invoice XML (Signed) -->
+    <BaseDropdownItem
+      v-if="canDownloadEInvoiceXml"
+      @click="downloadEInvoiceXml"
+    >
+      <BaseIcon
+        name="DocumentArrowDownIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('e_invoice.download_xml') }}
+    </BaseDropdownItem>
+
     <!--  Delete Invoice  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.DELETE_INVOICE)"
@@ -118,13 +130,14 @@
 
 <script setup>
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
+import { useEInvoiceStore } from '@/scripts/admin/stores/e-invoice'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/scripts/admin/stores/user'
-import { inject } from 'vue'
+import { inject, ref, computed, onMounted } from 'vue'
 import abilities from '@/scripts/admin/stub/abilities'
 import ExportXml from '@/scripts/components/ExportXml.vue'
 
@@ -144,6 +157,7 @@ const props = defineProps({
 })
 
 const invoiceStore = useInvoiceStore()
+const eInvoiceStore = useEInvoiceStore()
 const modalStore = useModalStore()
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()
@@ -153,6 +167,9 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const utils = inject('utils')
+
+const eInvoice = ref(null)
+const isLoadingEInvoice = ref(false)
 
 function canReSendInvoice(row) {
   return (
@@ -269,4 +286,57 @@ function copyPdfUrl() {
     message: t('general.copied_pdf_url_clipboard'),
   })
 }
+
+// Load e-invoice status when component mounts (for dropdown on view page)
+onMounted(async () => {
+  if (route.name === 'invoices.view' && props.row?.id) {
+    await loadEInvoiceStatus()
+  }
+})
+
+// Computed property to check if e-invoice XML can be downloaded
+const canDownloadEInvoiceXml = computed(() => {
+  if (!eInvoice.value) return false
+
+  // Check if user has permission and e-invoice is signed
+  return (
+    userStore.hasAbilities(abilities.VIEW_INVOICE) &&
+    eInvoice.value.status &&
+    ['SIGNED', 'SUBMITTED', 'ACCEPTED', 'REJECTED'].includes(eInvoice.value.status)
+  )
+})
+
+// Load e-invoice status
+async function loadEInvoiceStatus() {
+  if (isLoadingEInvoice.value) return
+
+  isLoadingEInvoice.value = true
+  try {
+    await eInvoiceStore.fetchEInvoiceStatus(props.row.id)
+    eInvoice.value = eInvoiceStore.currentEInvoice
+  } catch (error) {
+    // Silently fail if no e-invoice exists
+    eInvoice.value = null
+  } finally {
+    isLoadingEInvoice.value = false
+  }
+}
+
+// Download e-invoice XML
+async function downloadEInvoiceXml() {
+  if (!eInvoice.value?.id) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('e_invoice.no_einvoice'),
+    })
+    return
+  }
+
+  try {
+    await eInvoiceStore.downloadXml(eInvoice.value.id)
+  } catch (error) {
+    console.error('Download e-invoice XML failed:', error)
+  }
+}
 </script>
+// CLAUDE-CHECKPOINT

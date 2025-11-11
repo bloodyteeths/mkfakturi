@@ -1,100 +1,104 @@
-2025-11-10T14:54:10.000000000Z [inf]  Starting Container
-2025-11-10T14:54:11.936957589Z [inf]  Waiting for database... (1/30)
-2025-11-10T14:54:11.937023699Z [inf]  === Application Startup ===
-2025-11-10T14:54:11.937039084Z [inf]  Railway detected: Parsing MYSQL_URL...
-2025-11-10T14:54:11.937048858Z [inf]  DB configured from MYSQL_URL
-2025-11-10T14:54:11.937057821Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
-2025-11-10T14:54:13.190001825Z [inf]  Waiting for database... (2/30)
-2025-11-10T14:54:15.362407695Z [inf]  Waiting for database... (3/30)
-2025-11-10T14:54:18.057734655Z [inf]  Waiting for database... (4/30)
-2025-11-10T14:54:20.145810701Z [inf]  Waiting for database... (5/30)
-2025-11-10T14:54:22.177736046Z [inf]  Waiting for database... (6/30)
-2025-11-10T14:54:24.113501688Z [inf]  Waiting for database... (7/30)
-2025-11-10T14:54:26.212417137Z [inf]  Waiting for database... (8/30)
-2025-11-10T14:54:28.393820346Z [inf]  Waiting for database... (9/30)
-2025-11-10T14:54:30.568808805Z [inf]  Waiting for database... (10/30)
-2025-11-10T14:54:33.207332317Z [inf]  Waiting for database... (11/30)
-2025-11-10T14:54:35.112014182Z [inf]  Waiting for database... (12/30)
-2025-11-10T14:54:37.120309193Z [inf]  Waiting for database... (13/30)
-2025-11-10T14:54:39.248307734Z [inf]  Waiting for database... (14/30)
-2025-11-10T14:54:41.419798603Z [inf]  Waiting for database... (15/30)
-2025-11-10T14:54:43.592541620Z [inf]  Waiting for database... (16/30)
-2025-11-10T14:54:46.183671553Z [inf]  Waiting for database... (17/30)
-2025-11-10T14:54:48.150580645Z [inf]  Waiting for database... (18/30)
-2025-11-10T14:54:50.212109739Z [inf]  Waiting for database... (19/30)
-2025-11-10T14:54:52.286036505Z [inf]  Waiting for database... (20/30)
-2025-11-10T14:54:54.442967873Z [inf]  Waiting for database... (21/30)
-2025-11-10T14:54:56.611412640Z [inf]  Waiting for database... (22/30)
-2025-11-10T14:54:58.776273537Z [inf]  Waiting for database... (23/30)
-2025-11-10T14:55:01.350669983Z [inf]  Waiting for database... (24/30)
-2025-11-10T14:55:03.374256811Z [inf]  Waiting for database... (25/30)
-2025-11-10T14:55:05.319453486Z [inf]  Waiting for database... (26/30)
-2025-11-10T14:55:07.512289871Z [inf]  Waiting for database... (27/30)
-2025-11-10T14:55:09.655467152Z [inf]  Waiting for database... (28/30)
-2025-11-10T14:55:11.842880223Z [inf]  Waiting for database... (29/30)
-2025-11-10T14:55:14.374301327Z [inf]  Waiting for database... (30/30)
-2025-11-10T14:55:16.416616652Z [inf]  Clearing caches...
-2025-11-10T14:55:16.416623034Z [inf]  
-2025-11-10T14:55:16.416629082Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-10T14:55:16.416636074Z [inf]  
-2025-11-10T14:55:16.676464987Z [inf]  
-2025-11-10T14:55:16.676474070Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
-2025-11-10T14:55:16.676480828Z [inf]  
-2025-11-10T14:55:17.391181050Z [inf]  Running migrations...
-2025-11-10T14:55:17.391233119Z [inf]  
-2025-11-10T14:55:17.391239628Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-10T14:55:17.391248873Z [inf]  
-2025-11-10T14:55:17.391256125Z [inf]  
-2025-11-10T14:55:17.391264132Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-10T14:55:17.391270575Z [inf]  
-2025-11-10T14:55:17.744791959Z [inf]  
-2025-11-10T14:55:17.744803337Z [inf]     INFO  Running migrations.  
-2025-11-10T14:55:17.744809811Z [inf]  
-2025-11-10T14:55:17.754442137Z [inf]    2025_11_11_000001_create_audit_logs_table ...................... 5.81ms FAIL
-2025-11-10T14:55:17.764108271Z [inf]  
-2025-11-10T14:55:17.769138813Z [inf]    s` json null, `new_values` json null, `changed_fields` json null, `ip_addre  
-2025-11-10T14:55:17.769154688Z [inf]    ss` varchar(45) null, `user_agent` text null, `url` varchar(255) null, `htt  
-2025-11-10T14:55:17.769163503Z [inf]    p_method` varchar(10) null, `batch_id` char(36) null, `tags` json null, `cr  
-2025-11-10T14:55:17.769181634Z [inf]    eated_at` timestamp null, `updated_at` timestamp null) default character se  
-2025-11-10T14:55:17.769189830Z [inf]    t utf8 collate 'utf8_unicode_ci')                                            
-2025-11-10T14:55:17.769196949Z [inf]                                                                                 
-2025-11-10T14:55:17.769204379Z [inf]  
-2025-11-10T14:55:17.769218656Z [inf]  In Connection.php line 568:
-2025-11-10T14:55:17.769218767Z [inf]  In Connection.php line 822:
-2025-11-10T14:55:17.769232225Z [inf]                                                                                 
-2025-11-10T14:55:17.769233887Z [inf]                                                                                 
-2025-11-10T14:55:17.769246090Z [inf]    SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'audit_logs'  
-2025-11-10T14:55:17.769248113Z [inf]    SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'audit_logs'  
-2025-11-10T14:55:17.769258350Z [inf]     already exists (Connection: mysql, SQL: create table `audit_logs` (`id` bi  
-2025-11-10T14:55:17.769265265Z [inf]    gint unsigned not null auto_increment primary key, `company_id` bigint unsi  
-2025-11-10T14:55:17.769271222Z [inf]    gned not null, `auditable_type` varchar(255) not null, `auditable_id` bigin  
-2025-11-10T14:55:17.769276928Z [inf]    t unsigned not null, `user_id` bigint unsigned null, `user_name` varchar(25  
-2025-11-10T14:55:17.769283211Z [inf]    5) null, `event` varchar(255) not null, `description` text null, `old_value  
-2025-11-10T14:55:17.770956646Z [inf]     already exists                                                              
-2025-11-10T14:55:17.770966993Z [inf]                                                                                 
-2025-11-10T14:55:17.770973531Z [inf]  
-2025-11-10T14:55:17.788291667Z [inf]  Migrations failed or already applied
-2025-11-10T14:55:18.480783872Z [inf]  
-2025-11-10T14:55:18.480791530Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
-2025-11-10T14:55:18.480799846Z [inf]  
-2025-11-10T14:55:18.480807227Z [inf]  Starting application services...
-2025-11-10T14:55:18.480818060Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-2025-11-10T14:55:18.480823450Z [err]    import pkg_resources
-2025-11-10T14:55:18.480829061Z [inf]  2025-11-10 14:55:18,312 INFO Set uid to user 0 succeeded
-2025-11-10T14:55:18.480834350Z [inf]  2025-11-10 14:55:18,314 INFO supervisord started with pid 1
-2025-11-10T14:55:19.529328625Z [inf]  2025-11-10 14:55:19,317 INFO spawned: 'nginx' with pid 85
-2025-11-10T14:55:19.529339567Z [inf]  2025-11-10 14:55:19,319 INFO spawned: 'php-fpm' with pid 86
-2025-11-10T14:55:19.529351436Z [inf]  2025-11-10 14:55:19,322 INFO spawned: 'queue-worker_00' with pid 87
-2025-11-10T14:55:19.529359643Z [inf]  2025-11-10 14:55:19,326 INFO spawned: 'queue-worker_01' with pid 88
-2025-11-10T14:55:19.529374568Z [inf]  2025-11-10 14:55:19,328 INFO spawned: 'scheduler' with pid 89
-2025-11-10T14:55:19.529388031Z [err]  [10-Nov-2025 14:55:19] NOTICE: fpm is running, pid 86
-2025-11-10T14:55:19.529395613Z [err]  [10-Nov-2025 14:55:19] NOTICE: ready to handle connections
-2025-11-10T14:55:20.656430759Z [inf]  2025-11-10 14:55:20,653 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T14:55:20.656438073Z [inf]  2025-11-10 14:55:20,654 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T14:55:20.656443535Z [inf]  2025-11-10 14:55:20,654 INFO success: queue-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T14:55:20.656448765Z [inf]  2025-11-10 14:55:20,654 INFO success: queue-worker_01 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T14:55:20.656454216Z [inf]  2025-11-10 14:55:20,654 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T14:55:20.656459766Z [inf]  2025-11-10 14:55:20,654 INFO reaped unknown pid 109 (exit status 0)
-2025-11-10T14:56:21.067903983Z [inf]  2025-11-10 14:56:20,642 INFO reaped unknown pid 155 (exit status 0)
-2025-11-10T14:57:21.336287741Z [inf]  2025-11-10 14:57:20,642 INFO reaped unknown pid 160 (exit status 0)
-2025-11-10T14:58:21.611237056Z [inf]  2025-11-10 14:58:20,651 INFO reaped unknown pid 165 (exit status 0)
+[2025-11-11 22:37:12] production.WARNING: Slow operation detected {"operation":"req_6913ba97eb712","execution_time_ms":735.5,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
+[2025-11-11 22:37:12] production.WARNING: Slow request detected {"operation":"req_6913ba97eb712","execution_time_ms":735.5,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 22:37:12] production.WARNING: Certificate file missing for certificate {"certificate_id":12,"path":"certificates/company_2/931f2fb58ea0200b_1762889719.pem"} 
+[2025-11-11 22:37:14] production.WARNING: Slow operation detected {"operation":"req_6913ba9a24f9b","execution_time_ms":407.68,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-11 22:37:14] production.WARNING: Slow request detected {"operation":"req_6913ba9a24f9b","execution_time_ms":407.68,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://www.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 22:37:16] production.WARNING: Slow operation detected {"operation":"req_6913ba9a25241","execution_time_ms":2203.07,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
+[2025-11-11 22:37:16] production.WARNING: Slow request detected {"operation":"req_6913ba9a25241","execution_time_ms":2203.07,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices","route":"invoices.index","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 22:37:19] production.WARNING: Slow operation detected {"operation":"req_6913ba9e9df01","execution_time_ms":364.61,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-11 22:37:19] production.WARNING: Slow request detected {"operation":"req_6913ba9e9df01","execution_time_ms":364.61,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices/12","route":"invoices.show","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 22:37:19] production.WARNING: Slow operation detected {"operation":"req_6913ba9f33341","execution_time_ms":579.29,"memory_used_bytes":12582912,"memory_used_mb":12.0} 
+[2025-11-11 22:37:19] production.WARNING: Slow request detected {"operation":"req_6913ba9f33341","execution_time_ms":579.29,"memory_used_bytes":12582912,"memory_used_mb":12.0,"method":"GET","url":"https://www.facturino.mk/invoices/pdf/jNGLb5WPRY360Y1q843m","route":null,"user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 22:37:20] production.WARNING: Slow operation detected {"operation":"req_6913ba9e9df02","execution_time_ms":2044.75,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-11 22:37:20] production.WARNING: Slow request detected {"operation":"req_6913ba9e9df02","execution_time_ms":2044.75,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices","route":"invoices.index","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-11 22:37:21] production.INFO: [EInvoiceController::show] Request received {"e_invoice_id":12,"user_id":2,"user_email":"your-email@example.com","company_id":"N/A","is_owner":true} 
+[2025-11-11 22:37:21] production.INFO: [EInvoicePolicy::viewAny] Authorization check {"user_id":2,"user_email":"your-email@example.com","is_owner":true,"company_id":"N/A"} 
+[2025-11-11 22:37:21] production.INFO: [EInvoicePolicy::viewAny] User is owner - AUTHORIZED  
+[2025-11-11 22:37:21] production.INFO: [EInvoiceController::show] Authorization PASSED  
+[2025-11-11 22:37:26] production.INFO: [EInvoiceController::generate] Request received {"invoice_id":12,"user_id":2,"user_email":"your-email@example.com","company_id":"N/A","is_owner":true,"request_headers":{"x-xsrf-token":["eyJpdiI6IkN1Y0RpMlF4Wm84WkZEZ1NqaVVGUFE9PSIsInZhbHVlIjoic254UGZwZDRPbTVJU2trWnd4Y2dhelZTR2IycUxZS2U5RUtyZzlqMkhLbHFQZ0lNR2Y1eEw1UDhJcnZiWUxSeXFUL1kva25VbEVId1BrdkZ4bmNuNVhFaFdCaHJlanNSQzJuYTdtV2xCT1A3RmNDYUhxQ2krL3RaVzRMWXZ5dXMiLCJtYWMiOiJjZGYxYTE4MDUxYTE5ZDIyY2VmMGE3MWQ1OWExZmU1MDU0NTc1YzBjYTk2NDY4Nzg0N2M5M2E0MWY1M2QwNzMzIiwidGFnIjoiIn0="],"x-requested-with":["XMLHttpRequest"],"x-request-start":["1762900645772"],"x-real-ip":["79.125.199.91"],"x-railway-request-id":["5KjDQd6yTkezt_gH0-QtfA"],"x-railway-edge":["railway/europe-west4-drams3a"],"x-forwarded-proto":["https"],"x-forwarded-host":["www.facturino.mk"],"x-forwarded-for":["79.125.199.91"],"sec-fetch-site":["same-origin"],"sec-fetch-mode":["cors"],"sec-fetch-dest":["empty"],"sec-ch-ua-platform":["\"macOS\""],"sec-ch-ua-mobile":["?0"],"sec-ch-ua":["\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\""],"referer":["https://www.facturino.mk/admin/invoices/12/view"],"priority":["u=1, i"],"origin":["https://www.facturino.mk"],"cookie":["XSRF-TOKEN=eyJpdiI6IkN1Y0RpMlF4Wm84WkZEZ1NqaVVGUFE9PSIsInZhbHVlIjoic254UGZwZDRPbTVJU2trWnd4Y2dhelZTR2IycUxZS2U5RUtyZzlqMkhLbHFQZ0lNR2Y1eEw1UDhJcnZiWUxSeXFUL1kva25VbEVId1BrdkZ4bmNuNVhFaFdCaHJlanNSQzJuYTdtV2xCT1A3RmNDYUhxQ2krL3RaVzRMWXZ5dXMiLCJtYWMiOiJjZGYxYTE4MDUxYTE5ZDIyY2VmMGE3MWQ1OWExZmU1MDU0NTc1YzBjYTk2NDY4Nzg0N2M5M2E0MWY1M2QwNzMzIiwidGFnIjoiIn0%3D; facturino_session=eyJpdiI6IkN0aDIvODR3cGlaMUdKNGJiMTd5d3c9PSIsInZhbHVlIjoiUm80WEJyWnVCQW5LazIvNGk1b0dYNVRqUEZIUlRWRExKOFdxa3lHdVd0NGFFeXZMMFBjV0N5cVc1UWsxV0hnNmlDVDVwRjJFajE3MVExSDliTEZKUlV0N3JQTFRjUk54ZGJ0Mmx1dU5SMGZQTXBuUTUzNGtmMnVhb2tuUWxCOW0iLCJtYWMiOiIyMzc5ZDFlZWRhMTZhODIyMGI4N2VmNWQ2ZjkxYmUzYzI4NWYwNDBjYWZlNGIwODgzNmQ2MTU3MTE5NTUyYWRiIiwidGFnIjoiIn0%3D"],"company":["2"],"accept-language":["tr-TR,tr;q=0.9"],"accept-encoding":["gzip, deflate, br, zstd"],"accept":["*/*"],"content-length":["0"],"user-agent":["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"],"host":["www.facturino.mk"]}} 
+[2025-11-11 22:37:26] production.INFO: [EInvoicePolicy::create] Authorization check for generate {"user_id":2,"user_email":"your-email@example.com","is_owner":true,"company_id":"N/A"} 
+[2025-11-11 22:37:26] production.INFO: [EInvoicePolicy::create] User is owner - AUTHORIZED  
+[2025-11-11 22:37:26] production.INFO: [EInvoiceController::generate] Authorization PASSED  
+[2025-11-11 22:37:26] production.ERROR: Class "Modules\Mk\Services\MkUblMapper" not found {"userId":2,"exception":"[object] (Error(code: 0): Class \"Modules\\Mk\\Services\\MkUblMapper\" not found at /var/www/html/app/Http/Controllers/V1/Admin/EInvoice/EInvoiceController.php:177)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\EInvoice\\EInvoiceController->generate(12)
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('generate', Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\EInvoice\\EInvoiceController), 'generate')
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '60', '1')
+#9 /var/www/html/app/Http/Middleware/ScopeBouncer.php(53): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ScopeBouncer->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#11 /var/www/html/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#20 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#73 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#74 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#75 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#76 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#77 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#78 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#79 {main}
+"} 

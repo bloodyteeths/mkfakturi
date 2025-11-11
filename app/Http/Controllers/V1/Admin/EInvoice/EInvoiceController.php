@@ -122,8 +122,10 @@ class EInvoiceController extends Controller
             ])
             ->findOrFail($id);
 
+        // Return e-invoice with submissions
         return response()->json([
             'data' => $eInvoice,
+            'submissions' => $eInvoice->submissions->toArray(),
         ]);
     }
 
@@ -203,11 +205,14 @@ class EInvoiceController extends Controller
                 'invoice.customer',
                 'invoice.currency',
                 'invoice.items.taxes',
+                'certificate',
+                'submissions.submittedBy',
             ]);
 
             return response()->json([
                 'success' => true,
                 'data' => $eInvoice,
+                'submissions' => $eInvoice->submissions->toArray(),
                 'message' => 'E-invoice generated successfully',
             ]);
         } catch (Exception $e) {
@@ -298,13 +303,20 @@ class EInvoiceController extends Controller
                 // Update certificate last used timestamp
                 $certificate->markAsUsed();
 
+                // Reload e-invoice with relationships
+                $eInvoice = $eInvoice->fresh([
+                    'invoice.customer',
+                    'invoice.currency',
+                    'invoice.items.taxes',
+                    'certificate',
+                    'submissions.submittedBy',
+                ]);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'E-invoice signed successfully.',
-                    'data' => [
-                        'e_invoice' => $eInvoice->fresh(),
-                        'certificate_info' => $certInfo,
-                    ],
+                    'data' => $eInvoice,
+                    'submissions' => $eInvoice->submissions->toArray(),
                 ]);
             } finally {
                 // Always cleanup temporary files
@@ -388,13 +400,21 @@ class EInvoiceController extends Controller
                 // Dispatch job to submit to tax authority
                 dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
 
+                // Reload e-invoice with relationships
+                $eInvoice = $eInvoice->fresh([
+                    'invoice.customer',
+                    'invoice.currency',
+                    'invoice.items.taxes',
+                    'certificate',
+                    'submissions.submittedBy',
+                ]);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'E-invoice queued for submission.',
-                    'data' => [
-                        'e_invoice' => $eInvoice->fresh(),
-                        'submission' => $submission,
-                    ],
+                    'data' => $eInvoice,
+                    'submissions' => $eInvoice->submissions->toArray(),
+                    'submission' => $submission,
                 ]);
             } catch (Exception $e) {
                 DB::rollBack();
@@ -534,14 +554,21 @@ class EInvoiceController extends Controller
             // Dispatch job again
             dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
 
+            // Reload e-invoice with relationships
+            $eInvoice = $submission->eInvoice->fresh([
+                'invoice.customer',
+                'invoice.currency',
+                'invoice.items.taxes',
+                'certificate',
+                'submissions.submittedBy',
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'E-invoice resubmission queued.',
-                'data' => [
-                    'submission' => $submission->fresh(),
-                    'retry_count' => $submission->retry_count,
-                    'next_retry_at' => $submission->next_retry_at,
-                ],
+                'data' => $eInvoice,
+                'submissions' => $eInvoice->submissions->toArray(),
+                'submission' => $submission->fresh(),
             ]);
         } catch (Exception $e) {
             Log::error('E-invoice resubmission failed', [

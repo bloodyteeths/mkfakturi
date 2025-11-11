@@ -173,8 +173,8 @@
           </div>
         </BaseCard>
 
-        <!-- No Submissions -->
-        <BaseCard v-else-if="eInvoice.status !== 'DRAFT'">
+        <!-- No Submissions (shown for non-DRAFT statuses only) -->
+        <BaseCard v-else-if="eInvoice.status?.toUpperCase() !== 'DRAFT' && submissions.length === 0">
           <div class="p-6 text-center text-gray-500">
             {{ $t('e_invoice.no_submissions') }}
           </div>
@@ -227,19 +227,27 @@ const canGenerate = computed(() => {
 })
 
 const canSign = computed(() => {
-  return eInvoice.value && eInvoice.value.status === 'DRAFT'
+  if (!eInvoice.value) return false
+  const status = eInvoice.value.status?.toUpperCase()
+  return status === 'DRAFT'
 })
 
 const canSimulate = computed(() => {
-  return eInvoice.value && eInvoice.value.status === 'SIGNED'
+  if (!eInvoice.value) return false
+  const status = eInvoice.value.status?.toUpperCase()
+  return status === 'SIGNED'
 })
 
 const canSubmit = computed(() => {
-  return eInvoice.value && eInvoice.value.status === 'SIGNED'
+  if (!eInvoice.value) return false
+  const status = eInvoice.value.status?.toUpperCase()
+  return status === 'SIGNED'
 })
 
 const canDownload = computed(() => {
-  return eInvoice.value && ['SIGNED', 'SUBMITTED', 'ACCEPTED', 'REJECTED'].includes(eInvoice.value.status)
+  if (!eInvoice.value) return false
+  const status = eInvoice.value.status?.toUpperCase()
+  return ['SIGNED', 'SUBMITTED', 'ACCEPTED', 'REJECTED'].includes(status)
 })
 
 onMounted(async () => {

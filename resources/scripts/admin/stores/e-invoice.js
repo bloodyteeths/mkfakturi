@@ -35,6 +35,7 @@ export const useEInvoiceStore = (useWindow = false) => {
             .post(`/api/v1/e-invoices/generate/${invoiceId}`)
             .then((response) => {
               this.currentEInvoice = response.data.data
+              this.submissions = response.data.submissions || []
               notificationStore.showNotification({
                 type: 'success',
                 message: global.t('e_invoice.generated_successfully'),
@@ -64,6 +65,7 @@ export const useEInvoiceStore = (useWindow = false) => {
             .post(`/api/v1/e-invoices/${eInvoiceId}/sign`, { passphrase })
             .then((response) => {
               this.currentEInvoice = response.data.data
+              this.submissions = response.data.submissions || []
               notificationStore.showNotification({
                 type: 'success',
                 message: global.t('e_invoice.signed_successfully'),
@@ -92,9 +94,7 @@ export const useEInvoiceStore = (useWindow = false) => {
             .post(`/api/v1/e-invoices/${eInvoiceId}/submit`)
             .then((response) => {
               this.currentEInvoice = response.data.data
-              if (response.data.submission) {
-                this.submissions.unshift(response.data.submission)
-              }
+              this.submissions = response.data.submissions || []
               notificationStore.showNotification({
                 type: 'success',
                 message: global.t('e_invoice.submitted_successfully'),
@@ -254,9 +254,7 @@ export const useEInvoiceStore = (useWindow = false) => {
             .post(`/api/v1/e-invoices/submissions/${submissionId}/resubmit`)
             .then((response) => {
               this.currentEInvoice = response.data.data
-              if (response.data.submission) {
-                this.submissions.unshift(response.data.submission)
-              }
+              this.submissions = response.data.submissions || []
               notificationStore.showNotification({
                 type: 'success',
                 message: global.t('e_invoice.resubmitted_successfully'),
