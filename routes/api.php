@@ -476,7 +476,7 @@ Route::prefix('/v1')->group(function () {
             // E-Invoices
             // ----------------------------------
 
-            Route::prefix('e-invoices')->group(function () {
+            Route::prefix('e-invoices')->middleware(['throttle:60,1'])->group(function () {
                 Route::get('/', [EInvoiceController::class, 'index']);
                 Route::get('/portal-status', [EInvoiceController::class, 'checkPortalStatus']);
                 Route::get('/submission-queue', [EInvoiceController::class, 'getSubmissionQueue']);

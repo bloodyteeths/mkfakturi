@@ -37,13 +37,13 @@ return new class extends Migration
 
             // Status tracking
             $table->enum('status', [
-                'draft',      // Initial state, UBL generated but not signed
-                'signed',     // Digitally signed with QES certificate
-                'submitted',  // Submitted to government portal
-                'accepted',   // Accepted by government portal
-                'rejected',   // Rejected by government portal
-                'failed'      // Submission or processing failed
-            ])->default('draft');
+                'DRAFT',      // Initial state, UBL generated but not signed
+                'SIGNED',     // Digitally signed with QES certificate
+                'SUBMITTED',  // Submitted to government portal
+                'ACCEPTED',   // Accepted by government portal
+                'REJECTED',   // Rejected by government portal
+                'FAILED'      // Submission or processing failed
+            ])->default('DRAFT');
 
             // Hash and file paths
             $table->string('hash', 64)->nullable(); // SHA256 hash of UBL XML

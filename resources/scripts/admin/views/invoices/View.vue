@@ -12,6 +12,7 @@ import { useDialogStore } from '@/scripts/stores/dialog'
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
+import EInvoiceTab from '@/scripts/admin/views/invoices/partials/EInvoiceTab.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -529,20 +530,36 @@ onSearched = debounce(onSearched, 500)
       </div>
     </div>
 
-    <div
-      class="flex flex-col min-h-0 mt-8 overflow-hidden"
-      style="height: 75vh"
-    >
-      <iframe
-        :src="`${shareableLink}`"
-        class="
-          flex-1
-          border border-gray-400 border-solid
-          bg-white
-          rounded-md
-          frame-style
-        "
-      />
-    </div>
+    <BaseCard class="mt-8">
+      <BaseTabGroup>
+        <BaseTab
+          tab-panel-container="py-4 mt-px"
+          :title="$t('invoices.details')"
+        >
+          <div
+            class="flex flex-col min-h-0 overflow-hidden"
+            style="height: 75vh"
+          >
+            <iframe
+              :src="`${shareableLink}`"
+              class="
+                flex-1
+                border border-gray-400 border-solid
+                bg-white
+                rounded-md
+                frame-style
+              "
+            />
+          </div>
+        </BaseTab>
+
+        <BaseTab
+          tab-panel-container="py-4 mt-px"
+          :title="$t('e_invoice.title')"
+        >
+          <EInvoiceTab :invoice="invoiceData" />
+        </BaseTab>
+      </BaseTabGroup>
+    </BaseCard>
   </BasePage>
 </template>

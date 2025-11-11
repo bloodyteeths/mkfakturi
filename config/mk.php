@@ -329,6 +329,95 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | E-Faktura Portal Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Macedonian e-Faktura tax authority portal
+    |
+    */
+
+    'efaktura' => [
+
+        /*
+        |--------------------------------------------------------------------------
+        | Portal URL
+        |--------------------------------------------------------------------------
+        |
+        | The base URL for the Macedonian e-Faktura portal
+        |
+        */
+        'portal_url' => env('MK_EFAKTURA_PORTAL_URL', 'https://e-ujp.ujp.gov.mk'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Authentication Credentials
+        |--------------------------------------------------------------------------
+        |
+        | Username and password for e-Faktura portal authentication
+        |
+        */
+        'username' => env('MK_EFAKTURA_USERNAME'),
+        'password' => env('MK_EFAKTURA_PASSWORD'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submission Mode
+        |--------------------------------------------------------------------------
+        |
+        | Submission mode for e-invoices:
+        | - 'portal': Submit via web portal (requires username/password)
+        | - 'api': Submit via API (requires API credentials)
+        |
+        */
+        'mode' => env('MK_EFAKTURA_MODE', 'portal'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | API Credentials (for API mode)
+        |--------------------------------------------------------------------------
+        |
+        | API key and secret for programmatic submission
+        |
+        */
+        'api_key' => env('MK_EFAKTURA_API_KEY'),
+        'api_secret' => env('MK_EFAKTURA_API_SECRET'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Timeout Settings
+        |--------------------------------------------------------------------------
+        |
+        | HTTP timeout for portal/API requests (in seconds)
+        |
+        */
+        'timeout' => env('MK_EFAKTURA_TIMEOUT', 30),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Retry Settings
+        |--------------------------------------------------------------------------
+        |
+        | Number of times to retry failed submissions
+        |
+        */
+        'max_retries' => env('MK_EFAKTURA_MAX_RETRIES', 3),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Environment
+        |--------------------------------------------------------------------------
+        |
+        | Environment for e-Faktura submission:
+        | - 'production': Live submissions
+        | - 'sandbox': Test submissions
+        |
+        */
+        'environment' => env('MK_EFAKTURA_ENVIRONMENT', 'production'),
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Feature Flags
     |--------------------------------------------------------------------------
     |
@@ -339,6 +428,7 @@ return [
     'features' => [
         'advanced_payments' => env('FEATURE_ADVANCED_PAYMENTS', false),
         'psd2_banking' => env('FEATURE_PSD2_BANKING', false),
+        'e_invoicing' => env('FEATURE_E_INVOICING', false),
     ],
 
 ];

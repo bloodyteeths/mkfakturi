@@ -7,6 +7,7 @@ use App\Models\Certificate;
 use App\Models\EInvoice;
 use App\Models\EInvoiceSubmission;
 use App\Models\Invoice;
+use App\Services\CertificateExtractionService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -220,41 +221,52 @@ class EInvoiceController extends Controller
                 ], 422);
             }
 
-            // Extract certificate paths (decrypt if needed)
-            $privateKeyPath = $this->extractPrivateKey($certificate);
-            $certificatePath = $this->extractCertificate($certificate);
+            // Get passphrase from request
+            $passphrase = $request->input('passphrase');
 
-            // Sign the XML
-            $signer = new MkXmlSigner(
-                $privateKeyPath,
-                $certificatePath,
-                $request->input('passphrase')
-            );
+            // Create extraction service instance for cleanup tracking
+            $extractionService = app(CertificateExtractionService::class);
 
-            $signedXml = $signer->signXml($eInvoice->ubl_xml);
+            try {
+                // Extract certificate paths (decrypt if needed)
+                $privateKeyPath = $extractionService->getTempPrivateKeyPath($certificate, $passphrase);
+                $certificatePath = $extractionService->getTempCertificatePath($certificate, $passphrase);
 
-            // Get certificate info for metadata
-            $certInfo = $signer->getCertificateInfo();
+                // Sign the XML
+                $signer = new MkXmlSigner(
+                    $privateKeyPath,
+                    $certificatePath,
+                    $passphrase
+                );
 
-            // Update e-invoice with signed XML
-            $eInvoice->sign(
-                $certificate,
-                $signedXml,
-                $certInfo['subject'] ?? null,
-                $certInfo['issuer'] ?? null
-            );
+                $signedXml = $signer->signXml($eInvoice->ubl_xml);
 
-            // Update certificate last used timestamp
-            $certificate->markAsUsed();
+                // Get certificate info for metadata
+                $certInfo = $signer->getCertificateInfo();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'E-invoice signed successfully.',
-                'data' => [
-                    'e_invoice' => $eInvoice->fresh(),
-                    'certificate_info' => $certInfo,
-                ],
-            ]);
+                // Update e-invoice with signed XML
+                $eInvoice->sign(
+                    $certificate,
+                    $signedXml,
+                    $certInfo['subject'] ?? null,
+                    $certInfo['issuer'] ?? null
+                );
+
+                // Update certificate last used timestamp
+                $certificate->markAsUsed();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'E-invoice signed successfully.',
+                    'data' => [
+                        'e_invoice' => $eInvoice->fresh(),
+                        'certificate_info' => $certInfo,
+                    ],
+                ]);
+            } finally {
+                // Always cleanup temporary files
+                $extractionService->cleanup();
+            }
         } catch (Exception $e) {
             Log::error('E-invoice signing failed', [
                 'e_invoice_id' => $id,
@@ -331,8 +343,7 @@ class EInvoiceController extends Controller
                 DB::commit();
 
                 // Dispatch job to submit to tax authority
-                // NOTE: Create SubmitEInvoiceJob in app/Jobs/SubmitEInvoiceJob.php
-                // dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
+                dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
 
                 return response()->json([
                     'success' => true,
@@ -478,7 +489,7 @@ class EInvoiceController extends Controller
             $submission->retry();
 
             // Dispatch job again
-            // dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
+            dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
 
             return response()->json([
                 'success' => true,
@@ -592,37 +603,32 @@ class EInvoiceController extends Controller
 
     /**
      * Extract private key from certificate.
-     * Handles decryption and temporary file creation.
+     * Handles decryption and temporary file creation using CertificateExtractionService.
      *
      * @param  Certificate  $certificate
+     * @param  string|null  $passphrase Optional PFX passphrase
      * @return string Path to private key file
+     * @throws Exception
      */
-    protected function extractPrivateKey(Certificate $certificate): string
+    protected function extractPrivateKey(Certificate $certificate, ?string $passphrase = null): string
     {
-        // For now, assume certificate has a stored path
-        // In production, you may need to decrypt and create temp files
-        if ($certificate->certificate_path) {
-            // Extract private key from PFX/P12
-            // This is simplified - actual implementation depends on storage format
-            return storage_path('app/'.$certificate->certificate_path.'/private.key');
-        }
-
-        throw new Exception('Certificate private key path not configured');
+        $extractionService = app(CertificateExtractionService::class);
+        return $extractionService->getTempPrivateKeyPath($certificate, $passphrase);
     }
 
     /**
      * Extract certificate from Certificate model.
+     * Handles decryption and temporary file creation using CertificateExtractionService.
      *
      * @param  Certificate  $certificate
+     * @param  string|null  $passphrase Optional PFX passphrase
      * @return string Path to certificate file
+     * @throws Exception
      */
-    protected function extractCertificate(Certificate $certificate): string
+    protected function extractCertificate(Certificate $certificate, ?string $passphrase = null): string
     {
-        if ($certificate->certificate_path) {
-            return storage_path('app/'.$certificate->certificate_path.'/certificate.pem');
-        }
-
-        throw new Exception('Certificate path not configured');
+        $extractionService = app(CertificateExtractionService::class);
+        return $extractionService->getTempCertificatePath($certificate, $passphrase);
     }
 
     /**

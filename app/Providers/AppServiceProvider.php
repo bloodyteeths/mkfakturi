@@ -78,6 +78,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(\App\Models\ExportJob::class, \App\Policies\ExportJobPolicy::class);
         Gate::policy(\App\Models\RecurringExpense::class, \App\Policies\RecurringExpensePolicy::class);
 
+        // E-Invoice Policy
+        Gate::policy(\App\Models\EInvoice::class, \App\Policies\EInvoicePolicy::class);
+
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
         $this->bootAuth();
