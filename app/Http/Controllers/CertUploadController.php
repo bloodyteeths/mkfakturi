@@ -115,7 +115,12 @@ class CertUploadController extends Controller
             'certificate' => [
                 'required',
                 'file',
-                'mimes:p12,pfx',
+                function ($attribute, $value, $fail) {
+                    $extension = strtolower($value->getClientOriginalExtension());
+                    if (!in_array($extension, ['p12', 'pfx'])) {
+                        $fail(__('certificates.invalid_format'));
+                    }
+                },
                 'max:5120' // 5MB max
             ],
             'password' => [
@@ -125,6 +130,11 @@ class CertUploadController extends Controller
                 'max:255'
             ],
             'name' => [
+                'nullable',
+                'string',
+                'max:255'
+            ],
+            'description' => [
                 'nullable',
                 'string',
                 'max:255'
@@ -158,7 +168,7 @@ class CertUploadController extends Controller
 
             $certificateFile = $request->file('certificate');
             $password = $request->input('password');
-            $certificateName = $request->input('name', '');
+            $certificateName = $request->input('description') ?: $request->input('name', '');
 
             // Create secure temporary file for processing
             $tempPath = $this->createSecureTempFile($certificateFile);
