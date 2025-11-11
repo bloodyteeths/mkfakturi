@@ -154,7 +154,7 @@
               <BaseButton
                 variant="danger"
                 size="sm"
-                @click="showDeleteConfirmation = true"
+                @click="() => { console.log('Delete button clicked'); showDeleteConfirmation = true; }"
               >
                 <template #left>
                   <TrashIcon class="h-4 w-4" />
@@ -416,7 +416,13 @@ const uploadCertificate = async () => {
 }
 
 const deleteCertificate = async () => {
+  console.log('deleteCertificate called', {
+    certificateId: currentCertificate.value?.id,
+    hasCertificate: !!currentCertificate.value
+  })
+
   if (!currentCertificate.value?.id) {
+    console.log('No certificate ID found')
     notificationStore.showNotification({
       type: 'error',
       message: t('certificates.no_certificate')
@@ -425,9 +431,11 @@ const deleteCertificate = async () => {
   }
 
   isDeleting.value = true
+  console.log('Making DELETE request to:', `/api/v1/certificates/${currentCertificate.value.id}`)
 
   try {
     await axios.delete(`/api/v1/certificates/${currentCertificate.value.id}`)
+    console.log('Delete request successful')
 
     notificationStore.showNotification({
       type: 'success',
