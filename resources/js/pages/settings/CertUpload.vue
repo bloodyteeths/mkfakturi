@@ -399,7 +399,6 @@ const uploadCertificate = async () => {
 
     // Clear form and refresh certificate info
     onCertificateCleared()
-    certificateUploader.value?.clearFiles()
     await fetchCurrentCertificate()
 
   } catch (error) {
