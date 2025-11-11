@@ -32,39 +32,12 @@
               <BaseLabel>{{ $t('certificates.certificate_file') }}</BaseLabel>
               <BaseFileUploader
                 ref="certificateUploader"
-                :accepted-types="['.p12', '.pfx']"
-                :max-file-size="5"
-                @file-selected="onCertificateSelected"
-                @file-cleared="onCertificateCleared"
-              >
-                <template #default="{ dragActive, files }">
-                  <div
-                    class="border-2 border-dashed rounded-lg p-8 text-center"
-                    :class="{
-                      'border-primary-300 bg-primary-50': dragActive,
-                      'border-gray-300': !dragActive && !files.length,
-                      'border-green-300 bg-green-50': files.length > 0
-                    }"
-                  >
-                    <div v-if="!files.length">
-                      <UploadIcon class="mx-auto h-12 w-12 text-gray-400" />
-                      <div class="mt-4">
-                        <p class="text-sm text-gray-600">
-                          {{ $t('certificates.upload_description') }}
-                        </p>
-                        <p class="text-xs text-gray-500 mt-1">
-                          {{ $t('certificates.supported_formats') }}
-                        </p>
-                      </div>
-                    </div>
-                    <div v-else class="text-green-700">
-                      <CheckCircleIcon class="mx-auto h-12 w-12" />
-                      <p class="mt-2 font-medium">{{ files[0].name }}</p>
-                      <p class="text-sm">{{ formatFileSize(files[0].size) }}</p>
-                    </div>
-                  </div>
-                </template>
-              </BaseFileUploader>
+                accept=".p12,.pfx"
+                :preserve-local-files="false"
+                recommended-text=".p12 or .pfx file (max 5MB)"
+                @change="onCertificateSelected"
+                @remove="onCertificateCleared"
+              />
             </div>
 
             <!-- Password Field -->
@@ -356,13 +329,13 @@ const canUpload = computed(() => {
 })
 
 // Methods
-const onCertificateSelected = (files) => {
-  if (files && files.length > 0) {
-    selectedFile.value = files[0]
+const onCertificateSelected = (fieldName, file, fileCount) => {
+  if (file) {
+    selectedFile.value = file
     passwordError.value = ''
-    
+
     // Validate file type
-    const fileName = files[0].name.toLowerCase()
+    const fileName = file.name.toLowerCase()
     if (!fileName.endsWith('.p12') && !fileName.endsWith('.pfx')) {
       notificationStore.showNotification({
         type: 'error',
@@ -373,7 +346,7 @@ const onCertificateSelected = (files) => {
     }
 
     // Validate file size (5MB max)
-    if (files[0].size > 5 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       notificationStore.showNotification({
         type: 'error',
         message: t('certificates.file_too_large')
