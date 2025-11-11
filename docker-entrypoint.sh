@@ -140,6 +140,21 @@ php artisan storage:link || true
 echo "Verifying Laravel application..."
 php artisan --version || echo "Warning: Laravel not responding"
 
+# Test a simple PHP route to catch any bootstrap errors
+echo "Testing PHP bootstrap..."
+php artisan route:list | head -5 || echo "Warning: Route list failed"
+
+# Check if we can access the database
+echo "Testing database connection..."
+php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'DB OK'; } catch (\Exception \$e) { echo 'DB FAILED: ' . \$e->getMessage(); }" 2>&1 | tail -3
+
+# Enable verbose PHP error logging
+echo "Enabling verbose PHP errors for debugging..."
+echo "display_errors = On" >> /usr/local/etc/php/conf.d/custom.ini
+echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/custom.ini
+echo "log_errors = On" >> /usr/local/etc/php/conf.d/custom.ini
+echo "error_log = /var/www/html/storage/logs/php-errors.log" >> /usr/local/etc/php/conf.d/custom.ini
+
 # Start supervisor (nginx, php-fpm, scheduler)
 # Queue workers are disabled by default in supervisord.conf
 echo "Starting application services..."
