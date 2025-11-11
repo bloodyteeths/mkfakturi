@@ -278,7 +278,11 @@ class MkUblMapper
         
         if (!empty($taxSubTotals)) {
             $taxTotal = new TaxTotal();
-            $taxTotal->setTaxSubtotals($taxSubTotals);
+
+            // Add each tax subtotal individually
+            foreach ($taxSubTotals as $taxSubTotal) {
+                $taxTotal->addTaxSubTotal($taxSubTotal);
+            }
 
             // Calculate total tax amount for this line
             $totalTaxAmount = collect($taxSubTotals)->sum(function ($subTotal) {
@@ -335,7 +339,11 @@ class MkUblMapper
         if (!empty($taxSubTotals)) {
             $taxTotal = new TaxTotal();
             $taxTotal->setTaxAmount($totalTaxAmount);
-            $taxTotal->setTaxSubtotals($taxSubTotals);
+
+            // Add each tax subtotal individually
+            foreach ($taxSubTotals as $taxSubTotal) {
+                $taxTotal->addTaxSubTotal($taxSubTotal);
+            }
 
             $ublInvoice->setTaxTotal($taxTotal);
         }
