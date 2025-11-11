@@ -346,18 +346,33 @@ class PerformanceMonitorService
      */
     public function clearOldMetrics(): void
     {
-        if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
-            $redis = Cache::getStore()->connection();
-            $pattern = 'mkaccounting_cache:performance_metrics:*';
-            $keys = $redis->keys($pattern);
-            
-            foreach ($keys as $key) {
-                // Keep only metrics from last 24 hours
-                $timestamp = str_replace('mkaccounting_cache:performance_metrics:', '', $key);
-                if (strtotime($timestamp) < strtotime('-24 hours')) {
-                    $redis->del($key);
-                }
+        try {
+            if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+                $redis = Cache::getStore()->connection();
+                $pattern = 'mkaccounting_cache:performance_metrics:*';
+
+                // Use scan instead of keys for better performance and compatibility
+                $cursor = '0';
+                do {
+                    $result = $redis->scan($cursor, ['match' => $pattern, 'count' => 100]);
+                    if ($result === false) {
+                        break;
+                    }
+
+                    [$cursor, $keys] = $result;
+
+                    foreach ($keys as $key) {
+                        // Keep only metrics from last 24 hours
+                        $timestamp = str_replace('mkaccounting_cache:performance_metrics:', '', $key);
+                        if (strtotime($timestamp) < strtotime('-24 hours')) {
+                            $redis->del($key);
+                        }
+                    }
+                } while ($cursor !== '0');
             }
+        } catch (\Exception $e) {
+            // Silently fail - performance monitoring shouldn't break the app
+            \Log::debug('Failed to clear old performance metrics: ' . $e->getMessage());
         }
     }
 }
