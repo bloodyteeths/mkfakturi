@@ -423,6 +423,11 @@ if [ "$FEATURE_ACCOUNTING_BACKBONE" = "true" ]; then
     php artisan db:seed --class=MkIfrsSeeder --force 2>/dev/null || echo "IFRS seeder already run or failed"
 fi
 
+# Sync abilities for all companies (multi-tenant SaaS)
+# This ensures all tenants have up-to-date abilities from config/abilities.php
+echo "Syncing abilities for all companies from config..."
+php artisan abilities:sync 2>/dev/null || echo "Abilities sync completed or skipped"
+
 # Don't cache config in production - causes issues with environment variables
 echo "Skipping config cache to allow dynamic environment variables..."
 # php artisan config:cache
