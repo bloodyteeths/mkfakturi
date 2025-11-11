@@ -155,6 +155,20 @@ echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/custom.ini
 echo "log_errors = On" >> /usr/local/etc/php/conf.d/custom.ini
 echo "error_log = /var/www/html/storage/logs/php-errors.log" >> /usr/local/etc/php/conf.d/custom.ini
 
+# Test the home route directly to catch the error
+echo "Testing home route..."
+php artisan tinker --execute="
+try {
+    \$request = \Illuminate\Http\Request::create('/', 'GET');
+    \$response = app()->handle(\$request);
+    echo 'Home route status: ' . \$response->getStatusCode() . PHP_EOL;
+} catch (\Exception \$e) {
+    echo 'HOME ROUTE ERROR: ' . \$e->getMessage() . PHP_EOL;
+    echo 'File: ' . \$e->getFile() . ':' . \$e->getLine() . PHP_EOL;
+    echo 'Stack trace: ' . PHP_EOL . \$e->getTraceAsString() . PHP_EOL;
+}
+" 2>&1 | grep -A 20 "HOME ROUTE ERROR" || echo "Home route test passed"
+
 # Start supervisor (nginx, php-fpm, scheduler)
 # Queue workers are disabled by default in supervisord.conf
 echo "Starting application services..."
