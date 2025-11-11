@@ -25,6 +25,13 @@ return new class extends Migration
                   ->on('e_invoices')
                   ->onDelete('restrict');
 
+            // Company scope (multi-tenant)
+            $table->unsignedInteger('company_id');
+            $table->foreign('company_id')
+                  ->references('id')
+                  ->on('companies')
+                  ->onDelete('restrict');
+
             // Submission tracking
             $table->timestamp('submitted_at')->nullable(); // When submission was initiated
 
@@ -61,10 +68,12 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes for performance
+            $table->index('company_id');
             $table->index('e_invoice_id');
             $table->index('status');
             $table->index('idempotency_key');
             $table->index(['e_invoice_id', 'status']);
+            $table->index(['company_id', 'status']);
             $table->index(['status', 'next_retry_at']); // For retry queue processing
             $table->index(['submitted_at', 'status']);
 

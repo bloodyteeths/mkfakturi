@@ -339,8 +339,8 @@ class EInvoiceSubmission extends Model
     }
 
     /**
-     * Scope: filter by company (via e-invoice).
-     * Overrides the TenantScope version to work through the relationship.
+     * Scope: filter by company.
+     * Now uses direct company_id column instead of relationship join.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param int|null $companyId
@@ -350,9 +350,11 @@ class EInvoiceSubmission extends Model
     {
         $companyId = $companyId ?? request()->header('company');
 
-        return $query->whereHas('eInvoice', function ($q) use ($companyId) {
-            $q->where('company_id', $companyId);
-        });
+        if ($companyId) {
+            return $query->where('company_id', $companyId);
+        }
+
+        return $query;
     }
 }
 
