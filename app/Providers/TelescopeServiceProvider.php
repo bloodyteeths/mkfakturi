@@ -28,6 +28,11 @@ trait TelescopeServiceProviderTrait
      */
     public function register(): void
     {
+        // Skip Telescope during health checks to avoid any I/O operations
+        if ($this->isHealthCheckRequest()) {
+            return;
+        }
+
         // Don't enable Telescope during installation or if monitoring feature is disabled
         if (!InstallUtils::isDbCreated()) {
             return;
@@ -71,6 +76,21 @@ trait TelescopeServiceProviderTrait
             'x-csrf-token',
             'x-xsrf-token',
         ]);
+    }
+
+    /**
+     * Check if the current request is a health check endpoint
+     */
+    protected function isHealthCheckRequest(): bool
+    {
+        if (!$this->app->bound('request')) {
+            return false;
+        }
+
+        $request = $this->app->make('request');
+        $healthCheckPaths = ['/health', '/up', '/ping', '/ready'];
+
+        return in_array($request->path(), $healthCheckPaths);
     }
 
     /**

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Set umask to ensure new files are group-writable
+umask 002
+
 echo "=== Application Startup ==="
 
 # Railway-specific: Parse MySQL connection from environment
@@ -57,7 +60,8 @@ fi
 # DB_* variables are already exported at the top of this script
 
 # Create required directories and fix permissions
-mkdir -p storage/framework/{sessions,views,cache}
+# Laravel's file cache driver needs storage/framework/cache/data
+mkdir -p storage/framework/{sessions,views,cache/data,testing}
 mkdir -p storage/logs
 mkdir -p bootstrap/cache
 
@@ -83,10 +87,6 @@ php artisan config:clear || true
 php artisan cache:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
-
-# Fix cache file permissions after cache operations
-chown -R www:www /var/www/html/storage/framework/cache 2>/dev/null || true
-chown -R www:www /var/www/html/bootstrap/cache 2>/dev/null || true
 
 # Run migrations (Railway)
 if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
@@ -175,6 +175,15 @@ nginx -t 2>&1 || echo "Warning: nginx config validation failed"
 
 echo "Validating PHP-FPM configuration..."
 php-fpm -t 2>&1 || echo "Warning: PHP-FPM config validation failed"
+
+# Fix ALL permissions before starting services (CRITICAL)
+# All previous artisan commands run as root, so we need to fix ownership
+# before starting nginx/php-fpm which run as www user
+echo "Setting final permissions before starting services..."
+chown -R www:www /var/www/html/storage || echo "WARN: Failed to chown storage"
+chown -R www:www /var/www/html/bootstrap/cache || echo "WARN: Failed to chown bootstrap/cache"
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || echo "WARN: Failed to chmod"
+echo "✅ Final permissions set for www user"
 
 # Start supervisor in background (nginx, php-fpm, scheduler)
 # Queue workers are disabled by default in supervisord.conf

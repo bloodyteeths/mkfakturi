@@ -21,9 +21,14 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Skip view sharing if database not created or during console commands
+        // Skip view sharing for health checks and console commands
         // This prevents database queries during health checks and startup
-        if (!InstallUtils::isDbCreated() || $this->app->runningInConsole()) {
+        if ($this->isHealthCheckRequest() || $this->app->runningInConsole()) {
+            return;
+        }
+
+        // Skip view sharing if database not created
+        if (!InstallUtils::isDbCreated()) {
             return;
         }
 
@@ -33,6 +38,23 @@ class ViewServiceProvider extends ServiceProvider
         View::share('login_page_description', get_app_setting('login_page_description'));
         View::share('admin_page_title', get_app_setting('admin_page_title'));
         View::share('copyright_text', get_app_setting('copyright_text'));
+    }
+
+    /**
+     * Check if current request is a health check endpoint
+     *
+     * @return bool
+     */
+    protected function isHealthCheckRequest(): bool
+    {
+        if (!$this->app->bound('request')) {
+            return false;
+        }
+
+        $request = $this->app->make('request');
+        $healthCheckPaths = ['/health', '/up', '/ping', '/ready'];
+
+        return in_array($request->path(), $healthCheckPaths);
     }
 }
 

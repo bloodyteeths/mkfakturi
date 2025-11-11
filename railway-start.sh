@@ -123,7 +123,8 @@ fi
 
 # Create required storage directories
 echo "Creating storage directories..."
-mkdir -p storage/framework/{sessions,views,cache}
+# Laravel's file cache driver needs storage/framework/cache/data
+mkdir -p storage/framework/{sessions,views,cache/data,testing}
 mkdir -p storage/logs
 mkdir -p storage/certificates
 mkdir -p bootstrap/cache
