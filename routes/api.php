@@ -207,6 +207,24 @@ Route::prefix('/v1')->group(function () {
 
             Route::get('/bootstrap', BootstrapController::class);
 
+            // TEMPORARY: Sync abilities for all companies (owner only)
+            // TODO: Remove after all tenants have abilities synced
+            Route::get('/sync-abilities', function () {
+                if (!auth()->user()->isOwner()) {
+                    abort(403, 'Only owners can sync abilities');
+                }
+
+                \Artisan::call('abilities:sync');
+                $output = \Artisan::output();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Abilities synced successfully for all companies!',
+                    'output' => $output,
+                    'note' => 'This route can be removed after confirming all tenants have abilities'
+                ]);
+            });
+
             // Currencies
             // ----------------------------------
 
