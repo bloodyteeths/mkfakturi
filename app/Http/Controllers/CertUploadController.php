@@ -45,14 +45,17 @@ class CertUploadController extends Controller
                 ], 400);
             }
 
-            // Query active certificate from database
-            $certificate = Certificate::getActiveCertificate($companyId);
+            // Query certificate from database (prefer active, but show any if found)
+            $certificate = Certificate::where('company_id', $companyId)
+                ->orderBy('is_active', 'desc') // Active first
+                ->orderBy('created_at', 'desc') // Then most recent
+                ->first();
 
             if (!$certificate) {
                 return response()->json([
                     'data' => null,
                     'message' => __('certificates.no_certificate_found')
-                ], 200);
+                ], 404); // Return 404 instead of 200 when no certificate found
             }
 
             // Verify certificate file still exists
@@ -290,6 +293,14 @@ class CertUploadController extends Controller
                 return response()->json([
                     'message' => __('certificates.invalid_password'),
                     'errors' => ['password' => [__('certificates.invalid_password')]]
+                ], 422);
+            }
+
+            // Handle duplicate certificate fingerprint
+            if (str_contains($e->getMessage(), 'Duplicate entry') && str_contains($e->getMessage(), 'certificates_fingerprint_unique')) {
+                return response()->json([
+                    'message' => __('certificates.duplicate_certificate'),
+                    'error' => __('certificates.duplicate_certificate_details')
                 ], 422);
             }
 

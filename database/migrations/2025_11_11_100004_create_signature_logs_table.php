@@ -18,6 +18,13 @@ return new class extends Migration
         Schema::create('signature_logs', function (Blueprint $table) {
             $table->id();
 
+            // Company relationship (multi-tenant)
+            $table->unsignedInteger('company_id')->index();
+            $table->foreign('company_id')
+                  ->references('id')
+                  ->on('companies')
+                  ->onDelete('restrict');
+
             // Certificate relationship
             $table->unsignedBigInteger('certificate_id')->index();
             $table->foreign('certificate_id')
