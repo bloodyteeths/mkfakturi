@@ -200,30 +200,32 @@ Route::prefix('/v1')->group(function () {
     });
 
     Route::middleware(['auth:sanctum', 'company'])->group(function () {
+
+        // TEMPORARY: Sync abilities for all companies (OUTSIDE bouncer middleware to avoid chicken-egg)
+        // This endpoint bypasses bouncer since users need abilities to access anything
+        // TODO: Remove after all tenants have abilities synced
+        Route::get('/sync-abilities', function () {
+            if (!auth()->user()->isOwner()) {
+                abort(403, 'Only owners can sync abilities');
+            }
+
+            \Artisan::call('abilities:sync');
+            $output = \Artisan::output();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Abilities synced successfully for all companies!',
+                'output' => $output,
+                'note' => 'This route can be removed after confirming all tenants have abilities'
+            ]);
+        });
+
         Route::middleware(['bouncer'])->group(function () {
 
             // Bootstrap
             // ----------------------------------
 
             Route::get('/bootstrap', BootstrapController::class);
-
-            // TEMPORARY: Sync abilities for all companies (owner only)
-            // TODO: Remove after all tenants have abilities synced
-            Route::get('/sync-abilities', function () {
-                if (!auth()->user()->isOwner()) {
-                    abort(403, 'Only owners can sync abilities');
-                }
-
-                \Artisan::call('abilities:sync');
-                $output = \Artisan::output();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Abilities synced successfully for all companies!',
-                    'output' => $output,
-                    'note' => 'This route can be removed after confirming all tenants have abilities'
-                ]);
-            });
 
             // Currencies
             // ----------------------------------
