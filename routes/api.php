@@ -640,11 +640,11 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::prefix('reconciliation')->group(function () {
-                Route::get('/auto-matched', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'autoMatched']);
-                Route::get('/suggested', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'suggested']);
-                Route::get('/manual', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'manual']);
-                Route::post('/approve', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'approve']);
-                Route::post('/reject', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationController::class, 'reject']);
+                Route::get('/auto-matched', [\App\Http\Controllers\ReconciliationController::class, 'autoMatched']);
+                Route::get('/suggested', [\App\Http\Controllers\ReconciliationController::class, 'suggested']);
+                Route::get('/manual', [\App\Http\Controllers\ReconciliationController::class, 'manual']);
+                Route::post('/approve', [\App\Http\Controllers\ReconciliationController::class, 'approve']);
+                Route::post('/reject', [\App\Http\Controllers\ReconciliationController::class, 'reject']);
             });
 
             // Approvals (Phase 4)
@@ -843,10 +843,10 @@ Route::get('/cron', CronJobController::class)->middleware('cron-job');
 // Webhook Routes (Phase 4 - no auth required)
 // ----------------------------------
 Route::prefix('webhooks')->group(function () {
-    Route::post('paddle', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'paddle']);
-    Route::post('cpay', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'cpay']);
-    Route::post('bank/nlb', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'nlbBank']);
-    Route::post('bank/stopanska', [\App\Http\Controllers\V1\Webhook\WebhookController::class, 'stopanskaBank']);
+    Route::post('paddle', [\App\Http\Controllers\Webhooks\WebhookController::class, 'paddle']);
+    Route::post('cpay', [\App\Http\Controllers\Webhooks\WebhookController::class, 'cpay']);
+    Route::post('bank/nlb', [\App\Http\Controllers\Webhooks\WebhookController::class, 'nlbBank']);
+    Route::post('bank/stopanska', [\App\Http\Controllers\Webhooks\WebhookController::class, 'stopanskaBank']);
 });
 
 // AI Financial Assistant Routes
