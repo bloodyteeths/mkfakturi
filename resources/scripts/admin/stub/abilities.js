@@ -33,6 +33,11 @@ export default {
   VIEW_INVOICE: 'view-invoice',
   SEND_INVOICE: 'send-invoice',
 
+  // E-Invoices
+  VIEW_EINVOICE: 'view-einvoice',
+  GENERATE_EINVOICE: 'generate-einvoice',
+  SUBMIT_EINVOICE: 'submit-einvoice',
+
   // Recurring Invoices
   CREATE_RECURRING_INVOICE: 'create-recurring-invoice',
   DELETE_RECURRING_INVOICE: 'delete-recurring-invoice',

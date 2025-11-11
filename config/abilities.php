@@ -753,33 +753,33 @@ return [
         // E-Invoice
         [
             'name' => 'view e-invoice',
-            'ability' => 'view-e-invoice',
+            'ability' => 'view-einvoice',
             'model' => EInvoice::class,
         ],
         [
-            'name' => 'create e-invoice',
-            'ability' => 'create-e-invoice',
+            'name' => 'generate e-invoice',
+            'ability' => 'generate-einvoice',
             'model' => EInvoice::class,
             'depends_on' => [
-                'view-e-invoice',
+                'view-einvoice',
                 'view-invoice',
             ],
         ],
         [
             'name' => 'submit e-invoice',
-            'ability' => 'submit-e-invoice',
+            'ability' => 'submit-einvoice',
             'model' => EInvoice::class,
             'depends_on' => [
-                'view-e-invoice',
-                'sign-e-invoice',
+                'view-einvoice',
+                'generate-einvoice',
             ],
         ],
         [
             'name' => 'sign e-invoice',
-            'ability' => 'sign-e-invoice',
+            'ability' => 'sign-einvoice',
             'model' => EInvoice::class,
             'depends_on' => [
-                'view-e-invoice',
+                'view-einvoice',
                 'manage-certificates',
             ],
         ],
