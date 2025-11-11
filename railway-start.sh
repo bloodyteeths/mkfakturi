@@ -440,16 +440,17 @@ echo "SESSION_DRIVER: $SESSION_DRIVER"
 echo "REDIS_CLIENT: $REDIS_CLIENT"
 echo "BROADCAST_DRIVER: $BROADCAST_DRIVER"
 
-# Check if build assets exist
-echo "Checking frontend build assets..."
+# Always run frontend build to ensure latest code and translations
+echo "Building frontend assets..."
+npm run build || echo "Frontend build failed"
+
+# Verify build completed
 if [ -d "public/build/assets" ]; then
     ASSET_COUNT=$(ls -1 public/build/assets | wc -l)
-    echo "Build assets directory exists with $ASSET_COUNT files"
+    echo "Build completed successfully with $ASSET_COUNT files"
     ls -lh public/build/assets | head -10
 else
-    echo "WARNING: Build assets directory does not exist!"
-    echo "Running frontend build now..."
-    npm run build || echo "Frontend build failed"
+    echo "ERROR: Build assets directory does not exist after build!"
 fi
 
 # Enable detailed Laravel logging
