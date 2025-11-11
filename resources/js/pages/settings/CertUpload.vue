@@ -176,8 +176,11 @@
     </div>
 
     <!-- Certificate Information Modal -->
-    <BaseModal v-model="showCertificateInfo" :title="$t('certificates.certificate_details')">
-      <div v-if="currentCertificate" class="space-y-4">
+    <BaseModal :show="showCertificateInfo" @close="showCertificateInfo = false">
+      <template #header>
+        <span class="text-lg font-medium">{{ $t('certificates.certificate_details') }}</span>
+      </template>
+      <div v-if="currentCertificate" class="space-y-4 px-6 py-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700">
@@ -243,18 +246,23 @@
       </div>
 
       <template #footer>
-        <BaseButton variant="primary-outline" @click="showCertificateInfo = false">
-          {{ $t('general.close') }}
-        </BaseButton>
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <BaseButton variant="primary-outline" @click="showCertificateInfo = false">
+            {{ $t('general.close') }}
+          </BaseButton>
+        </div>
       </template>
     </BaseModal>
 
     <!-- Delete Confirmation Modal -->
-    <BaseModal 
-      v-model="showDeleteConfirmation" 
-      :title="$t('certificates.delete_confirmation_title')"
+    <BaseModal
+      :show="showDeleteConfirmation"
+      @close="showDeleteConfirmation = false"
     >
-      <div class="space-y-4">
+      <template #header>
+        <span class="text-lg font-medium">{{ $t('certificates.delete_confirmation_title') }}</span>
+      </template>
+      <div class="space-y-4 px-6 py-4">
         <p class="text-gray-700">
           {{ $t('certificates.delete_confirmation_message') }}
         </p>
@@ -269,7 +277,7 @@
       </div>
 
       <template #footer>
-        <div class="flex space-x-3">
+        <div class="flex justify-end space-x-3 px-6 py-4 bg-gray-50 border-t border-gray-200">
           <BaseButton variant="white" @click="showDeleteConfirmation = false">
             {{ $t('general.cancel') }}
           </BaseButton>
