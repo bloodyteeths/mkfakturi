@@ -152,7 +152,7 @@
             <!-- Delete Button -->
             <div class="pt-4 border-t">
               <BaseButton
-                variant="danger-outline"
+                variant="danger"
                 size="sm"
                 @click="showDeleteConfirmation = true"
               >
