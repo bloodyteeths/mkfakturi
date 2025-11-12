@@ -1,61 +1,39 @@
-2025-11-05T14:17:41.921646499Z [inf]  
-2025-11-05T14:17:46.436867075Z [inf]  [35m[Region: europe-west4][0m
-2025-11-05T14:17:46.474453770Z [inf]  [35m=========================
-2025-11-05T14:17:46.474488780Z [inf]  Using Detected Dockerfile
-2025-11-05T14:17:46.474493859Z [inf]  =========================
-2025-11-05T14:17:46.474498550Z [inf]  [0m
-2025-11-05T14:17:46.474513308Z [inf]  context: jk4r-KEki
-2025-11-05T14:17:46.655128109Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T14:17:46.655184059Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T14:17:46.655198873Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T14:17:46.676520504Z [inf]  [internal] load build definition from Dockerfile.mcp-server
-2025-11-05T14:17:46.679353962Z [inf]  [internal] load metadata for docker.io/library/python:3.12-slim
-2025-11-05T14:17:47.015477919Z [inf]  [internal] load metadata for docker.io/library/python:3.12-slim
-2025-11-05T14:17:47.015845668Z [inf]  [internal] load .dockerignore
-2025-11-05T14:17:47.015883070Z [inf]  [internal] load .dockerignore
-2025-11-05T14:17:47.015910308Z [inf]  [internal] load .dockerignore
-2025-11-05T14:17:47.033473946Z [inf]  [internal] load .dockerignore
-2025-11-05T14:17:47.042241471Z [inf]  [11/13] COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
-2025-11-05T14:17:47.042283061Z [inf]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
-2025-11-05T14:17:47.042298583Z [inf]  [ 9/13] COPY mcp-server/alembic ./alembic
-2025-11-05T14:17:47.042311364Z [inf]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
-2025-11-05T14:17:47.042319281Z [inf]  [ 7/13] RUN uv sync --frozen
-2025-11-05T14:17:47.042328373Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
-2025-11-05T14:17:47.042337143Z [inf]  [internal] load build context
-2025-11-05T14:17:47.042346363Z [inf]  [ 5/13] RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz   && tar -xzf ta-lib-0.6.4-src.tar.gz   && cd ta-lib-0.6.4/   && ./configure --prefix=/usr/local   && make -j$(nproc)   && make install   && cd ..   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
-2025-11-05T14:17:47.042354303Z [inf]  [ 4/13] RUN pip install --no-cache-dir uv
-2025-11-05T14:17:47.042363738Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
-2025-11-05T14:17:47.042371288Z [inf]  [ 2/13] WORKDIR /app
-2025-11-05T14:17:47.042379058Z [inf]  [12/13] RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-2025-11-05T14:17:47.042386875Z [inf]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
-2025-11-05T14:17:47.042404474Z [inf]  [13/13] RUN groupadd -g 1000 maverick &&     useradd -u 1000 -g maverick -s /bin/sh -m maverick &&     chown -R maverick:maverick /app
-2025-11-05T14:17:47.042420631Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
-2025-11-05T14:17:47.042431341Z [inf]  [internal] load build context
-2025-11-05T14:17:47.048255254Z [inf]  [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:a34e476ac3b74e17f76b26d38eb800b3460cb9490eafe4f9635bed7c80542130
-2025-11-05T14:17:47.048552448Z [inf]  [ 2/13] WORKDIR /app
-2025-11-05T14:17:47.048701292Z [inf]  [internal] load build context
-2025-11-05T14:17:47.048716494Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
-2025-11-05T14:17:47.070730596Z [inf]  [internal] load build context
-2025-11-05T14:17:47.073618561Z [inf]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
-2025-11-05T14:17:47.073646632Z [inf]  [ 4/13] RUN pip install --no-cache-dir uv
-2025-11-05T14:17:47.073659049Z [inf]  [ 5/13] RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz   && tar -xzf ta-lib-0.6.4-src.tar.gz   && cd ta-lib-0.6.4/   && ./configure --prefix=/usr/local   && make -j$(nproc)   && make install   && cd ..   && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/
-2025-11-05T14:17:47.073668515Z [inf]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
-2025-11-05T14:17:47.073679190Z [inf]  [ 7/13] RUN uv sync --frozen
-2025-11-05T14:17:47.073690903Z [inf]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
-2025-11-05T14:17:47.073701299Z [inf]  [ 9/13] COPY mcp-server/alembic ./alembic
-2025-11-05T14:17:47.073732653Z [inf]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
-2025-11-05T14:17:47.073752450Z [err]  [11/13] COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
-2025-11-05T14:17:47.073763443Z [err]  [ 8/13] COPY mcp-server/maverick_mcp ./maverick_mcp
-2025-11-05T14:17:47.073793808Z [err]  [ 6/13] COPY mcp-server/pyproject.toml mcp-server/uv.lock mcp-server/README.md ./
-2025-11-05T14:17:47.074256408Z [err]  [ 9/13] COPY mcp-server/alembic ./alembic
-2025-11-05T14:17:47.074311416Z [err]  [10/13] COPY mcp-server/alembic.ini mcp-server/setup.py ./
-2025-11-05T14:17:47.451195252Z [err]  [ 3/13] RUN apt-get update && apt-get install -yqq   build-essential   python3-dev   libpq-dev   wget   curl   && rm -rf /var/lib/apt/lists/*
-2025-11-05T14:17:47.471355988Z [err]  Dockerfile.mcp-server:43
-2025-11-05T14:17:47.471391198Z [err]  -------------------
-2025-11-05T14:17:47.471398184Z [err]  41 |
-2025-11-05T14:17:47.471404893Z [err]  42 |     # Copy entrypoint script
-2025-11-05T14:17:47.471412916Z [err]  43 | >>> COPY mcp-server/docker-entrypoint.sh /usr/local/bin/
-2025-11-05T14:17:47.471418310Z [err]  44 |     RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-2025-11-05T14:17:47.471424513Z [err]  45 |
-2025-11-05T14:17:47.471431238Z [err]  -------------------
-2025-11-05T14:17:47.471438636Z [err]  ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref 2x56p41w77brwr4xpbltvrfts::m0dmrc7oxzkjweay87mqp7v27: "/mcp-server/docker-entrypoint.sh": not found
+[2025-11-12 22:00:47] production.ERROR: Declaration of App\Http\Controllers\V1\Admin\Imports\ImportController::validate(Illuminate\Http\Request $request, $id) must be compatible with App\Http\Controllers\Controller::validate(Illuminate\Http\Request $request, array $rules, array $messages = [], array $attributes = []) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Declaration of App\\Http\\Controllers\\V1\\Admin\\Imports\\ImportController::validate(Illuminate\\Http\\Request $request, $id) must be compatible with App\\Http\\Controllers\\Controller::validate(Illuminate\\Http\\Request $request, array $rules, array $messages = [], array $attributes = []) at /var/www/html/app/Http/Controllers/V1/Admin/Imports/ImportController.php:90)
+[stacktrace]
+#0 {main}
+"} 
+[2025-11-12 22:01:25] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:26] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:26] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:26] production.WARNING: Slow operation detected {"operation":"req_691503b5904f3","execution_time_ms":572.52,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
+[2025-11-12 22:01:26] production.WARNING: Slow request detected {"operation":"req_691503b5904f3","execution_time_ms":572.52,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 22:01:45] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:45] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:45] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:46] production.WARNING: Slow operation detected {"operation":"req_691503c95b469","execution_time_ms":635.14,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 22:01:46] production.WARNING: Slow request detected {"operation":"req_691503c95b469","execution_time_ms":635.14,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 22:01:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:49] production.WARNING: Slow operation detected {"operation":"req_691503cd759c6","execution_time_ms":473.35,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 22:01:49] production.WARNING: Slow request detected {"operation":"req_691503cd759c6","execution_time_ms":473.35,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.WARNING: Slow operation detected {"operation":"req_691503d058347","execution_time_ms":394.55,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 22:01:52] production.WARNING: Slow request detected {"operation":"req_691503d058347","execution_time_ms":394.55,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:53] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:53] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:53] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:53] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:01:53] production.WARNING: Slow operation detected {"operation":"req_691503cff18ae","execution_time_ms":1456.19,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 22:01:53] production.WARNING: Slow request detected {"operation":"req_691503cff18ae","execution_time_ms":1456.19,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices","route":"invoices.index","user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
