@@ -862,6 +862,37 @@ Route::prefix('/v1')->group(function () {
             Route::get('/countries', CountriesController::class);
         });
     });
+
+    // Import / Migration Wizard Routes
+    // ----------------------------------
+    Route::middleware(['auth:sanctum'])->prefix('admin/imports')->group(function () {
+        // Upload file and create import job
+        Route::post('/', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'store']);
+
+        // Get import job details
+        Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'show']);
+
+        // Save field mappings
+        Route::post('/{id}/mapping', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'saveMapping']);
+
+        // Validate data
+        Route::post('/{id}/validate', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'validate']);
+
+        // Commit import
+        Route::post('/{id}/commit', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'commit']);
+
+        // Get progress
+        Route::get('/{id}/progress', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'progress']);
+
+        // Get logs
+        Route::get('/{id}/logs', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'logs']);
+
+        // Cancel import
+        Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'destroy']);
+    });
+
+    // CSV Template downloads (public within v1)
+    Route::get('migration/templates/{type}', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'downloadTemplate']);
 });
 
 Route::get('/cron', CronJobController::class)->middleware('cron-job');
