@@ -17,6 +17,7 @@ class CompanyResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'vat_id' => $this->vat_id,
+            'vat_number' => $this->vat_number ?? $this->vat_id, // Fallback to vat_id for compatibility
             'tax_id' => $this->tax_id,
             'logo' => $this->logo,
             'logo_path' => $this->logo_path,

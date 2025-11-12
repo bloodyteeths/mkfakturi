@@ -42,7 +42,7 @@ class CompanyRequest extends FormRequest
 
     public function getCompanyPayload()
     {
-        return collect($this->validated())
+        $payload = collect($this->validated())
             ->only([
                 'name',
                 'slug',
@@ -50,5 +50,12 @@ class CompanyRequest extends FormRequest
                 'tax_id',
             ])
             ->toArray();
+
+        // Sync vat_id to vat_number for Macedonian VAT return compatibility
+        if (isset($payload['vat_id'])) {
+            $payload['vat_number'] = $payload['vat_id'];
+        }
+
+        return $payload;
     }
 }
