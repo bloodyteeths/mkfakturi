@@ -1,21 +1,43 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('imports.universal_migration_wizard')">
+    <BasePageHeader :title="$t('imports.universal_migration_wizard')" class="import-wizard-header">
       <template #actions>
-        <BaseButton
-          v-if="importStore.importId"
-          variant="danger"
-          size="sm"
-          @click="confirmCancel"
-        >
-          {{ $t('general.cancel') }}
-        </BaseButton>
+        <div class="flex items-center space-x-3">
+          <!-- Help Guide Toggle Button -->
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            @click="toggleHelpGuide"
+          >
+            <BaseIcon name="QuestionMarkCircleIcon" class="w-4 h-4 mr-2" />
+            {{ showHelpGuide ? $t('imports.hide_help') : $t('imports.show_help') }}
+          </BaseButton>
+
+          <!-- Start Tour Button -->
+          <BaseButton
+            variant="primary-outline"
+            size="sm"
+            @click="startTour"
+          >
+            <BaseIcon name="AcademicCapIcon" class="w-4 h-4 mr-2" />
+            {{ $t('imports.start_tour') }}
+          </BaseButton>
+
+          <BaseButton
+            v-if="importStore.importId"
+            variant="danger"
+            size="sm"
+            @click="confirmCancel"
+          >
+            {{ $t('general.cancel') }}
+          </BaseButton>
+        </div>
       </template>
     </BasePageHeader>
 
     <div class="grid grid-cols-12 gap-6">
       <!-- Progress Sidebar -->
-      <div class="col-span-3">
+      <div :class="showHelpGuide ? 'col-span-2' : 'col-span-3'" class="progress-sidebar">
         <BaseCard>
           <template #header>
             <h3 class="text-lg font-medium leading-6 text-gray-900">
@@ -99,7 +121,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="col-span-9">
+      <div :class="showHelpGuide ? 'col-span-7' : 'col-span-9'">
         <BaseCard>
           <BaseWizard
             :current-step="importStore.currentStep - 1"
@@ -173,7 +195,19 @@
           </template>
         </BaseCard>
       </div>
+
+      <!-- Help Guide Sidebar -->
+      <div v-if="showHelpGuide" class="col-span-3">
+        <HelpGuidePanel :current-step="importStore.currentStep" @close="toggleHelpGuide" />
+      </div>
     </div>
+
+    <!-- Interactive Tour -->
+    <InteractiveTour
+      v-model:isActive="isTourActive"
+      :wizard-step="importStore.currentStep"
+      @tourComplete="handleTourComplete"
+    />
 
     <!-- Cancel Confirmation Dialog -->
     <BaseModal :show="showCancelDialog" :title="$t('imports.cancel_import')" @close="showCancelDialog = false">
@@ -226,6 +260,10 @@ import Step2Mapping from './components/Step2Mapping.vue'
 import Step3Validation from './components/Step3Validation.vue'
 import Step4Commit from './components/Step4Commit.vue'
 
+// Help Components
+import HelpGuidePanel from './components/HelpGuidePanel.vue'
+import InteractiveTour from './components/InteractiveTour.vue'
+
 // Store
 import { useImportStore } from '@/scripts/admin/stores/import'
 
@@ -237,6 +275,8 @@ const importStore = useImportStore()
 const isProcessingNext = ref(false)
 const showCancelDialog = ref(false)
 const isCancelling = ref(false)
+const showHelpGuide = ref(false)
+const isTourActive = ref(false)
 
 // Computed
 const steps = computed(() => [
@@ -339,14 +379,36 @@ const finishImport = () => {
   router.push('/admin/dashboard')
 }
 
+// Help methods
+const toggleHelpGuide = () => {
+  showHelpGuide.value = !showHelpGuide.value
+}
+
+const startTour = () => {
+  isTourActive.value = true
+}
+
+const handleTourComplete = () => {
+  // Optionally show a completion message
+  console.log('Tour completed!')
+}
+
 // Lifecycle
 onMounted(() => {
   // Reset store state when component mounts
   importStore.resetState()
+
+  // Auto-show help guide on first visit to step 1
+  const hasSeenHelp = localStorage.getItem('migration-wizard-help-seen')
+  if (!hasSeenHelp && importStore.currentStep === 1) {
+    showHelpGuide.value = true
+    localStorage.setItem('migration-wizard-help-seen', 'true')
+  }
 })
 
 onUnmounted(() => {
   // Stop any active polling when component unmounts
   importStore.stopProgressPolling()
 })
+// CLAUDE-CHECKPOINT
 </script>

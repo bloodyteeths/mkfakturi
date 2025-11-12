@@ -1,9 +1,25 @@
 <template>
   <div class="space-y-6">
+    <!-- QuickStart Panel (shown on first visit or when toggled) -->
+    <div v-if="showQuickStart" class="mb-6">
+      <QuickStartPanel
+        @close="hideQuickStart"
+        @startTour="$emit('startTour')"
+        @skip="hideQuickStart"
+      />
+    </div>
+
     <!-- Step Header -->
     <div class="text-center">
-      <BaseHeading tag="h2" class="text-2xl font-bold text-gray-900 mb-2">
+      <BaseHeading tag="h2" class="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center">
         {{ $t('imports.upload_file') }}
+        <HelpTooltip
+          :title="$t('imports.upload_step_help_title')"
+          :content="$t('imports.upload_step_help_content')"
+          icon="QuestionMarkCircleIcon"
+          placement="right"
+          class="ml-2"
+        />
       </BaseHeading>
       <p class="text-gray-600 max-w-2xl mx-auto">
         {{ $t('imports.upload_file_description_detailed') }}
@@ -15,6 +31,7 @@
       <div v-if="!importStore.uploadedFile" class="space-y-6">
         <!-- Drag & Drop Upload Area -->
         <div
+          class="upload-area"
           :class="[
             'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
             {
@@ -87,10 +104,19 @@
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex items-start">
             <BaseIcon name="InformationCircleIcon" class="w-5 h-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
-            <div>
-              <h4 class="text-sm font-medium text-blue-900 mb-1">
-                {{ $t('imports.supported_formats') }}
-              </h4>
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <h4 class="text-sm font-medium text-blue-900">
+                  {{ $t('imports.supported_formats') }}
+                </h4>
+                <HelpTooltip
+                  :title="$t('imports.format_help_title')"
+                  :content="$t('imports.format_help_content')"
+                  icon="QuestionMarkCircleIcon"
+                  icon-class="text-blue-500 hover:text-blue-700"
+                  placement="left"
+                />
+              </div>
               <div class="text-sm text-blue-700 space-y-2">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -138,13 +164,22 @@
         </div>
 
         <!-- CSV Templates Download Section -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="template-download-section bg-green-50 border border-green-200 rounded-lg p-4">
           <div class="flex items-start">
             <BaseIcon name="DocumentDownloadIcon" class="w-5 h-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
             <div class="flex-1">
-              <h4 class="text-sm font-medium text-green-900 mb-1">
-                {{ $t('imports.download_csv_templates') }}
-              </h4>
+              <div class="flex items-center justify-between mb-1">
+                <h4 class="text-sm font-medium text-green-900">
+                  {{ $t('imports.download_csv_templates') }}
+                </h4>
+                <HelpTooltip
+                  :title="$t('imports.template_help_title')"
+                  :content="$t('imports.template_help_content')"
+                  icon="QuestionMarkCircleIcon"
+                  icon-class="text-green-600 hover:text-green-800"
+                  placement="left"
+                />
+              </div>
               <p class="text-sm text-green-700 mb-3">
                 {{ $t('imports.download_csv_templates_description') }}
               </p>
@@ -287,10 +322,18 @@
 
     <!-- Tips Section -->
     <div class="max-w-4xl mx-auto">
-      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
-        <h4 class="text-sm font-medium text-gray-900 mb-3">
-          {{ $t('imports.tips_for_best_results') }}
-        </h4>
+      <div class="tips-section bg-gray-50 border border-gray-200 rounded-lg p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-sm font-medium text-gray-900">
+            {{ $t('imports.tips_for_best_results') }}
+          </h4>
+          <HelpTooltip
+            :content="$t('imports.tips_help_content')"
+            icon="InformationCircleIcon"
+            icon-class="text-gray-500 hover:text-gray-700"
+            placement="left"
+          />
+        </div>
         <ul class="space-y-2 text-sm text-gray-600">
           <li class="flex items-start">
             <BaseIcon name="LightBulbIcon" class="w-4 h-4 mt-0.5 mr-2 text-yellow-500 flex-shrink-0" />
@@ -315,7 +358,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, defineEmits } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 // Components
@@ -325,16 +368,20 @@ import BaseIcon from '@/scripts/components/base/BaseIcon.vue'
 import BaseSpinner from '@/scripts/components/base/BaseSpinner.vue'
 import BaseErrorAlert from '@/scripts/components/base/BaseErrorAlert.vue'
 import BaseBadge from '@/scripts/components/base/BaseBadge.vue'
+import QuickStartPanel from './QuickStartPanel.vue'
+import HelpTooltip from './HelpTooltip.vue'
 
 // Store
 import { useImportStore } from '@/scripts/admin/stores/import'
 
 const { t } = useI18n()
 const importStore = useImportStore()
+const emit = defineEmits(['startTour'])
 
 // Local state
 const isDragOver = ref(false)
 const uploadError = ref(null)
+const showQuickStart = ref(false)
 
 // Computed
 const acceptedFileTypes = computed(() => {
@@ -452,5 +499,21 @@ const downloadTemplate = async (type) => {
     uploadError.value = t('imports.template_download_failed')
   }
 }
+
+const hideQuickStart = () => {
+  showQuickStart.value = false
+  localStorage.setItem('migration-wizard-quickstart-hidden', 'true')
+}
+
+// Lifecycle
+onMounted(() => {
+  // Show QuickStart panel on first visit
+  const hasSeenQuickStart = localStorage.getItem('migration-wizard-quickstart-hidden')
+  const tourCompleted = localStorage.getItem('migration-wizard-tour-completed')
+
+  if (!hasSeenQuickStart && !tourCompleted) {
+    showQuickStart.value = true
+  }
+})
 // CLAUDE-CHECKPOINT
 </script>
