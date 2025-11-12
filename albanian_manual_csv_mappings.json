@@ -1,0 +1,478 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created_at": "2025-11-12",
+    "albanian_variations_count": 147,
+    "manual_csv_patterns_count": 157,
+    "total_expansions": 304,
+    "fields_covered": 32
+  },
+  "albanian_variations": {
+    "customer_name": [
+      "emri_klientit",
+      "emri_klienti",
+      "emri",
+      "klienti",
+      "klient_emri",
+      "bleresi",
+      "emri_bleresit",
+      "emri_subjektit",
+      "subjekti"
+    ],
+    "customer_id": [
+      "id_klienti",
+      "klient_id",
+      "kodi_klientit",
+      "kodi_klienti",
+      "id_bleresi",
+      "bleresi_id",
+      "kodi_subjektit"
+    ],
+    "tax_id": [
+      "nipt",
+      "numri_fiskal",
+      "numri_tatimor",
+      "nuis",
+      "numri_identifikimit",
+      "nid",
+      "nsh",
+      "nr_fiskal",
+      "nr_tatimor",
+      "tvsh_numri"
+    ],
+    "invoice_number": [
+      "numri_fatures",
+      "numri_fature",
+      "nr_fatures",
+      "fature_numri",
+      "numri",
+      "numri_dokumentit",
+      "nr_dokumentit",
+      "nr_fature"
+    ],
+    "invoice_date": [
+      "data_fatures",
+      "data_fature",
+      "data_leshimit",
+      "data_dokumentit",
+      "data",
+      "dt_fatures",
+      "dt_fature"
+    ],
+    "due_date": [
+      "afati_pageses",
+      "data_pageses",
+      "data_skadimit",
+      "afati",
+      "dt_pageses",
+      "dt_skadimit"
+    ],
+    "item_name": [
+      "produkti",
+      "emri_produktit",
+      "pershkrimi",
+      "artikulli",
+      "emri_artikullit",
+      "malli",
+      "sherbimi",
+      "emri_mallit"
+    ],
+    "item_code": [
+      "kodi_produktit",
+      "kodi",
+      "kodi_artikullit",
+      "kodi_mallit"
+    ],
+    "description": [
+      "pershkrimi",
+      "pershkrim",
+      "detajet",
+      "shenim"
+    ],
+    "quantity": [
+      "sasia",
+      "sasi",
+      "sasija",
+      "numri_njesi",
+      "nr_njesi"
+    ],
+    "unit": [
+      "njesia",
+      "njesi_matese",
+      "nj",
+      "njesia_matjes"
+    ],
+    "unit_price": [
+      "cmimi_njesie",
+      "cmimi",
+      "cmimi_per_njesi",
+      "cmimi_produktit",
+      "cmimi_artikullit",
+      "cmim_njesi"
+    ],
+    "price": [
+      "cmimi",
+      "cmim"
+    ],
+    "amount": [
+      "vlera",
+      "shuma",
+      "totali",
+      "vlera_totale",
+      "shuma_totale"
+    ],
+    "subtotal": [
+      "nentotali",
+      "vlera_neto",
+      "shuma_neto"
+    ],
+    "total": [
+      "totali",
+      "shuma_totale",
+      "vlera_totale",
+      "totali_pergjithshem"
+    ],
+    "currency": [
+      "monedha",
+      "valuta"
+    ],
+    "vat_rate": [
+      "norma_tvsh",
+      "norma",
+      "perqindja_tvsh",
+      "tvsh_norma",
+      "shkalla_tvsh",
+      "tvsh_perqindja"
+    ],
+    "vat_amount": [
+      "vlera_tvsh",
+      "shuma_tvsh",
+      "tvsh",
+      "tvsh_vlera",
+      "tvsh_shuma"
+    ],
+    "payment_date": [
+      "data_pageses",
+      "data_pagesave",
+      "dt_pageses"
+    ],
+    "payment_method": [
+      "metoda_pageses",
+      "menyra_pageses",
+      "lloji_pageses"
+    ],
+    "payment_amount": [
+      "shuma_paguar",
+      "vlera_pageses",
+      "shuma_pageses"
+    ],
+    "payment_reference": [
+      "referenca_pageses",
+      "nr_reference",
+      "kodi_pageses"
+    ],
+    "bank_account": [
+      "llogaria_bankare",
+      "llogaria",
+      "nr_llogarie"
+    ],
+    "bank_name": [
+      "banka",
+      "emri_bankes",
+      "institucioni_bankar"
+    ],
+    "address": [
+      "adresa",
+      "rruga",
+      "adresa_rruga"
+    ],
+    "city": [
+      "qyteti",
+      "qytet",
+      "vendbanimi"
+    ],
+    "postal_code": [
+      "kodi_postar",
+      "kodi_postal",
+      "kp"
+    ],
+    "country": [
+      "shteti",
+      "vendi",
+      "shteti_i_origjines"
+    ],
+    "email": [
+      "email",
+      "posta_elektronike",
+      "posta",
+      "e_mail"
+    ],
+    "phone": [
+      "telefoni",
+      "tel",
+      "nr_telefoni",
+      "numri_tel",
+      "celular"
+    ],
+    "contact_person": [
+      "personi_kontaktit",
+      "personi",
+      "perfaqesuesi"
+    ]
+  },
+  "manual_csv_patterns": {
+    "customer_name": [
+      "customer",
+      "client",
+      "buyer",
+      "company",
+      "name",
+      "company_name",
+      "business_name",
+      "org_name",
+      "organization"
+    ],
+    "customer_id": [
+      "id",
+      "code",
+      "cust_id",
+      "cust_code",
+      "ref",
+      "reference"
+    ],
+    "tax_id": [
+      "tax",
+      "vat",
+      "tax_no",
+      "vat_no",
+      "fiscal_no",
+      "fiscal_number"
+    ],
+    "invoice_number": [
+      "invoice",
+      "inv_no",
+      "inv_num",
+      "invoice_num",
+      "doc_no",
+      "number",
+      "num",
+      "no",
+      "document",
+      "doc_id"
+    ],
+    "invoice_date": [
+      "date",
+      "invoice_date",
+      "inv_date",
+      "created",
+      "issued",
+      "created_at",
+      "issue_date",
+      "doc_date"
+    ],
+    "due_date": [
+      "due",
+      "due_date",
+      "payment_date",
+      "maturity",
+      "expiry"
+    ],
+    "item_name": [
+      "item",
+      "product",
+      "article",
+      "goods",
+      "service",
+      "description",
+      "desc",
+      "item_desc",
+      "prod_name"
+    ],
+    "item_code": [
+      "sku",
+      "code",
+      "item_code",
+      "prod_code",
+      "barcode"
+    ],
+    "description": [
+      "desc",
+      "details",
+      "notes",
+      "remarks"
+    ],
+    "quantity": [
+      "qty",
+      "qnty",
+      "quant",
+      "count",
+      "units",
+      "pieces",
+      "pcs"
+    ],
+    "unit": [
+      "um",
+      "u_m",
+      "measure",
+      "unit_measure"
+    ],
+    "unit_price": [
+      "price",
+      "unit_price",
+      "u_price",
+      "rate",
+      "cost"
+    ],
+    "price": [
+      "prc",
+      "amt",
+      "value"
+    ],
+    "amount": [
+      "amount",
+      "amt",
+      "sum",
+      "value",
+      "val",
+      "total_amt"
+    ],
+    "subtotal": [
+      "sub_total",
+      "net",
+      "net_amount",
+      "net_total"
+    ],
+    "total": [
+      "total",
+      "grand_total",
+      "gross",
+      "gross_total",
+      "final_amount"
+    ],
+    "currency": [
+      "curr",
+      "curr_code",
+      "currency_code"
+    ],
+    "vat_rate": [
+      "vat",
+      "tax",
+      "tax_rate",
+      "vat_pct",
+      "tax_pct",
+      "vat_perc"
+    ],
+    "vat_amount": [
+      "vat_amt",
+      "tax_amt",
+      "vat_value",
+      "tax_value"
+    ],
+    "payment_date": [
+      "payment_dt",
+      "paid_dt",
+      "pay_date",
+      "transaction_date"
+    ],
+    "payment_method": [
+      "pay_method",
+      "method",
+      "payment_type",
+      "pay_mode"
+    ],
+    "payment_amount": [
+      "payment_amt",
+      "paid_amt",
+      "pay_amount"
+    ],
+    "payment_reference": [
+      "pay_ref",
+      "payment_ref",
+      "trans_id",
+      "transaction_id"
+    ],
+    "bank_account": [
+      "account",
+      "account_no",
+      "acc_no",
+      "bank_acc"
+    ],
+    "bank_name": [
+      "bank",
+      "bank_name",
+      "financial_institution"
+    ],
+    "address": [
+      "addr",
+      "street",
+      "address1",
+      "address_1",
+      "location"
+    ],
+    "city": [
+      "town",
+      "municipality"
+    ],
+    "postal_code": [
+      "zip",
+      "postcode",
+      "postal"
+    ],
+    "country": [
+      "ctry",
+      "nation"
+    ],
+    "email": [
+      "e_mail",
+      "mail",
+      "email_address",
+      "contact_email"
+    ],
+    "phone": [
+      "tel",
+      "phone_number",
+      "mobile",
+      "cell",
+      "contact_phone"
+    ],
+    "contact_person": [
+      "contact",
+      "contact_name",
+      "rep",
+      "representative",
+      "person"
+    ]
+  },
+  "confidence_scoring": {
+    "exact_match": 1.0,
+    "fuzzy_match_range": [0.65, 0.95],
+    "generic_pattern_range": [0.6, 0.75],
+    "semantic_ai_range": [0.6, 0.75]
+  },
+  "semantic_groups_updated": {
+    "financial": {
+      "basic_added": ["vlera", "shuma", "cmimi"],
+      "competitor_unchanged": true
+    },
+    "identity": {
+      "basic_added": ["numri", "kodi"],
+      "competitor_unchanged": true
+    },
+    "descriptive": {
+      "basic_added": ["emri", "pershkrim"],
+      "competitor_unchanged": true
+    },
+    "tax": {
+      "basic_added": ["tvsh", "norma"],
+      "competitor_unchanged": true
+    },
+    "payment": {
+      "basic_added": ["pagesa"],
+      "competitor_unchanged": true
+    },
+    "quantity": {
+      "basic_added": ["sasia", "qty"],
+      "competitor_unchanged": true
+    }
+  }
+}

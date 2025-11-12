@@ -126,6 +126,12 @@ class VatReturnController extends Controller
      */
     public function generate(Request $request): Response|JsonResponse
     {
+        \Log::info('VatReturnController::generate - START', [
+            'request_all' => $request->all(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+        ]);
+
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
             'period_start' => 'required|date',
@@ -134,13 +140,26 @@ class VatReturnController extends Controller
             'validate_xml' => 'boolean'
         ]);
 
+        \Log::info('VatReturnController::generate - Validation passed', [
+            'validated' => $validated,
+        ]);
+
         // Get company and authorize access
         $company = Company::findOrFail($validated['company_id']);
+
+        \Log::info('VatReturnController::generate - Company loaded', [
+            'company_id' => $company->id,
+            'company_name' => $company->name,
+            'vat_number' => $company->vat_number,
+            'vat_id' => $company->vat_id,
+        ]);
+
         Gate::authorize('view', $company);
 
         try {
             // Validate VAT number is set
             if (empty($company->vat_number)) {
+                \Log::warning('VatReturnController::generate - VAT number missing');
                 return response()->json([
                     'error' => 'VAT number required',
                     'message' => 'Company VAT number must be set before generating VAT returns. Please update your company settings.',
@@ -153,8 +172,16 @@ class VatReturnController extends Controller
             $periodEnd = Carbon::parse($validated['period_end']);
             $periodType = $validated['period_type'];
 
+            \Log::info('VatReturnController::generate - Dates parsed', [
+                'period_start' => $periodStart->format('Y-m-d'),
+                'period_end' => $periodEnd->format('Y-m-d'),
+                'period_type' => $periodType,
+            ]);
+
             // Validate period length
             $this->validatePeriodLength($periodStart, $periodEnd, $periodType);
+
+            \Log::info('VatReturnController::generate - Period length validated, calling VatXmlService');
 
             // Generate VAT return XML
             $xml = $this->vatService->generateVatReturn(
@@ -163,6 +190,11 @@ class VatReturnController extends Controller
                 $periodEnd,
                 $periodType
             );
+
+            \Log::info('VatReturnController::generate - XML generated', [
+                'xml_length' => strlen($xml),
+                'xml_preview' => substr($xml, 0, 200),
+            ]);
 
             // Validate XML if requested
             if ($validated['validate_xml'] ?? true) {
@@ -190,6 +222,11 @@ class VatReturnController extends Controller
                 $periodEnd->format('Y-m-d')
             );
 
+            \Log::info('VatReturnController::generate - Returning XML download', [
+                'filename' => $filename,
+                'xml_length' => strlen($xml),
+            ]);
+
             // Return XML file as download
             return response($xml, 200, [
                 'Content-Type' => 'application/xml',
@@ -200,8 +237,18 @@ class VatReturnController extends Controller
             ]);
 
         } catch (ValidationException $e) {
+            \Log::error('VatReturnController::generate - Validation error', [
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ]);
             throw $e;
         } catch (\Exception $e) {
+            \Log::error('VatReturnController::generate - Exception caught', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'error' => 'Failed to generate VAT return',
                 'message' => $e->getMessage()

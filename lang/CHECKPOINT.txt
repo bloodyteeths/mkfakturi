@@ -1,0 +1,1 @@
+// CLAUDE-CHECKPOINT: Added comprehensive imports section with 313 translation keys for migration wizard

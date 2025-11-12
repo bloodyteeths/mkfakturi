@@ -1,149 +1,110 @@
-2025-11-10T18:37:49.118089900Z [inf]  [snapshot] receiving snapshot, in progress 4.4 MB
-2025-11-10T18:37:49.462853143Z [inf]  scheduling build on Metal builder "builder-sgprfo"
-2025-11-10T18:37:51.118425470Z [inf]  [snapshot] receiving snapshot, in progress 9.6 MB
-2025-11-10T18:37:53.118554261Z [inf]  [snapshot] receiving snapshot, in progress 14 MB
-2025-11-10T18:37:55.119013827Z [inf]  [snapshot] receiving snapshot, in progress 19 MB
-2025-11-10T18:37:57.119135677Z [inf]  [snapshot] receiving snapshot, in progress 23 MB
-2025-11-10T18:37:59.119366630Z [inf]  [snapshot] receiving snapshot, in progress 28 MB
-2025-11-10T18:38:01.119739747Z [inf]  [snapshot] receiving snapshot, in progress 33 MB
-2025-11-10T18:38:03.119952673Z [inf]  [snapshot] receiving snapshot, in progress 38 MB
-2025-11-10T18:38:05.120326180Z [inf]  [snapshot] receiving snapshot, in progress 42 MB
-2025-11-10T18:38:07.120724094Z [inf]  [snapshot] receiving snapshot, in progress 47 MB
-2025-11-10T18:38:09.121136149Z [inf]  [snapshot] receiving snapshot, in progress 52 MB
-2025-11-10T18:38:11.121291980Z [inf]  [snapshot] receiving snapshot, in progress 57 MB
-2025-11-10T18:38:13.121594040Z [inf]  [snapshot] receiving snapshot, in progress 61 MB
-2025-11-10T18:38:15.940953699Z [inf]  [snapshot] receiving snapshot, in progress 66 MB
-2025-11-10T18:38:17.941155258Z [inf]  [snapshot] receiving snapshot, in progress 72 MB
-2025-11-10T18:38:19.941506422Z [inf]  [snapshot] receiving snapshot, in progress 77 MB
-2025-11-10T18:38:21.941725547Z [inf]  [snapshot] receiving snapshot, in progress 81 MB
-2025-11-10T18:38:23.941815239Z [inf]  [snapshot] receiving snapshot, in progress 86 MB
-2025-11-10T18:38:25.942386523Z [inf]  [snapshot] receiving snapshot, in progress 90 MB
-2025-11-10T18:38:27.353258736Z [inf]  [snapshot] received sha256:2aa89d73ec780e197b31e2148326c2e8560e80dad715c50db695747cd4b2b559 md5:876757ef368363f66e9143467bafcb02
-2025-11-10T18:38:27.353348842Z [inf]  [snapshot] receiving snapshot, complete 97 MB [took 40.810794809s]
-2025-11-10T18:38:28.299241693Z [inf]  [snapshot] analyzing snapshot, complete 97 MB [took 686.20053ms]
-2025-11-10T18:38:30.317489519Z [inf]  [snapshot] uploading snapshot, in progress 66 MB
-2025-11-10T18:38:32.317646121Z [inf]  [snapshot] uploading snapshot, in progress 76 MB
-2025-11-10T18:38:34.317936293Z [inf]  [snapshot] uploading snapshot, in progress 85 MB
-2025-11-10T18:38:36.318403761Z [inf]  [snapshot] uploading snapshot, in progress 85 MB
-2025-11-10T18:38:38.318542256Z [inf]  [snapshot] uploading snapshot, in progress 86 MB
-2025-11-10T18:38:40.318634341Z [inf]  [snapshot] uploading snapshot, in progress 92 MB
-2025-11-10T18:38:42.319229571Z [inf]  [snapshot] uploading snapshot, in progress 92 MB
-2025-11-10T18:38:44.319348546Z [inf]  [snapshot] uploading snapshot, in progress 94 MB
-2025-11-10T18:38:46.319488834Z [inf]  [snapshot] uploading snapshot, in progress 94 MB
-2025-11-10T18:38:48.319641369Z [inf]  [snapshot] uploading snapshot, in progress 95 MB
-2025-11-10T18:38:50.319964170Z [inf]  [snapshot] uploading snapshot, in progress 95 MB
-2025-11-10T18:38:50.647520804Z [inf]  [snapshot] uploading snapshot, complete 97 MB [took 22.348425561s]
-2025-11-10T18:39:00.588606562Z [inf]  scheduling build on Metal builder "builder-sgprfo"
-2025-11-10T18:39:01.991352014Z [inf]  [snapshot] fetching snapshot, in progress 52 MB
-2025-11-10T18:39:04.023056670Z [inf]  [snapshot] fetching snapshot, in progress 56 MB
-2025-11-10T18:39:05.727887057Z [inf]  fetched snapshot sha256:2aa89d73ec780e197b31e2148326c2e8560e80dad715c50db695747cd4b2b559 (97 MB bytes)
-2025-11-10T18:39:05.727943361Z [inf]  [snapshot] fetching snapshot, complete 97 MB [took 7.907469905s]
-2025-11-10T18:39:07.241653602Z [inf]  [snapshot] unpacking archive, complete 126 MB [took 850.385002ms]
-2025-11-10T18:39:09.248463947Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T18:39:09.248521233Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T18:39:09.248733902Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T18:39:09.487439384Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-10T18:39:09.528289405Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
-2025-11-10T18:39:09.528291418Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
-2025-11-10T18:39:09.528295665Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
-2025-11-10T18:39:09.670960879Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
-2025-11-10T18:39:09.710535576Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
-2025-11-10T18:39:09.712613033Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
-2025-11-10T18:39:09.713008166Z [inf]  [internal] load .dockerignore
-2025-11-10T18:39:09.713014586Z [inf]  [internal] load .dockerignore
-2025-11-10T18:39:09.713120805Z [inf]  [internal] load .dockerignore
-2025-11-10T18:39:09.928931296Z [inf]  [internal] load .dockerignore
-2025-11-10T18:39:09.980194230Z [inf]  [production 11/16] RUN cp .env.example .env
-2025-11-10T18:39:09.980198988Z [inf]  [internal] load build context
-2025-11-10T18:39:09.980199849Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T18:39:09.980200530Z [inf]  [composer-deps 4/4] RUN composer dump-autoload --optimize --no-dev
-2025-11-10T18:39:09.980201111Z [inf]  [frontend-builder 10/10] RUN npm run build
-2025-11-10T18:39:09.980201672Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
-2025-11-10T18:39:09.980202242Z [inf]  [frontend-builder  3/10] WORKDIR /app
-2025-11-10T18:39:09.980202793Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-2025-11-10T18:39:09.980203444Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
-2025-11-10T18:39:09.980204025Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
-2025-11-10T18:39:09.980204816Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache     storage/framework/sessions     storage/framework/views     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
-2025-11-10T18:39:09.980205417Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
-2025-11-10T18:39:09.980205718Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-2025-11-10T18:39:09.980206028Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T18:39:09.980206328Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
-2025-11-10T18:39:09.980216574Z [inf]  [composer-deps 1/4] COPY composer.json composer.lock ./
-2025-11-10T18:39:09.980217075Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
-2025-11-10T18:39:09.980217375Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
-2025-11-10T18:39:09.980217685Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
-2025-11-10T18:39:09.980217986Z [inf]  [production  7/16] WORKDIR /var/www/html
-2025-11-10T18:39:09.980218306Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
-2025-11-10T18:39:09.980218647Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
-2025-11-10T18:39:09.980218958Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-10T18:39:09.980219378Z [inf]  [php-base 5/5] WORKDIR /var/www/html
-2025-11-10T18:39:09.980219679Z [inf]  [frontend-builder  4/10] COPY package*.json ./
-2025-11-10T18:39:09.980219979Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
-2025-11-10T18:39:09.980220289Z [inf]  [frontend-builder  5/10] RUN npm ci --prefer-offline --no-audit
-2025-11-10T18:39:09.980220620Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T18:39:09.980220930Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-10T18:39:09.980221231Z [inf]  [composer-deps 3/4] COPY . .
-2025-11-10T18:39:09.980221541Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
-2025-11-10T18:39:09.980238387Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
-2025-11-10T18:39:09.980239528Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
-2025-11-10T18:39:09.980239869Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-2025-11-10T18:39:09.980240209Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
-2025-11-10T18:39:09.980240510Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
-2025-11-10T18:39:09.980267580Z [inf]  [internal] load build context
-2025-11-10T18:39:09.980268232Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T18:39:09.980667991Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T18:39:09.980670285Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T18:39:10.008756335Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-10T18:39:10.009592489Z [inf]  [internal] load build context
-2025-11-10T18:39:10.013816347Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-10T18:39:10.014298410Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-10T18:39:10.350392894Z [inf]  [internal] load build context
-2025-11-10T18:39:10.406499476Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-10T18:39:10.406503512Z [inf]  [frontend-builder  3/10] WORKDIR /app
-2025-11-10T18:39:10.406503873Z [inf]  [frontend-builder  4/10] COPY package*.json ./
-2025-11-10T18:39:10.406618895Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-10T18:39:10.406621319Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-2025-11-10T18:39:10.406621870Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
-2025-11-10T18:39:10.406622320Z [inf]  [php-base 5/5] WORKDIR /var/www/html
-2025-11-10T18:39:10.406622631Z [inf]  [composer-deps 1/4] COPY composer.json composer.lock ./
-2025-11-10T18:39:10.406622941Z [inf]  [composer-deps 2/4] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
-2025-11-10T18:39:10.406623432Z [inf]  [composer-deps 3/4] COPY . .
-2025-11-10T18:39:10.406623733Z [inf]  [frontend-builder  5/10] RUN npm ci --prefer-offline --no-audit
-2025-11-10T18:39:10.406629150Z [inf]  [composer-deps 3/4] COPY . .
-2025-11-10T18:39:10.406993087Z [inf]  [composer-deps 4/4] RUN composer dump-autoload --optimize --no-dev
-2025-11-10T18:39:11.127496625Z [inf]  Composer plugins have been disabled for safety in this non-interactive session.
-Set COMPOSER_ALLOW_SUPERUSER=1 if you want to allow plugins to run as root/super user.
-Do not run Composer as root/super user! See https://getcomposer.org/root for details
-
-2025-11-10T18:39:11.309903087Z [inf]  Generating optimized autoload files
-
-2025-11-10T18:39:11.503490374Z [inf]  npm error code EUSAGE
-
-2025-11-10T18:39:11.50370128Z [inf]  npm error
-npm error The `npm ci` command can only install with an existing package-lock.json or
-npm error npm-shrinkwrap.json with lockfileVersion >= 1. Run an install with npm@5 or
-npm error later to generate a package-lock.json file, then try again.
-npm error
-npm error Clean install a project
-npm error
-npm error Usage:
-npm error npm ci
-npm error
-npm error Options:
-npm error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
-npm error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
-npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
-npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
-npm error [--no-bin-links] [--no-fund] [--dry-run]
-npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
-npm error [-ws|--workspaces] [--include-workspace-root] [--install-links]
-npm error
-npm error aliases: clean-install, ic, install-clean, isntall-clean
-npm error
-npm error Run "npm help ci" for more info
-
-2025-11-10T18:39:11.504855963Z [inf]  npm error A complete log of this run can be found in: /root/.npm/_logs/2025-11-10T18_39_11_099Z-debug-0.log
-
-2025-11-10T18:39:12.504984589Z [err]  [frontend-builder  5/10] RUN npm ci --prefer-offline --no-audit
-2025-11-10T18:39:12.910743367Z [err]  [composer-deps 4/4] RUN composer dump-autoload --optimize --no-dev
-2025-11-10T18:39:13.057336465Z [err]  Build Failed: bc.Build: failed to solve: process "/bin/sh -c npm ci --prefer-offline --no-audit" did not complete successfully: exit code: 1
+[2025-11-12 01:22:13] production.WARNING: Slow operation detected {"operation":"req_6913e14516034","execution_time_ms":306.53,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-12 01:22:13] production.WARNING: Slow request detected {"operation":"req_6913e14516034","execution_time_ms":306.53,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://www.facturino.mk/login","route":null,"user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":302} 
+[2025-11-12 01:22:14] production.WARNING: Slow operation detected {"operation":"req_6913e145bf9cb","execution_time_ms":559.71,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
+[2025-11-12 01:22:14] production.WARNING: Slow request detected {"operation":"req_6913e145bf9cb","execution_time_ms":559.71,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:17] production.WARNING: Slow operation detected {"operation":"req_6913e148cc7ab","execution_time_ms":443.29,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-12 01:22:17] production.WARNING: Slow request detected {"operation":"req_6913e148cc7ab","execution_time_ms":443.29,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://www.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:19] production.WARNING: Slow operation detected {"operation":"req_6913e148cc7a8","execution_time_ms":2327.7,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
+[2025-11-12 01:22:19] production.WARNING: Slow request detected {"operation":"req_6913e148cc7a8","execution_time_ms":2327.7,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices","route":"invoices.index","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:21] production.WARNING: Slow operation detected {"operation":"req_6913e14d26e0b","execution_time_ms":352.75,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 01:22:21] production.WARNING: Slow request detected {"operation":"req_6913e14d26e0b","execution_time_ms":352.75,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices/13","route":"invoices.show","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:21] production.INFO: [EInvoiceController::showByInvoice] Request received {"invoice_id":13,"user_id":2,"user_email":"your-email@example.com","company_id":"N/A","is_owner":true} 
+[2025-11-12 01:22:21] production.INFO: [EInvoicePolicy::viewAny] Authorization check {"user_id":2,"user_email":"your-email@example.com","is_owner":true,"company_id":"N/A"} 
+[2025-11-12 01:22:21] production.INFO: [EInvoicePolicy::viewAny] User is owner - AUTHORIZED  
+[2025-11-12 01:22:21] production.INFO: [EInvoiceController::showByInvoice] Authorization PASSED  
+[2025-11-12 01:22:22] production.WARNING: Slow operation detected {"operation":"req_6913e14da77c8","execution_time_ms":370.26,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 01:22:22] production.WARNING: Slow request detected {"operation":"req_6913e14da77c8","execution_time_ms":370.26,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/e-invoices/by-invoice/13","route":null,"user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:23] production.INFO: [EInvoiceController::showByInvoice] Request received {"invoice_id":13,"user_id":2,"user_email":"your-email@example.com","company_id":"N/A","is_owner":true} 
+[2025-11-12 01:22:23] production.INFO: [EInvoicePolicy::viewAny] Authorization check {"user_id":2,"user_email":"your-email@example.com","is_owner":true,"company_id":"N/A"} 
+[2025-11-12 01:22:23] production.INFO: [EInvoicePolicy::viewAny] User is owner - AUTHORIZED  
+[2025-11-12 01:22:23] production.INFO: [EInvoiceController::showByInvoice] Authorization PASSED  
+[2025-11-12 01:22:23] production.WARNING: Slow operation detected {"operation":"req_6913e14d26a17","execution_time_ms":2071.05,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 01:22:23] production.WARNING: Slow request detected {"operation":"req_6913e14d26a17","execution_time_ms":2071.05,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices","route":"invoices.index","user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:23] production.WARNING: Slow operation detected {"operation":"req_6913e14f26d65","execution_time_ms":352.38,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-12 01:22:23] production.WARNING: Slow request detected {"operation":"req_6913e14f26d65","execution_time_ms":352.38,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://www.facturino.mk/api/v1/e-invoices/by-invoice/13","route":null,"user_id":2,"company_id":"2","ip":"79.125.199.91","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 01:22:26] production.INFO: [EInvoicePolicy::create] Authorization check for generate {"user_id":2,"user_email":"your-email@example.com","is_owner":true,"company_id":"N/A"} 
+[2025-11-12 01:22:26] production.INFO: [EInvoicePolicy::create] User is owner - AUTHORIZED  
+[2025-11-12 01:22:26] production.ERROR: Class "Modules\Mk\Services\XMLSecLibs\XMLSecurityDSig" not found {"userId":2,"exception":"[object] (Error(code: 0): Class \"Modules\\Mk\\Services\\XMLSecLibs\\XMLSecurityDSig\" not found at /var/www/html/Modules/Mk/Services/MkXmlSigner.php:137)
+[stacktrace]
+#0 /var/www/html/app/Http/Controllers/V1/Admin/EInvoice/EInvoiceController.php(526): Modules\\Mk\\Services\\MkXmlSigner->verifySignature('<?xml version=\"...')
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\EInvoice\\EInvoiceController->simulate(3)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('simulate', Array)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\EInvoice\\EInvoiceController), 'simulate')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '60', '1')
+#10 /var/www/html/app/Http/Middleware/ScopeBouncer.php(53): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ScopeBouncer->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#12 /var/www/html/app/Http/Middleware/CompanyMiddleware.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#21 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#50 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#73 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#74 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#75 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#76 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#77 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#78 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#79 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#80 {main}
+"} 

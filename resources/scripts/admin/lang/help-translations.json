@@ -1,0 +1,151 @@
+{
+  "imports": {
+    "help_guide": "Help Guide",
+    "show_help": "Show Help",
+    "hide_help": "Hide Help",
+    "start_tour": "Start Tour",
+    "finish_tour": "Finish Tour",
+    "tour_step_counter": "Step {current} of {total}",
+
+    "quick_start_guide": "Quick Start Guide",
+    "quickstart_goal": "Import Your Data in 4 Easy Steps",
+    "quickstart_goal_description": "Follow our guided wizard to migrate your data seamlessly",
+    "quickstart_steps_title": "Your Journey",
+
+    "step_1_upload": "Upload",
+    "step_1_upload_desc": "Choose your file",
+    "step_2_map": "Map",
+    "step_2_map_desc": "Connect fields",
+    "step_3_validate": "Validate",
+    "step_3_validate_desc": "Check data",
+    "step_4_complete": "Complete",
+    "step_4_complete_desc": "Import data",
+
+    "estimated_time": "Estimated Time: 5-10 minutes",
+
+    "prerequisites_checklist": "Before You Begin",
+    "prereq_data_file": "Prepare your data file (CSV, Excel, or XML)",
+    "prereq_data_file_hint": "Export from your previous system or use our template",
+    "prereq_backup": "Backup your existing data",
+    "prereq_backup_hint": "Always backup before importing",
+    "prereq_format": "Ensure data is properly formatted",
+    "prereq_format_hint": "Check for special characters and encoding",
+    "prereq_time": "Set aside 5-10 minutes for the process",
+
+    "start_interactive_tour": "Start Interactive Tour",
+    "skip_and_start": "Skip Tour and Get Started",
+    "new_to_migration": "New to Data Migration?",
+    "new_to_migration_tip": "We highly recommend taking the interactive tour to learn all features",
+
+    "watch_quick_tutorial": "Watch Quick Video Tutorial",
+    "watch_video_tutorial": "Watch Complete Video Tutorial",
+    "video_tutorial_duration": "3 minute overview",
+    "video_duration_3min": "Duration: 3 minutes",
+
+    "upload_step_help_title": "Upload Your Data File",
+    "upload_step_help_content": "Drag and drop your CSV, Excel, or XML file here, or click to browse. Maximum file size is 50MB.",
+
+    "format_help_title": "Supported File Formats",
+    "format_help_content": "We support CSV (.csv), Excel (.xls, .xlsx), and XML (.xml) files. For best results, use UTF-8 encoding.",
+
+    "template_help_title": "CSV Templates",
+    "template_help_content": "Download our pre-formatted templates to see exactly what format we expect. Fill in your data and upload it back.",
+
+    "tips_help_content": "Following these tips will help ensure a smooth import process without errors.",
+
+    "help_step1_title": "Step 1: Upload Your File",
+    "help_upload_visual_title": "How to Upload",
+    "help_upload_step1": "Drag and drop your file into the upload area",
+    "help_upload_step2": "Or click the 'Browse Files' button to select a file",
+    "help_upload_step3": "Wait for the upload to complete (progress bar will show status)",
+
+    "common_pitfalls": "Common Pitfalls",
+    "pitfall_file_size": "Files larger than 50MB - split into smaller files",
+    "pitfall_file_format": "Wrong file format - use CSV, Excel, or XML only",
+    "pitfall_encoding": "Special characters not displaying - ensure UTF-8 encoding",
+
+    "pro_tips": "Pro Tips",
+    "tip_use_templates": "Use our templates to avoid formatting errors",
+    "tip_test_small_file": "Test with a small file first (10-20 records) before importing everything",
+
+    "help_step2_title": "Step 2: Map Your Fields",
+    "help_mapping_visual_title": "How to Map Fields",
+    "help_mapping_step1": "Review the auto-detected field mappings",
+    "help_mapping_step2": "Click on dropdown to change any incorrect mappings",
+    "help_mapping_step3": "Ensure all required fields are mapped (marked with red asterisk)",
+
+    "example_mappings": "Example Mappings",
+    "example_csv_column_name": "Name",
+    "example_field_customer_name": "Customer Name",
+    "example_csv_column_email": "Email",
+    "example_field_email": "Email Address",
+
+    "help_step3_title": "Step 3: Validate Your Data",
+    "help_validation_visual_title": "How Validation Works",
+    "help_validation_step1": "Click 'Validate' to check your data for errors",
+    "help_validation_step2": "Review any validation errors or warnings",
+    "help_validation_step3": "Fix errors in your source file and re-upload if needed",
+
+    "common_validation_errors": "Common Validation Errors",
+    "validation_error_missing_required": "Missing required fields - ensure all mandatory columns have values",
+    "validation_error_invalid_format": "Invalid format - check date formats (YYYY-MM-DD) and number formats",
+    "validation_error_duplicate": "Duplicate entries - remove duplicate records from your file",
+
+    "help_step4_title": "Step 4: Complete Import",
+    "help_commit_visual_title": "Final Steps",
+    "help_commit_step1": "Review the summary of records to be imported",
+    "help_commit_step2": "Click 'Commit Import' to start the import process",
+    "help_commit_step3": "Wait for completion - don't close the browser window",
+
+    "important_note": "Important",
+    "commit_warning": "Once you commit the import, the data will be added to your system. This action cannot be undone automatically.",
+
+    "quick_links": "Quick Links",
+    "full_documentation": "Full Documentation",
+    "faq": "Frequently Asked Questions",
+    "contact_support": "Contact Support",
+    "learn_more": "Learn More",
+
+    "tour_welcome_title": "Welcome to the Migration Wizard",
+    "tour_welcome_content": "This guided tour will show you how to import your data in 4 simple steps. Let's get started!",
+
+    "tour_upload_title": "Upload Your File",
+    "tour_upload_content": "Drag and drop your CSV, Excel, or XML file here. We support files up to 50MB.",
+    "tour_upload_action": "Try dragging a file or clicking to browse",
+
+    "tour_template_title": "Download Templates",
+    "tour_template_content": "Not sure about the format? Download our pre-formatted templates for customers, items, invoices, and more.",
+    "tour_template_action": "Click any template button to download",
+
+    "tour_tips_title": "Helpful Tips",
+    "tour_tips_content": "These tips will help you avoid common mistakes and ensure a successful import.",
+
+    "tour_progress_title": "Track Your Progress",
+    "tour_progress_content": "The sidebar shows your current step and overall progress. You can jump between steps once they're unlocked.",
+
+    "tour_mapping_title": "Map Your Fields",
+    "tour_mapping_content": "Connect columns from your file to fields in our system. We auto-detect most fields, but you can adjust them.",
+    "tour_mapping_action": "Select a different field from any dropdown",
+
+    "tour_autodetect_title": "Auto-Detect Feature",
+    "tour_autodetect_content": "Click this button to automatically match your columns based on their names. It saves time!",
+    "tour_autodetect_action": "Click to auto-detect field mappings",
+
+    "tour_validation_title": "Validation Results",
+    "tour_validation_content": "See how many records passed validation and which ones have errors. All errors must be fixed before importing.",
+
+    "tour_errors_title": "Error Details",
+    "tour_errors_content": "Click on any error to see details. You can download an error report to fix issues in your source file.",
+    "tour_errors_action": "Review errors and fix them in your file",
+
+    "tour_commit_title": "Review Before Import",
+    "tour_commit_content": "This is your final chance to review what will be imported. Check the summary carefully.",
+
+    "tour_final_title": "Ready to Import",
+    "tour_final_content": "When you're ready, click this button to start the import. The process may take a few minutes depending on file size.",
+    "tour_final_action": "Click when you're ready to proceed",
+
+    "universal_migration_wizard": "Universal Migration Wizard"
+  }
+}
+// CLAUDE-CHECKPOINT

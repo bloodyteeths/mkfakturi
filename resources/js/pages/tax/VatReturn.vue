@@ -316,9 +316,26 @@ export default {
         })
       } catch (error) {
         console.error('Failed to generate VAT return:', error)
+
+        // Handle blob error response (when backend returns JSON error but we expect blob)
+        let errorMessage = 'Failed to generate VAT return'
+
+        if (error.response?.data instanceof Blob) {
+          try {
+            const text = await error.response.data.text()
+            const jsonError = JSON.parse(text)
+            errorMessage = jsonError.message || errorMessage
+            console.error('Backend error:', jsonError)
+          } catch (e) {
+            console.error('Could not parse error blob:', e)
+          }
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message
+        }
+
         notificationStore.showNotification({
           type: 'error',
-          message: error.response?.data?.message || 'Failed to generate VAT return'
+          message: errorMessage
         })
       } finally {
         isLoading.value = false

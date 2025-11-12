@@ -1,86 +1,781 @@
-2025-11-10T20:06:33.000000000Z [inf]  Starting Container
-2025-11-10T20:06:33.776342717Z [inf]  === Application Startup ===
-2025-11-10T20:06:33.776353819Z [inf]  Railway detected: Parsing MYSQL_URL...
-2025-11-10T20:06:33.776360595Z [inf]  DB configured from MYSQL_URL
-2025-11-10T20:06:33.776366705Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
-2025-11-10T20:06:33.776373055Z [inf]  Waiting for database... (1/30)
-2025-11-10T20:06:35.462891332Z [inf]  Waiting for database... (2/30)
-2025-11-10T20:06:37.904702596Z [inf]  Waiting for database... (3/30)
-2025-11-10T20:06:39.806266651Z [inf]  Waiting for database... (4/30)
-2025-11-10T20:06:41.966452777Z [inf]  Waiting for database... (5/30)
-2025-11-10T20:06:44.191338670Z [inf]  Waiting for database... (6/30)
-2025-11-10T20:06:46.357677829Z [inf]  Waiting for database... (7/30)
-2025-11-10T20:06:48.532994276Z [inf]  Waiting for database... (8/30)
-2025-11-10T20:06:50.946503513Z [inf]  Waiting for database... (9/30)
-2025-11-10T20:06:52.869776708Z [inf]  Waiting for database... (10/30)
-2025-11-10T20:06:55.035837728Z [inf]  Waiting for database... (11/30)
-2025-11-10T20:06:57.205393052Z [inf]  Waiting for database... (12/30)
-2025-11-10T20:06:59.366307452Z [inf]  Waiting for database... (13/30)
-2025-11-10T20:07:01.539286818Z [inf]  Waiting for database... (14/30)
-2025-11-10T20:07:03.930443287Z [inf]  Waiting for database... (15/30)
-2025-11-10T20:07:06.004491282Z [inf]  Waiting for database... (16/30)
-2025-11-10T20:07:08.081712725Z [inf]  Waiting for database... (17/30)
-2025-11-10T20:07:10.246549712Z [inf]  Waiting for database... (18/30)
-2025-11-10T20:07:12.411375353Z [inf]  Waiting for database... (19/30)
-2025-11-10T20:07:14.583791592Z [inf]  Waiting for database... (20/30)
-2025-11-10T20:07:16.946081536Z [inf]  Waiting for database... (21/30)
-2025-11-10T20:07:18.917541393Z [inf]  Waiting for database... (22/30)
-2025-11-10T20:07:21.084004052Z [inf]  Waiting for database... (23/30)
-2025-11-10T20:07:23.252684934Z [inf]  Waiting for database... (24/30)
-2025-11-10T20:07:25.423782824Z [inf]  Waiting for database... (25/30)
-2025-11-10T20:07:27.590863697Z [inf]  Waiting for database... (26/30)
-2025-11-10T20:07:29.985127019Z [inf]  Waiting for database... (27/30)
-2025-11-10T20:07:31.934964989Z [inf]  Waiting for database... (28/30)
-2025-11-10T20:07:34.102863070Z [inf]  Waiting for database... (29/30)
-2025-11-10T20:07:36.271468195Z [inf]  Waiting for database... (30/30)
-2025-11-10T20:07:38.314647434Z [inf]  Configuring nginx to listen on port 8080
-2025-11-10T20:07:38.316850579Z [inf]  Clearing caches...
-2025-11-10T20:07:38.632412102Z [inf]  
-2025-11-10T20:07:38.632417519Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-10T20:07:38.632422805Z [inf]  
-2025-11-10T20:07:39.017858662Z [inf]  
-2025-11-10T20:07:39.017862803Z [inf]     ERROR  Failed to clear cache. Make sure you have the appropriate permissions.  
-2025-11-10T20:07:39.017867624Z [inf]  
-2025-11-10T20:07:39.282753476Z [inf]  
-2025-11-10T20:07:39.282761166Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-10T20:07:39.282766165Z [inf]  
-2025-11-10T20:07:39.557804320Z [inf]  
-2025-11-10T20:07:39.557808599Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-10T20:07:39.557813677Z [inf]  
-2025-11-10T20:07:39.569299212Z [inf]  Running migrations...
-2025-11-10T20:07:40.018456902Z [inf]  
-2025-11-10T20:07:40.018460478Z [inf]     INFO  Nothing to migrate.  
-2025-11-10T20:07:40.018464050Z [inf]  
-2025-11-10T20:07:40.271138441Z [inf]  
-2025-11-10T20:07:40.271146251Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
-2025-11-10T20:07:40.271152406Z [inf]  
-2025-11-10T20:07:40.283379689Z [inf]  Starting application services...
-2025-11-10T20:07:40.453199180Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-2025-11-10T20:07:40.453204063Z [err]    import pkg_resources
-2025-11-10T20:07:40.485014107Z [inf]  2025-11-10 20:07:40,483 INFO Set uid to user 0 succeeded
-2025-11-10T20:07:40.487914667Z [inf]  2025-11-10 20:07:40,485 INFO supervisord started with pid 1
-2025-11-10T20:07:41.495625220Z [inf]  2025-11-10 20:07:41,488 INFO spawned: 'nginx' with pid 86
-2025-11-10T20:07:41.495629216Z [inf]  2025-11-10 20:07:41,490 INFO spawned: 'php-fpm' with pid 87
-2025-11-10T20:07:41.495633617Z [inf]  2025-11-10 20:07:41,492 INFO spawned: 'queue-worker_00' with pid 88
-2025-11-10T20:07:41.497093361Z [inf]  2025-11-10 20:07:41,495 INFO spawned: 'queue-worker_01' with pid 89
-2025-11-10T20:07:41.500099390Z [inf]  2025-11-10 20:07:41,497 INFO spawned: 'scheduler' with pid 90
-2025-11-10T20:07:41.537239280Z [err]  [10-Nov-2025 20:07:41] NOTICE: fpm is running, pid 87
-2025-11-10T20:07:41.537245598Z [err]  [10-Nov-2025 20:07:41] NOTICE: ready to handle connections
-2025-11-10T20:07:43.043094071Z [inf]  2025-11-10 20:07:42,841 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T20:07:43.043100937Z [inf]  2025-11-10 20:07:42,841 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T20:07:43.043106216Z [inf]  2025-11-10 20:07:42,841 INFO success: queue-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T20:07:43.043110662Z [inf]  2025-11-10 20:07:42,841 INFO success: queue-worker_01 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T20:07:43.043116712Z [inf]  2025-11-10 20:07:42,841 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-10T20:07:43.043123757Z [inf]  2025-11-10 20:07:42,841 INFO reaped unknown pid 100 (exit status 0)
-2025-11-10T20:08:03.074412834Z [err]  127.0.0.1 -  10/Nov/2025:20:07:55 +0000 "GET /index.php" 200
-2025-11-10T20:08:52.789628403Z [inf]  2025-11-10 20:08:42,822 INFO reaped unknown pid 156 (exit status 0)
-2025-11-10T20:09:42.800623230Z [inf]  2025-11-10 20:09:42,766 INFO reaped unknown pid 161 (exit status 0)
-2025-11-10T20:10:02.799572790Z [err]  127.0.0.1 -  10/Nov/2025:20:09:57 +0000 "GET /index.php" 302
-2025-11-10T20:10:02.799581728Z [err]  127.0.0.1 -  10/Nov/2025:20:09:57 +0000 "GET /index.php" 302
-2025-11-10T20:10:02.799588085Z [err]  127.0.0.1 -  10/Nov/2025:20:09:57 +0000 "GET /index.php" 200
-2025-11-10T20:10:02.799594027Z [err]  127.0.0.1 -  10/Nov/2025:20:09:57 +0000 "GET /index.php" 200
-2025-11-10T20:10:02.799601542Z [err]  127.0.0.1 -  10/Nov/2025:20:09:57 +0000 "GET /index.php" 200
-2025-11-10T20:10:10.674479147Z [err]  127.0.0.1 -  10/Nov/2025:20:10:10 +0000 "GET /index.php" 302
-2025-11-10T20:10:10.757267801Z [err]  127.0.0.1 -  10/Nov/2025:20:10:10 +0000 "GET /index.php" 200
-2025-11-10T20:10:10.949876914Z [err]  127.0.0.1 -  10/Nov/2025:20:10:10 +0000 "GET /index.php" 200
-2025-11-10T20:10:10.961097003Z [err]  127.0.0.1 -  10/Nov/2025:20:10:10 +0000 "GET /index.php" 200
+{
+    "data": {
+        "id": 3,
+        "invoice_id": 13,
+        "company_id": 2,
+        "status": "signed",
+        "certificate_id": 14,
+        "subject": {
+            "C": "MK",
+            "O": "Facturino",
+            "CN": "Facturino Test QES (DEV ONLY)"
+        },
+        "issuer": {
+            "C": "MK",
+            "O": "Facturino",
+            "CN": "Facturino Test QES (DEV ONLY)"
+        },
+        "signed_at": "2025-11-12T01:04:25.000000Z",
+        "submitted_at": null,
+        "accepted_at": null,
+        "rejected_at": null,
+        "rejection_reason": null,
+        "hash": null,
+        "xml_path": null,
+        "signed_xml_path": null,
+        "created_at": "2025-11-12T01:04:16.000000Z",
+        "updated_at": "2025-11-12T01:04:25.000000Z",
+        "invoice": {
+            "id": 13,
+            "ifrs_transaction_id": null,
+            "sequence_number": 12,
+            "customer_sequence_number": 2,
+            "invoice_date": "2025-11-12 00:00:00",
+            "due_date": "2025-11-13",
+            "invoice_number": "2025000012",
+            "reference_number": null,
+            "status": "SENT",
+            "paid_status": "UNPAID",
+            "tax_per_item": "YES",
+            "discount_per_item": "NO",
+            "notes": null,
+            "discount_type": "fixed",
+            "discount": 0,
+            "discount_val": 0,
+            "sub_total": 1200,
+            "total": 1416,
+            "tax": 216,
+            "due_amount": 1416,
+            "sent": 1,
+            "viewed": 0,
+            "unique_hash": "mjb49PL2Rm9eGVDNWz35",
+            "company_id": 2,
+            "created_at": "2025-11-12T01:04:04.000000Z",
+            "updated_at": "2025-11-12T01:04:11.000000Z",
+            "creator_id": 2,
+            "template_name": "invoice-mk",
+            "customer_id": 3,
+            "recurring_invoice_id": null,
+            "exchange_rate": 1,
+            "base_discount_val": 0,
+            "base_sub_total": 1200,
+            "base_total": 1416,
+            "base_tax": 216,
+            "base_due_amount": 1416,
+            "currency_id": 74,
+            "sales_tax_type": null,
+            "sales_tax_address_type": null,
+            "overdue": 0,
+            "formattedCreatedAt": "12.11.2025",
+            "formattedInvoiceDate": "12.11.2025",
+            "formattedDueDate": "13.11.2025",
+            "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf/mjb49PL2Rm9eGVDNWz35",
+            "customer": {
+                "id": 3,
+                "prefix": null,
+                "name": "test MK Doo",
+                "email": null,
+                "phone": null,
+                "facebook_id": null,
+                "google_id": null,
+                "github_id": null,
+                "tax_id": "MK12345678",
+                "contact_name": null,
+                "company_name": null,
+                "vat_number": null,
+                "website": null,
+                "enable_portal": false,
+                "currency_id": 74,
+                "company_id": 2,
+                "creator_id": 2,
+                "created_at": "2025-11-11T12:18:44.000000Z",
+                "updated_at": "2025-11-11T12:18:44.000000Z",
+                "formattedCreatedAt": "12.11.2025",
+                "avatar": 0,
+                "currency": {
+                    "id": 74,
+                    "name": "Macedonian Denar",
+                    "code": "MKD",
+                    "symbol": "ден",
+                    "precision": 0,
+                    "thousand_separator": ".",
+                    "decimal_separator": ",",
+                    "swap_currency_symbol": 1,
+                    "created_at": "2025-10-31T09:26:53.000000Z",
+                    "updated_at": "2025-10-31T09:26:53.000000Z"
+                },
+                "media": []
+            },
+            "currency": {
+                "id": 74,
+                "name": "Macedonian Denar",
+                "code": "MKD",
+                "symbol": "ден",
+                "precision": 0,
+                "thousand_separator": ".",
+                "decimal_separator": ",",
+                "swap_currency_symbol": 1,
+                "created_at": "2025-10-31T09:26:53.000000Z",
+                "updated_at": "2025-10-31T09:26:53.000000Z"
+            },
+            "company": {
+                "id": 2,
+                "name": "Teknomed DOO",
+                "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                "logo_path": "16/facturino_logo_clear.png",
+                "media": [
+                    {
+                        "id": 16,
+                        "model_type": "App\\Models\\Company",
+                        "model_id": 2,
+                        "collection_name": "logo",
+                        "name": "media-libraryvETS5P",
+                        "file_name": "facturino_logo_clear.png",
+                        "mime_type": "image/png",
+                        "disk": "s3compat",
+                        "size": 1308431,
+                        "manipulations": [],
+                        "custom_properties": [],
+                        "responsive_images": [],
+                        "order_column": 1,
+                        "created_at": "2025-11-06T22:20:25.000000Z",
+                        "updated_at": "2025-11-06T22:20:25.000000Z",
+                        "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                        "conversions_disk": "s3compat",
+                        "generated_conversions": [],
+                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                        "preview_url": ""
+                    }
+                ]
+            },
+            "items": [
+                {
+                    "id": 17,
+                    "name": "apple",
+                    "description": null,
+                    "discount_type": "fixed",
+                    "price": 1200,
+                    "quantity": 1,
+                    "unit_name": "Парче (Each)",
+                    "discount": 0,
+                    "discount_val": 0,
+                    "tax": 216,
+                    "total": 1200,
+                    "invoice_id": 13,
+                    "item_id": 4,
+                    "company_id": 2,
+                    "currency_id": null,
+                    "created_at": "2025-11-12T01:04:04.000000Z",
+                    "updated_at": "2025-11-12T01:04:04.000000Z",
+                    "recurring_invoice_id": null,
+                    "base_price": 1200,
+                    "exchange_rate": "1.000000",
+                    "base_discount_val": 0,
+                    "base_tax": 216,
+                    "base_total": 1200,
+                    "taxes": [
+                        {
+                            "id": 10,
+                            "tax_type_id": 2,
+                            "invoice_id": null,
+                            "estimate_id": null,
+                            "invoice_item_id": 17,
+                            "estimate_item_id": null,
+                            "item_id": null,
+                            "company_id": 2,
+                            "name": "18 ddv",
+                            "calculation_type": "percentage",
+                            "amount": 216,
+                            "percent": 18,
+                            "fixed_amount": null,
+                            "compound_tax": 0,
+                            "created_at": "2025-11-12T01:04:04.000000Z",
+                            "updated_at": "2025-11-12T01:04:04.000000Z",
+                            "exchange_rate": "1.000000",
+                            "base_amount": 216,
+                            "currency_id": 74,
+                            "recurring_invoice_id": null
+                        }
+                    ]
+                }
+            ]
+        },
+        "company": {
+            "id": 2,
+            "name": "Teknomed DOO",
+            "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+            "logo_path": "16/facturino_logo_clear.png",
+            "media": [
+                {
+                    "id": 16,
+                    "model_type": "App\\Models\\Company",
+                    "model_id": 2,
+                    "collection_name": "logo",
+                    "name": "media-libraryvETS5P",
+                    "file_name": "facturino_logo_clear.png",
+                    "mime_type": "image/png",
+                    "disk": "s3compat",
+                    "size": 1308431,
+                    "manipulations": [],
+                    "custom_properties": [],
+                    "responsive_images": [],
+                    "order_column": 1,
+                    "created_at": "2025-11-06T22:20:25.000000Z",
+                    "updated_at": "2025-11-06T22:20:25.000000Z",
+                    "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                    "conversions_disk": "s3compat",
+                    "generated_conversions": [],
+                    "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                    "preview_url": ""
+                }
+            ]
+        },
+        "certificate": {
+            "id": 14,
+            "company_id": 2,
+            "name": "Facturino Test QES (DEV ONLY)",
+            "subject": {
+                "C": "MK",
+                "O": "Facturino",
+                "CN": "Facturino Test QES (DEV ONLY)"
+            },
+            "issuer": {
+                "C": "MK",
+                "O": "Facturino",
+                "CN": "Facturino Test QES (DEV ONLY)"
+            },
+            "serial_number": "0x2FF740B059F3306B98F66A9A87D38F9D795908CC",
+            "fingerprint": "931f2fb58ea0200b52651eb04d52228d494085f1fe1b7796ea253b7c720d766d",
+            "valid_from": "2025-11-11T13:00:34.000000Z",
+            "valid_to": "2026-11-11T13:00:34.000000Z",
+            "certificate_path": "certificates/company_2/931f2fb58ea0200b_1762907468.pem",
+            "algorithm": "RSA-SHA256",
+            "key_size": 2048,
+            "is_active": true,
+            "is_expired": false,
+            "created_at": "2025-11-12T00:31:08.000000Z",
+            "updated_at": "2025-11-12T00:31:08.000000Z",
+            "last_used_at": null,
+            "is_valid": true,
+            "days_until_expiry": 364,
+            "company": {
+                "id": 2,
+                "name": "Teknomed DOO",
+                "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                "logo_path": "16/facturino_logo_clear.png",
+                "media": [
+                    {
+                        "id": 16,
+                        "model_type": "App\\Models\\Company",
+                        "model_id": 2,
+                        "collection_name": "logo",
+                        "name": "media-libraryvETS5P",
+                        "file_name": "facturino_logo_clear.png",
+                        "mime_type": "image/png",
+                        "disk": "s3compat",
+                        "size": 1308431,
+                        "manipulations": [],
+                        "custom_properties": [],
+                        "responsive_images": [],
+                        "order_column": 1,
+                        "created_at": "2025-11-06T22:20:25.000000Z",
+                        "updated_at": "2025-11-06T22:20:25.000000Z",
+                        "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                        "conversions_disk": "s3compat",
+                        "generated_conversions": [],
+                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                        "preview_url": ""
+                    }
+                ]
+            }
+        },
+        "submissions": [
+            {
+                "id": 2,
+                "e_invoice_id": 3,
+                "company_id": 2,
+                "submitted_at": "2025-11-12T01:48:27.000000Z",
+                "submitted_by": {
+                    "id": 2,
+                    "entity_id": null,
+                    "name": "Администратор",
+                    "email": "your-email@example.com",
+                    "phone": null,
+                    "role": "super admin",
+                    "facebook_id": null,
+                    "google_id": null,
+                    "github_id": null,
+                    "contact_name": null,
+                    "company_name": null,
+                    "website": null,
+                    "enable_portal": null,
+                    "currency_id": null,
+                    "created_at": "2025-10-31T09:35:04.000000Z",
+                    "updated_at": "2025-11-10T01:15:39.000000Z",
+                    "creator_id": null,
+                    "formattedCreatedAt": "31.10.2025",
+                    "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                    "currency": null,
+                    "media": [
+                        {
+                            "id": 15,
+                            "model_type": "App\\Models\\User",
+                            "model_id": 2,
+                            "collection_name": "admin_avatar",
+                            "name": "facturino_logo",
+                            "file_name": "facturino_logo.png",
+                            "mime_type": "image/png",
+                            "disk": "s3compat",
+                            "size": 1308431,
+                            "manipulations": [],
+                            "custom_properties": [],
+                            "responsive_images": [],
+                            "order_column": 1,
+                            "created_at": "2025-11-06T22:20:15.000000Z",
+                            "updated_at": "2025-11-06T22:20:15.000000Z",
+                            "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
+                            "conversions_disk": "s3compat",
+                            "generated_conversions": [],
+                            "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                            "preview_url": ""
+                        }
+                    ]
+                },
+                "portal_url": "https://e-ujp.ujp.gov.mk",
+                "upload_id": null,
+                "receipt_number": null,
+                "status": "pending",
+                "response_data": null,
+                "error_message": null,
+                "retry_count": 0,
+                "next_retry_at": null,
+                "idempotency_key": null,
+                "created_at": "2025-11-12T01:48:27.000000Z",
+                "updated_at": "2025-11-12T01:48:27.000000Z",
+                "e_invoice": {
+                    "id": 3,
+                    "invoice_id": 13,
+                    "status": "signed",
+                    "invoice": {
+                        "id": 13,
+                        "invoice_number": "2025000012",
+                        "invoice_date": "2025-11-12 00:00:00",
+                        "total": 1416,
+                        "company_id": 2,
+                        "customer_id": 3,
+                        "formattedCreatedAt": "12.11.2025",
+                        "formattedInvoiceDate": "12.11.2025",
+                        "formattedDueDate": "12.11.2025",
+                        "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
+                        "customer": {
+                            "id": 3,
+                            "name": "test MK Doo",
+                            "email": null,
+                            "formattedCreatedAt": "12.11.2025",
+                            "avatar": 0,
+                            "currency": null,
+                            "media": []
+                        },
+                        "currency": null,
+                        "company": {
+                            "id": 2,
+                            "name": "Teknomed DOO",
+                            "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                            "logo_path": "16/facturino_logo_clear.png",
+                            "media": [
+                                {
+                                    "id": 16,
+                                    "model_type": "App\\Models\\Company",
+                                    "model_id": 2,
+                                    "collection_name": "logo",
+                                    "name": "media-libraryvETS5P",
+                                    "file_name": "facturino_logo_clear.png",
+                                    "mime_type": "image/png",
+                                    "disk": "s3compat",
+                                    "size": 1308431,
+                                    "manipulations": [],
+                                    "custom_properties": [],
+                                    "responsive_images": [],
+                                    "order_column": 1,
+                                    "created_at": "2025-11-06T22:20:25.000000Z",
+                                    "updated_at": "2025-11-06T22:20:25.000000Z",
+                                    "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                                    "conversions_disk": "s3compat",
+                                    "generated_conversions": [],
+                                    "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                                    "preview_url": ""
+                                }
+                            ]
+                        }
+                    },
+                    "company": null
+                }
+            },
+            {
+                "id": 1,
+                "e_invoice_id": 3,
+                "company_id": 2,
+                "submitted_at": "2025-11-12T01:40:24.000000Z",
+                "submitted_by": {
+                    "id": 2,
+                    "entity_id": null,
+                    "name": "Администратор",
+                    "email": "your-email@example.com",
+                    "phone": null,
+                    "role": "super admin",
+                    "facebook_id": null,
+                    "google_id": null,
+                    "github_id": null,
+                    "contact_name": null,
+                    "company_name": null,
+                    "website": null,
+                    "enable_portal": null,
+                    "currency_id": null,
+                    "created_at": "2025-10-31T09:35:04.000000Z",
+                    "updated_at": "2025-11-10T01:15:39.000000Z",
+                    "creator_id": null,
+                    "formattedCreatedAt": "31.10.2025",
+                    "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                    "currency": null,
+                    "media": [
+                        {
+                            "id": 15,
+                            "model_type": "App\\Models\\User",
+                            "model_id": 2,
+                            "collection_name": "admin_avatar",
+                            "name": "facturino_logo",
+                            "file_name": "facturino_logo.png",
+                            "mime_type": "image/png",
+                            "disk": "s3compat",
+                            "size": 1308431,
+                            "manipulations": [],
+                            "custom_properties": [],
+                            "responsive_images": [],
+                            "order_column": 1,
+                            "created_at": "2025-11-06T22:20:15.000000Z",
+                            "updated_at": "2025-11-06T22:20:15.000000Z",
+                            "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
+                            "conversions_disk": "s3compat",
+                            "generated_conversions": [],
+                            "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                            "preview_url": ""
+                        }
+                    ]
+                },
+                "portal_url": "https://e-ujp.ujp.gov.mk",
+                "upload_id": null,
+                "receipt_number": null,
+                "status": "pending",
+                "response_data": null,
+                "error_message": null,
+                "retry_count": 0,
+                "next_retry_at": null,
+                "idempotency_key": null,
+                "created_at": "2025-11-12T01:40:24.000000Z",
+                "updated_at": "2025-11-12T01:40:24.000000Z",
+                "e_invoice": {
+                    "id": 3,
+                    "invoice_id": 13,
+                    "status": "signed",
+                    "invoice": {
+                        "id": 13,
+                        "invoice_number": "2025000012",
+                        "invoice_date": "2025-11-12 00:00:00",
+                        "total": 1416,
+                        "company_id": 2,
+                        "customer_id": 3,
+                        "formattedCreatedAt": "12.11.2025",
+                        "formattedInvoiceDate": "12.11.2025",
+                        "formattedDueDate": "12.11.2025",
+                        "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
+                        "customer": {
+                            "id": 3,
+                            "name": "test MK Doo",
+                            "email": null,
+                            "formattedCreatedAt": "12.11.2025",
+                            "avatar": 0,
+                            "currency": null,
+                            "media": []
+                        },
+                        "currency": null,
+                        "company": {
+                            "id": 2,
+                            "name": "Teknomed DOO",
+                            "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                            "logo_path": "16/facturino_logo_clear.png",
+                            "media": [
+                                {
+                                    "id": 16,
+                                    "model_type": "App\\Models\\Company",
+                                    "model_id": 2,
+                                    "collection_name": "logo",
+                                    "name": "media-libraryvETS5P",
+                                    "file_name": "facturino_logo_clear.png",
+                                    "mime_type": "image/png",
+                                    "disk": "s3compat",
+                                    "size": 1308431,
+                                    "manipulations": [],
+                                    "custom_properties": [],
+                                    "responsive_images": [],
+                                    "order_column": 1,
+                                    "created_at": "2025-11-06T22:20:25.000000Z",
+                                    "updated_at": "2025-11-06T22:20:25.000000Z",
+                                    "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                                    "conversions_disk": "s3compat",
+                                    "generated_conversions": [],
+                                    "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                                    "preview_url": ""
+                                }
+                            ]
+                        }
+                    },
+                    "company": null
+                }
+            }
+        ]
+    },
+    "submissions": [
+        {
+            "id": 2,
+            "e_invoice_id": 3,
+            "company_id": 2,
+            "submitted_at": "2025-11-12T01:48:27.000000Z",
+            "submitted_by": {
+                "id": 2,
+                "entity_id": null,
+                "name": "Администратор",
+                "email": "your-email@example.com",
+                "phone": null,
+                "role": "super admin",
+                "facebook_id": null,
+                "google_id": null,
+                "github_id": null,
+                "contact_name": null,
+                "company_name": null,
+                "website": null,
+                "enable_portal": null,
+                "currency_id": null,
+                "created_at": "2025-10-31T09:35:04.000000Z",
+                "updated_at": "2025-11-10T01:15:39.000000Z",
+                "creator_id": null,
+                "formattedCreatedAt": "31.10.2025",
+                "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                "currency": null,
+                "media": [
+                    {
+                        "id": 15,
+                        "model_type": "App\\Models\\User",
+                        "model_id": 2,
+                        "collection_name": "admin_avatar",
+                        "name": "facturino_logo",
+                        "file_name": "facturino_logo.png",
+                        "mime_type": "image/png",
+                        "disk": "s3compat",
+                        "size": 1308431,
+                        "manipulations": [],
+                        "custom_properties": [],
+                        "responsive_images": [],
+                        "order_column": 1,
+                        "created_at": "2025-11-06T22:20:15.000000Z",
+                        "updated_at": "2025-11-06T22:20:15.000000Z",
+                        "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
+                        "conversions_disk": "s3compat",
+                        "generated_conversions": [],
+                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                        "preview_url": ""
+                    }
+                ]
+            },
+            "portal_url": "https://e-ujp.ujp.gov.mk",
+            "upload_id": null,
+            "receipt_number": null,
+            "status": "pending",
+            "response_data": null,
+            "error_message": null,
+            "retry_count": 0,
+            "next_retry_at": null,
+            "idempotency_key": null,
+            "created_at": "2025-11-12T01:48:27.000000Z",
+            "updated_at": "2025-11-12T01:48:27.000000Z",
+            "e_invoice": {
+                "id": 3,
+                "invoice_id": 13,
+                "status": "signed",
+                "invoice": {
+                    "id": 13,
+                    "invoice_number": "2025000012",
+                    "invoice_date": "2025-11-12 00:00:00",
+                    "total": 1416,
+                    "company_id": 2,
+                    "customer_id": 3,
+                    "formattedCreatedAt": "12.11.2025",
+                    "formattedInvoiceDate": "12.11.2025",
+                    "formattedDueDate": "12.11.2025",
+                    "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
+                    "customer": {
+                        "id": 3,
+                        "name": "test MK Doo",
+                        "email": null,
+                        "formattedCreatedAt": "12.11.2025",
+                        "avatar": 0,
+                        "currency": null,
+                        "media": []
+                    },
+                    "currency": null,
+                    "company": {
+                        "id": 2,
+                        "name": "Teknomed DOO",
+                        "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                        "logo_path": "16/facturino_logo_clear.png",
+                        "media": [
+                            {
+                                "id": 16,
+                                "model_type": "App\\Models\\Company",
+                                "model_id": 2,
+                                "collection_name": "logo",
+                                "name": "media-libraryvETS5P",
+                                "file_name": "facturino_logo_clear.png",
+                                "mime_type": "image/png",
+                                "disk": "s3compat",
+                                "size": 1308431,
+                                "manipulations": [],
+                                "custom_properties": [],
+                                "responsive_images": [],
+                                "order_column": 1,
+                                "created_at": "2025-11-06T22:20:25.000000Z",
+                                "updated_at": "2025-11-06T22:20:25.000000Z",
+                                "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                                "conversions_disk": "s3compat",
+                                "generated_conversions": [],
+                                "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                                "preview_url": ""
+                            }
+                        ]
+                    }
+                },
+                "company": null
+            }
+        },
+        {
+            "id": 1,
+            "e_invoice_id": 3,
+            "company_id": 2,
+            "submitted_at": "2025-11-12T01:40:24.000000Z",
+            "submitted_by": {
+                "id": 2,
+                "entity_id": null,
+                "name": "Администратор",
+                "email": "your-email@example.com",
+                "phone": null,
+                "role": "super admin",
+                "facebook_id": null,
+                "google_id": null,
+                "github_id": null,
+                "contact_name": null,
+                "company_name": null,
+                "website": null,
+                "enable_portal": null,
+                "currency_id": null,
+                "created_at": "2025-10-31T09:35:04.000000Z",
+                "updated_at": "2025-11-10T01:15:39.000000Z",
+                "creator_id": null,
+                "formattedCreatedAt": "31.10.2025",
+                "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                "currency": null,
+                "media": [
+                    {
+                        "id": 15,
+                        "model_type": "App\\Models\\User",
+                        "model_id": 2,
+                        "collection_name": "admin_avatar",
+                        "name": "facturino_logo",
+                        "file_name": "facturino_logo.png",
+                        "mime_type": "image/png",
+                        "disk": "s3compat",
+                        "size": 1308431,
+                        "manipulations": [],
+                        "custom_properties": [],
+                        "responsive_images": [],
+                        "order_column": 1,
+                        "created_at": "2025-11-06T22:20:15.000000Z",
+                        "updated_at": "2025-11-06T22:20:15.000000Z",
+                        "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
+                        "conversions_disk": "s3compat",
+                        "generated_conversions": [],
+                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
+                        "preview_url": ""
+                    }
+                ]
+            },
+            "portal_url": "https://e-ujp.ujp.gov.mk",
+            "upload_id": null,
+            "receipt_number": null,
+            "status": "pending",
+            "response_data": null,
+            "error_message": null,
+            "retry_count": 0,
+            "next_retry_at": null,
+            "idempotency_key": null,
+            "created_at": "2025-11-12T01:40:24.000000Z",
+            "updated_at": "2025-11-12T01:40:24.000000Z",
+            "e_invoice": {
+                "id": 3,
+                "invoice_id": 13,
+                "status": "signed",
+                "invoice": {
+                    "id": 13,
+                    "invoice_number": "2025000012",
+                    "invoice_date": "2025-11-12 00:00:00",
+                    "total": 1416,
+                    "company_id": 2,
+                    "customer_id": 3,
+                    "formattedCreatedAt": "12.11.2025",
+                    "formattedInvoiceDate": "12.11.2025",
+                    "formattedDueDate": "12.11.2025",
+                    "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
+                    "customer": {
+                        "id": 3,
+                        "name": "test MK Doo",
+                        "email": null,
+                        "formattedCreatedAt": "12.11.2025",
+                        "avatar": 0,
+                        "currency": null,
+                        "media": []
+                    },
+                    "currency": null,
+                    "company": {
+                        "id": 2,
+                        "name": "Teknomed DOO",
+                        "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                        "logo_path": "16/facturino_logo_clear.png",
+                        "media": [
+                            {
+                                "id": 16,
+                                "model_type": "App\\Models\\Company",
+                                "model_id": 2,
+                                "collection_name": "logo",
+                                "name": "media-libraryvETS5P",
+                                "file_name": "facturino_logo_clear.png",
+                                "mime_type": "image/png",
+                                "disk": "s3compat",
+                                "size": 1308431,
+                                "manipulations": [],
+                                "custom_properties": [],
+                                "responsive_images": [],
+                                "order_column": 1,
+                                "created_at": "2025-11-06T22:20:25.000000Z",
+                                "updated_at": "2025-11-06T22:20:25.000000Z",
+                                "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
+                                "conversions_disk": "s3compat",
+                                "generated_conversions": [],
+                                "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
+                                "preview_url": ""
+                            }
+                        ]
+                    }
+                },
+                "company": null
+            }
+        }
+    ]
+}
