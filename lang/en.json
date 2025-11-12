@@ -20,6 +20,8 @@
     "tax_reports": "Tax Reports"
   },
   "general": {
+    "company_name": "Company Name",
+    "no_company_selected": "No Company Selected",
     "add_company": "Add Company",
     "view_pdf": "View PDF",
     "copy_pdf_url": "Copy PDF Url",
@@ -1771,6 +1773,8 @@
     "company_information": "Company Information",
     "vat_number": "VAT Number",
     "no_vat_number": "No VAT number entered",
+    "vat_number_required": "VAT Number Required",
+    "vat_number_warning_message": "Please enter your company's VAT number in Company Settings before generating VAT returns.",
     "tax_period": "Tax Period",
     "period_type": "Period Type",
     "monthly": "Monthly",
