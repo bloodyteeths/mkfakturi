@@ -131,14 +131,6 @@ class MkXmlSigner
                 return false;
             }
 
-            // Load certificate if embedded in signature
-            // XMLSecurityDSig::staticLocateKeyInfo() returns the KeyInfo node
-            try {
-                \RobRichards\XMLSecLibs\XMLSecurityDSig::staticLocateKeyInfo($objKey, $objDSig->sigNode);
-            } catch (\Exception $e) {
-                Log::warning('Failed to locate key info', ['error' => $e->getMessage()]);
-            }
-
             // Verify signature
             $isValid = $objDSig->verify($objKey);
 
