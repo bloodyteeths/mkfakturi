@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('certificates', function (Blueprint $table) {
-            $table->timestamp('last_used_at')->nullable()->after('uploaded_at');
+            $table->timestamp('last_used_at')->nullable()->after('updated_at');
             $table->index('last_used_at');
         });
     }
