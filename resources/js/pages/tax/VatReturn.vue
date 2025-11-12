@@ -148,16 +148,6 @@
                   </label>
                 </div>
 
-                <!-- Include test data notice -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                  <div class="flex">
-                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-3 mt-0.5"></i>
-                    <div class="text-sm text-yellow-700">
-                      <p class="font-medium">{{ $t('vat.test_data_notice') }}</p>
-                      <p>{{ $t('vat.test_data_description') }}</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
