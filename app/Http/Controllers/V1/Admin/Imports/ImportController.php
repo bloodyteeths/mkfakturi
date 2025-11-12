@@ -87,7 +87,7 @@ class ImportController extends Controller
     /**
      * Validate import data
      */
-    public function validate(Request $request, $id)
+    public function validateData(Request $request, $id)
     {
         $importJob = ImportJob::where('company_id', $request->user()->company_id)
             ->findOrFail($id);

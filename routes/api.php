@@ -876,7 +876,7 @@ Route::prefix('/v1')->group(function () {
         Route::post('/{id}/mapping', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'saveMapping']);
 
         // Validate data
-        Route::post('/{id}/validate', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'validate']);
+        Route::post('/{id}/validate', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'validateData']);
 
         // Commit import
         Route::post('/{id}/commit', [\App\Http\Controllers\V1\Admin\Imports\ImportController::class, 'commit']);
