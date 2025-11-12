@@ -158,7 +158,8 @@ class VatXmlService
         // For standard currencies (like USD), divide by 100 to get dollars from cents
         $value = $precision === 0 ? $amount : $amount / 100;
 
-        return number_format($value, 2);
+        // Format with 2 decimals, no thousands separator (XML requires plain numbers)
+        return number_format($value, 2, '.', '');
     }
 
     /**
@@ -287,22 +288,9 @@ class VatXmlService
      */
     protected function buildVATRateElement(DOMDocument $dom, DOMElement $parent, float $rate, array $data): void
     {
-        $precision = $this->getCurrencyPrecision();
-        $formattedTaxableBase = $this->formatAmount($data['taxable_base']);
-        $formattedVATAmount = $this->formatAmount($data['vat_amount']);
-
-        \Log::info('VatXmlService::buildVATRateElement - Formatting amounts', [
-            'rate' => $rate,
-            'taxable_base_raw' => $data['taxable_base'],
-            'vat_amount_raw' => $data['vat_amount'],
-            'currency_precision' => $precision,
-            'taxable_base_formatted' => $formattedTaxableBase,
-            'vat_amount_formatted' => $formattedVATAmount,
-        ]);
-
-        $parent->appendChild($dom->createElement('Rate', number_format($rate, 2)));
-        $parent->appendChild($dom->createElement('TaxableBase', $formattedTaxableBase));
-        $parent->appendChild($dom->createElement('VATAmount', $formattedVATAmount));
+        $parent->appendChild($dom->createElement('Rate', number_format($rate, 2, '.', '')));
+        $parent->appendChild($dom->createElement('TaxableBase', $this->formatAmount($data['taxable_base'])));
+        $parent->appendChild($dom->createElement('VATAmount', $this->formatAmount($data['vat_amount'])));
         $parent->appendChild($dom->createElement('TransactionCount', $data['transaction_count']));
     }
     
@@ -473,15 +461,6 @@ class VatXmlService
         $rate = $tax->percent ?? $tax->taxType->percent ?? 0;
         $amount = $tax->amount ?? 0;
 
-        // Log the raw values from database
-        \Log::info('VatXmlService::categorizeVatAmount - Processing tax', [
-            'tax_id' => $tax->id,
-            'rate' => $rate,
-            'amount_raw' => $amount,
-            'base_amount' => $tax->base_amount ?? null,
-            'invoice_item_total' => $tax->invoiceItem->total ?? null,
-        ]);
-
         // Calculate taxable base from VAT amount and rate
         // Note: base_amount field stores currency-converted VAT amount, NOT taxable base
         // Formula: taxable_base = vat_amount / (rate / 100)
@@ -492,11 +471,6 @@ class VatXmlService
             // For zero-rate or exempt, use the item total
             $taxableBase = $tax->invoiceItem->total ?? 0;
         }
-
-        \Log::info('VatXmlService::categorizeVatAmount - Calculated values', [
-            'taxable_base_calculated' => $taxableBase,
-            'vat_amount' => $amount,
-        ]);
 
         if ($rate >= 15) { // Standard rate (18%)
             $vatData['standard']['vat_amount'] += $amount;
