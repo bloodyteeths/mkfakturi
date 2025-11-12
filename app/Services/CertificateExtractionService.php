@@ -333,9 +333,17 @@ class CertificateExtractionService
             if (file_exists($file)) {
                 // Securely delete by overwriting with zeros first (optional)
                 // This prevents recovery of sensitive key material
-                $fileSize = filesize($file);
-                if ($fileSize > 0) {
-                    file_put_contents($file, str_repeat("\0", $fileSize));
+                try {
+                    $fileSize = filesize($file);
+                    if ($fileSize > 0) {
+                        @file_put_contents($file, str_repeat("\0", $fileSize));
+                    }
+                } catch (\Throwable $e) {
+                    // If overwrite fails, still attempt deletion
+                    Log::warning('CertificateExtractionService: Failed to overwrite file, will still delete', [
+                        'path' => $file,
+                        'error' => $e->getMessage(),
+                    ]);
                 }
 
                 @unlink($file);
