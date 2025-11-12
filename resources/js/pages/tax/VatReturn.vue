@@ -88,13 +88,24 @@
                 <!-- Period End -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.period_end') }}</label>
-                  <input 
-                    v-model="form.period_end" 
-                    type="date" 
+                  <input
+                    v-model="form.period_end"
+                    type="date"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     required
                   />
                 </div>
+              </div>
+
+              <!-- Period Helper Text -->
+              <div class="mt-3 text-sm text-gray-500">
+                <i class="fas fa-info-circle mr-1"></i>
+                <span v-if="form.period_type === 'MONTHLY'">
+                  {{ $t('vat.monthly_period_hint') || 'Monthly periods must be a full calendar month (28-31 days)' }}
+                </span>
+                <span v-else>
+                  {{ $t('vat.quarterly_period_hint') || 'Quarterly periods must be 3 full calendar months (89-92 days)' }}
+                </span>
               </div>
             </div>
 
@@ -237,14 +248,21 @@ export default {
       if (!form.value.period_start) return
 
       const startDate = new Date(form.value.period_start)
+
+      // Ensure we're starting from the first day of the month
+      const monthStart = new Date(startDate.getFullYear(), startDate.getMonth(), 1)
       let endDate
 
       if (form.value.period_type === 'MONTHLY') {
-        endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0)
+        // Last day of the same month
+        endDate = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)
       } else {
-        endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 3, 0)
+        // Last day of the quarter (3 months later)
+        endDate = new Date(monthStart.getFullYear(), monthStart.getMonth() + 3, 0)
       }
 
+      // Also update the start date to be the first of the month
+      form.value.period_start = monthStart.toISOString().split('T')[0]
       form.value.period_end = endDate.toISOString().split('T')[0]
     }
 

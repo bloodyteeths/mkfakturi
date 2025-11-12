@@ -1775,6 +1775,8 @@
     "no_vat_number": "No VAT number entered",
     "vat_number_required": "VAT Number Required",
     "vat_number_warning_message": "Please enter your company's VAT number in Company Settings before generating VAT returns.",
+    "monthly_period_hint": "Monthly periods must be a full calendar month (28-31 days)",
+    "quarterly_period_hint": "Quarterly periods must be 3 full calendar months (89-92 days)",
     "tax_period": "Tax Period",
     "period_type": "Period Type",
     "monthly": "Monthly",
