@@ -306,7 +306,7 @@ let isLoadingInvoices = ref(false)
 let invoiceList = ref([])
 const selectedInvoice = ref(null)
 
-const paymentValidationScope = 'newEstimate'
+const paymentValidationScope = 'newPayment'
 
 const PaymentFields = reactive([
   'customer',
@@ -423,7 +423,8 @@ async function onSelectInvoice(id) {
   if (id) {
     selectedInvoice.value = invoiceList.value.find((inv) => inv.id === id)
 
-    amount.value = selectedInvoice.value.due_amount / 100
+    // Set the amount directly - the computed setter handles precision conversion
+    paymentStore.currentPayment.amount = selectedInvoice.value.due_amount
     paymentStore.currentPayment.maxPayableAmount =
       selectedInvoice.value.due_amount
   }

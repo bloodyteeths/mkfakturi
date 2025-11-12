@@ -1,0 +1,7 @@
+name,email,phone,address,vat_number,website,currency
+КИРИЛИЦА ООД Скопје,кирилица@пример.мк,+38970111222,"ул. Џон Кенеди 33, Скопје",MK4080012562126,https://кирилица.мк,MKD
+Čučuk Import-Export ДООЕЛ,cucuk@example.mk,+38971222333,"ул. Широк Сокак 12, Битола",MK4080012562127,https://cucuk.mk,MKD
+Živković & Šarić DOO,zivkovic@example.mk,+38972333444,"бул. Гоце Делчев 88, Прилеп",MK4080012562128,https://zivkovic.mk,MKD
+Ђорђевић Трговија ООД,djordjevic@example.mk,+38970444555,"ул. Маршал Тито 5, Велес",MK4080012562129,https://djordjevic.mk,MKD
+Љубљана-Скопје Експрес ДООЕЛ,ljubjana@example.mk,+38971555666,"бул. Партизанска 99, Скопје",MK4080012562130,https://ljubjana-express.mk,MKD
+Њујорк-Македонија Трансфер ООД,njujork@example.mk,+38972666777,"ул. Илинденска 7, Охрид",MK4080012562131,https://ny-mk-transfer.mk,USD
