@@ -451,7 +451,7 @@ class EInvoiceController extends Controller
                 DB::commit();
 
                 // Dispatch job to submit to tax authority
-                dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
+                dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id))->onQueue('einvoice');
 
                 // Reload e-invoice with relationships
                 $eInvoice = $eInvoice->fresh([

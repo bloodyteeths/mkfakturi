@@ -80,8 +80,6 @@ class SubmitEInvoiceJob implements ShouldQueue
      *
      * @var string
      */
-    public $queue = 'einvoice';
-
     /**
      * E-invoice ID to submit
      *
