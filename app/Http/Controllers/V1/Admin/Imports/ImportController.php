@@ -106,9 +106,36 @@ class ImportController extends Controller
         $importJob = ImportJob::where('company_id', $request->header('company'))
             ->findOrFail($id);
 
+        // Parse CSV and detect fields if not already done
+        $data = $importJob->toArray();
+
+        if (!isset($data['detected_fields']) && $importJob->file_path) {
+            try {
+                $filePath = storage_path('app/' . $importJob->file_path);
+
+                if (file_exists($filePath)) {
+                    $file = fopen($filePath, 'r');
+                    $headers = fgetcsv($file);
+                    fclose($file);
+
+                    $data['detected_fields'] = $headers ?: [];
+                    $data['mapping_suggestions'] = [];
+                    $data['auto_mapping_confidence'] = 0;
+                }
+            } catch (\Exception $e) {
+                \Log::error('[ImportController] Field detection failed', [
+                    'import_id' => $id,
+                    'error' => $e->getMessage(),
+                ]);
+                $data['detected_fields'] = [];
+                $data['mapping_suggestions'] = [];
+                $data['auto_mapping_confidence'] = 0;
+            }
+        }
+
         return response()->json([
             'success' => true,
-            'data' => $importJob,
+            'data' => $data,
         ]);
     }
 
