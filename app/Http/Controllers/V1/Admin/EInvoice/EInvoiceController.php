@@ -130,6 +130,58 @@ class EInvoiceController extends Controller
     }
 
     /**
+     * Display e-invoice by invoice ID with submissions.
+     *
+     * @param  int  $invoiceId
+     * @return JsonResponse
+     */
+    public function showByInvoice(int $invoiceId): JsonResponse
+    {
+        Log::info('[EInvoiceController::showByInvoice] Request received', [
+            'invoice_id' => $invoiceId,
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()->email,
+            'company_id' => auth()->user()->company_id ?? 'N/A',
+            'is_owner' => auth()->user()->isOwner(),
+        ]);
+
+        try {
+            $this->authorize('viewAny', EInvoice::class);
+            Log::info('[EInvoiceController::showByInvoice] Authorization PASSED');
+        } catch (\Exception $e) {
+            Log::error('[EInvoiceController::showByInvoice] Authorization FAILED', [
+                'error' => $e->getMessage(),
+                'user_abilities' => auth()->user()->getAbilities()->pluck('name')->toArray(),
+            ]);
+            throw $e;
+        }
+
+        $eInvoice = EInvoice::whereCompany()
+            ->whereInvoice($invoiceId)
+            ->with([
+                'invoice.customer',
+                'invoice.currency',
+                'invoice.items.taxes',
+                'certificate',
+                'submissions.submittedBy',
+            ])
+            ->first();
+
+        if (!$eInvoice) {
+            return response()->json([
+                'data' => null,
+                'submissions' => [],
+            ]);
+        }
+
+        return response()->json([
+            'data' => $eInvoice,
+            'submissions' => $eInvoice->submissions->toArray(),
+        ]);
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
      * Generate UBL XML for an invoice (preview mode, doesn't save).
      *
      * @param  int  $invoiceId

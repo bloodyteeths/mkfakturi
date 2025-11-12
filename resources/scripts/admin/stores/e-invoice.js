@@ -146,7 +146,7 @@ export const useEInvoiceStore = (useWindow = false) => {
       fetchEInvoiceStatus(invoiceId) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/e-invoices/${invoiceId}`)
+            .get(`/api/v1/e-invoices/by-invoice/${invoiceId}`)
             .then((response) => {
               this.currentEInvoice = response.data.data
               this.submissions = response.data.submissions || []

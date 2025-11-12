@@ -500,6 +500,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/', [EInvoiceController::class, 'index']);
                 Route::get('/portal-status', [EInvoiceController::class, 'checkPortalStatus']);
                 Route::get('/submission-queue', [EInvoiceController::class, 'getSubmissionQueue']);
+                Route::get('/by-invoice/{invoiceId}', [EInvoiceController::class, 'showByInvoice']);
                 Route::get('/{id}', [EInvoiceController::class, 'show']);
                 Route::post('/generate/{invoiceId}', [EInvoiceController::class, 'generate']);
                 Route::post('/{id}/sign', [EInvoiceController::class, 'sign']);
@@ -508,6 +509,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/download-xml', [EInvoiceController::class, 'downloadXml']);
                 Route::post('/{submissionId}/resubmit', [EInvoiceController::class, 'resubmit']);
             });
+            // CLAUDE-CHECKPOINT
 
             // VAT Returns
             // ----------------------------------
