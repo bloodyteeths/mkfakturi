@@ -1,0 +1,6 @@
+name,email,phone,address,vat_number,website,currency
+Минимал ООД,minimal@example.mk,,,,https://minimal.mk,MKD
+Само Име ДООЕЛ,samo@example.mk,+38970123456,,,https://samo.mk,MKD
+Без Веб ООД,bezweb@example.mk,+38971234567,"ул. Македонија 10, Скопје",MK4080012562140,,MKD
+Без ДДВ ДООЕЛ,bezddv@example.mk,+38972345678,"ул. Партизанска 20, Битола",,https://bezddv.mk,MKD
+Само Задолжителни,samo-zadolzitelni@example.mk,,,,https://zadolzitelni.mk,EUR

@@ -1,0 +1,7 @@
+name,email,phone,address,vat_number,website,currency
+Празна Веб ООД,prazen@example.mk,+38970123456,"ул. Празна 1, Скопје",MK4080012562150,"",MKD
+Null Веб ООД,null@example.mk,+38971234567,"ул. Null 2, Скопје",MK4080012562151,,MKD
+Празна Адреса ООД,prazna-adresa@example.mk,+38972345678,"",MK4080012562152,https://prazna.mk,MKD
+Null Адреса ООД,null-adresa@example.mk,+38970456789,,MK4080012562153,https://null.mk,MKD
+Празен Телефон ООД,prazen-tel@example.mk,"","ул. Телефон 3, Скопје",MK4080012562154,https://tel.mk,MKD
+Null Телефон ООД,null-tel@example.mk,,"ул. Телефон 4, Скопје",MK4080012562155,https://tel-null.mk,MKD

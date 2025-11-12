@@ -1,0 +1,7 @@
+name,email,phone,address,vat_number,website,currency
+"'; DROP TABLE customers; --",sql1@example.mk,+38970123456,"ул. SQL 1, Скопје",MK4080012562230,https://sql1.mk,MKD
+"1' OR '1'='1",sql2@example.mk,+38971234567,"ул. SQL 2, Скопје",MK4080012562231,https://sql2.mk,MKD
+"admin'--",sql3@example.mk,+38972345678,"ул. SQL 3, Скопје",MK4080012562232,https://sql3.mk,MKD
+"<script>alert('XSS')</script>",xss@example.mk,+38970456789,"ул. XSS 1, Скопје",MK4080012562233,https://xss.mk,EUR
+"../../../etc/passwd",pathtraversal@example.mk,+38971567890,"ул. Path 1, Скопје",MK4080012562234,https://path.mk,MKD
+"UNION SELECT * FROM users",union@example.mk,+38972678901,"ул. Union 1, Скопје",MK4080012562235,https://union.mk,USD

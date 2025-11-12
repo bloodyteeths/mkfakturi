@@ -1,0 +1,6 @@
+name,description,price,unit,category,sku,tax_type,tax_rate
+Премиум услуга,"Премиум консултантски услуги","1 500,00",hour,Services,PREM-001,Standard,18
+Делукс пакет,"Комплетен делукс пакет услуги","МКД 25,000.00",project,Packages,DELUX-001,Standard,18
+Месечна претплата,"Месечна претплата за сервисот",€ 99.99,month,Subscriptions,МЕСЕЦ-001,Standard,18
+Годишна лиценца,"Годишна софтверска лиценца",$1200,year,Licenses,ГОД-001,Standard,18
+Стандарден пакет,Стандарден сервисен пакет,75 EUR,package,Services,СТАНД-001,Reduced,5

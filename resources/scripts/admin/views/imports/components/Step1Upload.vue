@@ -136,6 +136,63 @@
             </div>
           </div>
         </div>
+
+        <!-- CSV Templates Download Section -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div class="flex items-start">
+            <BaseIcon name="DocumentDownloadIcon" class="w-5 h-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
+            <div class="flex-1">
+              <h4 class="text-sm font-medium text-green-900 mb-1">
+                {{ $t('imports.download_csv_templates') }}
+              </h4>
+              <p class="text-sm text-green-700 mb-3">
+                {{ $t('imports.download_csv_templates_description') }}
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <button
+                  @click="downloadTemplate('customers')"
+                  class="flex items-center justify-between px-3 py-2 bg-white border border-green-300 rounded-md hover:bg-green-100 transition-colors text-sm"
+                >
+                  <span class="flex items-center text-green-900">
+                    <BaseIcon name="UsersIcon" class="w-4 h-4 mr-2" />
+                    {{ $t('imports.customer_template') }}
+                  </span>
+                  <BaseIcon name="ArrowDownTrayIcon" class="w-4 h-4 text-green-600" />
+                </button>
+                <button
+                  @click="downloadTemplate('items')"
+                  class="flex items-center justify-between px-3 py-2 bg-white border border-green-300 rounded-md hover:bg-green-100 transition-colors text-sm"
+                >
+                  <span class="flex items-center text-green-900">
+                    <BaseIcon name="CubeIcon" class="w-4 h-4 mr-2" />
+                    {{ $t('imports.items_template') }}
+                  </span>
+                  <BaseIcon name="ArrowDownTrayIcon" class="w-4 h-4 text-green-600" />
+                </button>
+                <button
+                  @click="downloadTemplate('invoices')"
+                  class="flex items-center justify-between px-3 py-2 bg-white border border-green-300 rounded-md hover:bg-green-100 transition-colors text-sm"
+                >
+                  <span class="flex items-center text-green-900">
+                    <BaseIcon name="DocumentTextIcon" class="w-4 h-4 mr-2" />
+                    {{ $t('imports.invoice_template') }}
+                  </span>
+                  <BaseIcon name="ArrowDownTrayIcon" class="w-4 h-4 text-green-600" />
+                </button>
+                <button
+                  @click="downloadTemplate('invoice_with_items')"
+                  class="flex items-center justify-between px-3 py-2 bg-white border border-green-300 rounded-md hover:bg-green-100 transition-colors text-sm"
+                >
+                  <span class="flex items-center text-green-900">
+                    <BaseIcon name="DocumentDuplicateIcon" class="w-4 h-4 mr-2" />
+                    {{ $t('imports.invoice_with_items_template') }}
+                  </span>
+                  <BaseIcon name="ArrowDownTrayIcon" class="w-4 h-4 text-green-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Uploaded File Info -->
@@ -362,4 +419,38 @@ const formatFileSize = (bytes) => {
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleString()
 }
+
+const downloadTemplate = async (type) => {
+  try {
+    const response = await window.axios.get(`/api/v1/migration/templates/${type}`, {
+      responseType: 'blob',
+    })
+
+    // Create a blob URL and trigger download
+    const blob = new Blob([response.data], { type: 'text/csv; charset=UTF-8' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+
+    // Extract filename from Content-Disposition header or use default
+    const contentDisposition = response.headers['content-disposition']
+    let filename = `${type}_import_template.csv`
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
+      if (filenameMatch) {
+        filename = filenameMatch[1]
+      }
+    }
+
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Template download failed:', error)
+    uploadError.value = t('imports.template_download_failed')
+  }
+}
+// CLAUDE-CHECKPOINT
 </script>

@@ -373,13 +373,22 @@ class ImportTempCustomer extends Model
         ];
     }
 
+    /**
+     * Find duplicate customer within the same company
+     * Updated to properly scope uniqueness checks to company_id
+     *
+     * CLAUDE-CHECKPOINT
+     */
     public function findDuplicateCustomer()
     {
-        $query = Customer::where('company_id', $this->importJob->company_id);
+        $companyId = $this->importJob->company_id;
 
         // Try email match first (most reliable)
+        // Email uniqueness is now scoped to company_id via composite unique constraint
         if ($this->email) {
-            $customer = $query->where('email', $this->email)->first();
+            $customer = Customer::where('company_id', $companyId)
+                ->where('email', $this->email)
+                ->first();
             if ($customer) {
                 return ['customer' => $customer, 'match_field' => 'email'];
             }
@@ -387,7 +396,9 @@ class ImportTempCustomer extends Model
 
         // Try tax_id match
         if ($this->tax_id) {
-            $customer = $query->where('tax_id', $this->tax_id)->first();
+            $customer = Customer::where('company_id', $companyId)
+                ->where('tax_id', $this->tax_id)
+                ->first();
             if ($customer) {
                 return ['customer' => $customer, 'match_field' => 'tax_id'];
             }
@@ -395,7 +406,9 @@ class ImportTempCustomer extends Model
 
         // Try name match
         if ($this->name) {
-            $customer = $query->where('name', $this->name)->first();
+            $customer = Customer::where('company_id', $companyId)
+                ->where('name', $this->name)
+                ->first();
             if ($customer) {
                 return ['customer' => $customer, 'match_field' => 'name'];
             }
@@ -403,4 +416,5 @@ class ImportTempCustomer extends Model
 
         return null;
     }
+    // CLAUDE-CHECKPOINT
 }

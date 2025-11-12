@@ -8,8 +8,12 @@ namespace App\Services\Migration;
  * Provides column mapping presets for different accounting software:
  * - Onivo (Macedonian software)
  * - Megasoft (Macedonian software)
+ * - Effect Plus (Macedonian software)
+ * - Eurofaktura (Serbian software)
+ * - Manager.io (International software)
+ * - Generic/Manual (Fallback for non-software CSVs)
  *
- * Maps Macedonian/Cyrillic column names to our internal field names.
+ * Maps column names from various sources to our internal field names.
  *
  * @package App\Services\Migration
  */
@@ -18,7 +22,7 @@ class ImportPresetService
     /**
      * Get preset mapping for a specific source and entity type
      *
-     * @param string $source Source system (onivo, megasoft)
+     * @param string $source Source system (onivo, megasoft, effectplus, eurofaktura, managerio, generic)
      * @param string $entityType Entity type (customers, items, invoices)
      * @return array Column mapping
      */
@@ -27,6 +31,10 @@ class ImportPresetService
         return match (strtolower($source)) {
             'onivo' => $this->getOnivoPreset($entityType),
             'megasoft' => $this->getMegasoftPreset($entityType),
+            'effectplus' => $this->getEffectPlusPreset($entityType),
+            'eurofaktura' => $this->getEurofakturaPreset($entityType),
+            'managerio' => $this->getManagerIoPreset($entityType),
+            'generic' => $this->getGenericPreset($entityType),
             default => [],
         };
     }
@@ -41,6 +49,10 @@ class ImportPresetService
         return [
             'onivo' => 'Onivo',
             'megasoft' => 'Megasoft',
+            'effectplus' => 'Effect Plus',
+            'eurofaktura' => 'Eurofaktura',
+            'managerio' => 'Manager.io',
+            'generic' => 'Generic/Manual',
         ];
     }
 
@@ -137,6 +149,208 @@ class ImportPresetService
                 'discount_val' => 'PopustIznos',
                 'notes' => 'Zabeleska',
                 'status' => 'Status',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Get Effect Plus preset mapping
+     *
+     * Effect Plus uses Latin-based Macedonian/Serbian column names
+     *
+     * @param string $entityType
+     * @return array
+     */
+    private function getEffectPlusPreset(string $entityType): array
+    {
+        return match (strtolower($entityType)) {
+            'customers' => [
+                'name' => 'klijent_pun_naziv',
+                'contact_name' => 'firma',
+                'vat_number' => 'pdv_br',
+                'tax_id' => 'mbr',
+                'email' => 'email',
+                'phone' => 'telefon',
+                'address_street_1' => 'adresa',
+                'city' => 'grad',
+                'zip' => 'postanski_kod',
+                'country' => 'drzava',
+                'website' => 'web',
+            ],
+            'items' => [
+                'name' => 'artikal',
+                'description' => 'opis',
+                'unit_name' => 'jm',
+                'price' => 'vpc',
+                'sale_price' => 'mpc',
+                'sku' => 'sifra',
+                'quantity' => 'kol',
+            ],
+            'invoices' => [
+                'invoice_number' => 'dok_br',
+                'reference_number' => 'fakt_br',
+                'invoice_date' => 'dat_izdavanja',
+                'due_date' => 'rok_placanja',
+                'customer_name' => 'klijent',
+                'sub_total' => 'osnovica',
+                'tax' => 'porez',
+                'discount' => 'rabat',
+                'discount_val' => 'rabat_iznos',
+                'total' => 'ukupno',
+                'paid_status' => 'placeno',
+                'notes' => 'napomena',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Get Eurofaktura preset mapping
+     *
+     * Eurofaktura uses English-style column names
+     *
+     * @param string $entityType
+     * @return array
+     */
+    private function getEurofakturaPreset(string $entityType): array
+    {
+        return match (strtolower($entityType)) {
+            'customers' => [
+                'name' => 'company_name',
+                'contact_name' => 'legal_name',
+                'vat_number' => 'tin',
+                'tax_id' => 'business_id',
+                'email' => 'email',
+                'phone' => 'phone',
+                'address_street_1' => 'address',
+                'address_street_2' => 'address_line_2',
+                'city' => 'city',
+                'zip' => 'postal_code',
+                'country' => 'country',
+                'website' => 'website',
+            ],
+            'items' => [
+                'name' => 'line_item',
+                'description' => 'description',
+                'sku' => 'product_code',
+                'unit_name' => 'unit',
+                'price' => 'rate',
+                'quantity' => 'qty',
+            ],
+            'invoices' => [
+                'invoice_number' => 'invoice_ref',
+                'invoice_date' => 'issued_on',
+                'due_date' => 'due_on',
+                'invoice_type' => 'invoice_type',
+                'customer_name' => 'client',
+                'sub_total' => 'net_amount',
+                'tax' => 'vat',
+                'tax_percent' => 'tax_rate',
+                'total' => 'gross_amount',
+                'discount' => 'discount_percent',
+                'discount_val' => 'discount_amount',
+                'notes' => 'notes',
+                'paid_status' => 'payment_status',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Get Manager.io preset mapping
+     *
+     * Manager.io uses English column names with underscores
+     *
+     * @param string $entityType
+     * @return array
+     */
+    private function getManagerIoPreset(string $entityType): array
+    {
+        return match (strtolower($entityType)) {
+            'customers' => [
+                'name' => 'customer',
+                'contact_name' => 'business_name',
+                'vat_number' => 'tax_number',
+                'tax_id' => 'code',
+                'email' => 'email',
+                'phone' => 'phone',
+                'address_street_1' => 'billing_address',
+                'city' => 'city',
+                'zip' => 'postal_code',
+                'state' => 'state',
+                'country' => 'country',
+            ],
+            'items' => [
+                'name' => 'item',
+                'description' => 'inventory_item',
+                'sku' => 'code',
+                'unit_name' => 'unit',
+                'price' => 'unit_price',
+                'quantity' => 'qty',
+            ],
+            'invoices' => [
+                'invoice_number' => 'reference',
+                'invoice_date' => 'issue_date',
+                'due_date' => 'due_date',
+                'customer_name' => 'customer',
+                'sub_total' => 'subtotal',
+                'tax' => 'tax',
+                'total' => 'total',
+                'paid_status' => 'amount_paid',
+                'balance_due' => 'balance',
+                'notes' => 'notes',
+                'status' => 'status',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Get Generic/Manual preset mapping
+     *
+     * Generic preset with common English field names for manually created CSVs
+     *
+     * @param string $entityType
+     * @return array
+     */
+    private function getGenericPreset(string $entityType): array
+    {
+        return match (strtolower($entityType)) {
+            'customers' => [
+                'name' => 'name',
+                'company_name' => 'company',
+                'contact_name' => 'contact',
+                'email' => 'email',
+                'phone' => 'phone',
+                'vat_number' => 'vat',
+                'tax_id' => 'tax_id',
+                'address_street_1' => 'address',
+                'city' => 'city',
+                'zip' => 'zip',
+                'state' => 'state',
+                'country' => 'country',
+                'website' => 'website',
+            ],
+            'items' => [
+                'name' => 'name',
+                'description' => 'description',
+                'sku' => 'sku',
+                'price' => 'price',
+                'unit_name' => 'unit',
+                'quantity' => 'quantity',
+            ],
+            'invoices' => [
+                'invoice_number' => 'number',
+                'invoice_date' => 'date',
+                'due_date' => 'due_date',
+                'customer_name' => 'customer',
+                'sub_total' => 'subtotal',
+                'tax' => 'tax',
+                'total' => 'total',
+                'discount' => 'discount',
+                'notes' => 'notes',
+                'status' => 'status',
             ],
             default => [],
         };

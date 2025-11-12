@@ -646,6 +646,33 @@ class MigrationController extends Controller
     }
 
     /**
+     * Get all available preset sources
+     *
+     * @param ImportPresetService $presetService
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function availablePresets(ImportPresetService $presetService)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        try {
+            $sources = $presetService->getAvailableSources();
+            $entityTypes = $presetService->getAvailableEntityTypes();
+
+            return response()->json([
+                'sources' => $sources,
+                'entity_types' => $entityTypes,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to retrieve available presets', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to get available presets'], 500);
+        }
+    }
+
+    /**
      * Get preset mapping for source system
      *
      * @param string $source
@@ -802,6 +829,134 @@ class MigrationController extends Controller
             return response()->json(['message' => 'Download failed'], 500);
         }
     }
+
+    /**
+     * Download CSV import template
+     *
+     * @param Request $request
+     * @param string $type
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+     */
+    public function downloadTemplate(Request $request, string $type)
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('create', ImportJob::class);
+
+        $validTypes = [
+            'customers' => 'customer_import_template.csv',
+            'items' => 'items_import_template.csv',
+            'invoices' => 'invoice_import_template.csv',
+            'invoice_with_items' => 'invoice_with_items_template.csv',
+        ];
+
+        if (!isset($validTypes[$type])) {
+            return response()->json([
+                'message' => 'Invalid template type',
+                'valid_types' => array_keys($validTypes)
+            ], 422);
+        }
+
+        try {
+            $filename = $validTypes[$type];
+            $templatePath = storage_path('app/templates/' . $filename);
+
+            if (!file_exists($templatePath)) {
+                Log::error('Template file not found', [
+                    'type' => $type,
+                    'path' => $templatePath
+                ]);
+                return response()->json(['message' => 'Template file not found'], 404);
+            }
+
+            Log::info('Template downloaded', [
+                'type' => $type,
+                'filename' => $filename,
+                'user_id' => auth()->id(),
+                'company_id' => request()->header('company')
+            ]);
+
+            return response()->download($templatePath, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Template download failed', [
+                'type' => $type,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['message' => 'Download failed: ' . $e->getMessage()], 500);
+        }
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
+     * Get list of available templates
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function templates()
+    {
+        if (!Feature::active('migration-wizard')) {
+            return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
+        }
+
+        $this->authorize('create', ImportJob::class);
+
+        return response()->json([
+            'templates' => [
+                [
+                    'type' => 'customers',
+                    'name' => 'Customer Import Template',
+                    'description' => 'Template for importing customer/client information',
+                    'filename' => 'customer_import_template.csv',
+                    'download_url' => route('migration.download-template', ['type' => 'customers']),
+                    'required_fields' => ['name', 'email'],
+                    'optional_fields' => ['phone', 'contact_name', 'company_name', 'website', 'vat_number', 'address', 'city', 'zip', 'country'],
+                ],
+                [
+                    'type' => 'items',
+                    'name' => 'Items/Products Import Template',
+                    'description' => 'Template for importing products, services, or items',
+                    'filename' => 'items_import_template.csv',
+                    'download_url' => route('migration.download-template', ['type' => 'items']),
+                    'required_fields' => ['name', 'price'],
+                    'optional_fields' => ['description', 'unit', 'sku', 'quantity'],
+                ],
+                [
+                    'type' => 'invoices',
+                    'name' => 'Invoice Import Template',
+                    'description' => 'Template for importing invoice headers (without line items)',
+                    'filename' => 'invoice_import_template.csv',
+                    'download_url' => route('migration.download-template', ['type' => 'invoices']),
+                    'required_fields' => ['invoice_number', 'invoice_date', 'due_date', 'customer_name or customer_email', 'subtotal', 'tax', 'total', 'status'],
+                    'optional_fields' => ['discount', 'discount_type', 'notes'],
+                ],
+                [
+                    'type' => 'invoice_with_items',
+                    'name' => 'Invoice with Items Template',
+                    'description' => 'Template for importing complete invoices with line items',
+                    'filename' => 'invoice_with_items_template.csv',
+                    'download_url' => route('migration.download-template', ['type' => 'invoice_with_items']),
+                    'required_fields' => ['row_type', 'invoice details', 'item details'],
+                    'optional_fields' => ['notes', 'discount'],
+                ],
+            ],
+            'documentation_url' => storage_path('app/templates/README.md'),
+            'guidelines' => [
+                'Always save CSV files as UTF-8 encoding',
+                'Use decimal point (.) for numbers, not comma',
+                'Date formats: YYYY-MM-DD, DD/MM/YYYY, DD.MM.YYYY',
+                'Enclose fields with commas in double quotes',
+                'Lines starting with # are treated as comments',
+            ],
+        ]);
+    }
+    // CLAUDE-CHECKPOINT
 }
 
 // CLAUDE-CHECKPOINT

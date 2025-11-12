@@ -1,0 +1,6 @@
+payment_date,amount,payment_method,invoice_number,customer_name,reference,currency,notes
+2025-01-15,-11800.00,Bank Transfer,INV-2025-001,Технологија ДООЕЛ,BT-NEG-001,MKD,Негативен износ - можна рефундација
+2025-01-20,0.00,Cash,INV-2025-002,Балкан Консалтинг ООД,CASH-ZERO-001,MKD,Нула износ
+2025-01-25,999999999.99,Credit Card,INV-2025-003,Евро Импорт ДООЕЛ,CC-HUGE-001,EUR,Огромен износ
+2025-02-01,0.01,PayPal,INV-2025-004,Технологија ДООЕЛ,PP-TINY-001,MKD,Минимален износ
+2025-02-05,invalid,Check,INV-2025-005,Балкан Консалтинг ООД,CHK-INVALID-001,MKD,Невалиден износ - текст

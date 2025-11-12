@@ -1,0 +1,4 @@
+name,email,phone,address,vat_number,website,currency
+Премногу Колони ООД,too-many@example.mk,+38970123456,"ул. Премногу 1, Скопје",MK4080012562200,https://toomany.mk,MKD,EXTRA,COLUMNS,HERE
+Премалку Колони ООД,too-few@example.mk,+38971234567
+Точни Колони ООД,correct@example.mk,+38972345678,"ул. Точни 3, Скопје",MK4080012562202,https://correct.mk,MKD

@@ -620,12 +620,16 @@ Route::prefix('/v1')->group(function () {
             Route::prefix('migration')->group(function () {
                 Route::post('/upload', [MigrationController::class, 'upload']);
                 Route::get('/{job}/preview', [MigrationController::class, 'preview']);
+                Route::get('/presets', [MigrationController::class, 'availablePresets']);
                 Route::get('/presets/{source}', [MigrationController::class, 'presets']);
                 Route::post('/{job}/dry-run', [MigrationController::class, 'dryRun']);
                 Route::post('/{job}/import', [MigrationController::class, 'import']);
                 Route::get('/{job}/status', [MigrationController::class, 'status']);
                 Route::get('/{job}/errors', [MigrationController::class, 'errors']);
+                Route::get('/templates', [MigrationController::class, 'templates']);
+                Route::get('/templates/{type}', [MigrationController::class, 'downloadTemplate'])->name('migration.download-template');
             });
+            // CLAUDE-CHECKPOINT
 
             // PSD2 Banking Integration (OAuth + Transaction Management)
             // Feature flag: FEATURE_PSD2_BANKING

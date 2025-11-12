@@ -1,0 +1,8 @@
+name,email,phone,address,vat_number,website,currency
+Невалиден ДДВ 1 ООД,invalid1@example.mk,+38970123456,"ул. ДДВ 1, Скопје",12345,https://invalid1.mk,MKD
+Невалиден ДДВ 2 ООД,invalid2@example.mk,+38971234567,"ул. ДДВ 2, Скопје",MK123,https://invalid2.mk,MKD
+Невалиден ДДВ 3 ООД,invalid3@example.mk,+38972345678,"ул. ДДВ 3, Скопје",MKXXXXXXXXXXXXXXX,https://invalid3.mk,MKD
+Невалиден ДДВ 4 ООД,invalid4@example.mk,+38970456789,"ул. ДДВ 4, Скопје",MK40800125621234567890,https://invalid4.mk,EUR
+Специјални Карактери ООД,special@example.mk,+38971567890,"ул. ДДВ 5, Скопје",MK@#$%^&*()123,https://special.mk,MKD
+Текст ДДВ ООД,text@example.mk,+38972678901,"ул. ДДВ 6, Скопје",ABCDEFGHIJKLM,https://text.mk,USD
+Празнина ДДВ ООД,space@example.mk,+38970789012,"ул. ДДВ 7, Скопје",MK 4080012562123,https://space.mk,MKD

@@ -1,0 +1,6 @@
+name,email,phone,address,vat_number,website,currency
+,missing-name@example.mk,+38970123456,"ул. Без Име 1, Скопје",MK4080012562170,https://noname.mk,MKD
+Без Email ООД,,+38971234567,"ул. Без Email 2, Скопје",MK4080012562171,https://noemail.mk,MKD
+Без Валута ООД,no-currency@example.mk,+38972345678,"ул. Без Валута 3, Скопје",MK4080012562172,https://nocurrency.mk,
+,,,,,,
+Празни Полиња ООД,empty@example.mk,+38970456789,"ул. Празни 4, Скопје",MK4080012562173,https://empty.mk,

@@ -1,0 +1,3 @@
+﻿name,email,phone,address,vat_number,website,currency
+BOM Тест ООД,bom@example.mk,+38970123456,"ул. BOM 1, Скопје",MK4080012562260,https://bom.mk,MKD
+Редовен Запис ООД,normal@example.mk,+38971234567,"ул. Редовна 2, Скопје",MK4080012562261,https://normal.mk,MKD

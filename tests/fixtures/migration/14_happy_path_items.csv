@@ -1,0 +1,8 @@
+name,description,price,unit,category,sku,tax_type,tax_rate
+Консултантски услуги,Професионални консултантски услуги за бизнис развој,150.00,hour,Services,CONS-001,Standard,18
+Програмски услуги,Развој на софтверски решенија и апликации,80.00,hour,Development,PROG-001,Standard,18
+Веб дизајн,Дизајн на веб страници и апликации,2000.00,project,Design,WEB-001,Standard,18
+Мобилна апликација,Развој на мобилна апликација за Android и iOS,5000.00,project,Development,MOB-001,Standard,18
+Server хостинг,Месечен хостинг сервис со техничка подршка,50.00,month,Hosting,HOST-001,Reduced,5
+SSL сертификат,Годишен SSL сертификат за безбедност,100.00,year,Security,SSL-001,Standard,18
+Domain име,Годишна регистрација на .mk домен,15.00,year,Domain,DOM-001,Zero,0

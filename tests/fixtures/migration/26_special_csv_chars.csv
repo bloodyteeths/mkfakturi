@@ -1,0 +1,7 @@
+name,email,phone,address,vat_number,website,currency
+"Компанија со ""наводници"" ООД",quotes@example.mk,+38970123456,"ул. Наводници 1, Скопје",MK4080012562210,https://quotes.mk,MKD
+"Компанија со ,запирки, ООД",comma@example.mk,+38971234567,"ул. Запирки 2, Скопје",MK4080012562211,https://comma.mk,MKD
+"Компанија со
+нов ред ООД",newline@example.mk,+38972345678,"ул. Нов Ред 3, Скопје",MK4080012562212,https://newline.mk,MKD
+Компанија со ; точка-запирка ООД,semicolon@example.mk,+38970456789,"ул. Точка-Запирка 4; Скопје",MK4080012562213,https://semicolon.mk,EUR
+"Компанија со	таб ООД",tab@example.mk,+38971567890,"ул. Таб 5, Скопје",MK4080012562214,https://tab.mk,MKD

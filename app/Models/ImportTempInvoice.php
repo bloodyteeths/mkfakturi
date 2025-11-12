@@ -387,13 +387,22 @@ class ImportTempInvoice extends Model
         return $currency ? $currency->id : null;
     }
 
+    /**
+     * Find duplicate invoice within the same company
+     * Updated to properly scope uniqueness checks to company_id
+     *
+     * CLAUDE-CHECKPOINT
+     */
     public function findDuplicateInvoice()
     {
-        $query = Invoice::where('company_id', $this->importJob->company_id);
+        $companyId = $this->importJob->company_id;
 
         // Try invoice number match first (most reliable)
+        // Invoice number uniqueness is now scoped to company_id via composite unique constraint
         if ($this->invoice_number) {
-            $invoice = $query->where('invoice_number', $this->invoice_number)->first();
+            $invoice = Invoice::where('company_id', $companyId)
+                ->where('invoice_number', $this->invoice_number)
+                ->first();
             if ($invoice) {
                 return ['invoice' => $invoice, 'match_field' => 'invoice_number'];
             }
@@ -401,7 +410,9 @@ class ImportTempInvoice extends Model
 
         // Try reference number match
         if ($this->reference_number) {
-            $invoice = $query->where('reference_number', $this->reference_number)->first();
+            $invoice = Invoice::where('company_id', $companyId)
+                ->where('reference_number', $this->reference_number)
+                ->first();
             if ($invoice) {
                 return ['invoice' => $invoice, 'match_field' => 'reference_number'];
             }
@@ -409,6 +420,7 @@ class ImportTempInvoice extends Model
 
         return null;
     }
+    // CLAUDE-CHECKPOINT
 
     public function getValidationSummary()
     {

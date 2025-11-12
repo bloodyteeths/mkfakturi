@@ -1,0 +1,7 @@
+name,email,phone,address,vat_number,website,currency
+UTF-8 Кирилица ООД,utf8@example.mk,+38970123456,"ул. Кирилица 1, Скопје",MK4080012562190,https://utf8.mk,MKD
+Č Ž Š Ć ООД,czsc@example.mk,+38971234567,"ул. Чешка 2, Битола",MK4080012562191,https://czsc.mk,MKD
+Ђ Љ Њ ДООЕЛ,djljnj@example.mk,+38972345678,"ул. Специјална 3, Охрид",MK4080012562192,https://djljnj.mk,MKD
+Емоџи Company ООД,emoji@example.mk,+38970456789,"ул. Емоџи 4, Скопје",MK4080012562193,https://emoji.mk,MKD
+Ѓ Ќ Ѕ Џ ООД,gjkjdzd@example.mk,+38971567890,"ул. Македонска 5, Струмица",MK4080012562194,https://gjkjdzd.mk,MKD
+€ ¥ £ $ ООД,currency-symbols@example.mk,+38972678901,"ул. Валути 6, Скопје",MK4080012562195,https://currency.mk,EUR

@@ -432,6 +432,8 @@ class FieldMapperService
 
     /**
      * Map input fields to standardized field names with confidence scoring
+     * Fixed: Cache availability check with fallback
+     * CLAUDE-CHECKPOINT: Safe cache handling added
      *
      * @param array $inputFields Array of field names from source (CSV headers, XML tags, etc.)
      * @param string $format Input format hint ('csv', 'excel', 'xml', 'json')
@@ -440,28 +442,62 @@ class FieldMapperService
      */
     public function mapFields(array $inputFields, string $format = 'csv', array $context = []): array
     {
+        // Fix #4: Check cache availability before using it
+        try {
+            $cacheAvailable = class_exists('\Illuminate\Support\Facades\Cache') && \Cache::getStore() !== null;
+        } catch (\Exception $e) {
+            $cacheAvailable = false;
+        } catch (\Error $e) {
+            // Catch fatal errors like class not found
+            $cacheAvailable = false;
+        }
+
+        if (!$cacheAvailable) {
+            // Direct computation without cache
+            return $this->computeFieldMappings($inputFields, $format, $context);
+        }
+
         $cacheKey = $this->cachePrefix . md5(serialize($inputFields) . $format . serialize($context));
-        
-        return \Cache::remember($cacheKey, $this->cacheMinutes, function () use ($inputFields, $format, $context) {
-            $mappedFields = [];
-            
-            foreach ($inputFields as $inputField) {
-                $mapping = $this->findBestMatch($inputField, $format, $context);
-                $mappedFields[] = [
-                    'input_field' => $inputField,
-                    'mapped_field' => $mapping['field'] ?? null,
-                    'confidence' => $mapping['confidence'] ?? 0.0,
-                    'algorithm' => $mapping['algorithm'] ?? 'unknown',
-                    'alternatives' => $mapping['alternatives'] ?? [],
-                ];
+
+        try {
+            return \Cache::remember($cacheKey, $this->cacheMinutes, function () use ($inputFields, $format, $context) {
+                return $this->computeFieldMappings($inputFields, $format, $context);
+            });
+        } catch (\Exception $e) {
+            // Fallback to direct computation if cache fails
+            if (function_exists('\\Log::warning')) {
+                \Log::warning('Field mapper cache failed, using direct computation', ['error' => $e->getMessage()]);
             }
-            
-            return $mappedFields;
-        });
+            return $this->computeFieldMappings($inputFields, $format, $context);
+        }
+    }
+
+    /**
+     * Compute field mappings (extracted for cache fallback)
+     * CLAUDE-CHECKPOINT: Extraction for safe cache handling
+     */
+    protected function computeFieldMappings(array $inputFields, string $format, array $context): array
+    {
+        $mappedFields = [];
+
+        foreach ($inputFields as $inputField) {
+            $mapping = $this->findBestMatch($inputField, $format, $context);
+            $mappedFields[] = [
+                'input_field' => $inputField,
+                'mapped_field' => $mapping['field'] ?? null,
+                'confidence' => $mapping['confidence'] ?? 0.0,
+                'algorithm' => $mapping['algorithm'] ?? 'unknown',
+                'alternatives' => $mapping['alternatives'] ?? [],
+            ];
+        }
+
+        return $mappedFields;
     }
 
     /**
      * Find the best matching field for an input field
+     * Fix #7: Added competitor context validation
+     * CLAUDE-CHECKPOINT: Validated context handling
      *
      * @param string $inputField
      * @param string $format
@@ -470,6 +506,9 @@ class FieldMapperService
      */
     protected function findBestMatch(string $inputField, string $format = 'csv', array $context = []): array
     {
+        // Validate and normalize context
+        $context = $this->validateContext($context);
+
         $inputField = $this->normalizeFieldName($inputField);
         $matches = [];
 
@@ -510,25 +549,64 @@ class FieldMapperService
     }
 
     /**
+     * Validate and normalize competitor context
+     * Fix #7: Competitor context validation
+     * CLAUDE-CHECKPOINT: Safe context handling
+     */
+    protected function validateContext(array $context): array
+    {
+        $validSoftware = ['onivo', 'megasoft', 'pantheon'];
+
+        // Normalize software name if provided
+        if (isset($context['software'])) {
+            $software = mb_strtolower(trim($context['software']), 'UTF-8');
+
+            // Validate against known competitors
+            if (!in_array($software, $validSoftware)) {
+                // Log if in application context (not unit tests)
+                if (function_exists('app') && app()->bound('log')) {
+                    try {
+                        \Illuminate\Support\Facades\Log::warning('Unknown competitor software in context', ['software' => $software]);
+                    } catch (\Exception $e) {
+                        // Silently fail if Log is not available
+                    }
+                }
+                // Don't unset, but log for analysis
+            }
+
+            $context['software'] = $software;
+        }
+
+        // Ensure context is array
+        if (!is_array($context)) {
+            return [];
+        }
+
+        return $context;
+    }
+
+    /**
      * Normalize field name for comparison
+     * Fix #6: UTF-8 regex modifiers added (/u flag)
+     * CLAUDE-CHECKPOINT: UTF-8 safe normalization
      */
     protected function normalizeFieldName(string $fieldName): string
     {
         // Remove common prefixes/suffixes and normalize
-        $normalized = strtolower(trim($fieldName));
-        
-        // Remove common delimiters and replace with underscore
-        $normalized = preg_replace('/[\s\-\.]+/', '_', $normalized);
-        
-        // Remove brackets and quotes
-        $normalized = preg_replace('/[\[\]()"\']/', '', $normalized);
-        
-        // Remove trailing numbers (often used for duplicates)
-        $normalized = preg_replace('/_?\d+$/', '', $normalized);
-        
-        // Remove common prefixes
-        $normalized = preg_replace('/^(field_|col_|column_|attr_)/', '', $normalized);
-        
+        $normalized = mb_strtolower(trim($fieldName), 'UTF-8');
+
+        // Remove common delimiters and replace with underscore (UTF-8 safe)
+        $normalized = preg_replace('/[\s\-\.]+/u', '_', $normalized);
+
+        // Remove brackets and quotes (UTF-8 safe)
+        $normalized = preg_replace('/[\[\]()"\'\x{201C}\x{201D}\x{2018}\x{2019}]/u', '', $normalized);
+
+        // Remove trailing numbers (often used for duplicates) (UTF-8 safe)
+        $normalized = preg_replace('/_?\d+$/u', '', $normalized);
+
+        // Remove common prefixes (UTF-8 safe)
+        $normalized = preg_replace('/^(field_|col_|column_|attr_)/u', '', $normalized);
+
         return $normalized;
     }
 
@@ -633,36 +711,79 @@ class FieldMapperService
 
     /**
      * Enhanced similarity calculation with competitor-aware algorithms
+     * Fixed: Handles 255+ char limit for levenshtein, Cyrillic incompatibility for metaphone
+     * CLAUDE-CHECKPOINT: Bug fixes applied for levenshtein limit, Cyrillic detection, dynamic weights
      */
     protected function calculateSimilarity(string $str1, string $str2): float
     {
-        // Combine multiple similarity algorithms for better accuracy
-        $levenshtein = 1 - (levenshtein($str1, $str2) / max(strlen($str1), strlen($str2)));
+        // Detect if strings are Cyrillic for weight adjustment
+        $isCyrillic = $this->isCyrillic($str1) || $this->isCyrillic($str2);
+
+        // Fix #1: Levenshtein has a 255-char limit, use Jaro as fallback for long strings
+        $maxLen = max(strlen($str1), strlen($str2));
+        if ($maxLen > 255 || $maxLen === 0) {
+            // Use Jaro as primary algorithm for very long strings
+            $levenshtein = 0;
+        } else {
+            $levenshtein = 1 - (levenshtein($str1, $str2) / $maxLen);
+        }
+
         $jaro = $this->jaroSimilarity($str1, $str2);
         $substring = $this->substringMatchScore($str1, $str2);
-        $metaphone = $this->metaphoneSimilarity($str1, $str2);
+
+        // Fix #2: Skip metaphone for Cyrillic text (incompatible)
+        $metaphone = $isCyrillic ? 0 : $this->metaphoneSimilarity($str1, $str2);
+
         $ngram = $this->ngramSimilarity($str1, $str2);
-        
-        // Enhanced weighted combination with more algorithms
-        return ($levenshtein * 0.25) + ($jaro * 0.25) + ($substring * 0.2) + ($metaphone * 0.15) + ($ngram * 0.15);
+
+        // Fix #3: Dynamic weights based on context
+        if ($isCyrillic) {
+            // Cyrillic: skip metaphone, boost Jaro and n-gram
+            return ($levenshtein * 0.25) + ($jaro * 0.35) + ($substring * 0.2) + ($ngram * 0.2);
+        } elseif ($maxLen > 255) {
+            // Long strings: rely on Jaro, substring, and n-gram
+            return ($jaro * 0.4) + ($substring * 0.3) + ($ngram * 0.3);
+        } elseif (strlen($str1) <= 4 || strlen($str2) <= 4) {
+            // Short fields: boost exact matching (levenshtein)
+            return ($levenshtein * 0.4) + ($jaro * 0.25) + ($substring * 0.15) + ($metaphone * 0.1) + ($ngram * 0.1);
+        } else {
+            // Standard weighted combination
+            return ($levenshtein * 0.25) + ($jaro * 0.25) + ($substring * 0.2) + ($metaphone * 0.15) + ($ngram * 0.15);
+        }
+    }
+
+    /**
+     * Check if string contains Cyrillic characters
+     * CLAUDE-CHECKPOINT: Cyrillic detection helper added
+     */
+    protected function isCyrillic(string $str): bool
+    {
+        return preg_match('/[\p{Cyrillic}]/u', $str) === 1;
     }
 
     /**
      * Metaphone-based similarity for phonetic matching
+     * Fixed: Added Cyrillic check to prevent incompatibility
+     * CLAUDE-CHECKPOINT: Metaphone now skips Cyrillic gracefully
      */
     protected function metaphoneSimilarity(string $str1, string $str2): float
     {
+        // Skip metaphone for Cyrillic strings
+        if ($this->isCyrillic($str1) || $this->isCyrillic($str2)) {
+            return 0.0;
+        }
+
         $metaphone1 = metaphone($str1);
         $metaphone2 = metaphone($str2);
-        
+
         if ($metaphone1 === $metaphone2) {
             return 1.0;
         }
-        
+
         if (empty($metaphone1) || empty($metaphone2)) {
             return 0.0;
         }
-        
+
         return 1 - (levenshtein($metaphone1, $metaphone2) / max(strlen($metaphone1), strlen($metaphone2)));
     }
 
@@ -758,90 +879,150 @@ class FieldMapperService
     }
 
     /**
-     * Substring matching score
+     * Substring matching score with position weighting
+     * Fix #5: Enhanced with start/end position boosting
+     * CLAUDE-CHECKPOINT: Position-aware substring matching
      */
     protected function substringMatchScore(string $str1, string $str2): float
     {
         $longerString = strlen($str1) > strlen($str2) ? $str1 : $str2;
         $shorterString = strlen($str1) <= strlen($str2) ? $str1 : $str2;
-        
+
         if (strlen($shorterString) === 0) return 0.0;
-        
-        return strpos($longerString, $shorterString) !== false ? 
-            strlen($shorterString) / strlen($longerString) : 0.0;
+
+        $position = strpos($longerString, $shorterString);
+
+        if ($position === false) {
+            // No exact substring match, check for partial overlap
+            return $this->partialSubstringScore($str1, $str2);
+        }
+
+        // Base score from substring length ratio
+        $baseScore = strlen($shorterString) / strlen($longerString);
+
+        // Position boost: higher score for matches at start or end
+        $positionBoost = 0.0;
+        $longerLen = strlen($longerString);
+
+        if ($position === 0) {
+            // Perfect start match: boost by 20%
+            $positionBoost = 0.2;
+        } elseif ($position + strlen($shorterString) === $longerLen) {
+            // Perfect end match: boost by 15%
+            $positionBoost = 0.15;
+        } elseif ($position <= 2) {
+            // Near start: boost by 10%
+            $positionBoost = 0.1;
+        } elseif ($position + strlen($shorterString) >= $longerLen - 2) {
+            // Near end: boost by 8%
+            $positionBoost = 0.08;
+        }
+
+        return min(1.0, $baseScore + $positionBoost);
+    }
+
+    /**
+     * Calculate partial substring score for non-exact matches
+     * CLAUDE-CHECKPOINT: Partial matching for better fuzzy detection
+     */
+    protected function partialSubstringScore(string $str1, string $str2): float
+    {
+        $longerString = strlen($str1) > strlen($str2) ? $str1 : $str2;
+        $shorterString = strlen($str1) <= strlen($str2) ? $str1 : $str2;
+
+        if (strlen($shorterString) < 3) return 0.0;
+
+        $maxScore = 0.0;
+        $shortLen = strlen($shorterString);
+
+        // Try progressively shorter substrings
+        for ($len = $shortLen; $len >= 3; $len--) {
+            for ($i = 0; $i <= $shortLen - $len; $i++) {
+                $substring = substr($shorterString, $i, $len);
+                if (strpos($longerString, $substring) !== false) {
+                    $score = ($len / $shortLen) * 0.7; // Partial match penalty
+                    $maxScore = max($maxScore, $score);
+                }
+            }
+            if ($maxScore > 0) break; // Found a match, no need to check shorter
+        }
+
+        return $maxScore;
     }
 
     /**
      * Enhanced heuristic scoring with competitor-specific patterns and context awareness
+     * Fix #6: UTF-8 regex modifiers added
+     * CLAUDE-CHECKPOINT: UTF-8 safe pattern matching
      */
     protected function heuristicScore(string $inputField, string $format, array $context): array
     {
         // Get software context for specialized patterns
         $software = $context['software'] ?? null;
-        
-        // Base patterns for all software
+
+        // Base patterns for all software (UTF-8 safe with /u flag)
         $patterns = [
             // Common patterns in Macedonia accounting software
-            '/^(broj|br|no).*faktura/i' => ['field' => 'invoice_number', 'confidence' => 0.9],
-            '/^(datum|data).*faktura/i' => ['field' => 'invoice_date', 'confidence' => 0.9],
-            '/^(iznos|suma|amount)/i' => ['field' => 'amount', 'confidence' => 0.8],
-            '/^(kolicina|qty|quantity)/i' => ['field' => 'quantity', 'confidence' => 0.8],
-            '/^(cena|price)/i' => ['field' => 'unit_price', 'confidence' => 0.8],
-            '/^(pdv|ddv|vat).*stapka/i' => ['field' => 'vat_rate', 'confidence' => 0.9],
-            '/^(pdv|ddv|vat).*iznos/i' => ['field' => 'vat_amount', 'confidence' => 0.9],
-            '/^(klient|customer|kupuvach)/i' => ['field' => 'customer_name', 'confidence' => 0.8],
-            '/^embs$/i' => ['field' => 'tax_id', 'confidence' => 1.0],
-            '/^edb$/i' => ['field' => 'tax_id', 'confidence' => 1.0],
+            '/^(broj|br|no).*faktura/iu' => ['field' => 'invoice_number', 'confidence' => 0.9],
+            '/^(datum|data).*faktura/iu' => ['field' => 'invoice_date', 'confidence' => 0.9],
+            '/^(iznos|suma|amount)/iu' => ['field' => 'amount', 'confidence' => 0.8],
+            '/^(kolicina|qty|quantity)/iu' => ['field' => 'quantity', 'confidence' => 0.8],
+            '/^(cena|price)/iu' => ['field' => 'unit_price', 'confidence' => 0.8],
+            '/^(pdv|ddv|vat).*stapka/iu' => ['field' => 'vat_rate', 'confidence' => 0.9],
+            '/^(pdv|ddv|vat).*iznos/iu' => ['field' => 'vat_amount', 'confidence' => 0.9],
+            '/^(klient|customer|kupuvach)/iu' => ['field' => 'customer_name', 'confidence' => 0.8],
+            '/^embs$/iu' => ['field' => 'tax_id', 'confidence' => 1.0],
+            '/^edb$/iu' => ['field' => 'tax_id', 'confidence' => 1.0],
         ];
 
-        // Add competitor-specific patterns based on context
+        // Add competitor-specific patterns based on context (UTF-8 safe)
         if ($software === 'onivo') {
             $patterns = array_merge($patterns, [
-                '/^customer_name$/i' => ['field' => 'customer_name', 'confidence' => 0.95],
-                '/^customer_id$/i' => ['field' => 'customer_id', 'confidence' => 0.95],
-                '/^customer_tax_id$/i' => ['field' => 'tax_id', 'confidence' => 0.95],
-                '/^invoice_id$/i' => ['field' => 'invoice_number', 'confidence' => 0.95],
-                '/^invoice_date$/i' => ['field' => 'invoice_date', 'confidence' => 0.95],
-                '/^invoice_due_date$/i' => ['field' => 'due_date', 'confidence' => 0.95],
-                '/^item_name$/i' => ['field' => 'item_name', 'confidence' => 0.95],
-                '/^item_quantity$/i' => ['field' => 'quantity', 'confidence' => 0.95],
-                '/^item_unit_price$/i' => ['field' => 'unit_price', 'confidence' => 0.95],
-                '/^payment_date$/i' => ['field' => 'payment_date', 'confidence' => 0.95],
-                '/^payment_amount$/i' => ['field' => 'payment_amount', 'confidence' => 0.95],
+                '/^customer_name$/iu' => ['field' => 'customer_name', 'confidence' => 0.95],
+                '/^customer_id$/iu' => ['field' => 'customer_id', 'confidence' => 0.95],
+                '/^customer_tax_id$/iu' => ['field' => 'tax_id', 'confidence' => 0.95],
+                '/^invoice_id$/iu' => ['field' => 'invoice_number', 'confidence' => 0.95],
+                '/^invoice_date$/iu' => ['field' => 'invoice_date', 'confidence' => 0.95],
+                '/^invoice_due_date$/iu' => ['field' => 'due_date', 'confidence' => 0.95],
+                '/^item_name$/iu' => ['field' => 'item_name', 'confidence' => 0.95],
+                '/^item_quantity$/iu' => ['field' => 'quantity', 'confidence' => 0.95],
+                '/^item_unit_price$/iu' => ['field' => 'unit_price', 'confidence' => 0.95],
+                '/^payment_date$/iu' => ['field' => 'payment_date', 'confidence' => 0.95],
+                '/^payment_amount$/iu' => ['field' => 'payment_amount', 'confidence' => 0.95],
             ]);
         } elseif ($software === 'megasoft') {
             $patterns = array_merge($patterns, [
-                '/^naziv_kupca$/i' => ['field' => 'customer_name', 'confidence' => 0.95],
-                '/^pib_?kupca?$/i' => ['field' => 'tax_id', 'confidence' => 0.95],
-                '/^broj_ra[cč]una$/i' => ['field' => 'invoice_number', 'confidence' => 0.95],
-                '/^datum_ra[cč]una$/i' => ['field' => 'invoice_date', 'confidence' => 0.95],
-                '/^naziv_robe$/i' => ['field' => 'item_name', 'confidence' => 0.95],
-                '/^[sš]ifra_robe$/i' => ['field' => 'item_code', 'confidence' => 0.95],
-                '/^koli[cč]ina_robe$/i' => ['field' => 'quantity', 'confidence' => 0.95],
-                '/^cena_robe$/i' => ['field' => 'unit_price', 'confidence' => 0.95],
-                '/^stopa_pdv$/i' => ['field' => 'vat_rate', 'confidence' => 0.95],
-                '/^iznos_pdv$/i' => ['field' => 'vat_amount', 'confidence' => 0.95],
-                '/^na[cč]in_pla[cć]anja$/i' => ['field' => 'payment_method', 'confidence' => 0.95],
+                '/^naziv_kupca$/iu' => ['field' => 'customer_name', 'confidence' => 0.95],
+                '/^pib_?kupca?$/iu' => ['field' => 'tax_id', 'confidence' => 0.95],
+                '/^broj_ra[cč]una$/iu' => ['field' => 'invoice_number', 'confidence' => 0.95],
+                '/^datum_ra[cč]una$/iu' => ['field' => 'invoice_date', 'confidence' => 0.95],
+                '/^naziv_robe$/iu' => ['field' => 'item_name', 'confidence' => 0.95],
+                '/^[sš]ifra_robe$/iu' => ['field' => 'item_code', 'confidence' => 0.95],
+                '/^koli[cč]ina_robe$/iu' => ['field' => 'quantity', 'confidence' => 0.95],
+                '/^cena_robe$/iu' => ['field' => 'unit_price', 'confidence' => 0.95],
+                '/^stopa_pdv$/iu' => ['field' => 'vat_rate', 'confidence' => 0.95],
+                '/^iznos_pdv$/iu' => ['field' => 'vat_amount', 'confidence' => 0.95],
+                '/^na[cč]in_pla[cć]anja$/iu' => ['field' => 'payment_method', 'confidence' => 0.95],
             ]);
         } elseif ($software === 'pantheon') {
             $patterns = array_merge($patterns, [
-                '/^partner_naziv$/i' => ['field' => 'customer_name', 'confidence' => 0.95],
-                '/^partner_[sš]ifra$/i' => ['field' => 'customer_id', 'confidence' => 0.95],
-                '/^partner_pib$/i' => ['field' => 'tax_id', 'confidence' => 0.95],
-                '/^dokument_broj$/i' => ['field' => 'invoice_number', 'confidence' => 0.95],
-                '/^dokument_datum$/i' => ['field' => 'invoice_date', 'confidence' => 0.95],
-                '/^stavka_naziv$/i' => ['field' => 'item_name', 'confidence' => 0.95],
-                '/^stavka_[sš]ifra$/i' => ['field' => 'item_code', 'confidence' => 0.95],
-                '/^stavka_koli[cč]ina$/i' => ['field' => 'quantity', 'confidence' => 0.95],
-                '/^stavka_cena$/i' => ['field' => 'unit_price', 'confidence' => 0.95],
-                '/^stavka_pdv_stopa$/i' => ['field' => 'vat_rate', 'confidence' => 0.95],
-                '/^uplata_datum$/i' => ['field' => 'payment_date', 'confidence' => 0.95],
-                '/^uplata_iznos$/i' => ['field' => 'payment_amount', 'confidence' => 0.95],
+                '/^partner_naziv$/iu' => ['field' => 'customer_name', 'confidence' => 0.95],
+                '/^partner_[sš]ifra$/iu' => ['field' => 'customer_id', 'confidence' => 0.95],
+                '/^partner_pib$/iu' => ['field' => 'tax_id', 'confidence' => 0.95],
+                '/^dokument_broj$/iu' => ['field' => 'invoice_number', 'confidence' => 0.95],
+                '/^dokument_datum$/iu' => ['field' => 'invoice_date', 'confidence' => 0.95],
+                '/^stavka_naziv$/iu' => ['field' => 'item_name', 'confidence' => 0.95],
+                '/^stavka_[sš]ifra$/iu' => ['field' => 'item_code', 'confidence' => 0.95],
+                '/^stavka_koli[cč]ina$/iu' => ['field' => 'quantity', 'confidence' => 0.95],
+                '/^stavka_cena$/iu' => ['field' => 'unit_price', 'confidence' => 0.95],
+                '/^stavka_pdv_stopa$/iu' => ['field' => 'vat_rate', 'confidence' => 0.95],
+                '/^uplata_datum$/iu' => ['field' => 'payment_date', 'confidence' => 0.95],
+                '/^uplata_iznos$/iu' => ['field' => 'payment_amount', 'confidence' => 0.95],
                 // Abbreviated forms
-                '/^prt_naziv$/i' => ['field' => 'customer_name', 'confidence' => 0.9],
-                '/^dok_broj$/i' => ['field' => 'invoice_number', 'confidence' => 0.9],
-                '/^stv_naziv$/i' => ['field' => 'item_name', 'confidence' => 0.9],
-                '/^upl_datum$/i' => ['field' => 'payment_date', 'confidence' => 0.9],
+                '/^prt_naziv$/iu' => ['field' => 'customer_name', 'confidence' => 0.9],
+                '/^dok_broj$/iu' => ['field' => 'invoice_number', 'confidence' => 0.9],
+                '/^stv_naziv$/iu' => ['field' => 'item_name', 'confidence' => 0.9],
+                '/^upl_datum$/iu' => ['field' => 'payment_date', 'confidence' => 0.9],
             ]);
         }
 
@@ -1148,19 +1329,25 @@ class FieldMapperService
             ];
 
             // Store in cache for immediate use
-            $cacheKey = $this->cachePrefix . 'learned_' . md5($inputField);
-            \Cache::put($cacheKey, $learningData, $this->cacheMinutes * 24); // 24 hours
+            if (class_exists('\Illuminate\Support\Facades\Cache')) {
+                $cacheKey = $this->cachePrefix . 'learned_' . md5($inputField);
+                \Cache::put($cacheKey, $learningData, $this->cacheMinutes * 24); // 24 hours
+            }
 
             // Log for analysis
-            \Log::info('Field mapping learned', $learningData);
+            if (class_exists('\Illuminate\Support\Facades\Log')) {
+                \Log::info('Field mapping learned', $learningData);
+            }
 
             return true;
         } catch (\Exception $e) {
-            \Log::error('Failed to learn from mapping', [
-                'input_field' => $inputField,
-                'mapped_field' => $mappedField,
-                'error' => $e->getMessage()
-            ]);
+            if (class_exists('\Illuminate\Support\Facades\Log')) {
+                \Log::error('Failed to learn from mapping', [
+                    'input_field' => $inputField,
+                    'mapped_field' => $mappedField,
+                    'error' => $e->getMessage()
+                ]);
+            }
             return false;
         }
     }
@@ -1324,13 +1511,19 @@ class FieldMapperService
     public function clearCache(): bool
     {
         try {
+            if (!class_exists('\Illuminate\Support\Facades\Cache')) {
+                return false;
+            }
+
             $keys = \Cache::getStore()->getRedis()->keys($this->cachePrefix . '*');
             if (!empty($keys)) {
                 \Cache::getStore()->getRedis()->del($keys);
             }
             return true;
         } catch (\Exception $e) {
-            \Log::error('Failed to clear field mapper cache', ['error' => $e->getMessage()]);
+            if (class_exists('\Illuminate\Support\Facades\Log')) {
+                \Log::error('Failed to clear field mapper cache', ['error' => $e->getMessage()]);
+            }
             return false;
         }
     }

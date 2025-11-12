@@ -81,6 +81,9 @@ class AppServiceProvider extends ServiceProvider
         // E-Invoice Policy
         Gate::policy(\App\Models\EInvoice::class, \App\Policies\EInvoicePolicy::class);
 
+        // Import/Migration Policy
+        Gate::policy(\App\Models\ImportJob::class, \App\Policies\ImportJobPolicy::class);
+
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
         $this->bootAuth();

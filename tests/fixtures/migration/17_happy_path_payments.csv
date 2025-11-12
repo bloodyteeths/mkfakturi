@@ -1,0 +1,6 @@
+payment_date,amount,payment_method,invoice_number,customer_name,reference,currency,notes
+2025-01-20,11800.00,Bank Transfer,INV-2025-001,Технологија ДООЕЛ,BT-20250120-001,MKD,Плаќање за фактура INV-2025-001
+2025-01-25,23600.00,Cash,INV-2025-002,Балкан Консалтинг ООД,CASH-20250125-001,MKD,Готовинско плаќање
+2025-02-01,1180.00,Credit Card,INV-2025-003,Евро Импорт ДООЕЛ,CC-20250201-001,EUR,Payment via Stripe
+2025-02-05,5900.00,PayPal,INV-2025-004,Технологија ДООЕЛ,PP-20250205-001,MKD,Online payment
+2025-02-10,590.00,Check,INV-2025-005,Балкан Консалтинг ООД,CHK-20250210-001,MKD,Check payment received

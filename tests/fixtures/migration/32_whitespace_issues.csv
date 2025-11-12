@@ -1,0 +1,6 @@
+name,email,phone,address,vat_number,website,currency
+  Почетни Празнини ООД,leading@example.mk,+38970123456,"ул. Почетни 1, Скопје",MK4080012562250,https://leading.mk,MKD
+Завршни Празнини ООД  ,trailing@example.mk,+38971234567,"ул. Завршни 2, Скопје",MK4080012562251,https://trailing.mk,MKD
+  Двојни Празнини ООД  ,both@example.mk,+38972345678,"ул. Двојни 3, Скопје",MK4080012562252,https://both.mk,EUR
+Табулатори	ООД,tabs@example.mk,+38970456789,"ул. Табулатори 4, Скопје",MK4080012562253,https://tabs.mk,MKD
+Повеќе     Празнини     ООД,multiple@example.mk,+38971567890,"ул. Повеќе 5, Скопје",MK4080012562254,https://multiple.mk,USD

@@ -1,0 +1,8 @@
+name,email,phone,address,vat_number,website,currency
+Невалиден Email 1 ООД,invalid-email,+38970123456,"ул. Email 1, Скопје",MK4080012562180,https://invalid1.mk,MKD
+Невалиден Email 2 ООД,@example.mk,+38971234567,"ул. Email 2, Скопје",MK4080012562181,https://invalid2.mk,MKD
+Невалиден Email 3 ООД,test@,+38972345678,"ул. Email 3, Скопје",MK4080012562182,https://invalid3.mk,MKD
+Невалиден Email 4 ООД,test@@example.mk,+38970456789,"ул. Email 4, Скопје",MK4080012562183,https://invalid4.mk,EUR
+Невалиден Email 5 ООД,test example@mk,+38971567890,"ул. Email 5, Скопје",MK4080012562184,https://invalid5.mk,MKD
+Невалиден Email 6 ООД,test@example,+38972678901,"ул. Email 6, Скопје",MK4080012562185,https://invalid6.mk,USD
+Кирилица Email ООД,тест@пример.мк,+38970789012,"ул. Email 7, Скопје",MK4080012562186,https://cyrillic.mk,MKD

@@ -1,0 +1,6 @@
+name,email,phone,address,vat_number,website,currency
+Дупликат ООД,duplicate@example.mk,+38970123456,"ул. Дупликат 1, Скопје",MK4080012562160,https://duplicate.mk,MKD
+Дупликат ООД,duplicate@example.mk,+38971234567,"ул. Дупликат 2, Битола",MK4080012562161,https://duplicate2.mk,MKD
+Дупликат ООД,different@example.mk,+38972345678,"ул. Дупликат 3, Охрид",MK4080012562162,https://duplicate3.mk,MKD
+Различен Име ООД,duplicate@example.mk,+38970456789,"ул. Различен 1, Скопје",MK4080012562163,https://different.mk,EUR
+Друг Компанија ООД,duplicate@example.mk,+38971567890,"ул. Друг 1, Скопје",MK4080012562164,https://drug.mk,USD

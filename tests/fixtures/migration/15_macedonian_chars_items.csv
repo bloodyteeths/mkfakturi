@@ -1,0 +1,8 @@
+name,description,price,unit,category,sku,tax_type,tax_rate
+Графички дизајн,Дизајн на лого, банери, флаери и други графички материјали,120.00,hour,Дизајн,ГРФ-001,Standard,18
+Дигитален маркетинг,Услуги за дигитален маркетинг и SEO оптимизација,100.00,hour,Маркетинг,ДМК-001,Standard,18
+Čišćenje prostorija,Професионално чистење на деловни простории,30.00,hour,Услуги,ЧИС-001,Reduced,5
+Šoping korpa plugin,Плагин за e-commerce шопинг корпа,250.00,piece,Software,ШОП-001,Standard,18
+Ljubičasta boja,Љубичаста боја за ѕидови - висок квалитет,15.00,liter,Материјали,ЉУБ-001,Standard,18
+Đorđe Consulting,Специјализирани консултантски услуги - Ђорђе,180.00,hour,Консалтинг,ЂОР-001,Standard,18
+Njujork style pizza,Достава на пица во њујоршки стил,8.00,piece,Храна,ЊУЈ-001,Reduced,5

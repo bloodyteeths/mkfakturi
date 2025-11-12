@@ -1,0 +1,8 @@
+name,email,phone,address,vat_number,website,currency
+Валиден Запис 1 ООД,valid1@example.mk,+38970123456,"ул. Валидна 1, Скопје",MK4080012562240,https://valid1.mk,MKD
+,invalid-no-name@example.mk,+38971234567,"ул. Невалидна 2, Скопје",MK4080012562241,https://invalid2.mk,MKD
+Валиден Запис 2 ООД,valid2@example.mk,+38972345678,"ул. Валидна 3, Скопје",MK4080012562242,https://valid2.mk,EUR
+Невалиден Email ООД,not-an-email,+38970456789,"ул. Невалидна 4, Скопје",MK4080012562243,https://invalid4.mk,MKD
+Валиден Запис 3 ООД,valid3@example.mk,+38971567890,"ул. Валидна 5, Скопје",MK4080012562244,https://valid3.mk,USD
+Без Валута ООД,no-currency@example.mk,+38972678901,"ул. Невалидна 6, Скопје",MK4080012562245,https://invalid6.mk,
+Валиден Запис 4 ООД,valid4@example.mk,+38970789012,"ул. Валидна 7, Скопје",MK4080012562246,https://valid4.mk,MKD
