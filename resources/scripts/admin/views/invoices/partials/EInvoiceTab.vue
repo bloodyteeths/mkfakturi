@@ -128,48 +128,57 @@
               {{ $t('e_invoice.submissions') }}
             </h3>
 
-            <BaseTable class="mt-4">
-              <template #header>
-                <BaseTableHeader>
-                  <BaseTableHeaderCell>{{ $t('e_invoice.submission_date') }}</BaseTableHeaderCell>
-                  <BaseTableHeaderCell>{{ $t('e_invoice.submission_status') }}</BaseTableHeaderCell>
-                  <BaseTableHeaderCell>{{ $t('e_invoice.response') }}</BaseTableHeaderCell>
-                  <BaseTableHeaderCell>{{ $t('general.actions') }}</BaseTableHeaderCell>
-                </BaseTableHeader>
-              </template>
-
-              <template #body>
-                <BaseTableRow v-for="submission in submissions" :key="submission.id">
-                  <BaseTableCell>
-                    {{ formatDateTime(submission.created_at) }}
-                  </BaseTableCell>
-                  <BaseTableCell>
-                    <BaseBadge :variant="getSubmissionStatusVariant(submission.status)">
-                      {{ submission.status }}
-                    </BaseBadge>
-                  </BaseTableCell>
-                  <BaseTableCell>
-                    <div v-if="submission.response_message" class="text-sm">
-                      {{ submission.response_message }}
-                    </div>
-                    <div v-if="submission.portal_id" class="text-xs text-gray-500 mt-1">
-                      Portal ID: {{ submission.portal_id }}
-                    </div>
-                  </BaseTableCell>
-                  <BaseTableCell>
-                    <BaseButton
-                      v-if="submission.status === 'FAILED'"
-                      variant="danger-outline"
-                      size="sm"
-                      @click="handleResubmit(submission.id)"
-                    >
-                      <BaseIcon name="ArrowPathIcon" class="h-4 mr-1" />
-                      {{ $t('e_invoice.resubmit') }}
-                    </BaseButton>
-                  </BaseTableCell>
-                </BaseTableRow>
-              </template>
-            </BaseTable>
+            <div class="mt-4 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      {{ $t('e_invoice.submission_date') }}
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      {{ $t('e_invoice.submission_status') }}
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      {{ $t('e_invoice.response') }}
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      {{ $t('general.actions') }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                  <tr v-for="submission in submissions" :key="submission.id">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                      {{ formatDateTime(submission.created_at) }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <BaseBadge :variant="getSubmissionStatusVariant(submission.status)">
+                        {{ submission.status }}
+                      </BaseBadge>
+                    </td>
+                    <td class="px-3 py-4 text-sm text-gray-500">
+                      <div v-if="submission.response_message" class="text-sm">
+                        {{ submission.response_message }}
+                      </div>
+                      <div v-if="submission.portal_id" class="text-xs text-gray-500 mt-1">
+                        Portal ID: {{ submission.portal_id }}
+                      </div>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                      <BaseButton
+                        v-if="submission.status === 'FAILED'"
+                        variant="danger-outline"
+                        size="sm"
+                        @click="handleResubmit(submission.id)"
+                      >
+                        <BaseIcon name="ArrowPathIcon" class="h-4 mr-1" />
+                        {{ $t('e_invoice.resubmit') }}
+                      </BaseButton>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </BaseCard>
 
