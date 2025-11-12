@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\CompanySetting;
+use App\Models\Currency;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\TaxType;
@@ -117,7 +119,48 @@ class VatXmlService
         libxml_clear_errors();
         return $errors;
     }
-    
+
+    /**
+     * Get currency precision for the company
+     *
+     * @return int Currency precision (0 for MKD, 2 for USD, etc.)
+     */
+    protected function getCurrencyPrecision(): int
+    {
+        if (!$this->company || !$this->company->id) {
+            return 2; // Default to 2 decimal places if company not set
+        }
+
+        $currencyId = CompanySetting::getSetting('currency', $this->company->id);
+        if (!$currencyId) {
+            return 2; // Default to 2 decimal places if currency not set
+        }
+
+        $currency = Currency::find($currencyId);
+        if (!$currency) {
+            return 2; // Default to 2 decimal places if currency not found
+        }
+
+        return (int) $currency->precision;
+    }
+
+    /**
+     * Format amount for XML output based on currency precision
+     *
+     * @param float $amount Amount in smallest unit (cents/denars)
+     * @return string Formatted amount
+     */
+    protected function formatAmount(float $amount): string
+    {
+        $precision = $this->getCurrencyPrecision();
+
+        // For zero-precision currencies (like MKD), don't divide by 100
+        // For standard currencies (like USD), divide by 100 to get dollars from cents
+        $value = $precision === 0 ? $amount : $amount / 100;
+
+        return number_format($value, 2);
+    }
+
     /**
      * Build Header section
      */
@@ -245,8 +288,8 @@ class VatXmlService
     protected function buildVATRateElement(DOMDocument $dom, DOMElement $parent, float $rate, array $data): void
     {
         $parent->appendChild($dom->createElement('Rate', number_format($rate, 2)));
-        $parent->appendChild($dom->createElement('TaxableBase', number_format($data['taxable_base'] / 100, 2)));
-        $parent->appendChild($dom->createElement('VATAmount', number_format($data['vat_amount'] / 100, 2)));
+        $parent->appendChild($dom->createElement('TaxableBase', $this->formatAmount($data['taxable_base'])));
+        $parent->appendChild($dom->createElement('VATAmount', $this->formatAmount($data['vat_amount'])));
         $parent->appendChild($dom->createElement('TransactionCount', $data['transaction_count']));
     }
     
@@ -263,14 +306,14 @@ class VatXmlService
         $totalInputVAT = 0; // Would need expense/purchase data
         $netVATDue = max(0, $totalOutputVAT - $totalInputVAT);
         $vatRefund = max(0, $totalInputVAT - $totalOutputVAT);
-        
-        $vatSummary->appendChild($dom->createElement('TotalOutputVAT', number_format($totalOutputVAT / 100, 2)));
-        $vatSummary->appendChild($dom->createElement('TotalInputVAT', number_format($totalInputVAT / 100, 2)));
-        $vatSummary->appendChild($dom->createElement('NetVATDue', number_format($netVATDue / 100, 2)));
-        $vatSummary->appendChild($dom->createElement('VATRefund', number_format($vatRefund / 100, 2)));
+
+        $vatSummary->appendChild($dom->createElement('TotalOutputVAT', $this->formatAmount($totalOutputVAT)));
+        $vatSummary->appendChild($dom->createElement('TotalInputVAT', $this->formatAmount($totalInputVAT)));
+        $vatSummary->appendChild($dom->createElement('NetVATDue', $this->formatAmount($netVATDue)));
+        $vatSummary->appendChild($dom->createElement('VATRefund', $this->formatAmount($vatRefund)));
         $vatSummary->appendChild($dom->createElement('PreviousPeriodCredit', '0.00'));
-        $vatSummary->appendChild($dom->createElement('VATToPay', number_format($netVATDue / 100, 2)));
-        $vatSummary->appendChild($dom->createElement('VATCarryForward', number_format($vatRefund / 100, 2)));
+        $vatSummary->appendChild($dom->createElement('VATToPay', $this->formatAmount($netVATDue)));
+        $vatSummary->appendChild($dom->createElement('VATCarryForward', $this->formatAmount($vatRefund)));
     }
     
     /**
@@ -416,17 +459,27 @@ class VatXmlService
     {
         $rate = $tax->percent ?? $tax->taxType->percent ?? 0;
         $amount = $tax->amount ?? 0;
-        $baseAmount = $tax->base_amount ?? 0;
-        
+
+        // Calculate taxable base from VAT amount and rate
+        // Note: base_amount field stores currency-converted VAT amount, NOT taxable base
+        // Formula: taxable_base = vat_amount / (rate / 100)
+        $taxableBase = 0;
+        if ($rate > 0) {
+            $taxableBase = ($amount * 100) / $rate;
+        } elseif ($tax->invoiceItem) {
+            // For zero-rate or exempt, use the item total
+            $taxableBase = $tax->invoiceItem->total ?? 0;
+        }
+
         if ($rate >= 15) { // Standard rate (18%)
             $vatData['standard']['vat_amount'] += $amount;
-            $vatData['standard']['taxable_base'] += $baseAmount;
+            $vatData['standard']['taxable_base'] += $taxableBase;
         } elseif ($rate >= 3) { // Reduced rate (5%)
             $vatData['reduced']['vat_amount'] += $amount;
-            $vatData['reduced']['taxable_base'] += $baseAmount;
+            $vatData['reduced']['taxable_base'] += $taxableBase;
         } else { // Zero or exempt
             $vatData['zero']['vat_amount'] += $amount;
-            $vatData['zero']['taxable_base'] += $baseAmount;
+            $vatData['zero']['taxable_base'] += $taxableBase;
         }
     }
     
