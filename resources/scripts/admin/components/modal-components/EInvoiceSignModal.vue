@@ -2,7 +2,6 @@
   <BaseModal
     :show="modalActive"
     @close="closeModal"
-    @open="setInitialData"
   >
     <template #header>
       <div class="flex justify-between w-full">
@@ -101,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, watch } from 'vue'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useI18n } from 'vue-i18n'
 import { useEInvoiceStore } from '@/scripts/admin/stores/e-invoice'
@@ -222,5 +221,14 @@ function closeModal() {
   errorMessage.value = ''
   v$.value.$reset()
 }
+
+// Watch for modal opening and load certificates ONCE
+watch(modalActive, (newValue, oldValue) => {
+  if (newValue && !oldValue) {
+    // Modal just opened
+    console.log('[EInvoiceSignModal] Modal opened, loading initial data')
+    setInitialData()
+  }
+})
 </script>
 // CLAUDE-CHECKPOINT
