@@ -3,14 +3,8 @@ import { defineStore } from 'pinia'
 import { handleError } from '@/scripts/helpers/error-handling'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
-export const useImportStore = (useWindow = false) => {
-  const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
-  const { global } = window.i18n
-  const notificationStore = useNotificationStore()
-
-  return defineStoreFunc({
-    id: 'import',
-    state: () => ({
+export const useImportStore = defineStore('import', {
+  state: () => ({
       // Wizard state
       currentStep: 1,
       totalSteps: 4,
@@ -180,7 +174,9 @@ export const useImportStore = (useWindow = false) => {
           }
 
           this.updateCanProceed()
-          
+
+          const notificationStore = useNotificationStore()
+          const { global } = window.i18n
           notificationStore.showNotification({
             type: 'success',
             message: global.t('imports.file_uploaded_successfully'),
@@ -284,6 +280,8 @@ export const useImportStore = (useWindow = false) => {
           this.importJob = response.data.data
           this.updateCanProceed()
 
+          const notificationStore = useNotificationStore()
+          const { global } = window.i18n
           notificationStore.showNotification({
             type: 'success',
             message: global.t('imports.mapping_saved_successfully'),
@@ -415,6 +413,8 @@ export const useImportStore = (useWindow = false) => {
               this.stopProgressPolling()
               this.updateCanProceed()
 
+              const notificationStore = useNotificationStore()
+              const { global } = window.i18n
               notificationStore.showNotification({
                 type: 'success',
                 message: global.t('imports.import_completed_successfully'),
@@ -473,7 +473,9 @@ export const useImportStore = (useWindow = false) => {
 
         try {
           await axios.delete(`/api/v1/admin/imports/${this.importId}`)
-          
+
+          const notificationStore = useNotificationStore()
+          const { global } = window.i18n
           notificationStore.showNotification({
             type: 'success',
             message: global.t('imports.import_cancelled_successfully'),
@@ -499,6 +501,5 @@ export const useImportStore = (useWindow = false) => {
           return []
         }
       },
-    },
-  })
-}
+    }
+})
