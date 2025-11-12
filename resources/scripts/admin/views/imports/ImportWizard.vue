@@ -395,15 +395,26 @@ const handleTourComplete = () => {
 
 // Lifecycle
 onMounted(() => {
+  console.log('[ImportWizard] Component mounted')
+  console.log('[ImportWizard] importStore:', importStore)
+  console.log('[ImportWizard] importStore.currentStep:', importStore.currentStep)
+
   // Reset store state when component mounts
   importStore.resetState()
+  console.log('[ImportWizard] Store state reset')
 
   // Auto-show help guide on first visit to step 1
   const hasSeenHelp = localStorage.getItem('migration-wizard-help-seen')
+  console.log('[ImportWizard] hasSeenHelp:', hasSeenHelp)
+
   if (!hasSeenHelp && importStore.currentStep === 1) {
     showHelpGuide.value = true
     localStorage.setItem('migration-wizard-help-seen', 'true')
+    console.log('[ImportWizard] Showing help guide')
   }
+
+  console.log('[ImportWizard] showHelpGuide.value:', showHelpGuide.value)
+  console.log('[ImportWizard] Component setup complete')
 })
 
 onUnmounted(() => {

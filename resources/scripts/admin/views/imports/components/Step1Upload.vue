@@ -507,13 +507,25 @@ const hideQuickStart = () => {
 
 // Lifecycle
 onMounted(() => {
+  console.log('[Step1Upload] Component mounted')
+  console.log('[Step1Upload] importStore:', importStore)
+  console.log('[Step1Upload] importStore.uploadedFile:', importStore.uploadedFile)
+  console.log('[Step1Upload] importStore.supportedFormats:', importStore.supportedFormats)
+
   // Show QuickStart panel on first visit
   const hasSeenQuickStart = localStorage.getItem('migration-wizard-quickstart-hidden')
   const tourCompleted = localStorage.getItem('migration-wizard-tour-completed')
 
+  console.log('[Step1Upload] hasSeenQuickStart:', hasSeenQuickStart)
+  console.log('[Step1Upload] tourCompleted:', tourCompleted)
+
   if (!hasSeenQuickStart && !tourCompleted) {
     showQuickStart.value = true
+    console.log('[Step1Upload] Showing QuickStart panel')
   }
+
+  console.log('[Step1Upload] showQuickStart.value:', showQuickStart.value)
+  console.log('[Step1Upload] Component setup complete')
 })
 // CLAUDE-CHECKPOINT
 </script>

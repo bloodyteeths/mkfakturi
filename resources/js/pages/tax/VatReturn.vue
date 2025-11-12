@@ -63,49 +63,99 @@
                 <!-- Period Type -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.period_type') }}</label>
-                  <select 
-                    v-model="form.period_type" 
+                  <select
+                    v-model="form.period_type"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    @change="updatePeriodDates"
+                    @change="onPeriodTypeChange"
                   >
                     <option value="MONTHLY">{{ $t('vat.monthly') }}</option>
                     <option value="QUARTERLY">{{ $t('vat.quarterly') }}</option>
+                    <option value="CUSTOM">{{ $t('vat.custom') }}</option>
                   </select>
                 </div>
 
-                <!-- Period Start -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.period_start') }}</label>
-                  <input 
-                    v-model="form.period_start" 
-                    type="date" 
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    @change="updatePeriodEnd"
-                    required
-                  />
+                <!-- Month/Quarter/Year Selector (for MONTHLY/QUARTERLY) -->
+                <div v-if="form.period_type === 'MONTHLY'" class="lg:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.select_month') }}</label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <select
+                      v-model="form.selected_month"
+                      @change="updateDatesFromSelection"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option v-for="month in availableMonths" :key="month.value" :value="month.value">
+                        {{ month.label }}
+                      </option>
+                    </select>
+                    <select
+                      v-model="form.selected_year"
+                      @change="updateDatesFromSelection"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option v-for="year in availableYears" :key="year" :value="year">
+                        {{ year }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
-                <!-- Period End -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.period_end') }}</label>
-                  <input
-                    v-model="form.period_end"
-                    type="date"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    required
-                  />
+                <div v-if="form.period_type === 'QUARTERLY'" class="lg:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.select_quarter') }}</label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <select
+                      v-model="form.selected_quarter"
+                      @change="updateDatesFromSelection"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option v-for="quarter in availableQuarters" :key="quarter.value" :value="quarter.value">
+                        {{ quarter.label }}
+                      </option>
+                    </select>
+                    <select
+                      v-model="form.selected_year"
+                      @change="updateDatesFromSelection"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option v-for="year in availableYears" :key="year" :value="year">
+                        {{ year }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
+
+                <!-- Custom Date Range (for CUSTOM) -->
+                <template v-if="form.period_type === 'CUSTOM'">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.period_start') }}</label>
+                    <input
+                      v-model="form.period_start"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('vat.period_end') }}</label>
+                    <input
+                      v-model="form.period_end"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    />
+                  </div>
+                </template>
               </div>
 
-              <!-- Period Helper Text -->
-              <div class="mt-3 text-sm text-gray-500">
-                <i class="fas fa-info-circle mr-1"></i>
-                <span v-if="form.period_type === 'MONTHLY'">
-                  {{ $t('vat.monthly_period_hint') || 'Monthly periods must be a full calendar month (28-31 days)' }}
-                </span>
-                <span v-else>
-                  {{ $t('vat.quarterly_period_hint') || 'Quarterly periods must be 3 full calendar months (89-92 days)' }}
-                </span>
+              <!-- Display selected period -->
+              <div v-if="form.period_start && form.period_end" class="mt-4 p-3 bg-gray-50 rounded-md">
+                <div class="text-sm text-gray-700">
+                  <span class="font-medium">{{ $t('vat.selected_period') }}:</span>
+                  {{ formatDate(form.period_start) }} - {{ formatDate(form.period_end) }}
+                </div>
               </div>
             </div>
 
@@ -206,6 +256,9 @@ export default {
     // Form data
     const form = ref({
       period_type: 'MONTHLY',
+      selected_month: '',
+      selected_quarter: '',
+      selected_year: '',
       period_start: '',
       period_end: '',
       validate_xml: true
@@ -217,53 +270,101 @@ export default {
 
     // Computed properties
     const currentCompany = computed(() => companyStore.selectedCompany)
-    
+
     const isFormValid = computed(() => {
-      return form.value.period_start && 
-             form.value.period_end && 
+      return form.value.period_start &&
+             form.value.period_end &&
              currentCompany.value?.id
     })
 
+    // Available years (current year and 5 years back)
+    const availableYears = computed(() => {
+      const currentYear = new Date().getFullYear()
+      const years = []
+      for (let i = 0; i <= 5; i++) {
+        years.push(currentYear - i)
+      }
+      return years
+    })
+
+    // Available months
+    const availableMonths = computed(() => {
+      const months = [
+        { value: 0, label: 'Јануари' },
+        { value: 1, label: 'Февруари' },
+        { value: 2, label: 'Март' },
+        { value: 3, label: 'Април' },
+        { value: 4, label: 'Мај' },
+        { value: 5, label: 'Јуни' },
+        { value: 6, label: 'Јули' },
+        { value: 7, label: 'Август' },
+        { value: 8, label: 'Септември' },
+        { value: 9, label: 'Октомври' },
+        { value: 10, label: 'Ноември' },
+        { value: 11, label: 'Декември' }
+      ]
+      return months
+    })
+
+    // Available quarters
+    const availableQuarters = computed(() => {
+      return [
+        { value: 1, label: 'Q1 (Јануари - Март)' },
+        { value: 2, label: 'Q2 (Април - Јуни)' },
+        { value: 3, label: 'Q3 (Јули - Септември)' },
+        { value: 4, label: 'Q4 (Октомври - Декември)' }
+      ]
+    })
+
     // Methods
-    const updatePeriodDates = () => {
+    const onPeriodTypeChange = () => {
+      // Reset selections when period type changes
       const today = new Date()
-      let startDate, endDate
 
       if (form.value.period_type === 'MONTHLY') {
-        // Previous month
-        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-        endDate = new Date(today.getFullYear(), today.getMonth(), 0)
-      } else {
-        // Previous quarter
-        const quarter = Math.floor((today.getMonth()) / 3)
-        startDate = new Date(today.getFullYear(), quarter * 3 - 3, 1)
-        endDate = new Date(today.getFullYear(), quarter * 3, 0)
+        // Default to previous month
+        form.value.selected_month = today.getMonth() - 1 < 0 ? 11 : today.getMonth() - 1
+        form.value.selected_year = today.getMonth() - 1 < 0 ? today.getFullYear() - 1 : today.getFullYear()
+      } else if (form.value.period_type === 'QUARTERLY') {
+        // Default to previous quarter
+        const currentQuarter = Math.floor(today.getMonth() / 3) + 1
+        form.value.selected_quarter = currentQuarter - 1 < 1 ? 4 : currentQuarter - 1
+        form.value.selected_year = currentQuarter - 1 < 1 ? today.getFullYear() - 1 : today.getFullYear()
+      } else if (form.value.period_type === 'CUSTOM') {
+        // Default to previous month for custom
+        const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+        form.value.period_start = startDate.toISOString().split('T')[0]
+        form.value.period_end = endDate.toISOString().split('T')[0]
       }
 
-      form.value.period_start = startDate.toISOString().split('T')[0]
-      form.value.period_end = endDate.toISOString().split('T')[0]
+      updateDatesFromSelection()
     }
 
-    const updatePeriodEnd = () => {
-      if (!form.value.period_start) return
-
-      const startDate = new Date(form.value.period_start)
-
-      // Ensure we're starting from the first day of the month
-      const monthStart = new Date(startDate.getFullYear(), startDate.getMonth(), 1)
-      let endDate
-
+    const updateDatesFromSelection = () => {
       if (form.value.period_type === 'MONTHLY') {
-        // Last day of the same month
-        endDate = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)
-      } else {
-        // Last day of the quarter (3 months later)
-        endDate = new Date(monthStart.getFullYear(), monthStart.getMonth() + 3, 0)
-      }
+        // Calculate first and last day of selected month
+        const startDate = new Date(form.value.selected_year, form.value.selected_month, 1)
+        const endDate = new Date(form.value.selected_year, form.value.selected_month + 1, 0)
 
-      // Also update the start date to be the first of the month
-      form.value.period_start = monthStart.toISOString().split('T')[0]
-      form.value.period_end = endDate.toISOString().split('T')[0]
+        form.value.period_start = startDate.toISOString().split('T')[0]
+        form.value.period_end = endDate.toISOString().split('T')[0]
+      } else if (form.value.period_type === 'QUARTERLY') {
+        // Calculate first and last day of selected quarter
+        const startMonth = (form.value.selected_quarter - 1) * 3
+        const startDate = new Date(form.value.selected_year, startMonth, 1)
+        const endDate = new Date(form.value.selected_year, startMonth + 3, 0)
+
+        form.value.period_start = startDate.toISOString().split('T')[0]
+        form.value.period_end = endDate.toISOString().split('T')[0]
+      }
+      // For CUSTOM, dates are manually set by the user
+    }
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return ''
+      const date = new Date(dateStr)
+      return date.toLocaleDateString('mk-MK', { year: 'numeric', month: 'long', day: 'numeric' })
     }
 
     const previewVatData = async () => {
@@ -369,11 +470,8 @@ export default {
 
     // Initialize form with default period
     onMounted(() => {
-      updatePeriodDates()
+      onPeriodTypeChange()
     })
-
-    // Watch for period type changes
-    watch(() => form.value.period_type, updatePeriodDates)
 
     return {
       form,
@@ -381,8 +479,12 @@ export default {
       vatSummary,
       currentCompany,
       isFormValid,
-      updatePeriodDates,
-      updatePeriodEnd,
+      availableYears,
+      availableMonths,
+      availableQuarters,
+      onPeriodTypeChange,
+      updateDatesFromSelection,
+      formatDate,
       previewVatData,
       generateVatReturn,
       formatMoney
