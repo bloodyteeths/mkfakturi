@@ -26,6 +26,11 @@ class Company extends Model implements HasMedia
     ];
 
     protected $fillable = [
+        'name',
+        'slug',
+        'vat_id',
+        'vat_number',
+        'tax_id',
         'ifrs_entity_id',
     ];
 
