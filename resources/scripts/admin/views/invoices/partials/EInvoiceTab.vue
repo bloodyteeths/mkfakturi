@@ -188,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
@@ -252,6 +252,20 @@ const canDownload = computed(() => {
 
 onMounted(async () => {
   await loadEInvoice()
+})
+
+// Watch for route changes (when navigating between invoices)
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    await loadEInvoice()
+  }
+})
+
+// Watch for invoice prop changes (when invoice data updates)
+watch(() => props.invoice?.id, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    await loadEInvoice()
+  }
 })
 
 async function loadEInvoice() {
