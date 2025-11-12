@@ -24,7 +24,7 @@ class ImportController extends Controller
         try {
             $request->validate([
                 'file' => 'required|file|mimes:csv,xls,xlsx,xml|max:51200', // 50MB
-                'type' => 'required|string|in:customers,invoices,items,payments,expenses,complete',
+                'type' => 'required|string|in:universal_migration,customers,invoices,items,payments,expenses,complete',
             ]);
         } catch (\Exception $e) {
             \Log::error('[ImportController] Validation failed', [
@@ -36,6 +36,9 @@ class ImportController extends Controller
 
         $user = $request->user();
         $companyId = $user->company_id;
+
+        // Map universal_migration to complete type for database
+        $importType = $request->type === 'universal_migration' ? 'complete' : $request->type;
 
         \Log::info('[ImportController] User and company loaded', [
             'user_id' => $user->id,
@@ -68,7 +71,7 @@ class ImportController extends Controller
                 'company_id' => $companyId,
                 'creator_id' => $user->id,
                 'name' => 'Import from ' . $file->getClientOriginalName(),
-                'type' => $request->type,
+                'type' => $importType,
                 'file_path' => $path,
                 'file_type' => $file->getClientOriginalExtension(),
                 'file_info' => [
