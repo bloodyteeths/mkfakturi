@@ -24,7 +24,7 @@ class ImportController extends Controller
         try {
             $request->validate([
                 'file' => 'required|file|mimes:csv,xls,xlsx,xml|max:51200', // 50MB
-                'type' => 'required|string|in:universal_migration,customers,items,invoices,expenses',
+                'type' => 'required|string|in:customers,invoices,items,payments,expenses,complete',
             ]);
         } catch (\Exception $e) {
             \Log::error('[ImportController] Validation failed', [
@@ -66,13 +66,17 @@ class ImportController extends Controller
         try {
             $importJob = ImportJob::create([
                 'company_id' => $companyId,
-                'user_id' => $user->id,
+                'creator_id' => $user->id,
+                'name' => 'Import from ' . $file->getClientOriginalName(),
                 'type' => $request->type,
                 'file_path' => $path,
-                'file_name' => $file->getClientOriginalName(),
-                'file_size' => $file->getSize(),
-                'status' => 'uploaded',
-                'step' => 1,
+                'file_type' => $file->getClientOriginalExtension(),
+                'file_info' => [
+                    'original_name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                ],
+                'status' => 'pending',
             ]);
             \Log::info('[ImportController] ImportJob created', ['id' => $importJob->id]);
         } catch (\Exception $e) {
@@ -118,9 +122,8 @@ class ImportController extends Controller
         ]);
 
         $importJob->update([
-            'field_mappings' => $request->mappings,
-            'step' => 2,
-            'status' => 'mapped',
+            'mapping_config' => $request->mappings,
+            'status' => 'mapping',
         ]);
 
         return response()->json([
@@ -147,9 +150,8 @@ class ImportController extends Controller
         ];
 
         $importJob->update([
-            'validation_results' => $validationResults,
-            'step' => 3,
-            'status' => 'validated',
+            'validation_rules' => $validationResults,
+            'status' => 'validating',
         ]);
 
         return response()->json([
@@ -168,8 +170,8 @@ class ImportController extends Controller
 
         // TODO: Implement actual import logic
         $importJob->update([
-            'step' => 4,
-            'status' => 'processing',
+            'status' => 'committing',
+            'started_at' => now(),
         ]);
 
         // Simulate processing (in production, this would be a queued job)
@@ -196,9 +198,11 @@ class ImportController extends Controller
             'success' => true,
             'data' => [
                 'status' => $importJob->status,
-                'step' => $importJob->step,
-                'progress' => $importJob->progress ?? 0,
-                'results' => $importJob->results,
+                'progress' => $importJob->progressPercentage ?? 0,
+                'total_records' => $importJob->total_records,
+                'processed_records' => $importJob->processed_records,
+                'successful_records' => $importJob->successful_records,
+                'failed_records' => $importJob->failed_records,
             ],
         ]);
     }
@@ -257,7 +261,7 @@ class ImportController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $importJob->logs ?? [],
+            'data' => $importJob->logs()->get(),
         ]);
     }
 }
