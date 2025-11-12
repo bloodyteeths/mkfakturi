@@ -334,11 +334,19 @@ export default {
         // Default to previous month for custom
         const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
         const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
-        form.value.period_start = startDate.toISOString().split('T')[0]
-        form.value.period_end = endDate.toISOString().split('T')[0]
+        form.value.period_start = formatDateForAPI(startDate)
+        form.value.period_end = formatDateForAPI(endDate)
       }
 
       updateDatesFromSelection()
+    }
+
+    const formatDateForAPI = (date) => {
+      // Format date as YYYY-MM-DD without timezone issues
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     }
 
     const updateDatesFromSelection = () => {
@@ -347,16 +355,16 @@ export default {
         const startDate = new Date(form.value.selected_year, form.value.selected_month, 1)
         const endDate = new Date(form.value.selected_year, form.value.selected_month + 1, 0)
 
-        form.value.period_start = startDate.toISOString().split('T')[0]
-        form.value.period_end = endDate.toISOString().split('T')[0]
+        form.value.period_start = formatDateForAPI(startDate)
+        form.value.period_end = formatDateForAPI(endDate)
       } else if (form.value.period_type === 'QUARTERLY') {
         // Calculate first and last day of selected quarter
         const startMonth = (form.value.selected_quarter - 1) * 3
         const startDate = new Date(form.value.selected_year, startMonth, 1)
         const endDate = new Date(form.value.selected_year, startMonth + 3, 0)
 
-        form.value.period_start = startDate.toISOString().split('T')[0]
-        form.value.period_end = endDate.toISOString().split('T')[0]
+        form.value.period_start = formatDateForAPI(startDate)
+        form.value.period_end = formatDateForAPI(endDate)
       }
       // For CUSTOM, dates are manually set by the user
     }
