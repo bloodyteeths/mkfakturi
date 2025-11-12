@@ -1,217 +1,84 @@
-2025-11-05T23:27:36.000000000Z [inf]  Starting Container
-2025-11-05T23:27:37.197159621Z [inf]  === Railway Startup Script ===
-2025-11-05T23:27:37.197170422Z [inf]  Environment variables check:
-2025-11-05T23:27:37.197178453Z [inf]  All environment variables (searching for MySQL related):
-2025-11-05T23:27:37.197187299Z [inf]  MYSQLDATABASE=railway
-2025-11-05T23:27:37.197195170Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
-2025-11-05T23:27:37.197223691Z [inf]  MYSQLPASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-11-05T23:27:37.197231447Z [inf]  MYSQLPORT=3306
-2025-11-05T23:27:37.197239283Z [inf]  MYSQLUSER=root
-2025-11-05T23:27:37.197247137Z [inf]  MYSQL_DATABASE=railway
-2025-11-05T23:27:37.197254255Z [inf]  MYSQL_PUBLIC_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@switchback.proxy.rlwy.net:31829/railway
-2025-11-05T23:27:37.197263980Z [inf]  MYSQL_ROOT_PASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-11-05T23:27:37.197271848Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
-2025-11-05T23:27:37.197281014Z [inf]  
-2025-11-05T23:27:37.197289355Z [inf]  Checking specific variables:
-2025-11-05T23:27:37.197297248Z [inf]  MYSQL_URL=mysql://root:uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx@mysql-y5el.railway.internal:3306/railway
-2025-11-05T23:27:37.197307086Z [inf]  DATABASE_URL=NOT SET
-2025-11-05T23:27:37.197315047Z [inf]  MYSQLHOST=mysql-y5el.railway.internal
-2025-11-05T23:27:37.197322470Z [inf]  MYSQLPORT=3306
-2025-11-05T23:27:37.197330109Z [inf]  MYSQLUSER=root
-2025-11-05T23:27:37.197337160Z [inf]  MYSQLDATABASE=railway
-2025-11-05T23:27:37.197344897Z [inf]  Using Railway MYSQL_URL to parse connection...
-2025-11-05T23:27:37.197352617Z [inf]  Parsed from MYSQL_URL:
-2025-11-05T23:27:37.197360568Z [inf]  DB_HOST: mysql-y5el.railway.internal
-2025-11-05T23:27:37.197368779Z [inf]  DB_PORT: 3306
-2025-11-05T23:27:37.197376905Z [inf]  DB_DATABASE: railway
-2025-11-05T23:27:37.197384650Z [inf]  Final DB config:
-2025-11-05T23:27:37.199447484Z [inf]  DB_CONNECTION: mysql
-2025-11-05T23:27:37.199453355Z [inf]  DB_HOST: mysql-y5el.railway.internal
-2025-11-05T23:27:37.199460162Z [inf]  DB_PORT: 3306
-2025-11-05T23:27:37.199466384Z [inf]  DB_DATABASE: railway
-2025-11-05T23:27:37.199472398Z [inf]  DB_USERNAME: root
-2025-11-05T23:27:37.199477797Z [inf]  Creating minimal .env file for installation wizard...
-2025-11-05T23:27:37.199485696Z [inf]  Checking if auto-install needed...
-2025-11-05T23:27:37.199491399Z [inf]  Profile status: COMPLETED
-2025-11-05T23:27:37.199497288Z [inf]  Already installed (profile_complete = COMPLETED), skipping...
-2025-11-05T23:27:37.199504226Z [inf]  Creating storage directories...
-2025-11-05T23:27:37.199510075Z [inf]  Configuring session for Railway domain: www.facturino.mk
-2025-11-05T23:27:37.199516002Z [inf]  Clearing caches...
-2025-11-05T23:27:37.305004579Z [inf]  
-2025-11-05T23:27:37.305013180Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-05T23:27:37.305021433Z [inf]  
-2025-11-05T23:27:38.456642035Z [inf]  
-2025-11-05T23:27:38.456801659Z [inf]     INFO  Application cache cleared successfully.  
-2025-11-05T23:27:38.456813062Z [inf]  
-2025-11-05T23:27:38.456820920Z [inf]  
-2025-11-05T23:27:38.456829242Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-05T23:27:38.456837463Z [inf]  
-2025-11-05T23:27:38.456845309Z [inf]  
-2025-11-05T23:27:38.456851871Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-05T23:27:38.456859665Z [inf]  
-2025-11-05T23:27:38.456867025Z [inf]  Optimizing application...
-2025-11-05T23:27:38.464411143Z [inf]  
-2025-11-05T23:27:38.464418267Z [inf]     INFO  Caching framework bootstrap, configuration, and metadata.  
-2025-11-05T23:27:38.464427182Z [inf]  
-2025-11-05T23:27:38.464513193Z [inf]    config ........................................................ 22.45ms DONE
-2025-11-05T23:27:38.464521683Z [inf]    events ......................................................... 1.65ms DONE
-2025-11-05T23:27:38.466962193Z [inf]    routes ........................................................ 57.76ms DONE
-2025-11-05T23:27:38.523826608Z [inf]    views ......................................................... 53.73ms DONE
-2025-11-05T23:27:38.523832962Z [inf]  
-2025-11-05T23:27:38.539644126Z [inf]  Running migrations...
-2025-11-05T23:27:38.539649262Z [inf]  Checking for existing tables to skip duplicate migrations...
-2025-11-05T23:27:39.200869416Z [inf]  Running main migrations batch...
-2025-11-05T23:27:39.316691117Z [inf]  
-2025-11-05T23:27:39.316696147Z [inf]     INFO  Running migrations.  
-2025-11-05T23:27:39.316702754Z [inf]  
-2025-11-05T23:27:39.325914210Z [inf]    2025_11_04_000000_add_ifrs_entity_id_to_companies_table ........ 5.13ms FAIL
-2025-11-05T23:27:39.336286344Z [inf]  
-2025-11-05T23:27:39.340139052Z [inf]  In Connection.php line 822:
-2025-11-05T23:27:39.340146390Z [inf]                                                                                 
-2025-11-05T23:27:39.340155577Z [inf]    SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'ifrs_en  
-2025-11-05T23:27:39.340165089Z [inf]    tity_id' (Connection: mysql, SQL: alter table `companies` add `ifrs_entity_  
-2025-11-05T23:27:39.340176817Z [inf]    id` bigint unsigned null after `id`)                                         
-2025-11-05T23:27:39.340184830Z [inf]                                                                                 
-2025-11-05T23:27:39.340193033Z [inf]  
-2025-11-05T23:27:39.340200963Z [inf]  In Connection.php line 568:
-2025-11-05T23:27:39.340208666Z [inf]                                                                                 
-2025-11-05T23:27:39.340216434Z [inf]    SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'ifrs_en  
-2025-11-05T23:27:39.340227250Z [inf]    tity_id'                                                                     
-2025-11-05T23:27:39.340234836Z [inf]                                                                                 
-2025-11-05T23:27:39.340242274Z [inf]  
-2025-11-05T23:27:39.360411781Z [inf]  Ensuring banking tables exist...
-2025-11-05T23:27:40.170641425Z [inf]  bank_accounts table exists
-2025-11-05T23:27:40.170645495Z [inf]  bank_transactions table exists
-2025-11-05T23:27:40.170651994Z [inf]  
-2025-11-05T23:27:40.170657662Z [inf]     INFO  Goodbye.
-2025-11-05T23:27:40.170665198Z [inf]  
-2025-11-05T23:27:40.302780330Z [inf]  
-2025-11-05T23:27:40.302786495Z [inf]     INFO  Goodbye.
-2025-11-05T23:27:40.302792518Z [inf]  
-2025-11-05T23:27:40.320829052Z [inf]  Ensuring IFRS entity migrations are run...
-2025-11-05T23:27:40.320838268Z [inf]  FORCE_IFRS_MIGRATIONS enabled - resetting migration status for entity migrations...
-2025-11-05T23:27:41.116093678Z [inf]  Reset migration: 2025_11_04_000000_add_ifrs_entity_id_to_companies_table
-2025-11-05T23:27:41.116102694Z [inf]  Reset migration: 2025_11_04_000001_add_entity_id_to_users_table
-2025-11-05T23:27:41.116110918Z [inf]  
-2025-11-05T23:27:41.116121571Z [inf]     INFO  Running migrations.  
-2025-11-05T23:27:41.116128230Z [inf]  
-2025-11-05T23:27:41.116134959Z [inf]    2025_11_04_000000_add_ifrs_entity_id_to_companies_table ........ 3.88ms FAIL
-2025-11-05T23:27:41.116152741Z [inf]  
-2025-11-05T23:27:41.116161491Z [inf]  In Connection.php line 822:
-2025-11-05T23:27:41.116169196Z [inf]                                                                                 
-2025-11-05T23:27:41.116175924Z [inf]    SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'ifrs_en  
-2025-11-05T23:27:41.116182165Z [inf]    tity_id' (Connection: mysql, SQL: alter table `companies` add `ifrs_entity_  
-2025-11-05T23:27:41.116189314Z [inf]    id` bigint unsigned null after `id`)                                         
-2025-11-05T23:27:41.116196628Z [inf]                                                                                 
-2025-11-05T23:27:41.116203958Z [inf]  
-2025-11-05T23:27:41.116211497Z [inf]  In Connection.php line 568:
-2025-11-05T23:27:41.116219760Z [inf]                                                                                 
-2025-11-05T23:27:41.116227278Z [inf]    SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'ifrs_en  
-2025-11-05T23:27:41.116234337Z [inf]    tity_id'                                                                     
-2025-11-05T23:27:41.116240952Z [inf]                                                                                 
-2025-11-05T23:27:41.116247802Z [inf]  
-2025-11-05T23:27:41.116254337Z [inf]  Entity migration already applied
-2025-11-05T23:27:41.133064761Z [inf]  
-2025-11-05T23:27:41.133069342Z [inf]     INFO  Running migrations.  
-2025-11-05T23:27:41.133074299Z [inf]  
-2025-11-05T23:27:41.136777289Z [inf]    2025_11_04_000001_add_entity_id_to_users_table ................. 3.89ms FAIL
-2025-11-05T23:27:41.143922233Z [inf]  
-2025-11-05T23:27:41.146985523Z [inf]  
-2025-11-05T23:27:41.146990949Z [inf]                                                                                 
-2025-11-05T23:27:41.147006130Z [inf]  
-2025-11-05T23:27:41.147008424Z [inf]  In Connection.php line 822:
-2025-11-05T23:27:41.147015656Z [inf]  In Connection.php line 568:
-2025-11-05T23:27:41.147021309Z [inf]                                                                                 
-2025-11-05T23:27:41.147021651Z [inf]                                                                                 
-2025-11-05T23:27:41.147033156Z [inf]    SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'entity_  
-2025-11-05T23:27:41.147035849Z [inf]    SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'entity_  
-2025-11-05T23:27:41.147045019Z [inf]    id' (Connection: mysql, SQL: alter table `users` add `entity_id` bigint uns  
-2025-11-05T23:27:41.147048532Z [inf]    id'                                                                          
-2025-11-05T23:27:41.147054943Z [inf]    igned null after `id`)                                                       
-2025-11-05T23:27:41.147058362Z [inf]                                                                                 
-2025-11-05T23:27:41.161370406Z [inf]  Entity migration already applied
-2025-11-05T23:27:41.161381005Z [inf]  RAILWAY_SKIP_INSTALL enabled - forcing installation complete...
-2025-11-05T23:27:41.161393585Z [inf]  Creating database_created marker file...
-2025-11-05T23:27:41.166006800Z [inf]  Checking existing users in database...
-2025-11-05T23:27:42.139389062Z [inf]  admin@invoiceshelf.com - Jane Doe
-2025-11-05T23:27:42.139393813Z [inf]  your-email@example.com - Администратор
-2025-11-05T23:27:42.139398458Z [inf]  Creating/resetting admin user with email: your-email@example.com
-2025-11-05T23:27:42.139402921Z [inf]  Looking for existing admin user with email: your-email@example.com
-2025-11-05T23:27:42.139407595Z [inf]  Found existing user. Resetting password and settings...
-2025-11-05T23:27:42.239133041Z [inf]  Password: your-secure-password
-2025-11-05T23:27:42.239142231Z [inf]  =================================
-2025-11-05T23:27:42.239222635Z [inf]  Password and settings updated for user: your-email@example.com
-2025-11-05T23:27:42.239229524Z [inf]  
-2025-11-05T23:27:42.239236832Z [inf]  =================================
-2025-11-05T23:27:42.239243073Z [inf]  Admin credentials:
-2025-11-05T23:27:42.239248592Z [inf]  Email: your-email@example.com
-2025-11-05T23:27:42.248961042Z [inf]  Verifying user settings...
-2025-11-05T23:27:43.248467448Z [inf]  User has 2 settingslanguage: mk
-2025-11-05T23:27:43.248473753Z [inf]  currency: 74
-2025-11-05T23:27:43.394734803Z [inf]  Verification - profile_complete is now: COMPLETED
-2025-11-05T23:27:44.365131248Z [inf]  Number of users in database: 2
-2025-11-05T23:27:44.365136546Z [inf]  Database marker file created successfully
-2025-11-05T23:27:44.365142509Z [inf]  =================================
-2025-11-05T23:27:44.365147809Z [inf]  Installation bypass complete!
-2025-11-05T23:27:44.365154653Z [inf]  Login credentials:
-2025-11-05T23:27:44.365164033Z [inf]    Email: your-email@example.com
-2025-11-05T23:27:44.365171128Z [inf]    Password: your-secure-password
-2025-11-05T23:27:44.365178149Z [inf]  =================================
-2025-11-05T23:27:44.365185252Z [inf]  Running PartnerSeeder to ensure Partner records exist for admin users...
-2025-11-05T23:27:44.365193271Z [inf]  
-2025-11-05T23:27:44.365218326Z [inf]     INFO  Seeding database.  
-2025-11-05T23:27:44.365227462Z [inf]  
-2025-11-05T23:27:44.365235700Z [inf]  Starting Partner creation for admin/accountant users...
-2025-11-05T23:27:44.365243871Z [inf]  Partner already exists for user admin@invoiceshelf.com (ID: 1)
-2025-11-05T23:27:44.365250755Z [inf]  Partner already exists for user your-email@example.com (ID: 2)
-2025-11-05T23:27:44.365258341Z [inf]  Partner seeding completed!
-2025-11-05T23:27:44.365265718Z [inf]  Total users processed: 2
-2025-11-05T23:27:44.365273067Z [inf]  Partners created: 0
-2025-11-05T23:27:44.365281619Z [inf]  Partners skipped (already exist): 2
-2025-11-05T23:27:44.365288176Z [inf]  IFRS accounting feature enabled - ensuring chart of accounts...
-2025-11-05T23:27:45.224452334Z [inf]  
-2025-11-05T23:27:45.224456872Z [inf]     INFO  Seeding database.  
-2025-11-05T23:27:45.224460803Z [inf]  
-2025-11-05T23:27:45.224465047Z [inf]  Seeding Macedonian Chart of Accounts...
-2025-11-05T23:27:45.224469570Z [inf]  Seeding chart of accounts for company: xyz
-2025-11-05T23:27:45.224474099Z [inf]    → 2025 reporting period already exists
-2025-11-05T23:27:45.224478325Z [inf]  Asset accounts seeded (1000-1999)
-2025-11-05T23:27:45.224482699Z [inf]  Liability accounts seeded (2000-2999)
-2025-11-05T23:27:45.224486607Z [inf]  Equity accounts seeded (3000-3999)
-2025-11-05T23:27:45.224490488Z [inf]  Revenue accounts seeded (4000-4999)
-2025-11-05T23:27:45.224494360Z [inf]  Expense accounts seeded (5000-5999)
-2025-11-05T23:27:45.224498326Z [inf]  Seeding chart of accounts for company: Teknomed DOO
-2025-11-05T23:27:45.224503269Z [inf]    → 2025 reporting period already exists
-2025-11-05T23:27:45.224509164Z [inf]  Asset accounts seeded (1000-1999)
-2025-11-05T23:27:45.224513744Z [inf]  Liability accounts seeded (2000-2999)
-2025-11-05T23:27:45.224518330Z [inf]  Equity accounts seeded (3000-3999)
-2025-11-05T23:27:45.224522403Z [inf]  Revenue accounts seeded (4000-4999)
-2025-11-05T23:27:45.224526849Z [inf]  Expense accounts seeded (5000-5999)
-2025-11-05T23:27:45.224531147Z [inf]  Macedonian Chart of Accounts seeded successfully!
-2025-11-05T23:27:45.224535393Z [inf]  Skipping config cache to allow dynamic environment variables...
-2025-11-05T23:27:45.224544952Z [inf]  Creating storage link...
-2025-11-05T23:27:45.245979313Z [inf]  
-2025-11-05T23:27:45.245991383Z [inf]     INFO  The [public/storage] link has been connected to [storagepublic].  
-2025-11-05T23:27:45.246000847Z [inf]  
-2025-11-05T23:27:45.261459460Z [inf]  REDIS_CLIENT: 
-2025-11-05T23:27:45.261471486Z [inf]  BROADCAST_DRIVER: log
-2025-11-05T23:27:45.261481531Z [inf]  Checking frontend build assets...
-2025-11-05T23:27:45.261582109Z [inf]  === Final Environment Check ===
-2025-11-05T23:27:45.261587781Z [inf]  CACHE_STORE: file
-2025-11-05T23:27:45.261593706Z [inf]  CACHE_DRIVER: file
-2025-11-05T23:27:45.261600489Z [inf]  QUEUE_CONNECTION: sync
-2025-11-05T23:27:45.261606252Z [inf]  SESSION_DRIVER: file
-2025-11-05T23:27:45.263621581Z [inf]  Build assets directory exists with 167 files
-2025-11-05T23:27:45.268539225Z [inf]  total 7.6M
-2025-11-05T23:27:45.268543987Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  5 23:25 404-DPm2Jn1o.js
-2025-11-05T23:27:45.268549045Z [inf]  -rw-r--r-- 1 root root 4.3K Nov  5 23:25 AccountSetting-H-kQo482.js
-2025-11-05T23:27:45.268554916Z [inf]  -rw-r--r-- 1 root root 7.3K Nov  5 23:25 AddressInformation-BbRZkxPR.js
-2025-11-05T23:27:45.268559855Z [inf]  -rw-r--r-- 1 root root 7.2K Nov  5 23:25 AiInsightsSetting-CF7ye6E_.js
-2025-11-05T23:27:45.268564707Z [inf]  -rw-r--r-- 1 root root 5.9K Nov  5 23:25 AstronautIcon-Bpc9NjYb.js
-2025-11-05T23:27:45.268569972Z [inf]  -rw-r--r-- 1 root root 7.6K Nov  5 23:25 BackupSetting-XBi8tXGX.js
-2025-11-05T23:27:45.268575246Z [inf]  -rw-r--r-- 1 root root  24K Nov  5 23:25 BankingDashboard-7LNjfvsl.js
-2025-11-05T23:27:45.268581872Z [inf]  -rw-r--r-- 1 root root 324K Nov  5 23:25 BaseEditor-Ccf5uP4b.js
-2025-11-05T23:27:45.268588567Z [inf]  -rw-r--r-- 1 root root 1.2K Nov  5 23:25 BaseEditor-FtAAJv83.css
-2025-11-05T23:27:45.268595378Z [inf]  Starting PHP server on port 8080...
-2025-11-05T23:27:45.268601988Z [inf]  Laravel logs will be written to storage/logs/laravel.log
-2025-11-05T23:27:45.307459272Z [inf]  [Wed Nov  5 23:27:45 2025] PHP 8.2.27 Development Server (http://0.0.0.0:8080) started
+[2025-11-12 22:27:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:27:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:27:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-12 22:27:47] production.WARNING: Slow operation detected {"operation":"req_691509e2ad7e4","execution_time_ms":622.38,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
+[2025-11-12 22:27:47] production.WARNING: Slow request detected {"operation":"req_691509e2ad7e4","execution_time_ms":622.38,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-12 22:27:54] production.INFO: [ImportController] Upload started {"has_file":true,"type":"universal_migration","user_id":2} 
+[2025-11-12 22:27:54] production.ERROR: Attempt to read property "id" on null {"userId":2,"exception":"[object] (ErrorException(code: 0): Attempt to read property \"id\" on null at /var/www/html/app/Http/Controllers/V1/Admin/Imports/ImportController.php:42)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Attempt to read...', '/var/www/html/a...', 42)
+#1 /var/www/html/app/Http/Controllers/V1/Admin/Imports/ImportController.php(42): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'Attempt to read...', '/var/www/html/a...', 42)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Imports\\ImportController->store(Object(Illuminate\\Http\\Request))
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('store', Array)
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Imports\\ImportController), 'store')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#15 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#28 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#40 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#42 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#73 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#74 {main}
+"} 
