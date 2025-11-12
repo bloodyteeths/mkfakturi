@@ -53,9 +53,9 @@ class CertUploadController extends Controller
 
             if (!$certificate) {
                 return response()->json([
-                    'data' => null,
+                    'data' => [], // Return empty array for dropdown compatibility
                     'message' => __('certificates.no_certificate_found')
-                ], 404); // Return 404 instead of 200 when no certificate found
+                ], 200); // Return 200 with empty array instead of 404
             }
 
             // Check if certificate file still exists
@@ -68,9 +68,9 @@ class CertUploadController extends Controller
                 ]);
             }
 
-            // Return certificate info from database (even if files are missing so user can delete it)
+            // Return certificate info from database as an array (for dropdown compatibility)
             return response()->json([
-                'data' => [
+                'data' => [[
                     'id' => $certificate->id,
                     'name' => $certificate->name,
                     'serial_number' => $certificate->serial_number,
@@ -79,6 +79,7 @@ class CertUploadController extends Controller
                     'issuer' => $certificate->issuer,
                     'valid_from' => $certificate->valid_from->toISOString(),
                     'valid_to' => $certificate->valid_to->toISOString(),
+                    'expires_at' => $certificate->valid_to->toISOString(), // Alias for compatibility
                     'algorithm' => $certificate->algorithm,
                     'key_size' => $certificate->key_size,
                     'is_active' => $certificate->is_active,
@@ -88,7 +89,7 @@ class CertUploadController extends Controller
                     'last_used_at' => $certificate->last_used_at?->toISOString(),
                     'uploaded_at' => $certificate->created_at->toISOString(),
                     'file_missing' => $fileMissing, // Flag to indicate missing files
-                ],
+                ]],
                 'message' => $fileMissing ? __('certificates.certificate_files_missing') : __('certificates.current_certificate_retrieved'),
                 'warning' => $fileMissing // Flag to show warning notification
             ]);
