@@ -35,11 +35,11 @@ class ImportController extends Controller
         }
 
         $user = $request->user();
-        $company = $user->company;
+        $companyId = $user->company_id;
 
         \Log::info('[ImportController] User and company loaded', [
             'user_id' => $user->id,
-            'company_id' => $company->id,
+            'company_id' => $companyId,
         ]);
 
         // Store the uploaded file
@@ -52,7 +52,7 @@ class ImportController extends Controller
         ]);
 
         try {
-            $path = $file->storeAs('imports/' . $company->id, $filename, 'local');
+            $path = $file->storeAs('imports/' . $companyId, $filename, 'local');
             \Log::info('[ImportController] File stored successfully', ['path' => $path]);
         } catch (\Exception $e) {
             \Log::error('[ImportController] File storage failed', [
@@ -65,7 +65,7 @@ class ImportController extends Controller
         // Create import job
         try {
             $importJob = ImportJob::create([
-                'company_id' => $company->id,
+                'company_id' => $companyId,
                 'user_id' => $user->id,
                 'type' => $request->type,
                 'file_path' => $path,
