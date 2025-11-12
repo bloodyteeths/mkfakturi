@@ -15,30 +15,75 @@ class ImportController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,xls,xlsx,xml|max:51200', // 50MB
-            'type' => 'required|string|in:universal_migration,customers,items,invoices,expenses',
+        \Log::info('[ImportController] Upload started', [
+            'has_file' => $request->hasFile('file'),
+            'type' => $request->input('type'),
+            'user_id' => $request->user()?->id,
         ]);
+
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:csv,xls,xlsx,xml|max:51200', // 50MB
+                'type' => 'required|string|in:universal_migration,customers,items,invoices,expenses',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('[ImportController] Validation failed', [
+                'error' => $e->getMessage(),
+                'errors' => $e->errors ?? []
+            ]);
+            throw $e;
+        }
 
         $user = $request->user();
         $company = $user->company;
 
+        \Log::info('[ImportController] User and company loaded', [
+            'user_id' => $user->id,
+            'company_id' => $company->id,
+        ]);
+
         // Store the uploaded file
         $file = $request->file('file');
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('imports/' . $company->id, $filename, 'local');
+        \Log::info('[ImportController] Storing file', [
+            'filename' => $filename,
+            'original_name' => $file->getClientOriginalName(),
+            'size' => $file->getSize(),
+        ]);
+
+        try {
+            $path = $file->storeAs('imports/' . $company->id, $filename, 'local');
+            \Log::info('[ImportController] File stored successfully', ['path' => $path]);
+        } catch (\Exception $e) {
+            \Log::error('[ImportController] File storage failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
 
         // Create import job
-        $importJob = ImportJob::create([
-            'company_id' => $company->id,
-            'user_id' => $user->id,
-            'type' => $request->type,
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
-            'status' => 'uploaded',
-            'step' => 1,
-        ]);
+        try {
+            $importJob = ImportJob::create([
+                'company_id' => $company->id,
+                'user_id' => $user->id,
+                'type' => $request->type,
+                'file_path' => $path,
+                'file_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+                'status' => 'uploaded',
+                'step' => 1,
+            ]);
+            \Log::info('[ImportController] ImportJob created', ['id' => $importJob->id]);
+        } catch (\Exception $e) {
+            \Log::error('[ImportController] ImportJob creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+
+        \Log::info('[ImportController] Upload completed successfully', ['import_id' => $importJob->id]);
 
         return response()->json([
             'success' => true,
