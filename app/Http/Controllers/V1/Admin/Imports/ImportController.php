@@ -35,7 +35,22 @@ class ImportController extends Controller
         }
 
         $user = $request->user();
+
+        \Log::info('[ImportController] CRITICAL - User loaded', [
+            'user_id' => $user->id,
+            'user_company_id_direct' => $user->company_id,
+            'user_attributes' => $user->getAttributes(),
+        ]);
+
         $companyId = $user->company_id;
+
+        if (!$companyId) {
+            \Log::error('[ImportController] CRITICAL - company_id is NULL', [
+                'user_id' => $user->id,
+                'user_dump' => $user->toArray(),
+            ]);
+            throw new \Exception('User has no company_id assigned');
+        }
 
         // Map universal_migration to complete type for database
         $importType = $request->type === 'universal_migration' ? 'complete' : $request->type;
@@ -43,6 +58,8 @@ class ImportController extends Controller
         \Log::info('[ImportController] User and company loaded', [
             'user_id' => $user->id,
             'company_id' => $companyId,
+            'import_type_requested' => $request->type,
+            'import_type_mapped' => $importType,
         ]);
 
         // Store the uploaded file
