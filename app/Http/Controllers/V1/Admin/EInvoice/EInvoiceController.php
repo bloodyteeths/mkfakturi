@@ -409,10 +409,11 @@ class EInvoiceController extends Controller
      */
     public function submit(int $id): JsonResponse
     {
-        $this->authorize('update', EInvoice::class);
-
         try {
             $eInvoice = EInvoice::whereCompany()->findOrFail($id);
+
+            // Authorize after loading the model
+            $this->authorize('update', $eInvoice);
 
             // Validate e-invoice is signed
             if (!$eInvoice->isSigned()) {

@@ -125,16 +125,18 @@ class MkXmlSigner
             
             // Get signature key info
             $objKey = $objDSig->locateKey();
-            
+
             if (!$objKey) {
                 Log::warning('No key found in XML signature');
                 return false;
             }
 
             // Load certificate if embedded in signature
-            $x509Certificate = $objDSig->locateX509Certificate();
-            if ($x509Certificate) {
-                $objKey->loadKey($x509Certificate, false, true);
+            // XMLSecurityDSig::staticLocateKeyInfo() returns the KeyInfo node
+            try {
+                XMLSecLibs\XMLSecurityDSig::staticLocateKeyInfo($objKey, $objDSig->sigNode);
+            } catch (\Exception $e) {
+                Log::warning('Failed to locate key info', ['error' => $e->getMessage()]);
             }
 
             // Verify signature
@@ -142,7 +144,6 @@ class MkXmlSigner
 
             Log::info('XML signature verification completed', [
                 'is_valid' => $isValid,
-                'has_certificate' => !empty($x509Certificate)
             ]);
 
             return $isValid;
