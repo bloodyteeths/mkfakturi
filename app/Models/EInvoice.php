@@ -260,7 +260,7 @@ class EInvoice extends Model
      */
     public function isSigned(): bool
     {
-        return in_array($this->status, [
+        return in_array(strtoupper($this->status), [
             self::STATUS_SIGNED,
             self::STATUS_SUBMITTED,
             self::STATUS_ACCEPTED,
