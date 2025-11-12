@@ -466,7 +466,11 @@ const deleteCertificate = async () => {
 const fetchCurrentCertificate = async () => {
   try {
     const response = await axios.get('/api/v1/certificates/current')
-    currentCertificate.value = response.data.data
+    // API returns array for dropdown compatibility, take first element
+    const certData = response.data.data
+    currentCertificate.value = Array.isArray(certData) && certData.length > 0
+      ? certData[0]
+      : null
 
     // Show warning if certificate files are missing
     if (response.data.warning && response.data.message) {
@@ -515,3 +519,4 @@ onMounted(() => {
 })
 </script>
 
+// CLAUDE-CHECKPOINT: Fixed array response handling from /api/v1/certificates/current
