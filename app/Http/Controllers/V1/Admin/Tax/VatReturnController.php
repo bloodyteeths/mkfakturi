@@ -120,11 +120,11 @@ class VatReturnController extends Controller
 
     /**
      * Generate and download VAT return XML
-     * 
+     *
      * @param Request $request
-     * @return Response
+     * @return Response|JsonResponse
      */
-    public function generate(Request $request): Response
+    public function generate(Request $request): Response|JsonResponse
     {
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
