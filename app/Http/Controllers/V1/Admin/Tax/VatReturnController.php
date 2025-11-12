@@ -51,6 +51,15 @@ class VatReturnController extends Controller
         Gate::authorize('view', $company);
 
         try {
+            // Validate VAT number is set
+            if (empty($company->vat_number)) {
+                return response()->json([
+                    'error' => 'VAT number required',
+                    'message' => 'Company VAT number must be set before generating VAT returns. Please update your company settings.',
+                    'action' => 'set_vat_number'
+                ], 422);
+            }
+
             // Parse dates
             $periodStart = Carbon::parse($validated['period_start']);
             $periodEnd = Carbon::parse($validated['period_end']);
@@ -113,6 +122,15 @@ class VatReturnController extends Controller
         Gate::authorize('view', $company);
 
         try {
+            // Validate VAT number is set
+            if (empty($company->vat_number)) {
+                return response()->json([
+                    'error' => 'VAT number required',
+                    'message' => 'Company VAT number must be set before generating VAT returns. Please update your company settings.',
+                    'action' => 'set_vat_number'
+                ], 422);
+            }
+
             // Parse dates
             $periodStart = Carbon::parse($validated['period_start']);
             $periodEnd = Carbon::parse($validated['period_end']);
@@ -236,17 +254,72 @@ class VatReturnController extends Controller
         Gate::authorize('view', $company);
 
         try {
-            // Mock data for VAT compliance status
+            $now = now();
+            $currentMonth = $now->startOfMonth();
+            $complianceAlerts = [];
+
+            // Check if VAT number is set
+            if (empty($company->vat_number)) {
+                $complianceAlerts[] = [
+                    'type' => 'warning',
+                    'severity' => 'high',
+                    'message' => 'VAT number not set for company. Please update company settings.',
+                    'action_required' => true
+                ];
+            }
+
+            // Get most recent filed tax return
+            $lastReturn = TaxReturn::where('company_id', $company->id)
+                ->where('return_type', TaxReturn::TYPE_VAT)
+                ->whereIn('status', [TaxReturn::STATUS_FILED, TaxReturn::STATUS_ACCEPTED])
+                ->orderBy('submitted_at', 'desc')
+                ->first();
+
+            // Get the most recent period (filed or open)
+            $lastPeriod = TaxReportPeriod::where('company_id', $company->id)
+                ->orderBy('end_date', 'desc')
+                ->first();
+
+            // Calculate next deadline (assume monthly, 15th of following month)
+            $nextDeadline = $currentMonth->copy()->addMonth()->day(15)->endOfDay();
+
+            // Determine compliance status
+            $currentStatus = 'unknown';
+            if ($lastReturn) {
+                $daysSinceLastFiling = $now->diffInDays($lastReturn->submitted_at);
+                if ($daysSinceLastFiling <= 45) { // Within last period + grace
+                    $currentStatus = 'compliant';
+                } else {
+                    $currentStatus = 'overdue';
+                    $complianceAlerts[] = [
+                        'type' => 'error',
+                        'severity' => 'critical',
+                        'message' => 'VAT return overdue. Last filing was ' . $daysSinceLastFiling . ' days ago.',
+                        'action_required' => true
+                    ];
+                }
+            } else {
+                $currentStatus = 'no_returns';
+                $complianceAlerts[] = [
+                    'type' => 'info',
+                    'severity' => 'medium',
+                    'message' => 'No VAT returns have been filed yet.',
+                    'action_required' => false
+                ];
+            }
+
             $status = [
-                'current_status' => 'compliant',
-                'last_generation' => '2024-12-15T10:30:00Z',
-                'return_period' => [
-                    'start' => '2024-12-01',
-                    'end' => '2024-12-31',
-                    'type' => 'MONTHLY'
-                ],
-                'compliance_alerts' => [],
-                'next_deadline' => '2025-01-31T23:59:59Z'
+                'current_status' => $currentStatus,
+                'last_generation' => $lastReturn ? $lastReturn->submitted_at->toIso8601String() : null,
+                'return_period' => $lastPeriod ? [
+                    'start' => $lastPeriod->start_date->format('Y-m-d'),
+                    'end' => $lastPeriod->end_date->format('Y-m-d'),
+                    'type' => strtoupper($lastPeriod->period_type),
+                    'status' => strtoupper($lastPeriod->status)
+                ] : null,
+                'compliance_alerts' => $complianceAlerts,
+                'next_deadline' => $nextDeadline->toIso8601String(),
+                'vat_number' => $company->vat_number
             ];
 
             return response()->json($status);

@@ -18,6 +18,21 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4">
+      <!-- VAT Number Warning -->
+      <div v-if="!currentCompany?.vat_number" class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-yellow-700">
+              <strong class="font-medium">{{ $t('vat.vat_number_required') }}</strong>
+              {{ $t('vat.vat_number_warning_message') }}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-white rounded-lg shadow">
         <div class="p-6">
           <!-- VAT Return Form -->

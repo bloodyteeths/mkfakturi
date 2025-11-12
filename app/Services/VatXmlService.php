@@ -333,7 +333,18 @@ class VatXmlService
                     ])
                     ->with(['taxes.taxType', 'items.taxes.taxType'])
                     ->get();
-                
+
+                // Check if any invoices were found
+                if ($invoices->isEmpty()) {
+                    throw new Exception(
+                        sprintf(
+                            "No paid invoices found for period %s to %s. Please ensure you have invoices marked as PAID within this period.",
+                            $this->periodStart->format('Y-m-d'),
+                            $this->periodEnd->format('Y-m-d')
+                        )
+                    );
+                }
+
                 foreach ($invoices as $invoice) {
                     // Process invoice-level taxes
                     foreach ($invoice->taxes as $tax) {
@@ -358,12 +369,12 @@ class VatXmlService
                     }
                 }
             } catch (Exception $e) {
-                // Fallback to sample data for testing
-                $vatData = $this->getSampleVatData();
+                // Re-throw exception with context
+                throw new Exception("Failed to calculate VAT from invoices: " . $e->getMessage(), 0, $e);
             }
         } else {
-            // Use sample data for testing or when no database access
-            $vatData = $this->getSampleVatData();
+            // No database access or company not set
+            throw new Exception("Cannot calculate VAT: Company not properly initialized or database not accessible");
         }
         
         return $vatData;
