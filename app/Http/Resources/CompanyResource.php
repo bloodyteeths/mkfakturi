@@ -13,7 +13,7 @@ class CompanyResource extends JsonResource
      */
     public function toArray($request): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'name' => $this->name,
             'vat_id' => $this->vat_id,
@@ -31,5 +31,16 @@ class CompanyResource extends JsonResource
                 return RoleResource::collection($this->roles);
             }),
         ];
+
+        // Log what we're returning to frontend
+        \Log::info('CompanyResource::toArray - Returning to frontend', [
+            'company_id' => $this->id,
+            'vat_id' => $this->vat_id,
+            'vat_number_raw' => $this->vat_number,
+            'vat_number_returned' => $data['vat_number'],
+            'tax_id' => $this->tax_id,
+        ]);
+
+        return $data;
     }
 }

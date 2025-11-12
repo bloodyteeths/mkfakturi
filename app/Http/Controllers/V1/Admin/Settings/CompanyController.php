@@ -50,7 +50,28 @@ class CompanyController extends Controller
 
         $this->authorize('manage company', $company);
 
-        $company->update($request->getCompanyPayload());
+        $payload = $request->getCompanyPayload();
+
+        // Log the payload being saved
+        \Log::info('CompanyController::updateCompany - Payload', [
+            'company_id' => $company->id,
+            'payload' => $payload,
+            'vat_id' => $payload['vat_id'] ?? null,
+            'vat_number' => $payload['vat_number'] ?? null,
+        ]);
+
+        $company->update($payload);
+
+        // Reload to get fresh data
+        $company->refresh();
+
+        // Log what was actually saved
+        \Log::info('CompanyController::updateCompany - After Save', [
+            'company_id' => $company->id,
+            'vat_id' => $company->vat_id,
+            'vat_number' => $company->vat_number,
+            'tax_id' => $company->tax_id,
+        ]);
 
         $company->address()->updateOrCreate(['company_id' => $company->id], $request->address);
 

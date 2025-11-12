@@ -51,8 +51,25 @@ class VatReturnController extends Controller
         Gate::authorize('view', $company);
 
         try {
+            // Log company VAT info for debugging
+            \Log::info('VatReturnController::preview - Company VAT Check', [
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+                'vat_number' => $company->vat_number,
+                'vat_id' => $company->vat_id,
+                'tax_id' => $company->tax_id,
+                'vat_number_empty' => empty($company->vat_number),
+                'vat_number_is_null' => is_null($company->vat_number),
+            ]);
+
             // Validate VAT number is set
             if (empty($company->vat_number)) {
+                \Log::warning('VatReturnController::preview - VAT number missing', [
+                    'company_id' => $company->id,
+                    'vat_number' => $company->vat_number,
+                    'vat_id' => $company->vat_id,
+                ]);
+
                 return response()->json([
                     'error' => 'VAT number required',
                     'message' => 'Company VAT number must be set before generating VAT returns. Please update your company settings.',
