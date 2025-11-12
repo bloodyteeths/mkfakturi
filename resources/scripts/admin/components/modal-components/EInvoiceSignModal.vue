@@ -165,15 +165,25 @@ async function setInitialData() {
 async function loadCertificates() {
   loadingCertificates.value = true
   try {
+    console.log('[EInvoiceSignModal] Loading certificates...')
     const response = await axios.get('/api/v1/certificates/current')
+    console.log('[EInvoiceSignModal] API Response:', response.data)
+
     certificates.value = response.data.data || []
+    console.log('[EInvoiceSignModal] Certificates loaded:', certificates.value)
+    console.log('[EInvoiceSignModal] Certificate count:', certificates.value.length)
 
     // Auto-select if only one certificate
     if (certificates.value.length === 1) {
       signForm.certificate_id = certificates.value[0].id
+      console.log('[EInvoiceSignModal] Auto-selected certificate ID:', signForm.certificate_id)
+    } else if (certificates.value.length === 0) {
+      console.warn('[EInvoiceSignModal] No certificates found!')
+      errorMessage.value = t('certificates.no_certificate')
     }
   } catch (error) {
-    console.error('Failed to load certificates:', error)
+    console.error('[EInvoiceSignModal] Failed to load certificates:', error)
+    console.error('[EInvoiceSignModal] Error details:', error.response?.data)
     errorMessage.value = t('e_invoice.failed_to_load_certificates')
   } finally {
     loadingCertificates.value = false
