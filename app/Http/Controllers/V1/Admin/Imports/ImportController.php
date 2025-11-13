@@ -115,15 +115,70 @@ class ImportController extends Controller
         $data = $importJob->toArray();
 
         if (!isset($data['detected_fields']) && $importJob->file_path) {
+            \Log::info('[ImportController] show() - detecting fields', [
+                'import_id' => $id,
+                'file_path' => $importJob->file_path,
+            ]);
+
             try {
                 $filePath = storage_path('app/' . $importJob->file_path);
 
+                \Log::info('[ImportController] File path constructed', [
+                    'file_path' => $filePath,
+                    'exists' => file_exists($filePath),
+                ]);
+
                 if (file_exists($filePath)) {
                     $file = fopen($filePath, 'r');
+
+                    // Read headers
                     $headers = fgetcsv($file);
+
+                    // Read sample rows
+                    $sampleRows = [];
+                    for ($i = 0; $i < 3 && !feof($file); $i++) {
+                        $row = fgetcsv($file);
+                        if ($row) {
+                            $sampleRows[] = $row;
+                        }
+                    }
+
                     fclose($file);
 
-                    $data['detected_fields'] = $headers ?: [];
+                    // Transform headers into objects with metadata
+                    $detectedFields = [];
+                    if ($headers) {
+                        foreach ($headers as $index => $headerName) {
+                            // Collect sample values for this column
+                            $samples = [];
+                            foreach ($sampleRows as $row) {
+                                if (isset($row[$index])) {
+                                    $samples[] = $row[$index];
+                                }
+                            }
+
+                            $detectedFields[] = [
+                                'name' => $headerName,
+                                'type' => 'string',
+                                'sample_data' => $samples,
+                                'index' => $index,
+                            ];
+                        }
+                    }
+
+                    $data['detected_fields'] = $detectedFields;
+                    $data['mapping_suggestions'] = [];
+                    $data['auto_mapping_confidence'] = 0;
+
+                    \Log::info('[ImportController] Fields detected successfully', [
+                        'count' => count($detectedFields),
+                        'field_names' => array_column($detectedFields, 'name'),
+                    ]);
+                } else {
+                    \Log::warning('[ImportController] File not found', [
+                        'file_path' => $filePath,
+                    ]);
+                    $data['detected_fields'] = [];
                     $data['mapping_suggestions'] = [];
                     $data['auto_mapping_confidence'] = 0;
                 }
@@ -131,6 +186,7 @@ class ImportController extends Controller
                 \Log::error('[ImportController] Field detection failed', [
                     'import_id' => $id,
                     'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                 ]);
                 $data['detected_fields'] = [];
                 $data['mapping_suggestions'] = [];
