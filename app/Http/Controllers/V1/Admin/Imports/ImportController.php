@@ -666,8 +666,14 @@ class ImportController extends Controller
 
                 if (empty($data['email'])) {
                     $errors[] = "Row {$rowNumber}: Email is required";
-                } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-                    $errors[] = "Row {$rowNumber}: Invalid email format";
+                } else {
+                    // Validate email format with support for internationalized domain names (IDN)
+                    $email = trim($data['email']);
+
+                    // Basic email structure validation: contains @ and domain part
+                    if (!preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/', $email)) {
+                        $errors[] = "Row {$rowNumber}: Invalid email format";
+                    }
                 }
 
                 // Optional field warnings
