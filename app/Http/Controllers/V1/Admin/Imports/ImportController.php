@@ -366,22 +366,218 @@ class ImportController extends Controller
         $importJob = ImportJob::where('company_id', $request->header('company'))
             ->findOrFail($id);
 
-        // TODO: Implement actual import logic
+        \Log::info('[ImportController] commit() started', [
+            'import_id' => $id,
+            'type' => $importJob->type,
+            'file_path' => $importJob->file_path,
+        ]);
+
         $importJob->update([
             'status' => 'committing',
             'started_at' => now(),
         ]);
 
-        // Simulate processing (in production, this would be a queued job)
-        $importJob->update([
-            'status' => 'completed',
-            'completed_at' => now(),
+        try {
+            $filePath = storage_path('app/' . $importJob->file_path);
+
+            if (!file_exists($filePath)) {
+                throw new \Exception('File not found: ' . $filePath);
+            }
+
+            // Read CSV and apply field mappings
+            $file = fopen($filePath, 'r');
+            $headers = fgetcsv($file);
+
+            $mappingConfig = $importJob->mapping_config ?? [];
+            $successCount = 0;
+            $failCount = 0;
+            $errors = [];
+
+            \DB::beginTransaction();
+
+            while (($row = fgetcsv($file)) !== false) {
+                try {
+                    // Map CSV row to target fields
+                    $mappedData = [];
+                    foreach ($headers as $index => $csvField) {
+                        $targetField = $mappingConfig[$csvField] ?? null;
+                        if ($targetField && isset($row[$index])) {
+                            $mappedData[$targetField] = $row[$index];
+                        }
+                    }
+
+                    // Import based on type
+                    $this->importRecord($importJob->type, $mappedData, $request->header('company'), $request->user()->id);
+                    $successCount++;
+
+                } catch (\Exception $e) {
+                    $failCount++;
+                    $errors[] = [
+                        'row' => $successCount + $failCount,
+                        'error' => $e->getMessage(),
+                    ];
+                    \Log::error('[ImportController] Record import failed', [
+                        'row' => $successCount + $failCount,
+                        'error' => $e->getMessage(),
+                        'data' => $mappedData ?? [],
+                    ]);
+                }
+            }
+
+            fclose($file);
+            \DB::commit();
+
+            $importJob->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'successful_records' => $successCount,
+                'failed_records' => $failCount,
+                'processed_records' => $successCount + $failCount,
+                'error_details' => $errors,
+            ]);
+
+            \Log::info('[ImportController] commit() completed', [
+                'import_id' => $id,
+                'successful_records' => $successCount,
+                'failed_records' => $failCount,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $importJob->fresh(),
+            ]);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            \Log::error('[ImportController] commit() failed', [
+                'import_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            $importJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Import a single record based on type
+     */
+    private function importRecord($type, $data, $companyId, $creatorId)
+    {
+        switch ($type) {
+            case 'customers':
+            case 'complete':
+                return $this->importCustomer($data, $companyId, $creatorId);
+
+            case 'invoices':
+                return $this->importInvoice($data, $companyId, $creatorId);
+
+            case 'items':
+                return $this->importItem($data, $companyId, $creatorId);
+
+            case 'payments':
+                return $this->importPayment($data, $companyId, $creatorId);
+
+            case 'expenses':
+                return $this->importExpense($data, $companyId, $creatorId);
+
+            default:
+                throw new \Exception('Unsupported import type: ' . $type);
+        }
+    }
+
+    /**
+     * Import a customer record
+     */
+    private function importCustomer($data, $companyId, $creatorId)
+    {
+        // Get or create currency
+        $currencyCode = $data['currency'] ?? 'MKD';
+        $currency = \App\Models\Currency::where('code', $currencyCode)->first();
+
+        if (!$currency) {
+            $currency = \App\Models\Currency::where('code', 'MKD')->first();
+        }
+
+        // Create customer
+        $customer = \App\Models\Customer::create([
+            'name' => $data['name'],
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'website' => $data['website'] ?? null,
+            'company_id' => $companyId,
+            'creator_id' => $creatorId,
+            'currency_id' => $currency ? $currency->id : null,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => $importJob->fresh(),
+        // Create billing address if address data exists
+        if (!empty($data['billing_address_street_1']) || !empty($data['address'])) {
+            \App\Models\Address::create([
+                'name' => $data['name'],
+                'address_street_1' => $data['billing_address_street_1'] ?? $data['address'] ?? null,
+                'address_street_2' => $data['billing_address_street_2'] ?? null,
+                'city' => $data['billing_address_city'] ?? null,
+                'state' => $data['billing_address_state'] ?? null,
+                'zip' => $data['billing_address_zip'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'type' => 'billing',
+                'user_id' => $customer->id,
+                'company_id' => $companyId,
+            ]);
+        }
+
+        \Log::info('[ImportController] Customer imported', [
+            'customer_id' => $customer->id,
+            'name' => $customer->name,
         ]);
+
+        return $customer;
+    }
+
+    /**
+     * Import an invoice record
+     */
+    private function importInvoice($data, $companyId, $creatorId)
+    {
+        // TODO: Implement invoice import
+        throw new \Exception('Invoice import not yet implemented');
+    }
+
+    /**
+     * Import an item record
+     */
+    private function importItem($data, $companyId, $creatorId)
+    {
+        // TODO: Implement item import
+        throw new \Exception('Item import not yet implemented');
+    }
+
+    /**
+     * Import a payment record
+     */
+    private function importPayment($data, $companyId, $creatorId)
+    {
+        // TODO: Implement payment import
+        throw new \Exception('Payment import not yet implemented');
+    }
+
+    /**
+     * Import an expense record
+     */
+    private function importExpense($data, $companyId, $creatorId)
+    {
+        // TODO: Implement expense import
+        throw new \Exception('Expense import not yet implemented');
     }
 
     /**
@@ -536,5 +732,4 @@ class ImportController extends Controller
         return $suggestions;
     }
 }
-// CLAUDE-CHECKPOINT
 // CLAUDE-CHECKPOINT
