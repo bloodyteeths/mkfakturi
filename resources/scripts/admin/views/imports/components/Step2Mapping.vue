@@ -417,7 +417,22 @@ const mappedFieldsCount = computed(() => {
 
 const requiredFieldsMissing = computed(() => {
   const mappedTargets = Object.values(importStore.fieldMappings)
-  const requiredFields = ['customer_name', 'invoice_number', 'invoice_date', 'total_amount', 'item_name', 'quantity', 'unit_price']
+
+  // Get import type from importJob
+  const importType = importStore.importJob?.type || 'customers'
+
+  // Define required fields for each import type (same as store validation)
+  const requiredFieldsByType = {
+    customers: ['name', 'email'],
+    invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total'],
+    items: ['name', 'price'],
+    payments: ['payment_date', 'amount'],
+    expenses: ['expense_date', 'amount'],
+  }
+
+  // Get required fields for current import type
+  const requiredFields = requiredFieldsByType[importType] || []
+
   return requiredFields.filter(field => !mappedTargets.includes(field)).length
 })
 
