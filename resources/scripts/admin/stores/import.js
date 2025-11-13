@@ -192,8 +192,6 @@ export const useImportStore = defineStore('import', {
             isUploading: this.isUploading,
           })
 
-          this.updateCanProceed()
-
           const notificationStore = useNotificationStore()
           const { global } = window.i18n
           notificationStore.showNotification({
@@ -209,6 +207,8 @@ export const useImportStore = defineStore('import', {
           throw error
         } finally {
           this.isUploading = false
+          // Update canProceed AFTER isUploading is set to false
+          this.updateCanProceed()
         }
       },
 
