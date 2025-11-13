@@ -373,7 +373,7 @@ class IntelligentFieldMapper
     {
         $analysis = [];
 
-        foreach ($csvHeaders as $field) {
+        foreach ($csvHeaders as $index => $field) {
             // Extract sample values for this field
             $sampleValues = array_map(function ($row) use ($field) {
                 return $row[$field] ?? null;
@@ -385,7 +385,12 @@ class IntelligentFieldMapper
             });
 
             // Use field analyzer to detect data type and patterns
-            $analysis[$field] = $this->analyzer->analyze($field, $sampleValues);
+            $analysis[$field] = $this->analyzer->analyze(
+                $field,
+                $sampleValues,
+                $index,
+                $csvHeaders
+            );
         }
 
         return $analysis;
