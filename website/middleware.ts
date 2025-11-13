@@ -11,7 +11,15 @@ function getLocale(pathname: string): Locale | null {
 }
 
 export function middleware(request: Request) {
-  const { pathname } = new URL(request.url)
+  const url = new URL(request.url)
+  const { pathname } = url
+
+  // 1) Canonical domain: redirect www.facturino.mk -> facturino.mk (301)
+  const host = (request.headers.get('host') || '').toLowerCase()
+  if (host === 'www.facturino.mk') {
+    url.hostname = 'facturino.mk'
+    return NextResponse.redirect(url, 301)
+  }
 
   // Ignore next internal assets and API routes
   if (
@@ -24,9 +32,9 @@ export function middleware(request: Request) {
 
   const locale = getLocale(pathname)
   if (!locale) {
-    const url = new URL(request.url)
-    url.pathname = `/${defaultLocale}${pathname}`
-    return NextResponse.redirect(url)
+    const r = new URL(request.url)
+    r.pathname = `/${defaultLocale}${pathname}`
+    return NextResponse.redirect(r)
   }
 
   return NextResponse.next()
@@ -35,4 +43,3 @@ export function middleware(request: Request) {
 export const config = {
   matcher: ['/((?!_next|.*\.).*)'],
 }
-
