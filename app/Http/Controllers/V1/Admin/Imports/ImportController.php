@@ -237,24 +237,125 @@ class ImportController extends Controller
         $importJob = ImportJob::where('company_id', $request->header('company'))
             ->findOrFail($id);
 
-        // TODO: Implement validation logic
-        $validationResults = [
-            'total_records' => 10,
-            'valid_records' => 9,
-            'invalid_records' => 1,
-            'errors' => [],
-            'warnings' => [],
+        \Log::info('[ImportController] validateData() called', [
+            'import_id' => $id,
+            'file_path' => $importJob->file_path,
+        ]);
+
+        try {
+            $filePath = storage_path('app/' . $importJob->file_path);
+
+            if (!file_exists($filePath)) {
+                throw new \Exception('File not found: ' . $filePath);
+            }
+
+            // Read and parse CSV
+            $file = fopen($filePath, 'r');
+            $headers = fgetcsv($file);
+
+            $records = [];
+            $rowNumber = 1;
+
+            while (($row = fgetcsv($file)) !== false) {
+                $recordData = [];
+                foreach ($headers as $index => $header) {
+                    $recordData[$header] = $row[$index] ?? '';
+                }
+
+                // Validate this record
+                $validation = $this->validateRecord($recordData, $rowNumber);
+
+                $records[] = [
+                    'row_number' => $rowNumber,
+                    'data' => $recordData,
+                    'has_errors' => !empty($validation['errors']),
+                    'has_warnings' => !empty($validation['warnings']),
+                    'errors' => $validation['errors'],
+                    'warnings' => $validation['warnings'],
+                ];
+
+                $rowNumber++;
+            }
+
+            fclose($file);
+
+            // Calculate statistics
+            $totalRecords = count($records);
+            $invalidRecords = count(array_filter($records, fn($r) => $r['has_errors']));
+            $validRecords = $totalRecords - $invalidRecords;
+
+            $validationResults = [
+                'total_records' => $totalRecords,
+                'valid_records' => $validRecords,
+                'invalid_records' => $invalidRecords,
+                'errors' => [],
+                'warnings' => [],
+                'preview' => $records,
+            ];
+
+            \Log::info('[ImportController] Validation completed', [
+                'total_records' => $totalRecords,
+                'valid_records' => $validRecords,
+                'invalid_records' => $invalidRecords,
+            ]);
+
+            $importJob->update([
+                'total_records' => $totalRecords,
+                'validation_rules' => $validationResults,
+                'status' => 'validated',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $validationResults,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('[ImportController] Validation failed', [
+                'import_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Validate a single record
+     */
+    private function validateRecord($data, $rowNumber)
+    {
+        $errors = [];
+        $warnings = [];
+
+        // Required field validation
+        if (empty($data['name'])) {
+            $errors[] = "Row {$rowNumber}: Name is required";
+        }
+
+        if (empty($data['email'])) {
+            $errors[] = "Row {$rowNumber}: Email is required";
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Row {$rowNumber}: Invalid email format";
+        }
+
+        // Optional field warnings
+        if (empty($data['phone'])) {
+            $warnings[] = "Row {$rowNumber}: Phone number is missing";
+        }
+
+        if (empty($data['vat_number'])) {
+            $warnings[] = "Row {$rowNumber}: VAT number is missing";
+        }
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
         ];
-
-        $importJob->update([
-            'validation_rules' => $validationResults,
-            'status' => 'validating',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'data' => $validationResults,
-        ]);
     }
 
     /**
@@ -435,4 +536,5 @@ class ImportController extends Controller
         return $suggestions;
     }
 }
+// CLAUDE-CHECKPOINT
 // CLAUDE-CHECKPOINT

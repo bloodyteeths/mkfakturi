@@ -327,15 +327,10 @@ const handleNext = async () => {
         // Auto-detect fields when moving from upload to mapping
         await importStore.detectFields()
         break
-        
+
       case 2:
         // Save mapping when moving from mapping to validation
         await importStore.saveMapping()
-        break
-        
-      case 3:
-        // Validate data when moving from mapping to validation
-        await importStore.validateData()
         break
     }
     

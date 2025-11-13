@@ -396,7 +396,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 // Components
@@ -415,6 +415,13 @@ const importStore = useImportStore()
 
 // Local state
 const showFullPreview = ref(false)
+
+// Auto-trigger validation when entering Step 3
+onMounted(async () => {
+  if (!importStore.validationResults && !importStore.isValidating) {
+    await startValidation()
+  }
+})
 
 // Computed
 const hasErrors = computed(() => importStore.validationErrors.length > 0)
@@ -445,7 +452,7 @@ const previewFields = computed(() => {
   const sampleRecord = importStore.validationResults.preview[0]
   if (!sampleRecord) return []
   
-  return Object.keys(sampleRecord.data).slice(0, showFullPreview.value ? -1 : 5)
+  return Object.keys(sampleRecord.data).slice(0, showFullPreview.value ? undefined : 5)
 })
 
 const previewRecords = computed(() => {
