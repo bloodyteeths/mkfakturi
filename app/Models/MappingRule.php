@@ -331,11 +331,15 @@ class MappingRule extends Model
             }
         }
 
-        // Check language variations
+        // Check language variations (nested structure: ["en" => [...], "mk" => [...]])
         if (!empty($this->language_variations)) {
-            foreach ($this->language_variations as $variation) {
-                if (strtolower($variation) === strtolower($sourceField)) {
-                    return true;
+            foreach ($this->language_variations as $lang => $variations) {
+                if (is_array($variations)) {
+                    foreach ($variations as $variation) {
+                        if (is_string($variation) && strtolower($variation) === strtolower($sourceField)) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
