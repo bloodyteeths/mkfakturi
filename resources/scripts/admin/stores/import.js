@@ -326,12 +326,10 @@ export const useImportStore = defineStore('import', {
 
         try {
           const response = await axios.post(`/api/v1/admin/imports/${this.importId}/validate`)
-          
+
           this.validationResults = response.data.data
           this.validationErrors = response.data.data.errors || []
           this.validationWarnings = response.data.data.warnings || []
-
-          this.updateCanProceed()
 
           // Start polling for validation progress if still processing
           if (response.data.data.status === 'validating') {
@@ -346,6 +344,8 @@ export const useImportStore = defineStore('import', {
           throw error
         } finally {
           this.isValidating = false
+          // Update canProceed AFTER isValidating is set to false
+          this.updateCanProceed()
         }
       },
 
