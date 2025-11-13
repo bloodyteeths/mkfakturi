@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Facturino — AI + e‑Faktura platform",
   description: "Most advanced AI‑powered, e‑Faktura‑ready accounting platform for North Macedonia.",
+  icons: { icon: "/brand/facturino_logo.png" },
 };
 
 export default function RootLayout({
