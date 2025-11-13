@@ -93,14 +93,14 @@ class MappingRule extends Model
         return round($this->success_rate, 2);
     }
 
-    public function getIsSystemRuleAttribute()
+    public function getIsSystemRuleAttribute($value)
     {
-        return $this->is_system_rule;
+        return (bool) $value;
     }
 
-    public function getIsActiveAttribute()
+    public function getIsActiveAttribute($value)
     {
-        return $this->is_active;
+        return (bool) $value;
     }
 
     public function getHasTestCasesAttribute()
