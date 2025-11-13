@@ -169,7 +169,7 @@ class IntelligentFieldMapper
             $overallConfidence = $mappedFields > 0 ? $overallConfidence / $mappedFields : 0;
 
             // Generate quality score
-            $qualityScore = $this->scorer->calculateQuality($mappings, $entityType);
+            $qualityScore = $this->scorer->calculateQuality($mappings, $entityType, $totalFields, $companyId);
 
             // Compile results
             $result = [
