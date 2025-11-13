@@ -83,14 +83,19 @@ class ExactMatcher implements MatcherInterface
                 $alreadyAdded = collect($candidates)->contains('rule_id', $rule->id);
 
                 if (!$alreadyAdded) {
-                    foreach ($rule->language_variations as $variation) {
-                        if ($this->normalize($variation) === $normalizedCsvField) {
-                            $candidates[] = $this->buildCandidate(
-                                $rule->target_field,
-                                $variation,
-                                $rule->id
-                            );
-                            break; // Only add one candidate per rule
+                    // Flatten language_variations (it's a nested array: ["en" => [...], "mk" => [...]])
+                    foreach ($rule->language_variations as $lang => $variations) {
+                        if (is_array($variations)) {
+                            foreach ($variations as $variation) {
+                                if (is_string($variation) && $this->normalize($variation) === $normalizedCsvField) {
+                                    $candidates[] = $this->buildCandidate(
+                                        $rule->target_field,
+                                        $variation,
+                                        $rule->id
+                                    );
+                                    break 2; // Exit both loops - only add one candidate per rule
+                                }
+                            }
                         }
                     }
                 }
