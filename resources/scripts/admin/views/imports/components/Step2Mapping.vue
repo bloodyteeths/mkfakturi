@@ -378,38 +378,87 @@ const targetFieldOptions = computed(() => [
   { label: t('imports.field_payment_reference'), value: 'payment_reference' },
 ])
 
-const requiredFieldsCategories = computed(() => [
-  {
-    name: 'customers',
-    icon: 'UserIcon',
-    fields: [
-      { key: 'customer_name', required: true },
-      { key: 'customer_email', required: false },
-      { key: 'customer_phone', required: false },
-      { key: 'customer_tax_id', required: false },
-    ]
-  },
-  {
-    name: 'invoices',
-    icon: 'DocumentIcon',
-    fields: [
-      { key: 'invoice_number', required: true },
-      { key: 'invoice_date', required: true },
-      { key: 'total_amount', required: true },
-      { key: 'due_date', required: false },
-    ]
-  },
-  {
-    name: 'items',
-    icon: 'CubeIcon',
-    fields: [
-      { key: 'item_name', required: true },
-      { key: 'quantity', required: true },
-      { key: 'unit_price', required: true },
-      { key: 'tax_rate', required: false },
-    ]
-  },
-])
+const requiredFieldsCategories = computed(() => {
+  // Get import type from importJob
+  const importType = importStore.importJob?.type || 'customers'
+
+  // Define categories based on import type
+  const categoriesByType = {
+    customers: [
+      {
+        name: 'customers',
+        icon: 'UserIcon',
+        fields: [
+          { key: 'name', required: true },
+          { key: 'email', required: true },
+          { key: 'phone', required: false },
+          { key: 'address', required: false },
+          { key: 'vat_number', required: false },
+        ]
+      }
+    ],
+    invoices: [
+      {
+        name: 'invoices',
+        icon: 'DocumentIcon',
+        fields: [
+          { key: 'invoice_number', required: true },
+          { key: 'customer_name', required: true },
+          { key: 'invoice_date', required: true },
+          { key: 'total', required: true },
+          { key: 'due_date', required: false },
+          { key: 'subtotal', required: false },
+          { key: 'tax', required: false },
+          { key: 'status', required: false },
+          { key: 'currency', required: false },
+          { key: 'notes', required: false },
+        ]
+      }
+    ],
+    items: [
+      {
+        name: 'items',
+        icon: 'CubeIcon',
+        fields: [
+          { key: 'name', required: true },
+          { key: 'price', required: true },
+          { key: 'description', required: false },
+          { key: 'unit', required: false },
+          { key: 'tax_rate', required: false },
+        ]
+      }
+    ],
+    payments: [
+      {
+        name: 'payments',
+        icon: 'CashIcon',
+        fields: [
+          { key: 'payment_date', required: true },
+          { key: 'amount', required: true },
+          { key: 'payment_method', required: false },
+          { key: 'reference', required: false },
+          { key: 'customer_name', required: false },
+          { key: 'invoice_number', required: false },
+        ]
+      }
+    ],
+    expenses: [
+      {
+        name: 'expenses',
+        icon: 'ReceiptTaxIcon',
+        fields: [
+          { key: 'expense_date', required: true },
+          { key: 'amount', required: true },
+          { key: 'category', required: false },
+          { key: 'customer_name', required: false },
+          { key: 'notes', required: false },
+        ]
+      }
+    ],
+  }
+
+  return categoriesByType[importType] || categoriesByType.customers
+})
 
 const mappedFieldsCount = computed(() => {
   return Object.keys(importStore.fieldMappings).filter(field => importStore.fieldMappings[field]).length
