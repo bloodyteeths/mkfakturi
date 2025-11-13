@@ -4,12 +4,29 @@ namespace App\Http\Controllers\V1\Admin\Imports;
 
 use App\Http\Controllers\Controller;
 use App\Models\ImportJob;
+use App\Services\Import\ImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ImportController extends Controller
 {
+    /**
+     * Import service for intelligent field mapping
+     *
+     * @var ImportService
+     */
+    protected ImportService $importService;
+
+    /**
+     * Initialize controller with dependencies
+     *
+     * @param ImportService $importService Import service instance
+     */
+    public function __construct(ImportService $importService)
+    {
+        $this->importService = $importService;
+    }
     /**
      * Upload and create new import job
      */
@@ -166,9 +183,66 @@ class ImportController extends Controller
                         }
                     }
 
-                    // Generate mapping suggestions based on import type
-                    $mappingSuggestions = $this->generateMappingSuggestions($detectedFields, $importJob->type);
-                    $confidence = count($mappingSuggestions) / max(count($detectedFields), 1);
+                    // Check if intelligent mapping is enabled
+                    $intelligentEnabled = config('import.intelligent_enabled', false);
+
+                    if ($intelligentEnabled) {
+                        \Log::info('[ImportController] Using intelligent mapping system', [
+                            'import_id' => $id,
+                            'type' => $importJob->type,
+                        ]);
+
+                        try {
+                            // Use intelligent mapping service
+                            $intelligentResults = $this->importService->detectFieldsAndSuggestMappings(
+                                array_column($detectedFields, 'name'),
+                                $sampleRows,
+                                $importJob->type,
+                                $importJob->company_id
+                            );
+
+                            // Set mapping suggestions and confidence from intelligent system
+                            $mappingSuggestions = $intelligentResults['mapping_suggestions'];
+                            $confidence = $intelligentResults['overall_confidence'];
+
+                            // Store additional intelligent data in summary field
+                            $intelligentMetadata = [
+                                'intelligent_mapping' => true,
+                                'confidence_scores' => $intelligentResults['confidence_scores'] ?? [],
+                                'quality_score' => $intelligentResults['quality_score'] ?? 0,
+                                'quality_grade' => $intelligentResults['quality_grade'] ?? 'N/A',
+                                'statistics' => $intelligentResults['statistics'] ?? [],
+                                'recommendations' => $intelligentResults['recommendations'] ?? [],
+                            ];
+
+                            // Add to response data
+                            $data['intelligent_metadata'] = $intelligentMetadata;
+
+                            \Log::info('[ImportController] Intelligent mapping completed', [
+                                'mapped_fields' => count($mappingSuggestions),
+                                'confidence' => $confidence,
+                                'quality_grade' => $intelligentMetadata['quality_grade'],
+                            ]);
+
+                        } catch (\Exception $e) {
+                            \Log::error('[ImportController] Intelligent mapping failed, falling back to legacy', [
+                                'error' => $e->getMessage(),
+                            ]);
+
+                            // Fallback to legacy mapping
+                            $mappingSuggestions = $this->legacyMappingSuggestions(array_column($detectedFields, 'name'), $importJob->type);
+                            $confidence = count($mappingSuggestions) / max(count($detectedFields), 1);
+                        }
+                    } else {
+                        \Log::info('[ImportController] Using legacy mapping system', [
+                            'import_id' => $id,
+                            'type' => $importJob->type,
+                        ]);
+
+                        // Use legacy mapping logic
+                        $mappingSuggestions = $this->legacyMappingSuggestions(array_column($detectedFields, 'name'), $importJob->type);
+                        $confidence = count($mappingSuggestions) / max(count($detectedFields), 1);
+                    }
 
                     $data['detected_fields'] = $detectedFields;
                     $data['mapping_suggestions'] = $mappingSuggestions;
@@ -177,7 +251,7 @@ class ImportController extends Controller
                     \Log::info('[ImportController] Fields detected successfully', [
                         'count' => count($detectedFields),
                         'field_names' => array_column($detectedFields, 'name'),
-                        'suggestions' => $mappingSuggestions,
+                        'suggestions_count' => count($mappingSuggestions),
                         'confidence' => $data['auto_mapping_confidence'],
                     ]);
                 } else {
@@ -1442,8 +1516,35 @@ class ImportController extends Controller
     }
 
     /**
+     * Generate mapping suggestions using legacy hardcoded rules
+     *
+     * This method provides backward compatibility for when the intelligent
+     * mapping system is disabled. It uses hardcoded field mapping rules.
+     *
+     * @param array $csvHeaders Array of CSV field names (not objects)
+     * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
+     * @return array Mapping suggestions where CSV field name => target field name
+     */
+    private function legacyMappingSuggestions(array $csvHeaders, string $importType = 'customers'): array
+    {
+        // Convert headers to the format expected by the original method
+        $detectedFields = array_map(function ($header, $index) {
+            return [
+                'name' => $header,
+                'type' => 'string',
+                'sample_data' => [],
+                'index' => $index,
+            ];
+        }, $csvHeaders, array_keys($csvHeaders));
+
+        return $this->generateMappingSuggestions($detectedFields, $importType);
+    }
+
+    /**
      * Generate mapping suggestions based on field names and import type
      * Supports type-aware suggestions for customers, invoices, items, payments, and expenses
+     *
+     * LEGACY METHOD - Used only when intelligent mapping is disabled
      *
      * @param array $detectedFields Array of detected CSV field objects
      * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
@@ -1648,4 +1749,4 @@ class ImportController extends Controller
         return $suggestions;
     }
 }
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT - ImportService integration completed

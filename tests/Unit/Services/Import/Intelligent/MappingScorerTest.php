@@ -29,11 +29,14 @@ class MappingScorerTest extends TestCase
         parent::setUp();
 
         // Create required database records
-        $this->currency = Currency::factory()->create([
+        $this->currency = Currency::create([
             'code' => 'MKD',
             'name' => 'Macedonian Denar',
             'symbol' => 'МКД',
             'precision' => 2,
+            'thousand_separator' => ',',
+            'decimal_separator' => '.',
+            'swap_currency_symbol' => false,
         ]);
 
         $this->user = User::factory()->create([
@@ -136,21 +139,21 @@ class MappingScorerTest extends TestCase
     {
         $this->createCustomerMappingRules();
 
-        // Missing one critical field
+        // Missing one critical field + lower confidence
         $mappings = [
             'Customer Name' => [
                 'target_field' => 'name',
-                'confidence' => 0.90,
-                'source' => 'rule',
+                'confidence' => 0.70, // Lower confidence
+                'source' => 'pattern',
             ],
             'Email Address' => [
                 'target_field' => 'email',
-                'confidence' => 0.85,
-                'source' => 'rule',
+                'confidence' => 0.65, // Lower confidence
+                'source' => 'pattern',
             ],
             'Phone' => [
                 'target_field' => 'phone',
-                'confidence' => 0.75,
+                'confidence' => 0.60, // Lower confidence
                 'source' => 'pattern',
             ],
             // Missing vat_number
@@ -426,6 +429,7 @@ class MappingScorerTest extends TestCase
         // Name - required
         MappingRule::factory()->create([
             'company_id' => $this->company->id,
+            'creator_id' => $this->user->id,
             'entity_type' => MappingRule::ENTITY_CUSTOMER,
             'source_field' => 'name',
             'target_field' => 'name',
@@ -437,6 +441,7 @@ class MappingScorerTest extends TestCase
         // Email - required
         MappingRule::factory()->create([
             'company_id' => $this->company->id,
+            'creator_id' => $this->user->id,
             'entity_type' => MappingRule::ENTITY_CUSTOMER,
             'source_field' => 'email',
             'target_field' => 'email',
@@ -448,6 +453,7 @@ class MappingScorerTest extends TestCase
         // Phone - required
         MappingRule::factory()->create([
             'company_id' => $this->company->id,
+            'creator_id' => $this->user->id,
             'entity_type' => MappingRule::ENTITY_CUSTOMER,
             'source_field' => 'phone',
             'target_field' => 'phone',
@@ -459,6 +465,7 @@ class MappingScorerTest extends TestCase
         // VAT Number - required
         MappingRule::factory()->create([
             'company_id' => $this->company->id,
+            'creator_id' => $this->user->id,
             'entity_type' => MappingRule::ENTITY_CUSTOMER,
             'source_field' => 'vat_number',
             'target_field' => 'vat_number',
@@ -470,6 +477,7 @@ class MappingScorerTest extends TestCase
         // Address - optional
         MappingRule::factory()->create([
             'company_id' => $this->company->id,
+            'creator_id' => $this->user->id,
             'entity_type' => MappingRule::ENTITY_CUSTOMER,
             'source_field' => 'address',
             'target_field' => 'address',

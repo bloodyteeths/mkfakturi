@@ -21,7 +21,12 @@ class MappingRuleFactory extends Factory
      */
     public function definition(): array
     {
+        $sourceField = $this->faker->word();
+        $targetField = $this->faker->word();
+
         return [
+            'name' => ucfirst($sourceField) . ' to ' . ucfirst($targetField), // Human-readable name
+            'description' => $this->faker->sentence(),
             'company_id' => function () {
                 return Company::factory()->create()->id;
             },
@@ -36,8 +41,8 @@ class MappingRuleFactory extends Factory
                 MappingRule::ENTITY_EXPENSE,
             ]),
             'source_system' => $this->faker->randomElement(['csv', 'onivo', 'megasoft', null]),
-            'source_field' => $this->faker->word(),
-            'target_field' => $this->faker->word(),
+            'source_field' => $sourceField,
+            'target_field' => $targetField,
             'transformation_type' => MappingRule::TRANSFORM_DIRECT,
             'field_variations' => [],
             'transformation_config' => [],
