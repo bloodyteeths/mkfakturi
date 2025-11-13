@@ -166,8 +166,8 @@ class ImportController extends Controller
                         }
                     }
 
-                    // Generate mapping suggestions
-                    $mappingSuggestions = $this->generateMappingSuggestions($detectedFields);
+                    // Generate mapping suggestions based on import type
+                    $mappingSuggestions = $this->generateMappingSuggestions($detectedFields, $importJob->type);
                     $confidence = count($mappingSuggestions) / max(count($detectedFields), 1);
 
                     $data['detected_fields'] = $detectedFields;
@@ -549,8 +549,135 @@ class ImportController extends Controller
      */
     private function importInvoice($data, $companyId, $creatorId)
     {
-        // TODO: Implement invoice import
-        throw new \Exception('Invoice import not yet implemented');
+        // Lookup customer by name or email
+        $customer = null;
+
+        if (!empty($data['customer_name'])) {
+            $customer = \App\Models\Customer::where('company_id', $companyId)
+                ->where('name', $data['customer_name'])
+                ->first();
+        }
+
+        if (!$customer && !empty($data['customer_email'])) {
+            $customer = \App\Models\Customer::where('company_id', $companyId)
+                ->where('email', $data['customer_email'])
+                ->first();
+        }
+
+        // Handle customer not found
+        if (!$customer) {
+            throw new \Exception('Customer not found: ' . ($data['customer_name'] ?? $data['customer_email'] ?? 'unknown'));
+        }
+
+        // Get or create currency
+        $currencyCode = $data['currency'] ?? 'MKD';
+        $currency = \App\Models\Currency::where('code', $currencyCode)->first();
+
+        if (!$currency) {
+            $currency = \App\Models\Currency::where('code', 'MKD')->first();
+        }
+
+        if (!$currency) {
+            throw new \Exception('Currency not found: ' . $currencyCode);
+        }
+
+        // Parse dates
+        $invoiceDate = !empty($data['invoice_date'])
+            ? \Carbon\Carbon::parse($data['invoice_date'])
+            : now();
+
+        $dueDate = !empty($data['due_date'])
+            ? \Carbon\Carbon::parse($data['due_date'])
+            : now()->addDays(30);
+
+        // Convert amounts to integer (cents)
+        $total = !empty($data['total']) ? (int)round((float)$data['total'] * 100) : 0;
+        $subTotal = !empty($data['subtotal']) ? (int)round((float)$data['subtotal'] * 100) : $total;
+        $tax = !empty($data['tax']) ? (int)round((float)$data['tax'] * 100) : 0;
+
+        // Map status from CSV to valid invoice status
+        $status = $this->mapInvoiceStatus($data['status'] ?? 'DRAFT');
+        $paidStatus = $this->mapInvoicePaidStatus($data['status'] ?? 'DRAFT');
+
+        // Create invoice
+        $invoice = \App\Models\Invoice::create([
+            'invoice_number' => $data['invoice_number'] ?? 'INV-' . time(),
+            'invoice_date' => $invoiceDate,
+            'due_date' => $dueDate,
+            'customer_id' => $customer->id,
+            'company_id' => $companyId,
+            'creator_id' => $creatorId,
+            'currency_id' => $currency->id,
+            'total' => $total,
+            'sub_total' => $subTotal,
+            'tax' => $tax,
+            'due_amount' => $total, // Initially unpaid
+            'base_due_amount' => $total, // Assuming 1:1 exchange rate for simplicity
+            'status' => $status,
+            'paid_status' => $paidStatus,
+            'tax_per_item' => 'NO',
+            'discount_per_item' => 'NO',
+            'discount' => 0,
+            'discount_val' => 0,
+            'notes' => $data['notes'] ?? null,
+            'reference_number' => $data['reference_number'] ?? null,
+            'exchange_rate' => 1.0,
+            'sent' => in_array($status, [\App\Models\Invoice::STATUS_SENT, \App\Models\Invoice::STATUS_VIEWED, \App\Models\Invoice::STATUS_COMPLETED]),
+            'viewed' => in_array($status, [\App\Models\Invoice::STATUS_VIEWED]),
+        ]);
+
+        // Generate unique hash
+        $invoice->unique_hash = \Vinkla\Hashids\Facades\Hashids::connection(\App\Models\Invoice::class)->encode($invoice->id);
+        $invoice->save();
+
+        \Log::info('[ImportController] Invoice imported', [
+            'invoice_id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'customer_id' => $customer->id,
+            'total' => $total,
+        ]);
+
+        return $invoice;
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
+     * Map CSV status to valid Invoice status constant
+     */
+    private function mapInvoiceStatus($status)
+    {
+        $statusMap = [
+            'DRAFT' => \App\Models\Invoice::STATUS_DRAFT,
+            'SENT' => \App\Models\Invoice::STATUS_SENT,
+            'VIEWED' => \App\Models\Invoice::STATUS_VIEWED,
+            'COMPLETED' => \App\Models\Invoice::STATUS_COMPLETED,
+            'PAID' => \App\Models\Invoice::STATUS_COMPLETED,
+            'UNPAID' => \App\Models\Invoice::STATUS_SENT,
+            'OVERDUE' => \App\Models\Invoice::STATUS_SENT,
+        ];
+
+        $normalizedStatus = strtoupper(trim($status));
+        return $statusMap[$normalizedStatus] ?? \App\Models\Invoice::STATUS_DRAFT;
+    }
+
+    /**
+     * Map CSV status to valid Invoice paid_status constant
+     */
+    private function mapInvoicePaidStatus($status)
+    {
+        $paidStatusMap = [
+            'DRAFT' => \App\Models\Invoice::STATUS_UNPAID,
+            'SENT' => \App\Models\Invoice::STATUS_UNPAID,
+            'VIEWED' => \App\Models\Invoice::STATUS_UNPAID,
+            'COMPLETED' => \App\Models\Invoice::STATUS_PAID,
+            'PAID' => \App\Models\Invoice::STATUS_PAID,
+            'UNPAID' => \App\Models\Invoice::STATUS_UNPAID,
+            'PARTIALLY_PAID' => \App\Models\Invoice::STATUS_PARTIALLY_PAID,
+            'OVERDUE' => \App\Models\Invoice::STATUS_UNPAID,
+        ];
+
+        $normalizedStatus = strtoupper(trim($status));
+        return $paidStatusMap[$normalizedStatus] ?? \App\Models\Invoice::STATUS_UNPAID;
     }
 
     /**
@@ -558,18 +685,223 @@ class ImportController extends Controller
      */
     private function importItem($data, $companyId, $creatorId)
     {
-        // TODO: Implement item import
-        throw new \Exception('Item import not yet implemented');
+        // Validate required fields
+        if (empty($data['name'])) {
+            throw new \Exception('Item name is required');
+        }
+
+        if (empty($data['price'])) {
+            throw new \Exception('Item price is required');
+        }
+
+        // Convert price to cents (integer)
+        $priceInCents = (int) (floatval($data['price']) * 100);
+
+        // Get or create unit
+        $unitId = null;
+        if (!empty($data['unit'])) {
+            $unit = \App\Models\Unit::where('name', $data['unit'])
+                ->where(function ($q) use ($companyId) {
+                    $q->where('company_id', $companyId)
+                      ->orWhereNull('company_id');
+                })
+                ->first();
+
+            if (!$unit) {
+                // Create new unit for this company
+                $unit = \App\Models\Unit::create([
+                    'name' => $data['unit'],
+                    'company_id' => $companyId,
+                ]);
+            }
+
+            $unitId = $unit->id;
+        }
+
+        // Get currency (default to company's currency)
+        $currencyCode = $data['currency'] ?? 'MKD';
+        $currency = \App\Models\Currency::where('code', $currencyCode)->first();
+
+        if (!$currency) {
+            $currency = \App\Models\Currency::where('code', 'MKD')->first();
+        }
+
+        // Create item
+        $itemData = [
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'price' => $priceInCents,
+            'unit' => $data['unit'] ?? null,
+            'unit_id' => $unitId,
+            'company_id' => $companyId,
+            'creator_id' => $creatorId,
+            'currency_id' => $currency ? $currency->id : null,
+        ];
+
+        $item = \App\Models\Item::create($itemData);
+
+        // Handle tax if tax_type and tax_rate are provided
+        if (!empty($data['tax_type']) && !empty($data['tax_rate'])) {
+            $taxRate = floatval($data['tax_rate']);
+
+            // Find or create tax type
+            $taxType = \App\Models\TaxType::where('name', $data['tax_type'])
+                ->where('company_id', $companyId)
+                ->first();
+
+            if (!$taxType) {
+                $taxType = \App\Models\TaxType::create([
+                    'name' => $data['tax_type'],
+                    'percent' => $taxRate,
+                    'company_id' => $companyId,
+                    'collective_tax' => 0,
+                ]);
+            }
+
+            // Create tax entry for this item
+            \App\Models\Tax::create([
+                'tax_type_id' => $taxType->id,
+                'item_id' => $item->id,
+                'company_id' => $companyId,
+                'percent' => $taxRate,
+                'amount' => 0, // Calculated when item is used
+            ]);
+
+            // Mark item as having per-item tax
+            $item->update(['tax_per_item' => true]);
+        }
+
+        \Log::info('[ImportController] Item imported', [
+            'item_id' => $item->id,
+            'name' => $item->name,
+            'price' => $item->price,
+            'unit' => $item->unit,
+            'has_tax' => !empty($data['tax_type']),
+        ]);
+
+        return $item;
     }
+// CLAUDE-CHECKPOINT
 
     /**
      * Import a payment record
      */
     private function importPayment($data, $companyId, $creatorId)
     {
-        // TODO: Implement payment import
-        throw new \Exception('Payment import not yet implemented');
+        // Lookup customer by name
+        $customer = null;
+        if (!empty($data['customer_name'])) {
+            $customer = \App\Models\Customer::where('company_id', $companyId)
+                ->where('name', $data['customer_name'])
+                ->first();
+
+            if (!$customer) {
+                throw new \Exception("Customer not found: {$data['customer_name']}");
+            }
+        }
+
+        // Lookup invoice by invoice_number
+        $invoice = null;
+        if (!empty($data['invoice_number'])) {
+            $invoice = \App\Models\Invoice::where('company_id', $companyId)
+                ->where('invoice_number', $data['invoice_number'])
+                ->first();
+
+            if (!$invoice) {
+                throw new \Exception("Invoice not found: {$data['invoice_number']}");
+            }
+
+            // If customer wasn't provided, use the invoice's customer
+            if (!$customer && $invoice->customer_id) {
+                $customer = \App\Models\Customer::find($invoice->customer_id);
+            }
+        }
+
+        // Customer is required
+        if (!$customer) {
+            throw new \Exception("Customer is required for payment import");
+        }
+
+        // Get or create currency
+        $currencyCode = $data['currency'] ?? 'MKD';
+        $currency = \App\Models\Currency::where('code', $currencyCode)->first();
+
+        if (!$currency) {
+            $currency = \App\Models\Currency::where('code', 'MKD')->first();
+        }
+
+        // Get or create payment method
+        $paymentMethod = null;
+        if (!empty($data['payment_method'])) {
+            $paymentMethod = \App\Models\PaymentMethod::where('company_id', $companyId)
+                ->where('name', $data['payment_method'])
+                ->first();
+
+            // Create payment method if it doesn't exist
+            if (!$paymentMethod) {
+                $paymentMethod = \App\Models\PaymentMethod::create([
+                    'name' => $data['payment_method'],
+                    'company_id' => $companyId,
+                    'type' => \App\Models\PaymentMethod::TYPE_GENERAL,
+                ]);
+            }
+        }
+
+        // Parse payment date
+        $paymentDate = !empty($data['payment_date'])
+            ? \Carbon\Carbon::parse($data['payment_date'])
+            : now();
+
+        // Convert amount to integer (cents)
+        $amount = !empty($data['amount']) ? (int)round((float)$data['amount'] * 100) : 0;
+
+        // Create payment record
+        $payment = \App\Models\Payment::create([
+            'payment_date' => $paymentDate,
+            'amount' => $amount,
+            'payment_method_id' => $paymentMethod ? $paymentMethod->id : null,
+            'invoice_id' => $invoice ? $invoice->id : null,
+            'customer_id' => $customer->id,
+            'payment_number' => $data['reference'] ?? 'IMP-' . uniqid(),
+            'notes' => $data['notes'] ?? null,
+            'currency_id' => $currency ? $currency->id : null,
+            'company_id' => $companyId,
+            'creator_id' => $creatorId,
+            'user_id' => $customer->id, // Legacy field
+            'exchange_rate' => 1.0,
+            'base_amount' => $amount,
+        ]);
+
+        // Generate unique hash
+        $payment->unique_hash = \Vinkla\Hashids\Facades\Hashids::connection(\App\Models\Payment::class)->encode($payment->id);
+
+        // Generate serial numbers
+        $serial = (new \App\Services\SerialNumberFormatter)
+            ->setModel($payment)
+            ->setCompany($payment->company_id)
+            ->setCustomer($payment->customer_id)
+            ->setNextNumbers();
+
+        $payment->sequence_number = $serial->nextSequenceNumber;
+        $payment->customer_sequence_number = $serial->nextCustomerSequenceNumber;
+        $payment->save();
+
+        // If payment is linked to an invoice, update invoice paid status
+        if ($invoice) {
+            $invoice->subtractInvoicePayment($amount);
+        }
+
+        \Log::info('[ImportController] Payment imported', [
+            'payment_id' => $payment->id,
+            'payment_number' => $payment->payment_number,
+            'amount' => $amount,
+            'customer_name' => $customer->name,
+            'invoice_number' => $invoice ? $invoice->invoice_number : null,
+        ]);
+
+        return $payment;
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Import an expense record
@@ -632,6 +964,7 @@ class ImportController extends Controller
             'items' => "name,description,price,unit,category,sku,tax_type,tax_rate\nConsulting Services,Professional services,100.00,hour,Services,SERV-001,Standard,18",
             'invoices' => "invoice_number,customer_name,invoice_date,due_date,total,subtotal,tax,status,currency,notes\nINV-001,Customer Name,2025-01-01,2025-02-01,1180.00,1000.00,180.00,SENT,MKD,Notes here",
             'invoice_with_items' => "invoice_number,customer_name,invoice_date,due_date,item_name,quantity,unit_price,tax_rate,currency\nINV-001,Customer Name,2025-01-01,2025-02-01,Service,1,1000.00,18,MKD",
+            'payments' => "payment_date,amount,payment_method,invoice_number,customer_name,reference,currency,notes\n2025-01-20,11800.00,Bank Transfer,INV-2025-001,Example Company,BT-20250120-001,MKD,Payment for invoice INV-2025-001",
         ];
 
         if (!isset($templates[$type])) {
@@ -660,15 +993,19 @@ class ImportController extends Controller
     }
 
     /**
-     * Generate mapping suggestions based on field names
+     * Generate mapping suggestions based on field names and import type
+     * Supports type-aware suggestions for customers, invoices, items, payments, and expenses
+     *
+     * @param array $detectedFields Array of detected CSV field objects
+     * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
+     * @return array Mapping suggestions where CSV field name => target field name
      */
-    private function generateMappingSuggestions($detectedFields)
+    private function generateMappingSuggestions($detectedFields, $importType = 'customers')
     {
         $suggestions = [];
 
-        // Define mapping rules (CSV field name => target field name)
-        $mappingRules = [
-            // Customer fields
+        // Define common customer mapping rules
+        $customerMappingRules = [
             'name' => 'name',
             'customer_name' => 'name',
             'company_name' => 'name',
@@ -679,48 +1016,178 @@ class ImportController extends Controller
             'mobile' => 'phone',
             'address' => 'billing_address_street_1',
             'street' => 'billing_address_street_1',
+            'street_1' => 'billing_address_street_1',
+            'address_line_1' => 'billing_address_street_1',
+            'street_2' => 'billing_address_street_2',
+            'address_line_2' => 'billing_address_street_2',
             'city' => 'billing_address_city',
+            'state' => 'billing_address_state',
+            'province' => 'billing_address_state',
             'zip' => 'billing_address_zip',
             'postal_code' => 'billing_address_zip',
+            'zipcode' => 'billing_address_zip',
             'country' => 'billing_address_country',
             'vat_number' => 'vat_number',
             'tax_id' => 'vat_number',
+            'vat_id' => 'vat_number',
             'website' => 'website',
+            'url' => 'website',
             'currency' => 'currency',
-
-            // Invoice fields
-            'invoice_number' => 'invoice_number',
-            'invoice_date' => 'invoice_date',
-            'due_date' => 'due_date',
-            'total' => 'total',
-            'amount' => 'total',
-            'subtotal' => 'sub_total',
-            'tax' => 'tax',
-            'discount' => 'discount',
-            'notes' => 'notes',
-            'description' => 'notes',
-
-            // Item fields
-            'item_name' => 'name',
-            'product_name' => 'name',
-            'quantity' => 'quantity',
-            'qty' => 'quantity',
-            'price' => 'price',
-            'unit_price' => 'price',
-            'unit' => 'unit',
         ];
 
+        // Define invoice-specific mapping rules
+        $invoiceMappingRules = [
+            // Invoice header fields
+            'invoice_number' => 'invoice_number',
+            'invoice_no' => 'invoice_number',
+            'inv_number' => 'invoice_number',
+            'invoice_id' => 'invoice_number',
+            'number' => 'invoice_number',
+            'invoice_date' => 'invoice_date',
+            'date' => 'invoice_date',
+            'due_date' => 'due_date',
+            'payment_due' => 'due_date',
+            'duedate' => 'due_date',
+            'total' => 'total',
+            'amount' => 'total',
+            'invoice_total' => 'total',
+            'subtotal' => 'subtotal',
+            'sub_total' => 'subtotal',
+            'sub_amount' => 'subtotal',
+            'tax' => 'tax',
+            'tax_amount' => 'tax',
+            'total_tax' => 'tax',
+            'status' => 'status',
+            'invoice_status' => 'status',
+            'currency' => 'currency',
+            'currency_code' => 'currency',
+            'notes' => 'notes',
+            'description' => 'notes',
+            'invoice_notes' => 'notes',
+            'memo' => 'notes',
+            'comment' => 'notes',
+            'discount' => 'discount',
+            'discount_amount' => 'discount',
+            'shipping' => 'shipping',
+            'shipping_amount' => 'shipping',
+            'shipping_cost' => 'shipping',
+            // Customer reference fields
+            'customer_name' => 'customer_name',
+            'customer_email' => 'customer_email',
+            'customer_phone' => 'customer_phone',
+            'customer_id' => 'customer_id',
+        ];
+
+        // Define item-specific mapping rules
+        $itemMappingRules = [
+            // Item fields
+            'name' => 'name',
+            'item_name' => 'name',
+            'product_name' => 'name',
+            'product' => 'name',
+            'item' => 'name',
+            'description' => 'description',
+            'item_description' => 'description',
+            'product_description' => 'description',
+            'detail' => 'description',
+            'details' => 'description',
+            'price' => 'price',
+            'unit_price' => 'price',
+            'price_per_unit' => 'price',
+            'unit_cost' => 'price',
+            'cost' => 'price',
+            'rate' => 'price',
+            'unit' => 'unit',
+            'unit_of_measure' => 'unit',
+            'uom' => 'unit',
+            'quantity' => 'quantity',
+            'qty' => 'quantity',
+            'amount' => 'quantity',
+            'category' => 'category',
+            'item_category' => 'category',
+            'product_category' => 'category',
+            'type' => 'category',
+            'sku' => 'sku',
+            'product_code' => 'sku',
+            'item_code' => 'sku',
+            'code' => 'sku',
+            'tax_type' => 'tax_type',
+            'tax_category' => 'tax_type',
+            'tax_name' => 'tax_type',
+            'tax_rate' => 'tax_rate',
+            'tax_percent' => 'tax_rate',
+            'tax' => 'tax_rate',
+            'percentage' => 'tax_rate',
+        ];
+
+        // Define payment-specific mapping rules
+        $paymentMappingRules = [
+            'payment_date' => 'payment_date',
+            'date' => 'payment_date',
+            'transaction_date' => 'payment_date',
+            'paid_date' => 'payment_date',
+            'amount' => 'amount',
+            'payment_amount' => 'amount',
+            'paid_amount' => 'amount',
+            'total' => 'amount',
+            'transaction_amount' => 'amount',
+            'payment_method' => 'payment_method',
+            'method' => 'payment_method',
+            'type' => 'payment_method',
+            'payment_type' => 'payment_method',
+            'mode' => 'payment_method',
+            'invoice_number' => 'invoice_number',
+            'invoice_no' => 'invoice_number',
+            'inv_number' => 'invoice_number',
+            'invoice_id' => 'invoice_number',
+            'related_invoice' => 'invoice_number',
+            'customer_name' => 'customer_name',
+            'customer' => 'customer_name',
+            'payer' => 'customer_name',
+            'payer_name' => 'customer_name',
+            'reference' => 'reference',
+            'transaction_reference' => 'reference',
+            'reference_number' => 'reference',
+            'ref_number' => 'reference',
+            'transaction_id' => 'reference',
+            'transaction_number' => 'reference',
+            'currency' => 'currency',
+            'currency_code' => 'currency',
+            'notes' => 'notes',
+            'description' => 'notes',
+            'memo' => 'notes',
+            'comment' => 'notes',
+        ];
+
+        // Select mapping rules based on import type
+        $mappingRules = match ($importType) {
+            'invoices' => array_merge($customerMappingRules, $invoiceMappingRules),
+            'items' => $itemMappingRules,
+            'payments' => array_merge($customerMappingRules, $paymentMappingRules),
+            'expenses' => array_merge($customerMappingRules, $itemMappingRules),
+            'complete' => array_merge(
+                $customerMappingRules,
+                $invoiceMappingRules,
+                $itemMappingRules,
+                $paymentMappingRules
+            ),
+            default => $customerMappingRules, // Default to customer rules
+        };
+        // CLAUDE-CHECKPOINT
+
+        // Apply mapping suggestions to detected fields
         foreach ($detectedFields as $field) {
             $fieldName = $field['name'];
             $normalizedName = strtolower(trim(str_replace([' ', '_', '-'], '_', $fieldName)));
 
-            // Direct match
+            // Direct match - exact normalized field name
             if (isset($mappingRules[$normalizedName])) {
                 $suggestions[$fieldName] = $mappingRules[$normalizedName];
                 continue;
             }
 
             // Fuzzy match - check if any rule key is contained in the field name
+            // or if the rule key contains the field name (partial matching)
             foreach ($mappingRules as $ruleKey => $ruleValue) {
                 if (str_contains($normalizedName, $ruleKey) || str_contains($ruleKey, $normalizedName)) {
                     $suggestions[$fieldName] = $ruleValue;

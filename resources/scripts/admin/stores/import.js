@@ -21,6 +21,8 @@ export const useImportStore = defineStore('import', {
       supportedFormats: ['csv', 'xls', 'xlsx', 'xml'],
       uploadProgress: 0,
       isUploading: false,
+      detectedImportType: null, // Auto-detected from CSV headers
+      detectionConfidence: 0, // Confidence score for type detection
 
       // Step 2 - Mapping
       detectedFields: [],
@@ -44,7 +46,7 @@ export const useImportStore = defineStore('import', {
 
       // Progress polling
       pollingInterval: null,
-      
+
       // Error handling
       errors: {},
       hasErrors: false,
@@ -150,6 +152,162 @@ export const useImportStore = defineStore('import', {
         this.canProceed = canProceed
       },
 
+      // Detect import type from CSV headers
+      detectTypeFromHeaders(headers) {
+        if (!headers || headers.length === 0) {
+          return { type: null, confidence: 0 }
+        }
+
+        // Normalize headers for comparison
+        const normalizedHeaders = headers.map(h =>
+          h.toLowerCase().trim().replace(/[\s_-]/g, '_')
+        )
+
+        // Define patterns for each import type
+        const typePatterns = {
+          customers: {
+            requiredPatterns: ['name', 'email'],
+            optionalPatterns: ['phone', 'address', 'vat_number', 'customer_name', 'telephone', 'mobile', 'street', 'city', 'zip', 'postal_code', 'country', 'tax_id', 'website', 'currency', 'billing_address'],
+          },
+          invoices: {
+            requiredPatterns: ['invoice_number', 'invoice_date'],
+            optionalPatterns: ['due_date', 'total', 'subtotal', 'tax', 'amount', 'discount', 'notes', 'description', 'customer_name', 'status', 'currency', 'customer_id'],
+          },
+          items: {
+            requiredPatterns: ['name', 'price'],
+            optionalPatterns: ['description', 'unit', 'sku', 'tax_rate', 'quantity', 'qty', 'category', 'tax_type', 'unit_price', 'product_name', 'item_name'],
+          },
+          payments: {
+            requiredPatterns: ['payment_date', 'amount'],
+            optionalPatterns: ['payment_method', 'invoice_number', 'paid_on', 'payment_type', 'currency', 'reference', 'notes', 'description'],
+          },
+        }
+
+        // Score each type based on header matches
+        const scores = {}
+        let maxScore = 0
+        let detectedType = null
+
+        for (const [type, patterns] of Object.entries(typePatterns)) {
+          let score = 0
+          const maxPossibleScore = patterns.requiredPatterns.length + patterns.optionalPatterns.length
+
+          // Check required patterns (weighted more)
+          for (const pattern of patterns.requiredPatterns) {
+            if (normalizedHeaders.some(h => h.includes(pattern) || pattern.includes(h))) {
+              score += 2
+            }
+          }
+
+          // Check optional patterns
+          for (const pattern of patterns.optionalPatterns) {
+            if (normalizedHeaders.some(h => h.includes(pattern) || pattern.includes(h))) {
+              score += 1
+            }
+          }
+
+          scores[type] = score
+          const confidence = score / (maxPossibleScore * 2)
+
+          if (confidence > 0.3 && score > maxScore) {
+            maxScore = score
+            detectedType = type
+          }
+        }
+
+        const confidence = detectedType ? (scores[detectedType] / (typePatterns[detectedType].requiredPatterns.length + typePatterns[detectedType].optionalPatterns.length) / 2) : 0
+
+        return {
+          type: detectedType,
+          confidence: Math.min(confidence, 1),
+          scores: scores,
+        }
+      },
+
+      // Read first line from CSV file and detect type
+      async detectTypeFromFile(file) {
+        return new Promise((resolve) => {
+          // Only process CSV files
+          const fileExtension = file.name.split('.').pop().toLowerCase()
+          if (fileExtension !== 'csv') {
+            resolve({ type: null, confidence: 0 })
+            return
+          }
+
+          // Read first line of CSV
+          const reader = new FileReader()
+
+          reader.onload = (e) => {
+            try {
+              const text = e.target.result
+              const lines = text.split('\n')
+              const headerLine = lines[0]
+
+              // Parse CSV header
+              const headers = this.parseCSVLine(headerLine)
+
+              console.log('[importStore] Detected headers:', headers)
+
+              const detection = this.detectTypeFromHeaders(headers)
+
+              console.log('[importStore] Type detection result:', {
+                type: detection.type,
+                confidence: detection.confidence,
+                scores: detection.scores,
+              })
+
+              resolve(detection)
+            } catch (error) {
+              console.error('[importStore] Error detecting type from file:', error)
+              resolve({ type: null, confidence: 0 })
+            }
+          }
+
+          reader.onerror = () => {
+            console.error('[importStore] FileReader error')
+            resolve({ type: null, confidence: 0 })
+          }
+
+          // Read only first 1KB to get headers
+          const blob = file.slice(0, 1024)
+          reader.readAsText(blob, 'utf-8')
+        })
+      },
+
+      // Parse CSV header line into array
+      parseCSVLine(line) {
+        // Handle quoted fields
+        const result = []
+        let current = ''
+        let insideQuotes = false
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i]
+          const nextChar = line[i + 1]
+
+          if (char === '"') {
+            if (insideQuotes && nextChar === '"') {
+              current += '"'
+              i++
+            } else {
+              insideQuotes = !insideQuotes
+            }
+          } else if (char === ',' && !insideQuotes) {
+            result.push(current.trim())
+            current = ''
+          } else {
+            current += char
+          }
+        }
+
+        // Push last field
+        if (current) {
+          result.push(current.trim())
+        }
+
+        return result
+      },
+
       // Step 1 - File Upload
       async uploadFile(file) {
         this.isUploading = true
@@ -157,9 +315,30 @@ export const useImportStore = defineStore('import', {
         this.resetErrors()
 
         try {
+          // Detect import type from CSV headers
+          let importType = 'universal_migration' // Default fallback
+          let detectionConfidence = 0
+
+          const detection = await this.detectTypeFromFile(file)
+          if (detection.type && detection.confidence >= 0.3) {
+            importType = detection.type
+            detectionConfidence = detection.confidence
+
+            console.log('[importStore] Using detected type:', {
+              type: importType,
+              confidence: detectionConfidence,
+            })
+          } else {
+            console.log('[importStore] Using default type: universal_migration')
+          }
+
+          // Store detected type for later reference
+          this.detectedImportType = detection.type
+          this.detectionConfidence = detection.confidence
+
           const formData = new FormData()
           formData.append('file', file)
-          formData.append('type', 'universal_migration')
+          formData.append('type', importType)
 
           const response = await axios.post('/api/v1/admin/imports', formData, {
             headers: {
@@ -218,6 +397,8 @@ export const useImportStore = defineStore('import', {
         this.uploadProgress = 0
         this.importJob = null
         this.importId = null
+        this.detectedImportType = null
+        this.detectionConfidence = 0
         this.resetState()
         this.updateCanProceed()
       },
@@ -523,3 +704,4 @@ export const useImportStore = defineStore('import', {
       },
     }
 })
+// CLAUDE-CHECKPOINT

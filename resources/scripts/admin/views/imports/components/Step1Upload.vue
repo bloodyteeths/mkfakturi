@@ -276,6 +276,24 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Detected Type Info -->
+                <div v-if="importStore.detectedImportType" class="mt-4 pt-4 border-t border-green-200">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <BaseIcon name="LightBulbIcon" class="w-5 h-5 text-yellow-500 mr-2" />
+                      <span class="text-sm font-medium text-gray-700">{{ $t('imports.detected_type') }}:</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <BaseBadge :variant="getDetectionBadgeVariant()">
+                        {{ formatDetectedType(importStore.detectedImportType) }}
+                      </BaseBadge>
+                      <span class="text-xs text-gray-500">
+                        ({{ Math.round(importStore.detectionConfidence * 100) }}% {{ $t('imports.confidence') }})
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Actions -->
@@ -503,6 +521,31 @@ const downloadTemplate = async (type) => {
 const hideQuickStart = () => {
   showQuickStart.value = false
   localStorage.setItem('migration-wizard-quickstart-hidden', 'true')
+}
+
+const formatDetectedType = (type) => {
+  if (!type) return '-'
+
+  const typeLabels = {
+    customers: t('imports.type_customers'),
+    invoices: t('imports.type_invoices'),
+    items: t('imports.type_items'),
+    payments: t('imports.type_payments'),
+  }
+
+  return typeLabels[type] || type.charAt(0).toUpperCase() + type.slice(1)
+}
+
+const getDetectionBadgeVariant = () => {
+  const confidence = importStore.detectionConfidence
+
+  if (confidence >= 0.7) {
+    return 'success'
+  } else if (confidence >= 0.5) {
+    return 'warning'
+  } else {
+    return 'info'
+  }
 }
 
 // Lifecycle
