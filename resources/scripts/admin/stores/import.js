@@ -368,7 +368,7 @@ export const useImportStore = defineStore('import', {
           })
 
           this.commitResults = response.data.data
-          
+
           // Start polling for commit progress
           this.startProgressPolling()
 
@@ -376,6 +376,7 @@ export const useImportStore = defineStore('import', {
 
         } catch (error) {
           this.commitStatus = 'failed'
+          this.isCommitting = false
           this.setError('commit', error.response?.data?.message || 'Commit failed')
           handleError(error)
           throw error
