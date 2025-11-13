@@ -262,8 +262,8 @@ class ImportController extends Controller
                     $recordData[$header] = $row[$index] ?? '';
                 }
 
-                // Validate this record
-                $validation = $this->validateRecord($recordData, $rowNumber);
+                // Validate this record with import type
+                $validation = $this->validateRecord($recordData, $rowNumber, $importJob->type);
 
                 $records[] = [
                     'row_number' => $rowNumber,
@@ -325,31 +325,360 @@ class ImportController extends Controller
     }
 
     /**
-     * Validate a single record
+     * Validate a single record based on import type
+     *
+     * @param array $data The record data to validate
+     * @param int $rowNumber The row number for error reporting
+     * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
+     * @return array Array with 'errors' and 'warnings' keys
      */
-    private function validateRecord($data, $rowNumber)
+    private function validateRecord($data, $rowNumber, $importType = 'customers')
     {
         $errors = [];
         $warnings = [];
 
-        // Required field validation
-        if (empty($data['name'])) {
-            $errors[] = "Row {$rowNumber}: Name is required";
-        }
+        // Type-specific validation
+        switch ($importType) {
+            case 'payments':
+                // Required fields for payments
+                if (empty($data['payment_date'])) {
+                    $errors[] = "Row {$rowNumber}: Payment date is required";
+                } else {
+                    // Validate date format
+                    try {
+                        \Carbon\Carbon::parse($data['payment_date']);
+                    } catch (\Exception $e) {
+                        $errors[] = "Row {$rowNumber}: Invalid payment date format. Use YYYY-MM-DD or similar standard format";
+                    }
+                }
 
-        if (empty($data['email'])) {
-            $errors[] = "Row {$rowNumber}: Email is required";
-        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Row {$rowNumber}: Invalid email format";
-        }
+                if (empty($data['amount'])) {
+                    $errors[] = "Row {$rowNumber}: Amount is required";
+                } else {
+                    // Validate amount is numeric and positive
+                    $amount = floatval($data['amount']);
+                    if (!is_numeric($data['amount'])) {
+                        $errors[] = "Row {$rowNumber}: Amount must be a valid number";
+                    } elseif ($amount <= 0) {
+                        $errors[] = "Row {$rowNumber}: Amount must be greater than 0";
+                    }
+                }
 
-        // Optional field warnings
-        if (empty($data['phone'])) {
-            $warnings[] = "Row {$rowNumber}: Phone number is missing";
-        }
+                if (empty($data['customer_name'])) {
+                    $errors[] = "Row {$rowNumber}: Customer name is required";
+                }
 
-        if (empty($data['vat_number'])) {
-            $warnings[] = "Row {$rowNumber}: VAT number is missing";
+                // Optional field warnings
+                if (empty($data['payment_method'])) {
+                    $warnings[] = "Row {$rowNumber}: Payment method is missing";
+                } else {
+                    // Validate payment method against common methods
+                    $commonMethods = [
+                        'bank transfer', 'bank_transfer', 'wire transfer',
+                        'cash', 'credit card', 'credit_card', 'creditcard',
+                        'debit card', 'debit_card', 'debitcard',
+                        'paypal', 'stripe', 'check', 'cheque',
+                        'online', 'electronic', 'eft', 'ach'
+                    ];
+
+                    $normalizedMethod = strtolower(trim($data['payment_method']));
+                    $isValid = false;
+
+                    foreach ($commonMethods as $method) {
+                        if (str_contains($normalizedMethod, $method) || str_contains($method, $normalizedMethod)) {
+                            $isValid = true;
+                            break;
+                        }
+                    }
+
+                    if (!$isValid) {
+                        $warnings[] = "Row {$rowNumber}: Payment method '{$data['payment_method']}' is uncommon. Common methods include: Bank Transfer, Cash, Credit Card, etc.";
+                    }
+                }
+
+                if (empty($data['invoice_number'])) {
+                    $warnings[] = "Row {$rowNumber}: Invoice number is missing - payment will not be linked to an invoice";
+                }
+
+                if (empty($data['reference'])) {
+                    $warnings[] = "Row {$rowNumber}: Reference/transaction ID is missing";
+                }
+                break;
+
+            case 'invoices':
+                // Required fields for invoices
+                if (empty($data['invoice_number'])) {
+                    $errors[] = "Row {$rowNumber}: Invoice number is required";
+                }
+
+                if (empty($data['customer_name'])) {
+                    $errors[] = "Row {$rowNumber}: Customer name is required";
+                }
+
+                if (empty($data['invoice_date'])) {
+                    $errors[] = "Row {$rowNumber}: Invoice date is required";
+                } else {
+                    // Validate date format
+                    try {
+                        \Carbon\Carbon::parse($data['invoice_date']);
+                    } catch (\Exception $e) {
+                        $errors[] = "Row {$rowNumber}: Invalid invoice date format. Use YYYY-MM-DD or similar standard format";
+                    }
+                }
+
+                if (empty($data['total'])) {
+                    $errors[] = "Row {$rowNumber}: Total is required";
+                } else {
+                    // Validate total is numeric and positive
+                    $total = floatval($data['total']);
+                    if (!is_numeric($data['total'])) {
+                        $errors[] = "Row {$rowNumber}: Total must be a valid number";
+                    } elseif ($total <= 0) {
+                        $errors[] = "Row {$rowNumber}: Total must be greater than 0";
+                    }
+                }
+
+                // Optional field warnings
+                if (empty($data['due_date'])) {
+                    $warnings[] = "Row {$rowNumber}: Due date is missing";
+                } else {
+                    // Validate date format
+                    try {
+                        \Carbon\Carbon::parse($data['due_date']);
+                    } catch (\Exception $e) {
+                        $errors[] = "Row {$rowNumber}: Invalid due date format. Use YYYY-MM-DD or similar standard format";
+                    }
+                }
+
+                if (empty($data['subtotal'])) {
+                    $warnings[] = "Row {$rowNumber}: Subtotal is missing";
+                } else {
+                    // Validate subtotal is numeric
+                    if (!is_numeric($data['subtotal'])) {
+                        $errors[] = "Row {$rowNumber}: Subtotal must be a valid number";
+                    }
+                }
+
+                if (empty($data['tax'])) {
+                    $warnings[] = "Row {$rowNumber}: Tax is missing";
+                } else {
+                    // Validate tax is numeric
+                    if (!is_numeric($data['tax'])) {
+                        $errors[] = "Row {$rowNumber}: Tax must be a valid number";
+                    }
+                }
+
+                // Status validation
+                if (!empty($data['status'])) {
+                    $validStatuses = ['DRAFT', 'SENT', 'VIEWED', 'COMPLETED', 'PAID', 'UNPAID', 'PARTIALLY_PAID', 'OVERDUE'];
+                    $normalizedStatus = strtoupper(trim($data['status']));
+                    if (!in_array($normalizedStatus, $validStatuses)) {
+                        $warnings[] = "Row {$rowNumber}: Status '{$data['status']}' is not a standard value. Valid values: " . implode(', ', $validStatuses);
+                    }
+                }
+
+                // Currency code validation
+                if (!empty($data['currency'])) {
+                    $currencyCode = strtoupper(trim($data['currency']));
+                    // Standard 3-letter currency codes (ISO 4217)
+                    if (strlen($currencyCode) !== 3 || !ctype_alpha($currencyCode)) {
+                        $warnings[] = "Row {$rowNumber}: Currency code '{$data['currency']}' should be a 3-letter code (e.g., MKD, USD, EUR)";
+                    }
+                }
+                break;
+                // CLAUDE-CHECKPOINT
+
+            case 'items':
+                // Required fields for items
+                if (empty($data['name'])) {
+                    $errors[] = "Row {$rowNumber}: Item name is required";
+                }
+
+                if (empty($data['price'])) {
+                    $errors[] = "Row {$rowNumber}: Price is required";
+                } else {
+                    // Validate price is numeric and positive
+                    $price = floatval($data['price']);
+                    if (!is_numeric($data['price'])) {
+                        $errors[] = "Row {$rowNumber}: Price must be a valid number";
+                    } elseif ($price <= 0) {
+                        $errors[] = "Row {$rowNumber}: Price must be greater than 0";
+                    }
+                }
+
+                // Tax rate validation (0-100 range)
+                if (!empty($data['tax_rate'])) {
+                    $taxRate = floatval($data['tax_rate']);
+                    if (!is_numeric($data['tax_rate'])) {
+                        $errors[] = "Row {$rowNumber}: Tax rate must be a valid number";
+                    } elseif ($taxRate < 0 || $taxRate > 100) {
+                        $errors[] = "Row {$rowNumber}: Tax rate must be between 0 and 100";
+                    }
+                }
+
+                // Unit validation (common units)
+                if (!empty($data['unit'])) {
+                    $validUnits = [
+                        'hour', 'hours', 'hr', 'hrs',
+                        'piece', 'pieces', 'pcs', 'pc',
+                        'kg', 'kilogram', 'kilograms',
+                        'g', 'gram', 'grams',
+                        'l', 'liter', 'liters', 'litre', 'litres',
+                        'ml', 'milliliter', 'milliliters', 'millilitre', 'millilitres',
+                        'm', 'meter', 'meters', 'metre', 'metres',
+                        'cm', 'centimeter', 'centimeters', 'centimetre', 'centimetres',
+                        'mm', 'millimeter', 'millimeters', 'millimetre', 'millimetres',
+                        'ft', 'foot', 'feet',
+                        'in', 'inch', 'inches',
+                        'lb', 'pound', 'pounds',
+                        'oz', 'ounce', 'ounces',
+                        'day', 'days',
+                        'week', 'weeks',
+                        'month', 'months',
+                        'year', 'years',
+                        'item', 'items',
+                        'unit', 'units',
+                        'box', 'boxes',
+                        'pack', 'packs',
+                        'set', 'sets',
+                        'pair', 'pairs',
+                        'dozen',
+                        'each',
+                    ];
+
+                    $normalizedUnit = strtolower(trim($data['unit']));
+                    if (!in_array($normalizedUnit, $validUnits)) {
+                        $warnings[] = "Row {$rowNumber}: Unit '{$data['unit']}' is not a standard unit. Common units: hour, piece, kg, liter, meter, etc.";
+                    }
+                }
+
+                // Optional field warnings
+                if (empty($data['description'])) {
+                    $warnings[] = "Row {$rowNumber}: Item description is missing";
+                }
+
+                if (empty($data['unit'])) {
+                    $warnings[] = "Row {$rowNumber}: Unit of measure is missing";
+                }
+
+                if (empty($data['category'])) {
+                    $warnings[] = "Row {$rowNumber}: Category is missing";
+                }
+
+                if (empty($data['sku'])) {
+                    $warnings[] = "Row {$rowNumber}: SKU/Product code is missing";
+                }
+
+                // Tax warnings
+                if (empty($data['tax_type']) && !empty($data['tax_rate'])) {
+                    $warnings[] = "Row {$rowNumber}: Tax rate is provided but tax type is missing";
+                }
+
+                if (!empty($data['tax_type']) && empty($data['tax_rate'])) {
+                    $warnings[] = "Row {$rowNumber}: Tax type is provided but tax rate is missing";
+                }
+                break;
+                // CLAUDE-CHECKPOINT
+
+            case 'expenses':
+                // Required fields for expenses
+                if (empty($data['expense_date'])) {
+                    $errors[] = "Row {$rowNumber}: Expense date is required";
+                } else {
+                    // Validate date format
+                    try {
+                        \Carbon\Carbon::parse($data['expense_date']);
+                    } catch (\Exception $e) {
+                        $errors[] = "Row {$rowNumber}: Invalid expense date format. Use YYYY-MM-DD or similar standard format";
+                    }
+                }
+
+                if (empty($data['amount'])) {
+                    $errors[] = "Row {$rowNumber}: Amount is required";
+                } else {
+                    // Validate amount is numeric and positive
+                    $amount = floatval($data['amount']);
+                    if (!is_numeric($data['amount'])) {
+                        $errors[] = "Row {$rowNumber}: Amount must be a valid number";
+                    } elseif ($amount <= 0) {
+                        $errors[] = "Row {$rowNumber}: Amount must be greater than 0";
+                    }
+                }
+
+                // Optional field warnings
+                if (empty($data['category'])) {
+                    $warnings[] = "Row {$rowNumber}: Category is missing - expense will be assigned to 'Uncategorized'";
+                }
+
+                if (empty($data['notes'])) {
+                    $warnings[] = "Row {$rowNumber}: Notes/description is missing";
+                }
+
+                if (empty($data['payment_method'])) {
+                    $warnings[] = "Row {$rowNumber}: Payment method is missing";
+                } else {
+                    // Validate payment method against common methods
+                    $commonMethods = [
+                        'bank transfer', 'bank_transfer', 'wire transfer',
+                        'cash', 'credit card', 'credit_card', 'creditcard',
+                        'debit card', 'debit_card', 'debitcard',
+                        'paypal', 'stripe', 'check', 'cheque',
+                        'online', 'electronic', 'eft', 'ach'
+                    ];
+
+                    $normalizedMethod = strtolower(trim($data['payment_method']));
+                    $isValid = false;
+
+                    foreach ($commonMethods as $method) {
+                        if (str_contains($normalizedMethod, $method) || str_contains($method, $normalizedMethod)) {
+                            $isValid = true;
+                            break;
+                        }
+                    }
+
+                    if (!$isValid) {
+                        $warnings[] = "Row {$rowNumber}: Payment method '{$data['payment_method']}' is uncommon. Common methods include: Bank Transfer, Cash, Credit Card, etc.";
+                    }
+                }
+
+                // Currency code validation
+                if (!empty($data['currency'])) {
+                    $currencyCode = strtoupper(trim($data['currency']));
+                    // Standard 3-letter currency codes (ISO 4217)
+                    if (strlen($currencyCode) !== 3 || !ctype_alpha($currencyCode)) {
+                        $warnings[] = "Row {$rowNumber}: Currency code '{$data['currency']}' should be a 3-letter code (e.g., MKD, USD, EUR)";
+                    }
+                }
+
+                // Customer name validation (optional but warn if provided)
+                if (!empty($data['customer_name'])) {
+                    $warnings[] = "Row {$rowNumber}: Customer name provided - will attempt to link expense to customer if found";
+                }
+                break;
+                // CLAUDE-CHECKPOINT
+
+            case 'customers':
+            default:
+                // Required field validation for customers
+                if (empty($data['name'])) {
+                    $errors[] = "Row {$rowNumber}: Name is required";
+                }
+
+                if (empty($data['email'])) {
+                    $errors[] = "Row {$rowNumber}: Email is required";
+                } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                    $errors[] = "Row {$rowNumber}: Invalid email format";
+                }
+
+                // Optional field warnings
+                if (empty($data['phone'])) {
+                    $warnings[] = "Row {$rowNumber}: Phone number is missing";
+                }
+
+                if (empty($data['vat_number'])) {
+                    $warnings[] = "Row {$rowNumber}: VAT number is missing";
+                }
+                break;
         }
 
         return [
@@ -357,6 +686,7 @@ class ImportController extends Controller
             'warnings' => $warnings,
         ];
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Commit the import
@@ -908,9 +1238,122 @@ class ImportController extends Controller
      */
     private function importExpense($data, $companyId, $creatorId)
     {
-        // TODO: Implement expense import
-        throw new \Exception('Expense import not yet implemented');
+        // Lookup customer (optional)
+        $customer = null;
+        if (!empty($data['customer_name'])) {
+            $customer = \App\Models\Customer::where('company_id', $companyId)
+                ->where('name', $data['customer_name'])
+                ->first();
+
+            // If customer not found, log warning but continue (customer is optional)
+            if (!$customer) {
+                \Log::warning('[ImportController] Customer not found for expense', [
+                    'customer_name' => $data['customer_name'],
+                    'company_id' => $companyId,
+                ]);
+            }
+        }
+
+        // Get or create currency
+        $currencyCode = $data['currency'] ?? 'MKD';
+        $currency = \App\Models\Currency::where('code', $currencyCode)->first();
+
+        if (!$currency) {
+            $currency = \App\Models\Currency::where('code', 'MKD')->first();
+        }
+
+        if (!$currency) {
+            throw new \Exception('Currency not found: ' . $currencyCode);
+        }
+
+        // Lookup or create expense category
+        $expenseCategory = null;
+        if (!empty($data['category'])) {
+            // Try to find existing category
+            $expenseCategory = \App\Models\ExpenseCategory::where('company_id', $companyId)
+                ->where('name', $data['category'])
+                ->first();
+
+            // Create category if it doesn't exist
+            if (!$expenseCategory) {
+                $expenseCategory = \App\Models\ExpenseCategory::create([
+                    'name' => $data['category'],
+                    'company_id' => $companyId,
+                    'description' => 'Auto-created from import',
+                ]);
+
+                \Log::info('[ImportController] Created new expense category', [
+                    'category_name' => $data['category'],
+                    'category_id' => $expenseCategory->id,
+                    'company_id' => $companyId,
+                ]);
+            }
+        } else {
+            // If no category provided, try to find or create a default "Uncategorized" category
+            $expenseCategory = \App\Models\ExpenseCategory::where('company_id', $companyId)
+                ->where('name', 'Uncategorized')
+                ->first();
+
+            if (!$expenseCategory) {
+                $expenseCategory = \App\Models\ExpenseCategory::create([
+                    'name' => 'Uncategorized',
+                    'company_id' => $companyId,
+                    'description' => 'Default category for imported expenses',
+                ]);
+            }
+        }
+
+        // Get or create payment method (optional)
+        $paymentMethod = null;
+        if (!empty($data['payment_method'])) {
+            $paymentMethod = \App\Models\PaymentMethod::where('company_id', $companyId)
+                ->where('name', $data['payment_method'])
+                ->first();
+
+            // Create payment method if it doesn't exist
+            if (!$paymentMethod) {
+                $paymentMethod = \App\Models\PaymentMethod::create([
+                    'name' => $data['payment_method'],
+                    'company_id' => $companyId,
+                    'type' => \App\Models\PaymentMethod::TYPE_GENERAL,
+                ]);
+            }
+        }
+
+        // Parse expense date
+        $expenseDate = !empty($data['expense_date'])
+            ? \Carbon\Carbon::parse($data['expense_date'])
+            : now();
+
+        // Convert amount to integer (cents)
+        $amount = !empty($data['amount']) ? (int)round((float)$data['amount'] * 100) : 0;
+
+        // Create expense record
+        $expense = \App\Models\Expense::create([
+            'expense_date' => $expenseDate,
+            'amount' => $amount,
+            'base_amount' => $amount, // Assuming 1:1 exchange rate for simplicity
+            'notes' => $data['notes'] ?? null,
+            'expense_category_id' => $expenseCategory->id,
+            'company_id' => $companyId,
+            'creator_id' => $creatorId,
+            'customer_id' => $customer ? $customer->id : null,
+            'currency_id' => $currency->id,
+            'payment_method_id' => $paymentMethod ? $paymentMethod->id : null,
+            'exchange_rate' => 1.0,
+        ]);
+
+        \Log::info('[ImportController] Expense imported', [
+            'expense_id' => $expense->id,
+            'amount' => $amount,
+            'category' => $expenseCategory->name,
+            'customer_name' => $customer ? $customer->name : null,
+            'expense_date' => $expenseDate->format('Y-m-d'),
+        ]);
+
+        return $expense;
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Get import progress

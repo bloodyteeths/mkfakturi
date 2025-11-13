@@ -23,6 +23,7 @@ export const useImportStore = defineStore('import', {
       isUploading: false,
       detectedImportType: null, // Auto-detected from CSV headers
       detectionConfidence: 0, // Confidence score for type detection
+      manualTypeOverride: null, // Manual type selection to override auto-detection
 
       // Step 2 - Mapping
       detectedFields: [],
@@ -336,6 +337,12 @@ export const useImportStore = defineStore('import', {
           this.detectedImportType = detection.type
           this.detectionConfidence = detection.confidence
 
+          // Use manual override if set, otherwise use detected type
+          if (this.manualTypeOverride) {
+            importType = this.manualTypeOverride
+            console.log('[importStore] Using manual type override:', importType)
+          }
+
           const formData = new FormData()
           formData.append('file', file)
           formData.append('type', importType)
@@ -399,6 +406,7 @@ export const useImportStore = defineStore('import', {
         this.importId = null
         this.detectedImportType = null
         this.detectionConfidence = 0
+        this.manualTypeOverride = null
         this.resetState()
         this.updateCanProceed()
       },

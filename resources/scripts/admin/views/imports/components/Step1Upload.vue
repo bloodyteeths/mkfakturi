@@ -294,6 +294,28 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Manual Type Override -->
+                <div class="mt-4 pt-4 border-t border-green-200">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700 flex items-center">
+                      {{ $t('imports.override_type') }}
+                      <HelpTooltip
+                        :content="$t('imports.override_type_help')"
+                        icon="InformationCircleIcon"
+                        icon-class="text-gray-500 hover:text-gray-700"
+                        placement="right"
+                        class="ml-2"
+                      />
+                    </label>
+                    <BaseSelectInput
+                      v-model="selectedTypeOverride"
+                      :options="typeOptions"
+                      :placeholder="$t('imports.select_type_override')"
+                      @update:modelValue="handleTypeOverrideChange"
+                    />
+                  </div>
+                </div>
               </div>
 
               <!-- Actions -->
@@ -386,6 +408,7 @@ import BaseIcon from '@/scripts/components/base/BaseIcon.vue'
 import BaseSpinner from '@/scripts/components/base/BaseSpinner.vue'
 import BaseErrorAlert from '@/scripts/components/base/BaseErrorAlert.vue'
 import BaseBadge from '@/scripts/components/base/BaseBadge.vue'
+import BaseSelectInput from '@/scripts/components/base/BaseSelectInput.vue'
 import QuickStartPanel from './QuickStartPanel.vue'
 import HelpTooltip from './HelpTooltip.vue'
 
@@ -400,13 +423,29 @@ const emit = defineEmits(['startTour'])
 const isDragOver = ref(false)
 const uploadError = ref(null)
 const showQuickStart = ref(false)
+const selectedTypeOverride = ref(null)
 
 // Computed
 const acceptedFileTypes = computed(() => {
   return importStore.supportedFormats.map(format => `.${format}`).join(',')
 })
 
+const typeOptions = computed(() => {
+  return [
+    { value: null, text: t('imports.use_detected_type') },
+    { value: 'customers', text: t('imports.type_customers') },
+    { value: 'invoices', text: t('imports.type_invoices') },
+    { value: 'items', text: t('imports.type_items') },
+    { value: 'payments', text: t('imports.type_payments') },
+    { value: 'expenses', text: t('imports.type_expenses') },
+  ]
+})
+
 // Methods
+const handleTypeOverrideChange = (value) => {
+  importStore.manualTypeOverride = value
+  console.log('[Step1Upload] Manual type override set to:', value)
+}
 const handleDragOver = (event) => {
   event.preventDefault()
   isDragOver.value = true
@@ -469,6 +508,7 @@ const handleFile = async (file) => {
 const removeFile = () => {
   importStore.removeFile()
   uploadError.value = null
+  selectedTypeOverride.value = null
 }
 
 const formatFileSize = (bytes) => {
@@ -554,6 +594,9 @@ onMounted(() => {
   console.log('[Step1Upload] importStore:', importStore)
   console.log('[Step1Upload] importStore.uploadedFile:', importStore.uploadedFile)
   console.log('[Step1Upload] importStore.supportedFormats:', importStore.supportedFormats)
+
+  // Initialize selectedTypeOverride from store
+  selectedTypeOverride.value = importStore.manualTypeOverride
 
   // Show QuickStart panel on first visit
   const hasSeenQuickStart = localStorage.getItem('migration-wizard-quickstart-hidden')

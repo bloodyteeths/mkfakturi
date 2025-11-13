@@ -2118,7 +2118,17 @@
         "tour_final_title": "Подготвено за увоз",
         "tour_final_content": "Кога сте подготвени, кликнете на ова копче за да го започнете увозот. Процесот може да потрае неколку минути во зависност од големината на фајлот.",
         "tour_final_action": "Кликнете кога сте подготвени да продолжите",
-        "universal_migration_wizard": "Универзален волшебник за миграција"
+        "universal_migration_wizard": "Универзален волшебник за миграција",
+        "detected_type": "Детектиран тип",
+        "confidence": "сигурност",
+        "override_type": "Промени тип (опционално)",
+        "type_customers": "Клиенти",
+        "type_invoices": "Фактури",
+        "type_items": "Артикли",
+        "type_payments": "Плаќања",
+        "type_expenses": "Трошоци",
+        "auto_detected_with_confidence": "Автоматски детектирано со {confidence}% сигурност",
+        "manual_type_override": "Рачно избран тип"
     },
     "import": {
         "csv_wizard_title": "CSV Увозник",
@@ -2144,6 +2154,7 @@
         "type_customers": "Клиенти",
         "type_items": "Ставки",
         "type_invoices": "Фактури",
+        "type_payments": "Плаќања",
         "type_expenses": "Трошоци",
         "column_mapping": "Мапирање на колони",
         "csv_column": "CSV колона",
