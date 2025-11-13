@@ -18,14 +18,12 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   }
 }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode
-  params: { locale: string }
-}) {
-  const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
+// Note: Next.js 16 types `params` as possibly a Promise.
+// Loosen the annotation to keep builds green across versions.
+export default async function LocaleLayout(props: any) {
+  const { children, params } = props
+  const resolvedParams = typeof params?.then === 'function' ? await params : params
+  const locale: Locale = isLocale(resolvedParams?.locale) ? (resolvedParams.locale as Locale) : defaultLocale
   const t = await getDictionary(locale)
   return (
     <>
