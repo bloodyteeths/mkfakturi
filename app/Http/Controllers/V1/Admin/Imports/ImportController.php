@@ -40,7 +40,8 @@ class ImportController extends Controller
 
         try {
             $request->validate([
-                'file' => 'required|file|mimes:csv,xls,xlsx,xml|max:51200', // 50MB
+                // Use mimetypes instead of mimes to allow text/plain for CSV files with UTF-8/Cyrillic
+                'file' => 'required|file|mimetypes:text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/xml,application/xml|max:51200', // 50MB
                 'type' => 'required|string|in:universal_migration,customers,invoices,items,payments,expenses,complete',
             ]);
         } catch (\Exception $e) {
