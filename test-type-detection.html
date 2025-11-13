@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Type Detection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 3px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSV Type Detection Test</h1>
+    <p>Upload a CSV file to test the auto-detection logic</p>
+
+    <div class="test-section">
+        <h3>Upload Test CSV</h3>
+        <input type="file" id="fileInput" accept=".csv" />
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Detection logic (same as in the store)
+        function detectTypeFromHeaders(headers) {
+            if (!headers || headers.length === 0) {
+                return { type: null, confidence: 0 }
+            }
+
+            const normalizedHeaders = headers.map(h =>
+                h.toLowerCase().trim().replace(/[\s_-]/g, '_')
+            )
+
+            const typePatterns = {
+                customers: {
+                    requiredPatterns: ['name', 'email'],
+                    optionalPatterns: ['phone', 'address', 'vat_number', 'customer_name', 'telephone', 'mobile', 'street', 'city', 'zip', 'postal_code', 'country', 'tax_id', 'website', 'currency', 'billing_address'],
+                },
+                invoices: {
+                    requiredPatterns: ['invoice_number', 'invoice_date'],
+                    optionalPatterns: ['due_date', 'total', 'subtotal', 'tax', 'amount', 'discount', 'notes', 'description', 'customer_name', 'status', 'currency', 'customer_id'],
+                },
+                items: {
+                    requiredPatterns: ['name', 'price'],
+                    optionalPatterns: ['description', 'unit', 'sku', 'tax_rate', 'quantity', 'qty', 'category', 'tax_type', 'unit_price', 'product_name', 'item_name'],
+                },
+                payments: {
+                    requiredPatterns: ['payment_date', 'amount'],
+                    optionalPatterns: ['payment_method', 'invoice_number', 'paid_on', 'payment_type', 'currency', 'reference', 'notes', 'description'],
+                },
+            }
+
+            const scores = {}
+            let maxScore = 0
+            let detectedType = null
+
+            for (const [type, patterns] of Object.entries(typePatterns)) {
+                let score = 0
+
+                // Check required patterns (weighted more)
+                for (const pattern of patterns.requiredPatterns) {
+                    if (normalizedHeaders.some(h => h.includes(pattern) || pattern.includes(h))) {
+                        score += 2
+                    }
+                }
+
+                // Check optional patterns
+                for (const pattern of patterns.optionalPatterns) {
+                    if (normalizedHeaders.some(h => h.includes(pattern) || pattern.includes(h))) {
+                        score += 1
+                    }
+                }
+
+                scores[type] = score
+                const confidence = score / (patterns.requiredPatterns.length + patterns.optionalPatterns.length) / 2
+
+                if (confidence > 0.3 && score > maxScore) {
+                    maxScore = score
+                    detectedType = type
+                }
+            }
+
+            const confidence = detectedType
+                ? (scores[detectedType] / (typePatterns[detectedType].requiredPatterns.length + typePatterns[detectedType].optionalPatterns.length) / 2)
+                : 0
+
+            return {
+                type: detectedType,
+                confidence: Math.min(confidence, 1),
+                scores: scores,
+            }
+        }
+
+        function parseCSVLine(line) {
+            const result = []
+            let current = ''
+            let insideQuotes = false
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i]
+                const nextChar = line[i + 1]
+
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        current += '"'
+                        i++
+                    } else {
+                        insideQuotes = !insideQuotes
+                    }
+                } else if (char === ',' && !insideQuotes) {
+                    result.push(current.trim())
+                    current = ''
+                } else {
+                    current += char
+                }
+            }
+
+            if (current) {
+                result.push(current.trim())
+            }
+
+            return result
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0]
+            if (!file) return
+
+            const reader = new FileReader()
+
+            reader.onload = function(event) {
+                const text = event.target.result
+                const lines = text.split('\n')
+                const headerLine = lines[0]
+
+                const headers = parseCSVLine(headerLine)
+                const detection = detectTypeFromHeaders(headers)
+
+                const resultsDiv = document.getElementById('results')
+                const confidencePercent = Math.round(detection.confidence * 100)
+
+                let badgeClass = 'info'
+                if (detection.confidence >= 0.7) {
+                    badgeClass = 'success'
+                } else if (detection.confidence >= 0.5) {
+                    badgeClass = 'warning'
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="result ${badgeClass}">
+                        <h4>Detection Result</h4>
+                        <p><strong>Detected Type:</strong> ${detection.type || 'Unknown'}</p>
+                        <p><strong>Confidence:</strong> ${confidencePercent}%</p>
+                        <p><strong>Headers Found:</strong> ${headers.join(', ')}</p>
+                        <details>
+                            <summary>Score Details</summary>
+                            <pre>${JSON.stringify(detection.scores, null, 2)}</pre>
+                        </details>
+                    </div>
+                `
+            }
+
+            // Read only first 1KB
+            const blob = file.slice(0, 1024)
+            reader.readAsText(blob, 'utf-8')
+        })
+    </script>
+</body>
+</html>

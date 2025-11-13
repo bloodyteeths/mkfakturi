@@ -1,0 +1,3 @@
+name,email,phone,address,vat_number,website,currency
+Test Company,test@example.com,+38970123456,Address Line 1,MK1234567890123,https://example.com,MKD
+Another Company,info@another.com,+38971555444,Street 123,MK9876543210123,https://another.com,MKD

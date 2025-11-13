@@ -1,0 +1,3 @@
+name,description,price,unit,category,sku,tax_type,tax_rate
+Consulting Services,Professional services,100.00,hour,Services,SERV-001,Standard,18
+Software License,Annual license fee,500.00,license,Products,PROD-001,Standard,18

@@ -456,11 +456,23 @@ export const useImportStore = defineStore('import', {
 
       validateMappings() {
         this.mappingErrors = []
-        
-        // Check for required field mappings
-        const requiredFields = ['name', 'email'] // Add more required fields
+
+        // Get import type from importJob
+        const importType = this.importJob?.type || 'customers'
+
+        // Define required fields for each import type
+        const requiredFieldsByType = {
+          customers: ['name', 'email'],
+          invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total'],
+          items: ['name', 'price'],
+          payments: ['payment_date', 'amount'],
+          expenses: ['expense_date', 'amount'],
+        }
+
+        // Get required fields for current import type
+        const requiredFields = requiredFieldsByType[importType] || []
         const mappedTargets = Object.values(this.fieldMappings)
-        
+
         requiredFields.forEach(field => {
           if (!mappedTargets.includes(field)) {
             this.mappingErrors.push(`Required field '${field}' is not mapped`)
