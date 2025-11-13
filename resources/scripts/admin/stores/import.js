@@ -463,6 +463,13 @@ export const useImportStore = defineStore('import', {
         // Get import type from importJob
         const importType = this.importJob?.type || 'customers'
 
+        console.log('[validateMappings] Debug:', {
+          importType,
+          hasImportJob: !!this.importJob,
+          importJobType: this.importJob?.type,
+          importJobId: this.importJob?.id,
+        })
+
         // Define required fields for each import type
         const requiredFieldsByType = {
           customers: ['name', 'email'],
@@ -475,6 +482,9 @@ export const useImportStore = defineStore('import', {
         // Get required fields for current import type
         const requiredFields = requiredFieldsByType[importType] || []
         const mappedTargets = Object.values(this.fieldMappings)
+
+        console.log('[validateMappings] Required fields for', importType, ':', requiredFields)
+        console.log('[validateMappings] Mapped targets:', mappedTargets)
 
         requiredFields.forEach(field => {
           if (!mappedTargets.includes(field)) {
