@@ -71,15 +71,22 @@ class SynonymMatcher implements MatcherInterface
             }
 
             // Check language_variations for multilingual synonyms
-            $match = $this->findSynonymInArray($normalizedCsvField, $rule->language_variations ?? []);
-            if ($match) {
-                $candidates[] = $this->buildCandidate(
-                    $rule->target_field,
-                    $match['source'],
-                    $rule->id,
-                    $match['confidence']
-                );
-                continue;
+            // language_variations is nested: ["en" => [...], "mk" => [...]]
+            if (!empty($rule->language_variations) && is_array($rule->language_variations)) {
+                foreach ($rule->language_variations as $lang => $variations) {
+                    if (is_array($variations)) {
+                        $match = $this->findSynonymInArray($normalizedCsvField, $variations);
+                        if ($match) {
+                            $candidates[] = $this->buildCandidate(
+                                $rule->target_field,
+                                $match['source'],
+                                $rule->id,
+                                $match['confidence']
+                            );
+                            break; // Exit loop after first match
+                        }
+                    }
+                }
             }
         }
 
