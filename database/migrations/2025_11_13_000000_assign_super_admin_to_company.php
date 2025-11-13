@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -10,6 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Check if company_id column exists before trying to update it
+        if (!Schema::hasColumn('users', 'company_id')) {
+            \Log::info('[Migration] Skipping - company_id column does not exist on users table');
+            return;
+        }
+
         // Assign super admin users to the first available company if they don't have one
         $firstCompany = DB::table('companies')->orderBy('id')->first();
 
