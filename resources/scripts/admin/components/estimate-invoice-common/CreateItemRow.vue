@@ -409,6 +409,8 @@ function onSelectItem(itm) {
     state[props.storeProp].items[props.index].price = itm.price
     state[props.storeProp].items[props.index].item_id = itm.id
     state[props.storeProp].items[props.index].description = itm.description
+    state[props.storeProp].items[props.index].sku = itm.sku
+    state[props.storeProp].items[props.index].barcode = itm.barcode
 
     if (itm.unit) {
       state[props.storeProp].items[props.index].unit_name = itm.unit.name
@@ -432,6 +434,7 @@ function onSelectItem(itm) {
   itemStore.fetchItems()
   syncItemToStore()
 }
+// CLAUDE-CHECKPOINT: Added SKU and barcode transfer when selecting item
 
 function selectFixed() {
   if (props.itemData.discount_type === 'fixed') {

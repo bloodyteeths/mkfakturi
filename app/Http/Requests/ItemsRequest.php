@@ -19,6 +19,9 @@ class ItemsRequest extends FormRequest
      */
     public function rules(): array
     {
+        $companyId = $this->header('company');
+        $itemId = $this->route('item') ? $this->route('item')->id : null;
+
         return [
             'name' => [
                 'required',
@@ -32,6 +35,20 @@ class ItemsRequest extends FormRequest
             'description' => [
                 'nullable',
             ],
+            'sku' => [
+                'nullable',
+                'string',
+                'max:100',
+                'unique:items,sku,' . $itemId . ',id,company_id,' . $companyId,
+            ],
+            'barcode' => [
+                'nullable',
+                'string',
+                'max:100',
+                'unique:items,barcode,' . $itemId . ',id,company_id,' . $companyId,
+            ],
         ];
     }
+
+    // CLAUDE-CHECKPOINT
 }

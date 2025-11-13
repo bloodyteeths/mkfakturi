@@ -44,6 +44,19 @@
       @update:modelValue="(val) => $emit('select', val)"
       @searchChange="(val) => $emit('search', val)"
     >
+      <template #singlelabel="{ value }">
+        <div class="multiselect-single-label">
+          <span>{{ value.name }}</span>
+          <span v-if="value.sku" class="text-gray-500 text-xs ml-2">(SKU: {{ value.sku }})</span>
+        </div>
+      </template>
+      <template #option="{ option }">
+        <div class="flex justify-between items-center">
+          <span>{{ option.name }}</span>
+          <span v-if="option.sku" class="text-gray-500 text-xs ml-2">(SKU: {{ option.sku }})</span>
+        </div>
+      </template>
+
       <!-- Add Item Action  -->
       <template #action>
         <BaseSelectAction
@@ -190,4 +203,5 @@ function openItemModal() {
 function deselectItem(index) {
   props.store.deselectItem(index)
 }
+// CLAUDE-CHECKPOINT: Added SKU display in dropdown and selected item
 </script>

@@ -1,0 +1,1551 @@
+{
+  "version": "2.0",
+  "created_at": "2025-01-13",
+  "description": "Comprehensive field synonym database for CSV import mapping across multiple languages and formats",
+  "languages": ["en", "mk", "sq", "sr"],
+  "entity_types": {
+    "customer": {
+      "description": "Customer/Client entity mappings",
+      "fields": {
+        "name": {
+          "required": true,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "name", "customer_name", "client_name", "company", "company_name", "business_name",
+              "customer", "client", "account_name", "organization", "organisation", "org_name",
+              "firm", "firm_name", "enterprise", "business", "corporation", "corp_name",
+              "cust_name", "custname", "customername", "clientname", "companyname",
+              "c_name", "cname", "customer name", "client name", "company name",
+              "legal_name", "legalname", "trading_name", "tradingname", "merchant",
+              "vendor_name", "vendorname", "partner", "partner_name", "partnername"
+            ],
+            "mk": [
+              "име", "назив", "компанија", "клиент", "фирма", "претприатие",
+              "име_на_клиент", "име_на_компанија", "назив_на_фирма", "деловно_име",
+              "правно_име", "трговско_име", "партнер", "добавувач", "купувач",
+              "организација", "фирма_име", "клиент_име", "сопственик"
+            ],
+            "sq": [
+              "emri", "emri_klientit", "klienti", "kompania", "emri_kompanise",
+              "biznesi", "firma", "partneri", "organizata", "emri_biznesit",
+              "emri_firmes", "klient", "emri_klient", "kompani", "emerim",
+              "emri_tregtar", "emri_ligjor", "shoqeria", "ndermarre"
+            ],
+            "sr": [
+              "име", "назив", "клијент", "компанија", "фирма", "предузеће",
+              "име_клијента", "назив_компаније", "правно_име", "трговачко_име",
+              "партнер", "организација", "добављач", "купац", "пословно_име"
+            ]
+          },
+          "patterns": [
+            "^.*name.*$",
+            "^.*client.*$",
+            "^.*customer.*$",
+            "^.*company.*$",
+            "^.*firm.*$",
+            "^.*business.*$",
+            "^.*corp.*$",
+            "^.*organization.*$",
+            "^.*клиент.*$",
+            "^.*компан.*$",
+            "^.*фирма.*$"
+          ],
+          "examples": ["ACME Corp", "John's Hardware", "МК Трговија ДООЕЛ", "Firma ABC"],
+          "validation": null
+        },
+        "email": {
+          "required": true,
+          "data_type": "email",
+          "synonyms": {
+            "en": [
+              "email", "e-mail", "email_address", "emailaddress", "mail", "e_mail",
+              "contact_email", "contactemail", "customer_email", "customeremail",
+              "client_email", "clientemail", "primary_email", "primaryemail",
+              "email_addr", "emailaddr", "mail_address", "mailaddress", "electronic_mail",
+              "e mail", "email address", "contact email", "customer email"
+            ],
+            "mk": [
+              "емаил", "е-пошта", "електронска_пошта", "контакт_емаил", "email",
+              "е_пошта", "адреса_емаил", "емаил_адреса", "пошта", "е-адреса",
+              "контакт_пошта", "клиент_емаил", "електронска_адреса"
+            ],
+            "sq": [
+              "email", "emaili", "adresa_emailit", "posta_elektronike", "posta",
+              "email_adresa", "kontakt_email", "klient_email", "emailadresa",
+              "posta elektronike", "adresa email"
+            ],
+            "sr": [
+              "емаил", "е-пошта", "електронска_пошта", "контакт_емаил", "email",
+              "адреса_емаила", "е_пошта", "пошта", "мејл", "е-адреса"
+            ]
+          },
+          "patterns": [
+            "^.*email.*$",
+            "^.*mail.*$",
+            "^.*@.*$",
+            "^.*e-?mail.*$",
+            "^.*пошта.*$",
+            "^.*емаил.*$"
+          ],
+          "examples": ["info@company.com", "client@example.mk"],
+          "validation": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+        },
+        "phone": {
+          "required": false,
+          "data_type": "phone",
+          "synonyms": {
+            "en": [
+              "phone", "telephone", "phone_number", "phonenumber", "tel", "mobile",
+              "cell", "contact", "contact_number", "contactnumber", "tel_number",
+              "telephone_number", "phone_num", "phonenum", "mobile_number",
+              "mobilenumber", "cell_number", "cellnumber", "tel_num", "contact_phone",
+              "phone number", "contact number", "telephone number", "mobile phone"
+            ],
+            "mk": [
+              "телефон", "тел", "мобилен", "контакт", "телефонски_број", "мобилен_број",
+              "број_телефон", "контакт_телефон", "тел_број", "моб", "телефон_број",
+              "фиксен_телефон", "мобилен_телефон", "контакт_број"
+            ],
+            "sq": [
+              "telefon", "numri_telefonit", "tel", "mobil", "kontakt", "celular",
+              "numri_kontaktit", "telefoni", "numri_tel", "numri_mobil", "numri",
+              "telefon_mobil", "kontakt_telefon", "nr_telefoni"
+            ],
+            "sr": [
+              "телефон", "тел", "мобилни", "контакт", "број_телефона", "мобилни_број",
+              "телефонски_број", "контакт_телефон", "тел_број", "мобилан"
+            ]
+          },
+          "patterns": [
+            "^.*phone.*$",
+            "^.*tel.*$",
+            "^.*mobile.*$",
+            "^.*cell.*$",
+            "^.*contact.*$",
+            "^.*телефон.*$",
+            "^.*мобил.*$",
+            "^\\+?[0-9\\s\\-()]+$"
+          ],
+          "examples": ["+389 2 123 4567", "070 123 456", "+38971234567"],
+          "validation": "^[+]?[0-9\\s\\-()]{7,20}$"
+        },
+        "address": {
+          "required": false,
+          "data_type": "text",
+          "synonyms": {
+            "en": [
+              "address", "street_address", "streetaddress", "addr", "location",
+              "street", "billing_address", "billingaddress", "physical_address",
+              "mailing_address", "mailingaddress", "business_address", "businessaddress",
+              "office_address", "officeaddress", "full_address", "fulladdress",
+              "postal_address", "postaladdress", "address_line", "addressline"
+            ],
+            "mk": [
+              "адреса", "улица", "адреса_седиште", "локација", "адреса_на_седиште",
+              "деловна_адреса", "адреса_за_фактури", "пошта_адреса", "физичка_адреса",
+              "адреса_канцеларија", "седиште", "улица_број", "адреса_улица"
+            ],
+            "sq": [
+              "adresa", "rruga", "vendndodhja", "adresa_zyres", "adresa_biznesit",
+              "adresa_postare", "adresa_fizike", "rruges", "adresa_plote",
+              "adresa_kontaktit", "lokacioni", "adresa_rruga"
+            ],
+            "sr": [
+              "адреса", "улица", "адреса_седишта", "локација", "пословна_адреса",
+              "адреса_за_фактуре", "физичка_адреса", "поштанска_адреса", "седиште"
+            ]
+          },
+          "patterns": [
+            "^.*address.*$",
+            "^.*street.*$",
+            "^.*addr.*$",
+            "^.*location.*$",
+            "^.*адреса.*$",
+            "^.*улица.*$"
+          ],
+          "examples": ["123 Main St, Skopje", "ул. Македонија бр.10"],
+          "validation": null
+        },
+        "vat_number": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "vat_number", "vatnumber", "vat", "vat_id", "vatid", "tax_number",
+              "taxnumber", "tax_id", "taxid", "edb", "edb_number", "edbnumber",
+              "vat_registration", "vat_reg", "vat_no", "vatno", "tax_no", "taxno",
+              "fiscal_number", "fiscalnumber", "fiscal_id", "tin", "tax_identification",
+              "vat number", "tax number", "vat no", "tax id"
+            ],
+            "mk": [
+              "ддв", "ддв_број", "даночен_број", "ембс", "ембс_број", "ембг",
+              "данок_број", "ддв_регистрација", "едб", "едб_број", "даночен_идентификациски",
+              "данок_идентификација", "фискален_број", "данок_id", "даночен_id"
+            ],
+            "sq": [
+              "numri_tvsh", "tvsh", "numri_fiskal", "numri_tatimit", "edb",
+              "numri_edb", "id_tatimit", "numri_tatim", "tvsh_numri", "id_fiskal",
+              "identifikimi_fiskal", "nipt", "numri_nipt"
+            ],
+            "sr": [
+              "пдв", "пдв_број", "порески_број", "пиб", "мб", "матични_број",
+              "порески_идентификациони_број", "јмбг", "данак_број", "фискални_број"
+            ]
+          },
+          "patterns": [
+            "^.*vat.*$",
+            "^.*tax.*$",
+            "^.*edb.*$",
+            "^.*ддв.*$",
+            "^.*едб.*$",
+            "^.*пдв.*$",
+            "^.*пиб.*$",
+            "^[A-Z]{2}[0-9]{8,15}$",
+            "^[0-9]{13}$"
+          ],
+          "examples": ["MK4080012514599", "4080012514599"],
+          "validation": "^([A-Z]{2})?[0-9]{8,15}$"
+        },
+        "website": {
+          "required": false,
+          "data_type": "url",
+          "synonyms": {
+            "en": [
+              "website", "web", "url", "site", "homepage", "web_address", "webaddress",
+              "web_site", "website_url", "websiteurl", "web_url", "weburl", "domain",
+              "internet_address", "www", "online_address", "web_page", "webpage",
+              "site_url", "siteurl", "company_website", "companywebsite"
+            ],
+            "mk": [
+              "веб", "веб_страна", "веб_адреса", "интернет_страна", "сајт",
+              "веб_сајт", "веб_локација", "домен", "интернет_адреса", "www",
+              "онлајн_адреса", "веб_url", "урл", "страна"
+            ],
+            "sq": [
+              "faqja_web", "web", "url", "faqe", "adresa_web", "sajti",
+              "website", "faqja_internetit", "adresa_internetit", "webfaqe",
+              "domeni", "www", "faqe_online"
+            ],
+            "sr": [
+              "веб", "веб_страна", "веб_адреса", "интернет_страна", "сајт",
+              "веб_сајт", "домен", "www", "урл", "интернет_адреса"
+            ]
+          },
+          "patterns": [
+            "^.*web.*$",
+            "^.*url.*$",
+            "^.*site.*$",
+            "^.*www.*$",
+            "^.*domain.*$",
+            "^https?://.*$",
+            "^.*\\.com$",
+            "^.*\\.mk$"
+          ],
+          "examples": ["www.company.com", "https://example.mk"],
+          "validation": "^(https?://)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*/?$"
+        },
+        "currency": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "currency", "curr", "currency_code", "currencycode", "curr_code",
+              "money_currency", "payment_currency", "billing_currency", "currency_type",
+              "iso_currency", "currency_symbol", "curr_symbol", "currency_iso"
+            ],
+            "mk": [
+              "валута", "валута_код", "валутен_код", "тип_валута", "пари_валута",
+              "код_валута", "валута_тип", "iso_валута", "симбол_валута"
+            ],
+            "sq": [
+              "valuta", "monedha", "kodi_valutes", "valute", "tipi_valutes",
+              "kodi_monedhes", "simbol_valute", "iso_valuta"
+            ],
+            "sr": [
+              "валута", "валута_код", "валутни_код", "тип_валуте", "код_валуте",
+              "iso_валута", "симбол_валуте"
+            ]
+          },
+          "patterns": [
+            "^.*currency.*$",
+            "^.*curr.*$",
+            "^.*валута.*$",
+            "^.*valut.*$",
+            "^[A-Z]{3}$"
+          ],
+          "examples": ["MKD", "EUR", "USD"],
+          "validation": "^[A-Z]{3}$"
+        },
+        "city": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "city", "town", "municipality", "city_name", "cityname", "town_name",
+              "townname", "settlement", "locality", "urban_area"
+            ],
+            "mk": [
+              "град", "општина", "населба", "место", "град_име", "општина_име",
+              "локалитет", "град_назив"
+            ],
+            "sq": [
+              "qyteti", "komuna", "vendi", "qytet", "emri_qytetit", "bashkia",
+              "vendbanimi", "lokaliteti"
+            ],
+            "sr": [
+              "град", "општина", "место", "насеље", "град_име", "град_назив",
+              "локалитет"
+            ]
+          },
+          "patterns": [
+            "^.*city.*$",
+            "^.*town.*$",
+            "^.*град.*$",
+            "^.*qytet.*$"
+          ],
+          "examples": ["Skopje", "Битола", "Prishtina"],
+          "validation": null
+        },
+        "country": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "country", "country_name", "countryname", "country_code", "countrycode",
+              "nation", "state", "territory", "iso_country"
+            ],
+            "mk": [
+              "држава", "земја", "држава_име", "земја_име", "код_држава",
+              "држава_код", "iso_држава", "нација"
+            ],
+            "sq": [
+              "shteti", "vendi", "emri_shtetit", "kodi_shtetit", "nacio",
+              "iso_shteti", "shteti_kodi"
+            ],
+            "sr": [
+              "држава", "земља", "држава_име", "код_државе", "iso_држава",
+              "нација"
+            ]
+          },
+          "patterns": [
+            "^.*country.*$",
+            "^.*nation.*$",
+            "^.*држав.*$",
+            "^.*shtet.*$",
+            "^[A-Z]{2}$"
+          ],
+          "examples": ["Macedonia", "MK", "Albania"],
+          "validation": null
+        },
+        "postal_code": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "postal_code", "postalcode", "zip", "zip_code", "zipcode", "postcode",
+              "post_code", "postal", "zip_postal", "mail_code"
+            ],
+            "mk": [
+              "поштенски_код", "поштенски_број", "код", "zip_код", "пошта_код",
+              "поштенски", "поштен_код"
+            ],
+            "sq": [
+              "kodi_postar", "postare", "zip", "kodi_zip", "kodi_postes",
+              "postar_kodi", "zip_kodi"
+            ],
+            "sr": [
+              "поштански_број", "поштански_код", "zip", "код_поште", "поштански",
+              "zip_код"
+            ]
+          },
+          "patterns": [
+            "^.*postal.*$",
+            "^.*zip.*$",
+            "^.*postcode.*$",
+            "^.*пошт.*$",
+            "^[0-9]{4,10}$"
+          ],
+          "examples": ["1000", "10000"],
+          "validation": "^[0-9]{4,10}$"
+        }
+      }
+    },
+    "invoice": {
+      "description": "Invoice entity mappings",
+      "fields": {
+        "invoice_number": {
+          "required": true,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "invoice_number", "invoicenumber", "invoice_no", "invoiceno", "inv_number",
+              "inv_no", "invno", "invoice_id", "invoiceid", "invoice_num", "invoicenum",
+              "number", "no", "doc_number", "docnumber", "document_number", "documentnumber",
+              "invoice #", "inv#", "invoice#", "reference_number", "referencenumber",
+              "invoice number", "invoice no", "document number", "ref_no", "refno"
+            ],
+            "mk": [
+              "број_фактура", "фактура_број", "фактура_бр", "бр_фактура", "број",
+              "бр", "документ_број", "број_документ", "ид_фактура", "фактура_ид",
+              "реф_број", "референца_број", "бр_док", "фактура_бр_број"
+            ],
+            "sq": [
+              "numri_fatures", "fature_numri", "nr_fatures", "numri", "nr_fat",
+              "numri_dokumentit", "fatura_nr", "id_fatures", "referenca_numri",
+              "nr_ref", "numri_fat", "fatura_numri"
+            ],
+            "sr": [
+              "број_фактуре", "фактура_број", "бр_фактуре", "број_документа",
+              "број", "бр", "ид_фактуре", "референца_број", "број_рачуна"
+            ]
+          },
+          "patterns": [
+            "^.*invoice.*number.*$",
+            "^.*inv.*no.*$",
+            "^.*фактура.*број.*$",
+            "^.*fatur.*numr.*$",
+            "^.*број.*факт.*$",
+            "^INV-.*$",
+            "^[0-9]+$"
+          ],
+          "examples": ["INV-2025-001", "FAK-123456", "0001"],
+          "validation": null
+        },
+        "customer_name": {
+          "required": true,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "customer_name", "customername", "customer", "client_name", "clientname",
+              "client", "bill_to", "billto", "sold_to", "soldto", "customer_company",
+              "client_company", "account_name", "accountname", "buyer", "buyer_name",
+              "purchaser", "company", "company_name", "companyname", "business_name"
+            ],
+            "mk": [
+              "клиент", "клиент_име", "име_клиент", "купувач", "купувач_име",
+              "компанија", "компанија_име", "фирма", "назив_клиент", "партнер"
+            ],
+            "sq": [
+              "klienti", "emri_klientit", "klient_emri", "bleresi", "emri_bleresit",
+              "kompania", "firma", "partneri", "klient", "emri_klient"
+            ],
+            "sr": [
+              "клијент", "име_клијента", "клијент_име", "купац", "компанија",
+              "фирма", "назив_клијента", "партнер"
+            ]
+          },
+          "patterns": [
+            "^.*customer.*$",
+            "^.*client.*$",
+            "^.*buyer.*$",
+            "^.*клиент.*$",
+            "^.*купувач.*$",
+            "^.*klient.*$"
+          ],
+          "examples": ["ACME Corp", "МК Трговија", "Firma ABC"],
+          "validation": null
+        },
+        "invoice_date": {
+          "required": true,
+          "data_type": "date",
+          "synonyms": {
+            "en": [
+              "invoice_date", "invoicedate", "inv_date", "invdate", "date", "issue_date",
+              "issuedate", "created_date", "createddate", "billing_date", "billingdate",
+              "document_date", "documentdate", "invoice_created", "date_issued",
+              "dateissued", "doc_date", "docdate", "invoice date", "issue date"
+            ],
+            "mk": [
+              "датум_фактура", "датум_издавање", "фактура_датум", "датум", "дата",
+              "датум_документ", "издадена_датум", "датум_креирање", "дат_факт",
+              "датум_издавање_фактура", "датум_испорака"
+            ],
+            "sq": [
+              "data_fatures", "fature_data", "data_leshimit", "data", "date_fat",
+              "data_dokumentit", "data_krijuar", "data_faturimit", "dt_fature"
+            ],
+            "sr": [
+              "датум_фактуре", "датум_издавања", "фактура_датум", "датум", "дата",
+              "датум_документа", "датум_креирања", "издата_датум"
+            ]
+          },
+          "patterns": [
+            "^.*invoice.*date.*$",
+            "^.*date.*$",
+            "^.*датум.*$",
+            "^.*data.*$",
+            "^\\d{4}-\\d{2}-\\d{2}$",
+            "^\\d{2}\\.\\d{2}\\.\\d{4}$",
+            "^\\d{2}/\\d{2}/\\d{4}$"
+          ],
+          "examples": ["2025-01-13", "13.01.2025", "13/01/2025"],
+          "validation": null
+        },
+        "due_date": {
+          "required": false,
+          "data_type": "date",
+          "synonyms": {
+            "en": [
+              "due_date", "duedate", "payment_due", "paymentdue", "due", "pay_by",
+              "payby", "pay_date", "paydate", "expiry_date", "expirydate", "maturity_date",
+              "maturitydate", "deadline", "payment_deadline", "due_by", "dueby",
+              "payment_date", "paymentdate", "due date", "payment due date"
+            ],
+            "mk": [
+              "датум_плаќање", "рок_плаќање", "валута", "датум_доспевање", "краен_рок",
+              "датум_до", "плати_до", "рок_за_плаќање", "доспева_на", "валидна_до",
+              "датум_валидност", "датум_достасува"
+            ],
+            "sq": [
+              "data_pageses", "afati_pageses", "data_skadimit", "afati", "paguaj_deri",
+              "data_maturimit", "deri_ne", "skadenca", "afat_pagese", "data_perfundimit"
+            ],
+            "sr": [
+              "датум_плаћања", "рок_плаћања", "валута", "датум_доспећа", "крајњи_рок",
+              "плати_до", "рок_за_плаћање", "доспева", "датум_доспијећа"
+            ]
+          },
+          "patterns": [
+            "^.*due.*date.*$",
+            "^.*payment.*$",
+            "^.*рок.*$",
+            "^.*датум.*плаќ.*$",
+            "^.*afat.*$",
+            "^\\d{4}-\\d{2}-\\d{2}$",
+            "^\\d{2}\\.\\d{2}\\.\\d{4}$"
+          ],
+          "examples": ["2025-02-13", "13.02.2025"],
+          "validation": null
+        },
+        "total": {
+          "required": true,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "total", "total_amount", "totalamount", "grand_total", "grandtotal",
+              "amount_total", "total_due", "totaldue", "invoice_total", "invoicetotal",
+              "sum_total", "sumtotal", "final_amount", "finalamount", "total_value",
+              "amount", "total_price", "totalprice", "balance_due", "balancedue",
+              "total amount", "grand total", "amount due"
+            ],
+            "mk": [
+              "вкупно", "вкупен_износ", "износ_вкупно", "сума", "вкупна_сума",
+              "износ", "вкупно_за_плаќање", "финален_износ", "вредност_вкупно",
+              "вкупна_вредност", "конечен_износ", "вк_износ", "вкупно_износ"
+            ],
+            "sq": [
+              "totali", "shuma_totale", "vlera_totale", "total_shume", "shuma",
+              "cmimi_total", "gjithsej", "shuma_gjithsej", "vlera_perfundimtare",
+              "totali_fatures", "shume_total"
+            ],
+            "sr": [
+              "укупно", "укупан_износ", "износ_укупно", "сума", "укупна_сума",
+              "износ", "финални_износ", "вредност_укупно", "коначни_износ"
+            ]
+          },
+          "patterns": [
+            "^.*total.*$",
+            "^.*amount.*$",
+            "^.*sum.*$",
+            "^.*вкупно.*$",
+            "^.*износ.*$",
+            "^.*total.*$",
+            "^.*shuma.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["1500.00", "12345.50", "100"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}$"
+        },
+        "subtotal": {
+          "required": false,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "subtotal", "sub_total", "subtotal_amount", "subtotalamount", "net_amount",
+              "netamount", "amount_before_tax", "pre_tax", "pretax", "net_total",
+              "nettotal", "base_amount", "baseamount", "taxable_amount", "taxableamount",
+              "sub total", "net total", "amount before tax"
+            ],
+            "mk": [
+              "подвкупно", "износ_пред_данок", "нето_износ", "основен_износ",
+              "износ_без_данок", "износ_пред_ддв", "подвкупен_износ", "база_данок",
+              "основа_за_данок", "нето", "износ_нето"
+            ],
+            "sq": [
+              "nentotali", "shuma_para_taksave", "shuma_neto", "baza_tatimore",
+              "vlera_neto", "shuma_bazike", "para_tvsh", "shuma_neto_vlere"
+            ],
+            "sr": [
+              "подукупно", "износ_пре_пореза", "нето_износ", "основни_износ",
+              "износ_без_пореза", "основа_за_порез", "нето"
+            ]
+          },
+          "patterns": [
+            "^.*subtotal.*$",
+            "^.*sub.*total.*$",
+            "^.*net.*$",
+            "^.*подвкупно.*$",
+            "^.*нето.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["1200.00", "10000.00"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}$"
+        },
+        "tax": {
+          "required": false,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "tax", "tax_amount", "taxamount", "vat", "vat_amount", "vatamount",
+              "sales_tax", "salestax", "gst", "vat_total", "vattotal", "tax_total",
+              "taxtotal", "tax_value", "taxvalue", "total_tax", "totaltax",
+              "tax amount", "vat amount", "sales tax"
+            ],
+            "mk": [
+              "данок", "ддв", "износ_данок", "износ_ддв", "данок_износ", "ддв_износ",
+              "вредност_данок", "сума_данок", "данок_на_додадена_вредност", "порез"
+            ],
+            "sq": [
+              "tatimi", "tvsh", "shuma_tatimit", "vlera_tvsh", "tatim_vlere",
+              "tvsh_shume", "tatim_shitjes", "tatimi_vlere"
+            ],
+            "sr": [
+              "порез", "пдв", "износ_пореза", "износ_пдв", "порез_износ",
+              "вредност_пореза", "сума_пореза"
+            ]
+          },
+          "patterns": [
+            "^.*tax.*$",
+            "^.*vat.*$",
+            "^.*ддв.*$",
+            "^.*данок.*$",
+            "^.*tvsh.*$",
+            "^.*пдв.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["300.00", "2345.50", "18%"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}$"
+        },
+        "status": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "status", "invoice_status", "invoicestatus", "state", "payment_status",
+              "paymentstatus", "billing_status", "billingstatus", "doc_status",
+              "docstatus", "current_status", "currentstatus", "invoice_state"
+            ],
+            "mk": [
+              "статус", "статус_фактура", "состојба", "статус_плаќање", "положба",
+              "статус_документ", "стање", "тековен_статус"
+            ],
+            "sq": [
+              "statusi", "statusi_fatures", "gjendja", "statusi_pageses",
+              "statusi_dokumentit", "gjendje", "statusi_aktual"
+            ],
+            "sr": [
+              "статус", "статус_фактуре", "стање", "статус_плаћања", "положај",
+              "статус_документа", "тренутни_статус"
+            ]
+          },
+          "patterns": [
+            "^.*status.*$",
+            "^.*state.*$",
+            "^.*статус.*$",
+            "^.*(paid|unpaid|draft|sent).*$"
+          ],
+          "examples": ["paid", "unpaid", "draft", "sent"],
+          "validation": null
+        },
+        "currency": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "currency", "curr", "currency_code", "currencycode", "curr_code"
+            ],
+            "mk": [
+              "валута", "валута_код", "валутен_код"
+            ],
+            "sq": [
+              "valuta", "monedha", "kodi_valutes"
+            ],
+            "sr": [
+              "валута", "валута_код"
+            ]
+          },
+          "patterns": [
+            "^.*currency.*$",
+            "^[A-Z]{3}$"
+          ],
+          "examples": ["MKD", "EUR", "USD"],
+          "validation": "^[A-Z]{3}$"
+        },
+        "notes": {
+          "required": false,
+          "data_type": "text",
+          "synonyms": {
+            "en": [
+              "notes", "note", "comments", "comment", "remarks", "remark", "description",
+              "memo", "additional_info", "additionalinfo", "invoice_notes", "invoicenotes",
+              "private_notes", "privatenotes", "internal_notes", "internalnotes",
+              "customer_notes", "customernotes", "terms", "terms_conditions"
+            ],
+            "mk": [
+              "забелешки", "забелешка", "коментари", "коментар", "напомени", "напомена",
+              "опис", "дополнителни_информации", "белешки", "услови", "напоменa"
+            ],
+            "sq": [
+              "shenimet", "komente", "verejtje", "pershkrim", "informacion_shtese",
+              "kushte", "termat", "nota", "verejtjet"
+            ],
+            "sr": [
+              "напомене", "белешке", "коментари", "примедбе", "опис",
+              "додатне_информације", "услови", "напомена"
+            ]
+          },
+          "patterns": [
+            "^.*notes?.*$",
+            "^.*comment.*$",
+            "^.*remark.*$",
+            "^.*забелешк.*$",
+            "^.*коментар.*$",
+            "^.*shenim.*$"
+          ],
+          "examples": ["Payment terms: Net 30", "Забелешка: ..."],
+          "validation": null
+        },
+        "discount": {
+          "required": false,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "discount", "discount_amount", "discountamount", "disc", "discount_value",
+              "discountvalue", "total_discount", "totaldiscount", "rebate", "deduction",
+              "price_reduction", "discount_percent", "discountpercent"
+            ],
+            "mk": [
+              "попуст", "износ_попуст", "попуст_износ", "вредност_попуст", "рабат",
+              "намалување", "процент_попуст", "попуст_процент"
+            ],
+            "sq": [
+              "zbritja", "shuma_zbritjes", "vlera_zbritjes", "rabati", "ulja",
+              "perqindja_zbritjes", "zbritje_cmimi"
+            ],
+            "sr": [
+              "попуст", "износ_попуста", "вредност_попуста", "рабат", "умањење",
+              "проценат_попуста"
+            ]
+          },
+          "patterns": [
+            "^.*discount.*$",
+            "^.*попуст.*$",
+            "^.*zbritj.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["100.00", "10%", "5"],
+          "validation": null
+        }
+      }
+    },
+    "payment": {
+      "description": "Payment entity mappings",
+      "fields": {
+        "payment_date": {
+          "required": true,
+          "data_type": "date",
+          "synonyms": {
+            "en": [
+              "payment_date", "paymentdate", "pay_date", "paydate", "date", "paid_on",
+              "paidon", "date_paid", "datepaid", "transaction_date", "transactiondate",
+              "received_date", "receiveddate", "payment_received", "date_received",
+              "payment date", "date paid", "transaction date"
+            ],
+            "mk": [
+              "датум_плаќање", "датум_уплата", "плаќање_датум", "датум", "платено_на",
+              "дата_плаќање", "датум_трансакција", "примено_датум", "датум_примено"
+            ],
+            "sq": [
+              "data_pageses", "data_paguaj", "paguar_ne", "data_transaksionit",
+              "data_marrjes", "data", "pagese_data", "dt_pagese"
+            ],
+            "sr": [
+              "датум_плаћања", "датум_уплате", "плаћање_датум", "датум", "плаћено_на",
+              "датум_трансакције", "примљено_датум"
+            ]
+          },
+          "patterns": [
+            "^.*payment.*date.*$",
+            "^.*pay.*date.*$",
+            "^.*датум.*плаќ.*$",
+            "^.*data.*pages.*$",
+            "^\\d{4}-\\d{2}-\\d{2}$",
+            "^\\d{2}\\.\\d{2}\\.\\d{4}$"
+          ],
+          "examples": ["2025-01-13", "13.01.2025"],
+          "validation": null
+        },
+        "amount": {
+          "required": true,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "amount", "payment_amount", "paymentamount", "paid_amount", "paidamount",
+              "pay_amount", "payamount", "sum", "total", "value", "payment_value",
+              "transaction_amount", "transactionamount", "paid", "received_amount",
+              "payment amount", "paid amount", "transaction amount"
+            ],
+            "mk": [
+              "износ", "износ_плаќање", "плаќање_износ", "платен_износ", "сума",
+              "вкупно", "вредност", "износ_трансакција", "примен_износ", "уплата"
+            ],
+            "sq": [
+              "shuma", "shuma_pageses", "paguar_shume", "vlera", "totali",
+              "shuma_transaksionit", "shuma_marrjes", "pagese_shume"
+            ],
+            "sr": [
+              "износ", "износ_плаћања", "плаћени_износ", "сума", "вредност",
+              "износ_трансакције", "примљени_износ", "уплата"
+            ]
+          },
+          "patterns": [
+            "^.*amount.*$",
+            "^.*sum.*$",
+            "^.*total.*$",
+            "^.*износ.*$",
+            "^.*shuma.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["1500.00", "12345.50"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}$"
+        },
+        "payment_method": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "payment_method", "paymentmethod", "method", "pay_method", "paymethod",
+              "payment_type", "paymenttype", "pay_type", "paytype", "mode_of_payment",
+              "modeofpayment", "payment_mode", "paymentmode", "method_of_payment",
+              "payment method", "payment type", "mode of payment"
+            ],
+            "mk": [
+              "начин_плаќање", "метод_плаќање", "тип_плаќање", "начин_уплата",
+              "метод", "начин", "тип", "плаќање_метод", "плаќање_начин"
+            ],
+            "sq": [
+              "menyra_pageses", "metoda_pageses", "tipi_pageses", "metode",
+              "menyre", "lloji_pageses", "forma_pageses"
+            ],
+            "sr": [
+              "начин_плаћања", "метод_плаћања", "тип_плаћања", "метод", "начин",
+              "тип", "плаћање_метод"
+            ]
+          },
+          "patterns": [
+            "^.*payment.*method.*$",
+            "^.*pay.*method.*$",
+            "^.*начин.*плаќ.*$",
+            "^.*menyr.*pages.*$"
+          ],
+          "examples": ["Cash", "Bank Transfer", "Credit Card", "Готовина"],
+          "validation": null
+        },
+        "reference": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "reference", "ref", "reference_number", "referencenumber", "ref_number",
+              "refnumber", "ref_no", "refno", "transaction_id", "transactionid",
+              "transaction_reference", "transactionreference", "payment_reference",
+              "paymentreference", "check_number", "checknumber", "receipt_number",
+              "receiptnumber", "transaction_no", "transactionno", "reference no"
+            ],
+            "mk": [
+              "референца", "реф", "референца_број", "број_референца", "реф_број",
+              "трансакција_ид", "број_трансакција", "број_чек", "број_потврда",
+              "потврда_број", "ид_трансакција"
+            ],
+            "sq": [
+              "referenca", "numri_referencias", "ref", "id_transaksionit",
+              "numri_transaksionit", "numri_cekut", "numri_fatures_tatimore",
+              "ref_numri"
+            ],
+            "sr": [
+              "референца", "реф", "број_референце", "ид_трансакције",
+              "број_трансакције", "број_чека", "број_потврде"
+            ]
+          },
+          "patterns": [
+            "^.*reference.*$",
+            "^.*ref.*$",
+            "^.*transaction.*$",
+            "^.*референц.*$",
+            "^.*трансакц.*$"
+          ],
+          "examples": ["TXN123456", "CHK-001", "REF-2025-001"],
+          "validation": null
+        },
+        "customer_name": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "customer_name", "customername", "customer", "client_name", "clientname",
+              "client", "payer", "payer_name", "payername", "from", "received_from",
+              "receivedfrom", "paid_by", "paidby"
+            ],
+            "mk": [
+              "клиент", "клиент_име", "платец", "платил", "примено_од", "од"
+            ],
+            "sq": [
+              "klienti", "emri_klientit", "paguesi", "paguar_nga", "marrur_nga"
+            ],
+            "sr": [
+              "клијент", "име_клијента", "платац", "платио", "примљено_од"
+            ]
+          },
+          "patterns": [
+            "^.*customer.*$",
+            "^.*client.*$",
+            "^.*payer.*$",
+            "^.*клиент.*$"
+          ],
+          "examples": ["ACME Corp", "John Doe"],
+          "validation": null
+        },
+        "invoice_number": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "invoice_number", "invoicenumber", "invoice_no", "invoiceno", "invoice",
+              "inv_number", "inv_no", "invno", "invoice_id", "invoiceid",
+              "bill_number", "billnumber", "related_invoice", "relatedinvoice"
+            ],
+            "mk": [
+              "број_фактура", "фактура_број", "фактура", "бр_фактура", "ид_фактура"
+            ],
+            "sq": [
+              "numri_fatures", "fature_numri", "fatura", "nr_fatures", "id_fatures"
+            ],
+            "sr": [
+              "број_фактуре", "фактура_број", "фактура", "бр_фактуре"
+            ]
+          },
+          "patterns": [
+            "^.*invoice.*$",
+            "^.*inv.*$",
+            "^.*фактура.*$",
+            "^.*fatur.*$"
+          ],
+          "examples": ["INV-2025-001", "FAK-123"],
+          "validation": null
+        },
+        "notes": {
+          "required": false,
+          "data_type": "text",
+          "synonyms": {
+            "en": [
+              "notes", "note", "comments", "comment", "remarks", "remark", "memo",
+              "description", "payment_notes", "paymentnotes", "additional_info"
+            ],
+            "mk": [
+              "забелешки", "забелешка", "коментари", "опис", "напомени", "белешки"
+            ],
+            "sq": [
+              "shenimet", "komente", "verejtje", "pershkrim", "nota"
+            ],
+            "sr": [
+              "напомене", "белешке", "коментари", "опис", "примедбе"
+            ]
+          },
+          "patterns": [
+            "^.*notes?.*$",
+            "^.*comment.*$",
+            "^.*забелешк.*$"
+          ],
+          "examples": ["Payment for invoice INV-001"],
+          "validation": null
+        }
+      }
+    },
+    "item": {
+      "description": "Item/Product entity mappings",
+      "fields": {
+        "name": {
+          "required": true,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "name", "item_name", "itemname", "product_name", "productname", "product",
+              "item", "description", "item_description", "itemdescription", "title",
+              "service", "service_name", "servicename", "goods", "goods_name",
+              "sku", "product_description", "productdescription"
+            ],
+            "mk": [
+              "име", "артикал", "производ", "назив", "опис", "артикал_име", "производ_име",
+              "услуга", "стока", "назив_артикал", "назив_производ", "име_артикал"
+            ],
+            "sq": [
+              "emri", "produkti", "artikulli", "pershkrim", "emri_produktit",
+              "sherbimi", "malli", "emri_artikullit", "titulli"
+            ],
+            "sr": [
+              "име", "артикал", "производ", "назив", "опис", "услуга", "роба",
+              "назив_артикла", "име_производа"
+            ]
+          },
+          "patterns": [
+            "^.*name.*$",
+            "^.*item.*$",
+            "^.*product.*$",
+            "^.*артикал.*$",
+            "^.*производ.*$",
+            "^.*produkt.*$"
+          ],
+          "examples": ["Laptop Computer", "Консултантски услуги", "Produkt ABC"],
+          "validation": null
+        },
+        "price": {
+          "required": true,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "price", "unit_price", "unitprice", "rate", "cost", "amount", "value",
+              "item_price", "itemprice", "product_price", "productprice", "unit_cost",
+              "unitcost", "selling_price", "sellingprice", "sale_price", "saleprice",
+              "list_price", "listprice", "retail_price", "retailprice"
+            ],
+            "mk": [
+              "цена", "цена_единица", "единична_цена", "износ", "вредност", "стојност",
+              "цена_артикал", "цена_производ", "продажна_цена", "набавна_цена",
+              "малопродажна_цена", "цена_по_единица"
+            ],
+            "sq": [
+              "cmimi", "cmimi_njesi", "vlera", "shuma", "kosto", "cmimi_produktit",
+              "cmimi_shitjes", "cmimi_njesia", "cmimi_artikullit"
+            ],
+            "sr": [
+              "цена", "цена_јединице", "јединична_цена", "износ", "вредност",
+              "продајна_цена", "набавна_цена", "цена_артикла"
+            ]
+          },
+          "patterns": [
+            "^.*price.*$",
+            "^.*rate.*$",
+            "^.*cost.*$",
+            "^.*цена.*$",
+            "^.*cmim.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["99.99", "1500.00", "25"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}$"
+        },
+        "description": {
+          "required": false,
+          "data_type": "text",
+          "synonyms": {
+            "en": [
+              "description", "desc", "item_description", "itemdescription",
+              "product_description", "productdescription", "details", "item_details",
+              "itemdetails", "product_details", "productdetails", "notes",
+              "specifications", "specs", "long_description"
+            ],
+            "mk": [
+              "опис", "опис_артикал", "опис_производ", "детали", "детали_артикал",
+              "спецификации", "спец", "забелешки", "долг_опис"
+            ],
+            "sq": [
+              "pershkrim", "pershkrimi", "detaje", "detajet", "specifikimet",
+              "pershkrim_produktit", "pershkrim_artikullit", "shenimet"
+            ],
+            "sr": [
+              "опис", "опис_артикла", "опис_производа", "детаљи", "спецификације",
+              "напомене", "дуг_опис"
+            ]
+          },
+          "patterns": [
+            "^.*description.*$",
+            "^.*desc.*$",
+            "^.*details.*$",
+            "^.*опис.*$",
+            "^.*pershkrim.*$"
+          ],
+          "examples": ["15-inch laptop with 16GB RAM", "Детален опис производа"],
+          "validation": null
+        },
+        "unit": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "unit", "unit_of_measure", "unitofmeasure", "uom", "measure", "unit_type",
+              "unittype", "measurement_unit", "measurementunit", "qty_unit", "qtyunit",
+              "u/m", "um", "measurement", "measure_unit"
+            ],
+            "mk": [
+              "единица", "мерка", "единица_мера", "мерна_единица", "тип_единица",
+              "ем", "е_м", "мерна_ед", "единица_мерка"
+            ],
+            "sq": [
+              "njesia", "njesia_matese", "matja", "tipi_njesis", "njesi_mat",
+              "matje_njesia", "nm", "nj"
+            ],
+            "sr": [
+              "јединица", "мера", "јединица_мере", "мерна_јединица", "тип_јединице",
+              "јм", "ј_м", "мерна_јед"
+            ]
+          },
+          "patterns": [
+            "^.*unit.*$",
+            "^.*measure.*$",
+            "^.*единиц.*$",
+            "^.*мерка.*$",
+            "^.*njesi.*$"
+          ],
+          "examples": ["pcs", "kg", "m", "hrs", "парче", "kg"],
+          "validation": null
+        },
+        "quantity": {
+          "required": false,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "quantity", "qty", "amount", "count", "number", "num", "quantity_ordered",
+              "quantityordered", "qty_ordered", "qtyordered", "order_qty", "orderqty",
+              "units", "pieces", "pcs", "item_quantity", "itemquantity"
+            ],
+            "mk": [
+              "количина", "кол", "количество", "број", "бр", "количина_нарачана",
+              "парчиња", "парчиња_број", "количина_артикал", "кол_нарачка"
+            ],
+            "sq": [
+              "sasia", "sas", "numri", "nr", "sasia_porositur", "cope", "copra",
+              "sasia_artikullit", "sasi_porosise"
+            ],
+            "sr": [
+              "количина", "кол", "број", "бр", "количина_поручена", "комади",
+              "парчад", "количина_артикла"
+            ]
+          },
+          "patterns": [
+            "^.*quantity.*$",
+            "^.*qty.*$",
+            "^.*amount.*$",
+            "^.*количин.*$",
+            "^.*sasi.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["10", "5.5", "100"],
+          "validation": "^[0-9]+\\.?[0-9]{0,4}$"
+        },
+        "tax_rate": {
+          "required": false,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "tax_rate", "taxrate", "tax", "vat_rate", "vatrate", "vat", "tax_percent",
+              "taxpercent", "tax_percentage", "taxpercentage", "vat_percent", "vatpercent",
+              "rate", "gst_rate", "gstrate", "sales_tax_rate", "salestaxrate"
+            ],
+            "mk": [
+              "даночна_стапка", "данок_стапка", "ддв_стапка", "стапка_ддв", "данок",
+              "ддв", "процент_данок", "данок_процент", "стапка_данок", "даночна_ст"
+            ],
+            "sq": [
+              "shkalla_tatimit", "tatimi", "perqindja_tvsh", "tvsh", "shkalla_tvsh",
+              "tatim_perqindja", "norma_tatimit", "norma_tvsh"
+            ],
+            "sr": [
+              "пореска_стопа", "стопа_пореза", "порез", "стопа_пдв", "пдв_стопа",
+              "проценат_пореза", "порез_проценат", "стопа_данка"
+            ]
+          },
+          "patterns": [
+            "^.*tax.*rate.*$",
+            "^.*vat.*rate.*$",
+            "^.*данок.*стапка.*$",
+            "^.*shkall.*tatim.*$",
+            "^[0-9]+\\.?[0-9]*%?$"
+          ],
+          "examples": ["18", "18%", "5.00", "0"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}%?$"
+        },
+        "sku": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "sku", "product_code", "productcode", "item_code", "itemcode", "code",
+              "product_id", "productid", "item_id", "itemid", "part_number", "partnumber",
+              "catalog_number", "catalognumber", "stock_code", "stockcode", "barcode",
+              "product_sku", "item_sku"
+            ],
+            "mk": [
+              "шифра", "код", "шифра_артикал", "артикал_код", "шифра_производ",
+              "каталошки_број", "број_парт", "баркод", "шк", "шифра_код"
+            ],
+            "sq": [
+              "kodi", "kodi_produktit", "kodi_artikullit", "shifra", "numri_katalogut",
+              "barcode", "kodi_stokut", "numri_pjeses"
+            ],
+            "sr": [
+              "шифра", "код", "шифра_артикла", "код_производа", "каталошки_број",
+              "бар_код", "шифра_робе"
+            ]
+          },
+          "patterns": [
+            "^.*sku.*$",
+            "^.*code.*$",
+            "^.*шифра.*$",
+            "^.*kod.*$"
+          ],
+          "examples": ["SKU-12345", "PROD-ABC", "12345678"],
+          "validation": null
+        }
+      }
+    },
+    "expense": {
+      "description": "Expense entity mappings",
+      "fields": {
+        "expense_date": {
+          "required": true,
+          "data_type": "date",
+          "synonyms": {
+            "en": [
+              "expense_date", "expensedate", "date", "transaction_date", "transactiondate",
+              "purchase_date", "purchasedate", "payment_date", "paymentdate",
+              "incurred_date", "incurreddate", "date_incurred", "dateincurred",
+              "spent_date", "spentdate", "expense date", "transaction date"
+            ],
+            "mk": [
+              "датум_трошок", "датум_расход", "датум", "датум_трансакција",
+              "датум_набавка", "датум_плаќање", "дата_трошок", "датум_потрошено"
+            ],
+            "sq": [
+              "data_shpenzimit", "data", "data_transaksionit", "data_blerjes",
+              "data_pageses", "dt_shpenzim", "data_shpenzuar"
+            ],
+            "sr": [
+              "датум_трошка", "датум_расхода", "датум", "датум_трансакције",
+              "датум_набавке", "датум_плаћања", "датум_потрошено"
+            ]
+          },
+          "patterns": [
+            "^.*expense.*date.*$",
+            "^.*date.*$",
+            "^.*датум.*трошок.*$",
+            "^.*data.*shpenz.*$",
+            "^\\d{4}-\\d{2}-\\d{2}$",
+            "^\\d{2}\\.\\d{2}\\.\\d{4}$"
+          ],
+          "examples": ["2025-01-13", "13.01.2025"],
+          "validation": null
+        },
+        "amount": {
+          "required": true,
+          "data_type": "decimal",
+          "synonyms": {
+            "en": [
+              "amount", "expense_amount", "expenseamount", "cost", "total", "value",
+              "spent", "spent_amount", "spentamount", "expense_total", "expensetotal",
+              "sum", "price", "expense_value", "expensevalue"
+            ],
+            "mk": [
+              "износ", "износ_трошок", "трошок_износ", "цена", "вкупно", "вредност",
+              "потрошено", "сума", "износ_расход", "вредност_трошок"
+            ],
+            "sq": [
+              "shuma", "shuma_shpenzimit", "vlera", "kosto", "totali",
+              "shpenzuar", "cmimi", "vlera_shpenzimit"
+            ],
+            "sr": [
+              "износ", "износ_трошка", "цена", "вредност", "укупно",
+              "потрошено", "сума", "вредност_трошка"
+            ]
+          },
+          "patterns": [
+            "^.*amount.*$",
+            "^.*cost.*$",
+            "^.*износ.*$",
+            "^.*shuma.*$",
+            "^[0-9]+\\.?[0-9]*$"
+          ],
+          "examples": ["250.00", "1500.50"],
+          "validation": "^[0-9]+\\.?[0-9]{0,2}$"
+        },
+        "category": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "category", "expense_category", "expensecategory", "type", "expense_type",
+              "expensetype", "classification", "class", "expense_class", "expenseclass",
+              "account", "account_category", "expense_account", "expenseaccount"
+            ],
+            "mk": [
+              "категорија", "категорија_трошок", "тип", "тип_трошок", "класа",
+              "класификација", "сметка", "категорија_расход", "тип_расход"
+            ],
+            "sq": [
+              "kategoria", "kategoria_shpenzimit", "lloji", "tipi_shpenzimit",
+              "klasifikimi", "llogaria", "tipi", "klasa"
+            ],
+            "sr": [
+              "категорија", "категорија_трошка", "тип", "тип_трошка", "класа",
+              "класификација", "рачун", "категорија_расхода"
+            ]
+          },
+          "patterns": [
+            "^.*category.*$",
+            "^.*type.*$",
+            "^.*class.*$",
+            "^.*категориј.*$",
+            "^.*kategori.*$"
+          ],
+          "examples": ["Office Supplies", "Travel", "Канцелариски материјал"],
+          "validation": null
+        },
+        "notes": {
+          "required": false,
+          "data_type": "text",
+          "synonyms": {
+            "en": [
+              "notes", "note", "description", "comments", "comment", "remarks", "remark",
+              "memo", "expense_notes", "expensenotes", "details", "expense_description",
+              "expensedescription", "purpose", "reason"
+            ],
+            "mk": [
+              "забелешки", "забелешка", "опис", "коментари", "коментар", "напомени",
+              "белешки", "цел", "причина", "опис_трошок", "детали"
+            ],
+            "sq": [
+              "shenimet", "pershkrim", "komente", "verejtje", "detaje", "nota",
+              "arsyeja", "qellimi", "pershkrim_shpenzimit"
+            ],
+            "sr": [
+              "напомене", "опис", "белешке", "коментари", "примедбе", "детаљи",
+              "разлог", "циљ", "опис_трошка"
+            ]
+          },
+          "patterns": [
+            "^.*notes?.*$",
+            "^.*description.*$",
+            "^.*comment.*$",
+            "^.*забелешк.*$",
+            "^.*shenim.*$"
+          ],
+          "examples": ["Taxi to airport", "Забелешка за трошок"],
+          "validation": null
+        },
+        "customer_name": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "customer_name", "customername", "customer", "client_name", "clientname",
+              "client", "vendor", "vendor_name", "vendorname", "supplier", "supplier_name",
+              "suppliername", "merchant", "merchant_name", "merchantname", "payee",
+              "paid_to", "paidto"
+            ],
+            "mk": [
+              "клиент", "клиент_име", "добавувач", "добавувач_име", "продавач",
+              "испраќач", "платено_на", "примач", "трговец"
+            ],
+            "sq": [
+              "klienti", "emri_klientit", "furnizuesi", "emri_furnizuesit",
+              "shitesi", "paguar_tek", "marres", "tregtari"
+            ],
+            "sr": [
+              "клијент", "име_клијента", "добављач", "име_добављача", "продавац",
+              "плаћено_на", "прималац", "трговац"
+            ]
+          },
+          "patterns": [
+            "^.*customer.*$",
+            "^.*client.*$",
+            "^.*vendor.*$",
+            "^.*supplier.*$",
+            "^.*клиент.*$",
+            "^.*добавувач.*$",
+            "^.*furnizues.*$"
+          ],
+          "examples": ["Office Depot", "Канцеларија ДООЕЛ"],
+          "validation": null
+        },
+        "receipt_number": {
+          "required": false,
+          "data_type": "string",
+          "synonyms": {
+            "en": [
+              "receipt_number", "receiptnumber", "receipt_no", "receiptno", "receipt",
+              "receipt_id", "receiptid", "voucher_number", "vouchernumber", "document_number",
+              "documentnumber", "reference", "ref", "ref_number", "refnumber"
+            ],
+            "mk": [
+              "број_сметка", "број_фискална", "фискална_број", "сметка_број",
+              "број_документ", "ид_сметка", "референца", "реф_број"
+            ],
+            "sq": [
+              "numri_fatures_tatimore", "numri_fatures", "fature_numri",
+              "numri_dokumentit", "referenca", "numri_kuponit"
+            ],
+            "sr": [
+              "број_рачуна", "број_фискалног", "фискални_број", "рачун_број",
+              "број_документа", "референца"
+            ]
+          },
+          "patterns": [
+            "^.*receipt.*$",
+            "^.*voucher.*$",
+            "^.*сметка.*$",
+            "^.*fatur.*$"
+          ],
+          "examples": ["REC-123", "FIS-456789"],
+          "validation": null
+        }
+      }
+    }
+  },
+  "data_type_patterns": {
+    "email": {
+      "regex": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "confidence_boost": 0.15,
+      "examples": ["user@example.com", "info@company.mk"]
+    },
+    "phone": {
+      "regex": "^[+]?[0-9\\s\\-()]{7,20}$",
+      "confidence_boost": 0.10,
+      "examples": ["+389 2 123 4567", "070123456", "+38971234567"]
+    },
+    "date": {
+      "patterns": [
+        "\\d{4}-\\d{2}-\\d{2}",
+        "\\d{2}\\.\\d{2}\\.\\d{4}",
+        "\\d{2}/\\d{2}/\\d{4}",
+        "\\d{1,2}-\\d{1,2}-\\d{4}",
+        "\\d{1,2}\\/\\d{1,2}\\/\\d{4}"
+      ],
+      "confidence_boost": 0.12,
+      "examples": ["2025-01-13", "13.01.2025", "13/01/2025", "1-13-2025"]
+    },
+    "decimal": {
+      "regex": "^[0-9]+\\.?[0-9]{0,4}$",
+      "confidence_boost": 0.08,
+      "examples": ["100", "99.99", "1500.00", "0.5"]
+    },
+    "url": {
+      "regex": "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*\\/?$",
+      "confidence_boost": 0.10,
+      "examples": ["www.example.com", "https://company.mk", "example.com"]
+    },
+    "vat_number": {
+      "regex": "^([A-Z]{2})?[0-9]{8,15}$",
+      "confidence_boost": 0.13,
+      "examples": ["MK4080012514599", "4080012514599", "1234567890"]
+    },
+    "currency_code": {
+      "regex": "^[A-Z]{3}$",
+      "confidence_boost": 0.15,
+      "examples": ["MKD", "EUR", "USD", "GBP"]
+    },
+    "postal_code": {
+      "regex": "^[0-9]{4,10}$",
+      "confidence_boost": 0.08,
+      "examples": ["1000", "10000", "12345"]
+    }
+  },
+  "common_typos": {
+    "customer": ["custmer", "costumer", "custommer", "cusotmer"],
+    "invoice": ["invoce", "invioce", "invocie", "invoiec"],
+    "email": ["emial", "eamil", "e-mail", "e mail"],
+    "phone": ["fone", "phon", "telefon", "telphone"],
+    "address": ["adress", "addres", "adres", "addresse"],
+    "payment": ["paymen", "paiment", "pament", "pymnt"],
+    "amount": ["ammount", "amunt", "amont", "amoutn"],
+    "total": ["toatal", "totla", "ttoal", "totall"],
+    "date": ["dat", "datte", "dtae", "daet"],
+    "description": ["desription", "descriptin", "discription", "descritpion"]
+  },
+  "legacy_formats": {
+    "uppercase": {
+      "description": "Legacy systems often use ALL CAPS field names",
+      "examples": ["CUSTOMER_NAME", "INV_NO", "TOTAL_AMT", "DATE_ISSUED"]
+    },
+    "abbreviated": {
+      "description": "Short abbreviated field names from old systems",
+      "examples": ["CUST_NM", "INV_DT", "AMT", "TOT", "QTY", "DESC"]
+    },
+    "underscored": {
+      "description": "Database-style field names with underscores",
+      "examples": ["customer_name", "invoice_number", "total_amount"]
+    },
+    "camelCase": {
+      "description": "Programming-style camelCase field names",
+      "examples": ["customerName", "invoiceNumber", "totalAmount", "dueDate"]
+    },
+    "prefixed": {
+      "description": "Fields with table/entity prefixes",
+      "examples": ["cust_name", "inv_total", "pay_date", "exp_amount"]
+    },
+    "excel_default": {
+      "description": "Default Excel column names",
+      "examples": ["Column1", "Column2", "Field1", "Field2", "A", "B", "C"]
+    }
+  },
+  "confidence_rules": {
+    "exact_match": {
+      "score": 1.0,
+      "description": "Perfect match with synonym"
+    },
+    "pattern_match": {
+      "score": 0.85,
+      "description": "Matches regex pattern"
+    },
+    "partial_match": {
+      "score": 0.70,
+      "description": "Contains synonym as substring"
+    },
+    "fuzzy_match": {
+      "score": 0.60,
+      "description": "Similar with typos (Levenshtein distance <= 2)"
+    },
+    "data_type_match": {
+      "score": 0.75,
+      "description": "Matches data type validation pattern"
+    },
+    "context_boost": {
+      "score": 0.10,
+      "description": "Additional boost for contextual clues"
+    }
+  },
+  "special_cases": {
+    "name_variations": {
+      "description": "Common variations of name fields across languages",
+      "patterns": [
+        "^(name|nome|nombre|nom|ime|emri|назив|име)$",
+        "^.*(customer|client|klient|клиент).*name.*$",
+        "^.*(company|firma|kompani|компанија|фирма).*$"
+      ]
+    },
+    "date_variations": {
+      "description": "Date field variations across languages and formats",
+      "patterns": [
+        "^(date|data|datum|датум|датa).*$",
+        "^.*(invoice|invoice|fature|фактура).*date.*$",
+        "^.*(payment|pay|pages|плаќање).*date.*$"
+      ]
+    },
+    "amount_variations": {
+      "description": "Amount/money field variations",
+      "patterns": [
+        "^(amount|suma|shuma|износ|сума).*$",
+        "^.*(total|vkupno|totali|вкупно).*$",
+        "^.*(price|cena|cmimi|цена).*$"
+      ]
+    }
+  }
+}

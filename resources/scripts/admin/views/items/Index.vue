@@ -159,6 +159,12 @@
           </router-link>
         </template>
 
+        <template #cell-sku="{ row }">
+          <span class="text-gray-600">
+            {{ row.data.sku || '-' }}
+          </span>
+        </template>
+
         <template #cell-unit_name="{ row }">
           <span>
             {{ row.data.unit ? row.data.unit.name : '-' }}
@@ -247,6 +253,7 @@ const itemColumns = computed(() => {
       thClass: 'extra',
       tdClass: 'font-medium text-gray-900',
     },
+    { key: 'sku', label: t('items.sku') },
     { key: 'unit_name', label: t('items.unit') },
     { key: 'price', label: t('items.price') },
     { key: 'created_at', label: t('items.added_on') },
@@ -259,6 +266,7 @@ const itemColumns = computed(() => {
     },
   ]
 })
+// CLAUDE-CHECKPOINT: Added SKU column to items table
 
 debouncedWatch(
   filters,

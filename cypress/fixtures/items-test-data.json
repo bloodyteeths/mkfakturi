@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "Widget Pro",
+      "sku": "WIDGET-001",
+      "barcode": "1234567890128",
+      "price": 99.99,
+      "description": "Premium widget product with advanced features"
+    },
+    {
+      "name": "Gadget Max",
+      "sku": "GADGET-001",
+      "barcode": "9876543210987",
+      "price": 149.99,
+      "description": "Advanced gadget device for professionals"
+    },
+    {
+      "name": "Tool Kit",
+      "sku": "TOOL-KIT-001",
+      "barcode": "1111111111116",
+      "price": 79.99,
+      "description": "Complete tool kit for everyday use"
+    },
+    {
+      "name": "Supply Box",
+      "sku": "SUPPLY-BOX-001",
+      "barcode": "2222222222229",
+      "price": 49.99,
+      "description": "Essential supply box with various items"
+    }
+  ]
+}

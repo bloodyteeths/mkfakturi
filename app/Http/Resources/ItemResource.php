@@ -25,6 +25,8 @@ class ItemResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'tax_per_item' => $this->tax_per_item,
+            'sku' => $this->sku,
+            'barcode' => $this->barcode,
             'formatted_created_at' => $this->formattedCreatedAt,
             'unit' => $this->whenLoaded('unit', function () {
                 return UnitResource::make($this->unit);
@@ -40,4 +42,6 @@ class ItemResource extends JsonResource
             }),
         ];
     }
+
+    // CLAUDE-CHECKPOINT
 }

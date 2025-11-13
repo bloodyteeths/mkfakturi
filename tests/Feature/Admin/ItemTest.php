@@ -169,3 +169,136 @@ test('create item with fixed amount tax', function () {
         'fixed_amount' => 5000,
     ]);
 });
+
+test('create item with SKU and barcode', function () {
+    $item = Item::factory()->raw([
+        'sku' => 'TEST-SKU-001',
+        'barcode' => '1234567890128',
+    ]);
+
+    $response = postJson('api/v1/items', $item);
+
+    $response->assertOk();
+
+    $this->assertDatabaseHas('items', [
+        'name' => $item['name'],
+        'sku' => 'TEST-SKU-001',
+        'barcode' => '1234567890128',
+        'company_id' => $item['company_id'],
+    ]);
+});
+
+test('SKU uniqueness is scoped by company_id', function () {
+    $user = User::find(1);
+    $companyId = $user->companies()->first()->id;
+
+    // Create first item with SKU
+    $item1 = Item::factory()->raw([
+        'sku' => 'UNIQUE-SKU-001',
+        'company_id' => $companyId,
+    ]);
+    postJson('api/v1/items', $item1)->assertOk();
+
+    // Try to create another item with same SKU in same company (should fail)
+    $item2 = Item::factory()->raw([
+        'sku' => 'UNIQUE-SKU-001',
+        'company_id' => $companyId,
+    ]);
+    $response = postJson('api/v1/items', $item2);
+
+    // Expecting validation error for duplicate SKU
+    $response->assertStatus(422);
+});
+
+test('can search items by barcode', function () {
+    Item::factory()->withBarcode('1111111111116')->create(['name' => 'Item 1']);
+    Item::factory()->withBarcode('2222222222229')->create(['name' => 'Item 2']);
+
+    $response = getJson('api/v1/items?search=1111111111116');
+
+    $response->assertOk();
+    $data = $response->getData()->data;
+
+    expect($data)->toHaveCount(1);
+    expect($data[0]->barcode)->toBe('1111111111116');
+});
+
+test('can search items by SKU', function () {
+    Item::factory()->withSku('SKU-SEARCH-001')->create(['name' => 'Item 1']);
+    Item::factory()->withSku('SKU-SEARCH-002')->create(['name' => 'Item 2']);
+
+    $response = getJson('api/v1/items?search=SKU-SEARCH-001');
+
+    $response->assertOk();
+    $data = $response->getData()->data;
+
+    expect($data)->toHaveCount(1);
+    expect($data[0]->sku)->toBe('SKU-SEARCH-001');
+});
+
+test('search handles null barcode and SKU gracefully', function () {
+    Item::factory()->create(['name' => 'Item without barcode', 'barcode' => null, 'sku' => null]);
+
+    $response = getJson('api/v1/items?search=Item');
+
+    $response->assertOk();
+    $data = $response->getData()->data;
+
+    expect($data)->toHaveCount(1);
+});
+
+test('can update item barcode and SKU', function () {
+    $item = Item::factory()->withBarcode('1234567890128')->withSku('OLD-SKU')->create();
+
+    $updateData = [
+        'name' => $item->name,
+        'description' => $item->description,
+        'price' => $item->price,
+        'unit_id' => $item->unit_id,
+        'company_id' => $item->company_id,
+        'sku' => 'NEW-SKU-001',
+        'barcode' => '9876543210987',
+    ];
+
+    $response = putJson("api/v1/items/{$item->id}", $updateData);
+
+    $response->assertOk();
+
+    $this->assertDatabaseHas('items', [
+        'id' => $item->id,
+        'sku' => 'NEW-SKU-001',
+        'barcode' => '9876543210987',
+    ]);
+});
+
+test('duplicate barcode detection across items', function () {
+    Item::factory()->withBarcode('1234567890128')->create();
+    Item::factory()->withBarcode('1234567890128')->create();
+
+    $response = getJson('api/v1/items?search=1234567890128');
+
+    $response->assertOk();
+    $data = $response->getData()->data;
+
+    // Should find both items with same barcode
+    expect($data)->toHaveCount(2);
+});
+
+test('multi-field search finds items by name, SKU, or barcode', function () {
+    Item::factory()->withBarcode('1111111111116')->withSku('SKU-001')->create(['name' => 'Widget']);
+    Item::factory()->withBarcode('2222222222229')->withSku('SKU-002')->create(['name' => 'Gadget']);
+
+    // Search by name
+    $response1 = getJson('api/v1/items?search=Widget');
+    expect($response1->getData()->data)->toHaveCount(1);
+
+    // Search by SKU
+    $response2 = getJson('api/v1/items?search=SKU-002');
+    expect($response2->getData()->data)->toHaveCount(1);
+
+    // Search by barcode
+    $response3 = getJson('api/v1/items?search=1111111111116');
+    expect($response3->getData()->data)->toHaveCount(1);
+});
+
+// CLAUDE-CHECKPOINT

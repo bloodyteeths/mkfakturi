@@ -27,6 +27,8 @@ export const useItemStore = (useWindow = false) => {
         unit: null,
         taxes: [],
         tax_per_item: false,
+        sku: '',
+        barcode: '',
       },
     }),
     getters: {
@@ -41,8 +43,11 @@ export const useItemStore = (useWindow = false) => {
           unit_id: '',
           unit: null,
           taxes: [],
+          sku: '',
+          barcode: '',
         }
       },
+      // CLAUDE-CHECKPOINT: Added SKU and barcode to item store state
       fetchItems(params) {
         return new Promise((resolve, reject) => {
           axios

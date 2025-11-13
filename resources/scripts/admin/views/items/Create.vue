@@ -35,6 +35,38 @@
           </BaseInputGroup>
 
           <BaseInputGroup
+            :label="$t('items.sku')"
+            :content-loading="isFetchingInitialData"
+            :error="
+              v$.currentItem.sku.$error &&
+              v$.currentItem.sku.$errors[0].$message
+            "
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.sku"
+              :content-loading="isFetchingInitialData"
+              :invalid="v$.currentItem.sku.$error"
+              @input="v$.currentItem.sku.$touch()"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('items.barcode')"
+            :content-loading="isFetchingInitialData"
+            :error="
+              v$.currentItem.barcode.$error &&
+              v$.currentItem.barcode.$errors[0].$message
+            "
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.barcode"
+              :content-loading="isFetchingInitialData"
+              :invalid="v$.currentItem.barcode.$error"
+              @input="v$.currentItem.barcode.$touch()"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
             :label="$t('items.price')"
             :content-loading="isFetchingInitialData"
           >
@@ -250,6 +282,20 @@ const rules = computed(() => {
         ),
       },
 
+      sku: {
+        maxLength: helpers.withMessage(
+          t('validation.sku_maxlength'),
+          maxLength(255)
+        ),
+      },
+
+      barcode: {
+        maxLength: helpers.withMessage(
+          t('validation.barcode_maxlength'),
+          maxLength(255)
+        ),
+      },
+
       description: {
         maxLength: helpers.withMessage(
           t('validation.description_maxlength'),
@@ -261,6 +307,7 @@ const rules = computed(() => {
 })
 
 const v$ = useVuelidate(rules, itemStore)
+// CLAUDE-CHECKPOINT: Added SKU and Barcode fields with validation
 
 async function addItemUnit() {
   modalStore.openModal({

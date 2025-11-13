@@ -11,5 +11,7 @@ return [
     // Enabled only when FEATURE_MONITORING is true (via service provider check)
     App\Providers\TelescopeServiceProvider::class,
     App\Providers\ViewServiceProvider::class,
+    // Macedonian module services (barcode, QR codes)
+    Modules\Mk\Providers\MkServiceProvider::class,
 ];
 // CLAUDE-CHECKPOINT

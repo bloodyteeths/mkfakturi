@@ -62,10 +62,24 @@ class Item extends Model
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * Scope a query to search items by name, SKU, barcode, or description.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeWhereSearch($query, $search)
     {
-        return $query->where('items.name', 'LIKE', '%'.$search.'%');
+        return $query->where(function ($query) use ($search) {
+            $query->where('items.name', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.sku', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.barcode', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.description', 'LIKE', '%'.$search.'%');
+        });
     }
+
+    // CLAUDE-CHECKPOINT
 
     public function scopeWherePrice($query, $price)
     {

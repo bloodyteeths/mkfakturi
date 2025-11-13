@@ -522,10 +522,13 @@ class CommitImportJob implements ShouldQueue
             'price' => isset($data['price']) ? (int) round(floatval($data['price']) * 100) : 0,
             'unit_name' => $data['unit'] ?? null,
             'sku' => $data['sku'] ?? null,
+            'barcode' => $data['barcode'] ?? null,
             'tax_per_item' => false,
             'base_price' => isset($data['price']) ? (int) round(floatval($data['price']) * 100) : 0,
         ];
     }
+
+    // CLAUDE-CHECKPOINT
 
     /**
      * Commit payments
