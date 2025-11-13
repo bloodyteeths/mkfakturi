@@ -5,6 +5,7 @@ namespace App\Services\Import\Intelligent;
 use App\Models\MappingRule;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Exception;
 
 /**
@@ -120,10 +121,12 @@ class IntelligentFieldMapper
         ?int $companyId = null
     ): array {
         try {
+            $normalizedEntityType = $this->normalizeEntityType($entityType);
+
             Log::info('Starting intelligent field matching', [
                 'csv_fields' => count($csvHeaders),
                 'sample_rows' => count($sampleData),
-                'entity_type' => $entityType,
+                'entity_type' => $normalizedEntityType ?? $entityType,
                 'company_id' => $companyId
             ]);
 
@@ -133,7 +136,7 @@ class IntelligentFieldMapper
             }
 
             // Load mapping rules from database
-            $this->loadMappingRules($entityType, $companyId);
+            $this->loadMappingRules($normalizedEntityType, $companyId);
 
             // Analyze CSV fields and sample data
             $fieldAnalysis = $this->analyzeFields($csvHeaders, $sampleData);
@@ -147,7 +150,7 @@ class IntelligentFieldMapper
                 $mapping = $this->mapSingleField(
                     $csvField,
                     $fieldAnalysis[$csvField] ?? [],
-                    $entityType
+                    $normalizedEntityType
                 );
 
                 if ($mapping) {
@@ -171,7 +174,7 @@ class IntelligentFieldMapper
             // Compile results
             $result = [
                 'mappings' => $mappings,
-                'entity_type' => $entityType,
+                'entity_type' => $normalizedEntityType ?? $entityType,
                 'overall_confidence' => round($overallConfidence, 2),
                 'quality_score' => $qualityScore,
                 'statistics' => [
@@ -189,7 +192,8 @@ class IntelligentFieldMapper
             Log::info('Field matching completed', [
                 'mapped_fields' => $mappedFields,
                 'overall_confidence' => $result['overall_confidence'],
-                'quality_score' => $qualityScore['overall_score']
+                'quality_score' => $qualityScore['overall_score'],
+                'entity_type' => $normalizedEntityType ?? $entityType,
             ]);
 
             return $result;
@@ -256,8 +260,8 @@ class IntelligentFieldMapper
         foreach ($this->matchers as $matcher) {
             $matches = $matcher->match(
                 $csvField,
-                $this->mappingRulesCache,
                 $analysis,
+                $this->mappingRulesCache,
                 $entityType
             );
 
@@ -301,7 +305,7 @@ class IntelligentFieldMapper
 
         // Apply data type validation boost
         $dataTypeMatch = $this->dataTypeMatches(
-            $analysis['detected_type'] ?? 'string',
+            $analysis['data_type'] ?? 'string',
             $bestCandidate['expected_type'] ?? 'string'
         );
 
@@ -316,7 +320,7 @@ class IntelligentFieldMapper
             'target_field' => $bestCandidate['target_field'],
             'confidence' => round($finalConfidence, 2),
             'method' => $bestCandidate['method'] ?? 'unknown',
-            'data_type' => $analysis['detected_type'] ?? 'string',
+            'data_type' => $analysis['data_type'] ?? 'string',
             'data_type_match' => $dataTypeMatch,
             'rule_id' => $bestCandidate['rule_id'] ?? null,
             'source_field_variations' => $bestCandidate['variations'] ?? [],
@@ -336,6 +340,8 @@ class IntelligentFieldMapper
      */
     protected function loadMappingRules(?string $entityType = null, ?int $companyId = null): void
     {
+        $entityType = $this->normalizeEntityType($entityType);
+
         // Build query for mapping rules
         $query = MappingRule::query()
             ->active()
@@ -504,6 +510,42 @@ class IntelligentFieldMapper
         }
 
         return $recommendations;
+    }
+
+    /**
+     * Normalize incoming entity types to canonical mapping rule values
+     *
+     * @param string|null $entityType Incoming entity type value
+     * @return string|null Normalized entity type or null when unavailable
+     */
+    protected function normalizeEntityType(?string $entityType): ?string
+    {
+        if (!$entityType) {
+            return null;
+        }
+
+        $entityType = Str::lower(trim($entityType));
+
+        $map = [
+            'customer' => MappingRule::ENTITY_CUSTOMER,
+            'customers' => MappingRule::ENTITY_CUSTOMER,
+            'client' => MappingRule::ENTITY_CUSTOMER,
+            'clients' => MappingRule::ENTITY_CUSTOMER,
+            'invoice' => MappingRule::ENTITY_INVOICE,
+            'invoices' => MappingRule::ENTITY_INVOICE,
+            'bill' => MappingRule::ENTITY_INVOICE,
+            'bills' => MappingRule::ENTITY_INVOICE,
+            'item' => MappingRule::ENTITY_ITEM,
+            'items' => MappingRule::ENTITY_ITEM,
+            'product' => MappingRule::ENTITY_ITEM,
+            'products' => MappingRule::ENTITY_ITEM,
+            'payment' => MappingRule::ENTITY_PAYMENT,
+            'payments' => MappingRule::ENTITY_PAYMENT,
+            'expense' => MappingRule::ENTITY_EXPENSE,
+            'expenses' => MappingRule::ENTITY_EXPENSE,
+        ];
+
+        return $map[$entityType] ?? Str::singular($entityType);
     }
 
     /**
