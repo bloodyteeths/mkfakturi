@@ -422,6 +422,9 @@ export const useImportStore = defineStore('import', {
           const response = await axios.get(`/api/v1/admin/imports/${this.importId}`)
           const jobData = response.data.data
 
+          // Update importJob with latest data including type
+          this.importJob = jobData
+
           this.detectedFields = jobData.detected_fields || []
           this.mappingSuggestions = jobData.mapping_suggestions || {}
           this.autoMappingConfidence = jobData.auto_mapping_confidence || 0
