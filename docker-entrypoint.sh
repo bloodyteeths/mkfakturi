@@ -136,6 +136,11 @@ fi
 # Create storage symlink
 php artisan storage:link || true
 
+# Ensure favicon is served directly by nginx to avoid PHP fallback
+if [ ! -f public/favicon.ico ] && [ -f public/favicons/favicon.ico ]; then
+    ln -sf favicons/favicon.ico public/favicon.ico || true
+fi
+
 # Verify Laravel is ready before starting services
 echo "Verifying Laravel application..."
 php artisan --version || echo "Warning: Laravel not responding"
