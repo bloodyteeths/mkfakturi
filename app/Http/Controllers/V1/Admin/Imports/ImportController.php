@@ -166,13 +166,19 @@ class ImportController extends Controller
                         }
                     }
 
+                    // Generate mapping suggestions
+                    $mappingSuggestions = $this->generateMappingSuggestions($detectedFields);
+                    $confidence = count($mappingSuggestions) / max(count($detectedFields), 1);
+
                     $data['detected_fields'] = $detectedFields;
-                    $data['mapping_suggestions'] = [];
-                    $data['auto_mapping_confidence'] = 0;
+                    $data['mapping_suggestions'] = $mappingSuggestions;
+                    $data['auto_mapping_confidence'] = round($confidence, 2);
 
                     \Log::info('[ImportController] Fields detected successfully', [
                         'count' => count($detectedFields),
                         'field_names' => array_column($detectedFields, 'name'),
+                        'suggestions' => $mappingSuggestions,
+                        'confidence' => $data['auto_mapping_confidence'],
                     ]);
                 } else {
                     \Log::warning('[ImportController] File not found', [
@@ -354,6 +360,79 @@ class ImportController extends Controller
             'success' => true,
             'data' => $importJob->logs()->get(),
         ]);
+    }
+
+    /**
+     * Generate mapping suggestions based on field names
+     */
+    private function generateMappingSuggestions($detectedFields)
+    {
+        $suggestions = [];
+
+        // Define mapping rules (CSV field name => target field name)
+        $mappingRules = [
+            // Customer fields
+            'name' => 'name',
+            'customer_name' => 'name',
+            'company_name' => 'name',
+            'email' => 'email',
+            'customer_email' => 'email',
+            'phone' => 'phone',
+            'telephone' => 'phone',
+            'mobile' => 'phone',
+            'address' => 'billing_address_street_1',
+            'street' => 'billing_address_street_1',
+            'city' => 'billing_address_city',
+            'zip' => 'billing_address_zip',
+            'postal_code' => 'billing_address_zip',
+            'country' => 'billing_address_country',
+            'vat_number' => 'vat_number',
+            'tax_id' => 'vat_number',
+            'website' => 'website',
+            'currency' => 'currency',
+
+            // Invoice fields
+            'invoice_number' => 'invoice_number',
+            'invoice_date' => 'invoice_date',
+            'due_date' => 'due_date',
+            'total' => 'total',
+            'amount' => 'total',
+            'subtotal' => 'sub_total',
+            'tax' => 'tax',
+            'discount' => 'discount',
+            'notes' => 'notes',
+            'description' => 'notes',
+
+            // Item fields
+            'item_name' => 'name',
+            'product_name' => 'name',
+            'quantity' => 'quantity',
+            'qty' => 'quantity',
+            'price' => 'price',
+            'unit_price' => 'price',
+            'unit' => 'unit',
+        ];
+
+        foreach ($detectedFields as $field) {
+            $fieldName = $field['name'];
+            $normalizedName = strtolower(trim(str_replace([' ', '_', '-'], '_', $fieldName)));
+
+            // Direct match
+            if (isset($mappingRules[$normalizedName])) {
+                $suggestions[$fieldName] = $mappingRules[$normalizedName];
+                continue;
+            }
+
+            // Fuzzy match - check if any rule key is contained in the field name
+            foreach ($mappingRules as $ruleKey => $ruleValue) {
+                if (str_contains($normalizedName, $ruleKey) || str_contains($ruleKey, $normalizedName)) {
+                    $suggestions[$fieldName] = $ruleValue;
+                    break;
+                }
+            }
+        }
+
+        return $suggestions;
     }
 }
 // CLAUDE-CHECKPOINT
