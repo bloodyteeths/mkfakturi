@@ -432,17 +432,19 @@ const acceptedFileTypes = computed(() => {
 
 const typeOptions = computed(() => {
   return [
-    { value: null, text: t('imports.use_detected_type') },
-    { value: 'customers', text: t('imports.type_customers') },
-    { value: 'invoices', text: t('imports.type_invoices') },
-    { value: 'items', text: t('imports.type_items') },
-    { value: 'payments', text: t('imports.type_payments') },
-    { value: 'expenses', text: t('imports.type_expenses') },
+    { id: 'auto', value: null, label: t('imports.use_detected_type') },
+    { id: 'customers', value: 'customers', label: t('imports.type_customers') },
+    { id: 'invoices', value: 'invoices', label: t('imports.type_invoices') },
+    { id: 'items', value: 'items', label: t('imports.type_items') },
+    { id: 'payments', value: 'payments', label: t('imports.type_payments') },
+    { id: 'expenses', value: 'expenses', label: t('imports.type_expenses') },
   ]
 })
 
 // Methods
-const handleTypeOverrideChange = (value) => {
+const handleTypeOverrideChange = (option) => {
+  // BaseSelectInput passes the entire option object
+  const value = option?.value ?? null
   importStore.manualTypeOverride = value
   console.log('[Step1Upload] Manual type override set to:', value)
 }

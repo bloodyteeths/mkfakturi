@@ -2122,6 +2122,7 @@
         "detected_type": "Детектиран тип",
         "confidence": "сигурност",
         "override_type": "Промени тип (опционално)",
+        "use_detected_type": "Користи детектиран тип",
         "type_customers": "Клиенти",
         "type_invoices": "Фактури",
         "type_items": "Артикли",
