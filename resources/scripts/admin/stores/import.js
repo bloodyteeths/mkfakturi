@@ -138,7 +138,16 @@ export const useImportStore = defineStore('import', {
       },
 
       updateCanProceed() {
-        this.canProceed = this.canProceedToNextStep()
+        const canProceed = this.canProceedToNextStep()
+        console.log('[importStore] updateCanProceed', {
+          currentStep: this.currentStep,
+          canProceed,
+          isStep1Valid: this.isStep1Valid,
+          uploadedFile: this.uploadedFile,
+          fileInfo: this.fileInfo,
+          isUploading: this.isUploading,
+        })
+        this.canProceed = canProceed
       },
 
       // Step 1 - File Upload
@@ -163,6 +172,8 @@ export const useImportStore = defineStore('import', {
             },
           })
 
+          console.log('[importStore] Upload response:', response.data)
+
           this.importJob = response.data.data
           this.importId = this.importJob.id
           this.uploadedFile = file
@@ -172,6 +183,14 @@ export const useImportStore = defineStore('import', {
             type: file.type,
             lastModified: file.lastModified,
           }
+
+          console.log('[importStore] State after upload:', {
+            importJob: this.importJob,
+            importId: this.importId,
+            uploadedFile: this.uploadedFile,
+            fileInfo: this.fileInfo,
+            isUploading: this.isUploading,
+          })
 
           this.updateCanProceed()
 

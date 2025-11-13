@@ -90,11 +90,16 @@ class ImportController extends Controller
             throw $e;
         }
 
-        \Log::info('[ImportController] Upload completed successfully', ['import_id' => $importJob->id]);
+        $responseData = $importJob->fresh();
+
+        \Log::info('[ImportController] Upload completed successfully', [
+            'import_id' => $importJob->id,
+            'response_data' => $responseData->toArray(),
+        ]);
 
         return response()->json([
             'success' => true,
-            'data' => $importJob->fresh(),
+            'data' => $responseData,
         ]);
     }
 
