@@ -52,7 +52,8 @@ use App\Http\Controllers\V1\Admin\Invoice\SendInvoiceController;
 use App\Http\Controllers\V1\Admin\Invoice\SendInvoicePreviewController;
 use App\Http\Controllers\V1\Admin\Item\ItemsController;
 use App\Http\Controllers\V1\Admin\Item\UnitsController;
-use App\Http\Controllers\V1\Admin\Mobile\AuthController;
+use App\Http\Controllers\V1\Admin\Mobile\AuthController as MobileAuthController;
+use App\Http\Controllers\V1\Admin\Auth\LoginController;
 use App\Http\Controllers\V1\Admin\Modules\ApiTokenController;
 use App\Http\Controllers\V1\Admin\Modules\CompleteModuleInstallationController;
 use App\Http\Controllers\V1\Admin\Modules\CopyModuleController;
@@ -150,9 +151,11 @@ Route::prefix('/v1')->group(function () {
     // ----------------------------------
 
     Route::prefix('auth')->middleware('throttle:auth')->group(function () {
-        Route::post('login', [AuthController::class, 'login']);
+        // Web/SPA login - uses session authentication
+        Route::post('login', [LoginController::class, 'login']);
 
-        Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+        // Mobile logout - uses token authentication
+        Route::post('logout', [MobileAuthController::class, 'logout'])->middleware('auth:sanctum');
 
         // Send reset password mail
         Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
