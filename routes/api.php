@@ -199,7 +199,9 @@ Route::prefix('/v1')->group(function () {
         Route::post('/finish', FinishController::class);
     });
 
-    Route::middleware(['auth', 'company'])->group(function () {
+    // IMPORTANT: Using 'web' middleware here to ensure session support for SPA authentication
+    // The 'api' middleware group doesn't include StartSession, which breaks session-based auth
+    Route::middleware(['web', 'auth', 'company'])->group(function () {
 
         // TEMPORARY: Sync abilities for all companies (OUTSIDE bouncer middleware to avoid chicken-egg)
         // This endpoint bypasses bouncer since users need abilities to access anything
