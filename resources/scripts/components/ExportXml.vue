@@ -21,6 +21,21 @@
       {{ $t('invoices.export_xml') }}
     </BaseButton>
 
+    <!-- Upgrade CTA Modal (FG-01-12) -->
+    <UpgradeCTA
+      :show="showUpgradeModal"
+      @close="showUpgradeModal = false"
+      required-tier="standard"
+      :feature-name="$t('invoices.export_xml')"
+      icon="DocumentArrowDownIcon"
+      :features="[
+        $t('subscriptions.features.efaktura_sending'),
+        $t('subscriptions.features.qes_signing'),
+        $t('subscriptions.features.multi_users'),
+        $t('subscriptions.features.200_invoices'),
+      ]"
+    />
+
     <!-- Export Modal -->
     <BaseModal
       :show="showModal"
@@ -81,6 +96,8 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
+import UpgradeCTA from '@/scripts/admin/components/UpgradeCTA.vue'
 
 const props = defineProps({
   invoice: {
@@ -96,9 +113,11 @@ const props = defineProps({
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
 const invoiceStore = useInvoiceStore()
+const companyStore = useCompanyStore()
 
 // Modal state
 const showModal = ref(false)
+const showUpgradeModal = ref(false)
 const isExporting = ref(false)
 
 // Export options
@@ -111,7 +130,34 @@ const formatOptions = computed(() => [
   { value: 'ubl_signed', label: t('invoices.format_ubl_signed') },
 ])
 
+// FG-01-12: Check if company has Standard+ tier for e-Faktura
+const canExportXml = computed(() => {
+  const company = companyStore.selectedCompany
+  if (!company || !company.subscription) {
+    return false // Default to Free tier
+  }
+
+  const plan = company.subscription.plan || 'free'
+  const status = company.subscription.status || 'inactive'
+  const onTrial = company.subscription.on_trial || false
+
+  // Trial users get Standard features
+  if (onTrial) {
+    return true
+  }
+
+  // Check plan hierarchy (Standard, Business, Max can export)
+  const allowedPlans = ['standard', 'business', 'max']
+  return allowedPlans.includes(plan) && ['active', 'trial'].includes(status)
+})
+
 function exportXml() {
+  // FG-01-12: Check tier before showing export modal
+  if (!canExportXml.value) {
+    showUpgradeModal.value = true
+    return
+  }
+
   showModal.value = true
 }
 
@@ -170,6 +216,13 @@ async function performExport() {
     console.error('XML export failed:', error)
 
     let errorMessage = t('invoices.xml_export_failed')
+
+    // FG-01-12: Handle 402 Payment Required (tier upgrade needed)
+    if (error.response?.status === 402) {
+      closeModal()
+      showUpgradeModal.value = true
+      return
+    }
 
     // Handle specific error types
     if (error.response?.data?.message) {

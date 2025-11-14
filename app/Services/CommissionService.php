@@ -58,63 +58,96 @@ class CommissionService
             return ['success' => false, 'message' => 'Commission already recorded'];
         }
 
-        // Calculate commission
+        // Calculate commission with multi-level logic
         $commissionRate = $this->calculateCommissionRate($partner);
         $directCommission = $subscriptionAmount * $commissionRate;
 
         $uplineCommission = null;
         $uplinePartnerId = null;
+        $salesRepCommission = null;
+        $salesRepId = null;
 
-        // Check for multi-level commission (upline)
-        if ($partner->user_id) {
-            $user = User::find($partner->user_id);
-            if ($user && $user->referrer_user_id) {
-                // Find upline partner
-                $uplinePartner = Partner::where('user_id', $user->referrer_user_id)
-                    ->where('is_active', true)
-                    ->first();
+        // Get user for multi-level checks
+        $user = $partner->user_id ? User::find($partner->user_id) : null;
 
-                if ($uplinePartner) {
-                    $uplineRate = config('affiliate.upline_rate', 0.05);
-                    $uplineCommission = $subscriptionAmount * $uplineRate;
-                    $uplinePartnerId = $uplinePartner->id;
+        // Check for upline commission
+        if ($user && $user->referrer_user_id) {
+            // Find upline partner
+            $uplinePartner = Partner::where('user_id', $user->referrer_user_id)
+                ->where('is_active', true)
+                ->first();
 
-                    // Adjust direct commission for multi-level split
-                    $directRate = config('affiliate.direct_rate_multi_level', 0.15);
-                    $directCommission = $subscriptionAmount * $directRate;
+            if ($uplinePartner) {
+                $uplineRate = config('affiliate.upline_rate', 0.05);
+                $uplineCommission = $subscriptionAmount * $uplineRate;
+                $uplinePartnerId = $uplinePartner->id;
 
-                    // Create upline event
-                    AffiliateEvent::create([
-                        'affiliate_partner_id' => $uplinePartnerId,
-                        'upline_partner_id' => null,
-                        'company_id' => $companyId,
-                        'event_type' => 'recurring_commission',
-                        'amount' => $uplineCommission,
-                        'upline_amount' => null,
-                        'month_ref' => $monthRef,
-                        'subscription_id' => $subscriptionId,
-                        'metadata' => [
-                            'type' => 'upline',
-                            'downline_partner_id' => $partner->id,
-                        ],
-                    ]);
-                }
+                // Adjust direct commission for multi-level split
+                $directRate = config('affiliate.direct_rate_multi_level', 0.15);
+                $directCommission = $subscriptionAmount * $directRate;
+
+                // Create upline event
+                AffiliateEvent::create([
+                    'affiliate_partner_id' => $uplinePartnerId,
+                    'upline_partner_id' => null,
+                    'sales_rep_id' => null,
+                    'company_id' => $companyId,
+                    'event_type' => 'recurring_commission',
+                    'amount' => $uplineCommission,
+                    'upline_amount' => null,
+                    'sales_rep_amount' => null,
+                    'month_ref' => $monthRef,
+                    'subscription_id' => $subscriptionId,
+                    'metadata' => [
+                        'type' => 'upline',
+                        'downline_partner_id' => $partner->id,
+                    ],
+                ]);
             }
+        }
+
+        // Check for sales rep commission
+        if ($user && $user->sales_rep_id) {
+            $salesRepRate = config('affiliate.sales_rep_rate', 0.05);
+            $salesRepCommission = $subscriptionAmount * $salesRepRate;
+            $salesRepId = $user->sales_rep_id;
+
+            // Create sales rep event
+            AffiliateEvent::create([
+                'affiliate_partner_id' => $partner->id, // Link to accountant's partner record for payout
+                'upline_partner_id' => null,
+                'sales_rep_id' => $salesRepId,
+                'company_id' => $companyId,
+                'event_type' => 'recurring_commission',
+                'amount' => $salesRepCommission,
+                'upline_amount' => null,
+                'sales_rep_amount' => null, // This IS the sales rep commission
+                'month_ref' => $monthRef,
+                'subscription_id' => $subscriptionId,
+                'metadata' => [
+                    'type' => 'sales_rep',
+                    'accountant_partner_id' => $partner->id,
+                    'accountant_user_id' => $user->id,
+                ],
+            ]);
         }
 
         // Create direct commission event
         $event = AffiliateEvent::create([
             'affiliate_partner_id' => $partner->id,
             'upline_partner_id' => $uplinePartnerId,
+            'sales_rep_id' => $salesRepId,
             'company_id' => $companyId,
             'event_type' => 'recurring_commission',
             'amount' => $directCommission,
             'upline_amount' => $uplineCommission,
+            'sales_rep_amount' => $salesRepCommission,
             'month_ref' => $monthRef,
             'subscription_id' => $subscriptionId,
             'metadata' => [
                 'subscription_amount' => $subscriptionAmount,
                 'commission_rate' => $commissionRate,
+                'split_type' => $this->getCommissionSplitType($uplineCommission, $salesRepCommission),
             ],
         ]);
 
@@ -124,6 +157,8 @@ class CommissionService
             'company_id' => $companyId,
             'amount' => $directCommission,
             'upline_amount' => $uplineCommission,
+            'sales_rep_amount' => $salesRepCommission,
+            'split_type' => $this->getCommissionSplitType($uplineCommission, $salesRepCommission),
         ]);
 
         return [
@@ -131,6 +166,7 @@ class CommissionService
             'event_id' => $event->id,
             'direct_commission' => $directCommission,
             'upline_commission' => $uplineCommission,
+            'sales_rep_commission' => $salesRepCommission,
         ];
     }
 
@@ -346,6 +382,26 @@ class CommissionService
             ->where('target', 'company')
             ->where('is_active', true)
             ->first();
+    }
+
+    /**
+     * Determine commission split type for metadata/reporting
+     *
+     * @param float|null $uplineCommission
+     * @param float|null $salesRepCommission
+     * @return string
+     */
+    protected function getCommissionSplitType(?float $uplineCommission, ?float $salesRepCommission): string
+    {
+        if ($uplineCommission && $salesRepCommission) {
+            return '3-way'; // 15% direct + 5% upline + 5% sales rep = 25% total
+        } elseif ($uplineCommission) {
+            return '2-way_upline'; // 15% direct + 5% upline = 20% total
+        } elseif ($salesRepCommission) {
+            return '2-way_sales_rep'; // 15% direct + 5% sales rep = 20% total
+        } else {
+            return 'direct_only'; // 20% direct (or 22% for Plus)
+        }
     }
 }
 

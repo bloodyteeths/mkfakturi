@@ -20,6 +20,9 @@ return [
     // Upline commission rate (for the partner who referred the direct partner)
     'upline_rate' => env('AFFILIATE_UPLINE_RATE', 0.05), // 5%
 
+    // Sales rep commission rate (for Facturino employee/agency who brought the accountant)
+    'sales_rep_rate' => env('AFFILIATE_SALES_REP_RATE', 0.05), // 5%
+
     // When multi-level is enabled, split is: direct 15%, upline 5%
     'direct_rate_multi_level' => env('AFFILIATE_DIRECT_RATE_ML', 0.15), // 15% (when upline exists)
 

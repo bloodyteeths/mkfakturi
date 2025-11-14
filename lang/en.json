@@ -2555,5 +2555,28 @@
     "banking_integration_description": "Connect your bank accounts to automatically import transactions and reconcile payments.",
     "tax_compliance_title": "Tax Compliance",
     "tax_compliance_description": "Generate tax reports, manage VAT returns, and ensure compliance with local tax regulations."
+  },
+  "subscriptions": {
+    "upgrade_required": "Upgrade Required",
+    "upgrade_to": "Upgrade to",
+    "upgrade_now": "Upgrade Now",
+    "month": "month",
+    "cancel_anytime": "Cancel anytime. No hidden fees.",
+    "feature_requires_plan": "{feature} requires {plan} plan or higher.",
+    "upgrade_initiated": "Upgrade initiated! Your subscription will be updated shortly.",
+    "upgrade_failed": "Upgrade failed. Please try again or contact support.",
+    "features": {
+      "efaktura_sending": "Send E-Faktura to government",
+      "qes_signing": "QES digital signatures",
+      "multi_users": "Up to 3 users",
+      "200_invoices": "200 invoices per month",
+      "bank_connections": "Connect bank accounts via PSD2",
+      "auto_reconciliation": "Automatic payment reconciliation",
+      "1000_invoices": "1,000 invoices per month",
+      "5_users": "Up to 5 users",
+      "unlimited": "Unlimited invoices and users",
+      "api_access": "API access for integrations",
+      "priority_support": "Priority support"
+    }
   }
 }

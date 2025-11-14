@@ -30,6 +30,15 @@ class CompanyResource extends JsonResource
             'roles' => $this->whenLoaded('roles', function () {
                 return RoleResource::collection($this->roles);
             }),
+            // FG-01-12: Include subscription data for feature gating
+            'subscription' => $this->whenLoaded('subscription', function () {
+                return [
+                    'plan' => $this->subscription->plan ?? 'free',
+                    'status' => $this->subscription->status ?? 'inactive',
+                    'trial_ends_at' => $this->subscription->trial_ends_at,
+                    'on_trial' => $this->subscription->onTrial() ?? false,
+                ];
+            }),
         ];
 
         // Log what we're returning to frontend

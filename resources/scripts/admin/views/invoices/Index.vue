@@ -167,13 +167,26 @@
         </BaseDropdown>
       </div>
 
+      <!-- Mobile: Card View (< 768px) -->
+      <div v-if="invoiceListData.length" class="block md:hidden mt-6">
+        <InvoiceCard
+          v-for="invoice in invoiceListData"
+          :key="invoice.id"
+          :invoice="invoice"
+          :selectable="userStore.hasAbilities(abilities.DELETE_INVOICE)"
+          :is-selected="invoiceStore.selectedInvoices.includes(invoice.id)"
+          @toggle-select="toggleInvoiceSelection"
+        />
+      </div>
+
+      <!-- Desktop: Table View (>= 768px) -->
       <BaseTable
         ref="table"
         :data="fetchData"
         :columns="invoiceColumns"
         :placeholder-count="invoiceStore.invoiceTotalCount >= 20 ? 10 : 5"
         :key="tableKey"
-        class="mt-10"
+        class="mt-10 hidden md:block"
       >
         <!-- Select All Checkbox -->
         <template #header>
@@ -278,7 +291,8 @@ import { debouncedWatch } from '@vueuse/core'
 import MoonwalkerIcon from '@/scripts/components/icons/empty/MoonwalkerIcon.vue'
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
-import BaseInvoiceStatusLabel from "@/scripts/components/base/BaseInvoiceStatusLabel.vue";
+import BaseInvoiceStatusLabel from "@/scripts/components/base/BaseInvoiceStatusLabel.vue"
+import InvoiceCard from '@/scripts/admin/components/InvoiceCard.vue'
 // Stores
 const invoiceStore = useInvoiceStore()
 const dialogStore = useDialogStore()
@@ -324,6 +338,8 @@ let filters = reactive({
   to_date: '',
   invoice_number: '',
 })
+
+const invoiceListData = ref([])
 
 const showEmptyScreen = computed(
   () => !invoiceStore.invoiceTotalCount && !isRequestOngoing.value
@@ -425,6 +441,9 @@ async function fetchData({ page, filter, sort }) {
   let response = await invoiceStore.fetchInvoices(data)
   console.log('API response:', response.data.data)
 
+  // Store data for mobile card view
+  invoiceListData.value = response.data.data
+
   isRequestOngoing.value = false
 
   return {
@@ -436,6 +455,10 @@ async function fetchData({ page, filter, sort }) {
       limit: 10,
     },
   }
+}
+
+function toggleInvoiceSelection(invoiceId) {
+  invoiceStore.selectInvoice([invoiceId])
 }
 
 function setStatusFilter(val) {

@@ -13,10 +13,12 @@ class AffiliateEvent extends Model
     protected $fillable = [
         'affiliate_partner_id',
         'upline_partner_id',
+        'sales_rep_id',
         'company_id',
         'event_type',
         'amount',
         'upline_amount',
+        'sales_rep_amount',
         'month_ref',
         'subscription_id',
         'is_clawed_back',
@@ -28,6 +30,7 @@ class AffiliateEvent extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'upline_amount' => 'decimal:2',
+        'sales_rep_amount' => 'decimal:2',
         'is_clawed_back' => 'boolean',
         'paid_at' => 'datetime',
         'metadata' => 'array',
@@ -141,11 +144,19 @@ class AffiliateEvent extends Model
     }
 
     /**
-     * Get the total commission amount (including upline if applicable)
+     * Get the sales rep who earns this commission
+     */
+    public function salesRep(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sales_rep_id');
+    }
+
+    /**
+     * Get the total commission amount (including upline and sales rep if applicable)
      */
     public function getTotalAmountAttribute(): float
     {
-        return $this->amount + ($this->upline_amount ?? 0);
+        return $this->amount + ($this->upline_amount ?? 0) + ($this->sales_rep_amount ?? 0);
     }
 }
 

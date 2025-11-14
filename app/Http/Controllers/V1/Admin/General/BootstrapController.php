@@ -37,10 +37,12 @@ class BootstrapController extends Controller
         ]);
 
         // Eager load user relationships to avoid N+1 queries
+        // FG-01-12: Include subscription for feature gating
         $current_user = $request->user()->load([
             'currency',
             'settings',
             'companies.address',
+            'companies.subscription',
         ]);
 
         $current_user_settings = $current_user->getAllSettings();

@@ -306,7 +306,9 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/invoices/{invoice}/status', ChangeInvoiceStatusController::class);
 
-            Route::post('/invoices/{invoice}/export-xml', [\App\Http\Controllers\V1\Admin\Invoice\ExportXmlController::class, 'export']);
+            // FG-01-10: E-Faktura (UBL XML export) requires Standard+ tier
+            Route::post('/invoices/{invoice}/export-xml', [\App\Http\Controllers\V1\Admin\Invoice\ExportXmlController::class, 'export'])
+                ->middleware('tier:standard');
 
             Route::post('/invoices/{invoice}/payment/cpay', [InvoicesController::class, 'initiateCpayPayment']);
 
@@ -510,14 +512,15 @@ Route::prefix('/v1')->group(function () {
             // E-Invoices
             // ----------------------------------
 
-            Route::prefix('e-invoices')->middleware(['throttle:60,1'])->group(function () {
+            // FG-01-11: E-Invoice operations require Standard+ tier
+            Route::prefix('e-invoices')->middleware(['throttle:60,1', 'tier:standard'])->group(function () {
                 Route::get('/', [EInvoiceController::class, 'index']);
                 Route::get('/portal-status', [EInvoiceController::class, 'checkPortalStatus']);
                 Route::get('/submission-queue', [EInvoiceController::class, 'getSubmissionQueue']);
                 Route::get('/by-invoice/{invoiceId}', [EInvoiceController::class, 'showByInvoice']);
                 Route::get('/{id}', [EInvoiceController::class, 'show']);
                 Route::post('/generate/{invoiceId}', [EInvoiceController::class, 'generate']);
-                Route::post('/{id}/sign', [EInvoiceController::class, 'sign']);
+                Route::post('/{id}/sign', [EInvoiceController::class, 'sign']); // QES signing
                 Route::post('/{id}/submit', [EInvoiceController::class, 'submit']);
                 Route::post('/{id}/simulate', [EInvoiceController::class, 'simulate']);
                 Route::get('/{id}/download-xml', [EInvoiceController::class, 'downloadXml']);

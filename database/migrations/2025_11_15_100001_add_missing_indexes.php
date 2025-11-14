@@ -290,6 +290,19 @@ return new class extends Migration
     private function indexExists(string $table, string $indexName): bool
     {
         $connection = Schema::getConnection();
+        $driver = $connection->getDriverName();
+
+        // SQLite doesn't have information_schema, use try-catch instead
+        if ($driver === 'sqlite') {
+            try {
+                // For SQLite, we can't easily check if an index exists
+                // So we'll just return false and let the schema builder handle duplicates
+                return false;
+            } catch (\Exception $e) {
+                return true;
+            }
+        }
+
         $database = $connection->getDatabaseName();
         $tableName = $connection->getTablePrefix().$table;
 

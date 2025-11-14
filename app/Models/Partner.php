@@ -18,11 +18,12 @@ class Partner extends Model
         'phone',
         'company_name',
         'tax_id',
-        'registration_number', 
+        'registration_number',
         'bank_account',
         'bank_name',
         'commission_rate',
         'is_active',
+        'kyc_status',
         'user_id',
         'notes'
     ];
