@@ -26,37 +26,40 @@ return new class extends Migration
 
         try {
             // 1. Fix 'name' field variations - remove description and sku related terms
-            $nameRule = MappingRule::where('entity_type', MappingRule::ENTITY_ITEM)
+            $cleanedVariations = [
+                // English
+                'name', 'item_name', 'itemname', 'product_name', 'productname',
+                'product', 'item', 'title', 'service', 'service_name',
+                'servicename', 'goods', 'goods_name',
+
+                // Macedonian (Cyrillic)
+                'іме', 'артикал', 'производ', 'назив', 'артикал_име',
+                'производ_іме', 'услуга', 'стока', 'назив_артикал',
+                'назив_производ', 'іме_артикал',
+
+                // Albanian
+                'emri', 'produkti', 'artikulli', 'emri_produktit',
+                'sherbimi', 'malli', 'emri_artikullit', 'titulli',
+
+                // Serbian (Cyrillic)
+                'роба', 'назив_артикла', 'іме_производа',
+            ];
+
+            $cleanedVariationsJson = json_encode($cleanedVariations, JSON_UNESCAPED_UNICODE);
+
+            // Use direct SQL update to ensure it works across all databases
+            $updated = DB::table('mapping_rules')
+                ->where('entity_type', 'item')
                 ->where('target_field', 'name')
-                ->first();
+                ->update(['field_variations' => $cleanedVariationsJson]);
 
-            if ($nameRule) {
-                $cleanedVariations = [
-                    // English
-                    'name', 'item_name', 'itemname', 'product_name', 'productname',
-                    'product', 'item', 'title', 'service', 'service_name',
-                    'servicename', 'goods', 'goods_name',
-
-                    // Macedonian (Cyrillic)
-                    'име', 'артикал', 'производ', 'назив', 'артикал_име',
-                    'производ_име', 'услуга', 'стока', 'назив_артикал',
-                    'назив_производ', 'име_артикал',
-
-                    // Albanian
-                    'emri', 'produkti', 'artikulli', 'emri_produktit',
-                    'sherbimi', 'malli', 'emri_artikullit', 'titulli',
-
-                    // Serbian (Cyrillic)
-                    'роба', 'назив_артикла', 'име_производа',
-                ];
-
-                $nameRule->field_variations = $cleanedVariations;
-                $nameRule->save();
-
+            if ($updated > 0) {
                 \Log::info("Migration: Updated 'name' field variations (removed description/sku conflicts)", [
-                    'rule_id' => $nameRule->id,
+                    'rows_updated' => $updated,
                     'variations_count' => count($cleanedVariations),
                 ]);
+            } else {
+                \Log::warning("Migration: No 'name' rule found to update");
             }
 
             // 2. Add 'category' mapping rule if it doesn't exist
