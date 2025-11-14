@@ -3,6 +3,7 @@ import Image from 'next/image'
 import LanguageSwitcher from './LanguageSwitcher'
 import { Dictionary } from '@/i18n/dictionaries'
 import { Locale } from '@/i18n/locales'
+import { APP_URL } from '@/config'
 
 export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
@@ -41,7 +42,7 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
         </div>
         <div className="flex items-center gap-3">
           <LanguageSwitcher current={locale} />
-          <Link href="#login" className="text-sm text-gray-700 hover:underline">
+          <Link href={`${APP_URL}/admin`} className="text-sm text-gray-700 hover:underline">
             {t.nav.login}
           </Link>
           <Link href={`/${locale}/pricing`} className="btn-accent text-sm">
