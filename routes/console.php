@@ -82,6 +82,24 @@ if (InstallUtils::isDbCreated()) {
             Log::error('AwardBounties job failed');
         });
 
+    // Calculate affiliate payouts - runs on 5th of each month at 3:00 AM UTC (AC-01-40)
+    // Processes previous month's commissions for verified partners
+    // Minimum €100 threshold, generates CSV for bank transfer
+    Schedule::command('payouts:calculate')
+        ->monthlyOn(5, '03:00')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+
+    // Process trial expirations - runs daily at 1:00 AM UTC (FG-01-41)
+    // Sends trial expiry reminders (7 days, 1 day before)
+    // Downgrades expired trials to Free tier
+    Schedule::command('subscriptions:process-trial-expirations')
+        ->dailyAt('01:00')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+
     // Health check self-test - runs every hour
     Schedule::call(function () {
         try {

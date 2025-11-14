@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CompaniesRequest;
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
+use App\Models\CompanySubscription;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
+use Carbon\Carbon;
 
 class CompaniesController extends Controller
 {
@@ -28,6 +30,20 @@ class CompaniesController extends Controller
 
         if ($request->address) {
             $company->address()->create($request->address);
+        }
+
+        // FG-01-40: Auto-enroll new companies in Standard trial (14 days)
+        if (config('subscriptions.trial.enabled', true)) {
+            $trialDays = config('subscriptions.trial.duration_days', 14);
+            $trialPlan = config('subscriptions.trial.plan', 'standard');
+
+            CompanySubscription::create([
+                'company_id' => $company->id,
+                'plan' => $trialPlan,
+                'status' => 'trial',
+                'started_at' => Carbon::now(),
+                'trial_ends_at' => Carbon::now()->addDays($trialDays),
+            ]);
         }
 
         return new CompanyResource($company);

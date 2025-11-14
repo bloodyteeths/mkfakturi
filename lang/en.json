@@ -2565,6 +2565,13 @@
     "feature_requires_plan": "{feature} requires {plan} plan or higher.",
     "upgrade_initiated": "Upgrade initiated! Your subscription will be updated shortly.",
     "upgrade_failed": "Upgrade failed. Please try again or contact support.",
+    "continue_premium_features": "Continue with Premium Features",
+    "trial_ending_description": "Your trial is ending soon. Upgrade now to keep all your premium features.",
+    "trial_ends_on": "Trial ends on {date}",
+    "trial_ends_today": "Your trial ends today!",
+    "trial_ends_tomorrow": "Your trial ends tomorrow",
+    "trial_ends_soon": "Your trial ends in {days} days",
+    "trial_active": "{days} days left in your trial",
     "features": {
       "efaktura_sending": "Send E-Faktura to government",
       "qes_signing": "QES digital signatures",
