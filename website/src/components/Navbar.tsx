@@ -3,7 +3,7 @@ import Image from 'next/image'
 import LanguageSwitcher from './LanguageSwitcher'
 import { Dictionary } from '@/i18n/dictionaries'
 import { Locale } from '@/i18n/locales'
-import { APP_URL } from '@/config'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.facturino.mk'
 
 export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
