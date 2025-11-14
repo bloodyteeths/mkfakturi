@@ -50,14 +50,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->append([
-            \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
-            \App\Http\Middleware\TrimStrings::class,
-            \App\Http\Middleware\TrustProxies::class,
             \App\Http\Middleware\SecurityHeaders::class, // SEC-01-02: Security headers
             \App\Http\Middleware\ConfigMiddleware::class,
             \App\Http\Middleware\LocaleMiddleware::class,
             \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
         ]);
+
+        // Replace framework middleware with custom implementations
+        $middleware->replace(\Illuminate\Foundation\Http\Middleware\TrimStrings::class, \App\Http\Middleware\TrimStrings::class);
 
         // Web middleware runs after the default "web" group, ensuring that
         // the session is started before referral tracking or CSRF handling.
