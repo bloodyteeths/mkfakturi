@@ -14,10 +14,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('paddle_id')->nullable()->unique()->after('partner_tier');
-            $table->string('partner_subscription_tier')->default('free')->after('paddle_id')
+            $table->string('paddle_id')->nullable()->unique();
+            $table->string('partner_subscription_tier')->default('free')
                   ->comment('Partner subscription: free or plus');
-            $table->timestamp('partner_trial_ends_at')->nullable()->after('partner_subscription_tier');
+            $table->timestamp('partner_trial_ends_at')->nullable();
         });
     }
 
