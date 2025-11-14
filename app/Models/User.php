@@ -8,6 +8,8 @@ use App\Providers\CacheServiceProvider;
 use App\Traits\CacheableTrait;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
+use Coderflex\LaravelTicket\Concerns\HasTickets;
+use Coderflex\LaravelTicket\Contracts\CanUseTickets;
 use IFRS\Traits\IFRSUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,22 +19,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Paddle\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Silber\Bouncer\BouncerFacade;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-CHECKPOINT: Added CanUseTickets interface
 {
     use HasApiTokens;
     use CacheableTrait;
     use HasCustomFieldsTrait;
     use HasFactory;
     use HasRolesAndAbilities;
+    use HasTickets; // CLAUDE-CHECKPOINT: Added HasTickets trait for support ticketing
     use IFRSUser; // CLAUDE-CHECKPOINT: Added IFRSUser trait for IFRS entity relationship
     use InteractsWithMedia;
     use Notifiable;
+    use Billable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait for Partner Plus subscriptions
 
     /**
      * The attributes that are mass assignable.

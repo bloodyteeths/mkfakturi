@@ -904,10 +904,37 @@ Route::prefix('webhooks')->group(function () {
     Route::post('cpay', [\App\Http\Controllers\Webhooks\WebhookController::class, 'cpay']);
     Route::post('bank/nlb', [\App\Http\Controllers\Webhooks\WebhookController::class, 'nlbBank']);
     Route::post('bank/stopanska', [\App\Http\Controllers\Webhooks\WebhookController::class, 'stopanskaBank']);
+
+    // Subscription webhooks
+    Route::post('paddle/subscription', [\Modules\Mk\Billing\Controllers\PaddleWebhookController::class, 'handleWebhook']);
+    Route::post('cpay/subscription', [\Modules\Mk\Billing\Controllers\CpayWebhookController::class, 'handleSubscriptionCallback']);
+});
+
+// Company Subscription Routes (B-31 series)
+// ----------------------------------
+Route::middleware(['auth:sanctum'])->prefix('companies/{company}/subscription')->group(function () {
+    Route::get('/', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::post('/checkout', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'checkout'])->name('subscription.checkout');
+    Route::get('/success', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'success'])->name('subscription.success');
+    Route::get('/manage', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'manage'])->name('subscription.manage');
+    Route::post('/swap', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'swap'])->name('subscription.swap');
+    Route::post('/cancel', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+    Route::post('/resume', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'resume'])->name('subscription.resume');
+});
+
+// Partner Plus Subscription Routes (B-31-04)
+// ----------------------------------
+Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(function () {
+    Route::get('/', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'index'])->name('partner.subscription.index');
+    Route::post('/checkout', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'checkout'])->name('partner.subscription.checkout');
+    Route::get('/success', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'success'])->name('partner.subscription.success');
+    Route::get('/manage', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'manage'])->name('partner.subscription.manage');
+    Route::post('/cancel', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'cancel'])->name('partner.subscription.cancel');
+    Route::post('/resume', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'resume'])->name('partner.subscription.resume');
 });
 
 // AI Financial Assistant Routes
 Route::middleware(['auth:sanctum'])->prefix('ai')->group(function () {
     Route::get('/summary', [App\Http\Controllers\AiSummaryController::class, 'getSummary']);
     Route::get('/risk', [App\Http\Controllers\AiSummaryController::class, 'getRisk']);
-});
+}); // CLAUDE-CHECKPOINT: Added subscription routes

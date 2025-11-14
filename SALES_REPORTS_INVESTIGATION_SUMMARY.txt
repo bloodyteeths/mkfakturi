@@ -1,0 +1,224 @@
+================================================================================
+SALES REPORTS SHOWING 0 денари - INVESTIGATION SUMMARY
+================================================================================
+
+Date: 2025-11-14
+Issue: Dashboard shows 8.437.000 ден but Sales Reports show 0 денари
+
+================================================================================
+ROOT CAUSES (4 CRITICAL BUGS FOUND)
+================================================================================
+
+BUG #1: Wrong Field Name in CommitImportJob
+-----------
+Location: /app/Jobs/Migration/CommitImportJob.php (lines 208, 325, 434, 539, 611)
+Problem: Code queries 'validation_status' field that doesn't exist in database
+Impact: Query returns 0 records, no invoices/items are created
+Fix: Change ->where('validation_status', 'valid') to ->where('status', 'validated')
+
+BUG #2: Non-Existent transformed_data Column
+-----------
+Location: /app/Jobs/Migration/CommitImportJob.php (lines 219, 336, 445, etc.)
+Problem: Code accesses $tempRecord->transformed_data which doesn't exist
+Impact: json_decode(null) returns null, causing data to be empty or null
+Fix: Access columns directly from temp record instead of decoded JSON
+
+BUG #3: Missing Customer ID in Invoice Creation
+-----------
+Location: /app/Jobs/Migration/CommitImportJob.php (lines 356-362)
+Problem: createInvoice() doesn't set 'customer_id' which is required
+Impact: Database foreign key constraint violation, invoice creation fails
+Fix: Resolve temp_customer_id to actual customer ID before creating invoice
+
+BUG #4: Invoice Items Never Created
+-----------
+Location: /app/Jobs/Migration/CommitImportJob.php
+Problem: commitItems() has same 'validation_status' bug, so items are never created
+Impact: Reports query empty invoice_items table, showing 0
+Fix: Fix the 'validation_status' -> 'status' issue in commitItems()
+
+================================================================================
+WHY DASHBOARD WORKS BUT REPORTS DON'T
+================================================================================
+
+DASHBOARD (/app/Services/DashboardMetricsService.php):
+- Queries Invoice.base_total directly
+- Uses: SELECT SUM(base_total) FROM invoices
+- Shows: 8.437.000 ден (from Payment records or manual entry)
+
+CUSTOMER SALES REPORT (/app/Http/Controllers/V1/Admin/Report/CustomerSalesReportController.php):
+- Loads invoices, loops through, sums invoice->base_total
+- Shows: 0 денари (because no invoice items exist)
+
+ITEM SALES REPORT (/app/Http/Controllers/V1/Admin/Report/ItemSalesReportController.php):
+- Uses InvoiceItem::itemAttributes() scope
+- Executes: SELECT SUM(invoice_items.base_total) FROM invoice_items
+- Shows: 0 денари (invoice_items table is completely empty)
+
+KEY DIFFERENCE:
+- Dashboard aggregates Invoice records
+- Reports aggregate InvoiceItem records
+- Because items are never created, reports show 0
+
+================================================================================
+SCHEMA MISMATCH DETAILS
+================================================================================
+
+CommitImportJob Expects:
+┌─────────────────────────────┬──────────────────────────┐
+│ Expected Field              │ Actual Field             │
+├─────────────────────────────┼──────────────────────────┤
+│ validation_status           │ status (enum)            │
+│ transformed_data (JSON)     │ Direct columns           │
+│ duplicate_info (JSON)       │ Not found in schema      │
+└─────────────────────────────┴──────────────────────────┘
+
+Actual ImportTempInvoice Columns:
+- invoice_number (varchar)
+- reference_number (varchar)
+- invoice_date (date)
+- due_date (date)
+- total (bigint)
+- sub_total (bigint)
+- tax (bigint)
+- exchange_rate (decimal)
+- status (enum: pending, validated, mapped, failed, committed)
+- raw_data (json)
+- validation_errors (json)
+- line_items (json)
+- is_duplicate (boolean)
+- etc.
+
+================================================================================
+FAILURE CHAIN
+================================================================================
+
+1. CSV Import Process Starts
+   ↓
+2. CommitImportJob::commitInvoices() Called
+   ↓
+3. Query: WHERE validation_status = 'valid'
+   - Field doesn't exist → Returns 0 rows
+   ↓
+4. foreach ($validRecords) Loop Never Executes
+   ↓
+5. No Invoices Created in Production
+   ↓
+6. CommitImportJob::commitItems() Also Fails (same bug)
+   ↓
+7. No Invoice Items Created
+   ↓
+8. Sales Reports Query:
+   SELECT SUM(base_total) FROM invoice_items
+   → Returns 0 (table is empty)
+   ↓
+9. User Sees 0 денари in Reports ✓
+
+================================================================================
+WHAT EXISTS IN DATABASE
+================================================================================
+
+import_temp_invoices table:
+- Has rows with status = 'validated' ✓
+- Has all data in columns ✓
+- Ready to be processed ✓
+
+invoices table:
+- Has 0 or incomplete records ✗
+- Records not created because of bugs ✗
+
+invoice_items table:
+- Is completely empty ✗
+- No data from import ✗
+
+================================================================================
+FIX PRIORITY ORDER
+================================================================================
+
+Priority 1: Fix validation_status Field Name
+- Lines: 208, 325, 434, 539, 611
+- Change: ->where('validation_status', 'valid')
+- To: ->where('status', 'validated')
+- Impact: HIGH - Unblocks all imports
+
+Priority 2: Fix Data Access Pattern
+- Lines: 219, 336, 445, etc.
+- Remove: json_decode($tempRecord->transformed_data)
+- Use: Direct column access ($tempRecord->invoice_number, etc.)
+- Impact: HIGH - Fixes data retrieval
+
+Priority 3: Fix Customer ID Resolution
+- Resolve temp_customer_id to actual customer_id
+- Add customer_id to $invoiceData before creating invoice
+- Impact: HIGH - Fixes FK constraint
+
+Priority 4: Create Invoice Items from Temp Items
+- After invoice created, load ImportTempItem records
+- Create InvoiceItem records with base_total calculation
+- Impact: HIGH - Fixes reports data
+
+================================================================================
+TESTING CHECKLIST
+================================================================================
+
+After fixes are applied:
+
+□ Check database queries work:
+  SELECT COUNT(*) FROM import_temp_invoices WHERE status = 'validated'
+  (should return > 0)
+
+□ Run CommitImportJob:
+  Verify logs show: "Import commit started" and "Import commit completed"
+
+□ Check production tables:
+  SELECT COUNT(*) FROM invoices (should be > 0)
+  SELECT COUNT(*) FROM invoice_items (should be > 0)
+
+□ Check totals:
+  SELECT SUM(base_total) FROM invoices (should be > 0)
+  SELECT SUM(base_total) FROM invoice_items (should be > 0)
+
+□ Dashboard should still show 8.437.000 ден
+
+□ Customer Sales Report should show > 0 денари
+
+□ Item Sales Report should show > 0 денари
+
+□ No validation_status errors in logs
+
+================================================================================
+AFFECTED FILES
+================================================================================
+
+Primary Issue:
+- /app/Jobs/Migration/CommitImportJob.php (5 bugs)
+
+Related Files (need review):
+- /app/Models/ImportTempInvoice.php
+- /app/Models/ImportTempCustomer.php
+- /app/Models/ImportTempItem.php
+- /app/Models/ImportTempPayment.php
+- /app/Models/ImportTempExpense.php
+
+Report Files (should work after fixes):
+- /app/Http/Controllers/V1/Admin/Report/CustomerSalesReportController.php
+- /app/Http/Controllers/V1/Admin/Report/ItemSalesReportController.php
+- /app/Models/InvoiceItem.php (itemAttributes scope)
+- /resources/views/app/pdf/reports/sales-customers.blade.php
+- /resources/views/app/pdf/reports/sales-items.blade.php
+
+================================================================================
+CRITICAL INSIGHT
+================================================================================
+
+The CommitImportJob code and database schema are completely out of sync.
+This suggests a refactoring issue where:
+1. Schema was created with direct columns
+2. CommitImportJob was written for different schema (transformed_data JSON)
+3. Code was never tested with actual migration data
+4. No error handling or logging to catch the mismatch
+
+The bug causes silent failure - no exceptions thrown, just empty results
+that cascade through to reports.
+
+================================================================================

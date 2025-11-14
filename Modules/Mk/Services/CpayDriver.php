@@ -18,12 +18,134 @@ use Illuminate\Support\Facades\Log;
  * - Processing payment callbacks
  * - Signature generation and verification
  * - Idempotency checks to prevent duplicate payments
+ * - Subscription management (recurring payments)
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @author Claude Code - CPAY Integration Agent
  */
 class CpayDriver
 {
+    /**
+     * Create recurring payment agreement for subscription
+     *
+     * @param \App\Models\Company $company
+     * @param string $tier
+     * @param float $monthlyPrice
+     * @return array Contains 'checkout_url' and 'params'
+     * @throws \Exception
+     */
+    public function createSubscription($company, string $tier, float $monthlyPrice): array
+    {
+        // Check feature flag
+        if (!config('mk.features.advanced_payments', false)) {
+            throw new \Exception('Advanced payments feature is disabled');
+        }
+
+        // Get CPAY configuration
+        $merchantId = config('mk.payment_gateways.cpay.merchant_id');
+        $paymentUrl = config('mk.payment_gateways.cpay.subscription_url', config('mk.payment_gateways.cpay.payment_url'));
+
+        if (!$merchantId || !$paymentUrl) {
+            throw new \Exception('CPAY configuration is missing');
+        }
+
+        // Generate unique subscription reference
+        $subscriptionRef = 'SUB-' . $company->id . '-' . time();
+
+        // Build subscription parameters
+        $params = [
+            'merchant_id' => $merchantId,
+            'amount' => number_format($monthlyPrice, 2, '.', ''),
+            'currency' => 'MKD',
+            'subscription_ref' => $subscriptionRef,
+            'company_id' => $company->id,
+            'tier' => $tier,
+            'interval' => 'monthly',
+            'callback_url' => route('cpay.subscription.callback'),
+        ];
+
+        // Generate signature
+        $params['signature'] = $this->generateSignature($params);
+
+        // Build checkout URL
+        $checkoutUrl = $paymentUrl . '?' . http_build_query($params);
+
+        Log::info('CPAY subscription checkout URL generated', [
+            'company_id' => $company->id,
+            'tier' => $tier,
+            'monthly_price' => $monthlyPrice,
+            'subscription_ref' => $subscriptionRef,
+        ]);
+
+        return [
+            'checkout_url' => $checkoutUrl,
+            'params' => $params,
+            'subscription_ref' => $subscriptionRef,
+        ];
+    }
+
+    /**
+     * Cancel CPAY recurring payment agreement
+     *
+     * @param string $subscriptionRef CPAY subscription reference
+     * @return bool Success status
+     * @throws \Exception
+     */
+    public function cancelSubscription(string $subscriptionRef): bool
+    {
+        // Check feature flag
+        if (!config('mk.features.advanced_payments', false)) {
+            throw new \Exception('Advanced payments feature is disabled');
+        }
+
+        // Get CPAY API configuration
+        $merchantId = config('mk.payment_gateways.cpay.merchant_id');
+        $apiUrl = config('mk.payment_gateways.cpay.api_url');
+
+        if (!$merchantId || !$apiUrl) {
+            throw new \Exception('CPAY API configuration is missing');
+        }
+
+        // Build cancellation request
+        $params = [
+            'merchant_id' => $merchantId,
+            'subscription_ref' => $subscriptionRef,
+            'action' => 'cancel',
+        ];
+
+        // Generate signature
+        $params['signature'] = $this->generateSignature($params);
+
+        try {
+            // Send cancellation request to CPAY API
+            $response = \Illuminate\Support\Facades\Http::post($apiUrl . '/subscription/cancel', $params);
+
+            if ($response->successful()) {
+                Log::info('CPAY subscription cancelled', [
+                    'subscription_ref' => $subscriptionRef,
+                ]);
+
+                return true;
+            }
+
+            Log::error('CPAY subscription cancellation failed', [
+                'subscription_ref' => $subscriptionRef,
+                'response' => $response->body(),
+            ]);
+
+            return false;
+
+        } catch (\Exception $e) {
+            Log::error('CPAY subscription cancellation error', [
+                'subscription_ref' => $subscriptionRef,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    } // CLAUDE-CHECKPOINT: Added subscription management methods
+
+
     /**
      * Create checkout URL for invoice payment
      *

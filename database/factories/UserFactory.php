@@ -32,6 +32,10 @@ class UserFactory extends Factory
             'role' => 'super admin',
             'password' => Hash::make('secret'),
             'currency_id' => Currency::first()->id,
+            'account_type' => 'company', // Default to company user
+            'kyc_status' => 'pending',
+            'partner_tier' => 'free',
         ];
     }
 }
+// CLAUDE-CHECKPOINT

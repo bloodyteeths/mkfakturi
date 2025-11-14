@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Paddle\Billable;
 use Silber\Bouncer\BouncerFacade;
 use Silber\Bouncer\Database\Role;
 use Spatie\MediaLibrary\HasMedia;
@@ -20,6 +21,7 @@ class Company extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use Billable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait
 
     protected $guarded = [
         'id',
@@ -32,7 +34,10 @@ class Company extends Model implements HasMedia
         'vat_number',
         'tax_id',
         'ifrs_entity_id',
-    ];
+        'paddle_id',
+        'subscription_tier',
+        'trial_ends_at',
+    ]; // CLAUDE-CHECKPOINT: Added Paddle subscription fields
 
     public const COMPANY_LEVEL = 'company_level';
 
@@ -223,6 +228,109 @@ class Company extends Model implements HasMedia
     {
         return $this->belongsTo(\IFRS\Models\Entity::class, 'ifrs_entity_id');
     } // CLAUDE-CHECKPOINT: Added ifrsEntity relationship
+
+    /**
+     * Company's subscription relationship
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(CompanySubscription::class);
+    }
+
+    /**
+     * Check if company is on a specific plan
+     *
+     * @param string $plan
+     * @return bool
+     */
+    public function isOnPlan(string $plan): bool
+    {
+        if (!$this->relationLoaded('subscription')) {
+            $this->load('subscription');
+        }
+
+        return $this->subscription &&
+               $this->subscription->plan === $plan &&
+               in_array($this->subscription->status, ['trial', 'active']);
+    }
+
+    /**
+     * Check if company can access a feature based on minimum required plan
+     *
+     * @param string $feature Feature key from config
+     * @return bool
+     */
+    public function canAccessFeature(string $feature): bool
+    {
+        // Plan hierarchy
+        $planHierarchy = ['free' => 0, 'starter' => 1, 'standard' => 2, 'business' => 3, 'max' => 4];
+
+        // Feature to minimum plan mapping (can be moved to config later)
+        $featureRequirements = [
+            'basic_invoicing' => 'free',
+            'estimates' => 'starter',
+            'recurring_invoices' => 'starter',
+            'expenses' => 'standard',
+            'reports' => 'standard',
+            'multi_currency' => 'business',
+            'custom_fields' => 'business',
+            'api_access' => 'max',
+        ];
+
+        $requiredPlan = $featureRequirements[$feature] ?? 'free';
+
+        if (!$this->relationLoaded('subscription')) {
+            $this->load('subscription');
+        }
+
+        if (!$this->subscription || !in_array($this->subscription->status, ['trial', 'active'])) {
+            return false;
+        }
+
+        $currentPlan = $this->subscription->plan;
+
+        return $planHierarchy[$currentPlan] >= $planHierarchy[$requiredPlan];
+    }
+
+    /**
+     * Check if upgrade is required to access a minimum plan level
+     *
+     * @param string $minPlan
+     * @return bool
+     */
+    public function upgradeRequired(string $minPlan): bool
+    {
+        $planHierarchy = ['free' => 0, 'starter' => 1, 'standard' => 2, 'business' => 3, 'max' => 4];
+
+        if (!$this->relationLoaded('subscription')) {
+            $this->load('subscription');
+        }
+
+        if (!$this->subscription) {
+            return true; // No subscription = upgrade required
+        }
+
+        $currentPlan = $this->subscription->plan;
+
+        return $planHierarchy[$currentPlan] < $planHierarchy[$minPlan];
+    }
+
+    /**
+     * Get current plan name
+     *
+     * @return string
+     */
+    public function getCurrentPlanAttribute(): string
+    {
+        if (!$this->relationLoaded('subscription')) {
+            $this->load('subscription');
+        }
+
+        return $this->subscription ? $this->subscription->plan : 'free';
+    }
+    // CLAUDE-CHECKPOINT
 
     public function setupRoles()
     {

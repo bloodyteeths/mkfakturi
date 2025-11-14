@@ -12,6 +12,7 @@
         "arquivei/laravel-prometheus-exporter": "dev-add-laravel-12",
         "aws/aws-sdk-php": "^3.336",
         "barryvdh/laravel-dompdf": "^v3.0",
+        "coderflex/laravel-ticket": "^2.1",
         "doctrine/dbal": "^4.2",
         "dragonmantank/cron-expression": "^v3.4",
         "ekmungai/eloquent-ifrs": "^5.0",

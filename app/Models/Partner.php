@@ -88,4 +88,87 @@ class Partner extends Model
     {
         return $query->where('is_active', true);
     }
+
+    /**
+     * Get the affiliate links for this partner
+     */
+    public function affiliateLinks(): HasMany
+    {
+        return $this->hasMany(AffiliateLink::class);
+    }
+
+    /**
+     * Get commission events where this partner is the affiliate
+     */
+    public function affiliateEvents(): HasMany
+    {
+        return $this->hasMany(AffiliateEvent::class, 'affiliate_partner_id');
+    }
+
+    /**
+     * Get commission events where this partner is the upline
+     */
+    public function uplineEvents(): HasMany
+    {
+        return $this->hasMany(AffiliateEvent::class, 'upline_partner_id');
+    }
+
+    /**
+     * Get payouts for this partner
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    /**
+     * Get the effective commission rate for this partner
+     * (considers Partner Plus status)
+     */
+    public function getEffectiveCommissionRate(): float
+    {
+        if ($this->isPartnerPlus()) {
+            return config('affiliate.direct_rate_plus', 0.22);
+        }
+
+        return config('affiliate.direct_rate', 0.20);
+    }
+
+    /**
+     * Check if partner qualifies for Partner Plus status
+     */
+    public function isPartnerPlus(): bool
+    {
+        $minCompanies = config('affiliate.plus_tier_min_companies', 10);
+        $activeCompaniesCount = $this->activeCompanies()->count();
+
+        if ($activeCompaniesCount < $minCompanies) {
+            return false;
+        }
+
+        // Additional checks can be added here (MRR, months of history, etc.)
+        return true;
+    }
+
+    /**
+     * Calculate total unpaid commissions for this partner
+     */
+    public function getUnpaidCommissionsTotal(): float
+    {
+        return $this->affiliateEvents()
+            ->unpaid()
+            ->sum('amount');
+    }
+
+    /**
+     * Calculate lifetime earnings for this partner
+     */
+    public function getLifetimeEarnings(): float
+    {
+        return $this->affiliateEvents()
+            ->where('is_clawed_back', false)
+            ->sum('amount');
+    }
 }
+
+// CLAUDE-CHECKPOINT

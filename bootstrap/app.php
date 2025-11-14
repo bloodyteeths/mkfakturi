@@ -53,9 +53,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
             \App\Http\Middleware\TrimStrings::class,
             \App\Http\Middleware\TrustProxies::class,
+            \App\Http\Middleware\SecurityHeaders::class, // SEC-01-02: Security headers
             \App\Http\Middleware\ConfigMiddleware::class,
             \App\Http\Middleware\LocaleMiddleware::class,
             \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
+            \App\Http\Middleware\CaptureReferral::class, // Capture affiliate referral codes
         ]);
 
         $middleware->web([
@@ -74,6 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
             'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
             'bouncer' => \App\Http\Middleware\ScopeBouncer::class,
+            'capture-referral' => \App\Http\Middleware\CaptureReferral::class,
             'company' => \App\Http\Middleware\CompanyMiddleware::class,
             'cron-job' => \App\Http\Middleware\CronJobMiddleware::class,
             'customer' => \App\Http\Middleware\CustomerRedirectIfAuthenticated::class,

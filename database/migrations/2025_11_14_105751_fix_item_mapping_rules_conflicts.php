@@ -69,6 +69,8 @@ return new class extends Migration
 
             if (!$categoryRule) {
                 $categoryRule = MappingRule::create([
+                    'name' => 'Item Category Mapping',
+                    'description' => 'Maps category field variations to item category',
                     'entity_type' => MappingRule::ENTITY_ITEM,
                     'source_field' => 'category',
                     'target_field' => 'category',
@@ -89,7 +91,6 @@ return new class extends Migration
                         // Serbian (Cyrillic)
                         'категорија', 'врста', 'група', 'класа',
                     ],
-                    'data_type' => 'string',
                     'validation_rules' => [
                         'required' => false,
                         'type' => 'string',
@@ -116,6 +117,8 @@ return new class extends Migration
 
             if (!$taxTypeRule) {
                 $taxTypeRule = MappingRule::create([
+                    'name' => 'Item Tax Type Mapping',
+                    'description' => 'Maps tax type field variations to item tax classification',
                     'entity_type' => MappingRule::ENTITY_ITEM,
                     'source_field' => 'tax_type',
                     'target_field' => 'tax_type',
@@ -134,7 +137,6 @@ return new class extends Migration
                         // Serbian (Cyrillic)
                         'тип_пореза', 'врста_пореза', 'категорија_пореза',
                     ],
-                    'data_type' => 'string',
                     'validation_rules' => [
                         'required' => false,
                         'type' => 'string',

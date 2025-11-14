@@ -1,0 +1,33 @@
+<?php
+
+namespace Coderflex\LaravelTicket\Database\Factories;
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        $tableName = config('laravel_ticket.table_names.categories', 'categories');
+
+        Schema::create($tableName, function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // CLAUDE-CHECKPOINT: Set engine
+            $table->charset = 'utf8mb4'; // CLAUDE-CHECKPOINT: Set charset
+            $table->collation = 'utf8mb4_unicode_ci'; // CLAUDE-CHECKPOINT: Set collation
+
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique(); // CLAUDE-CHECKPOINT: Added unique constraint
+            $table->boolean('is_visible')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        $tableName = config('laravel_ticket.table_names.categories', 'categories');
+        Schema::dropIfExists($tableName);
+    }
+};
