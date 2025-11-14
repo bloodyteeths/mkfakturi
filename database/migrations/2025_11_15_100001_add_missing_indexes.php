@@ -122,11 +122,11 @@ return new class extends Migration
         // Partner-specific indexes (if tables exist)
         if (Schema::hasTable('partners')) {
             Schema::table('partners', function (Blueprint $table) use ($self) {
-                if (! $self->indexExists('partners', 'idx_partners_user')) {
+                if (Schema::hasColumn('partners', 'user_id') && ! $self->indexExists('partners', 'idx_partners_user')) {
                     $table->index(['user_id'], 'idx_partners_user');
                 }
 
-                if (! $self->indexExists('partners', 'idx_partners_kyc_status')) {
+                if (Schema::hasColumn('partners', 'kyc_status') && ! $self->indexExists('partners', 'idx_partners_kyc_status')) {
                     $table->index(['kyc_status'], 'idx_partners_kyc_status');
                 }
             });
