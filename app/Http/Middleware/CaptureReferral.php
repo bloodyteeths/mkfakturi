@@ -22,6 +22,13 @@ class CaptureReferral
      */
     public function handle(Request $request, Closure $next)
     {
+        // If there is no session available on the request (for example,
+        // on health checks or stateless API routes), skip referral capture
+        // to avoid triggering "Session store not set" runtime errors.
+        if (! $request->hasSession()) {
+            return $next($request);
+        }
+
         $refParam = config('affiliate.ref_param', 'ref');
         $refCode = $request->query($refParam);
 

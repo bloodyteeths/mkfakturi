@@ -57,12 +57,14 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ConfigMiddleware::class,
             \App\Http\Middleware\LocaleMiddleware::class,
             \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
-            \App\Http\Middleware\CaptureReferral::class, // Capture affiliate referral codes
         ]);
 
-        $middleware->web([
+        // Web middleware runs after the default "web" group, ensuring that
+        // the session is started before referral tracking or CSRF handling.
+        $middleware->web(append: [
             \App\Http\Middleware\EncryptCookies::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\CaptureReferral::class, // Capture affiliate referral codes
         ]);
 
         $middleware->statefulApi();

@@ -28,8 +28,15 @@ return new class extends Migration
             $table->index(['company_id', 'invoice_date'], 'idx_invoices_company_date');
             $table->index(['company_id', 'due_date', 'status'], 'idx_invoices_company_due_status');
             $table->index(['status'], 'idx_invoices_status');
-            $table->index(['user_id'], 'idx_invoices_user');
         });
+
+        // Some legacy databases may not have the user_id column on invoices.
+        // Only create the index when the column exists to avoid SQL errors.
+        if (Schema::hasColumn('invoices', 'user_id')) {
+            Schema::table('invoices', function (Blueprint $table) {
+                $table->index(['user_id'], 'idx_invoices_user');
+            });
+        }
 
         // Customers: Index for company-scoped lookups and name searches
         Schema::table('customers', function (Blueprint $table) {
