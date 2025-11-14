@@ -72,11 +72,8 @@ chmod -R 775 storage bootstrap/cache
 
 echo "✅ Permissions set for www user"
 
-# Bind nginx to the port Railway provides for this service.
-# This makes the container compatible whether the domain is mapped to 80 or 8080.
-NGINX_PORT=${PORT:-80}
-echo "Configuring nginx to listen on port $NGINX_PORT"
-sed -i "s/listen 80;/listen ${NGINX_PORT};/" /etc/nginx/nginx.conf || true
+# Nginx is configured to listen on both 80 and 8080 in nginx.conf.
+echo "Nginx configured to listen on ports 80 and 8080"
 
 # Clear caches
 echo "Clearing caches..."
