@@ -13,11 +13,8 @@ return [
     |
     */
 
-    'stateful' => explode(',', env(
-        'SANCTUM_STATEFUL_DOMAINS',
-        // Include common local domains plus the production SPA host by default
-        'localhost,127.0.0.1,127.0.0.1:8000,::1,app.facturino.mk'
-    )),
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS')
+        ?: 'localhost,127.0.0.1,127.0.0.1:8000,::1,app.facturino.mk'),
 
     /*
     |--------------------------------------------------------------------------
