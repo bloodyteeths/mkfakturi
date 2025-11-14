@@ -145,6 +145,7 @@ class IntelligentFieldMapper
             $mappings = [];
             $overallConfidence = 0;
             $highConfidenceCount = 0;
+            $usedTargetFields = []; // Track which target fields are already mapped
 
             foreach ($csvHeaders as $csvField) {
                 $mapping = $this->mapSingleField(
@@ -154,7 +155,21 @@ class IntelligentFieldMapper
                 );
 
                 if ($mapping) {
+                    $targetField = $mapping['target_field'];
+
+                    // Check for duplicate mapping
+                    if (isset($usedTargetFields[$targetField])) {
+                        Log::warning('Duplicate mapping detected - skipping', [
+                            'csv_field' => $csvField,
+                            'target_field' => $targetField,
+                            'already_mapped_by' => $usedTargetFields[$targetField],
+                            'confidence' => $mapping['confidence']
+                        ]);
+                        continue; // Skip this mapping to avoid duplicates
+                    }
+
                     $mappings[$csvField] = $mapping;
+                    $usedTargetFields[$targetField] = $csvField; // Track usage
                     $overallConfidence += $mapping['confidence'];
 
                     if ($mapping['confidence'] >= self::MIN_AUTO_CONFIDENCE) {
@@ -313,6 +328,19 @@ class IntelligentFieldMapper
 
         if ($dataTypeMatch) {
             $finalConfidence = min(1.0, $finalConfidence + self::DATA_TYPE_BOOST);
+        }
+
+        // Apply minimum confidence threshold from config
+        $minConfidence = config('import.intelligent.confidence_threshold', 0.60);
+
+        if ($finalConfidence < $minConfidence) {
+            Log::debug('Best match rejected - confidence too low', [
+                'field' => $analysis['original_name'] ?? 'unknown',
+                'target' => $bestCandidate['target_field'],
+                'confidence' => $finalConfidence,
+                'threshold' => $minConfidence
+            ]);
+            return null;
         }
 
         // Build final mapping result
