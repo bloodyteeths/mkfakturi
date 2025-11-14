@@ -409,19 +409,33 @@ class CommitImportJob implements ShouldQueue
      */
     protected function prepareInvoiceData(array $data): array
     {
+        $defaultCurrency = $this->getDefaultCurrency();
+        $exchangeRate = $data['exchange_rate'] ?? 1.0;
+
+        $subTotal = isset($data['subtotal']) ? (int) round(floatval($data['subtotal']) * 100) : 0;
+        $tax = isset($data['tax_amount']) ? (int) round(floatval($data['tax_amount']) * 100) : 0;
+        $total = isset($data['total']) ? (int) round(floatval($data['total']) * 100) : 0;
+
         return [
             'invoice_number' => $data['invoice_number'] ?? uniqid('INV-'),
             'invoice_date' => $data['invoice_date'] ?? now()->format('Y-m-d'),
             'due_date' => $data['due_date'] ?? now()->addDays(30)->format('Y-m-d'),
-            'sub_total' => isset($data['subtotal']) ? (int) round(floatval($data['subtotal']) * 100) : 0,
-            'tax' => isset($data['tax_amount']) ? (int) round(floatval($data['tax_amount']) * 100) : 0,
-            'total' => isset($data['total']) ? (int) round(floatval($data['total']) * 100) : 0,
+            'sub_total' => $subTotal,
+            'tax' => $tax,
+            'total' => $total,
             'status' => $data['status'] ?? 'draft',
             'notes' => $data['notes'] ?? null,
             'paid_status' => Payment::STATUS_UNPAID,
-            'base_sub_total' => isset($data['subtotal']) ? (int) round(floatval($data['subtotal']) * 100) : 0,
-            'base_tax' => isset($data['tax_amount']) ? (int) round(floatval($data['tax_amount']) * 100) : 0,
-            'base_total' => isset($data['total']) ? (int) round(floatval($data['total']) * 100) : 0,
+
+            // Base amounts (critical for reports)
+            'base_sub_total' => $subTotal,
+            'base_tax' => $tax,
+            'base_total' => $total,
+            'base_due_amount' => $total,
+
+            // Currency and exchange rate
+            'currency_id' => $defaultCurrency->id,
+            'exchange_rate' => $exchangeRate,
         ];
     }
 

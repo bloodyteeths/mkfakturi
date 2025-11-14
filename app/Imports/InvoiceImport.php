@@ -4,6 +4,8 @@ namespace App\Imports;
 
 use App\Models\Invoice;
 use App\Models\Customer;
+use App\Models\CompanySetting;
+use App\Models\Currency;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
@@ -45,6 +47,8 @@ class InvoiceImport implements
     private int $successCount = 0;
     private int $failureCount = 0;
     private array $customerCache = [];
+    private ?int $companyCurrencyId = null;
+    private float $defaultExchangeRate = 1.0;
 
     /**
      * Constructor
@@ -64,6 +68,9 @@ class InvoiceImport implements
         $this->creatorId = $creatorId;
         $this->columnMapping = $columnMapping;
         $this->isDryRun = $isDryRun;
+
+        // Get company's default currency
+        $this->companyCurrencyId = CompanySetting::getSetting('currency', $companyId);
     }
 
     /**
@@ -97,6 +104,15 @@ class InvoiceImport implements
             return null;
         }
 
+        // Parse amounts
+        $subTotal = $this->parseAmount($mappedRow['sub_total'] ?? 0);
+        $tax = $this->parseAmount($mappedRow['tax'] ?? 0);
+        $total = $this->parseAmount($mappedRow['total'] ?? 0);
+        $discountVal = $this->parseAmount($mappedRow['discount_val'] ?? 0);
+
+        // Exchange rate (default to 1.0 for company currency)
+        $exchangeRate = $mappedRow['exchange_rate'] ?? $this->defaultExchangeRate;
+
         $invoice = new Invoice([
             'company_id' => $this->companyId,
             'creator_id' => $this->creatorId,
@@ -104,12 +120,26 @@ class InvoiceImport implements
             'invoice_number' => $mappedRow['invoice_number'] ?? null,
             'invoice_date' => $this->parseDate($mappedRow['invoice_date'] ?? null),
             'due_date' => $this->parseDate($mappedRow['due_date'] ?? null),
-            'sub_total' => $this->parseAmount($mappedRow['sub_total'] ?? 0),
-            'tax' => $this->parseAmount($mappedRow['tax'] ?? 0),
-            'total' => $this->parseAmount($mappedRow['total'] ?? 0),
+
+            // Original amounts
+            'sub_total' => $subTotal,
+            'tax' => $tax,
+            'total' => $total,
             'discount' => $mappedRow['discount'] ?? 0,
             'discount_type' => $mappedRow['discount_type'] ?? 'fixed',
-            'discount_val' => $this->parseAmount($mappedRow['discount_val'] ?? 0),
+            'discount_val' => $discountVal,
+
+            // Base amounts (for reports)
+            'base_sub_total' => $subTotal,
+            'base_tax' => $tax,
+            'base_total' => $total,
+            'base_discount_val' => $discountVal,
+            'base_due_amount' => $total, // Will be updated when payments are applied
+
+            // Currency and exchange rate
+            'currency_id' => $this->companyCurrencyId,
+            'exchange_rate' => $exchangeRate,
+
             'notes' => $mappedRow['notes'] ?? null,
             'status' => $mappedRow['status'] ?? Invoice::STATUS_DRAFT,
         ]);

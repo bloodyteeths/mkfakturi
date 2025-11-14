@@ -241,6 +241,45 @@ class Invoice extends Model implements HasMedia
         return Carbon::parse($this->invoice_date)->translatedFormat($dateFormat);
     }
 
+    /**
+     * Accessor for base_total - fallback to total if base_total is null
+     * Critical for migration wizard imports where base_total wasn't populated
+     */
+    public function getBaseTotalAttribute($value)
+    {
+        // If base_total is set, use it
+        if ($value !== null) {
+            return $value;
+        }
+
+        // Fallback to total for migrated invoices
+        return $this->attributes['total'] ?? 0;
+    }
+
+    /**
+     * Accessor for base_sub_total - fallback to sub_total if null
+     */
+    public function getBaseSubTotalAttribute($value)
+    {
+        return $value ?? ($this->attributes['sub_total'] ?? 0);
+    }
+
+    /**
+     * Accessor for base_tax - fallback to tax if null
+     */
+    public function getBaseTaxAttribute($value)
+    {
+        return $value ?? ($this->attributes['tax'] ?? 0);
+    }
+
+    /**
+     * Accessor for base_due_amount - fallback to total if null
+     */
+    public function getBaseDueAmountAttribute($value)
+    {
+        return $value ?? ($this->attributes['total'] ?? 0);
+    }
+
     public function scopeWhereStatus($query, $status)
     {
         return $query->where('invoices.status', $status);
