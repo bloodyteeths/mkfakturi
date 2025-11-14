@@ -22,6 +22,11 @@ export function middleware(request: Request) {
     return NextResponse.redirect(url, 301)
   }
 
+  // 2) Allow root health check without locale redirect
+  if (pathname === '/health') {
+    return NextResponse.next()
+  }
+
   // Ignore next internal assets and API routes
   if (
     pathname.startsWith('/_next') ||
