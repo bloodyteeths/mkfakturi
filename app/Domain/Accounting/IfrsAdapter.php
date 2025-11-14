@@ -5,6 +5,7 @@ namespace App\Domain\Accounting;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Company;
+use App\Models\CompanySetting;
 use IFRS\Models\Account;
 use IFRS\Models\Transaction;
 use IFRS\Models\LineItem;
@@ -887,14 +888,29 @@ class IfrsAdapter
      */
     protected function getCurrencyId(int $companyId): int
     {
-        // Get the company's currency or default to first available
-        $company = Company::find($companyId);
+        // Get the company's currency from settings
+        $appCurrencyId = CompanySetting::getSetting('currency', $companyId);
 
-        if ($company && $company->currency_id) {
-            return $company->currency_id;
+        if ($appCurrencyId) {
+            // Get the app currency
+            $appCurrency = \App\Models\Currency::find($appCurrencyId);
+
+            if ($appCurrency) {
+                // Find or create corresponding IFRS currency
+                $ifrsCurrency = \IFRS\Models\Currency::where('currency_code', $appCurrency->code)->first();
+
+                if (!$ifrsCurrency) {
+                    $ifrsCurrency = \IFRS\Models\Currency::create([
+                        'name' => $appCurrency->name,
+                        'currency_code' => $appCurrency->code,
+                    ]);
+                }
+
+                return $ifrsCurrency->id;
+            }
         }
 
-        // Return first IFRS currency or create default MKD
+        // Fallback: Return first IFRS currency or create default MKD
         $currency = \IFRS\Models\Currency::first();
 
         if (!$currency) {
