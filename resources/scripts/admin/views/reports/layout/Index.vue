@@ -45,21 +45,56 @@
       >
         <TaxReport ref="report" />
       </BaseTab>
+      <BaseTab
+        v-if="accountingBackboneEnabled"
+        :title="$t('reports.accounting.accounting')"
+        tab-panel-container="px-0 py-0"
+      >
+        <BaseTabGroup class="p-2">
+          <BaseTab
+            :title="$t('reports.accounting.trial_balance')"
+            tab-panel-container="px-0 py-0"
+          >
+            <TrialBalance ref="report" />
+          </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.balance_sheet')"
+            tab-panel-container="px-0 py-0"
+          >
+            <BalanceSheet ref="report" />
+          </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.income_statement')"
+            tab-panel-container="px-0 py-0"
+          >
+            <IncomeStatement ref="report" />
+          </BaseTab>
+        </BaseTabGroup>
+      </BaseTab>
     </BaseTabGroup>
   </BasePage>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import SalesReport from '../SalesReports.vue'
 import ExpenseReport from '../ExpensesReport.vue'
 import ProfitLossReport from '../ProfitLossReport.vue'
 import TaxReport from '../TaxReport.vue'
+import TrialBalance from '../TrialBalance.vue'
+import BalanceSheet from '../BalanceSheet.vue'
+import IncomeStatement from '../IncomeStatement.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const globalStore = useGlobalStore()
+
+const accountingBackboneEnabled = computed(() => {
+  return globalStore.featureFlags?.['accounting_backbone'] === true
+})
 
 function onDownload() {
   globalStore.downloadReport()
 }
 </script>
+
+// CLAUDE-CHECKPOINT

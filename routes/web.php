@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\V1\Admin\Auth\LoginController;
 use App\Http\Controllers\V1\Admin\Expense\ShowReceiptController;
+use App\Http\Controllers\V1\Admin\Report\BalanceSheetReportController;
 use App\Http\Controllers\V1\Admin\Report\CustomerSalesReportController;
 use App\Http\Controllers\V1\Admin\Report\ExpensesReportController;
+use App\Http\Controllers\V1\Admin\Report\IncomeStatementReportController;
 use App\Http\Controllers\V1\Admin\Report\ItemSalesReportController;
 use App\Http\Controllers\V1\Admin\Report\ProfitLossReportController;
 use App\Http\Controllers\V1\Admin\Report\TaxSummaryReportController;
+use App\Http\Controllers\V1\Admin\Report\TrialBalanceReportController;
 use App\Http\Controllers\V1\Customer\Auth\LoginController as CustomerLoginController;
 use App\Http\Controllers\V1\Customer\EstimatePdfController as CustomerEstimatePdfController;
 use App\Http\Controllers\V1\Customer\InvoicePdfController as CustomerInvoicePdfController;
@@ -79,11 +82,19 @@ Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
     // ----------------------------------
     Route::get('/profit-loss/{hash}', ProfitLossReportController::class);
 
+    // IFRS Accounting Reports
+    // ----------------------------------
+    Route::get('/trial-balance/{hash}', TrialBalanceReportController::class);
+    Route::get('/balance-sheet/{hash}', BalanceSheetReportController::class);
+    Route::get('/income-statement/{hash}', IncomeStatementReportController::class);
+
     // download expense receipt
     // -------------------------------------------------
     Route::get('/expenses/{expense}/download-receipt', DownloadReceiptController::class);
     Route::get('/expenses/{expense}/receipt', ShowReceiptController::class);
 });
+
+// CLAUDE-CHECKPOINT
 
 // PDF Endpoints
 // ----------------------------------------------

@@ -1,0 +1,102 @@
+2025-11-14T00:51:51.773041678Z [inf]  
+2025-11-14T00:51:56.414407168Z [inf]  [35m[Region: europe-west4][0m
+2025-11-14T00:51:56.417326664Z [inf]  [35m==============
+2025-11-14T00:51:56.417374179Z [inf]  Using Nixpacks
+2025-11-14T00:51:56.417379872Z [inf]  ==============
+2025-11-14T00:51:56.417384048Z [inf]  [0m
+2025-11-14T00:51:56.417522622Z [inf]  context: fms2-SmJD
+2025-11-14T00:51:56.523207111Z [inf]  ╔════════ Nixpacks v1.38.0 ═══════╗
+2025-11-14T00:51:56.523265374Z [inf]  ║ setup      │ nodejs_22, npm-9_x ║
+2025-11-14T00:51:56.523272561Z [inf]  ║─────────────────────────────────║
+2025-11-14T00:51:56.523276849Z [inf]  ║ install    │ npm i              ║
+2025-11-14T00:51:56.523284452Z [inf]  ║─────────────────────────────────║
+2025-11-14T00:51:56.523295119Z [inf]  ║ build      │ npm run build      ║
+2025-11-14T00:51:56.523300003Z [inf]  ║─────────────────────────────────║
+2025-11-14T00:51:56.523304279Z [inf]  ║ start      │ npm run start      ║
+2025-11-14T00:51:56.523308549Z [inf]  ╚═════════════════════════════════╝
+2025-11-14T00:51:56.774504913Z [inf]  [internal] load build definition from Dockerfile
+2025-11-14T00:51:56.774578200Z [inf]  [internal] load build definition from Dockerfile
+2025-11-14T00:51:56.774599893Z [inf]  [internal] load build definition from Dockerfile
+2025-11-14T00:51:56.785990206Z [inf]  [internal] load build definition from Dockerfile
+2025-11-14T00:51:56.788879096Z [inf]  [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+2025-11-14T00:51:57.204662201Z [inf]  [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+2025-11-14T00:51:57.204745591Z [inf]  [internal] load .dockerignore
+2025-11-14T00:51:57.204772373Z [inf]  [internal] load .dockerignore
+2025-11-14T00:51:57.204813397Z [inf]  [internal] load .dockerignore
+2025-11-14T00:51:57.226461884Z [inf]  [internal] load .dockerignore
+2025-11-14T00:51:57.230859140Z [inf]  [internal] load build context
+2025-11-14T00:51:57.230924010Z [inf]  [internal] load build context
+2025-11-14T00:51:57.270032932Z [inf]  [internal] load build context
+2025-11-14T00:51:57.273909728Z [inf]  [stage-0  3/10] COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
+2025-11-14T00:51:57.273951414Z [inf]  [stage-0  4/10] RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
+2025-11-14T00:51:57.273983124Z [inf]  [stage-0  5/10] COPY . /app/.
+2025-11-14T00:51:57.574515255Z [inf]  [stage-0  5/10] COPY . /app/.
+2025-11-14T00:51:57.578711405Z [inf]  [stage-0  6/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-/root/npm,target=/root/.npm npm i
+2025-11-14T00:51:57.976964954Z [inf]  npm warn config production Use `--omit=dev` instead.
+
+2025-11-14T00:52:33.602353619Z [inf]  
+added 360 packages, and audited 361 packages in 36s
+
+142 packages are looking for funding
+  run `npm fund` for details
+
+2025-11-14T00:52:33.603753289Z [inf]  
+found 0 vulnerabilities
+
+2025-11-14T00:52:34.287261900Z [inf]  [stage-0  6/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-/root/npm,target=/root/.npm npm i
+2025-11-14T00:52:34.288232039Z [inf]  [stage-0  7/10] COPY . /app/.
+2025-11-14T00:52:34.456537097Z [inf]  [stage-0  7/10] COPY . /app/.
+2025-11-14T00:52:34.459768219Z [inf]  [stage-0  8/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
+2025-11-14T00:52:34.665617625Z [inf]  npm warn config production Use `--omit=dev` instead.
+
+2025-11-14T00:52:34.684630983Z [inf]  
+> website@0.1.0 build
+> next build
+
+
+2025-11-14T00:52:35.657890614Z [inf]     ▲ Next.js 16.0.3 (Turbopack)
+
+2025-11-14T00:52:35.658212573Z [inf]  
+
+2025-11-14T00:52:35.733108833Z [inf]     Creating an optimized production build ...
+
+2025-11-14T00:52:38.695877718Z [inf]  
+
+2025-11-14T00:52:38.69609833Z [inf]  > Build error occurred
+
+2025-11-14T00:52:38.700562039Z [inf]  Error: Turbopack build failed with 1 errors:
+./src/components/Navbar.tsx:6:1
+Module not found: Can't resolve '@/config'
+[0m [90m 4 |[39m [36mimport[39m { [33mDictionary[39m } [36mfrom[39m [32m'@/i18n/dictionaries'[39m
+ [90m 5 |[39m [36mimport[39m { [33mLocale[39m } [36mfrom[39m [32m'@/i18n/locales'[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m { [33mAPP_URL[39m } [36mfrom[39m [32m'@/config'[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m
+ [90m 8 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mNavbar[39m({ t[33m,[39m locale }[33m:[39m { t[33m:[39m [33mDictionary[39m[33m;[39m locale[33m:[39m [33mLocale[39m }) {
+ [90m 9 |[39m   [36mreturn[39m ([0m
+
+Import map: aliased to relative './src/config' inside of [project]/
+
+
+Import trace:
+  Server Component:
+    ./src/components/Navbar.tsx
+    ./src/app/[locale]/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./src/components/Navbar.tsx:6:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+
+2025-11-14T00:52:39.091079036Z [err]  [stage-0  8/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
+2025-11-14T00:52:39.107246421Z [err]  Dockerfile:24
+2025-11-14T00:52:39.107320340Z [err]  -------------------
+2025-11-14T00:52:39.107331971Z [err]  22 |     # build phase
+2025-11-14T00:52:39.107338541Z [err]  23 |     COPY . /app/.
+2025-11-14T00:52:39.107347499Z [err]  24 | >>> RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
+2025-11-14T00:52:39.107353392Z [err]  25 |
+2025-11-14T00:52:39.107359804Z [err]  26 |
+2025-11-14T00:52:39.107365718Z [err]  -------------------
+2025-11-14T00:52:39.107373443Z [err]  ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
+2025-11-14T00:52:39.113220814Z [err]  Error: Docker build failed

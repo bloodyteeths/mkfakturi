@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Http\Controllers\V1\Admin\Report;
+
+use App\Domain\Accounting\IfrsAdapter;
+use App\Http\Controllers\Controller;
+use App\Models\Company;
+use App\Models\CompanySetting;
+use App\Models\Currency;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use PDF;
+
+class TrialBalanceReportController extends Controller
+{
+    /**
+     * Handle the incoming request.
+     *
+     * @param  string  $hash
+     * @return \Illuminate\Http\Response
+     */
+    public function __invoke(Request $request, $hash)
+    {
+        $company = Company::where('unique_hash', $hash)->first();
+
+        $this->authorize('view report', $company);
+
+        // Check if accounting backbone feature is enabled
+        if (!$this->isFeatureEnabled()) {
+            return response()->view('app.pdf.reports.feature-disabled', [
+                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.'
+            ]);
+        }
+
+        $locale = CompanySetting::getSetting('language', $company->id);
+        App::setLocale($locale);
+
+        // Get trial balance data via IfrsAdapter
+        $adapter = new IfrsAdapter();
+        $asOfDate = $request->has('as_of_date')
+            ? $request->as_of_date
+            : now()->toDateString();
+
+        $trialBalance = $adapter->getTrialBalance($company, $asOfDate);
+
+        // Handle errors from adapter
+        if (isset($trialBalance['error'])) {
+            return response()->view('app.pdf.reports.feature-disabled', [
+                'message' => $trialBalance['error']
+            ]);
+        }
+
+        // Format date
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $formatted_date = Carbon::createFromFormat('Y-m-d', $asOfDate)
+            ->translatedFormat($dateFormat);
+
+        $currency = Currency::findOrFail(
+            CompanySetting::getSetting('currency', $company->id)
+        );
+
+        // Get color settings
+        $colors = [
+            'primary_text_color',
+            'heading_text_color',
+            'section_heading_text_color',
+            'border_color',
+            'body_text_color',
+            'footer_text_color',
+            'footer_total_color',
+            'footer_bg_color',
+            'date_text_color',
+        ];
+        $colorSettings = CompanySetting::whereIn('option', $colors)
+            ->whereCompany($company->id)
+            ->get();
+
+        view()->share([
+            'company' => $company,
+            'trialBalance' => $trialBalance,
+            'as_of_date' => $formatted_date,
+            'colorSettings' => $colorSettings,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trial-balance');
+
+        if ($request->has('preview')) {
+            return view('app.pdf.reports.trial-balance');
+        }
+
+        if ($request->has('download')) {
+            return $pdf->download();
+        }
+
+        return $pdf->stream();
+    }
+
+    /**
+     * Check if accounting backbone feature is enabled
+     */
+    private function isFeatureEnabled(): bool
+    {
+        if (function_exists('feature')) {
+            return feature('accounting_backbone');
+        }
+
+        return config('ifrs.enabled', false) ||
+               env('FEATURE_ACCOUNTING_BACKBONE', false);
+    }
+}
+
+// CLAUDE-CHECKPOINT
