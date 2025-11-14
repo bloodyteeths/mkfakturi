@@ -217,29 +217,44 @@ class HealthController extends Controller
     }
 
     /**
-     * Check backup health using Spatie Backup monitoring
+     * Check backup health
      */
     private function checkBackup(): bool
     {
         try {
-            // Use Spatie Backup's built-in monitoring
-            $backupStatuses = \Spatie\Backup\Tasks\Monitor\BackupDestinationStatusFactory::createForMonitorConfig(
-                config('backup.monitor_backups')
-            );
+            // Check if backup directory exists and has recent backups
+            $backupName = config('backup.backup.name', 'facturino');
+            $backupPath = storage_path("app/{$backupName}");
 
-            foreach ($backupStatuses as $backupStatus) {
-                // Check if backup has health check failures
-                $healthCheckFailure = $backupStatus->getHealthCheckFailure();
+            // If backup directory doesn't exist, it's a new installation
+            if (!is_dir($backupPath)) {
+                return true;
+            }
 
-                if ($healthCheckFailure !== null) {
-                    \Log::warning('Health check: Backup health check failed', [
-                        'backup_name' => $backupStatus->backupDestination()->backupName(),
-                        'disk' => $backupStatus->backupDestination()->diskName(),
-                        'failure' => $healthCheckFailure->healthCheck()::class,
-                        'exception' => $healthCheckFailure->exception()?->getMessage(),
-                    ]);
-                    return false;
-                }
+            // Get all backup files
+            $backupFiles = glob($backupPath . '/*.zip');
+
+            if (empty($backupFiles)) {
+                \Log::warning('Health check: No backup files found');
+                return true; // Don't fail on new installations
+            }
+
+            // Get most recent backup
+            usort($backupFiles, function($a, $b) {
+                return filemtime($b) - filemtime($a);
+            });
+
+            $latestBackup = $backupFiles[0];
+            $backupAge = time() - filemtime($latestBackup);
+            $maxAge = 86400 * 2; // 2 days in seconds
+
+            if ($backupAge > $maxAge) {
+                \Log::warning('Health check: Latest backup is too old', [
+                    'age_hours' => round($backupAge / 3600, 2),
+                    'max_age_hours' => round($maxAge / 3600, 2),
+                    'backup_file' => basename($latestBackup),
+                ]);
+                return false;
             }
 
             return true;
