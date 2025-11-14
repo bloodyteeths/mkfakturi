@@ -87,6 +87,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'install' => \App\Http\Middleware\InstallationMiddleware::class,
             'invoice-limit' => \App\Http\Middleware\CheckInvoiceLimit::class, // FG-01-00: Invoice limits
+            'user-limit' => \App\Http\Middleware\CheckUserLimit::class, // FG-01-30: User limits
             'mcp.token' => \App\Http\Middleware\VerifyMcpToken::class,
             'partner' => \App\Http\Middleware\PartnerScopeMiddleware::class,
             'partner-scope' => \App\Http\Middleware\PartnerScopeMiddleware::class,

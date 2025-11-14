@@ -601,7 +601,7 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::prefix('support')->group(function () {
-                // Tickets
+                // Tickets (Customer View - Tenant Isolated)
                 Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'index']);
                 Route::post('/tickets', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'store']);
                 Route::get('/tickets/{ticket}', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'show']);
@@ -613,6 +613,26 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/tickets/{ticket}/messages', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'store']);
                 Route::put('/tickets/{ticket}/messages/{message}', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'update']);
                 Route::delete('/tickets/{ticket}/messages/{message}', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'destroy']);
+
+                // TRACK 3: MILESTONE 3.2 - Agent Dashboard (Admin/Support Only)
+                // Admin Ticket Operations (Cross-Tenant - Admins/Support Only)
+                Route::prefix('admin')->group(function () {
+                    Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'listAllTickets']);
+                    Route::get('/statistics', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'getStatistics']);
+                    Route::post('/tickets/{ticket}/assign', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'assignTicket']);
+                    Route::post('/tickets/{ticket}/change-status', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'changeStatus']);
+                    Route::post('/tickets/{ticket}/internal-notes', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'addInternalNote']);
+                });
+
+                // Canned Responses (Admin/Support Only)
+                Route::prefix('canned-responses')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'index']);
+                    Route::post('/', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'store']);
+                    Route::get('/{cannedResponse}', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'show']);
+                    Route::put('/{cannedResponse}', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'update']);
+                    Route::delete('/{cannedResponse}', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'destroy']);
+                    Route::post('/{cannedResponse}/use', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'use']);
+                });
             });
             // CLAUDE-CHECKPOINT
 
@@ -815,7 +835,15 @@ Route::prefix('/v1')->group(function () {
 
         Route::post('/users/delete', [UsersController::class, 'delete']);
 
-        Route::apiResource('/users', UsersController::class);
+        // FG-01-31: Apply user limit check to user creation
+        // Note: apiResource creates routes for: index, show, store, update, destroy
+        // We only want to gate 'store' (creation), so we'll split it
+        Route::get('/users', [UsersController::class, 'index']);
+        Route::get('/users/{user}', [UsersController::class, 'show']);
+        Route::post('/users', [UsersController::class, 'store'])->middleware('user-limit'); // FG-01-31
+        Route::put('/users/{user}', [UsersController::class, 'update']);
+        Route::patch('/users/{user}', [UsersController::class, 'update']);
+        Route::delete('/users/{user}', [UsersController::class, 'destroy']);
 
         // Modules
         // ----------------------------------
