@@ -54,10 +54,10 @@ Route::post('/{company:slug}/customer/logout', function () {
 });
 
 // SPA Bootstrap for authenticated admin users
-// Uses session-based auth (web guard) instead of Sanctum
+// Uses Sanctum stateful authentication for SPA
 // Note: 'web' middleware is already applied to all routes in web.php
 Route::get('/api/v1/bootstrap', BootstrapController::class)
-    ->middleware(['install', 'auth', 'company', 'bouncer']);
+    ->middleware(['install', 'auth:sanctum', 'company', 'bouncer']);
 
 // Report PDF & Expense Endpoints
 // ----------------------------------------------
