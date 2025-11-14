@@ -101,7 +101,9 @@ return new class extends Migration
 
         // Users: Index for company membership lookups
         Schema::table('users', function (Blueprint $table) use ($self) {
-            if (! $self->indexExists('users', 'idx_users_company')) {
+            // Some legacy databases may not have the company_id column on users.
+            // Only create the index when the column exists to avoid SQL errors.
+            if (Schema::hasColumn('users', 'company_id') && ! $self->indexExists('users', 'idx_users_company')) {
                 $table->index(['company_id'], 'idx_users_company');
             }
 
