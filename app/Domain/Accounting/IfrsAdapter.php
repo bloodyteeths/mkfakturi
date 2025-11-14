@@ -888,8 +888,16 @@ class IfrsAdapter
      */
     protected function getCurrencyId(int $companyId): int
     {
-        // Get the company's currency from settings
+        // Try 1: Get the company's currency from settings
         $appCurrencyId = CompanySetting::getSetting('currency', $companyId);
+
+        // Try 2: If not in settings, check the company's invoices (migrated companies)
+        if (!$appCurrencyId) {
+            $invoice = Invoice::where('company_id', $companyId)->whereNotNull('currency_id')->first();
+            if ($invoice) {
+                $appCurrencyId = $invoice->currency_id;
+            }
+        }
 
         if ($appCurrencyId) {
             // Get the app currency
