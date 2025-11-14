@@ -1,0 +1,125 @@
+2025-11-14T18:00:48.000000000Z [inf]  Mounting volume on: /var/lib/containers/railwayapp/bind-mounts/aad341c0-040f-4a43-8b20-fd56de29e996/vol_fbj0jmd9ow95b1he
+2025-11-14T18:00:49.393402989Z [inf]  === Application Startup ===
+2025-11-14T18:00:49.393408170Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-14T18:00:49.393413262Z [inf]  DB configured from MYSQL_URL
+2025-11-14T18:00:49.393421118Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-14T18:00:49.393426416Z [inf]  Waiting for database... (1/30)
+2025-11-14T18:00:51.386844430Z [inf]  Waiting for database... (2/30)
+2025-11-14T18:00:53.478992891Z [inf]  Waiting for database... (3/30)
+2025-11-14T18:00:55.525227444Z [inf]  Waiting for database... (4/30)
+2025-11-14T18:00:57.692874980Z [inf]  Waiting for database... (5/30)
+2025-11-14T18:00:59.876247788Z [inf]  Waiting for database... (6/30)
+2025-11-14T18:01:02.477898599Z [inf]  Waiting for database... (7/30)
+2025-11-14T18:01:04.536137560Z [inf]  Waiting for database... (8/30)
+2025-11-14T18:01:06.447514277Z [inf]  Waiting for database... (9/30)
+2025-11-14T18:01:08.550362012Z [inf]  Waiting for database... (10/30)
+2025-11-14T18:01:10.728408644Z [inf]  Waiting for database... (11/30)
+2025-11-14T18:01:12.900825682Z [inf]  Waiting for database... (12/30)
+2025-11-14T18:01:15.596590660Z [inf]  Waiting for database... (13/30)
+2025-11-14T18:01:17.560290754Z [inf]  Waiting for database... (14/30)
+2025-11-14T18:01:19.597452875Z [inf]  Waiting for database... (15/30)
+2025-11-14T18:01:21.590767007Z [inf]  Waiting for database... (16/30)
+2025-11-14T18:01:23.755091676Z [inf]  Waiting for database... (17/30)
+2025-11-14T18:01:25.925532173Z [inf]  Waiting for database... (18/30)
+2025-11-14T18:01:28.704555444Z [inf]  Waiting for database... (19/30)
+2025-11-14T18:01:30.706101422Z [inf]  Waiting for database... (20/30)
+2025-11-14T18:01:32.632491639Z [inf]  Waiting for database... (21/30)
+2025-11-14T18:01:34.656900532Z [inf]  Waiting for database... (22/30)
+2025-11-14T18:01:36.786259055Z [inf]  Waiting for database... (23/30)
+2025-11-14T18:01:38.955471073Z [inf]  Waiting for database... (24/30)
+2025-11-14T18:01:41.124103420Z [inf]  Waiting for database... (25/30)
+2025-11-14T18:01:43.674313947Z [inf]  Waiting for database... (26/30)
+2025-11-14T18:01:45.659421542Z [inf]  Waiting for database... (27/30)
+2025-11-14T18:01:47.676084702Z [inf]  Waiting for database... (28/30)
+2025-11-14T18:01:49.832054614Z [inf]  Waiting for database... (29/30)
+2025-11-14T18:01:51.980203795Z [inf]  Waiting for database... (30/30)
+2025-11-14T18:01:54.062818831Z [inf]  ✅ Permissions set for www user
+2025-11-14T18:01:54.062826091Z [inf]  Nginx configured to listen on ports 80 and 8080
+2025-11-14T18:01:54.062832128Z [inf]  Clearing caches...
+2025-11-14T18:01:54.723520676Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-14T18:01:54.723532415Z [inf]  
+2025-11-14T18:01:54.723563661Z [inf]  
+2025-11-14T18:01:54.854790174Z [inf]  
+2025-11-14T18:01:54.854799589Z [inf]     INFO  Application cache cleared successfully.  
+2025-11-14T18:01:54.854806115Z [inf]  
+2025-11-14T18:01:55.683480072Z [inf]  
+2025-11-14T18:01:55.683485578Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-14T18:01:55.683490046Z [inf]  
+2025-11-14T18:01:55.683494861Z [inf]  
+2025-11-14T18:01:55.683500111Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-14T18:01:55.683505158Z [inf]  
+2025-11-14T18:01:55.683510253Z [inf]  Running migrations...
+2025-11-14T18:01:55.897366724Z [inf]  
+2025-11-14T18:01:55.897372514Z [inf]     INFO  Nothing to migrate.  
+2025-11-14T18:01:55.897377430Z [inf]  
+2025-11-14T18:01:56.648643399Z [inf]  Profile status: COMPLETED
+2025-11-14T18:01:56.920178440Z [inf]  Database marker exists: YES
+2025-11-14T18:01:56.920184322Z [inf]  Already installed (profile_complete = COMPLETED)
+2025-11-14T18:01:56.920189890Z [inf]  ✅ Installation complete, all markers in place
+2025-11-14T18:01:57.785671856Z [inf]  
+2025-11-14T18:01:57.785700104Z [inf]  Verifying Laravel application...
+2025-11-14T18:01:57.785709522Z [inf]  Laravel Framework 12.12.0
+2025-11-14T18:01:57.785717590Z [inf]  Testing PHP bootstrap...
+2025-11-14T18:01:57.785779173Z [inf]  
+2025-11-14T18:01:57.785804333Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-14T18:01:57.999210547Z [inf]  
+2025-11-14T18:01:57.999221835Z [inf]    GET|HEAD        / ..................................................... home
+2025-11-14T18:01:57.999230926Z [inf]    GET|HEAD        admin/{vue?} ............................... admin.dashboard
+2025-11-14T18:01:57.999235889Z [inf]    GET|HEAD        api/ai/risk .................... AiSummaryController@getRisk
+2025-11-14T18:01:57.999240668Z [inf]    GET|HEAD        api/ai/summary .............. AiSummaryController@getSummary
+2025-11-14T18:01:58.032569646Z [inf]  Testing database connection...
+2025-11-14T18:01:58.800094620Z [inf]  DB OK
+2025-11-14T18:01:58.800100677Z [inf]  Enabling verbose PHP errors for debugging...
+2025-11-14T18:01:58.800144325Z [inf]  Testing home route...
+2025-11-14T18:01:59.162147260Z [inf]  Home route test passed
+2025-11-14T18:01:59.162156109Z [inf]  Validating nginx configuration...
+2025-11-14T18:01:59.171549063Z [inf]  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+2025-11-14T18:01:59.171554406Z [inf]  nginx: configuration file /etc/nginx/nginx.conf test is successful
+2025-11-14T18:01:59.174367796Z [inf]  Validating PHP-FPM configuration...
+2025-11-14T18:01:59.684504179Z [inf]  ✅ Final permissions set for www user
+2025-11-14T18:01:59.684514710Z [inf]  Starting application services in background...
+2025-11-14T18:01:59.684521888Z [inf]  Waiting for services to be ready...
+2025-11-14T18:01:59.684528949Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-14T18:01:59.684536217Z [err]    import pkg_resources
+2025-11-14T18:01:59.684543545Z [inf]  2025-11-14 18:01:59,435 INFO Set uid to user 0 succeeded
+2025-11-14T18:01:59.684550633Z [inf]  2025-11-14 18:01:59,437 INFO supervisord started with pid 118
+2025-11-14T18:01:59.684553695Z [inf]  [14-Nov-2025 18:01:59] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-11-14T18:01:59.684604562Z [inf]  
+2025-11-14T18:01:59.684626587Z [inf]  [14-Nov-2025 18:01:59] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-11-14T18:01:59.684637910Z [inf]  
+2025-11-14T18:01:59.684647494Z [inf]  Setting final permissions before starting services...
+2025-11-14T18:02:00.980378243Z [inf]  2025-11-14 18:02:00,442 INFO spawned: 'nginx' with pid 120
+2025-11-14T18:02:00.980388315Z [inf]  2025-11-14 18:02:00,445 INFO spawned: 'php-fpm' with pid 121
+2025-11-14T18:02:00.980396315Z [inf]  2025-11-14 18:02:00,447 INFO spawned: 'scheduler' with pid 122
+2025-11-14T18:02:00.980403919Z [err]  [14-Nov-2025 18:02:00] NOTICE: fpm is running, pid 121
+2025-11-14T18:02:00.980411215Z [err]  [14-Nov-2025 18:02:00] NOTICE: ready to handle connections
+2025-11-14T18:02:01.831165132Z [inf]  2025-11-14 18:02:01,827 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-14T18:02:01.831175216Z [inf]  2025-11-14 18:02:01,827 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-14T18:02:01.831182470Z [inf]  2025-11-14 18:02:01,827 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-14T18:02:04.783801628Z [inf]  Checking if PHP-FPM is listening on port 9000...
+2025-11-14T18:02:04.783809071Z [inf]  tcp        0      0 :::9000                 :::*                    LISTEN      
+2025-11-14T18:02:04.783815411Z [inf]  Checking if nginx is listening on port 8080...
+2025-11-14T18:02:04.783821773Z [inf]  tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      
+2025-11-14T18:02:04.783829095Z [inf]  Testing HTTP request through nginx/php-fpm...
+2025-11-14T18:02:04.974498196Z [err]  127.0.0.1 -  14/Nov/2025:18:02:04 +0000 "GET /index.php" 200
+2025-11-14T18:02:04.974510429Z [inf]  ✅ Health check passed (HTTP 200)
+2025-11-14T18:02:04.974517100Z [inf]  Testing home route through HTTP...
+2025-11-14T18:02:05.121234532Z [err]  127.0.0.1 -  14/Nov/2025:18:02:04 +0000 "GET /index.php" 200
+2025-11-14T18:02:05.121240914Z [inf]  ✅ Home route accessible (HTTP 200)
+2025-11-14T18:02:05.121245443Z [inf]  All startup checks complete. Supervisor running with PID 118
+2025-11-14T18:02:05.121253005Z [inf]  Application ready to serve requests.
+2025-11-14T18:02:25.119982549Z [err]  127.0.0.1 -  14/Nov/2025:18:02:15 +0000 "GET /index.php" 200
+2025-11-14T18:24:41.748531299Z [err]  127.0.0.1 -  14/Nov/2025:18:24:41 +0000 "GET /index.php" 302
+2025-11-14T18:24:41.748537961Z [err]  127.0.0.1 -  14/Nov/2025:18:24:41 +0000 "GET /index.php" 200
+2025-11-14T18:24:44.691554338Z [err]  127.0.0.1 -  14/Nov/2025:18:24:44 +0000 "GET /index.php" 204
+2025-11-14T18:24:44.754839701Z [err]  127.0.0.1 -  14/Nov/2025:18:24:44 +0000 "POST /index.php" 302
+2025-11-14T18:24:45.006130785Z [err]  127.0.0.1 -  14/Nov/2025:18:24:44 +0000 "GET /index.php" 302
+2025-11-14T18:24:45.171994886Z [err]  127.0.0.1 -  14/Nov/2025:18:24:45 +0000 "GET /index.php" 200
+2025-11-14T18:24:45.722179508Z [err]  127.0.0.1 -  14/Nov/2025:18:24:45 +0000 "GET /index.php" 401
+2025-11-14T18:24:50.081921871Z [err]  127.0.0.1 -  14/Nov/2025:18:24:49 +0000 "GET /index.php" 302
+2025-11-14T18:24:50.230100686Z [err]  127.0.0.1 -  14/Nov/2025:18:24:50 +0000 "GET /index.php" 200
+2025-11-14T18:24:53.747617495Z [err]  127.0.0.1 -  14/Nov/2025:18:24:53 +0000 "GET /index.php" 204
+2025-11-14T18:24:54.138778185Z [err]  127.0.0.1 -  14/Nov/2025:18:24:53 +0000 "POST /index.php" 302
+2025-11-14T18:24:54.239487055Z [err]  127.0.0.1 -  14/Nov/2025:18:24:54 +0000 "GET /index.php" 302
+2025-11-14T18:24:54.699677916Z [err]  127.0.0.1 -  14/Nov/2025:18:24:54 +0000 "GET /index.php" 401
+2025-11-14T18:24:54.699745358Z [err]  127.0.0.1 -  14/Nov/2025:18:24:54 +0000 "GET /index.php" 200
