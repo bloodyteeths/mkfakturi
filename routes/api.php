@@ -222,6 +222,11 @@ Route::prefix('/v1')->group(function () {
 
         Route::middleware(['bouncer'])->group(function () {
 
+            // Bootstrap
+            // ----------------------------------
+
+            Route::get('/bootstrap', BootstrapController::class);
+
             // Currencies
             // ----------------------------------
 

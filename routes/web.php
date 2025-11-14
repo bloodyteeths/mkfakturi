@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\V1\Admin\Auth\LoginController;
 use App\Http\Controllers\V1\Admin\Expense\ShowReceiptController;
-use App\Http\Controllers\V1\Admin\General\BootstrapController;
 use App\Http\Controllers\V1\Admin\Report\BalanceSheetReportController;
 use App\Http\Controllers\V1\Admin\Report\CustomerSalesReportController;
 use App\Http\Controllers\V1\Admin\Report\ExpensesReportController;
@@ -52,12 +51,6 @@ Route::post('/{company:slug}/customer/login', CustomerLoginController::class);
 Route::post('/{company:slug}/customer/logout', function () {
     Auth::guard('customer')->logout();
 });
-
-// SPA Bootstrap for authenticated admin users
-// Uses web guard authentication (session-based)
-// Note: 'web' middleware group is already applied to all routes in web.php
-Route::get('/api/v1/bootstrap', BootstrapController::class)
-    ->middleware(['install', 'auth', 'company', 'bouncer']);
 
 // Report PDF & Expense Endpoints
 // ----------------------------------------------
