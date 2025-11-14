@@ -61,9 +61,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Web middleware runs after the default "web" group, ensuring that
         // the session is started before referral tracking or CSRF handling.
+        // Note: EncryptCookies and VerifyCsrfToken are already in web group and replaced below
         $middleware->web(append: [
-            \App\Http\Middleware\EncryptCookies::class,
-            \App\Http\Middleware\VerifyCsrfToken::class,
             \App\Http\Middleware\CaptureReferral::class, // Capture affiliate referral codes
         ]);
 
