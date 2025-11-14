@@ -26,6 +26,16 @@ router.beforeEach((to, from, next) => {
   let ability = to.meta.ability
   const { isAppLoaded } = globalStore
 
+  // Check for partner-only routes
+  if (to.meta.isPartner && isAppLoaded && userStore.currentUser) {
+    const isPartner = userStore.currentUser.account_type === 'accountant' || userStore.currentUser.is_partner
+    if (!isPartner) {
+      // Redirect non-partner users to admin dashboard
+      next({ name: 'dashboard' })
+      return
+    }
+  }
+
   // Don't check abilities until app is fully loaded AND abilities are populated
   if (ability && isAppLoaded && to.meta.requiresAuth && userStore.currentAbilities && userStore.currentAbilities.length > 0) {
     if (userStore.hasAbilities(ability)) {
@@ -46,3 +56,4 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
+// CLAUDE-CHECKPOINT

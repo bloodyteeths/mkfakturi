@@ -413,6 +413,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'navigation.billing',
+            'group' => 3,
+            'link' => '/admin/billing',
+            'icon' => 'CreditCardIcon',
+            'name' => 'Billing',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'navigation.modules',
             'group' => 3,
             'link' => '/admin/modules',
@@ -578,7 +588,6 @@ return [
 ];
 
 // LLM-CHECKPOINT
-
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT
 
 // LLM-CHECKPOINT

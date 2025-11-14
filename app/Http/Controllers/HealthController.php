@@ -27,6 +27,8 @@ class HealthController extends Controller
             'signer' => $this->checkSigner(),
             'bank_sync' => $this->checkBankSync(),
             'storage' => $this->checkStorage(),
+            'backup' => $this->checkBackup(),
+            'certificates' => $this->checkCertificates(),
         ];
 
         $healthy = !in_array(false, $checks, true);
@@ -84,6 +86,11 @@ class HealthController extends Controller
                 ->where('failed_at', '>=', Carbon::now()->subHour())
                 ->count();
 
+            // Check for stuck jobs (running > 10 minutes)
+            $stuckJobs = DB::table('jobs')
+                ->where('reserved_at', '<', Carbon::now()->subMinutes(10)->timestamp)
+                ->count();
+
             if ($pendingJobs > 10000) {
                 \Log::warning('Health check: Queue backlog too large', ['pending_jobs' => $pendingJobs]);
                 return false;
@@ -91,6 +98,11 @@ class HealthController extends Controller
 
             if ($recentFailedJobs > 100) {
                 \Log::warning('Health check: Too many recent failed jobs', ['failed_jobs_last_hour' => $recentFailedJobs]);
+                return false;
+            }
+
+            if ($stuckJobs > 0) {
+                \Log::warning('Health check: Stuck jobs detected', ['stuck_jobs' => $stuckJobs]);
                 return false;
             }
 
@@ -175,16 +187,95 @@ class HealthController extends Controller
     private function checkStorage(): bool
     {
         try {
+            // Test storage write/read
             $testFile = 'health_check_' . time() . '.txt';
             \Storage::put($testFile, 'health check');
             if (\Storage::exists($testFile)) {
                 \Storage::delete($testFile);
-                return true;
             }
-            return false;
+
+            // Check disk space
+            $storagePath = storage_path();
+            $free = disk_free_space($storagePath);
+            $total = disk_total_space($storagePath);
+            $percentFree = ($free / $total) * 100;
+
+            if ($percentFree < 10) {
+                \Log::warning('Health check: Low disk space', [
+                    'percent_free' => round($percentFree, 2),
+                    'free_gb' => round($free / 1024 / 1024 / 1024, 2)
+                ]);
+                return false;
+            }
+
+            return true;
         } catch (\Exception $e) {
             \Log::error('Health check: Storage failed', ['error' => $e->getMessage()]);
             return false;
+        }
+    }
+
+    /**
+     * Check backup health using Spatie Backup monitoring
+     */
+    private function checkBackup(): bool
+    {
+        try {
+            // Use Spatie Backup's built-in monitoring
+            $backupStatuses = \Spatie\Backup\Tasks\Monitor\BackupDestinationStatusFactory::createForMonitorConfig(
+                config('backup.monitor_backups')
+            );
+
+            foreach ($backupStatuses as $backupStatus) {
+                // Check if backup has health check failures
+                $healthCheckFailure = $backupStatus->getHealthCheckFailure();
+
+                if ($healthCheckFailure !== null) {
+                    \Log::warning('Health check: Backup health check failed', [
+                        'backup_name' => $backupStatus->backupDestination()->backupName(),
+                        'disk' => $backupStatus->backupDestination()->diskName(),
+                        'failure' => $healthCheckFailure->healthCheck()::class,
+                        'exception' => $healthCheckFailure->exception()?->getMessage(),
+                    ]);
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::warning('Health check: Backup monitoring failed', ['error' => $e->getMessage()]);
+            return true; // Don't fail health check for backup issues in new installations
+        }
+    }
+
+    /**
+     * Check certificates expiry
+     */
+    private function checkCertificates(): bool
+    {
+        try {
+            // Check if certificates table exists
+            if (!DB::getSchemaBuilder()->hasTable('certificates')) {
+                return true; // Table doesn't exist yet
+            }
+
+            // Check for expiring certificates (within 30 days)
+            $expiringCerts = DB::table('certificates')
+                ->where('expires_at', '<=', Carbon::now()->addDays(30))
+                ->where('expires_at', '>', Carbon::now())
+                ->count();
+
+            if ($expiringCerts > 0) {
+                \Log::warning('Health check: Certificates expiring soon', [
+                    'expiring_certificates' => $expiringCerts
+                ]);
+                return false;
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::warning('Health check: Certificate check failed', ['error' => $e->getMessage()]);
+            return true; // Don't fail health check if table doesn't exist
         }
     }
 
@@ -196,7 +287,7 @@ class HealthController extends Controller
         try {
             // Check if migrations are up to date
             $migrationStatus = \Artisan::call('migrate:status');
-            
+
             return response()->json([
                 'status' => 'ready',
                 'timestamp' => now()->toISOString(),
@@ -212,3 +303,4 @@ class HealthController extends Controller
         }
     }
 }
+// CLAUDE-CHECKPOINT

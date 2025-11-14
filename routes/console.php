@@ -43,6 +43,49 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
+    // Backup cleanup - runs daily at 1:00 AM
+    Schedule::command('backup:clean')
+        ->daily()
+        ->at('01:00')
+        ->runInBackground()
+        ->withoutOverlapping();
+
+    // Database and file backup - runs daily at 2:00 AM
+    Schedule::command('backup:run')
+        ->daily()
+        ->at('02:00')
+        ->runInBackground()
+        ->withoutOverlapping();
+
+    // Monitor backup health - runs every 6 hours
+    Schedule::command('backup:monitor')
+        ->everySixHours()
+        ->runInBackground()
+        ->withoutOverlapping();
+
+    // Certificate expiry check - runs daily at 8:00 AM
+    Schedule::command('certificates:check-expiry')
+        ->dailyAt('08:00')
+        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+
+    // Health check self-test - runs every hour
+    Schedule::call(function () {
+        try {
+            $response = \Http::timeout(30)->get(url('/health'));
+            if ($response->status() !== 200) {
+                \Log::error('Health check self-test failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Health check self-test exception', [
+                'error' => $e->getMessage()
+            ]);
+        }
+    })->hourly()
+        ->name('health-check-self-test');
+
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
     //     ->dailyAt('02:00')

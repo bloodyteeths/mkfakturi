@@ -130,6 +130,11 @@ const ConsoleHome = () => import('@/js/pages/console/ConsoleHome.vue')
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
 
+// Billing & Subscription
+const PricingPage = () => import('@/js/pages/pricing/Companies.vue')
+const BillingIndex = () => import('@/js/pages/billing/Index.vue')
+const BillingSuccess = () => import('@/js/pages/billing/Success.vue')
+
 export default [
   {
     path: '/installation',
@@ -551,6 +556,26 @@ export default [
         component: BankingDashboard,
       },
 
+      // Billing & Subscription
+      {
+        path: 'pricing',
+        name: 'pricing',
+        meta: { requiresAuth: false },
+        component: PricingPage,
+      },
+      {
+        path: 'billing',
+        name: 'billing.index',
+        meta: { requiresAuth: true },
+        component: BillingIndex,
+      },
+      {
+        path: 'billing/success',
+        name: 'billing.success',
+        meta: { requiresAuth: true },
+        component: BillingSuccess,
+      },
+
       // Reports
       {
         path: 'reports',
@@ -563,4 +588,5 @@ export default [
 ]
 
 // LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT
 

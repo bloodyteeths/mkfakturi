@@ -32,13 +32,8 @@ Route::get('/modules/styles/{style}', StyleController::class);
 
 Route::get('/modules/scripts/{script}', ScriptController::class);
 
-// Simple health endpoint for Railway and other load balancers
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now()->toIso8601String(),
-    ]);
-});
+// Health check endpoint - comprehensive system health monitoring
+Route::get('/health', [\App\Http\Controllers\HealthController::class, 'health']);
 
 // Admin Auth
 // ----------------------------------------------

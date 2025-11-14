@@ -17,8 +17,8 @@
               <router-link
                 :to="{ name: 'partner.dashboard' }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
-                :class="$route.name === 'partner.dashboard' 
-                  ? 'border-blue-500 text-gray-900' 
+                :class="$route.name === 'partner.dashboard'
+                  ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
                 Контролна Табла
@@ -26,12 +26,30 @@
               <router-link
                 :to="{ name: 'partner.clients' }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
-                :class="$route.name === 'partner.clients' 
-                  ? 'border-blue-500 text-gray-900' 
+                :class="$route.name === 'partner.clients'
+                  ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 v-if="userStore.hasAbilities('view-clients')"
               >
                 Клиенти
+              </router-link>
+              <router-link
+                :to="{ name: 'partner.referrals' }"
+                class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
+                :class="$route.name === 'partner.referrals'
+                  ? 'border-blue-500 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              >
+                Препораки
+              </router-link>
+              <router-link
+                :to="{ name: 'partner.payouts' }"
+                class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
+                :class="$route.name === 'partner.payouts'
+                  ? 'border-blue-500 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              >
+                Исплати
               </router-link>
             </div>
           </div>
@@ -76,4 +94,5 @@ const handleLogout = async () => {
   router.push({ name: 'partner.login' })
 }
 </script>
+<!-- CLAUDE-CHECKPOINT -->
 
