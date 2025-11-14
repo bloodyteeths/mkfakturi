@@ -53,7 +53,7 @@ use App\Http\Controllers\V1\Admin\Invoice\SendInvoicePreviewController;
 use App\Http\Controllers\V1\Admin\Item\ItemsController;
 use App\Http\Controllers\V1\Admin\Item\UnitsController;
 use App\Http\Controllers\V1\Admin\Mobile\AuthController as MobileAuthController;
-use App\Http\Controllers\V1\Admin\Auth\LoginController;
+use App\Http\Controllers\V1\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\V1\Admin\Modules\ApiTokenController;
 use App\Http\Controllers\V1\Admin\Modules\CompleteModuleInstallationController;
 use App\Http\Controllers\V1\Admin\Modules\CopyModuleController;
@@ -152,7 +152,7 @@ Route::prefix('/v1')->group(function () {
 
     Route::prefix('auth')->middleware('throttle:auth')->group(function () {
         // Web/SPA login - uses session authentication
-        Route::post('login', [LoginController::class, 'login']);
+        Route::post('login', [AdminLoginController::class, 'login']);
 
         // Mobile logout - uses token authentication
         Route::post('logout', [MobileAuthController::class, 'logout'])->middleware('auth:sanctum');
