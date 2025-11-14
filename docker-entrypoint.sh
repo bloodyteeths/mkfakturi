@@ -72,14 +72,9 @@ chmod -R 775 storage bootstrap/cache
 
 echo "✅ Permissions set for www user"
 
-# Configure nginx to listen on Railway's assigned PORT
-NGINX_PORT=${PORT:-80}
-if [ "$NGINX_PORT" != "80" ]; then
-    echo "Configuring nginx to listen on port $NGINX_PORT"
-    sed -i "s/listen 80;/listen ${NGINX_PORT};/" /etc/nginx/nginx.conf
-else
-    echo "Using default nginx port 80"
-fi
+# Always use nginx on port 80 inside the container.
+# Railway Metal Edge domain for the app must target port 80.
+echo "Using default nginx port 80 (ignoring PORT env)"
 
 # Clear caches
 echo "Clearing caches..."
