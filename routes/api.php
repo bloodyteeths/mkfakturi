@@ -249,7 +249,7 @@ Route::prefix('/v1')->group(function () {
             // Auth check
             // ----------------------------------
 
-            Route::get('/auth/check', [AuthController::class, 'check']);
+            Route::get('/auth/check', [MobileAuthController::class, 'check']);
 
             // Search users
             // ----------------------------------
