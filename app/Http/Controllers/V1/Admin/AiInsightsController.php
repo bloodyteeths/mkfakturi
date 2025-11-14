@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\GenerateAiInsights;
 use App\Models\Company;
 use App\Services\AiInsightsService;
 use Illuminate\Http\JsonResponse;
@@ -70,7 +69,7 @@ class AiInsightsController extends Controller
     }
 
     /**
-     * Generate AI insights (async via job queue)
+     * Generate AI insights (synchronous execution)
      *
      * POST /api/v1/ai/insights/generate
      *
@@ -90,30 +89,42 @@ class AiInsightsController extends Controller
         $this->authorize('view dashboard', $company);
 
         try {
-            // Dispatch async job for generation
-            GenerateAiInsights::dispatch($company);
-
-            Log::info('AI insights generation queued', [
+            // Execute synchronously instead of queuing to avoid queue processing issues
+            // In production, this ensures immediate execution regardless of queue configuration
+            Log::info('AI insights generation started (synchronous)', [
                 'company_id' => $company->id,
                 'user_id' => $request->user()->id,
             ]);
 
+            // Generate insights immediately
+            $insights = $this->aiService->analyzeFinancials($company);
+
+            Log::info('AI insights generated successfully', [
+                'company_id' => $company->id,
+                'insights_count' => count($insights['items'] ?? []),
+                'provider' => $insights['provider'] ?? null,
+                'model' => $insights['model'] ?? null,
+            ]);
+
             return response()->json([
-                'message' => 'AI insights generation started',
-                'status' => 'processing',
+                'message' => 'AI insights generation completed',
+                'status' => 'completed',
+                'insights_count' => count($insights['items'] ?? []),
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Failed to queue AI insights generation', [
+            Log::error('Failed to generate AI insights', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'error' => 'Failed to start insights generation',
+                'error' => 'Failed to generate insights',
                 'message' => $e->getMessage(),
             ], 500);
         }
+        // CLAUDE-CHECKPOINT
     }
 
     /**
