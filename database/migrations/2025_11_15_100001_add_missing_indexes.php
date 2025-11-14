@@ -43,11 +43,9 @@ return new class extends Migration
 
         // Some legacy databases may not have the user_id column on invoices.
         // Only create the index when the column exists to avoid SQL errors.
-        if (Schema::hasColumn('invoices', 'user_id')) {
-            Schema::table('invoices', function (Blueprint $table) use ($self) {
-                if (! $self->indexExists('invoices', 'idx_invoices_user')) {
-                    $table->index(['user_id'], 'idx_invoices_user');
-                }
+        if (Schema::hasColumn('invoices', 'user_id') && ! $this->indexExists('invoices', 'idx_invoices_user')) {
+            Schema::table('invoices', function (Blueprint $table) {
+                $table->index(['user_id'], 'idx_invoices_user');
             });
         }
 
@@ -200,18 +198,10 @@ return new class extends Migration
 
         // Invoices
         Schema::table('invoices', function (Blueprint $table) {
-            if ($this->indexExists('invoices', 'idx_invoices_company_date')) {
-                $table->dropIndex('idx_invoices_company_date');
-            }
-            if ($this->indexExists('invoices', 'idx_invoices_company_due_status')) {
-                $table->dropIndex('idx_invoices_company_due_status');
-            }
-            if ($this->indexExists('invoices', 'idx_invoices_status')) {
-                $table->dropIndex('idx_invoices_status');
-            }
-            if ($this->indexExists('invoices', 'idx_invoices_user')) {
-                $table->dropIndex('idx_invoices_user');
-            }
+            $table->dropIndex('idx_invoices_company_date');
+            $table->dropIndex('idx_invoices_company_due_status');
+            $table->dropIndex('idx_invoices_status');
+            $table->dropIndex('idx_invoices_user');
         });
 
         // Customers
