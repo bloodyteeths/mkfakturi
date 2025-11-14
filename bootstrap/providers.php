@@ -7,7 +7,7 @@ return [
     App\Providers\FeatureFlagServiceProvider::class,
     App\Providers\PDFServiceProvider::class,
     App\Providers\PrometheusServiceProvider::class,
-    // RouteServiceProvider removed - routing handled in bootstrap/app.php (Laravel 12)
+    App\Providers\RouteServiceProvider::class, // Re-enabled for rate limiter configuration
     // Enabled only when FEATURE_MONITORING is true (via service provider check)
     App\Providers\TelescopeServiceProvider::class,
     App\Providers\ViewServiceProvider::class,

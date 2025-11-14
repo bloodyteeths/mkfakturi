@@ -38,23 +38,8 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
-        $this->routes(function () {
-            Route::prefix('api')
-                ->middleware('api')
-                ->group(base_path('routes/api.php'));
-
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
-
-            // Webhook routes (without CSRF protection)
-            Route::middleware('web')
-                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
-                ->group(base_path('routes/webhooks.php'));
-
-            // Partner Portal routes
-            Route::middleware('web')
-                ->group(base_path('routes/partner.php'));
-        });
+        // Note: Route registration moved to bootstrap/app.php (Laravel 11 style)
+        // This provider now only handles rate limiting configuration
     }
 
     /**
