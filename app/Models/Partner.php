@@ -123,6 +123,14 @@ class Partner extends Model
     }
 
     /**
+     * Get KYC documents for this partner
+     */
+    public function kycDocuments(): HasMany
+    {
+        return $this->hasMany(KycDocument::class);
+    }
+
+    /**
      * Get the effective commission rate for this partner
      * (considers Partner Plus status)
      */

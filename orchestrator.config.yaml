@@ -1,0 +1,16 @@
+# Orchestrator configuration template
+
+repo_path: "<ABSOLUTE_OR_RELATIVE_REPO_PATH>"   # e.g., /Users/you/path/to/repo
+model: "gpt-4.1-mini"                           # Recommended: "gpt-4.1-mini" or "gpt-4.1"
+fallback_model: "gpt-4o-mini"                   # Optional fallback
+agent_count: 3                                  # Project Manager, Developer, Tester
+mode: "serial"                                  # "serial" or "parallel" (template supports serial)
+sandbox_mode: "workspace-write"                 # As requested
+approval_policy: "never"                        # As requested
+log_file: "LOG.md"                              # Central log file
+
+# Optional: tracing / logging flags, used by the orchestrator
+tracing:
+  enabled: true
+  verbose: false
+

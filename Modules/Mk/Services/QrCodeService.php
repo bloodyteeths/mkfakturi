@@ -2,9 +2,13 @@
 
 namespace Modules\Mk\Services;
 
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /**
  * QR Code Generation Service
@@ -280,12 +284,30 @@ class QrCodeService
 
             $margin = $margin ?? self::DEFAULT_MARGIN;
 
-            // Generate QR code using SimpleSoftwareIO\QrCode
-            $qr = QrCode::format($format)
-                ->size($size)
-                ->errorCorrection($errorCorrection)
-                ->margin($margin)
-                ->generate($data);
+            // Map error correction levels to bacon-qr-code v3
+            $ecLevel = match($errorCorrection) {
+                'L' => \BaconQrCode\Common\ErrorCorrectionLevel::L(),
+                'M' => \BaconQrCode\Common\ErrorCorrectionLevel::M(),
+                'Q' => \BaconQrCode\Common\ErrorCorrectionLevel::Q(),
+                'H' => \BaconQrCode\Common\ErrorCorrectionLevel::H(),
+                default => \BaconQrCode\Common\ErrorCorrectionLevel::M(),
+            };
+
+            // Generate QR code using bacon-qr-code v3
+            if ($format === 'svg') {
+                $renderer = new ImageRenderer(
+                    new RendererStyle($size, $margin, null, null, $ecLevel),
+                    new SvgImageBackEnd()
+                );
+            } else { // png (ImagickImageBackEnd requires Imagick extension)
+                $renderer = new ImageRenderer(
+                    new RendererStyle($size, $margin, null, null, $ecLevel),
+                    new ImagickImageBackEnd()
+                );
+            }
+
+            $writer = new Writer($renderer);
+            $qr = $writer->writeString($data);
 
             Log::debug('QR code generated', [
                 'format' => $format,

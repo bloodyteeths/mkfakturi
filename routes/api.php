@@ -670,7 +670,8 @@ Route::prefix('/v1')->group(function () {
             // Feature flag: FEATURE_PSD2_BANKING
             // ----------------------------------
 
-            Route::prefix('banking')->group(function () {
+            // FG-01-20: Banking operations require Business+ tier (PSD2 connections)
+            Route::prefix('banking')->middleware('tier:business')->group(function () {
                 // Bank account management
                 Route::get('/accounts', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'accounts']);
                 Route::get('/transactions', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'transactions']);
@@ -685,7 +686,8 @@ Route::prefix('/v1')->group(function () {
             // Bank Connections (Phase 3)
             // ----------------------------------
 
-            Route::prefix('bank')->group(function () {
+            // FG-01-21: Bank connections require Business+ tier
+            Route::prefix('bank')->middleware('tier:business')->group(function () {
                 // OAuth flow
                 Route::post('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class, 'start']);
 
@@ -700,7 +702,8 @@ Route::prefix('/v1')->group(function () {
             // Reconciliation (Phase 3)
             // ----------------------------------
 
-            Route::prefix('reconciliation')->group(function () {
+            // FG-01-22: Automatic reconciliation requires Business+ tier
+            Route::prefix('reconciliation')->middleware('tier:business')->group(function () {
                 Route::get('/auto-matched', [\App\Http\Controllers\ReconciliationController::class, 'autoMatched']);
                 Route::get('/suggested', [\App\Http\Controllers\ReconciliationController::class, 'suggested']);
                 Route::get('/manual', [\App\Http\Controllers\ReconciliationController::class, 'manual']);

@@ -4,6 +4,8 @@ import DashboardChart from '../dashboard/DashboardChart.vue'
 import DashboardTable from '../dashboard/DashboardTable.vue'
 import AiInsightsWidget from './widgets/AiInsightsWidget.vue'
 import AiChatWidget from './widgets/AiChatWidget.vue'
+import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
+import OverdueInvoicesWidget from './widgets/OverdueInvoicesWidget.vue'
 import BankStatus from '@/scripts/components/widgets/BankStatus.vue'
 import VatStatus from '@/scripts/components/widgets/VatStatus.vue'
 import CertExpiry from '@/scripts/components/widgets/CertExpiry.vue'
@@ -47,9 +49,16 @@ onMounted(() => {
 
 <template>
   <BasePage>
+    <!-- Top Stats Cards (always visible) -->
     <DashboardStats />
 
-    <!-- Main Chart -->
+    <!-- Quick Actions & Overdue Alerts Row (Mobile: stack, Desktop: side-by-side) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <QuickActionsWidget />
+      <OverdueInvoicesWidget />
+    </div>
+
+    <!-- Main Revenue Chart (full width) -->
     <div class="mb-6">
       <DashboardChart />
     </div>
@@ -60,13 +69,14 @@ onMounted(() => {
       <AiChatWidget />
     </div>
 
-    <!-- Status Widgets Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Status Widgets Section (Mobile: stack, Tablet: 2 cols, Desktop: 3 cols) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       <BankStatus />
       <VatStatus />
       <CertExpiry />
     </div>
 
+    <!-- Recent Invoices Table -->
     <DashboardTable />
   </BasePage>
 </template>
