@@ -10,15 +10,15 @@ const copy = {
     popularBadge: 'Популарно',
     recommendedBadge: 'Препорачано',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['5 фактури/месец', '1 корисник', 'PDF извоз', 'Основни шаблони'] },
-      { name: 'Starter', price: '€12', period: '/месец', bullets: ['50 фактури/месец', '1 корисник', 'Неограничено клиенти', 'Email фактури'] },
+      { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['5 фактури/месец', '1 корисник', 'PDF извоз', 'Основни шаблони'], popular: false },
+      { name: 'Starter', price: '€12', period: '/месец', bullets: ['50 фактури/месец', '1 корисник', 'Неограничено клиенти', 'Email фактури'], popular: false },
       { name: 'Standard', price: '€29', period: '/месец', bullets: ['200 фактури/месец', '3 корисници', 'Е‑Фактура испраќање', 'QES потпис', 'AI увоз'], popular: true },
-      { name: 'Business', price: '€59', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', 'Авто-категоризација', 'Full AI увоз'] },
-      { name: 'Max', price: '€149', period: '/месец', bullets: ['Се неограничено', 'API пристап', 'Мулти-локации', 'IFRS извештаи', 'WhatsApp поддршка'] }
+      { name: 'Business', price: '€59', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', 'Авто-категоризација', 'Full AI увоз'], popular: false },
+      { name: 'Max', price: '€149', period: '/месец', bullets: ['Се неограничено', 'API пристап', 'Мулти-локации', 'IFRS извештаи', 'WhatsApp поддршка'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Партнер портал', '20% рекурентна провизија', 'Следење на заработка'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/месец', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'] }
+      { name: 'Partner Plus', price: '€29', period: '/месec', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
     ],
     cta: 'Започни сега',
     ctaPartner: 'Придружи се'
@@ -31,15 +31,15 @@ const copy = {
     popularBadge: 'Popullor',
     recommendedBadge: 'I rekomanduar',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['5 fatura/muaj', '1 përdorues', 'Eksport PDF', 'Shabllone bazë'] },
-      { name: 'Starter', price: '€12', period: '/muaj', bullets: ['50 fatura/muaj', '1 përdorues', 'Klientë të pakufizuar', 'Email fatura'] },
+      { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['5 fatura/muaj', '1 përdorues', 'Eksport PDF', 'Shabllone bazë'], popular: false },
+      { name: 'Starter', price: '€12', period: '/muaj', bullets: ['50 fatura/muaj', '1 përdorues', 'Klientë të pakufizuar', 'Email fatura'], popular: false },
       { name: 'Standard', price: '€29', period: '/muaj', bullets: ['200 fatura/muaj', '3 përdorues', 'Dërgim e‑Faturë', 'Nënshkrim QES', 'Import AI'], popular: true },
-      { name: 'Business', price: '€59', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', 'Auto-kategorizim', 'Import AI i plotë'] },
-      { name: 'Max', price: '€149', period: '/muaj', bullets: ['Çdo gjë e pakufizuar', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS', 'Suport WhatsApp'] }
+      { name: 'Business', price: '€59', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', 'Auto-kategorizim', 'Import AI i plotë'], popular: false },
+      { name: 'Max', price: '€149', period: '/muaj', bullets: ['Çdo gjë e pakufizuar', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS', 'Suport WhatsApp'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portal partneri', 'Komision 20% rekurent', 'Ndjekje fitimesh'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'] }
+      { name: 'Partner Plus', price: '€29', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
     ],
     cta: 'Fillo tani',
     ctaPartner: 'Bashkohu'
@@ -52,15 +52,15 @@ const copy = {
     popularBadge: 'Popüler',
     recommendedBadge: 'Önerilen',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/süresiz', bullets: ['5 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', 'Temel şablonlar'] },
-      { name: 'Starter', price: '€12', period: '/ay', bullets: ['50 fatura/ay', '1 kullanıcı', 'Sınırsız müşteri', 'Email fatura'] },
+      { name: 'Free', price: '€0', period: '/süresiz', bullets: ['5 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', 'Temel şablonlar'], popular: false },
+      { name: 'Starter', price: '€12', period: '/ay', bullets: ['50 fatura/ay', '1 kullanıcı', 'Sınırsız müşteri', 'Email fatura'], popular: false },
       { name: 'Standard', price: '€29', period: '/ay', bullets: ['200 fatura/ay', '3 kullanıcı', 'e‑Fatura gönderim', 'QES imza', 'AI içe aktarma'], popular: true },
-      { name: 'Business', price: '€59', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', 'Otomatik kategorizasyon', 'Tam AI içe aktarma'] },
-      { name: 'Max', price: '€149', period: '/ay', bullets: ['Her şey sınırsız', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları', 'WhatsApp destek'] }
+      { name: 'Business', price: '€59', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', 'Otomatik kategorizasyon', 'Tam AI içe aktarma'], popular: false },
+      { name: 'Max', price: '€149', period: '/ay', bullets: ['Her şey sınırsız', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları', 'WhatsApp destek'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Partner portalı', '%20 tekrarlayan komisyon', 'Kazanç takibi'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'] }
+      { name: 'Partner Plus', price: '€29', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
     ],
     cta: 'Şimdi başla',
     ctaPartner: 'Katıl'
