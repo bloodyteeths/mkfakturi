@@ -15,8 +15,10 @@ export function middleware(request: Request) {
   const { pathname } = url
 
   // 1) Canonical domain: redirect www.facturino.mk -> facturino.mk (301)
+  //    Guarded by env to avoid redirect until apex DNS is live.
+  const enableCanonical = process.env.NEXT_CANONICAL_APEX === 'true'
   const host = (request.headers.get('host') || '').toLowerCase()
-  if (host === 'www.facturino.mk') {
+  if (enableCanonical && host === 'www.facturino.mk') {
     url.hostname = 'facturino.mk'
     return NextResponse.redirect(url, 301)
   }
