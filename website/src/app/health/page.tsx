@@ -16,6 +16,7 @@ interface HealthCheck {
     storage: boolean;
     backup: boolean;
     certificates: boolean;
+    paddle: boolean;
   };
 }
 
@@ -83,6 +84,7 @@ export default function HealthMonitoring() {
       storage: 'Storage',
       backup: 'Backup Status',
       certificates: 'Certificates',
+      paddle: 'Paddle Billing',
     };
     return labels[key] || key;
   };

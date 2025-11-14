@@ -930,14 +930,14 @@ Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(funct
 
 // Partner Portal Routes
 // ----------------------------------
-Route::middleware(['auth:sanctum'])->prefix('partner')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('partner')->group(function () {
     Route::get('/dashboard', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'index']);
     Route::get('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'index']);
-    Route::post('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'store']);
+    Route::post('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'store'])->middleware('throttle:strict');
     Route::get('/clients', [\Modules\Mk\Partner\Controllers\PartnerClientsController::class, 'index']);
     Route::get('/payouts', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'index']);
     Route::get('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'getBankDetails']);
-    Route::post('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'updateBankDetails']);
+    Route::post('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'updateBankDetails'])->middleware('throttle:strict');
     Route::get('/payouts/{payout}/receipt', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'downloadReceipt']);
 });
 

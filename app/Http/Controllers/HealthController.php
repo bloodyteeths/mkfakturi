@@ -29,6 +29,7 @@ class HealthController extends Controller
             'storage' => $this->checkStorage(),
             'backup' => $this->checkBackup(),
             'certificates' => $this->checkCertificates(),
+            'paddle' => $this->checkPaddleConfig(),
         ];
 
         $healthy = !in_array(false, $checks, true);
@@ -276,6 +277,64 @@ class HealthController extends Controller
         } catch (\Exception $e) {
             \Log::warning('Health check: Certificate check failed', ['error' => $e->getMessage()]);
             return true; // Don't fail health check if table doesn't exist
+        }
+    }
+
+    /**
+     * Check Paddle billing configuration
+     */
+    private function checkPaddleConfig(): bool
+    {
+        try {
+            // Check required Paddle configuration variables
+            $required = [
+                'cashier.seller_id',
+                'cashier.api_key',
+                'cashier.public_key',
+                'cashier.webhook.secret',
+            ];
+
+            foreach ($required as $configKey) {
+                $value = config($configKey);
+                if (empty($value)) {
+                    \Log::warning('Health check: Missing Paddle configuration', [
+                        'config_key' => $configKey
+                    ]);
+                    return false;
+                }
+            }
+
+            // Test Paddle API connection (if not in local environment)
+            if (config('app.env') !== 'local' && config('app.env') !== 'testing') {
+                try {
+                    $response = \Http::withToken(config('cashier.api_key'))
+                        ->timeout(5)
+                        ->get('https://api.paddle.com/products', [
+                            'per_page' => 1
+                        ]);
+
+                    if (!$response->successful()) {
+                        \Log::warning('Health check: Paddle API connection failed', [
+                            'status' => $response->status(),
+                            'response' => $response->body()
+                        ]);
+                        return false;
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Health check: Paddle API connection error', [
+                        'error' => $e->getMessage()
+                    ]);
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::warning('Health check: Paddle configuration check failed', [
+                'error' => $e->getMessage()
+            ]);
+            // Don't fail health check if Paddle isn't configured yet
+            return true;
         }
     }
 

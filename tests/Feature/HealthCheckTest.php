@@ -35,6 +35,7 @@ class HealthCheckTest extends TestCase
                 'storage',
                 'backup',
                 'certificates',
+                'paddle',
             ],
         ]);
     }
@@ -109,6 +110,7 @@ class HealthCheckTest extends TestCase
         $this->assertArrayHasKey('storage', $data['checks']);
         $this->assertArrayHasKey('backup', $data['checks']);
         $this->assertArrayHasKey('certificates', $data['checks']);
+        $this->assertArrayHasKey('paddle', $data['checks']);
     }
 
     /**
