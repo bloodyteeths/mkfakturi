@@ -16,12 +16,16 @@ class VerifyCsrfToken extends Middleware
     /**
      * The URIs that should be excluded from CSRF verification.
      *
+     * Security Note: Only external callbacks that cannot provide CSRF tokens
+     * should be listed here. All internal forms and API calls must use CSRF protection.
+     *
      * @var array
      */
     protected $except = [
         'login',
-        'webhooks/*', // All webhook routes are excluded from CSRF
+        'webhooks/*', // All webhook routes (Paddle, CPAY, Bank webhooks)
         'payment/cpay/callback', // CPAY payment callback
+        'api/webhooks/*', // API webhook endpoints
     ];
 }
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: CSRF protection configured - webhooks properly exempted

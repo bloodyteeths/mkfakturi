@@ -149,22 +149,22 @@ Route::prefix('/v1')->group(function () {
     // Authentication & Password Reset
     // ----------------------------------
 
-    Route::prefix('auth')->group(function () {
+    Route::prefix('auth')->middleware('throttle:auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
 
         Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
         // Send reset password mail
-        Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:10,2');
+        Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 
         // handle reset password form process
         Route::post('reset/password', [ResetPasswordController::class, 'reset']);
     });
 
-    // Countries
+    // Countries (public route)
     // ----------------------------------
 
-    Route::get('/countries', CountriesController::class);
+    Route::get('/countries', CountriesController::class)->middleware('throttle:public');
 
     // Banking OAuth Callback (public route - no auth required)
     // ----------------------------------
@@ -275,7 +275,7 @@ Route::prefix('/v1')->group(function () {
             // Customers
             // ----------------------------------
 
-            Route::post('/customers/delete', [CustomersController::class, 'delete']);
+            Route::post('/customers/delete', [CustomersController::class, 'delete'])->middleware('throttle:strict');
 
             Route::get('customers/{customer}/stats', CustomerStatsController::class);
 
@@ -284,7 +284,7 @@ Route::prefix('/v1')->group(function () {
             // Items
             // ----------------------------------
 
-            Route::post('/items/delete', [ItemsController::class, 'delete']);
+            Route::post('/items/delete', [ItemsController::class, 'delete'])->middleware('throttle:strict');
 
             Route::resource('items', ItemsController::class);
 
@@ -305,7 +305,7 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/invoices/{invoice}/payment/cpay', [InvoicesController::class, 'initiateCpayPayment']);
 
-            Route::post('/invoices/delete', [InvoicesController::class, 'delete']);
+            Route::post('/invoices/delete', [InvoicesController::class, 'delete'])->middleware('throttle:strict');
 
             Route::get('/invoices/templates', InvoiceTemplatesController::class);
 
@@ -348,7 +348,7 @@ Route::prefix('/v1')->group(function () {
 
             Route::get('/estimates/templates', EstimateTemplatesController::class);
 
-            Route::post('/estimates/delete', [EstimatesController::class, 'delete']);
+            Route::post('/estimates/delete', [EstimatesController::class, 'delete'])->middleware('throttle:strict');
 
             Route::apiResource('estimates', EstimatesController::class);
 
@@ -359,7 +359,7 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/expenses/{expense}/upload/receipts', UploadReceiptController::class);
 
-            Route::post('/expenses/delete', [ExpensesController::class, 'delete']);
+            Route::post('/expenses/delete', [ExpensesController::class, 'delete'])->middleware('throttle:strict');
 
             Route::apiResource('expenses', ExpensesController::class);
 
@@ -391,7 +391,7 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/payments/{payment}/send', SendPaymentController::class);
 
-            Route::post('/payments/delete', [PaymentsController::class, 'delete']);
+            Route::post('/payments/delete', [PaymentsController::class, 'delete'])->middleware('throttle:strict');
 
             Route::apiResource('payments', PaymentsController::class);
 
@@ -914,23 +914,23 @@ Route::prefix('webhooks')->group(function () {
 // ----------------------------------
 Route::middleware(['auth:sanctum'])->prefix('companies/{company}/subscription')->group(function () {
     Route::get('/', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');
-    Route::post('/checkout', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'checkout'])->name('subscription.checkout');
+    Route::post('/checkout', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'checkout'])->name('subscription.checkout')->middleware('throttle:strict');
     Route::get('/success', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'success'])->name('subscription.success');
     Route::get('/manage', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'manage'])->name('subscription.manage');
-    Route::post('/swap', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'swap'])->name('subscription.swap');
-    Route::post('/cancel', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'cancel'])->name('subscription.cancel');
-    Route::post('/resume', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'resume'])->name('subscription.resume');
+    Route::post('/swap', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'swap'])->name('subscription.swap')->middleware('throttle:strict');
+    Route::post('/cancel', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'cancel'])->name('subscription.cancel')->middleware('throttle:strict');
+    Route::post('/resume', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'resume'])->name('subscription.resume')->middleware('throttle:strict');
 });
 
 // Partner Plus Subscription Routes (B-31-04)
 // ----------------------------------
 Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(function () {
     Route::get('/', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'index'])->name('partner.subscription.index');
-    Route::post('/checkout', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'checkout'])->name('partner.subscription.checkout');
+    Route::post('/checkout', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'checkout'])->name('partner.subscription.checkout')->middleware('throttle:strict');
     Route::get('/success', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'success'])->name('partner.subscription.success');
     Route::get('/manage', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'manage'])->name('partner.subscription.manage');
-    Route::post('/cancel', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'cancel'])->name('partner.subscription.cancel');
-    Route::post('/resume', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'resume'])->name('partner.subscription.resume');
+    Route::post('/cancel', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'cancel'])->name('partner.subscription.cancel')->middleware('throttle:strict');
+    Route::post('/resume', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'resume'])->name('partner.subscription.resume')->middleware('throttle:strict');
 });
 
 // Partner Portal Routes
@@ -950,4 +950,5 @@ Route::middleware(['auth:sanctum'])->prefix('partner')->group(function () {
 Route::middleware(['auth:sanctum'])->prefix('ai')->group(function () {
     Route::get('/summary', [App\Http\Controllers\AiSummaryController::class, 'getSummary']);
     Route::get('/risk', [App\Http\Controllers\AiSummaryController::class, 'getRisk']);
-}); // CLAUDE-CHECKPOINT: Added subscription routes
+});
+// CLAUDE-CHECKPOINT: Rate limiting applied - auth:5/min, public:30/min, strict:10/min for sensitive operations

@@ -62,8 +62,25 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
+        // General API rate limit: 60 requests/minute per user or IP
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60);
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Strict rate limit for sensitive operations: 10 requests/minute
+        RateLimiter::for('strict', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Public routes rate limit: 30 requests/minute per IP
+        RateLimiter::for('public', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip());
+        });
+
+        // Auth routes: 5 login attempts per minute per IP
+        RateLimiter::for('auth', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
         });
     }
+    // CLAUDE-CHECKPOINT
 }

@@ -15,7 +15,11 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    storage_path('app/certificates'), // QES certificates
+                    storage_path('app/public/uploads'), // User uploads
+                    base_path('.env'), // Environment configuration
+                    storage_path('logs'), // Application logs
+                    base_path('config'), // Configuration files
                 ],
 
                 /*
@@ -26,6 +30,10 @@ return [
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
+                    storage_path('framework/cache'),
+                    storage_path('framework/sessions'),
+                    storage_path('framework/views'),
+                    storage_path('app/backup-temp'),
                 ],
 
                 /*
@@ -36,14 +44,14 @@ return [
                 /*
                  * Determines if it should avoid unreadable folders.
                  */
-                'ignore_unreadable_directories' => false,
+                'ignore_unreadable_directories' => true,
 
                 /*
                  * This path is used to make directories in resulting zip-file relative
                  * Set to `null` to include complete absolute path
                  * Example: base_path()
                  */
-                'relative_path' => null,
+                'relative_path' => base_path(),
             ],
 
             /*
@@ -149,9 +157,12 @@ return [
 
             /*
              * The disk names on which the backups will be stored.
+             * Facturino: Store backups locally and optionally on S3 if configured
              */
             'disks' => [
                 'local',
+                // Add 's3' if AWS credentials are configured in .env
+                // env('AWS_BUCKET') ? 's3' : null,
             ],
         ],
 
@@ -211,11 +222,11 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('BACKUP_NOTIFICATION_EMAIL', env('MAIL_FROM_ADDRESS', 'admin@facturino.mk')),
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-                'name' => env('MAIL_FROM_NAME', 'Example'),
+                'address' => env('MAIL_FROM_ADDRESS', 'noreply@facturino.mk'),
+                'name' => env('MAIL_FROM_NAME', 'Facturino Backups'),
             ],
         ],
 
@@ -254,11 +265,11 @@ return [
      */
     'monitor_backups' => [
         [
-            'name' => env('APP_NAME', 'laravel-backup'),
+            'name' => env('APP_NAME', 'Facturino'),
             'disks' => ['local'],
             'health_checks' => [
-                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
-                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 5000,
+                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 2, // Alert if backup older than 2 days
+                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 10000, // Alert if backups exceed 10GB
             ],
         ],
 
@@ -289,6 +300,7 @@ return [
         'default_strategy' => [
             /*
              * The number of days for which backups must be kept.
+             * Facturino: Keep all backups for 7 days
              */
             'keep_all_backups_for_days' => 7,
 
@@ -296,27 +308,31 @@ return [
              * After the "keep_all_backups_for_days" period is over, the most recent backup
              * of that day will be kept. Older backups within the same day will be removed.
              * If you create backups only once a day, no backups will be removed yet.
+             * Facturino: Keep daily backups for 30 days (1 month)
              */
-            'keep_daily_backups_for_days' => 16,
+            'keep_daily_backups_for_days' => 30,
 
             /*
              * After the "keep_daily_backups_for_days" period is over, the most recent backup
              * of that week will be kept. Older backups within the same week will be removed.
              * If you create backups only once a week, no backups will be removed yet.
+             * Facturino: Keep weekly backups for 12 weeks (3 months)
              */
-            'keep_weekly_backups_for_weeks' => 8,
+            'keep_weekly_backups_for_weeks' => 12,
 
             /*
              * After the "keep_weekly_backups_for_weeks" period is over, the most recent backup
              * of that month will be kept. Older backups within the same month will be removed.
+             * Facturino: Keep monthly backups for 12 months (1 year)
              */
-            'keep_monthly_backups_for_months' => 4,
+            'keep_monthly_backups_for_months' => 12,
 
             /*
              * After the "keep_monthly_backups_for_months" period is over, the most recent backup
              * of that year will be kept. Older backups within the same year will be removed.
+             * Facturino: Keep yearly backups for 3 years
              */
-            'keep_yearly_backups_for_years' => 2,
+            'keep_yearly_backups_for_years' => 3,
 
             /*
              * After cleaning up the backups remove the oldest backup until
