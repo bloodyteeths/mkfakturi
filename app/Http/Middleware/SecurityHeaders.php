@@ -56,8 +56,9 @@ class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
-        // Prevent information leakage via Referer header
-        $response->headers->set('Referrer-Policy', 'no-referrer');
+        // Use a strict referrer policy that still allows Sanctum
+        // to detect same-origin frontend requests for stateful auth
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
         // Feature Policy / Permissions Policy
         // Disable unnecessary browser features
