@@ -34,6 +34,20 @@ Route::get('/modules/scripts/{script}', ScriptController::class);
 // Health check endpoint - comprehensive system health monitoring
 Route::get('/health', [\App\Http\Controllers\HealthController::class, 'health']);
 
+// DEBUG: Temporary debug endpoint to check auth state
+Route::get('/debug-auth', function () {
+    return response()->json([
+        'authenticated' => auth()->check(),
+        'user_id' => auth()->id(),
+        'guard' => auth()->getDefaultDriver(),
+        'session_id' => session()->getId(),
+        'session_driver' => config('session.driver'),
+        'sanctum_stateful' => config('sanctum.stateful'),
+        'app_url' => config('app.url'),
+        'session_domain' => config('session.domain'),
+    ]);
+})->middleware(['web']);
+
 // Admin Auth
 // ----------------------------------------------
 
