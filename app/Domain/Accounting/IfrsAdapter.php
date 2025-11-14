@@ -891,11 +891,25 @@ class IfrsAdapter
         // Try 1: Get the company's currency from settings
         $appCurrencyId = CompanySetting::getSetting('currency', $companyId);
 
+        Log::info("getCurrencyId: Step 1 - CompanySetting lookup", [
+            'company_id' => $companyId,
+            'app_currency_id' => $appCurrencyId,
+        ]);
+
         // Try 2: If not in settings, check the company's invoices (migrated companies)
         if (!$appCurrencyId) {
             $invoice = Invoice::where('company_id', $companyId)->whereNotNull('currency_id')->first();
             if ($invoice) {
                 $appCurrencyId = $invoice->currency_id;
+                Log::info("getCurrencyId: Step 2 - Found currency from invoice", [
+                    'company_id' => $companyId,
+                    'invoice_id' => $invoice->id,
+                    'app_currency_id' => $appCurrencyId,
+                ]);
+            } else {
+                Log::warning("getCurrencyId: Step 2 - No invoices with currency found", [
+                    'company_id' => $companyId,
+                ]);
             }
         }
 
@@ -912,19 +926,38 @@ class IfrsAdapter
                         'name' => $appCurrency->name,
                         'currency_code' => $appCurrency->code,
                     ]);
+                    Log::info("getCurrencyId: Created new IFRS currency", [
+                        'ifrs_currency_id' => $ifrsCurrency->id,
+                        'code' => $appCurrency->code,
+                    ]);
                 }
 
+                Log::info("getCurrencyId: Returning IFRS currency", [
+                    'ifrs_currency_id' => $ifrsCurrency->id,
+                    'code' => $appCurrency->code,
+                ]);
                 return $ifrsCurrency->id;
+            } else {
+                Log::error("getCurrencyId: App currency not found", [
+                    'app_currency_id' => $appCurrencyId,
+                ]);
             }
         }
 
         // Fallback: Return first IFRS currency or create default MKD
+        Log::warning("getCurrencyId: Using fallback - first IFRS currency or MKD", [
+            'company_id' => $companyId,
+        ]);
+
         $currency = \IFRS\Models\Currency::first();
 
         if (!$currency) {
             $currency = \IFRS\Models\Currency::create([
                 'name' => 'Macedonian Denar',
                 'currency_code' => 'MKD',
+            ]);
+            Log::info("getCurrencyId: Created fallback MKD currency", [
+                'ifrs_currency_id' => $currency->id,
             ]);
         }
 
