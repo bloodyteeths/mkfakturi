@@ -84,6 +84,10 @@ class AppServiceProvider extends ServiceProvider
         // Import/Migration Policy
         Gate::policy(\App\Models\ImportJob::class, \App\Policies\ImportJobPolicy::class);
 
+        // Support Ticketing Policy (PHASE 2 - TRACK 3: MILESTONE 3.1)
+        Gate::policy(\Coderflex\LaravelTicket\Models\Ticket::class, \App\Policies\TicketPolicy::class);
+        // CLAUDE-CHECKPOINT
+
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
         $this->bootAuth();

@@ -314,7 +314,16 @@ Route::prefix('/v1')->group(function () {
 
             Route::get('/invoices/templates', InvoiceTemplatesController::class);
 
-            Route::apiResource('invoices', InvoicesController::class);
+            // FG-01-00: Apply invoice limit middleware to creation only
+            // Note: store() creates new invoices, update() modifies existing ones
+            Route::post('/invoices', [InvoicesController::class, 'store'])
+                ->middleware('invoice-limit');
+
+            // Other invoice routes (without invoice-limit middleware)
+            Route::get('/invoices', [InvoicesController::class, 'index']);
+            Route::get('/invoices/{invoice}', [InvoicesController::class, 'show']);
+            Route::put('/invoices/{invoice}', [InvoicesController::class, 'update']);
+            Route::patch('/invoices/{invoice}', [InvoicesController::class, 'update']);
 
             // Credit Notes
             // -------------------------------------------------
@@ -584,7 +593,25 @@ Route::prefix('/v1')->group(function () {
 
             Route::apiResource('audit-logs', \App\Http\Controllers\V1\Admin\AuditLogs\AuditLogController::class)->only(['index', 'show']);
 
-// CLAUDE-CHECKPOINT
+            // Support Ticketing System
+            // TRACK 3: MILESTONE 3.1 - Customer Ticket Portal
+            // ----------------------------------
+
+            Route::prefix('support')->group(function () {
+                // Tickets
+                Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'index']);
+                Route::post('/tickets', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'store']);
+                Route::get('/tickets/{ticket}', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'show']);
+                Route::put('/tickets/{ticket}', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'update']);
+                Route::delete('/tickets/{ticket}', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'destroy']);
+
+                // Ticket Messages (Replies)
+                Route::get('/tickets/{ticket}/messages', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'index']);
+                Route::post('/tickets/{ticket}/messages', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'store']);
+                Route::put('/tickets/{ticket}/messages/{message}', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'update']);
+                Route::delete('/tickets/{ticket}/messages/{message}', [\App\Http\Controllers\V1\Admin\Support\TicketMessageController::class, 'destroy']);
+            });
+            // CLAUDE-CHECKPOINT
 
             // Roles
             // ----------------------------------
