@@ -86,6 +86,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\FeatureMiddleware::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'install' => \App\Http\Middleware\InstallationMiddleware::class,
+            'invoice-limit' => \App\Http\Middleware\CheckInvoiceLimit::class, // FG-01-00: Invoice limits
             'mcp.token' => \App\Http\Middleware\VerifyMcpToken::class,
             'partner' => \App\Http\Middleware\PartnerScopeMiddleware::class,
             'partner-scope' => \App\Http\Middleware\PartnerScopeMiddleware::class,
@@ -94,6 +95,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'performance' => \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
             'redirect-if-installed' => \App\Http\Middleware\RedirectIfInstalled::class,
             'redirect-if-unauthenticated' => \App\Http\Middleware\RedirectIfUnauthorized::class,
+            'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
         ]);
         // CLAUDE-CHECKPOINT
 
