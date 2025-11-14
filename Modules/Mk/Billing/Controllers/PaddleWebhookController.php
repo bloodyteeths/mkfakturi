@@ -5,6 +5,7 @@ namespace Modules\Mk\Billing\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
+use App\Services\CommissionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -249,39 +250,45 @@ class PaddleWebhookController extends CashierWebhookController
      */
     private function triggerCommissionCalculation(Company $company, array $paymentData): void
     {
-        // Get active partners for this company
-        $partners = $company->activePartners;
+        try {
+            $amount = $paymentData['total'] ?? 0;
+            $subscriptionId = $paymentData['subscription_id'] ?? null;
 
-        if ($partners->isEmpty()) {
-            return;
-        }
+            // Calculate month reference (YYYY-MM format)
+            $monthRef = now()->format('Y-m');
 
-        $amount = $paymentData['total'] ?? 0;
-        $currency = $paymentData['currency'] ?? 'EUR';
+            // Get the CommissionService
+            $commissionService = app(CommissionService::class);
 
-        foreach ($partners as $partner) {
-            // Calculate commission based on partner tier
-            $commissionRate = $partner->partner_subscription_tier === 'plus' ? 0.22 : 0.18;
-            $commissionAmount = $amount * $commissionRate;
+            // Record recurring commission
+            $result = $commissionService->recordRecurring(
+                $company->id,
+                $amount,
+                $monthRef,
+                $subscriptionId
+            );
 
-            // Create commission record (assuming CommissionService exists)
-            if (class_exists(\Modules\Mk\Services\CommissionService::class)) {
-                $commissionService = app(\Modules\Mk\Services\CommissionService::class);
-                $commissionService->recordCommission([
-                    'partner_id' => $partner->id,
+            if ($result['success']) {
+                Log::info('Commission recorded for Paddle subscription payment', [
                     'company_id' => $company->id,
-                    'amount' => $commissionAmount,
-                    'currency' => $currency,
-                    'transaction_id' => $paymentData['id'],
-                    'subscription_payment' => true,
+                    'amount' => $amount,
+                    'event_id' => $result['event_id'],
+                    'direct_commission' => $result['direct_commission'],
+                    'upline_commission' => $result['upline_commission'],
+                    'month_ref' => $monthRef,
+                ]);
+            } else {
+                Log::warning('Commission not recorded for Paddle payment', [
+                    'company_id' => $company->id,
+                    'reason' => $result['message'] ?? 'Unknown',
+                    'amount' => $amount,
                 ]);
             }
-
-            Log::info('Commission calculated for subscription payment', [
-                'partner_id' => $partner->id,
+        } catch (\Exception $e) {
+            Log::error('Failed to record commission for Paddle payment', [
                 'company_id' => $company->id,
-                'amount' => $commissionAmount,
-                'rate' => $commissionRate,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

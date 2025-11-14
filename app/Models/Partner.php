@@ -136,18 +136,24 @@ class Partner extends Model
 
     /**
      * Check if partner qualifies for Partner Plus status
+     * Checks both paid subscription AND company count
      */
     public function isPartnerPlus(): bool
     {
+        // First check if user has paid Partner Plus subscription
+        if ($this->user && $this->user->partner_subscription_tier === 'plus') {
+            return true;
+        }
+
+        // Alternative: auto-qualify based on performance metrics
         $minCompanies = config('affiliate.plus_tier_min_companies', 10);
         $activeCompaniesCount = $this->activeCompanies()->count();
 
-        if ($activeCompaniesCount < $minCompanies) {
-            return false;
+        if ($activeCompaniesCount >= $minCompanies) {
+            return true;
         }
 
-        // Additional checks can be added here (MRR, months of history, etc.)
-        return true;
+        return false;
     }
 
     /**

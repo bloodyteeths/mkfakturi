@@ -933,6 +933,19 @@ Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(funct
     Route::post('/resume', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'resume'])->name('partner.subscription.resume');
 });
 
+// Partner Portal Routes
+// ----------------------------------
+Route::middleware(['auth:sanctum'])->prefix('partner')->group(function () {
+    Route::get('/dashboard', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'index']);
+    Route::get('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'index']);
+    Route::post('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'store']);
+    Route::get('/clients', [\Modules\Mk\Partner\Controllers\PartnerClientsController::class, 'index']);
+    Route::get('/payouts', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'index']);
+    Route::get('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'getBankDetails']);
+    Route::post('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'updateBankDetails']);
+    Route::get('/payouts/{payout}/receipt', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'downloadReceipt']);
+});
+
 // AI Financial Assistant Routes
 Route::middleware(['auth:sanctum'])->prefix('ai')->group(function () {
     Route::get('/summary', [App\Http\Controllers\AiSummaryController::class, 'getSummary']);
