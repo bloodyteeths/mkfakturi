@@ -50,8 +50,9 @@ Route::get('/debug-auth', function () {
 
 // Admin Auth
 // ----------------------------------------------
-
-Route::post('login', [LoginController::class, 'login']);
+// NOTE: The /login route has been removed from web.php
+// Please use POST /api/v1/auth/login instead
+// This ensures login and bootstrap use the same Sanctum session handling
 
 Route::post('auth/logout', function () {
     Auth::guard('web')->logout();
