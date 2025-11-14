@@ -27,6 +27,15 @@ class BootstrapController extends Controller
      */
     public function __invoke(Request $request)
     {
+        \Log::info('Bootstrap controller reached', [
+            'authenticated' => auth()->check(),
+            'user_id' => auth()->id(),
+            'guard' => auth()->getDefaultDriver(),
+            'session_id' => session()->getId(),
+            'has_company_header' => $request->hasHeader('company'),
+            'company_header' => $request->header('company'),
+        ]);
+
         // Eager load user relationships to avoid N+1 queries
         $current_user = $request->user()->load([
             'currency',
