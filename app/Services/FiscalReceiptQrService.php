@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
 use RuntimeException;
 use Zxing\QrReader;
@@ -17,6 +18,11 @@ class FiscalReceiptQrService
     {
         // Ensure we have at least one supported image backend
         if (! extension_loaded('imagick') && ! extension_loaded('gd')) {
+            Log::error('FiscalReceiptQrService::decodeAndNormalize - No image backend available', [
+                'imagick_loaded' => extension_loaded('imagick'),
+                'gd_loaded' => extension_loaded('gd'),
+            ]);
+
             throw new RuntimeException('QR decoding requires Imagick or GD PHP extensions to be enabled on the server.');
         }
 

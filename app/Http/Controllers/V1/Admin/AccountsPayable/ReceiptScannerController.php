@@ -21,75 +21,108 @@ class ReceiptScannerController extends Controller
 {
     public function scan(ReceiptScanRequest $request, FiscalReceiptQrService $service): JsonResponse
     {
-        \Log::info('ReceiptScannerController::scan - Starting', [
-            'user_id' => auth()->id(),
-            'company_id' => $request->header('company'),
-            'has_file' => $request->hasFile('receipt'),
-            'file_size' => $request->hasFile('receipt') ? $request->file('receipt')->getSize() : null,
-            'file_mime' => $request->hasFile('receipt') ? $request->file('receipt')->getMimeType() : null,
-        ]);
-
-        $companyId = (int) $request->header('company');
-
-        $file = $request->file('receipt');
-
-        if (!$file) {
-            \Log::error('ReceiptScannerController::scan - No file uploaded');
-            return response()->json(['message' => 'No file uploaded'], 400);
-        }
-
-        \Log::info('ReceiptScannerController::scan - File details', [
-            'original_name' => $file->getClientOriginalName(),
-            'size_bytes' => $file->getSize(),
-            'size_kb' => round($file->getSize() / 1024, 2),
-            'size_mb' => round($file->getSize() / 1024 / 1024, 2),
-            'mime_type' => $file->getMimeType(),
-        ]);
-
-        $this->authorize('create', Expense::class);
-
-        $disk = config('filesystems.default', 'local');
-        $storedPath = $file->store('scanned-receipts/'.$companyId, ['disk' => $disk]);
-
         try {
-            $normalized = $service->decodeAndNormalize($file);
-        } catch (\Throwable $e) {
-            // Clean up stored file if QR decoding failed
-            Storage::disk($disk)->delete($storedPath);
-
-            \Log::error('ReceiptScannerController::scan - QR decode failed', [
+            \Log::info('ReceiptScannerController::scan - Starting', [
                 'user_id' => auth()->id(),
-                'company_id' => $companyId,
+                'company_id' => $request->header('company'),
+                'has_file' => $request->hasFile('receipt'),
+                'file_size' => $request->hasFile('receipt') ? $request->file('receipt')->getSize() : null,
+                'file_mime' => $request->hasFile('receipt') ? $request->file('receipt')->getMimeType() : null,
+            ]);
+
+            $companyId = (int) $request->header('company');
+
+            $file = $request->file('receipt');
+
+            if (! $file) {
+                \Log::error('ReceiptScannerController::scan - No file uploaded');
+
+                return response()->json(['message' => 'No file uploaded'], 400);
+            }
+
+            \Log::info('ReceiptScannerController::scan - File details', [
+                'original_name' => $file->getClientOriginalName(),
+                'size_bytes' => $file->getSize(),
+                'size_kb' => round($file->getSize() / 1024, 2),
+                'size_mb' => round($file->getSize() / 1024 / 1024, 2),
+                'mime_type' => $file->getMimeType(),
+            ]);
+
+            $this->authorize('create', Expense::class);
+
+            $disk = config('filesystems.default', 'local');
+            $storedPath = $file->store('scanned-receipts/'.$companyId, ['disk' => $disk]);
+
+            try {
+                $normalized = $service->decodeAndNormalize($file);
+            } catch (\Throwable $e) {
+                // Clean up stored file if QR decoding failed
+                Storage::disk($disk)->delete($storedPath);
+
+                \Log::error('ReceiptScannerController::scan - QR decode failed', [
+                    'user_id' => auth()->id(),
+                    'company_id' => $companyId,
+                    'error' => $e->getMessage(),
+                    'exception' => get_class($e),
+                ]);
+
+                // Also log to PHP error log so PaaS logs pick it up
+                error_log(sprintf(
+                    '[ReceiptScanner] QR decode failed for company %s: %s (%s:%d)',
+                    $companyId,
+                    $e->getMessage(),
+                    $e->getFile(),
+                    $e->getLine()
+                ));
+
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            $type = $normalized['type'] ?? 'cash';
+
+            if ($type === 'invoice') {
+                \Log::info('ReceiptScannerController::scan - Creating bill from receipt');
+                $bill = $this->createBillFromReceipt($normalized, $companyId, $storedPath, $request);
+                \Log::info('ReceiptScannerController::scan - Bill created successfully', ['bill_id' => $bill->id]);
+
+                return (new BillResource($bill))
+                    ->additional(['document_type' => 'bill'])
+                    ->response()
+                    ->setStatusCode(201);
+            }
+
+            \Log::info('ReceiptScannerController::scan - Creating expense from receipt');
+            $expense = $this->createExpenseFromReceipt($normalized, $companyId, $storedPath, $request);
+            \Log::info('ReceiptScannerController::scan - Expense created successfully', ['expense_id' => $expense->id]);
+
+            return (new ExpenseResource($expense))
+                ->additional(['document_type' => 'expense'])
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Throwable $e) {
+            \Log::error('ReceiptScannerController::scan - Unhandled exception', [
+                'user_id' => auth()->id(),
+                'company_id' => $request->header('company'),
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
             ]);
 
+            // Mirror into PHP error log so it appears in container logs
+            error_log(sprintf(
+                '[ReceiptScanner] Unhandled exception for company %s: %s (%s:%d)',
+                $request->header('company'),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
+
             return response()->json([
-                'message' => $e->getMessage(),
-            ], 422);
+                'message' => 'receipt_scan_failed',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
-
-        $type = $normalized['type'] ?? 'cash';
-
-        if ($type === 'invoice') {
-            \Log::info('ReceiptScannerController::scan - Creating bill from receipt');
-            $bill = $this->createBillFromReceipt($normalized, $companyId, $storedPath, $request);
-            \Log::info('ReceiptScannerController::scan - Bill created successfully', ['bill_id' => $bill->id]);
-
-            return (new BillResource($bill))
-                ->additional(['document_type' => 'bill'])
-                ->response()
-                ->setStatusCode(201);
-        }
-
-        \Log::info('ReceiptScannerController::scan - Creating expense from receipt');
-        $expense = $this->createExpenseFromReceipt($normalized, $companyId, $storedPath, $request);
-        \Log::info('ReceiptScannerController::scan - Expense created successfully', ['expense_id' => $expense->id]);
-
-        return (new ExpenseResource($expense))
-            ->additional(['document_type' => 'expense'])
-            ->response()
-            ->setStatusCode(201);
     }
 
     protected function createExpenseFromReceipt(array $data, int $companyId, string $storedPath, Request $request): Expense

@@ -33,6 +33,14 @@ export const useReceiptScannerStore = (useWindow = false) => {
             })
             .catch((err) => {
               this.isScanning = false
+              // Surface more detail in browser console for debugging
+              // (status code, message, backend payload if any)
+              // eslint-disable-next-line no-console
+              console.error('Receipt scan failed', {
+                status: err.response?.status,
+                statusText: err.response?.statusText,
+                data: err.response?.data,
+              })
               handleError(err)
               reject(err)
             })
