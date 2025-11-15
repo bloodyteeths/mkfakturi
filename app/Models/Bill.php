@@ -527,6 +527,28 @@ class Bill extends Model implements HasMedia
         }
 
         $billTemplate = 'bill1'; // Default bill template
+
+        // Build a lightweight "invoice-like" DTO so we can reuse
+        // the existing invoice items/table partial for bill PDFs.
+        $invoiceDto = new \stdClass();
+        $invoiceDto->items = $this->items;
+        $invoiceDto->discount_per_item = $this->discount_per_item ?? 'NO';
+        $invoiceDto->tax_per_item = $this->tax_per_item ?? 'NO';
+        $invoiceDto->discount_type = $this->discount_type;
+        $invoiceDto->discount = $this->discount ?? 0;
+        $invoiceDto->discount_val = $this->discount_val ?? 0;
+        $invoiceDto->sub_total = $this->sub_total;
+        $invoiceDto->total = $this->total;
+        $invoiceDto->paid_status = $this->paid_status;
+        $invoiceDto->due_amount = $this->due_amount;
+        $invoiceDto->taxes = $taxes;
+
+        // Minimal customer wrapper so the invoice partial can
+        // access $invoice->customer->currency
+        $invoiceCustomer = new \stdClass();
+        $invoiceCustomer->currency = $this->currency;
+        $invoiceDto->customer = $invoiceCustomer;
+
         $company = Company::find($this->company_id);
         $locale = CompanySetting::getSetting('language', $company->id);
 
@@ -544,6 +566,7 @@ class Bill extends Model implements HasMedia
         $customFields = CustomField::where('model_type', 'BillItem')->get();
 
         view()->share([
+            // Bill-specific data
             'bill' => $this,
             'company' => $company,
             'supplier' => $this->supplier,
@@ -554,6 +577,8 @@ class Bill extends Model implements HasMedia
             'shipping_address' => false, // Bills don't have shipping addresses
             'notes' => $this->getNotes(),
             'customFields' => $customFields,
+            // Reused invoice variables for shared partials
+            'invoice' => $invoiceDto,
         ]);
 
         return \PDF::loadView('app.pdf.bill.'.$billTemplate);

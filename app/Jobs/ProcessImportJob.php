@@ -189,7 +189,7 @@ class ProcessImportJob implements ShouldQueue
                 $mapping,
                 $this->isDryRun
             ),
-            'bills' => new BillImport(
+            ImportJob::TYPE_BILLS => new BillImport(
                 $companyId,
                 $creatorId,
                 $mapping,

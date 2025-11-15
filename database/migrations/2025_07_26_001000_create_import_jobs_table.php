@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('import_jobs', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // User-friendly job name
-            $table->enum('type', ['customers', 'invoices', 'items', 'payments', 'expenses', 'complete']); // Import type
+            $table->string('name')->nullable(); // User-friendly job name
+            $table->enum('type', ['customers', 'invoices', 'items', 'payments', 'expenses', 'bills', 'complete']); // Import type (includes bills)
             $table->enum('status', ['pending', 'parsing', 'mapping', 'validating', 'committing', 'completed', 'failed'])->default('pending');
             $table->string('source_system')->nullable(); // e.g., 'onivo', 'megasoft', 'pantheon'
             $table->string('file_type')->nullable(); // csv, xlsx, xml, etc.

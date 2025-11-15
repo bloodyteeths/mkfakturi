@@ -90,8 +90,18 @@ class ReceiptScannerController extends Controller
         $companyCurrency = CompanySetting::getSetting('currency', $companyId);
         $amount = (int) ($data['total'] ?? 0);
 
+        // Prefer an existing category for this company; if none exists,
+        // create a lightweight default so the flow never fails.
         $category = ExpenseCategory::whereCompany($companyId)->first()
-            ?? ExpenseCategory::first();
+            ?? ExpenseCategory::where('company_id', $companyId)->first();
+
+        if (! $category) {
+            $category = ExpenseCategory::create([
+                'name' => 'Scanned receipts',
+                'company_id' => $companyId,
+                'description' => 'Auto-created category for scanned fiscal receipts',
+            ]);
+        }
 
         $expense = Expense::create([
             'expense_date' => Carbon::parse($data['date_time'] ?? now())->toDateString(),
@@ -175,4 +185,3 @@ class ReceiptScannerController extends Controller
         return $bill;
     }
 }
-

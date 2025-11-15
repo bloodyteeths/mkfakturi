@@ -36,8 +36,24 @@ class BillObserver
     {
         // Generate unique hash if not set
         if (!$bill->unique_hash) {
-            $bill->unique_hash = Hashids::connection(Bill::class)->encode($bill->id);
-            $bill->saveQuietly();
+            try {
+                // Use dedicated connection when configured, otherwise fall back to default
+                $connection = config('hashids.connections.'.Bill::class) ? Bill::class : null;
+
+                if ($connection) {
+                    $bill->unique_hash = Hashids::connection($connection)->encode($bill->id);
+                } else {
+                    $bill->unique_hash = Hashids::encode($bill->id);
+                }
+
+                $bill->saveQuietly();
+            } catch (\Throwable $e) {
+                Log::error('BillObserver: Failed to generate unique hash', [
+                    'bill_id' => $bill->id,
+                    'error' => $e->getMessage(),
+                ]);
+                // Do not block bill creation on hash generation failures
+            }
         }
 
         // Post to ledger only when bill is marked as COMPLETED

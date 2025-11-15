@@ -36,8 +36,24 @@ class BillPaymentObserver
     {
         // Generate unique hash if not set
         if (!$billPayment->unique_hash) {
-            $billPayment->unique_hash = Hashids::connection(BillPayment::class)->encode($billPayment->id);
-            $billPayment->saveQuietly();
+            try {
+                // Use dedicated connection when configured, otherwise fall back to default
+                $connection = config('hashids.connections.'.BillPayment::class) ? BillPayment::class : null;
+
+                if ($connection) {
+                    $billPayment->unique_hash = Hashids::connection($connection)->encode($billPayment->id);
+                } else {
+                    $billPayment->unique_hash = Hashids::encode($billPayment->id);
+                }
+
+                $billPayment->saveQuietly();
+            } catch (\Throwable $e) {
+                Log::error('BillPaymentObserver: Failed to generate unique hash', [
+                    'bill_payment_id' => $billPayment->id,
+                    'error' => $e->getMessage(),
+                ]);
+                // Do not block bill payment creation on hash generation failures
+            }
         }
 
         // Update bill's paid status

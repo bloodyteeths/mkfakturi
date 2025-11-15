@@ -25,9 +25,15 @@ class BillsImportController extends Controller
         $importJob = ImportJob::create([
             'company_id' => $companyId,
             'creator_id' => $user->id,
-            'type' => 'bills',
+            'name' => 'Bills import: '.$file->getClientOriginalName(),
+            'type' => ImportJob::TYPE_BILLS,
             'status' => ImportJob::STATUS_PENDING,
+            'file_type' => $file->getClientOriginalExtension(),
+            'file_path' => $path,
             'file_info' => [
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
                 'path' => $path,
             ],
             'source_system' => 'csv',
@@ -41,4 +47,3 @@ class BillsImportController extends Controller
         ], 202);
     }
 }
-

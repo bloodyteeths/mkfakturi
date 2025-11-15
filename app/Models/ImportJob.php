@@ -18,6 +18,7 @@ class ImportJob extends Model
     public const TYPE_ITEMS = 'items';
     public const TYPE_PAYMENTS = 'payments';
     public const TYPE_EXPENSES = 'expenses';
+     public const TYPE_BILLS = 'bills';
     public const TYPE_COMPLETE = 'complete';
 
     // Job statuses
