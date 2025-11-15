@@ -11,6 +11,8 @@ use App\Models\CompanySetting;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Supplier;
+use App\Services\InvoiceParsing\InvoiceParserClient;
+use App\Services\InvoiceParsing\ParsedInvoiceMapper;
 use App\Services\FiscalReceiptQrService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +21,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ReceiptScannerController extends Controller
 {
-    public function scan(ReceiptScanRequest $request, FiscalReceiptQrService $service): JsonResponse
+    public function scan(
+        ReceiptScanRequest $request,
+        FiscalReceiptQrService $service,
+        InvoiceParserClient $parserClient,
+        ParsedInvoiceMapper $mapper,
+    ): JsonResponse
     {
         try {
             \Log::info('ReceiptScannerController::scan - Starting', [
@@ -56,17 +63,13 @@ class ReceiptScannerController extends Controller
             try {
                 $normalized = $service->decodeAndNormalize($file);
             } catch (\Throwable $e) {
-                // Clean up stored file if QR decoding failed
-                Storage::disk($disk)->delete($storedPath);
-
-                \Log::error('ReceiptScannerController::scan - QR decode failed', [
+                \Log::warning('ReceiptScannerController::scan - QR decode failed, falling back to parser', [
                     'user_id' => auth()->id(),
                     'company_id' => $companyId,
                     'error' => $e->getMessage(),
                     'exception' => get_class($e),
                 ]);
 
-                // Also log to PHP error log so PaaS logs pick it up
                 error_log(sprintf(
                     '[ReceiptScanner] QR decode failed for company %s: %s (%s:%d)',
                     $companyId,
@@ -75,9 +78,71 @@ class ReceiptScannerController extends Controller
                     $e->getLine()
                 ));
 
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ], 422);
+                // Fall back to invoice parser microservice (OCR/image-aware)
+                $parsed = $parserClient->parse(
+                    $companyId,
+                    $storedPath,
+                    $file->getClientOriginalName(),
+                    'receipt-scan',
+                    null
+                );
+
+                $components = $mapper->mapToBillComponents($companyId, $parsed);
+
+                $supplierData = $components['supplier'] ?? [];
+                $billData = $components['bill'] ?? [];
+                $items = $components['items'] ?? [];
+
+                $supplier = Supplier::updateOrCreate(
+                    [
+                        'company_id' => $companyId,
+                        'tax_id' => $supplierData['tax_id'] ?? null,
+                        'name' => $supplierData['name'] ?? null,
+                    ],
+                    [
+                        'company_id' => $companyId,
+                        'name' => $supplierData['name'] ?? null,
+                        'tax_id' => $supplierData['tax_id'] ?? null,
+                        'email' => $supplierData['email'] ?? null,
+                    ]
+                );
+
+                $billData['supplier_id'] = $supplier->id;
+                $billData['company_id'] = $companyId;
+
+                // Ensure bill number uniqueness per company by suffixing on conflict
+                $originalNumber = $billData['bill_number'] ?? null;
+                $counter = 1;
+                while ($billData['bill_number'] && Bill::where('company_id', $companyId)
+                    ->where('bill_number', $billData['bill_number'])
+                    ->exists()
+                ) {
+                    $billData['bill_number'] = $originalNumber.'-'.$counter;
+                    $counter++;
+                }
+
+                $bill = Bill::create($billData);
+
+                if (! empty($items)) {
+                    // Let Bill model compute base_* fields and taxes per item
+                    Bill::createItems($bill, $items);
+                }
+
+                $absolutePath = Storage::disk($disk)->path($storedPath);
+                if (file_exists($absolutePath)) {
+                    $bill->addMedia($absolutePath)->preservingOriginal()->toMediaCollection('bills');
+                }
+
+                \Log::info('ReceiptScannerController::scan - Bill created via parser fallback', [
+                    'bill_id' => $bill->id,
+                    'company_id' => $companyId,
+                    'supplier_id' => $supplier->id,
+                ]);
+
+                return (new BillResource($bill))
+                    ->additional(['document_type' => 'bill'])
+                    ->response()
+                    ->setStatusCode(201);
             }
 
             $type = $normalized['type'] ?? 'cash';

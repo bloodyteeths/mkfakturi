@@ -118,9 +118,19 @@ MAX_TOKENS_HINT: 500
     - Configure a dedicated Railway worker service for queues.  
     - Add a Railway service definition for `invoice2data-service` with uvicorn.  
     - Wire `INVOICE2DATA_URL`/`TIMEOUT` and add deployment sanity checks.  
-  - Status: InProgress
-  - LastUpdate: 2025-11-15T16:00:00Z
-  - Notes: Nixpacks + Docker-based Railway configs reconciled; worker JSON updated and invoice2data Railway descriptor added; remaining work is production validation and smoke tests.
+  - Status: Completed
+  - LastUpdate: 2025-11-15T21:55:00Z
+  - Notes: Nixpacks + Docker-based Railway configs reconciled; worker JSON updated and `invoice2data-service` Railway descriptor added; sanity checks cover AP routes and parser health.
+
+- Task: Phase 8.1 — OCR Image Parsing for AP Automation  
+  - Subtasks:
+    - Extend `invoice2data-service` to accept JPEG/PNG receipts via `/parse`.  
+    - Add OCR pipeline using Pillow + pytesseract and a lightweight text parser feeding `normalize_invoice_data()`.  
+    - Wire `ReceiptScannerController` to fall back to `InvoiceParserClient` + `ParsedInvoiceMapper` when QR decoding fails, creating Bills from parsed image data.  
+    - Add feature tests to cover parser fallback behavior and keep QR flows intact.  
+  - Status: Completed
+  - LastUpdate: 2025-11-15T22:05:00Z
+  - Notes: Parser microservice now handles both PDFs and images with a unified schema; Laravel receipt scanner uses QR first and OCR+parser as a safe fallback, with Pest tests validating the new path.
 
 ## Self-Audit Report
 
