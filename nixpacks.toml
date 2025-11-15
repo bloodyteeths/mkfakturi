@@ -33,3 +33,5 @@ cmd = "bash railway-start.sh"
 [variables]
 APP_ENV = "production"
 APP_DEBUG = "false"
+# Increase upload size limit for receipt scanning
+NIXPACKS_NGINX_CLIENT_MAX_BODY_SIZE = "20M"

@@ -229,11 +229,29 @@ class BillsController extends Controller
      */
     public function downloadPdf(Bill $bill)
     {
-        $this->authorize('view', $bill);
+        \Log::info('BillsController::downloadPdf - Starting', [
+            'bill_id' => $bill->id,
+            'bill_number' => $bill->bill_number,
+        ]);
 
-        $pdf = $bill->getPDFData();
+        try {
+            $this->authorize('view', $bill);
 
-        return $pdf->download("bill-{$bill->bill_number}.pdf");
+            \Log::info('BillsController::downloadPdf - Authorization passed');
+
+            $pdf = $bill->getPDFData();
+
+            \Log::info('BillsController::downloadPdf - PDF generated successfully');
+
+            return $pdf->download("bill-{$bill->bill_number}.pdf");
+        } catch (\Exception $e) {
+            \Log::error('BillsController::downloadPdf - Error', [
+                'bill_id' => $bill->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 }
 

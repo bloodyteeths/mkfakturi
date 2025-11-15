@@ -532,12 +532,20 @@ class Bill extends Model implements HasMedia
 
         \App::setLocale($locale);
 
+        // Handle logo with file existence check
         $logo = $company->logo_path;
+        if ($logo && ! filter_var($logo, FILTER_VALIDATE_URL)) {
+            // It's a local path, check if file exists
+            if (! file_exists($logo)) {
+                $logo = null;
+            }
+        }
 
         view()->share([
             'bill' => $this,
             'company' => $company,
-            'logo' => $logo ?? null,
+            'supplier' => $this->supplier,
+            'logo' => $logo,
             'taxes' => $taxes,
         ]);
 
