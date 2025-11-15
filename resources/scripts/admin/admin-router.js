@@ -336,6 +336,14 @@ export default [
         component: BillsInbox,
       },
 
+      // Receipt Scanner
+      {
+        path: 'receipts/scan',
+        name: 'receipts.scan',
+        meta: { ability: abilities.CREATE_BILL },
+        component: ReceiptScan,
+      },
+
       //settings
       {
         path: 'settings',
