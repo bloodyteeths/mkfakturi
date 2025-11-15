@@ -474,7 +474,7 @@ echo "Laravel logs will be written to storage/logs/laravel.log"
 echo "Server starting - Railway health checks should now pass"
 echo "Initialization will continue in the background"
 
-# Start server (this blocks, so everything above this line completes first)
-php -S 0.0.0.0:$PORT -t public 2>&1 | tee -a storage/logs/server.log
+# Start server with custom php.ini (this blocks, so everything above this line completes first)
+php -S 0.0.0.0:$PORT -t public -c php.ini 2>&1 | tee -a storage/logs/server.log
 
 # CLAUDE-CHECKPOINT

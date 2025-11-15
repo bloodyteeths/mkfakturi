@@ -541,6 +541,8 @@ class Bill extends Model implements HasMedia
             }
         }
 
+        $customFields = CustomField::where('model_type', 'BillItem')->get();
+
         view()->share([
             'bill' => $this,
             'company' => $company,
@@ -551,6 +553,7 @@ class Bill extends Model implements HasMedia
             'billing_address' => $this->getSupplierAddress(),
             'shipping_address' => false, // Bills don't have shipping addresses
             'notes' => $this->getNotes(),
+            'customFields' => $customFields,
         ]);
 
         return \PDF::loadView('app.pdf.bill.'.$billTemplate);
