@@ -10,6 +10,7 @@
  */
 
 use App\Models\Bill;
+use App\Models\BillPayment;
 use App\Models\Company;
 use App\Models\EmailLog;
 use App\Models\Estimate;
@@ -63,6 +64,11 @@ return [
             'salt' => Bill::class.config('app.key'),
             'length' => 20,
             'alphabet' => 'qX5Rm8Tz3Nv9Lk1Wp4Hd7Yc6JU2FsGb0Oi',
+        ],
+        BillPayment::class => [
+            'salt' => BillPayment::class.config('app.key'),
+            'length' => 20,
+            'alphabet' => 'Bp7Qw3Nx5Kz9Mt4Lv8Rf2Yh6Jc1DsGa0Pi',
         ],
         Company::class => [
             'salt' => Company::class.config('app.key'),
