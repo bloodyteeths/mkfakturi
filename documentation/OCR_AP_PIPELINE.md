@@ -78,30 +78,24 @@ The goal is to make `/admin/receipts/scan` and related flows resilient even
 when QR codes are missing, unreadable, or the document is just a photo/PDF
 without QR.
 
-### 3.1 Laravel – Receipt scanner fallback to OCR parser
+### 3.1 Laravel – Receipt scanner using OCR parser directly
 
 Controller to update:
 - `app/Http/Controllers/V1/Admin/AccountsPayable/ReceiptScannerController.php`
 
 Planned behavior:
-- Keep **QR decoding** as the first, fast path:
-  - Try `FiscalReceiptQrService::decodeAndNormalize(...)`.
-  - On success:
-    - Continue current behavior:
-      - `type='invoice'` → draft `Bill` + media.
-      - `type='cash'` → draft `Expense` + media.
-- On QR **failure** (exception thrown):
-  - Do **not** delete the stored file.
-  - Fallback to the invoice parser microservice:
-    - Inject `InvoiceParserClient` + `ParsedInvoiceMapper` into the controller
-      method.
-    - Call `$parserClient->parse($companyId, $storedPath, $originalName, 'receipt-scan', null)`.
-    - Map parsed result → `supplier`, `bill`, `items` via `ParsedInvoiceMapper`.
-    - Create:
-      - `Supplier::updateOrCreate(...)` (company‑scoped).
-      - `Bill` + `BillItem`s (using the mapped bill/items payload).
-      - Attach original image/PDF to `bills` media collection.
-    - Return `201` with `BillResource` and `document_type='bill'`.
+- Skip QR decoding entirely for now (ZXing/Imagick path removed from scanner).
+- Always delegate the uploaded file to the invoice parser microservice:
+  - Inject `InvoiceParserClient` + `ParsedInvoiceMapper` into the controller
+    method.
+  - Call `$parserClient->parse($companyId, $storedPath, $originalName, 'receipt-scan', null)`.
+  - Map parsed result → `supplier`, `bill`, `items` via `ParsedInvoiceMapper`.
+  - Create:
+    - `Supplier::updateOrCreate(...)` (company‑scoped).
+    - `Bill` + `BillItem`s (using the mapped bill/items payload and
+      `Bill::createItems()` for base_* fields).
+    - Attach original image/PDF to `bills` media collection.
+  - Return `201` with `BillResource` and `document_type='bill'`.
   - If the parser call fails (4xx/5xx from microservice):
     - Log the error (including HTTP status and body).
     - Return a **422**/500 JSON error to the UI with a clear message.
@@ -150,6 +144,7 @@ Multi‑tenant & safety:
 **Implementation status:**
 - ✅ Parser microservice extended to handle images via OCR and return the
   normalized schema used by Laravel.
-- ⏳ Next: wire `ReceiptScannerController` to call `InvoiceParserClient` as an
-  OCR fallback when QR decoding fails, and add regression tests for this path.
-
+- ✅ `ReceiptScannerController` now uses `InvoiceParserClient` directly for
+  all uploads (no QR decoding), creating Bills from the parsed output.
+- ✅ Receipt scanner feature tests updated to validate parser‑based bill
+  creation and tenant isolation.
