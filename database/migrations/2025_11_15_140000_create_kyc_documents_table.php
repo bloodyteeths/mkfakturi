@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('kyc_documents')) {
+            return;
+        }
+
         Schema::create('kyc_documents', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('partner_id');
