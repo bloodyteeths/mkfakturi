@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\CustomField;
 use App\Models\CustomFieldValue;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CustomFieldValueFactory extends Factory
@@ -21,12 +20,14 @@ class CustomFieldValueFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'custom_field_valuable_type' => $this->faker->name(),
             'custom_field_valuable_id' => 1,
             'type' => $this->faker->name(),
             'custom_field_id' => CustomField::factory(),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
         ];
     }
 }

@@ -108,7 +108,7 @@ class CsvParserService
             // Log parsing start
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_start',
+                'log_type' => 'file_parsed',
                 'message' => 'Starting CSV file parsing',
                 'data' => [
                     'file_path' => $filePath,
@@ -151,7 +151,7 @@ class CsvParserService
             // Log parsing completion
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_complete',
+                'log_type' => 'file_parsed',
                 'message' => 'CSV file parsing completed successfully',
                 'data' => [
                     'total_rows' => $totalRows,
@@ -180,7 +180,7 @@ class CsvParserService
             // Log parsing error
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_error',
+                'log_type' => 'parsing_error',
                 'message' => 'CSV file parsing failed',
                 'data' => [
                     'error' => $e->getMessage(),
@@ -320,8 +320,8 @@ class CsvParserService
             $reader->addStreamFilter('convert.iconv.' . $structure['encoding'] . '/UTF-8');
         }
         
-        // Skip rows if specified
-        if ($structure['skip_rows'] > 0) {
+        // Configure header offset when headers are present
+        if ($structure['has_headers']) {
             $reader->setHeaderOffset($structure['skip_rows']);
         }
         
@@ -373,7 +373,7 @@ class CsvParserService
         // Log field mapping results
         ImportLog::create([
             'import_job_id' => $importJob->id,
-            'log_type' => 'field_mapping',
+            'log_type' => 'mapping_applied',
             'message' => 'CSV field mapping completed',
             'data' => [
                 'total_fields' => count($headers),
@@ -525,11 +525,18 @@ class CsvParserService
                         break;
                 }
                 
+                // Store both standardized field and original header for downstream flexibility
                 $transformedRow[$standardField] = $transformedValue;
+                if (!array_key_exists($originalField, $transformedRow)) {
+                    $transformedRow[$originalField] = $transformedValue;
+                }
                 
             } catch (Exception $e) {
-                // Log transformation error but keep original value
+                // Log transformation error but keep original value under both keys
                 $transformedRow[$standardField] = $value;
+                if (!array_key_exists($originalField, $transformedRow)) {
+                    $transformedRow[$originalField] = $value;
+                }
             }
         }
         

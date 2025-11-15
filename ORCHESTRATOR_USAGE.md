@@ -14,7 +14,7 @@ MAX_TOKENS_HINT: 250
    - `repo_path`: set to this repository root.
    - `model`: e.g., `gpt-4.1-mini` (recommended) or `gpt-4.1`.
    - `agent_count`: keep `3` for Project Manager, Developer, Tester.
-   - `mode`: `serial` (default). Parallel can be added later.
+   - `mode`: `serial` (default) or `parallel` (all three agents run once in parallel).
    - `sandbox_mode`: `workspace-write`.
    - `approval_policy`: `never`.
    - `log_file`: usually `LOG.md`.
@@ -61,4 +61,3 @@ python orchestrator.py --config orchestrator.config.yaml
 - These prompts are:
   - Short, bullet-based.
   - Include `MAX_TOKENS_HINT` to enforce brevity.
-

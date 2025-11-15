@@ -73,6 +73,7 @@ class Payment extends Model implements HasMedia
         return [
             'notes' => 'string',
             'exchange_rate' => 'float',
+            'payment_mode' => 'string',
             'gateway_data' => 'array',
             'gateway_response' => 'array',
         ];

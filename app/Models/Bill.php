@@ -27,6 +27,7 @@ class Bill extends Model implements HasMedia
     use InteractsWithMedia;
     use RequiresApproval;
     use SoftDeletes;
+    use GeneratesPdfTrait;
 
     // Status constants
     public const STATUS_DRAFT = 'DRAFT';

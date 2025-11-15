@@ -102,6 +102,17 @@ class FeatureFlagServiceProvider extends ServiceProvider
                 : config('features.advanced_payments.enabled', false);
         });
 
+        Feature::define('redis-queues', function () {
+            if (!InstallUtils::isDbCreated()) {
+                return config('features.redis_queues.enabled', false);
+            }
+
+            $dbValue = Setting::getSetting('feature_flag.redis_queues');
+            return $dbValue !== null
+                ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
+                : config('features.redis_queues.enabled', false);
+        });
+
         Feature::define('mcp-ai-tools', function () {
             if (!InstallUtils::isDbCreated()) {
                 return config('features.mcp_ai_tools.enabled', false);

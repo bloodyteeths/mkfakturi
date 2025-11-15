@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         \Lavary\Menu\ServiceProvider::class,
+        \App\Providers\InvoiceParsingServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

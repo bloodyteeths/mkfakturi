@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Note;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class NoteFactory extends Factory
@@ -20,11 +19,13 @@ class NoteFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'type' => $this->faker->randomElement(['Invoice', 'Estimate', 'Payment']),
             'name' => $this->faker->word(),
             'notes' => $this->faker->text(),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
             'is_default' => $this->faker->boolean(),
         ];
     }

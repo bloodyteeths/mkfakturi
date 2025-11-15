@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\TaxType;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaxTypeFactory extends Factory
@@ -20,10 +19,12 @@ class TaxTypeFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'name' => $this->faker->word(),
             'calculation_type' => 'percentage',
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
             'percent' => $this->faker->numberBetween($min = 0, $max = 100),
             'fixed_amount' => null,
             'description' => $this->faker->text(),

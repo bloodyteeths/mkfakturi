@@ -540,33 +540,33 @@ Route::prefix('/v1')->group(function () {
                 Route::post('vat-return/periods/{periodId}/close', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'closePeriod']);
                 Route::post('vat-return/periods/{periodId}/reopen', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'reopenPeriod']);
                 Route::get('vat-return/{id}/download-xml', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'downloadXml']);
-                Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
+            Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
             });
 
-            // Suppliers, Bills, Bill Payments (Accounts Payable) - DISABLED
-            // Controllers not yet implemented - uncomment when ready
+            // Suppliers, Bills, Bill Payments (Accounts Payable)
             // ----------------------------------
-            // TODO: Implement AccountsPayable controllers:
-            //   - app/Http/Controllers/V1/Admin/AccountsPayable/SuppliersController.php
-            //   - app/Http/Controllers/V1/Admin/AccountsPayable/BillsController.php
-            //   - app/Http/Controllers/V1/Admin/AccountsPayable/BillPaymentsController.php
-            // Models exist and are ready (Bill, Supplier, BillPayment, BillItem)
-            // ----------------------------------
-            // Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
-            // Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
-            //
-            // Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
-            // Route::post('/bills/{bill}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsViewed']);
-            // Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
-            // Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);
-            // Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
-            // Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
-            //
-            // Route::get('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'index']);
-            // Route::post('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'store']);
-            // Route::get('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'show']);
-            // Route::put('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'update']);
-            // Route::delete('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'destroy']);
+            Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
+            Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
+
+            Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
+            Route::post('/bills/{bill}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsViewed']);
+            Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
+            Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);
+            Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
+            Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
+
+            Route::get('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'index']);
+            Route::post('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'store']);
+            Route::get('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'show']);
+            Route::put('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'update']);
+            Route::delete('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'destroy']);
+
+            // Bills CSV/XLSX Import
+            Route::post('/bills/import', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsImportController::class, 'import']);
+
+            // Receipt Scanner (Fiscal QR → Expense/Bill)
+            Route::post('/receipts/scan', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'scan']);
+
 
             // Proforma Invoices
             // ----------------------------------

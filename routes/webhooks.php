@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Webhooks\CpayCallbackController;
 use App\Http\Controllers\Webhooks\PaddleWebhookController;
+use App\Http\Controllers\Webhooks\InboundMailController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -98,5 +99,9 @@ Route::post('/webhooks/bank/nlb', [WebhookController::class, 'bankNlb'])
 
 Route::post('/webhooks/bank/stopanska', [WebhookController::class, 'bankStopanska'])
     ->name('webhooks.bank.stopanska');
+
+// Inbound email for Accounts Payable (Email → Bill automation entrypoint)
+Route::post('/webhooks/email-inbound', [InboundMailController::class, 'handle'])
+    ->name('webhooks.email_inbound');
 
 // CLAUDE-CHECKPOINT

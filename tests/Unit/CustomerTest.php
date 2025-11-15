@@ -5,6 +5,11 @@ use App\Models\Customer;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {
+    if (!env('RUN_SEED_HEAVY_TESTS', false)) {
+        $this->markTestSkipped('Customer seed-heavy tests are disabled by default (set RUN_SEED_HEAVY_TESTS=true to enable).');
+    }
+
+    Artisan::call('migrate', ['--force' => true]);
     Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
     Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 });

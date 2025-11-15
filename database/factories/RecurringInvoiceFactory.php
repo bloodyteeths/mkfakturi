@@ -21,6 +21,8 @@ class RecurringInvoiceFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'starts_at' => $this->faker->iso8601(),
             'send_automatically' => false,
@@ -34,7 +36,7 @@ class RecurringInvoiceFactory extends Factory
             'discount' => $this->faker->randomDigitNotNull(),
             'discount_val' => $this->faker->randomDigitNotNull(),
             'customer_id' => Customer::factory(),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
             'frequency' => '* * 18 * *',
             'limit_by' => $this->faker->randomElement(['NONE', 'COUNT', 'DATE']),
             'limit_count' => $this->faker->randomDigit(),

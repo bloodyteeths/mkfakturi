@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\CustomField;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CustomFieldFactory extends Factory
@@ -20,6 +19,8 @@ class CustomFieldFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'name' => $this->faker->name(),
             'label' => $this->faker->name(),
@@ -30,7 +31,7 @@ class CustomFieldFactory extends Factory
                 return clean_slug($item['model_type'], $item['label']);
             },
             'type' => $this->faker->randomElement(['Text', 'Textarea', 'Phone', 'URL', 'Number', 'Dropdown', 'Switch', 'Date', 'DateTime', 'Time']),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
         ];
     }
 }

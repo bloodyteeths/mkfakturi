@@ -42,6 +42,11 @@ return [
         'description' => 'Paddle and CPAY payment gateway integrations',
     ],
 
+    'redis_queues' => [
+        'enabled' => env('FEATURE_REDIS_QUEUES', false),
+        'description' => 'Use Redis-backed queues instead of database/sync (requires Redis service).',
+    ],
+
     'mcp_ai_tools' => [
         'enabled' => env('FEATURE_MCP_AI_TOOLS', false),
         'description' => 'MCP AI tools server (UBL validation, tax explanations)',

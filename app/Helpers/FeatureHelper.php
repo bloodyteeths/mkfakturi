@@ -94,6 +94,16 @@ class FeatureHelper
     }
 
     /**
+     * Check if Redis-backed queues are enabled.
+     *
+     * When enabled, queue workers can safely use Redis connections.
+     */
+    public static function redisQueuesEnabled(): bool
+    {
+        return Feature::active('redis-queues');
+    }
+
+    /**
      * Get all feature flags with their current states.
      *
      * @return array<string, bool>
@@ -109,6 +119,7 @@ class FeatureHelper
             'advanced-payments' => self::advancedPaymentsEnabled(),
             'mcp-ai-tools' => self::mcpAiToolsEnabled(),
             'monitoring' => self::monitoringEnabled(),
+            'redis-queues' => self::redisQueuesEnabled(),
         ];
     }
 }

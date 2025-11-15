@@ -24,16 +24,11 @@ import dataclasses
 import datetime as dt
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml  # pip install pyyaml
-
-try:
-    # Optional: OpenAI SDK. Replace this with your preferred Agents SDK.
-    from openai import OpenAI  # type: ignore
-except Exception:  # pragma: no cover - optional dependency
-    OpenAI = None  # type: ignore
 
 
 @dataclasses.dataclass
@@ -113,36 +108,19 @@ def run_llm(
     extra: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
-    Single-call LLM helper.
+    Local-only placeholder: external API calls are disabled.
 
-    TODO: Replace this with your Agents SDK integration, e.g.:
-      - OpenAI Responses / Agents API
-      - Custom tool-calling agent runtime
-    This function must remain minimal and stateless for easy swapping.
+    This function intentionally does NOT call any remote LLM or Agents SDK.
+    It simply echoes a compact JSON summary of the prompts so the rest of the
+    orchestration pipeline (roadmaps, logs) can be exercised locally.
     """
-    if OpenAI is None:
-        # Offline / placeholder mode: echo prompts as JSON for debugging.
-        payload = {
-            "mode": "offline",
-            "model": model,
-            "system": system_prompt[:200],
-            "user": user_prompt[:200],
-        }
-        return json.dumps(payload, indent=2)
-
-    client = OpenAI()  # API key via OPENAI_API_KEY env var.
-
-    # Simple chat-completions style call; adjust to your SDK.
-    resp = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        max_tokens=max_output_tokens,
-        temperature=0.3,
-    )
-    return resp.choices[0].message.content or ""
+    payload = {
+        "mode": "local-offline",
+        "model": model,
+        "system": system_prompt[:200],
+        "user": user_prompt[:200],
+    }
+    return json.dumps(payload, indent=2)
 
 
 def derive_task_name(agent: AgentSpec) -> str:
@@ -342,6 +320,16 @@ def run_serial(cfg: OrchestratorConfig, agents: List[AgentSpec]) -> None:
         run_agent_once(cfg, agent)
 
 
+def run_parallel(cfg: OrchestratorConfig, agents: List[AgentSpec]) -> None:
+    """
+    Simple parallel execution using threads.
+    All agents run once in parallel; use for independent tasks.
+    """
+    with ThreadPoolExecutor(max_workers=len(agents)) as executor:
+        for agent in agents:
+            executor.submit(run_agent_once, cfg, agent)
+
+
 def parse_args() -> argparse.Namespace:
     ap = argparse.ArgumentParser(description="Multi-agent orchestration template.")
     ap.add_argument(
@@ -365,9 +353,10 @@ def main() -> None:
     agents = make_agents(cfg)
     if cfg.mode == "serial":
         run_serial(cfg, agents)
+    elif cfg.mode == "parallel":
+        run_parallel(cfg, agents)
     else:
-        # Parallel or custom modes can be implemented here using threading / async.
-        # Keep prompts short and independent to save tokens.
+        # Fallback to serial for unknown modes.
         run_serial(cfg, agents)
 
 

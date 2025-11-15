@@ -21,6 +21,21 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $currencyId = Currency::query()->value('id');
+
+        if (!$currencyId) {
+            $currency = Currency::create([
+                'name' => 'Macedonian Denar',
+                'code' => 'MKD',
+                'symbol' => 'ден',
+                'precision' => 2,
+                'thousand_separator' => ',',
+                'decimal_separator' => '.',
+                'swap_currency_symbol' => false,
+            ]);
+            $currencyId = $currency->id;
+        }
+
         return [
             'name' => $this->faker->name(),
             'company_name' => $this->faker->company(),
@@ -31,7 +46,7 @@ class UserFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'role' => 'super admin',
             'password' => Hash::make('secret'),
-            'currency_id' => Currency::first()->id,
+            'currency_id' => $currencyId,
             'account_type' => 'company', // Default to company user
             'kyc_status' => 'pending',
             'partner_tier' => 'free',

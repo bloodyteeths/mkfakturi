@@ -20,9 +20,11 @@ class PaymentMethodFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'name' => $this->faker->name(),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
         ];
     }
 }

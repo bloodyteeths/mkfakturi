@@ -52,16 +52,22 @@ class ParsersTest extends TestCase
         $this->csvParser = new CsvParserService($fieldMapper, $dateTransformer, $decimalTransformer);
         $this->excelParser = new ExcelParserService($fieldMapper, $dateTransformer, $decimalTransformer);
         $this->xmlParser = new XmlParserService($fieldMapper, $dateTransformer, $decimalTransformer);
-        
-        // Create test import job
-        $this->importJob = ImportJob::create([
-            'company_id' => 1,
-            'original_filename' => 'test_file.csv',
+
+        // Create test import job using factory so required fields are populated
+        $this->importJob = \Database\Factories\ImportJobFactory::new()->create([
+            'name' => 'Macedonia Test Import',
+            'type' => \App\Models\ImportJob::TYPE_CUSTOMERS,
             'file_path' => 'imports/test_file.csv',
-            'file_size' => 1024,
-            'status' => 'uploaded',
+            'file_info' => [
+                'original_name' => 'test_file.csv',
+                'filename' => 'test_file.csv',
+                'extension' => 'csv',
+                'size' => 1024,
+                'mime_type' => 'text/csv',
+            ],
+            'status' => \App\Models\ImportJob::STATUS_PENDING,
             'total_records' => 100,
-            'processed_records' => 0
+            'processed_records' => 0,
         ]);
     }
 

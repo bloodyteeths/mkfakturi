@@ -50,6 +50,12 @@ class FeatureFlagsController extends Controller
             'description' => 'Enables CASYS payment links and advanced payment processing',
             'critical' => false,
         ],
+        'redis-queues' => [
+            'key' => 'redis_queues',
+            'name' => 'Redis Queues',
+            'description' => 'Use Redis-backed queues instead of database/sync (requires Redis service)',
+            'critical' => false,
+        ],
         'mcp-ai-tools' => [
             'key' => 'mcp_ai_tools',
             'name' => 'MCP AI Tools',

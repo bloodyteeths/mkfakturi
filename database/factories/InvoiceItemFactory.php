@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\InvoiceItem;
 use App\Models\Item;
 use App\Models\RecurringInvoice;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InvoiceItemFactory extends Factory
@@ -22,6 +21,8 @@ class InvoiceItemFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'item_id' => Item::factory(),
             'name' => function (array $item) {
@@ -33,7 +34,7 @@ class InvoiceItemFactory extends Factory
             'price' => function (array $item) {
                 return Item::find($item['item_id'])->price;
             },
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
             'quantity' => $this->faker->randomDigitNotNull(),
             'total' => function (array $item) {
                 return $item['price'] * $item['quantity'];

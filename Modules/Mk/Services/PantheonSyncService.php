@@ -91,7 +91,16 @@ class PantheonSyncService
 
         } catch (RequestException $e) {
             $this->handleApiError($e, 'invoice', $invoice->id);
-            throw $e;
+
+            // Network errors (no HTTP response) should bubble up as RequestException
+            if (! $e->getResponse()) {
+                throw $e;
+            }
+
+            // For HTTP errors, wrap in a domain-specific exception with a friendly message
+            $message = $this->extractApiErrorMessage($e);
+
+            throw new \Exception('PANTHEON API returned error: ' . $message, 0, $e);
         }
     }
 
@@ -128,7 +137,14 @@ class PantheonSyncService
 
         } catch (RequestException $e) {
             $this->handleApiError($e, 'payment', $payment->id);
-            throw $e;
+
+            if (! $e->getResponse()) {
+                throw $e;
+            }
+
+            $message = $this->extractApiErrorMessage($e);
+
+            throw new \Exception('PANTHEON API returned error: ' . $message, 0, $e);
         }
     }
 
@@ -162,7 +178,15 @@ class PantheonSyncService
 
         } catch (RequestException $e) {
             $this->handleApiError($e, 'status', null);
-            
+
+            $statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+
+            // For real server errors (5xx), surface an exception so callers can react
+            if ($statusCode >= 500) {
+                throw new \Exception('PANTHEON API server error: ' . $e->getMessage(), 0, $e);
+            }
+
+            // For network errors / non-HTTP failures, report offline status
             return [
                 'status' => 'offline',
                 'environment' => $this->sandbox ? 'sandbox' : 'production',
@@ -323,7 +347,18 @@ class PantheonSyncService
     {
         try {
             $status = $this->getStatus();
-            
+
+            // Treat any non-online status as a connection failure for this helper
+            if (($status['status'] ?? 'offline') !== 'online') {
+                $error = $status['error'] ?? 'Unknown error';
+
+                return [
+                    'success' => false,
+                    'message' => 'PANTHEON API connection failed: ' . $error,
+                    'error' => $error,
+                ];
+            }
+
             return [
                 'success' => true,
                 'message' => 'PANTHEON API connection successful',
@@ -355,5 +390,27 @@ class PantheonSyncService
             ],
         ];
     }
-}
 
+    /**
+     * Extract a human-friendly error message from a RequestException response.
+     */
+    protected function extractApiErrorMessage(RequestException $e): string
+    {
+        $response = $e->getResponse();
+
+        if (! $response) {
+            return $e->getMessage();
+        }
+
+        $body = (string) $response->getBody();
+
+        if ($body !== '') {
+            $data = json_decode($body, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($data['message'])) {
+                return $data['message'];
+            }
+        }
+
+        return $e->getMessage();
+    }
+}

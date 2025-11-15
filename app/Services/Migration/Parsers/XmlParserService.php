@@ -142,7 +142,7 @@ class XmlParserService
             // Log parsing start
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_start',
+                'log_type' => 'file_parsed',
                 'message' => 'Starting XML file parsing',
                 'data' => [
                     'file_path' => $filePath,
@@ -176,7 +176,7 @@ class XmlParserService
             // Log parsing completion
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_complete',
+                'log_type' => 'file_parsed',
                 'message' => 'XML file parsing completed successfully',
                 'data' => [
                     'total_records' => count($transformedData),
@@ -206,7 +206,7 @@ class XmlParserService
             // Log parsing error
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_error',
+                'log_type' => 'parsing_error',
                 'message' => 'XML file parsing failed',
                 'data' => [
                     'error' => $e->getMessage(),
@@ -656,29 +656,29 @@ class XmlParserService
         switch ($format) {
             case 'ubl_invoice':
                 return [
-                    '//cac:InvoiceLine' => [
-                        'line_id' => 'cbc:ID',
-                        'quantity' => 'cbc:InvoicedQuantity',
-                        'unit_price' => 'cac:Price/cbc:PriceAmount',
-                        'line_total' => 'cbc:LineExtensionAmount',
-                        'item_name' => 'cac:Item/cbc:Name',
-                        'item_description' => 'cac:Item/cbc:Description'
+                    "//*[local-name()='InvoiceLine']" => [
+                        'line_id' => "*[local-name()='ID']",
+                        'quantity' => "*[local-name()='InvoicedQuantity']",
+                        'unit_price' => "*[local-name()='Price']/*[local-name()='PriceAmount']",
+                        'line_total' => "*[local-name()='LineExtensionAmount']",
+                        'item_name' => "*[local-name()='Item']/*[local-name()='Name']",
+                        'item_description' => "*[local-name()='Item']/*[local-name()='Description']",
                     ]
                 ];
                 
             case 'onivo_export':
                 return [
-                    '//Customer' => [
-                        'customer_name' => 'Name',
-                        'tax_id' => 'TaxID',
-                        'address' => 'Address',
-                        'city' => 'City'
+                    "//*[local-name()='Customer']" => [
+                        'customer_name' => "*[local-name()='Name']",
+                        'tax_id' => "*[local-name()='TaxID']",
+                        'address' => "*[local-name()='Address']",
+                        'city' => "*[local-name()='City']",
                     ],
-                    '//Invoice' => [
-                        'invoice_number' => 'Number',
-                        'invoice_date' => 'Date',
-                        'due_date' => 'DueDate',
-                        'total_amount' => 'TotalAmount'
+                    "//*[local-name()='Invoice']" => [
+                        'invoice_number' => "*[local-name()='Number']",
+                        'invoice_date' => "*[local-name()='Date']",
+                        'due_date' => "*[local-name()='DueDate']",
+                        'total_amount' => "*[local-name()='TotalAmount']",
                     ]
                 ];
                 
@@ -751,7 +751,7 @@ class XmlParserService
         // Log field mapping results
         ImportLog::create([
             'import_job_id' => $importJob->id,
-            'log_type' => 'field_mapping',
+            'log_type' => 'mapping_applied',
             'message' => 'XML field mapping completed',
             'data' => [
                 'total_fields' => count($fields),
@@ -815,11 +815,18 @@ class XmlParserService
                             break;
                     }
                     
+                    // Store both standardized field and original XML field name
                     $transformedRecord[$standardField] = $transformedValue;
+                    if (!array_key_exists($originalField, $transformedRecord)) {
+                        $transformedRecord[$originalField] = $transformedValue;
+                    }
                     
                 } catch (Exception $e) {
                     // Keep original value if transformation fails
                     $transformedRecord[$standardField] = $value;
+                    if (!array_key_exists($originalField, $transformedRecord)) {
+                        $transformedRecord[$originalField] = $value;
+                    }
                 }
             }
             

@@ -12,7 +12,13 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'redis'),
+    // Default queue driver:
+    // - If FEATURE_REDIS_QUEUES=true, prefer Redis (requires Redis service).
+    // - Otherwise fall back to database driver for compatibility.
+    'default' => env(
+        'QUEUE_CONNECTION',
+        env('FEATURE_REDIS_QUEUES', false) ? 'redis' : 'database'
+    ),
 
     /*
     |--------------------------------------------------------------------------

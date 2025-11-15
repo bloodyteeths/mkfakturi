@@ -132,11 +132,21 @@ class CommissionService
             ]);
         }
 
+        // Round all commission amounts to 2 decimal places for currency safety
+        $directCommission = round($directCommission, 2);
+        if ($uplineCommission !== null) {
+            $uplineCommission = round($uplineCommission, 2);
+        }
+        if ($salesRepCommission !== null) {
+            $salesRepCommission = round($salesRepCommission, 2);
+        }
+
         // Create direct commission event
         $event = AffiliateEvent::create([
             'affiliate_partner_id' => $partner->id,
             'upline_partner_id' => $uplinePartnerId,
-            'sales_rep_id' => $salesRepId,
+            // Sales rep commission is tracked in separate events; keep this null to avoid double counting
+            'sales_rep_id' => null,
             'company_id' => $companyId,
             'event_type' => 'recurring_commission',
             'amount' => $directCommission,

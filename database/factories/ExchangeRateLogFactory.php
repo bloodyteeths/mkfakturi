@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Currency;
 use App\Models\ExchangeRateLog;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ExchangeRateLogFactory extends Factory
@@ -21,10 +20,14 @@ class ExchangeRateLogFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+        $baseCurrency = Currency::first() ?? Currency::factory()->create();
+        $targetCurrency = Currency::where('id', '!=', $baseCurrency->id)->first() ?? $baseCurrency;
+
         return [
-            'company_id' => Currency::find(1)->id,
-            'base_currency_id' => User::find(1)->companies()->first()->id,
-            'currency_id' => Currency::find(4)->id,
+            'company_id' => $company->id,
+            'base_currency_id' => $baseCurrency->id,
+            'currency_id' => $targetCurrency->id,
             'exchange_rate' => $this->faker->randomDigitNotNull(),
         ];
     }

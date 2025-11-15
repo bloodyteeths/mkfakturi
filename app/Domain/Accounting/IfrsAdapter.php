@@ -153,7 +153,7 @@ class IfrsAdapter
                 'account_id' => $cashAccount->id,
                 'transaction_date' => $payment->payment_date ?? Carbon::now(),
                 'narration' => "Payment #{$payment->payment_number} - {$payment->customer->name}",
-                'transaction_type' => Transaction::CR, // Client Receipt
+                'transaction_type' => Transaction::RC, // Client Receipt
                 'currency_id' => $this->getCurrencyId($payment->company_id),
                 'entity_id' => $entity->id,
             ]);

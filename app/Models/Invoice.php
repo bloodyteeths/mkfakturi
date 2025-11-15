@@ -78,6 +78,7 @@ class Invoice extends Model implements HasMedia
         return [
             'total' => 'integer',
             'tax' => 'integer',
+             'tax_total' => 'integer',
             'sub_total' => 'integer',
             'discount' => 'float',
             'discount_val' => 'integer',
@@ -239,6 +240,19 @@ class Invoice extends Model implements HasMedia
         }
 
         return Carbon::parse($this->invoice_date)->translatedFormat($dateFormat);
+    }
+
+    /**
+     * Accessor for tax_total - fallback to tax if null
+     * This keeps older records working where only tax was stored.
+     */
+    public function getTaxTotalAttribute($value)
+    {
+        if ($value !== null) {
+            return $value;
+        }
+
+        return $this->attributes['tax'] ?? 0;
     }
 
     /**

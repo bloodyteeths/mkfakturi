@@ -23,7 +23,7 @@ class ImportPresetService
      * Get preset mapping for a specific source and entity type
      *
      * @param string $source Source system (onivo, megasoft, effectplus, eurofaktura, managerio, generic)
-     * @param string $entityType Entity type (customers, items, invoices)
+     * @param string $entityType Entity type (customers, items, invoices, bills)
      * @return array Column mapping
      */
     public function getPreset(string $source, string $entityType): array
@@ -67,6 +67,7 @@ class ImportPresetService
             'customers' => 'Customers',
             'items' => 'Items',
             'invoices' => 'Invoices',
+            'bills' => 'Bills',
         ];
     }
 
@@ -351,6 +352,20 @@ class ImportPresetService
                 'discount' => 'discount',
                 'notes' => 'notes',
                 'status' => 'status',
+            ],
+            'bills' => [
+                'bill_number' => 'bill_number',
+                'supplier_name' => 'supplier_name',
+                'supplier_tax_id' => 'supplier_tax_id',
+                'bill_date' => 'bill_date',
+                'due_date' => 'due_date',
+                'sub_total' => 'sub_total',
+                'tax' => 'tax',
+                'total' => 'total',
+                'notes' => 'notes',
+                'item_description' => 'item_description',
+                'item_quantity' => 'item_quantity',
+                'item_price' => 'item_price',
             ],
             default => [],
         };

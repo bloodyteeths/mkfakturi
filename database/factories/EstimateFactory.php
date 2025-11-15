@@ -68,19 +68,17 @@ class EstimateFactory extends Factory
      */
     public function definition(): array
     {
-        $sequenceNumber = (new SerialNumberFormatter)
-            ->setModel(new Estimate)
-            ->setCompany(User::find(1)->companies()->first()->id)
-            ->setNextNumbers();
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+        $currency = Currency::first() ?? Currency::factory()->create();
 
         return [
             'estimate_date' => $this->faker->date('Y-m-d', 'now'),
             'expiry_date' => $this->faker->date('Y-m-d', 'now'),
-            'estimate_number' => $sequenceNumber->getNextNumber(),
-            'sequence_number' => $sequenceNumber->nextSequenceNumber,
-            'customer_sequence_number' => $sequenceNumber->nextCustomerSequenceNumber,
-            'reference_number' => $sequenceNumber->getNextNumber(),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'estimate_number' => 'EST-'.$this->faker->unique()->numerify('######'),
+            'sequence_number' => $this->faker->numberBetween(1, 1_000_000),
+            'customer_sequence_number' => $this->faker->numberBetween(1, 1_000_000),
+            'reference_number' => 'EREF-'.$this->faker->unique()->numerify('######'),
+            'company_id' => $company->id,
             'status' => Estimate::STATUS_DRAFT,
             'template_name' => 'estimate1',
             'sub_total' => $this->faker->randomDigitNotNull(),
@@ -103,7 +101,7 @@ class EstimateFactory extends Factory
             'base_sub_total' => $this->faker->randomDigitNotNull(),
             'base_total' => $this->faker->randomDigitNotNull(),
             'base_tax' => $this->faker->randomDigitNotNull(),
-            'currency_id' => Currency::find(1)->id,
+            'currency_id' => $currency->id,
         ];
     }
 }

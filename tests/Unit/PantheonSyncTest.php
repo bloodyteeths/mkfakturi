@@ -228,7 +228,7 @@ class PantheonSyncTest extends TestCase
 
         $this->assertEquals('offline', $result['status']);
         $this->assertEquals('sandbox', $result['environment']);
-        $this->assertStringContains('Connection refused', $result['error']);
+        $this->assertStringContainsString('Connection refused', $result['error']);
     }
 
     /** @test */
@@ -261,7 +261,7 @@ class PantheonSyncTest extends TestCase
         $result = $this->service->testConnection();
 
         $this->assertFalse($result['success']);
-        $this->assertStringContains('PANTHEON API connection failed', $result['message']);
+        $this->assertStringContainsString('PANTHEON API connection failed', $result['message']);
         $this->assertEquals('Connection failed', $result['error']);
     }
 
@@ -431,4 +431,3 @@ class PantheonSyncTest extends TestCase
         $this->testPayment->load(['invoice', 'customer', 'paymentMethod', 'currency']);
     }
 }
-

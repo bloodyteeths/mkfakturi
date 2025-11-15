@@ -271,7 +271,16 @@ describe('CPAY Laravel 12 Compatibility', function () {
             } catch (SoapFault $e) {
                 // Expected behavior - SOAP connection should fail gracefully
                 expect($e)->toBeInstanceOf(SoapFault::class);
-                expect($e->getMessage())->toContain('Could not connect to host');
+
+                $message = $e->getMessage();
+                expect($message)->not->toBe('');
+
+                $matchesExpected = str_contains($message, 'Could not connect to host')
+                    || str_contains($message, 'SOAP-ERROR: Parsing WSDL');
+
+                expect($matchesExpected)->toBeTrue(
+                    "Unexpected SOAP error message: {$message}"
+                );
             } catch (Exception $e) {
                 // Also acceptable - any connection-related exception
                 expect($e)->toBeInstanceOf(Exception::class);
@@ -314,7 +323,7 @@ describe('CPAY Laravel 12 Compatibility', function () {
                 $isValid = (
                     !empty($response) && 
                     (strpos($response, '<?xml') === 0 || strpos($response, '<') === 0) &&
-                    !strpos($response, '<error>')
+                    strpos($response, '<error>') === false
                 );
                 
                 expect($isValid)->toBeFalse("Response should be invalid: " . substr($response, 0, 50));

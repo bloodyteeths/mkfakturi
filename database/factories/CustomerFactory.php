@@ -22,6 +22,17 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
+        // Ensure we have a currency for customers
+        $currency = Currency::first() ?? Currency::create([
+            'name' => 'Macedonian Denar',
+            'code' => 'MKD',
+            'symbol' => 'ден',
+            'precision' => 2,
+            'thousand_separator' => ',',
+            'decimal_separator' => '.',
+            'swap_currency_symbol' => false,
+        ]);
+
         return [
             'name' => $this->faker->name(),
             'company_name' => $this->faker->company(),
@@ -35,9 +46,7 @@ class CustomerFactory extends Factory
                 return \App\Models\Company::factory()->create()->id;
             },
             'password' => Hash::make('secret'),
-            'currency_id' => function () {
-                return \App\Models\Currency::first()->id ?? 1;
-            },
+            'currency_id' => $currency->id,
         ];
     }
 }

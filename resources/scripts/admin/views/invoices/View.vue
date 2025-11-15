@@ -8,6 +8,7 @@ import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
@@ -20,6 +21,7 @@ const modalStore = useModalStore()
 const invoiceStore = useInvoiceStore()
 const userStore = useUserStore()
 const dialogStore = useDialogStore()
+const globalStore = useGlobalStore()
 
 const { t } = useI18n()
 const invoiceData = ref(null)
@@ -278,7 +280,8 @@ onSearched = debounce(onSearched, 500)
           v-if="
             (invoiceData.status === 'SENT' || invoiceData.status === 'VIEWED') &&
             invoiceData.status !== 'PAID' &&
-            userStore.hasAbilities(abilities.CREATE_PAYMENT)
+            userStore.hasAbilities(abilities.CREATE_PAYMENT) &&
+            globalStore.featureFlags?.['advanced_payments'] === true
           "
           variant="primary"
           class="mr-3"

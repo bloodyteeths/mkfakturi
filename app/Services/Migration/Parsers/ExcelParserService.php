@@ -140,7 +140,7 @@ class ExcelParserService
             // Log parsing start
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_start',
+                'log_type' => 'file_parsed',
                 'message' => 'Starting Excel file parsing',
                 'data' => [
                     'file_path' => $filePath,
@@ -189,7 +189,7 @@ class ExcelParserService
             // Log parsing completion
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_complete',
+                'log_type' => 'file_parsed',
                 'message' => 'Excel file parsing completed successfully',
                 'data' => [
                     'total_rows' => $totalRows,
@@ -223,7 +223,7 @@ class ExcelParserService
             // Log parsing error
             ImportLog::create([
                 'import_job_id' => $importJob->id,
-                'log_type' => 'parse_error',
+                'log_type' => 'parsing_error',
                 'message' => 'Excel file parsing failed',
                 'data' => [
                     'error' => $e->getMessage(),
@@ -469,7 +469,7 @@ class ExcelParserService
         // Log field mapping results
         ImportLog::create([
             'import_job_id' => $importJob->id,
-            'log_type' => 'field_mapping',
+            'log_type' => 'mapping_applied',
             'message' => 'Excel field mapping completed',
             'data' => [
                 'total_fields' => count($headers),

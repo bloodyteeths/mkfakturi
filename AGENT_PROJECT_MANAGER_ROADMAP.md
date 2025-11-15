@@ -1,28 +1,32 @@
+MAX_TOKENS_HINT: 400
+
 # AGENT_PROJECT_MANAGER_ROADMAP
 
-- Agent: Project Manager
-- MAX_TOKENS_HINT: 600
-- Goal: Plan and coordinate multi-agent work in this repo.
+- Agent: PROJECT_MANAGER
+- Goal: Plan and coordinate local-only multi-agent workflow.
 
-## 1. Planning Tasks
+## Tasks
 
-- [ ] Analyze repository structure (Status: pending, LastUpdate: n/a)
-- [ ] Draft requirements in `REQUIREMENTS.md` (Status: pending, LastUpdate: n/a)
-- [ ] Define tasks in `AGENT_TASKS.md` (Status: pending, LastUpdate: n/a)
+- Task: Define requirements and tasks  
+  - Subtasks:
+    - Review existing docs in `documentation/roadmaps/`.
+    - Write `REQUIREMENTS.md`.
+    - Update `AGENT_TASKS.md` with concrete tasks.
+  - Status: Done
+  - LastUpdate: 2025-11-15T10:20:00Z
+  - Notes: Requirements and task board aligned to local-only orchestrator work.
 
-## 2. Coordination Tasks
+- Task: Prepare handoff to DEVELOPER  
+  - Subtasks:
+    - Confirm `orchestrator.py` is safe for local-only runs.
+    - Specify DEVELOPER objectives in `AGENT_TASKS.md` (T2).
+  - Status: In-Progress
+  - LastUpdate: 2025-11-15T10:20:00Z
+  - Notes: Orchestrator already updated to avoid external API calls.
 
-- [ ] Trigger Developer work (Status: pending, LastUpdate: n/a)
-- [ ] Trigger Tester work (Status: pending, LastUpdate: n/a)
-- [ ] Review Tester results and close loop (Status: pending, LastUpdate: n/a)
+## Self-Audit Report
 
-## 3. Self-Audit Report (Project Manager)
-
-- What was done:
-  - `<FILL_IN>`
-- What could be improved:
-  - `<FILL_IN>`
-- TOKEN_ESTIMATE: `<INT>`
-- Lessons for next run:
-  - `<FILL_IN>`
-
+- TOKEN_ESTIMATE: 250
+- Lessons_for_next_run:
+  - Keep roadmap entries tightly scoped to 1–2 files each.
+  - Always link tasks directly to acceptance checks (commands or file paths).

@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Item;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EstimateItemFactory extends Factory
@@ -22,6 +21,8 @@ class EstimateItemFactory extends Factory
      */
     public function definition(): array
     {
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
+
         return [
             'item_id' => Item::factory(),
             'name' => function (array $item) {
@@ -35,7 +36,7 @@ class EstimateItemFactory extends Factory
             },
             'estimate_id' => Estimate::factory(),
             'quantity' => $this->faker->randomDigitNotNull(),
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
             'tax' => $this->faker->randomDigitNotNull(),
             'total' => function (array $item) {
                 return $item['price'] * $item['quantity'];

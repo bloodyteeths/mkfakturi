@@ -6,8 +6,6 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\RecurringInvoice;
-use App\Models\User;
-use App\Services\SerialNumberFormatter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InvoiceFactory extends Factory
@@ -78,24 +76,22 @@ class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
-        $sequenceNumber = (new SerialNumberFormatter)
-            ->setModel(new Invoice)
-            ->setCompany(User::find(1)->companies()->first()->id)
-            ->setNextNumbers();
+        // Create or reuse a simple company for test data
+        $company = \App\Models\Company::first() ?? \App\Models\Company::factory()->create();
 
         return [
             'invoice_date' => $this->faker->date('Y-m-d', 'now'),
             'due_date' => $this->faker->date('Y-m-d', 'now'),
-            'invoice_number' => $sequenceNumber->getNextNumber(),
-            'sequence_number' => $sequenceNumber->nextSequenceNumber,
-            'customer_sequence_number' => $sequenceNumber->nextCustomerSequenceNumber,
-            'reference_number' => $sequenceNumber->getNextNumber(),
+            'invoice_number' => 'INV-'.$this->faker->unique()->numerify('######'),
+            'sequence_number' => $this->faker->numberBetween(1, 1_000_000),
+            'customer_sequence_number' => $this->faker->numberBetween(1, 1_000_000),
+            'reference_number' => 'REF-'.$this->faker->unique()->numerify('######'),
             'template_name' => 'invoice1',
             'status' => Invoice::STATUS_DRAFT,
             'tax_per_item' => 'NO',
             'discount_per_item' => 'NO',
             'paid_status' => Invoice::STATUS_UNPAID,
-            'company_id' => User::find(1)->companies()->first()->id,
+            'company_id' => $company->id,
             'sub_total' => $this->faker->randomDigitNotNull(),
             'total' => $this->faker->randomDigitNotNull(),
             'discount_type' => $this->faker->randomElement(['percentage', 'fixed']),
@@ -119,7 +115,15 @@ class InvoiceFactory extends Factory
             'base_total' => $this->faker->randomDigitNotNull(),
             'base_tax' => $this->faker->randomDigitNotNull(),
             'base_due_amount' => $this->faker->randomDigitNotNull(),
-            'currency_id' => Currency::find(1)->id,
+            'currency_id' => Currency::first()->id ?? Currency::create([
+                'name' => 'Macedonian Denar',
+                'code' => 'MKD',
+                'symbol' => 'ден',
+                'precision' => 2,
+                'thousand_separator' => ',',
+                'decimal_separator' => '.',
+                'swap_currency_symbol' => false,
+            ])->id,
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Imports\CustomerImport;
 use App\Imports\InvoiceImport;
+use App\Imports\BillImport;
 use App\Imports\ItemImport;
 use App\Models\ImportJob;
 use App\Services\Migration\ImportPresetService;
@@ -159,7 +160,7 @@ class ProcessImportJob implements ShouldQueue
      * Create importer instance based on job type
      *
      * @param array $mapping
-     * @return CustomerImport|InvoiceImport|ItemImport
+     * @return CustomerImport|InvoiceImport|ItemImport|BillImport
      * @throws \Exception
      */
     private function createImporter(array $mapping)
@@ -183,6 +184,12 @@ class ProcessImportJob implements ShouldQueue
                 $this->isDryRun
             ),
             ImportJob::TYPE_INVOICES => new InvoiceImport(
+                $companyId,
+                $creatorId,
+                $mapping,
+                $this->isDryRun
+            ),
+            'bills' => new BillImport(
                 $companyId,
                 $creatorId,
                 $mapping,
