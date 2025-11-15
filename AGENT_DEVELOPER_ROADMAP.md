@@ -98,9 +98,29 @@ MAX_TOKENS_HINT: 500
     - Implement bill create/edit with supplier selector, items editor, totals calculation, PDF download and status actions, plus bill payments tab.  
     - Implement Inbox actions (view, approve, delete, convert to expense) and Receipt Scanner flow (upload → scan → redirect to Bill/Expense).  
     - Add minimal Cypress specs for AP navigation and basic create flows.  
+  - Status: Completed
+  - LastUpdate: 2025-11-15T15:10:00Z
+  - Notes: Routes, menu entries, Pinia stores, Suppliers/Bills/Inbox/ReceiptScanner views, payments tab, and Cypress AP navigation tests implemented; UI is multi-tenant-safe and aligned with existing design system.
+
+- Task: Phase 7 — AP Automation Regression & E2E Tests  
+  - Subtasks:
+    - Add regression tests for Bills/Suppliers CRUD, status changes, payments, and multi-tenant isolation.  
+    - Extend tests for Email→Bill, QR scanner, and CSV import flows.  
+    - Add backend permission tests for AP endpoints.  
+    - Add Cypress specs for AP navigation and basic supplier/bill flows.  
+  - Status: Completed
+  - LastUpdate: 2025-11-15T15:40:00Z
+  - Notes: New Pest tests for bills, suppliers, permissions and existing inbound/QR/import tests now form a full regression suite; Cypress AP smoke spec added for UI coverage.
+
+- Task: Phase 8 — Railway Deployment for AP Automation  
+  - Subtasks:
+    - Ensure Nixpacks build + Laravel start script handle migrations and assets.  
+    - Configure a dedicated Railway worker service for queues.  
+    - Add a Railway service definition for `invoice2data-service` with uvicorn.  
+    - Wire `INVOICE2DATA_URL`/`TIMEOUT` and add deployment sanity checks.  
   - Status: InProgress
-  - LastUpdate: 2025-11-15T14:15:00Z
-  - Notes: Routes, menu entries, Pinia stores, Suppliers/Bills/Inbox/ReceiptScanner views and initial Cypress tests implemented; further UX polish and regression passes will follow in Phase 7.
+  - LastUpdate: 2025-11-15T16:00:00Z
+  - Notes: Nixpacks + Docker-based Railway configs reconciled; worker JSON updated and invoice2data Railway descriptor added; remaining work is production validation and smoke tests.
 
 ## Self-Audit Report
 

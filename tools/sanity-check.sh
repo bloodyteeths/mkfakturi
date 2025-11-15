@@ -172,6 +172,37 @@ assert_pattern_in_file "INVOICE2DATA_TIMEOUT" ".env.example" "INVOICE2DATA_TIMEO
 assert_file "invoice2data-service/Dockerfile"
 assert_file "invoice2data-service/main.py"
 
+section "Deployment health checks (optional)"
+if [ -n "${APP_URL:-}" ]; then
+  if have_cmd curl; then
+    note "Checking API health at ${APP_URL}/api/health (if route exists)..."
+    if curl -sf "${APP_URL}/api/health" >/dev/null 2>&1; then
+      ok "API health endpoint responded at ${APP_URL}/api/health"
+    else
+      skip "API health endpoint not reachable at ${APP_URL}/api/health (may not be deployed yet)"
+    fi
+  else
+    skip "curl not available; skipping API health check"
+  fi
+else
+  skip "APP_URL not set; skipping API health check"
+fi
+
+if [ -n "${INVOICE2DATA_URL:-}" ]; then
+  if have_cmd curl; then
+    note "Checking invoice2data microservice health at ${INVOICE2DATA_URL}/health..."
+    if curl -sf "${INVOICE2DATA_URL}/health" >/dev/null 2>&1; then
+      ok "invoice2data microservice responded at ${INVOICE2DATA_URL}/health"
+    else
+      skip "invoice2data microservice not reachable at ${INVOICE2DATA_URL}/health (may not be deployed yet)"
+    fi
+  else
+    skip "curl not available; skipping invoice2data health check"
+  fi
+else
+  skip "INVOICE2DATA_URL not set; skipping invoice2data health check"
+fi
+
 section "Summary"
 printf "\n${GREEN}PASS:${NC} %d  ${RED}FAIL:${NC} %d  ${YELLOW}SKIP:${NC} %d\n" "$PASS" "$FAIL" "$SKIP"
 if [ "$FAIL" -gt 0 ]; then

@@ -40,7 +40,9 @@
 | T11 | Verify Receipt Scanner + QR Pipeline  | TESTER         | Validate receipt scans → Expense/Bill drafts, multi-tenant      | Done     | QR unit + feature tests passed; no regressions observed |
 | T12 | Bulk CSV Import for Bills Backend     | DEVELOPER      | Implement Bills import presets, importer, controller, and tests | Done     | AP_AUTOMATION_PLAN Phase 5 completed |
 | T13 | Verify Bulk Bills Import Pipeline     | TESTER         | Validate CSV/XLSX import → Bills/Suppliers, tenant isolation    | Done     | Bill import feature tests passed; no regressions observed |
-| T14 | Accounts Payable UI Integration       | DEVELOPER      | Implement Suppliers/Bills/Inbox/Receipt Scanner frontend        | InProgress | Phase 6 AP UI pages and stores under implementation |
+| T14 | Accounts Payable UI Integration       | DEVELOPER      | Implement Suppliers/Bills/Inbox/Receipt Scanner frontend        | Done     | Phase 6 AP UI implemented with routes, stores, and basic Cypress specs |
+| T15 | AP Automation Regression & E2E Tests  | TESTER         | Add regression + E2E tests for AP pipelines and UI              | Done     | Phase 7 backend regression and Cypress smoke tests added |
+| T16 | Railway Deployment for AP Automation  | DEVELOPER      | Configure Railway services (web, worker, invoice2data-service)  | InProgress | Phase 8 deployment descriptors and sanity checks under implementation |
 
 ## Hand-off Conditions
 
