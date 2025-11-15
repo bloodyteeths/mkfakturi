@@ -501,6 +501,69 @@ class Bill extends Model implements HasMedia
             }
         }
     }
+
+    /**
+     * Get PDF data for bill
+     *
+     * @return mixed
+     */
+    public function getPDFData()
+    {
+        $taxes = collect();
+
+        // Collect all taxes from items
+        foreach ($this->items as $item) {
+            foreach ($item->taxes as $tax) {
+                $found = $taxes->filter(function ($item) use ($tax) {
+                    return $item->tax_type_id == $tax->tax_type_id;
+                })->first();
+
+                if ($found) {
+                    $found->amount += $tax->amount;
+                } else {
+                    $taxes->push($tax);
+                }
+            }
+        }
+
+        $billTemplate = 'bill1'; // Default bill template
+        $company = Company::find($this->company_id);
+        $locale = CompanySetting::getSetting('language', $company->id);
+
+        \App::setLocale($locale);
+
+        $logo = $company->logo_path;
+
+        view()->share([
+            'bill' => $this,
+            'company' => $company,
+            'logo' => $logo ?? null,
+            'taxes' => $taxes,
+        ]);
+
+        return \PDF::loadView('app.pdf.bill.'.$billTemplate);
+    }
+
+    /**
+     * Get extra fields for PDF placeholders (Bill-specific)
+     *
+     * @return array
+     */
+    public function getExtraFields()
+    {
+        return [
+            '{BILL_DATE}' => $this->formattedBillDate,
+            '{BILL_DUE_DATE}' => $this->formattedDueDate,
+            '{BILL_NUMBER}' => $this->bill_number,
+            '{BILL_REF_NUMBER}' => $this->reference_number,
+            '{SUPPLIER_DISPLAY_NAME}' => $this->supplier->name ?? '',
+            '{SUPPLIER_CONTACT_NAME}' => $this->supplier->contact_name ?? '',
+            '{SUPPLIER_EMAIL}' => $this->supplier->email ?? '',
+            '{SUPPLIER_PHONE}' => $this->supplier->phone ?? '',
+            '{SUPPLIER_WEBSITE}' => $this->supplier->website ?? '',
+            '{SUPPLIER_TAX_ID}' => $this->supplier->tax_id ?? '',
+        ];
+    }
 }
 
 // CLAUDE-CHECKPOINT
