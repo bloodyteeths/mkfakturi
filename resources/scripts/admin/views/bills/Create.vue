@@ -101,7 +101,7 @@
               <BaseInputGroup :label="$t('bills.item_tax')">
                 <BaseMultiselect
                   v-model="line.taxes"
-                  :options="taxTypes"
+                  :options="taxTypeStore.taxTypes"
                   label="name"
                   value-prop="id"
                   track-by="id"
@@ -186,15 +186,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 
 const route = useRoute()
 const router = useRouter()
 const billsStore = useBillsStore()
 const globalStore = useGlobalStore()
 const companyStore = useCompanyStore()
+const taxTypeStore = useTaxTypeStore()
 
 const currencies = ref([])
-const taxTypes = ref([])
 
 const bill = reactive({
   id: null,
@@ -262,7 +263,7 @@ const calculatedTax = computed(() =>
 
     // Calculate tax based on selected tax types
     const lineTax = (line.taxes || []).reduce((taxSum, taxId) => {
-      const taxType = taxTypes.value.find(t => t.id === taxId)
+      const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
       if (taxType) {
         return taxSum + (lineSubtotal * Number(taxType.percent)) / 100
       }
@@ -318,7 +319,7 @@ function buildPayload() {
 
       // Calculate total tax for this line item
       const lineTax = (line.taxes || []).reduce((taxSum, taxId) => {
-        const taxType = taxTypes.value.find(t => t.id === taxId)
+        const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
         if (taxType) {
           return taxSum + (lineSubTotal * Number(taxType.percent)) / 100
         }
@@ -329,7 +330,7 @@ function buildPayload() {
 
       // Build taxes array with details
       const itemTaxes = (line.taxes || []).map(taxId => {
-        const taxType = taxTypes.value.find(t => t.id === taxId)
+        const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
         if (taxType) {
           const taxAmount = (lineSubTotal * Number(taxType.percent)) / 100
           return {
@@ -381,9 +382,7 @@ onMounted(() => {
   })
 
   // Fetch tax types
-  globalStore.fetchTaxTypes().then((res) => {
-    taxTypes.value = res.data.data || globalStore.taxTypes || []
-  })
+  taxTypeStore.fetchTaxTypes()
 
   if (isEdit.value) {
     billsStore.fetchBill(route.params.id).then((response) => {
