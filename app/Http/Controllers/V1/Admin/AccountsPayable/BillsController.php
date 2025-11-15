@@ -59,32 +59,60 @@ class BillsController extends Controller
      */
     public function store(BillRequest $request): JsonResponse
     {
-        $this->authorize('create', Bill::class);
+        \Log::info('BillsController::store - Starting bill creation', [
+            'user_id' => auth()->id(),
+            'company_id' => $request->header('company'),
+            'request_data' => $request->all(),
+        ]);
 
-        $bill = Bill::create($request->getBillPayload());
+        try {
+            $this->authorize('create', Bill::class);
 
-        if ($request->has('items')) {
-            $bill->items()->delete();
-            $bill->taxes()->delete();
+            \Log::info('BillsController::store - Authorization passed');
 
-            Bill::createItems($bill, $request->items);
+            $billPayload = $request->getBillPayload();
+            \Log::info('BillsController::store - Bill payload prepared', ['payload' => $billPayload]);
 
-            if ($request->has('taxes') && (! empty($request->taxes))) {
-                Bill::createTaxes($bill, $request->taxes);
+            $bill = Bill::create($billPayload);
+            \Log::info('BillsController::store - Bill created', ['bill_id' => $bill->id]);
+
+            if ($request->has('items')) {
+                \Log::info('BillsController::store - Processing items', ['item_count' => count($request->items)]);
+
+                $bill->items()->delete();
+                $bill->taxes()->delete();
+
+                Bill::createItems($bill, $request->items);
+                \Log::info('BillsController::store - Items created');
+
+                if ($request->has('taxes') && (! empty($request->taxes))) {
+                    Bill::createTaxes($bill, $request->taxes);
+                    \Log::info('BillsController::store - Taxes created');
+                }
             }
+
+            if ($request->customFields) {
+                \Log::info('BillsController::store - Adding custom fields');
+                $bill->addCustomFields($request->customFields);
+            }
+
+            $bill->load($this->billResourceRelations());
+            \Log::info('BillsController::store - Relationships loaded');
+
+            GenerateBillPdfJob::dispatchAfterResponse($bill->id);
+            \Log::info('BillsController::store - PDF generation job dispatched');
+
+            return (new BillResource($bill))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Exception $e) {
+            \Log::error('BillsController::store - Error creating bill', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+            throw $e;
         }
-
-        if ($request->customFields) {
-            $bill->addCustomFields($request->customFields);
-        }
-
-        $bill->load($this->billResourceRelations());
-
-        GenerateBillPdfJob::dispatchAfterResponse($bill->id);
-
-        return (new BillResource($bill))
-            ->response()
-            ->setStatusCode(201);
     }
 
     /**

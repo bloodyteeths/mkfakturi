@@ -9,6 +9,7 @@
  * @see https://github.com/vinkla/laravel-hashids
  */
 
+use App\Models\Bill;
 use App\Models\Company;
 use App\Models\EmailLog;
 use App\Models\Estimate;
@@ -57,6 +58,11 @@ return [
             'salt' => Payment::class.config('app.key'),
             'length' => 20,
             'alphabet' => 'aqW3eR2Icf0jp65Gl7UVS1dhyb8Mn9XKTZ4O',
+        ],
+        Bill::class => [
+            'salt' => Bill::class.config('app.key'),
+            'length' => 20,
+            'alphabet' => 'qX5Rm8Tz3Nv9Lk1Wp4Hd7Yc6JU2FsGb0Oi',
         ],
         Company::class => [
             'salt' => Company::class.config('app.key'),

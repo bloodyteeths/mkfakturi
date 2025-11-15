@@ -36,7 +36,7 @@ class BillObserver
     {
         // Generate unique hash if not set
         if (!$bill->unique_hash) {
-            $bill->unique_hash = Hashids::encode($bill->id);
+            $bill->unique_hash = Hashids::connection(Bill::class)->encode($bill->id);
             $bill->saveQuietly();
         }
 
