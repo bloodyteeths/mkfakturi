@@ -45,6 +45,11 @@ class Tax extends Model
         return $this->belongsTo(Estimate::class);
     }
 
+    public function bill(): BelongsTo
+    {
+        return $this->belongsTo(Bill::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -58,6 +63,11 @@ class Tax extends Model
     public function estimateItem(): BelongsTo
     {
         return $this->belongsTo(EstimateItem::class);
+    }
+
+    public function billItem(): BelongsTo
+    {
+        return $this->belongsTo(BillItem::class);
     }
 
     public function item(): BelongsTo
