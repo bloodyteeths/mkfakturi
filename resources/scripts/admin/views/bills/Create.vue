@@ -98,12 +98,17 @@
                 />
               </BaseInputGroup>
 
-              <BaseInputGroup :label="$t('bills.item_tax_rate')">
-                <BaseInput
-                  v-model.number="line.tax_rate"
-                  type="number"
-                  min="0"
-                  step="0.01"
+              <BaseInputGroup :label="$t('bills.item_tax')">
+                <BaseMultiselect
+                  v-model="line.taxes"
+                  :options="taxTypes"
+                  label="name"
+                  value-prop="id"
+                  track-by="id"
+                  mode="tags"
+                  :placeholder="$t('invoices.select_a_tax')"
+                  :can-clear="true"
+                  :close-on-select="false"
                 />
               </BaseInputGroup>
             </div>
@@ -189,6 +194,7 @@ const globalStore = useGlobalStore()
 const companyStore = useCompanyStore()
 
 const currencies = ref([])
+const taxTypes = ref([])
 
 const bill = reactive({
   id: null,
@@ -207,7 +213,7 @@ const items = reactive([
     description: '',
     quantity: 1,
     price: 0,
-    tax_rate: 0,
+    taxes: [],
   },
 ])
 
@@ -252,8 +258,18 @@ const calculatedTax = computed(() =>
   items.reduce((sum, line) => {
     const qty = Number(line.quantity) || 0
     const price = Number(line.price) || 0
-    const rate = Number(line.tax_rate) || 0
-    return sum + (qty * price * rate) / 100
+    const lineSubtotal = qty * price
+
+    // Calculate tax based on selected tax types
+    const lineTax = (line.taxes || []).reduce((taxSum, taxId) => {
+      const taxType = taxTypes.value.find(t => t.id === taxId)
+      if (taxType) {
+        return taxSum + (lineSubtotal * Number(taxType.percent)) / 100
+      }
+      return taxSum
+    }, 0)
+
+    return sum + lineTax
   }, 0)
 )
 
@@ -273,7 +289,7 @@ function addItemRow() {
     description: '',
     quantity: 1,
     price: 0,
-    tax_rate: 0,
+    taxes: [],
   })
 }
 
@@ -299,9 +315,33 @@ function buildPayload() {
     items: items.map((line) => {
       const lineSubTotal =
         (Number(line.quantity) || 0) * (Number(line.price) || 0)
-      const lineTax =
-        (lineSubTotal * (Number(line.tax_rate) || 0)) / 100
+
+      // Calculate total tax for this line item
+      const lineTax = (line.taxes || []).reduce((taxSum, taxId) => {
+        const taxType = taxTypes.value.find(t => t.id === taxId)
+        if (taxType) {
+          return taxSum + (lineSubTotal * Number(taxType.percent)) / 100
+        }
+        return taxSum
+      }, 0)
+
       const lineTotal = lineSubTotal + lineTax
+
+      // Build taxes array with details
+      const itemTaxes = (line.taxes || []).map(taxId => {
+        const taxType = taxTypes.value.find(t => t.id === taxId)
+        if (taxType) {
+          const taxAmount = (lineSubTotal * Number(taxType.percent)) / 100
+          return {
+            tax_type_id: taxType.id,
+            name: taxType.name,
+            percent: Number(taxType.percent),
+            amount: Math.round(taxAmount),
+            compound_tax: taxType.compound_tax || 0,
+          }
+        }
+        return null
+      }).filter(Boolean)
 
       return {
         name: line.name || line.description || 'Item',
@@ -312,6 +352,7 @@ function buildPayload() {
         discount_val: 0,
         tax: Math.round(lineTax),
         total: Math.round(lineTotal),
+        taxes: itemTaxes,
       }
     }),
   }
@@ -337,6 +378,11 @@ onMounted(() => {
     if (!bill.currency_id && companyStore.selectedCompanyCurrency) {
       bill.currency_id = companyStore.selectedCompanyCurrency.id
     }
+  })
+
+  // Fetch tax types
+  globalStore.fetchTaxTypes().then((res) => {
+    taxTypes.value = res.data.data || globalStore.taxTypes || []
   })
 
   if (isEdit.value) {
