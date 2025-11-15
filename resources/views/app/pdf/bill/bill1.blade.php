@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>@lang('pdf_bill_label') - {{ $bill->bill_number }}</title>
+    <title>Сметка - {{ $bill->bill_number }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     <style type="text/css">
