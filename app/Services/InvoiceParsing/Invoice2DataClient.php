@@ -17,6 +17,12 @@ class Invoice2DataClient implements InvoiceParserClient
         $absolutePath = Storage::disk($disk)->path($filePath);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
+        // Ensure we have an explicit scheme to avoid 301 http→https
+        // redirects that can change POST to GET and cause 405 responses.
+        if (! str_starts_with($baseUrl, 'http://') && ! str_starts_with($baseUrl, 'https://')) {
+            $baseUrl = 'https://'.$baseUrl;
+        }
+
         $timeout = (int) config('services.invoice2data.timeout', 30);
 
         $response = Http::timeout($timeout)
@@ -33,4 +39,3 @@ class Invoice2DataClient implements InvoiceParserClient
         return $response->json();
     }
 }
-
