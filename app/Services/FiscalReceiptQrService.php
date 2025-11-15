@@ -15,6 +15,11 @@ class FiscalReceiptQrService
      */
     public function decodeAndNormalize(UploadedFile $file): array
     {
+        // Ensure we have at least one supported image backend
+        if (! extension_loaded('imagick') && ! extension_loaded('gd')) {
+            throw new RuntimeException('QR decoding requires Imagick or GD PHP extensions to be enabled on the server.');
+        }
+
         $path = $file->getRealPath();
 
         if (! $path) {
@@ -102,4 +107,3 @@ class FiscalReceiptQrService
         ];
     }
 }
-

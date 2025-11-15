@@ -57,6 +57,13 @@ class ReceiptScannerController extends Controller
             // Clean up stored file if QR decoding failed
             Storage::disk($disk)->delete($storedPath);
 
+            \Log::error('ReceiptScannerController::scan - QR decode failed', [
+                'user_id' => auth()->id(),
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+
             return response()->json([
                 'message' => $e->getMessage(),
             ], 422);

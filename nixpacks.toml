@@ -3,6 +3,8 @@ nixPkgs = [
   "php82",
   "php82Packages.composer",
   "nodejs_20",
+  # Image manipulation for QR decoding
+  "php82Extensions.gd",
   # For PDF to Image conversion (AI vision features)
   "imagemagick",
   "ghostscript",
