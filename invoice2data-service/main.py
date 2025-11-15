@@ -165,9 +165,11 @@ def health() -> Dict[str, str]:
 
 @app.post("/parse")
 async def parse_invoice(file: UploadFile = File(...)) -> JSONResponse:
-    if extract_data is None:
-        raise HTTPException(status_code=500, detail="invoice2data library not available")
-
+    """
+    Parse an uploaded invoice:
+    - PDFs: use invoice2data when available.
+    - Images: use OCR + lightweight text parser (does not require invoice2data).
+    """
     try:
         contents = await file.read()
         if not contents:
@@ -180,6 +182,14 @@ async def parse_invoice(file: UploadFile = File(...)) -> JSONResponse:
         is_image = content_type.startswith("image/") or filename.endswith((".jpg", ".jpeg", ".png"))
 
         if is_pdf:
+            if extract_data is None:
+                # Invoice2data is not available on this deployment; signal that
+                # PDF template parsing is not supported here.
+                raise HTTPException(
+                    status_code=501,
+                    detail="PDF template parsing (invoice2data) is not available on this deployment",
+                )
+
             # invoice2data expects a file-like object or path; we use BytesIO.
             buffer = io.BytesIO(contents)
             data = extract_data(buffer, templates=TEMPLATES if TEMPLATES else None)
@@ -210,4 +220,3 @@ async def parse_invoice(file: UploadFile = File(...)) -> JSONResponse:
         raise
     except Exception as exc:  # pragma: no cover - defensive
         raise HTTPException(status_code=400, detail=str(exc))
-
