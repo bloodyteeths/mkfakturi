@@ -338,8 +338,8 @@
                     @if ($logo)
                         <img class="header-logo" style="height:50px" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="@lang('pdf_company_logo')">
                     @else
-                        @if ($bill->customer->company)
-                            <h2 class="header-logo"> {{ $bill->customer->company->name }}</h2>
+                        @if ($company)
+                            <h2 class="header-logo"> {{ $company->name }}</h2>
                         @endif
                     @endif
                 </td>
@@ -372,11 +372,11 @@
                     </tr>
                     <tr>
                         <td class="attribute-label">Датум на издавање</td>
-                        <td class="attribute-value"> &nbsp;{{ $bill->formattedInvoiceDate }}</td>
+                        <td class="attribute-value"> &nbsp;{{ $bill->formattedBillDate }}</td>
                     </tr>
                     <tr>
                         <td class="attribute-label">Ден на промет</td>
-                        <td class="attribute-value"> &nbsp;{{ $bill->formattedInvoiceDate }}</td>
+                        <td class="attribute-value"> &nbsp;{{ $bill->formattedBillDate }}</td>
                     </tr>
                     <tr>
                         <td class="attribute-label">Рок на плаќање</td>
@@ -394,8 +394,8 @@
                 <div class="billing-address">
                     {!! $billing_address !!}
                 </div>
-                @if(isset($bill->customer->vat_number) && $bill->customer->vat_number)
-                    <div style="margin-top: 5px; font-size: 11px; padding-left: 30px;"><strong>Даночен број:</strong> {{ $bill->customer->vat_number }}</div>
+                @if(isset($bill->supplier->tax_id) && $bill->supplier->tax_id)
+                    <div style="margin-top: 5px; font-size: 11px; padding-left: 30px;"><strong>Даночен број:</strong> {{ $bill->supplier->tax_id }}</div>
                 @endif
             @endif
         </div>

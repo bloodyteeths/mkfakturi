@@ -547,9 +547,66 @@ class Bill extends Model implements HasMedia
             'supplier' => $this->supplier,
             'logo' => $logo,
             'taxes' => $taxes,
+            'company_address' => $this->getCompanyAddress(),
+            'billing_address' => $this->getSupplierAddress(),
+            'shipping_address' => false, // Bills don't have shipping addresses
+            'notes' => $this->getNotes(),
         ]);
 
         return \PDF::loadView('app.pdf.bill.'.$billTemplate);
+    }
+
+    /**
+     * Get company address formatted for bill PDF
+     *
+     * @return string|bool
+     */
+    public function getCompanyAddress()
+    {
+        if ($this->company && (!$this->company->address()->exists())) {
+            return false;
+        }
+
+        $format = CompanySetting::getSetting('bill_company_address_format', $this->company_id);
+
+        // Fallback to invoice format if bill format not set
+        if (!$format) {
+            $format = CompanySetting::getSetting('invoice_company_address_format', $this->company_id);
+        }
+
+        return $this->getFormattedString($format);
+    }
+
+    /**
+     * Get supplier address formatted for bill PDF (bills use supplier instead of customer)
+     *
+     * @return string|bool
+     */
+    public function getSupplierAddress()
+    {
+        if (!$this->supplier) {
+            return false;
+        }
+
+        // Build supplier address from available fields
+        $addressParts = array_filter([
+            $this->supplier->name,
+            $this->supplier->contact_name,
+            $this->supplier->email,
+            $this->supplier->phone,
+        ]);
+
+        return implode('<br>', $addressParts);
+    }
+
+    /**
+     * Get formatted notes for bill PDF
+     *
+     * @return string
+     */
+    public function getNotes()
+    {
+        return $this->getFormattedString($this->notes);
     }
 
     /**
