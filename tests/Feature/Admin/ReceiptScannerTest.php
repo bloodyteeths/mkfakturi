@@ -5,6 +5,7 @@ use App\Http\Requests\ReceiptScanRequest;
 use App\Models\Bill;
 use App\Models\Company;
 use App\Models\User;
+use App\Services\FiscalReceiptQrService;
 use App\Services\InvoiceParsing\InvoiceParserClient;
 use App\Services\InvoiceParsing\ParsedInvoiceMapper;
 use Illuminate\Http\UploadedFile;
@@ -118,6 +119,15 @@ test('upload jpeg creates draft bill via parser', function () {
     };
     $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
 
+    // Ensure QR path fails so we exercise parser fallback in controller
+    $failingQrService = new class extends FiscalReceiptQrService {
+        public function decodeAndNormalize(UploadedFile $file): array
+        {
+            throw new RuntimeException('QR not found in test image');
+        }
+    };
+    $this->app->instance(FiscalReceiptQrService::class, $failingQrService);
+
     Storage::fake(config('filesystems.default', 'public'));
 
     $file = UploadedFile::fake()->image('ocr-receipt.jpg');
@@ -197,6 +207,14 @@ test('receipt scanner respects tenant isolation', function () {
         }
     };
     $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
+
+    $failingQrService = new class extends FiscalReceiptQrService {
+        public function decodeAndNormalize(UploadedFile $file): array
+        {
+            throw new RuntimeException('QR not found in test image');
+        }
+    };
+    $this->app->instance(FiscalReceiptQrService::class, $failingQrService);
 
     Storage::fake(config('filesystems.default', 'public'));
 
