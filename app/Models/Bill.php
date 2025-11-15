@@ -557,6 +557,69 @@ class Bill extends Model implements HasMedia
     }
 
     /**
+     * Override getFieldsArray from GeneratesPdfTrait to use supplier instead of customer
+     *
+     * @return array
+     */
+    public function getFieldsArray()
+    {
+        $supplier = $this->supplier ?? new Supplier();
+        $companyAddress = $this->company->address ?? new Address();
+
+        $fields = [
+            '{SHIPPING_ADDRESS_NAME}' => '',
+            '{SHIPPING_COUNTRY}' => '',
+            '{SHIPPING_STATE}' => '',
+            '{SHIPPING_CITY}' => '',
+            '{SHIPPING_ADDRESS_STREET_1}' => '',
+            '{SHIPPING_ADDRESS_STREET_2}' => '',
+            '{SHIPPING_PHONE}' => '',
+            '{SHIPPING_ZIP_CODE}' => '',
+            '{BILLING_ADDRESS_NAME}' => $supplier->name ?? '',
+            '{BILLING_COUNTRY}' => '',
+            '{BILLING_STATE}' => '',
+            '{BILLING_CITY}' => '',
+            '{BILLING_ADDRESS_STREET_1}' => '',
+            '{BILLING_ADDRESS_STREET_2}' => '',
+            '{BILLING_PHONE}' => $supplier->phone ?? '',
+            '{BILLING_ZIP_CODE}' => '',
+            '{COMPANY_NAME}' => $this->company->name ?? '',
+            '{COMPANY_COUNTRY}' => $companyAddress->country_name ?? '',
+            '{COMPANY_STATE}' => $companyAddress->state ?? '',
+            '{COMPANY_CITY}' => $companyAddress->city ?? '',
+            '{COMPANY_ADDRESS_STREET_1}' => $companyAddress->address_street_1 ?? '',
+            '{COMPANY_ADDRESS_STREET_2}' => $companyAddress->address_street_2 ?? '',
+            '{COMPANY_PHONE}' => $companyAddress->phone ?? '',
+            '{COMPANY_ZIP_CODE}' => $companyAddress->zip ?? '',
+            '{COMPANY_VAT}' => $this->company->vat_id ?? '',
+            '{COMPANY_TAX}' => $this->company->tax_id ?? '',
+            '{CONTACT_DISPLAY_NAME}' => $supplier->name ?? '',
+            '{PRIMARY_CONTACT_NAME}' => $supplier->contact_name ?? '',
+            '{CONTACT_EMAIL}' => $supplier->email ?? '',
+            '{CONTACT_PHONE}' => $supplier->phone ?? '',
+            '{CONTACT_WEBSITE}' => $supplier->website ?? '',
+            '{CONTACT_TAX_ID}' => __('pdf_tax_id').': '.($supplier->tax_id ?? ''),
+        ];
+
+        $customFields = $this->fields;
+        foreach ($customFields as $customField) {
+            $fields['{'.$customField->customField->slug.'}'] = $customField->defaultAnswer ?? '';
+        }
+
+        if ($supplier && isset($supplier->fields)) {
+            foreach ($supplier->fields as $customField) {
+                $fields['{'.$customField->customField->slug.'}'] = $customField->defaultAnswer ?? '';
+            }
+        }
+
+        foreach ($fields as $key => $field) {
+            $fields[$key] = htmlspecialchars($field, ENT_QUOTES, 'UTF-8');
+        }
+
+        return $fields;
+    }
+
+    /**
      * Get company address formatted for bill PDF
      *
      * @return string|bool
