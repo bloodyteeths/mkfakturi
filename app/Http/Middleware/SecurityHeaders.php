@@ -37,15 +37,16 @@ class SecurityHeaders
             "img-src 'self' data: https:",
             "font-src 'self' data:",
             "connect-src 'self'",
-            "frame-ancestors 'none'",
+            "frame-src 'self'", // Allow frames from same origin
+            "frame-ancestors 'self'", // Allow being framed by same origin
             "base-uri 'self'",
             "form-action 'self'",
         ]);
 
         $response->headers->set('Content-Security-Policy', $csp);
 
-        // Prevent clickjacking attacks
-        $response->headers->set('X-Frame-Options', 'DENY');
+        // Prevent clickjacking attacks - allow same-origin framing
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
         // Prevent MIME-sniffing
         $response->headers->set('X-Content-Type-Options', 'nosniff');
