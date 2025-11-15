@@ -131,6 +131,13 @@ mkdir -p storage/certificates
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Ensure nginx client body temp directory is writable (for file uploads)
+if [ -d "/var/lib/nginx" ]; then
+    echo "Ensuring /var/lib/nginx/tmp/client_body exists and is writable..."
+    mkdir -p /var/lib/nginx/tmp/client_body || true
+    chmod -R 777 /var/lib/nginx/tmp || true
+fi
+
 # Decode PSD2 certificates from base64 environment variables (for Railway)
 echo "Checking for PSD2 certificates in environment..."
 if [ ! -z "$NLB_MTLS_CERT_BASE64" ]; then
