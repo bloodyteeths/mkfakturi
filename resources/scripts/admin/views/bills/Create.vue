@@ -35,9 +35,8 @@
 
           <BaseInputGroup :label="$t('bills.supplier')">
             <BaseSupplierSelectInput
-              v-model="bill.supplier"
+              v-model="bill.supplier_id"
               fetch-all
-              @update:modelValue="onSupplierSelected"
             />
           </BaseInputGroup>
 
@@ -196,7 +195,6 @@ const bill = reactive({
   bill_number: '',
   bill_date: '',
   due_date: '',
-  supplier: null,
   supplier_id: null,
   currency_id: null,
   exchange_rate: 1,
@@ -228,7 +226,6 @@ function hydrateForm(data) {
   bill.bill_date = data.bill_date
   bill.due_date = data.due_date
   bill.supplier_id = data.supplier_id
-  bill.supplier = data.supplier || null
   bill.currency_id = data.currency_id
   bill.exchange_rate = data.exchange_rate || 1
   bill.discount = data.discount || 0
@@ -278,11 +275,6 @@ function addItemRow() {
     price: 0,
     tax_rate: 0,
   })
-}
-
-function onSupplierSelected(val) {
-  bill.supplier = val
-  bill.supplier_id = val ? val.id : null
 }
 
 function buildPayload() {
