@@ -53,7 +53,10 @@ class FiscalReceiptQrService
             $imagePath = $temporaryImagePath;
         }
 
-        $qr = new QrReader($imagePath);
+        // Use GD backend inside QrReader to avoid potential Imagick crashes
+        // in some hosting environments. We still use Imagick ourselves only
+        // for PDF → PNG conversion above.
+        $qr = new QrReader($imagePath, QrReader::SOURCE_TYPE_FILE, false);
         $text = $qr->text();
 
         if ($temporaryImagePath && file_exists($temporaryImagePath)) {
