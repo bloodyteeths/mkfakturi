@@ -79,6 +79,29 @@ MAX_TOKENS_HINT: 500
   - LastUpdate: 2025-11-15T13:20:00Z
   - Notes: QR decoding service, Macedonian QR payload parser, request/controller wiring, Bill/Expense creation, media attachments, routes, and tests implemented with tenant isolation.
 
+- Task: Phase 5 — Bulk CSV Import for Bills  
+  - Subtasks:
+    - Extend Import presets to include Bills entity type.  
+    - Implement `BillImport` to map CSV/XLSX rows into Supplier/Bill/BillItems with correct base_* currency fields.  
+    - Wire `ProcessImportJob` to handle `bills` type and create tenant-scoped records only.  
+    - Add `ImportBillsRequest` and `BillsImportController@import` endpoint.  
+    - Add feature tests for CSV upload, supplier auto-creation, bill/item creation, row-level errors, and tenant isolation.  
+  - Status: Completed
+  - LastUpdate: 2025-11-15T13:45:00Z
+  - Notes: Import presets, `BillImport`, process job integration, controller, and feature tests implemented; Bills import is multi-tenant safe and regressions avoided.
+
+- Task: Phase 6 — Accounts Payable UI Integration  
+  - Subtasks:
+    - Add Vue pages for Suppliers, Bills, Bills Inbox, and Receipt Scanner using existing Base components.  
+    - Implement Pinia stores for suppliers, bills, inbox, and receipt scanner with full CRUD and multi-tenant-aware API usage.  
+    - Wire admin router and main menu navigation for “Suppliers”, “Bills”, “Bills Inbox”, and “Receipt Scanner” respecting permissions.  
+    - Implement bill create/edit with supplier selector, items editor, totals calculation, PDF download and status actions, plus bill payments tab.  
+    - Implement Inbox actions (view, approve, delete, convert to expense) and Receipt Scanner flow (upload → scan → redirect to Bill/Expense).  
+    - Add minimal Cypress specs for AP navigation and basic create flows.  
+  - Status: InProgress
+  - LastUpdate: 2025-11-15T14:15:00Z
+  - Notes: Routes, menu entries, Pinia stores, Suppliers/Bills/Inbox/ReceiptScanner views and initial Cypress tests implemented; further UX polish and regression passes will follow in Phase 7.
+
 ## Self-Audit Report
 
 - TOKEN_ESTIMATE: 900

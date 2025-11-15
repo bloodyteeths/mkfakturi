@@ -83,6 +83,24 @@ const EstimateCreate = () =>
   import('@/scripts/admin/views/estimates/create/EstimateCreate.vue')
 const EstimateView = () => import('@/scripts/admin/views/estimates/View.vue')
 
+// Suppliers (Accounts Payable)
+const SuppliersIndex = () =>
+  import('@/scripts/admin/views/suppliers/Index.vue')
+const SupplierCreate = () =>
+  import('@/scripts/admin/views/suppliers/Create.vue')
+const SupplierView = () => import('@/scripts/admin/views/suppliers/View.vue')
+
+// Bills (Accounts Payable)
+const BillsIndex = () => import('@/scripts/admin/views/bills/Index.vue')
+const BillsCreate = () => import('@/scripts/admin/views/bills/Create.vue')
+const BillsView = () => import('@/scripts/admin/views/bills/View.vue')
+const BillsPayments = () =>
+  import('@/scripts/admin/views/bills/Payments.vue')
+const BillsInbox = () => import('@/scripts/admin/views/bills/Inbox.vue')
+
+// Receipt Scanner (Accounts Payable)
+const ReceiptScan = () => import('@/scripts/admin/views/receipts/Scan.vue')
+
 // Payments
 const PaymentsIndex = () => import('@/scripts/admin/views/payments/Index.vue')
 const PaymentCreate = () => import('@/scripts/admin/views/payments/Create.vue')
@@ -222,6 +240,33 @@ export default [
         meta: { ability: abilities.VIEW_CUSTOMER },
         component: CustomerView,
       },
+
+      // Suppliers
+      {
+        path: 'suppliers',
+        name: 'suppliers.index',
+        meta: { ability: abilities.VIEW_SUPPLIER },
+        component: SuppliersIndex,
+      },
+      {
+        path: 'suppliers/create',
+        name: 'suppliers.create',
+        meta: { ability: abilities.CREATE_SUPPLIER },
+        component: SupplierCreate,
+      },
+      {
+        path: 'suppliers/:id/edit',
+        name: 'suppliers.edit',
+        meta: { ability: abilities.EDIT_SUPPLIER },
+        component: SupplierCreate,
+      },
+      {
+        path: 'suppliers/:id/view',
+        name: 'suppliers.view',
+        meta: { ability: abilities.VIEW_SUPPLIER },
+        component: SupplierView,
+      },
+
       // Payments
       {
         path: 'payments',
@@ -251,6 +296,44 @@ export default [
         name: 'payments.view',
         meta: { ability: abilities.VIEW_PAYMENT },
         component: PaymentView,
+      },
+
+      // Bills
+      {
+        path: 'bills',
+        name: 'bills.index',
+        meta: { ability: abilities.VIEW_BILL },
+        component: BillsIndex,
+      },
+      {
+        path: 'bills/create',
+        name: 'bills.create',
+        meta: { ability: abilities.CREATE_BILL },
+        component: BillsCreate,
+      },
+      {
+        path: 'bills/:id/edit',
+        name: 'bills.edit',
+        meta: { ability: abilities.EDIT_BILL },
+        component: BillsCreate,
+      },
+      {
+        path: 'bills/:id/view',
+        name: 'bills.view',
+        meta: { ability: abilities.VIEW_BILL },
+        component: BillsView,
+      },
+      {
+        path: 'bills/:id/payments',
+        name: 'bills.payments',
+        meta: { ability: abilities.EDIT_BILL },
+        component: BillsPayments,
+      },
+      {
+        path: 'bills/inbox',
+        name: 'bills.inbox',
+        meta: { ability: abilities.VIEW_BILL },
+        component: BillsInbox,
       },
 
       //settings
@@ -614,4 +697,3 @@ export default [
 
 // LLM-CHECKPOINT
 // CLAUDE-CHECKPOINT
-

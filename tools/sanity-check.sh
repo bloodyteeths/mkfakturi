@@ -125,6 +125,11 @@ if can_run_artisan; then
   check_routes "/webhooks/" 4
   check_routes "/exports" 2
   check_routes "recurring-expenses" 5
+  check_routes "/suppliers" 2
+  check_routes "/bills" 4
+  check_routes "/bills/{bill}/payments" 2
+  check_routes "/receipts/scan" 1
+  check_routes "/bills/import" 1
 else
   skip "php artisan not available; skipping route checks"
 fi
@@ -156,6 +161,16 @@ assert_pattern_in_tree "encrypted_key_blob" "app" "Certificate uses encrypted_ke
 assert_pattern_in_tree "Crypt::encryptString|Crypt::decryptString" "app" "encryption helpers present"
 # PII encryption in audit logs
 assert_pattern_in_tree "encryptPii|decryptPii" "app" "PII encryption hooks present in audit logs"
+
+section "AP Automation configuration"
+assert_pattern_in_tree "AccountsPayable" "app/Http/Controllers/V1/Admin" "AP controllers present"
+assert_pattern_in_tree "suppliers" "routes/api.php" "AP routes for suppliers present"
+assert_pattern_in_tree "bills" "routes/api.php" "AP routes for bills present"
+assert_pattern_in_tree "ReceiptScannerController" "app" "Receipt scanner controller present"
+assert_pattern_in_file "INVOICE2DATA_URL" ".env.example" "INVOICE2DATA_URL present"
+assert_pattern_in_file "INVOICE2DATA_TIMEOUT" ".env.example" "INVOICE2DATA_TIMEOUT present"
+assert_file "invoice2data-service/Dockerfile"
+assert_file "invoice2data-service/main.py"
 
 section "Summary"
 printf "\n${GREEN}PASS:${NC} %d  ${RED}FAIL:${NC} %d  ${YELLOW}SKIP:${NC} %d\n" "$PASS" "$FAIL" "$SKIP"

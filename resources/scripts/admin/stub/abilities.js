@@ -81,4 +81,17 @@ export default {
   // settings
   MANAGE_NOTE: 'manage-all-notes',
   VIEW_NOTE: 'view-all-notes',
+
+  // Suppliers (Accounts Payable)
+  VIEW_SUPPLIER: 'view-supplier',
+  CREATE_SUPPLIER: 'create-supplier',
+  EDIT_SUPPLIER: 'edit-supplier',
+  DELETE_SUPPLIER: 'delete-supplier',
+
+  // Bills (Accounts Payable)
+  VIEW_BILL: 'view-bill',
+  CREATE_BILL: 'create-bill',
+  EDIT_BILL: 'edit-bill',
+  DELETE_BILL: 'delete-bill',
+  SEND_BILL: 'send-bill',
 }

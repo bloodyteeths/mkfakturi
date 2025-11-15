@@ -8,6 +8,8 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Note;
+use App\Models\Bill;
+use App\Models\Supplier;
 use App\Models\Payment;
 use App\Models\RecurringInvoice;
 use App\Models\TaxType;
@@ -400,6 +402,46 @@ return [
             'name' => 'Expenses',
             'owner_only' => false,
             'ability' => 'view-expense',
+            'model' => Expense::class,
+        ],
+        [
+            'title' => 'navigation.suppliers',
+            'group' => 2,
+            'link' => '/admin/suppliers',
+            'icon' => 'BuildingStorefrontIcon',
+            'name' => 'Suppliers',
+            'owner_only' => false,
+            'ability' => 'view-supplier',
+            'model' => Supplier::class,
+        ],
+        [
+            'title' => 'navigation.bills',
+            'group' => 2,
+            'link' => '/admin/bills',
+            'icon' => 'ClipboardDocumentListIcon',
+            'name' => 'Bills',
+            'owner_only' => false,
+            'ability' => 'view-bill',
+            'model' => Bill::class,
+        ],
+        [
+            'title' => 'navigation.bills_inbox',
+            'group' => 2,
+            'link' => '/admin/bills/inbox',
+            'icon' => 'InboxStackIcon',
+            'name' => 'Bills Inbox',
+            'owner_only' => false,
+            'ability' => 'view-bill',
+            'model' => Bill::class,
+        ],
+        [
+            'title' => 'navigation.receipts_scan',
+            'group' => 2,
+            'link' => '/admin/receipts/scan',
+            'icon' => 'QrCodeIcon',
+            'name' => 'Receipt Scanner',
+            'owner_only' => false,
+            'ability' => 'create-expense',
             'model' => Expense::class,
         ],
         [

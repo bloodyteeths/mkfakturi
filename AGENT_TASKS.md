@@ -38,6 +38,9 @@
 | T9  | Verify Parser Microservice + ParseInvoicePdfJob Integration | TESTER | Validate parser pipeline, bill creation, multi-tenant behavior | Done     | Parser job + alias→bill E2E tests passed; no regressions |
 | T10 | QR Fiscal Receipt Scanner Backend     | DEVELOPER      | Implement QR decoding service, scanner controller, and tests    | Done     | AP_AUTOMATION_PLAN Phase 4 completed |
 | T11 | Verify Receipt Scanner + QR Pipeline  | TESTER         | Validate receipt scans → Expense/Bill drafts, multi-tenant      | Done     | QR unit + feature tests passed; no regressions observed |
+| T12 | Bulk CSV Import for Bills Backend     | DEVELOPER      | Implement Bills import presets, importer, controller, and tests | Done     | AP_AUTOMATION_PLAN Phase 5 completed |
+| T13 | Verify Bulk Bills Import Pipeline     | TESTER         | Validate CSV/XLSX import → Bills/Suppliers, tenant isolation    | Done     | Bill import feature tests passed; no regressions observed |
+| T14 | Accounts Payable UI Integration       | DEVELOPER      | Implement Suppliers/Bills/Inbox/Receipt Scanner frontend        | InProgress | Phase 6 AP UI pages and stores under implementation |
 
 ## Hand-off Conditions
 

@@ -82,14 +82,14 @@ class XmlExportTest extends TestCase
             'vat_number' => 'MK4030009501234'
         ]);
 
-        // Create company address
+        // Create company address (country_id nullable to avoid FK reliance on seeded countries)
         Address::factory()->create([
             'company_id' => $this->company->id,
             'name' => 'Main Office',
             'address_street_1' => 'Македонија бр. 123',
             'city' => 'Скопје',
             'zip' => '1000',
-            'country_id' => 1, // Macedonia
+            'country_id' => null,
             'type' => 'billing'
         ]);
 
@@ -119,7 +119,7 @@ class XmlExportTest extends TestCase
             'address_street_1' => 'Клиентска улица бр. 456',
             'city' => 'Скопје',
             'zip' => '1000',
-            'country_id' => 1,
+            'country_id' => null,
             'type' => 'billing'
         ]);
 
