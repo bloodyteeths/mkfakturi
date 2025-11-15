@@ -75,3 +75,34 @@ def test_parse_malformed_pdf(monkeypatch):
 
     assert response.status_code == 400
 
+
+def test_parse_text_to_raw_prefers_total_keywords():
+    from main import _parse_text_to_raw, normalize_invoice_data
+
+    ocr_text = """
+    МАРКЕТ ДОБАР ДЕН
+    Фискална сметка бр. 1234567890123
+    Артикл 1  10 x 50,00  = 500,00
+    Артикл 2   5 x 20,00  = 100,00
+    ВКУПНО: 600,00
+    """
+
+    raw = _parse_text_to_raw(ocr_text)
+    normalized = normalize_invoice_data(raw)
+
+    assert normalized["totals"]["total"] == 60000
+
+
+def test_parse_text_to_raw_ignores_unreasonable_huge_numbers():
+    from main import _parse_text_to_raw, normalize_invoice_data
+
+    ocr_text = """
+    SOME SHOP
+    Code: 9999999999999999
+    TOTAL TO PAY  123,45
+    """
+
+    raw = _parse_text_to_raw(ocr_text)
+    normalized = normalize_invoice_data(raw)
+
+    assert normalized["totals"]["total"] == 12345

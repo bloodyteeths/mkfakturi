@@ -43,6 +43,7 @@
 | T14 | Accounts Payable UI Integration       | DEVELOPER      | Implement Suppliers/Bills/Inbox/Receipt Scanner frontend        | Done     | Phase 6 AP UI implemented with routes, stores, and basic Cypress specs |
 | T15 | AP Automation Regression & E2E Tests  | TESTER         | Add regression + E2E tests for AP pipelines and UI              | Done     | Phase 7 backend regression and Cypress smoke tests added |
 | T16 | Railway Deployment for AP Automation  | DEVELOPER      | Configure Railway services (web, worker, invoice2data-service)  | Done     | Phase 8 Railway web/worker/parser services configured; start scripts and sanity checks in place |
+| T17 | Enhance QR decoding + OCR fallback    | DEVELOPER      | Improve fiscal QR retry logic, OCR fallback, and tests          | InProgress | AP_AUTOMATION_PLAN Phase 8.1 fix |
 
 ## Hand-off Conditions
 

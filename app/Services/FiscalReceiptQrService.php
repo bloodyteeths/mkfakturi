@@ -36,38 +36,137 @@ class FiscalReceiptQrService
         $imagePath = $path;
         $temporaryImagePath = null;
 
+        // Convert first page of PDF receipts into a PNG for QR scanning
         if ($extension === 'pdf') {
             if (! class_exists(\Imagick::class)) {
                 throw new RuntimeException('PDF QR decoding requires Imagick extension');
             }
 
-            $imagick = new \Imagick();
-            $imagick->readImage($path.'[0]');
-            $imagick->setImageFormat('png');
-
-            $temporaryImagePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('qr_', true).'.png';
-            $imagick->writeImage($temporaryImagePath);
-            $imagick->clear();
-            $imagick->destroy();
-
+            $temporaryImagePath = $this->convertPdfToPng($path);
             $imagePath = $temporaryImagePath;
         }
 
-        // Use GD backend inside QrReader to avoid potential Imagick crashes
-        // in some hosting environments. We still use Imagick ourselves only
-        // for PDF → PNG conversion above.
-        $qr = new QrReader($imagePath, QrReader::SOURCE_TYPE_FILE, false);
-        $text = $qr->text();
+        $maxRetries = (int) env('FISCAL_QR_MAX_RETRIES', 2);
+
+        // Initial decode attempt on the original image/PDF-converted PNG
+        $text = $this->decodeImagePath($imagePath);
+
+        // Retry path with image enhancement (grayscale, higher DPI) when the
+        // first decode fails. This significantly increases success rates on
+        // Macedonian fiscal receipts with low contrast or narrow QR modules.
+        if (! $text && $maxRetries > 1) {
+            Log::info('FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, converting to high-contrast image and retrying');
+
+            $enhancedPath = $this->enhanceImageForQr($path, $extension);
+
+            if ($enhancedPath) {
+                $text = $this->decodeImagePath($enhancedPath);
+            }
+
+            if ($enhancedPath && file_exists($enhancedPath)) {
+                @unlink($enhancedPath);
+            }
+        }
 
         if ($temporaryImagePath && file_exists($temporaryImagePath)) {
             @unlink($temporaryImagePath);
         }
 
         if (! $text) {
-            throw new RuntimeException('QR code not detected in receipt');
+            // Do not leak low-level errors to the user; callers should treat
+            // this as a soft failure and may fall back to OCR parsing.
+            throw new RuntimeException('QR code not detected in receipt; please upload a clear image or PDF');
         }
 
         return $this->parsePayload($text);
+    }
+
+    protected function decodeImagePath(string $imagePath): ?string
+    {
+        $qr = new QrReader($imagePath, QrReader::SOURCE_TYPE_FILE, false);
+
+        return $qr->text() ?: null;
+    }
+
+    protected function convertPdfToPng(string $pdfPath): string
+    {
+        $imagick = new \Imagick();
+        $imagick->setResolution(300, 300);
+        $imagick->readImage($pdfPath.'[0]');
+        $imagick->setImageFormat('png');
+        $imagick->setImageColorspace(\Imagick::COLORSPACE_RGB);
+
+        $temporaryImagePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('qr_pdf_', true).'.png';
+        $imagick->writeImage($temporaryImagePath);
+        $imagick->clear();
+        $imagick->destroy();
+
+        return $temporaryImagePath;
+    }
+
+    protected function enhanceImageForQr(string $path, string $extension): ?string
+    {
+        // Prefer Imagick when available as it provides better control over
+        // DPI, grayscale conversion, and contrast enhancement. Fallback to GD
+        // when Imagick is not installed.
+        if (class_exists(\Imagick::class)) {
+            try {
+                $imagick = new \Imagick();
+                if ($extension === 'pdf') {
+                    $imagick->setResolution(300, 300);
+                    $imagick->readImage($path.'[0]');
+                } else {
+                    $imagick->readImage($path);
+                }
+
+                $imagick->setImageFormat('png');
+                $imagick->setImageColorspace(\Imagick::COLORSPACE_GRAY);
+                $imagick->setImageCompressionQuality(100);
+                // Increase contrast to make QR modules more distinct
+                $imagick->contrastImage(true);
+
+                $enhancedPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('qr_enhanced_', true).'.png';
+                $imagick->writeImage($enhancedPath);
+                $imagick->clear();
+                $imagick->destroy();
+
+                return $enhancedPath;
+            } catch (\Throwable $e) {
+                Log::warning('FiscalReceiptQrService::enhanceImageForQr - Imagick enhancement failed', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if (extension_loaded('gd')) {
+            try {
+                $image = null;
+                if (in_array($extension, ['jpg', 'jpeg'], true)) {
+                    $image = imagecreatefromjpeg($path);
+                } elseif ($extension === 'png') {
+                    $image = imagecreatefrompng($path);
+                }
+
+                if (! $image) {
+                    return null;
+                }
+
+                imagefilter($image, IMG_FILTER_GRAYSCALE);
+                imagefilter($image, IMG_FILTER_CONTRAST, -20);
+
+                $enhancedPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('qr_enhanced_', true).'.png';
+                imagepng($image, $enhancedPath);
+                imagedestroy($image);
+
+                return $enhancedPath;
+            } catch (\Throwable $e) {
+                Log::warning('FiscalReceiptQrService::enhanceImageForQr - GD enhancement failed', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -80,7 +179,8 @@ class FiscalReceiptQrService
      */
     public function parsePayload(string $payload): array
     {
-        if (! str_starts_with($payload, 'MK|')) {
+        $upper = strtoupper($payload);
+        if (! str_starts_with($upper, 'MK|')) {
             throw new RuntimeException('Unsupported fiscal QR format');
         }
 
@@ -100,15 +200,21 @@ class FiscalReceiptQrService
             throw new RuntimeException('Missing required fiscal QR fields');
         }
 
-        $total = (int) ($data['TOTAL'] ?? 0);
-        $vat = (int) ($data['VAT'] ?? 0);
+        $total = (float) $data['TOTAL'];
+        $vat = isset($data['VAT']) ? (float) $data['VAT'] : 0.0;
 
         $type = strtolower($data['TYPE'] ?? 'CASH');
         $documentType = $type === 'invoice' ? 'invoice' : 'cash';
 
+        try {
+            $dateTime = new \Carbon\Carbon($data['DATETIME']);
+        } catch (\Throwable $e) {
+            throw new RuntimeException('Invalid DATETIME in fiscal QR payload: '.$e->getMessage(), 0, $e);
+        }
+
         return [
             'issuer_tax_id' => $data['TIN'],
-            'date_time' => $data['DATETIME'],
+            'date_time' => $dateTime,
             'total' => $total,
             'vat_total' => $vat,
             'fiscal_id' => $data['FID'] ?? null,

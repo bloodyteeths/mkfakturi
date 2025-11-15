@@ -97,6 +97,10 @@ class ReceiptScannerController extends Controller
 
                 // Fall back to invoice parser microservice (PDF or image with OCR)
                 try {
+                    \Log::info('ReceiptScannerController::scan - Fallback OCR parse initiated', [
+                        'company_id' => $companyId,
+                    ]);
+
                     $parsed = $parserClient->parse(
                         $companyId,
                         $storedPath,
@@ -128,10 +132,16 @@ class ReceiptScannerController extends Controller
                     $billData['supplier_id'] = $supplier->id;
                     $billData['company_id'] = $companyId;
 
+                    // Ensure we always have a bill number; if the parser could not
+                    // extract one, generate a stable, per-company unique value.
+                    if (empty($billData['bill_number'])) {
+                        $billData['bill_number'] = 'SCAN-'.now()->format('Ymd-His');
+                    }
+
                     // Ensure bill number uniqueness per company by suffixing on conflict
-                    $originalNumber = $billData['bill_number'] ?? null;
+                    $originalNumber = $billData['bill_number'];
                     $counter = 1;
-                    while ($billData['bill_number'] && Bill::where('company_id', $companyId)
+                    while (Bill::where('company_id', $companyId)
                         ->where('bill_number', $billData['bill_number'])
                         ->exists()
                     ) {
@@ -154,10 +164,14 @@ class ReceiptScannerController extends Controller
                         'bill_id' => $bill->id,
                         'company_id' => $companyId,
                         'supplier_id' => $supplier->id,
+                        'parsed_source' => 'invoice2data-service',
                     ]);
 
                     return (new BillResource($bill))
-                        ->additional(['document_type' => 'bill'])
+                        ->additional([
+                            'document_type' => 'bill',
+                            'parsed_data' => $parsed,
+                        ])
                         ->response()
                         ->setStatusCode(201);
                 } catch (\Throwable $parserException) {

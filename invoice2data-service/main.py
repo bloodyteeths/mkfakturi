@@ -134,16 +134,58 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
     invoice_date = date_match.group(1) if date_match else None
 
     # Find candidate total amounts (numbers with 2 decimals or whole)
+    # Prefer numbers that appear on lines containing "total" / "Вкупно" etc.
+    # and clamp values to a reasonable range so we do not accidentally
+    # interpret fiscal IDs or long codes as monetary totals.
     amount_pattern = re.compile(r"(\d+[.,]\d{2}|\d+)")
-    numbers: List[float] = []
-    for m in amount_pattern.findall(text):
-        value = m.replace(",", ".")
-        try:
-            numbers.append(float(value))
-        except ValueError:
-            continue
+    all_numbers: List[float] = []
+    keyword_numbers: List[float] = []
 
-    total_amount = max(numbers) if numbers else None
+    MAX_REASONABLE_TOTAL = 1_000_000.0  # 1M in invoice currency units
+
+    def _parse_number(raw: str) -> Optional[float]:
+        value = raw.replace(",", ".")
+        try:
+            num = float(value)
+        except ValueError:
+            return None
+        if num <= 0 or num > MAX_REASONABLE_TOTAL:
+            return None
+        return num
+
+    keywords = [
+        "total",
+        "вкупно",
+        "vkupno",
+        "vkupen iznos",
+        "вкупен износ",
+        "износ за плаќање",
+        "iznos za plakjanje",
+        "iznos za plakjanje",
+    ]
+
+    # Scan line by line so we can detect numbers near likely "total" labels
+    for line in lines:
+        lower = line.lower()
+        line_numbers: List[float] = []
+        for m in amount_pattern.findall(line):
+            num = _parse_number(m)
+            if num is not None:
+                all_numbers.append(num)
+                line_numbers.append(num)
+
+        if any(kw in lower for kw in keywords) and line_numbers:
+            # For total lines, prefer the last number on the line
+            keyword_numbers.append(line_numbers[-1])
+
+    # Prefer numbers from keyword lines; otherwise fall back to the largest
+    # reasonable number we saw anywhere in the text.
+    if keyword_numbers:
+        total_amount: Optional[float] = max(keyword_numbers)
+    elif all_numbers:
+        total_amount = max(all_numbers)
+    else:
+        total_amount = None
 
     raw: Dict[str, Any] = {
         "issuer": supplier_name,

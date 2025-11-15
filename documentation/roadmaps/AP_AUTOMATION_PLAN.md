@@ -344,7 +344,7 @@
 #### Phase 4 — Completion Audit Notes
 - **QR service:** `FiscalReceiptQrService` uses the ZXing-based `Zxing\QrReader` and, when available, Imagick to render the first page of PDFs to images, enabling QR decoding from both images and PDFs.
 - **Payload parser:** The QR payload parser enforces the Macedonian-format `MK|` prefix and validates that TIN, TOTAL, and DATETIME are present before normalizing values into a fiscal receipt DTO.
-- **Controller flow:** `ReceiptScannerController` safely stores uploaded files, cleans up on QR decode failures, and branches into Expense or Bill draft creation based on receipt type, always attaching the original document via MediaLibrary.
+- **Controller flow:** `ReceiptScannerController` safely stores uploaded files, cleans up on QR decode failures, and branches into Expense or Bill draft creation based on receipt type, always attaching the original document via MediaLibrary. QR decoding now includes enhanced retry logic (high-contrast Imagick/GD preprocessing, configurable via `FISCAL_QR_MAX_RETRIES`) and falls back to OCR-based invoice parsing when QR decoding fails, ensuring Macedonian fiscal receipts are handled robustly.
 - **Multi-tenant:** All receipt scanning operations derive `company_id` from the `company` header and apply company scoping consistently on Expense, Bill, Supplier, and ExpenseCategory queries.
 - **Tests:** Dedicated unit tests validate QR payload parsing edge cases, and feature tests verify that JPEG/PNG receipt uploads create appropriate Expense/Bill drafts with correct scoping and behavior.
 - **Safety:** The QR scanner and related services are additive; existing Invoice, Expense, Bank, and IFRS functionality remains unchanged, with targeted suites confirming no regressions.
