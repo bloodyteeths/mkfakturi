@@ -438,6 +438,69 @@ class Bill extends Model implements HasMedia
 
         return true;
     }
+
+    /**
+     * Create bill items with base_* fields and taxes
+     *
+     * @param  self  $bill
+     * @param  array $billItems
+     * @return void
+     */
+    public static function createItems($bill, $billItems)
+    {
+        $exchangeRate = $bill->exchange_rate ?? 1;
+
+        foreach ($billItems as $billItem) {
+            $billItem['company_id'] = $bill->company_id;
+            $billItem['exchange_rate'] = $exchangeRate;
+            $billItem['base_price'] = $billItem['price'] * $exchangeRate;
+            $billItem['base_discount_val'] = ($billItem['discount_val'] ?? 0) * $exchangeRate;
+            $billItem['base_tax'] = ($billItem['tax'] ?? 0) * $exchangeRate;
+            $billItem['base_total'] = $billItem['total'] * $exchangeRate;
+
+            $item = $bill->items()->create($billItem);
+
+            if (array_key_exists('taxes', $billItem) && $billItem['taxes']) {
+                foreach ($billItem['taxes'] as $tax) {
+                    $tax['company_id'] = $bill->company_id;
+                    $tax['exchange_rate'] = $bill->exchange_rate ?? 1;
+                    $tax['base_amount'] = $tax['amount'] * $exchangeRate;
+                    $tax['currency_id'] = $bill->currency_id;
+
+                    if (gettype($tax['amount']) !== 'NULL') {
+                        $item->taxes()->create($tax);
+                    }
+                }
+            }
+
+            if (array_key_exists('custom_fields', $billItem) && $billItem['custom_fields']) {
+                $item->addCustomFields($billItem['custom_fields']);
+            }
+        }
+    }
+
+    /**
+     * Create bill-level taxes with base_* fields
+     *
+     * @param  self  $bill
+     * @param  array $taxes
+     * @return void
+     */
+    public static function createTaxes($bill, $taxes)
+    {
+        $exchangeRate = $bill->exchange_rate ?? 1;
+
+        foreach ($taxes as $tax) {
+            $tax['company_id'] = $bill->company_id;
+            $tax['exchange_rate'] = $bill->exchange_rate ?? 1;
+            $tax['base_amount'] = $tax['amount'] * $exchangeRate;
+            $tax['currency_id'] = $bill->currency_id;
+
+            if (gettype($tax['amount']) !== 'NULL') {
+                $bill->taxes()->create($tax);
+            }
+        }
+    }
 }
 
 // CLAUDE-CHECKPOINT
