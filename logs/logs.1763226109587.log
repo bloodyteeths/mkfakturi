@@ -1,0 +1,136 @@
+2025-11-15T17:00:16.000000000Z [inf]  Mounting volume on: /var/lib/containers/railwayapp/bind-mounts/713bb971-89c1-465d-a7dd-0a4dec3c2d7f/vol_fbj0jmd9ow95b1he
+2025-11-15T17:00:17.000000000Z [inf]  Starting Container
+2025-11-15T17:00:18.199194363Z [inf]  Waiting for database... (1/30)
+2025-11-15T17:00:18.199265597Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
+2025-11-15T17:00:18.199275595Z [inf]  === Application Startup ===
+2025-11-15T17:00:18.199282837Z [inf]  Railway detected: Parsing MYSQL_URL...
+2025-11-15T17:00:18.199289678Z [inf]  DB configured from MYSQL_URL
+2025-11-15T17:00:19.438923327Z [inf]  Waiting for database... (2/30)
+2025-11-15T17:00:21.614600981Z [inf]  Waiting for database... (3/30)
+2025-11-15T17:00:24.216067237Z [inf]  Waiting for database... (4/30)
+2025-11-15T17:00:26.327691959Z [inf]  Waiting for database... (5/30)
+2025-11-15T17:00:28.385158133Z [inf]  Waiting for database... (6/30)
+2025-11-15T17:00:30.322279145Z [inf]  Waiting for database... (7/30)
+2025-11-15T17:00:32.504562068Z [inf]  Waiting for database... (8/30)
+2025-11-15T17:00:34.655774000Z [inf]  Waiting for database... (9/30)
+2025-11-15T17:00:37.357312728Z [inf]  Waiting for database... (10/30)
+2025-11-15T17:00:39.325667497Z [inf]  Waiting for database... (11/30)
+2025-11-15T17:00:41.378832695Z [inf]  Waiting for database... (12/30)
+2025-11-15T17:00:43.498172007Z [inf]  Waiting for database... (13/30)
+2025-11-15T17:00:45.541512026Z [inf]  Waiting for database... (14/30)
+2025-11-15T17:00:47.669710116Z [inf]  Waiting for database... (15/30)
+2025-11-15T17:00:49.838714471Z [inf]  Waiting for database... (16/30)
+2025-11-15T17:00:52.529806426Z [inf]  Waiting for database... (17/30)
+2025-11-15T17:00:54.523805582Z [inf]  Waiting for database... (18/30)
+2025-11-15T17:00:56.568677759Z [inf]  Waiting for database... (19/30)
+2025-11-15T17:00:58.588657062Z [inf]  Waiting for database... (20/30)
+2025-11-15T17:01:00.699980396Z [inf]  Waiting for database... (21/30)
+2025-11-15T17:01:02.871097546Z [inf]  Waiting for database... (22/30)
+2025-11-15T17:01:05.044691180Z [inf]  Waiting for database... (23/30)
+2025-11-15T17:01:07.686820337Z [inf]  Waiting for database... (24/30)
+2025-11-15T17:01:09.659575890Z [inf]  Waiting for database... (25/30)
+2025-11-15T17:01:11.713652454Z [inf]  Waiting for database... (26/30)
+2025-11-15T17:01:13.753333952Z [inf]  Waiting for database... (27/30)
+2025-11-15T17:01:15.889014751Z [inf]  Waiting for database... (28/30)
+2025-11-15T17:01:18.122704322Z [inf]  Waiting for database... (29/30)
+2025-11-15T17:01:20.720902125Z [inf]  Waiting for database... (30/30)
+2025-11-15T17:01:22.661546117Z [inf]  ✅ Permissions set for www user
+2025-11-15T17:01:22.661551280Z [inf]  Nginx configured to listen on ports 80 and 8080
+2025-11-15T17:01:22.661556993Z [inf]  Clearing caches...
+2025-11-15T17:01:22.777874458Z [inf]  
+2025-11-15T17:01:22.777883021Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-11-15T17:01:22.777887600Z [inf]  
+2025-11-15T17:01:23.107664940Z [inf]  
+2025-11-15T17:01:23.107671658Z [inf]     INFO  Application cache cleared successfully.  
+2025-11-15T17:01:23.107676477Z [inf]  
+2025-11-15T17:01:23.770454993Z [inf]  
+2025-11-15T17:01:23.770468647Z [inf]     INFO  Route cache cleared successfully.  
+2025-11-15T17:01:23.770477856Z [inf]  
+2025-11-15T17:01:23.787404889Z [inf]  
+2025-11-15T17:01:23.787414777Z [inf]     INFO  Compiled views cleared successfully.  
+2025-11-15T17:01:23.787423711Z [inf]  
+2025-11-15T17:01:23.803599549Z [inf]  Running migrations...
+2025-11-15T17:01:24.136163115Z [inf]  
+2025-11-15T17:01:24.136169833Z [inf]     INFO  Running migrations.  
+2025-11-15T17:01:24.136177562Z [inf]  
+2025-11-15T17:01:24.136187495Z [inf]    2025_11_15_140000_create_kyc_documents_table ................... 4.61ms FAIL
+2025-11-15T17:01:24.136193997Z [inf]  
+2025-11-15T17:01:24.143522538Z [inf]  In Connection.php line 822:
+2025-11-15T17:01:24.143532422Z [inf]                                                                                 
+2025-11-15T17:01:24.143538281Z [inf]    SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'kyc_documen  
+2025-11-15T17:01:24.143543986Z [inf]    ts' already exists (Connection: mysql, SQL: create table `kyc_documents` (`  
+2025-11-15T17:01:24.143559548Z [inf]    id` bigint unsigned not null auto_increment primary key, `partner_id` bigin  
+2025-11-15T17:01:24.143564550Z [inf]    t unsigned not null, `document_type` enum('id_card', 'passport', 'proof_of_  
+2025-11-15T17:01:24.143568647Z [inf]    address', 'bank_statement', 'tax_certificate', 'other') not null, `original  
+2025-11-15T17:01:24.143572654Z [inf]    _filename` varchar(255) not null, `file_path` varchar(255) not null, `encry  
+2025-11-15T17:01:24.143587533Z [inf]    pted_data` text null, `status` enum('pending', 'approved', 'rejected') not   
+2025-11-15T17:01:24.143596560Z [inf]    null default 'pending', `verified_at` timestamp null, `verified_by` bigint   
+2025-11-15T17:01:24.143602176Z [inf]    unsigned null, `rejection_reason` text null, `metadata` json null, `created  
+2025-11-15T17:01:24.143607474Z [inf]    _at` timestamp null, `updated_at` timestamp null, `deleted_at` timestamp nu  
+2025-11-15T17:01:24.143615214Z [inf]    ll) default character set utf8 collate 'utf8_unicode_ci')                    
+2025-11-15T17:01:24.143623215Z [inf]                                                                                 
+2025-11-15T17:01:24.143630014Z [inf]  
+2025-11-15T17:01:24.143644033Z [inf]  In Connection.php line 568:
+2025-11-15T17:01:24.143649218Z [inf]                                                                                 
+2025-11-15T17:01:24.143657018Z [inf]    SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'kyc_documen  
+2025-11-15T17:01:24.145369998Z [inf]    ts' already exists                                                           
+2025-11-15T17:01:24.145378271Z [inf]                                                                                 
+2025-11-15T17:01:24.145386114Z [inf]  
+2025-11-15T17:01:24.153192852Z [inf]  Migrations failed or already applied
+2025-11-15T17:01:24.708544314Z [inf]  Profile status: COMPLETED
+2025-11-15T17:01:25.108237532Z [inf]  Database marker exists: YES
+2025-11-15T17:01:25.108245057Z [inf]  Already installed (profile_complete = COMPLETED)
+2025-11-15T17:01:25.108253012Z [inf]  ✅ Installation complete, all markers in place
+2025-11-15T17:01:25.771570066Z [inf]  Testing PHP bootstrap...
+2025-11-15T17:01:25.771618198Z [inf]  Laravel Framework 12.12.0
+2025-11-15T17:01:25.771622930Z [inf]  
+2025-11-15T17:01:25.771630581Z [inf]  Verifying Laravel application...
+2025-11-15T17:01:25.771645397Z [inf]  
+2025-11-15T17:01:25.771659515Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-11-15T17:01:26.141336964Z [inf]  
+2025-11-15T17:01:26.141344103Z [inf]    GET|HEAD        / ..................................................... home
+2025-11-15T17:01:26.141349454Z [inf]    GET|HEAD        admin/{vue?} ............................... admin.dashboard
+2025-11-15T17:01:26.141354143Z [inf]    GET|HEAD        api/ai/risk .................... AiSummaryController@getRisk
+2025-11-15T17:01:26.141359191Z [inf]    GET|HEAD        api/ai/summary .............. AiSummaryController@getSummary
+2025-11-15T17:01:26.174433812Z [inf]  Testing database connection...
+2025-11-15T17:01:26.740920012Z [inf]  DB OK
+2025-11-15T17:01:26.740925158Z [inf]  Enabling verbose PHP errors for debugging...
+2025-11-15T17:01:26.740929654Z [inf]  Testing home route...
+2025-11-15T17:01:27.057205052Z [inf]  Home route test passed
+2025-11-15T17:01:27.057216679Z [inf]  Validating nginx configuration...
+2025-11-15T17:01:27.066384132Z [inf]  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+2025-11-15T17:01:27.066396310Z [inf]  nginx: configuration file /etc/nginx/nginx.conf test is successful
+2025-11-15T17:01:27.066401409Z [inf]  Validating PHP-FPM configuration...
+2025-11-15T17:01:27.113911853Z [inf]  [15-Nov-2025 17:01:27] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-11-15T17:01:27.113916146Z [inf]  
+2025-11-15T17:01:27.113920388Z [inf]  [15-Nov-2025 17:01:27] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-11-15T17:01:27.113924956Z [inf]  
+2025-11-15T17:01:27.113929644Z [inf]  Setting final permissions before starting services...
+2025-11-15T17:01:27.123216819Z [inf]  ✅ Final permissions set for www user
+2025-11-15T17:01:27.123222946Z [inf]  Starting application services in background...
+2025-11-15T17:01:27.123229046Z [inf]  Waiting for services to be ready...
+2025-11-15T17:01:27.871252771Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-11-15T17:01:27.871263669Z [err]    import pkg_resources
+2025-11-15T17:01:27.871390172Z [inf]  2025-11-15 17:01:27,378 INFO Set uid to user 0 succeeded
+2025-11-15T17:01:27.871396406Z [inf]  2025-11-15 17:01:27,381 INFO supervisord started with pid 118
+2025-11-15T17:01:28.851107726Z [err]  [15-Nov-2025 17:01:28] NOTICE: fpm is running, pid 121
+2025-11-15T17:01:28.851116548Z [err]  [15-Nov-2025 17:01:28] NOTICE: ready to handle connections
+2025-11-15T17:01:28.851182050Z [inf]  2025-11-15 17:01:28,385 INFO spawned: 'nginx' with pid 120
+2025-11-15T17:01:28.851188275Z [inf]  2025-11-15 17:01:28,387 INFO spawned: 'php-fpm' with pid 121
+2025-11-15T17:01:28.851193605Z [inf]  2025-11-15 17:01:28,389 INFO spawned: 'scheduler' with pid 122
+2025-11-15T17:01:29.904221803Z [inf]  2025-11-15 17:01:29,884 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-15T17:01:29.904232007Z [inf]  2025-11-15 17:01:29,884 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-15T17:01:29.904244266Z [inf]  2025-11-15 17:01:29,884 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-15T17:01:32.130902027Z [inf]  Checking if PHP-FPM is listening on port 9000...
+2025-11-15T17:01:32.149907677Z [inf]  tcp        0      0 :::9000                 :::*                    LISTEN      
+2025-11-15T17:01:32.149912372Z [inf]  Checking if nginx is listening on port 8080...
+2025-11-15T17:01:32.167669335Z [inf]  tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      
+2025-11-15T17:01:32.167675490Z [inf]  Testing HTTP request through nginx/php-fpm...
+2025-11-15T17:01:32.921578154Z [err]  127.0.0.1 -  15/Nov/2025:17:01:32 +0000 "GET /index.php" 200
+2025-11-15T17:01:32.921582810Z [inf]  ✅ Health check passed (HTTP 200)
+2025-11-15T17:01:32.921587045Z [inf]  Testing home route through HTTP...
+2025-11-15T17:01:33.050000317Z [err]  127.0.0.1 -  15/Nov/2025:17:01:32 +0000 "GET /index.php" 200
+2025-11-15T17:01:33.050007256Z [inf]  ✅ Home route accessible (HTTP 200)
+2025-11-15T17:01:33.050013113Z [inf]  All startup checks complete. Supervisor running with PID 118
+2025-11-15T17:01:33.050019542Z [inf]  Application ready to serve requests.
+2025-11-15T17:01:40.803700304Z [err]  127.0.0.1 -  15/Nov/2025:17:01:40 +0000 "GET /index.php" 200

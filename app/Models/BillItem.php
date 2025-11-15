@@ -6,6 +6,7 @@ use App\Traits\HasCustomFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Traits\HasAuditing;
 
@@ -53,11 +54,11 @@ class BillItem extends Model
     }
 
     /**
-     * Relationship: BillItem has many Taxes (morphMany)
+     * Relationship: BillItem has many Taxes
      */
-    public function taxes(): MorphMany
+    public function taxes(): HasMany
     {
-        return $this->morphMany(Tax::class, 'taxable');
+        return $this->hasMany(Tax::class, 'bill_item_id');
     }
 
     /**

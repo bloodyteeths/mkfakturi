@@ -79,9 +79,7 @@ class BillsController extends Controller
             if ($request->has('items')) {
                 \Log::info('BillsController::store - Processing items', ['item_count' => count($request->items)]);
 
-                $bill->items()->delete();
-                $bill->taxes()->delete();
-
+                // No need to delete items/taxes for a new bill - they don't exist yet
                 Bill::createItems($bill, $request->items);
                 \Log::info('BillsController::store - Items created');
 
