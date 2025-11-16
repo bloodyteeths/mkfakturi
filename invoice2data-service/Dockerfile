@@ -24,10 +24,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Pre-download ZXing JAR for pyzxing (prevents runtime 404 errors)
-# pyzxing will try to download this from GitHub at runtime if not present
-RUN mkdir -p /root/.local/share/pyzxing && \
-    curl -L https://github.com/zxing/zxing/releases/download/zxing-3.4.1/zxing-3.4.1.jar \
-    -o /root/.local/share/pyzxing/zxing.jar
+# pyzxing expects javase-3.4.1-SNAPSHOT-jar-with-dependencies.jar in ~/.local/pyzxing/
+RUN mkdir -p /root/.local/pyzxing && \
+    curl -L https://github.com/ChenjieXu/pyzxing/releases/download/v1.1.0/javase-3.4.1-SNAPSHOT-jar-with-dependencies.jar \
+    -o /root/.local/pyzxing/javase-3.4.1-SNAPSHOT-jar-with-dependencies.jar
 
 COPY . .
 
