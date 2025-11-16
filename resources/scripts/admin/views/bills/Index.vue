@@ -8,38 +8,97 @@
 
       <template #actions>
         <BaseButton
-          v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
-          variant="primary"
-          @click="$router.push('/admin/bills/create')"
+          v-show="billsStore.billTotalCount"
+          variant="primary-outline"
+          @click="toggleFilter"
         >
-          <template #left="slotProps">
-            <BaseIcon name="PlusIcon" :class="slotProps.class" />
+          {{ $t('general.filter') }}
+          <template #right="slotProps">
+            <BaseIcon
+              v-if="!showFilters"
+              name="FunnelIcon"
+              :class="slotProps.class"
+            />
+            <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
           </template>
-          {{ $t('bills.new_bill') }}
         </BaseButton>
+
+        <router-link
+          v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
+          to="bills/create"
+        >
+          <BaseButton variant="primary" class="ml-4">
+            <template #left="slotProps">
+              <BaseIcon name="PlusIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('bills.new_bill') }}
+          </BaseButton>
+        </router-link>
       </template>
     </BasePageHeader>
 
-    <BaseFilterWrapper v-show="showFilters" @clear="clearFilter">
+    <BaseFilterWrapper
+      v-show="showFilters"
+      :row-on-xl="true"
+      @clear="clearFilter"
+    >
       <BaseInputGroup :label="$t('bills.supplier')">
-        <BaseInput v-model="filters.supplier" />
+        <BaseSupplierSelectInput
+          v-model="filters.supplier_id"
+          :placeholder="$t('bills.type_or_click')"
+          value-prop="id"
+          label="name"
+        />
       </BaseInputGroup>
-      <BaseInputGroup :label="$t('bills.bill_number')">
-        <BaseInput v-model="filters.bill_number" />
+
+      <BaseInputGroup :label="$t('bills.status')">
+        <BaseMultiselect
+          v-model="filters.status"
+          :groups="true"
+          :options="status"
+          searchable
+          :placeholder="$t('general.select_a_status')"
+          @update:modelValue="setActiveTab"
+          @remove="clearStatusSearch()"
+        />
       </BaseInputGroup>
+
       <BaseInputGroup :label="$t('general.from')">
-        <BaseDatePicker v-model="filters.from_date" />
+        <BaseDatePicker
+          v-model="filters.from_date"
+          :calendar-button="true"
+          calendar-button-icon="calendar"
+        />
       </BaseInputGroup>
-      <BaseInputGroup :label="$t('general.to')">
-        <BaseDatePicker v-model="filters.to_date" />
+
+      <div
+        class="hidden w-8 h-0 mx-4 border border-gray-400 border-solid xl:block"
+        style="margin-top: 1.5rem"
+      />
+
+      <BaseInputGroup :label="$t('general.to')" class="mt-2">
+        <BaseDatePicker
+          v-model="filters.to_date"
+          :calendar-button="true"
+          calendar-button-icon="calendar"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('bills.bill_number')">
+        <BaseInput v-model="filters.bill_number">
+          <template #left="slotProps">
+            <BaseIcon name="HashtagIcon" :class="slotProps.class" />
+          </template>
+        </BaseInput>
       </BaseInputGroup>
     </BaseFilterWrapper>
 
     <BaseEmptyPlaceholder
-      v-if="!billsStore.billTotalCount && !billsStore.isFetchingList"
+      v-show="showEmptyScreen"
       :title="$t('bills.no_bills')"
-      :description="$t('bills.empty_description')"
+      :description="$t('bills.list_of_bills')"
     >
+      <MoonwalkerIcon class="mt-5 mb-4" />
       <template
         v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
         #actions
@@ -56,32 +115,120 @@
       </template>
     </BaseEmptyPlaceholder>
 
-    <div v-else class="relative table-container">
-      <BaseTable
-        ref="tableComponent"
-        :data="billsStore.bills"
-        :columns="columns"
-        :meta="{ total: billsStore.billTotalCount }"
-        :loading="billsStore.isFetchingList"
-        @get-data="fetchData"
+    <div v-show="!showEmptyScreen" class="relative table-container">
+      <div
+        class="
+          relative
+          flex
+          items-center
+          justify-between
+          h-10
+          mt-5
+          list-none
+          border-b-2 border-gray-200 border-solid
+        "
       >
-        <template #cell-bill_date="{ row }">
-          {{ row.data.formatted_bill_date }}
+        <!-- Tabs -->
+        <BaseTabGroup class="-mb-5" @change="setStatusFilter">
+          <BaseTab :title="$t('general.all')" filter="" />
+          <BaseTab :title="$t('general.draft')" filter="DRAFT" />
+          <BaseTab :title="$t('general.sent')" filter="SENT" />
+          <BaseTab :title="$t('general.due')" filter="OVERDUE" />
+          <BaseTab :title="$t('general.paid')" filter="PAID" />
+        </BaseTabGroup>
+
+        <BaseDropdown
+          v-if="
+            billsStore.selectedBills.length &&
+            userStore.hasAbilities(abilities.DELETE_BILL)
+          "
+          class="absolute float-right"
+        >
+          <template #activator>
+            <span
+              class="
+                flex
+                text-sm
+                font-medium
+                cursor-pointer
+                select-none
+                text-primary-400
+              "
+            >
+              {{ $t('general.actions') }}
+              <BaseIcon name="ChevronDownIcon" />
+            </span>
+          </template>
+
+          <BaseDropdownItem @click="removeMultipleBills">
+            <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
+            {{ $t('general.delete') }}
+          </BaseDropdownItem>
+        </BaseDropdown>
+      </div>
+
+      <!-- Mobile: Card View (< 768px) -->
+      <div v-if="billListData.length" class="block md:hidden mt-6">
+        <BillCard
+          v-for="bill in billListData"
+          :key="bill.id"
+          :bill="bill"
+          :selectable="userStore.hasAbilities(abilities.DELETE_BILL)"
+          :is-selected="billsStore.selectedBills.includes(bill.id)"
+          @toggle-select="toggleBillSelection"
+        />
+      </div>
+
+      <!-- Desktop: Table View (>= 768px) -->
+      <BaseTable
+        ref="table"
+        :data="fetchData"
+        :columns="billColumns"
+        :placeholder-count="billsStore.billTotalCount >= 20 ? 10 : 5"
+        :key="tableKey"
+        class="mt-10 hidden md:block"
+      >
+        <!-- Select All Checkbox -->
+        <template #header>
+          <div class="absolute items-center left-6 top-2.5 select-none">
+            <BaseCheckbox
+              v-model="billsStore.selectAllField"
+              variant="primary"
+              @change="billsStore.selectAllBills"
+            />
+          </div>
         </template>
 
+        <template #cell-checkbox="{ row }">
+          <div class="relative block">
+            <BaseCheckbox
+              :id="row.id"
+              v-model="selectField"
+              :value="row.data.id"
+            />
+          </div>
+        </template>
+
+        <template #cell-supplier="{ row }">
+          <BaseText :text="row.data.supplier?.name || '-'" />
+        </template>
+
+        <!-- Bill Number  -->
         <template #cell-bill_number="{ row }">
           <router-link
-            :to="{ path: `/admin/bills/${row.data.id}/view` }"
+            :to="{ path: `bills/${row.data.id}/view` }"
             class="font-medium text-primary-500"
           >
             {{ row.data.bill_number }}
           </router-link>
         </template>
 
-        <template #cell-supplier="{ row }">
-          {{ row.data.supplier?.name || '-' }}
+        <!-- Bill date  -->
+        <template #cell-bill_date="{ row }">
+          {{ row.data.formatted_bill_date }}
         </template>
 
+        <!-- Bill Total  -->
         <template #cell-total="{ row }">
           <BaseFormatMoney
             :amount="row.data.total"
@@ -89,24 +236,41 @@
           />
         </template>
 
-        <template #cell-actions="{ row }">
-          <BaseDropdown>
-            <template #button="slotProps">
-              <BaseButton
-                variant="tertiary"
-                size="xs"
-                :class="slotProps.class"
-              >
-                {{ $t('general.actions') }}
-              </BaseButton>
-            </template>
-            <BaseDropdownItem
-              v-if="userStore.hasAbilities(abilities.EDIT_BILL)"
-              @click="$router.push(`/admin/bills/${row.data.id}/edit`)"
+        <!-- Bill status  -->
+        <template #cell-status="{ row }">
+          <BaseBillStatusBadge :status="row.data.status" class="px-3 py-1">
+            <BaseBillStatusLabel :status="row.data.status" />
+          </BaseBillStatusBadge>
+        </template>
+
+        <!-- Due Amount + Paid Status  -->
+        <template #cell-due_amount="{ row }">
+          <div class="flex justify-between">
+            <BaseFormatMoney
+              :amount="row.data.due_amount"
+              :currency="row.data.currency"
+            />
+
+            <BaseBillPaidStatusBadge
+              v-if="row.data.overdue"
+              status="OVERDUE"
+              class="px-1 py-0.5 ml-2"
             >
-              {{ $t('general.edit') }}
-            </BaseDropdownItem>
-          </BaseDropdown>
+              {{ $t('bills.overdue') }}
+            </BaseBillPaidStatusBadge>
+
+            <BaseBillPaidStatusBadge
+              :status="row.data.paid_status"
+              class="px-1 py-0.5 ml-2"
+            >
+              <BaseBillStatusLabel :status="row.data.paid_status" />
+            </BaseBillPaidStatusBadge>
+          </div>
+        </template>
+
+        <!-- Actions -->
+        <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
+          <BillIndexDropdown :row="row.data" :table="table" />
         </template>
       </BaseTable>
     </div>
@@ -114,60 +278,314 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { computed, onUnmounted, reactive, ref, inject } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import abilities from '@/scripts/admin/stub/abilities'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import abilities from '@/scripts/admin/stub/abilities'
+import { debouncedWatch } from '@vueuse/core'
+
+import MoonwalkerIcon from '@/scripts/components/icons/empty/MoonwalkerIcon.vue'
+import BillIndexDropdown from '@/scripts/admin/components/dropdowns/BillIndexDropdown.vue'
+import BaseBillStatusLabel from "@/scripts/components/base/BaseBillStatusLabel.vue"
+import BillCard from '@/scripts/admin/components/BillCard.vue'
+
+// Stores
+const billsStore = useBillsStore()
+const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 
 const { t } = useI18n()
-const billsStore = useBillsStore()
+
+// Local State
+const utils = inject('$utils')
+const table = ref(null)
+const tableKey = ref(0)
+const showFilters = ref(false)
+
+const status = ref([
+  {
+    label: t('bills.status'),
+    options: [
+      {label: t('general.draft'), value: 'DRAFT'},
+      {label: t('general.due'), value: 'DUE'},
+      {label: t('general.sent'), value: 'SENT'},
+      {label: t('bills.viewed'), value: 'VIEWED'},
+      {label: t('bills.completed'), value: 'COMPLETED'}
+    ],
+  },
+  {
+    label: t('bills.paid_status'),
+    options: [
+      {label: t('bills.unpaid'), value: 'UNPAID'},
+      {label: t('bills.paid'), value: 'PAID'},
+      {label: t('bills.partially_paid'), value: 'PARTIALLY_PAID'}],
+  },
+  ,
+])
+const isRequestOngoing = ref(true)
+const activeTab = ref('general.draft')
+const router = useRouter()
 const userStore = useUserStore()
 
-const showFilters = ref(false)
-const tableComponent = ref(null)
-
-const filters = reactive({
-  bill_number: '',
-  supplier: '',
+let filters = reactive({
+  supplier_id: '',
+  status: '',
   from_date: '',
   to_date: '',
-  page: 1,
-  limit: 10,
+  bill_number: '',
 })
 
-const columns = [
-  { key: 'bill_date', label: t('bills.bill_date') },
-  { key: 'bill_number', label: t('bills.bill_number') },
-  { key: 'supplier', label: t('bills.supplier') },
-  { key: 'total', label: t('bills.total') },
-  { key: 'actions', label: '', sortable: false, tdClass: 'text-right' },
-]
+const billListData = ref([])
 
-function fetchData(params) {
-  filters.page = params?.page ?? filters.page
-  filters.limit = params?.limit ?? filters.limit
-  const query = {
-    bill_number: filters.bill_number,
-    supplier_name: filters.supplier,
+const showEmptyScreen = computed(
+  () => !billsStore.billTotalCount && !isRequestOngoing.value
+)
+
+const selectField = computed({
+  get: () => billsStore.selectedBills,
+  set: (value) => {
+    return billsStore.selectBill(value)
+  },
+})
+
+const billColumns = computed(() => {
+  return [
+    {
+      key: 'checkbox',
+      thClass: 'extra w-10',
+      tdClass: 'font-medium text-gray-900',
+      placeholderClass: 'w-10',
+      sortable: false,
+    },
+    {
+      key: 'bill_date',
+      label: t('bills.date'),
+      thClass: 'extra',
+      tdClass: 'font-medium',
+    },
+    { key: 'bill_number', label: t('bills.number') },
+    { key: 'supplier', label: t('bills.supplier') },
+    { key: 'status', label: t('bills.status') },
+    {
+      key: 'due_amount',
+      label: t('dashboard.recent_bills_card.amount_due'),
+    },
+    {
+      key: 'total',
+      label: t('bills.total'),
+      tdClass: 'font-medium text-gray-900',
+    },
+
+    {
+      key: 'actions',
+      label: t('bills.action'),
+      tdClass: 'text-right text-sm font-medium',
+      thClass: 'text-right',
+      sortable: false,
+    },
+  ]
+})
+
+debouncedWatch(
+  filters,
+  () => {
+    setFilters()
+  },
+  { debounce: 500 }
+)
+
+onUnmounted(() => {
+  if (billsStore.selectAllField) {
+    billsStore.selectAllBills()
+  }
+})
+
+function hasAtleastOneAbility() {
+  return userStore.hasAbilities([
+    abilities.DELETE_BILL,
+    abilities.EDIT_BILL,
+    abilities.VIEW_BILL,
+  ])
+}
+
+async function clearStatusSearch(removedOption, id) {
+  filters.status = ''
+  refreshTable()
+}
+
+function refreshTable() {
+  table.value && table.value.refresh()
+}
+
+async function fetchData({ page, filter, sort }) {
+  let data = {
+    supplier_id: filters.supplier_id,
+    status: filters.status,
     from_date: filters.from_date,
     to_date: filters.to_date,
-    page: filters.page,
-    limit: filters.limit,
+    bill_number: filters.bill_number,
+    orderByField: sort.fieldName || 'created_at',
+    orderBy: sort.order || 'desc',
+    page,
   }
-  billsStore.fetchBills(query)
+
+  console.log(data)
+
+  isRequestOngoing.value = true
+
+  let response = await billsStore.fetchBills(data)
+  console.log('API response:', response.data.data)
+
+  // Store data for mobile card view
+  billListData.value = response.data.data
+
+  isRequestOngoing.value = false
+
+  return {
+    data: response.data.data,
+    pagination: {
+      totalPages: response.data.meta.last_page,
+      currentPage: page,
+      totalCount: response.data.meta.total,
+      limit: 10,
+    },
+  }
+}
+
+function toggleBillSelection(billId) {
+  billsStore.selectBill([billId])
+}
+
+function setStatusFilter(val) {
+  if (activeTab.value == val.title) {
+    return true
+  }
+
+  activeTab.value = val.title
+
+  switch (val.title) {
+    case t('general.draft'):
+      filters.status = 'DRAFT'
+      break
+    case t('general.sent'):
+      filters.status = 'SENT'
+      break
+
+    case t('general.due'):
+      filters.status = 'OVERDUE'
+      break
+
+    case t('general.paid'):
+      filters.status = 'PAID'
+      break
+
+    default:
+      filters.status = ''
+      break
+  }
+}
+
+function setFilters() {
+  billsStore.$patch((state) => {
+    state.selectedBills = []
+    state.selectAllField = false
+  })
+
+  tableKey.value += 1
+
+  refreshTable()
 }
 
 function clearFilter() {
-  filters.bill_number = ''
-  filters.supplier = ''
+  filters.supplier_id = ''
+  filters.status = ''
   filters.from_date = ''
   filters.to_date = ''
-  fetchData()
+  filters.bill_number = ''
+
+  activeTab.value = t('general.all')
 }
 
-onMounted(() => {
-  fetchData()
-})
-</script>
+async function removeMultipleBills() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('bills.confirm_delete'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await billsStore.deleteMultipleBills().then((res) => {
+          if (res.data.success) {
+            refreshTable()
 
+            billsStore.$patch((state) => {
+              state.selectedBills = []
+              state.selectAllField = false
+            })
+          }
+        })
+      }
+    })
+}
+
+function toggleFilter() {
+  if (showFilters.value) {
+    clearFilter()
+  }
+
+  showFilters.value = !showFilters.value
+}
+
+function setActiveTab(val) {
+  switch (val) {
+    case 'DRAFT':
+      activeTab.value = t('general.draft')
+      break
+    case 'SENT':
+      activeTab.value = t('general.sent')
+      break
+
+    case 'DUE':
+      activeTab.value = t('general.due')
+      break
+
+    case 'OVERDUE':
+      activeTab.value = t('general.due')
+      break
+
+    case 'COMPLETED':
+      activeTab.value = t('bills.completed')
+      break
+
+    case 'PAID':
+      activeTab.value = t('bills.paid')
+      break
+
+    case 'UNPAID':
+      activeTab.value = t('bills.unpaid')
+      break
+
+    case 'PARTIALLY_PAID':
+      activeTab.value = t('bills.partially_paid')
+      break
+
+    case 'VIEWED':
+      activeTab.value = t('bills.viewed')
+      break
+
+    default:
+      activeTab.value = t('general.all')
+      break
+  }
+}
+</script>
+// CLAUDE-CHECKPOINT

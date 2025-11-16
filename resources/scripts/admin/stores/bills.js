@@ -13,8 +13,10 @@ export const useBillsStore = (useWindow = false) => {
       bills: [],
       billTotalCount: 0,
       selectedBill: null,
+      selectedBills: [],
+      selectAllField: false,
       billPayments: [],
-       isFetchingInitial: false,
+      isFetchingInitial: false,
       isFetchingList: false,
       isFetchingView: false,
     }),
@@ -107,17 +109,43 @@ export const useBillsStore = (useWindow = false) => {
         })
       },
 
-      deleteBills(ids) {
+      deleteBill(id) {
         const notificationStore = useNotificationStore()
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/bills/delete', { ids })
+            .post('/api/v1/bills/delete', { ids: [id] })
             .then((response) => {
-              this.bills = this.bills.filter((b) => !ids.includes(b.id))
+              const index = this.bills.findIndex((bill) => bill.id === id)
+              this.bills.splice(index, 1)
               notificationStore.showNotification({
                 type: 'success',
-                message: global.t('bills.deleted_message'),
+                message: global.tc('bills.deleted_message', 1),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      deleteMultipleBills() {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/api/v1/bills/delete', { ids: this.selectedBills })
+            .then((response) => {
+              this.selectedBills.forEach((bill) => {
+                const index = this.bills.findIndex((_b) => _b.id === bill.id)
+                this.bills.splice(index, 1)
+              })
+              this.selectedBills = []
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.tc('bills.deleted_message', 2),
               })
               resolve(response)
             })
@@ -244,6 +272,29 @@ export const useBillsStore = (useWindow = false) => {
         })
       },
 
+      markAsSent(data) {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/api/v1/bills/${data.id}/mark-as-sent`, { status: data.status })
+            .then((response) => {
+              if (this.selectedBill && this.selectedBill.id === data.id) {
+                this.selectedBill.status = 'SENT'
+              }
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('bills.marked_sent_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       markAsViewed(billId) {
         const notificationStore = useNotificationStore()
 
@@ -290,6 +341,35 @@ export const useBillsStore = (useWindow = false) => {
         })
       },
 
+      selectBill(data) {
+        this.selectedBills = data
+        if (this.selectedBills.length === this.bills.length) {
+          this.selectAllField = true
+        } else {
+          this.selectAllField = false
+        }
+      },
+
+      selectAllBills() {
+        if (this.selectedBills.length === this.bills.length) {
+          this.selectedBills = []
+          this.selectAllField = false
+        } else {
+          const allBillIds = this.bills.map((bill) => bill.id)
+          this.selectedBills = allBillIds
+          this.selectAllField = true
+        }
+      },
+
+      resetSelectedBills() {
+        this.selectedBills = []
+        this.selectAllField = false
+      },
+
+      setSelectAllState(val) {
+        this.selectAllField = val
+      },
+
       cloneBill(id) {
         const notificationStore = useNotificationStore()
 
@@ -312,3 +392,4 @@ export const useBillsStore = (useWindow = false) => {
     },
   })()
 }
+// CLAUDE-CHECKPOINT

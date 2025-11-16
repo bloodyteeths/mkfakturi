@@ -67,8 +67,9 @@ class ReceiptScannerController extends Controller
                     'text_length' => strlen($ocrResult['text'] ?? ''),
                 ]);
 
-                // Generate the image URL
-                $imageUrl = Storage::disk($disk)->url($storedPath);
+                // Generate the image URL using our custom route instead of Storage::url()
+                // to avoid dependency on storage:link symlink which doesn't exist in Railway
+                $imageUrl = url('api/v1/receipts/image/'.$storedPath);
 
                 $responsePayload = [
                     'image_url' => $imageUrl,
@@ -118,6 +119,42 @@ class ReceiptScannerController extends Controller
                 'message' => 'receipt_scan_failed',
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
+        }
+    }
+
+    /**
+     * Serve a scanned receipt image from storage.
+     * This avoids the need for public/storage symlink in Railway.
+     */
+    public function getImage(string $path): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+    {
+        try {
+            $disk = config('filesystems.default', 'local');
+
+            // Security check: ensure the path starts with scanned-receipts/
+            if (! str_starts_with($path, 'scanned-receipts/')) {
+                return response()->json(['error' => 'Invalid path'], 403);
+            }
+
+            // Check if file exists
+            if (! Storage::disk($disk)->exists($path)) {
+                return response()->json(['error' => 'File not found'], 404);
+            }
+
+            $fullPath = Storage::disk($disk)->path($path);
+            $mimeType = Storage::disk($disk)->mimeType($path);
+
+            return response()->file($fullPath, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=3600',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('ReceiptScannerController::getImage - Failed to serve image', [
+                'path' => $path,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => 'Failed to load image'], 500);
         }
     } // CLAUDE-CHECKPOINT
 }

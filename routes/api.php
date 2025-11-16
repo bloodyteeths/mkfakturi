@@ -569,6 +569,7 @@ Route::prefix('/v1')->group(function () {
 
             // Receipt Scanner (Fiscal QR → Expense/Bill)
             Route::post('/receipts/scan', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'scan']);
+            Route::get('/receipts/image/{path}', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'getImage'])->where('path', '.*');
 
 
             // Proforma Invoices
