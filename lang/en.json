@@ -360,7 +360,12 @@
     "upload_receipt": "Upload Receipt (JPEG/PNG/PDF)",
     "scan_button": "Scan Receipt",
     "scan_result": "Scan Result",
-    "document_type": "Document Type"
+    "document_type": "Document Type",
+    "uploaded_image": "Uploaded Image",
+    "receipt_image": "Receipt Image",
+    "ocr_text": "OCR Text",
+    "no_text_extracted": "No text extracted",
+    "create_bill_from_scan": "Create Bill from Scan"
   },
   "items": {
     "title": "Items",

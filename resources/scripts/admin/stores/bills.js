@@ -289,6 +289,26 @@ export const useBillsStore = (useWindow = false) => {
             })
         })
       },
+
+      cloneBill(id) {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/api/v1/bills/${id}/clone`)
+            .then((response) => {
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('bills.cloned_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
     },
   })()
 }

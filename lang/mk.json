@@ -371,7 +371,12 @@
         "upload_receipt": "Прикачи сметка (JPEG/PNG/PDF)",
         "scan_button": "Скенирај сметка",
         "scan_result": "Резултат од скенирање",
-        "document_type": "Тип на документ"
+        "document_type": "Тип на документ",
+        "uploaded_image": "Прикачена слика",
+        "receipt_image": "Слика на сметка",
+        "ocr_text": "OCR текст",
+        "no_text_extracted": "Нема извлечен текст",
+        "create_bill_from_scan": "Креирај сметка од скен"
     },
     "items": {
         "title": "Items",
