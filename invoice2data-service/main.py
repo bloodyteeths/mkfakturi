@@ -339,9 +339,15 @@ async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
         # results is a list of dicts: [{'format': 'DATA_MATRIX', 'raw': '...', 'parsed': '...'}]
         first_result = results[0] if isinstance(results, list) else results
 
+        logger.info(f"First result structure: {first_result}")
+        logger.info(f"First result keys: {first_result.keys() if isinstance(first_result, dict) else 'not a dict'}")
+        logger.info(f"Raw field: {first_result.get('raw') if isinstance(first_result, dict) else 'N/A'}")
+        logger.info(f"Parsed field: {first_result.get('parsed') if isinstance(first_result, dict) else 'N/A'}")
+
         datamatrix_text = first_result.get("raw") or first_result.get("parsed", "")
 
         if not datamatrix_text:
+            logger.error(f"DataMatrix detected but text is empty. Full result: {first_result}")
             raise HTTPException(status_code=422, detail="DataMatrix detected but could not decode")
 
         logger.info(f"DataMatrix decoded: {datamatrix_text[:100]}...")
