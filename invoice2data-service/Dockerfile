@@ -17,10 +17,17 @@ RUN apt-get update \
         tesseract-ocr-eng \
         tesseract-ocr-srp \
         default-jre-headless \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-download ZXing JAR for pyzxing (prevents runtime 404 errors)
+# pyzxing will try to download this from GitHub at runtime if not present
+RUN mkdir -p /root/.local/share/pyzxing && \
+    curl -L https://github.com/zxing/zxing/releases/download/zxing-3.4.1/zxing-3.4.1.jar \
+    -o /root/.local/share/pyzxing/zxing.jar
 
 COPY . .
 
