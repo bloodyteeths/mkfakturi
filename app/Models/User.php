@@ -20,6 +20,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Paddle\Billable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Silber\Bouncer\BouncerFacade;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
@@ -38,6 +39,7 @@ class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-
     use InteractsWithMedia;
     use Notifiable;
     use Billable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait for Partner Plus subscriptions
+    use TwoFactorAuthenticatable; // CLAUDE-CHECKPOINT: Added TwoFactorAuthenticatable trait for 2FA
 
     /**
      * The attributes that are mass assignable.

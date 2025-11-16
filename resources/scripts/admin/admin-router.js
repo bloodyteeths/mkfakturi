@@ -64,6 +64,8 @@ const AiInsightsSetting = () =>
   import('@/scripts/admin/views/settings/AiInsightsSetting.vue')
 const FeatureFlagsSettings = () =>
   import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
+const TwoFactorSetting = () =>
+  import('@/scripts/admin/views/settings/TwoFactorSetting.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -354,6 +356,11 @@ export default [
             path: 'account-settings',
             name: 'account.settings',
             component: AccountSetting,
+          },
+          {
+            path: 'two-factor',
+            name: 'two.factor',
+            component: TwoFactorSetting,
           },
           {
             path: 'company-info',

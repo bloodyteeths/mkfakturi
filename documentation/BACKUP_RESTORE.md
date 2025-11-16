@@ -261,6 +261,240 @@ php artisan queue:work --once
 # Visit application URL and log in
 ```
 
+## Restoring from S3 (AWS)
+
+If you configured S3 as a backup destination, backups are stored in AWS S3 for redundancy.
+
+### Prerequisites
+
+1. **Install AWS CLI** (if not already installed):
+
+```bash
+# On Ubuntu/Debian
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Verify installation
+aws --version
+```
+
+2. **Configure AWS Credentials**:
+
+```bash
+aws configure
+# Enter your AWS Access Key ID
+# Enter your AWS Secret Access Key
+# Enter your default region (e.g., eu-central-1)
+# Enter default output format (json)
+```
+
+### Step 1: List Available S3 Backups
+
+```bash
+# List all backups in S3 bucket
+aws s3 ls s3://facturino-backups/Facturino/
+
+# Example output:
+# 2025-11-14 02:00:10   15728640 2025-11-14-02-00-00.zip
+# 2025-11-15 02:00:10   15831024 2025-11-15-02-00-00.zip
+# 2025-11-16 02:00:10   15912448 2025-11-16-02-00-00.zip
+```
+
+### Step 2: Download Backup from S3
+
+```bash
+# Download the latest backup
+aws s3 cp s3://facturino-backups/Facturino/2025-11-16-02-00-00.zip /tmp/backup-restore.zip
+
+# Verify download
+ls -lh /tmp/backup-restore.zip
+```
+
+### Step 3: Extract and Restore
+
+```bash
+# Extract backup
+mkdir -p /tmp/restore
+unzip /tmp/backup-restore.zip -d /tmp/restore/
+
+# Follow steps 4-10 from the standard restore procedure above
+```
+
+### Alternative: Direct S3 Integration
+
+If you have AWS credentials configured in `.env`, you can use Laravel's storage facade:
+
+```bash
+php artisan tinker
+
+# List backups
+>>> Storage::disk('s3')->files('Facturino');
+
+# Download backup
+>>> $backup = Storage::disk('s3')->get('Facturino/2025-11-16-02-00-00.zip');
+>>> file_put_contents('/tmp/backup-restore.zip', $backup);
+```
+
+### Disaster Recovery: Complete Server Restoration from S3
+
+**Scenario:** Your server has completely failed and you need to restore from S3 to a new server.
+
+**Estimated Recovery Time:** 30-60 minutes
+
+1. **Provision New Server** (5 minutes)
+   - Create new server with same specifications
+   - Install PHP 8.2, PostgreSQL, Nginx, Composer
+
+2. **Clone Application** (5 minutes)
+   ```bash
+   git clone https://github.com/facturino/facturino.git /var/www/facturino
+   cd /var/www/facturino
+   composer install --no-dev --optimize-autoloader
+   ```
+
+3. **Configure Basic Environment** (5 minutes)
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+
+   # Set minimal .env values:
+   # - APP_URL
+   # - DB_CONNECTION, DB_DATABASE, etc.
+   # - AWS credentials (to download backup)
+   ```
+
+4. **Download and Extract Backup from S3** (5-10 minutes)
+   ```bash
+   # Configure AWS CLI
+   aws configure
+
+   # Download latest backup
+   aws s3 cp s3://facturino-backups/Facturino/$(aws s3 ls s3://facturino-backups/Facturino/ | sort | tail -n 1 | awk '{print $4}') /tmp/backup.zip
+
+   # Extract
+   mkdir -p /tmp/restore
+   unzip /tmp/backup.zip -d /tmp/restore/
+   ```
+
+5. **Restore Database** (5 minutes)
+   ```bash
+   # Create database
+   sudo -u postgres createdb facturino
+
+   # Restore from backup
+   cd /tmp/restore/db-dumps/
+   gunzip pgsql-facturino.sql.gz
+   sudo -u postgres psql facturino < pgsql-facturino.sql
+   ```
+
+6. **Restore Files** (2 minutes)
+   ```bash
+   # Restore certificates
+   cp -r /tmp/restore/certificates/* /var/www/facturino/storage/app/certificates/
+
+   # Restore uploads
+   cp -r /tmp/restore/uploads/* /var/www/facturino/storage/app/public/uploads/
+
+   # Restore .env (merge with current .env)
+   cp /tmp/restore/.env /tmp/.env.backup
+   # Manually merge important settings from /tmp/.env.backup to /var/www/facturino/.env
+   ```
+
+7. **Set Permissions** (1 minute)
+   ```bash
+   sudo chown -R www-data:www-data /var/www/facturino
+   sudo chmod -R 775 /var/www/facturino/storage
+   sudo chmod -R 775 /var/www/facturino/bootstrap/cache
+   ```
+
+8. **Configure Web Server** (5 minutes)
+   ```bash
+   # Configure Nginx (copy from documentation)
+   sudo nano /etc/nginx/sites-available/facturino
+   sudo ln -s /etc/nginx/sites-available/facturino /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl restart nginx
+   ```
+
+9. **Start Services** (2 minutes)
+   ```bash
+   # Clear caches
+   php artisan config:clear
+   php artisan cache:clear
+
+   # Start queue workers
+   php artisan queue:restart
+
+   # Verify cron jobs
+   crontab -e
+   # Add: * * * * * cd /var/www/facturino && php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+10. **Verify and Update DNS** (5-10 minutes)
+    ```bash
+    # Test locally first
+    curl http://localhost/health
+
+    # If healthy, update DNS to point to new server
+    # Wait for DNS propagation (5-30 minutes)
+
+    # Monitor application
+    tail -f /var/www/facturino/storage/logs/laravel.log
+    ```
+
+### S3 Backup Best Practices
+
+1. **Versioning**: Enable S3 bucket versioning for protection against accidental deletion
+   ```bash
+   aws s3api put-bucket-versioning \
+     --bucket facturino-backups \
+     --versioning-configuration Status=Enabled
+   ```
+
+2. **Lifecycle Policies**: Configure S3 lifecycle rules to automatically archive old backups to Glacier for cost savings
+   ```json
+   {
+     "Rules": [
+       {
+         "Id": "Archive old backups",
+         "Status": "Enabled",
+         "Transitions": [
+           {
+             "Days": 90,
+             "StorageClass": "GLACIER"
+           }
+         ],
+         "Expiration": {
+           "Days": 1095
+         }
+       }
+     ]
+   }
+   ```
+
+3. **Cross-Region Replication**: For critical deployments, enable cross-region replication
+   ```bash
+   aws s3api put-bucket-replication \
+     --bucket facturino-backups \
+     --replication-configuration file://replication-config.json
+   ```
+
+4. **Encryption**: Enable server-side encryption for S3 bucket
+   ```bash
+   aws s3api put-bucket-encryption \
+     --bucket facturino-backups \
+     --server-side-encryption-configuration '{
+       "Rules": [
+         {
+           "ApplyServerSideEncryptionByDefault": {
+             "SSEAlgorithm": "AES256"
+           }
+         }
+       ]
+     }'
+   ```
+
 ## Backup Notifications
 
 Email notifications are sent to `BACKUP_NOTIFICATION_EMAIL` for:

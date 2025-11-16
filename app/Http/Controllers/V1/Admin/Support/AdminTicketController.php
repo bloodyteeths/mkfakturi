@@ -4,6 +4,8 @@ namespace App\Http\Controllers\V1\Admin\Support;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TicketResource;
+use App\Notifications\TicketClosedNotification;
+use App\Notifications\TicketUpdatedNotification;
 use Coderflex\LaravelTicket\Models\Ticket;
 use Coderflex\LaravelTicket\Models\Message;
 use Illuminate\Http\Request;
@@ -120,9 +122,7 @@ class AdminTicketController extends Controller
             'status' => 'in_progress', // Auto-set to in_progress when assigned
         ]);
 
-        // TODO: Trigger TicketAssigned notification to agent (Milestone 3.3)
-
-        $ticket->load(['user', 'categories', 'labels', 'assignedTo']);
+        $ticket->load(['user', 'categories', 'labels', 'assignedToUser']);
 
         return new TicketResource($ticket);
     }
@@ -151,23 +151,32 @@ class AdminTicketController extends Controller
         ]);
 
         $oldStatus = $ticket->status;
+        $newStatus = $request->status;
 
         $ticket->update([
-            'status' => $request->status,
-            'is_resolved' => in_array($request->status, ['resolved', 'closed']),
-            'is_locked' => $request->status === 'closed',
+            'status' => $newStatus,
+            'is_resolved' => in_array($newStatus, ['resolved', 'closed']),
+            'is_locked' => $newStatus === 'closed',
         ]);
 
-        // TODO: Trigger TicketStatusChanged notification to customer (Milestone 3.3)
-
         $ticket->load(['user', 'categories', 'labels']);
+
+        // Send appropriate notification to customer based on status change
+        if ($newStatus === 'closed') {
+            // Send closed notification
+            $wasResolved = $ticket->is_resolved;
+            $ticket->user->notify(new TicketClosedNotification($ticket, $wasResolved));
+        } else {
+            // Send status update notification for other status changes
+            $ticket->user->notify(new TicketUpdatedNotification($ticket, $oldStatus, $newStatus));
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Ticket status updated successfully',
             'data' => new TicketResource($ticket),
             'old_status' => $oldStatus,
-            'new_status' => $request->status,
+            'new_status' => $newStatus,
         ]);
     }
 

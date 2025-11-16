@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Admin\Support;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\ReplyTicketRequest;
 use App\Http\Resources\TicketMessageResource;
+use App\Notifications\TicketRepliedNotification;
 use Coderflex\LaravelTicket\Models\Message;
 use Coderflex\LaravelTicket\Models\Ticket;
 use Illuminate\Http\Request;
@@ -17,12 +18,19 @@ class TicketMessageController extends Controller
      * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Ticket $ticket)
+    public function index(Request $request, Ticket $ticket)
     {
         $this->authorize('view', $ticket);
 
+        $user = $request->user();
+
+        // Filter out internal notes for non-admin users
         $messages = $ticket->messages()
             ->with('user')
+            ->when(!$user->isOwner() && !$user->hasRole('support'), function ($query) {
+                // Hide internal notes from regular customers
+                $query->where('is_internal', false);
+            })
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -60,6 +68,20 @@ class TicketMessageController extends Controller
         }
 
         $message->load('user');
+
+        // Send notification based on who replied
+        // If the replier is the ticket owner (customer), notify the assigned agent
+        // If the replier is an agent/admin, notify the ticket owner (customer)
+        if ($user->id === $ticket->user_id) {
+            // Customer replied - notify assigned agent if exists
+            if ($ticket->assigned_to) {
+                $ticket->assignedToUser->notify(new TicketRepliedNotification($ticket, $message, false));
+            }
+        } else {
+            // Agent/admin replied - notify customer
+            $isAgentReply = $user->isOwner() || $user->hasRole('support');
+            $ticket->user->notify(new TicketRepliedNotification($ticket, $message, $isAgentReply));
+        }
 
         return new TicketMessageResource($message);
     }

@@ -66,7 +66,7 @@ return [
 
         'redis' => [
             'driver' => 'redis',
-            'connection' => env('QUEUE_REDIS_CONNECTION', 'default'),
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'queue'),
             'queue' => env('REDIS_QUEUE', 'default'),
             'retry_after' => 90,
             'block_for' => null,
@@ -76,7 +76,7 @@ return [
         // High priority queue for critical operations
         'high' => [
             'driver' => 'redis',
-            'connection' => env('QUEUE_REDIS_CONNECTION', 'default'),
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'queue'),
             'queue' => 'high',
             'retry_after' => 90,
             'block_for' => null,
@@ -86,7 +86,7 @@ return [
         // Migration queue for data import operations
         'migration' => [
             'driver' => 'redis',
-            'connection' => env('QUEUE_REDIS_CONNECTION', 'default'),
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'queue'),
             'queue' => 'migration',
             'retry_after' => 600, // 10 minutes for large data processing
             'block_for' => null,
@@ -96,7 +96,7 @@ return [
         // Background queue for low priority tasks
         'background' => [
             'driver' => 'redis',
-            'connection' => env('QUEUE_REDIS_CONNECTION', 'default'),
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'queue'),
             'queue' => 'background',
             'retry_after' => 90,
             'block_for' => null,
@@ -106,7 +106,7 @@ return [
         // E-invoice submission queue for tax authority submissions
         'einvoice' => [
             'driver' => 'redis',
-            'connection' => env('QUEUE_REDIS_CONNECTION', 'default'),
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'queue'),
             'queue' => 'einvoice',
             'retry_after' => 150, // 2.5 minutes (longer than job timeout)
             'block_for' => null,

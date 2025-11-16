@@ -173,3 +173,5 @@ return [
         ],
     ],
 ];
+
+// CLAUDE-CHECKPOINT

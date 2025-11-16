@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Admin\Support;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\CreateTicketRequest;
 use App\Http\Resources\TicketResource;
+use App\Notifications\TicketCreatedNotification;
 use Coderflex\LaravelTicket\Models\Ticket;
 use Illuminate\Http\Request;
 
@@ -93,6 +94,9 @@ class TicketController extends Controller
 
         // Load relationships for response
         $ticket->load(['user', 'categories', 'labels']);
+
+        // Send notification to customer
+        $user->notify(new TicketCreatedNotification($ticket));
 
         return new TicketResource($ticket);
     }
