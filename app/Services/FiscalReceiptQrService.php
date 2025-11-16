@@ -48,23 +48,40 @@ class FiscalReceiptQrService
 
         $maxRetries = (int) env('FISCAL_QR_MAX_RETRIES', 2);
 
-        // Initial decode attempt on the original image/PDF-converted PNG
+        // STRATEGY: Try QR decoding in this order for best results:
+        // 1. Original uploaded image/file (works for clear QR codes)
+        // 2. Enhanced image with grayscale + contrast (for low-quality scans)
+        // This ensures we don't break QR-only images with enhancement errors.
+
+        // Attempt 1: Decode original image directly
         $text = $this->decodeImagePath($imagePath);
 
-        // Retry path with image enhancement (grayscale, higher DPI) when the
-        // first decode fails. This significantly increases success rates on
-        // Macedonian fiscal receipts with low contrast or narrow QR modules.
+        // Attempt 2: If decode failed and we have retries enabled, enhance
+        // the image (grayscale, higher DPI, contrast) and retry. This
+        // significantly increases success rates on Macedonian fiscal receipts
+        // with low contrast or narrow QR modules, BUT can fail on some PNGs
+        // with color space issues, so we only do this as a fallback.
         if (! $text && $maxRetries > 1) {
-            Log::info('FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, converting to high-contrast image and retrying');
+            Log::info('FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, trying image enhancement');
 
-            $enhancedPath = $this->enhanceImageForQr($path, $extension);
+            try {
+                $enhancedPath = $this->enhanceImageForQr($path, $extension);
 
-            if ($enhancedPath) {
-                $text = $this->decodeImagePath($enhancedPath);
-            }
+                if ($enhancedPath) {
+                    $text = $this->decodeImagePath($enhancedPath);
+                }
 
-            if ($enhancedPath && file_exists($enhancedPath)) {
-                @unlink($enhancedPath);
+                if ($enhancedPath && file_exists($enhancedPath)) {
+                    @unlink($enhancedPath);
+                }
+            } catch (\Throwable $enhanceException) {
+                // Enhancement can fail on some images (e.g., PNG color space
+                // issues). Log the error but don't throw - we'll fall back
+                // to the parser microservice instead.
+                Log::warning('FiscalReceiptQrService::decodeAndNormalize - Image enhancement failed', [
+                    'error' => $enhanceException->getMessage(),
+                    'exception' => get_class($enhanceException),
+                ]);
             }
         }
 
@@ -140,11 +157,21 @@ class FiscalReceiptQrService
 
         if (extension_loaded('gd')) {
             try {
-                $image = null;
-                if (in_array($extension, ['jpg', 'jpeg'], true)) {
-                    $image = imagecreatefromjpeg($path);
-                } elseif ($extension === 'png') {
-                    $image = imagecreatefrompng($path);
+                // Read the image from file contents to avoid path issues
+                $contents = @file_get_contents($path);
+                if ($contents === false) {
+                    return null;
+                }
+
+                $image = @imagecreatefromstring($contents);
+
+                if (! $image) {
+                    // Try extension-specific loaders as fallback
+                    if (in_array($extension, ['jpg', 'jpeg'], true)) {
+                        $image = @imagecreatefromjpeg($path);
+                    } elseif ($extension === 'png') {
+                        $image = @imagecreatefrompng($path);
+                    }
                 }
 
                 if (! $image) {
