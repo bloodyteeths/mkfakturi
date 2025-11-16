@@ -111,6 +111,14 @@ class Supplier extends Model
     }
 
     /**
+     * Relationship: Supplier belongs to Currency
+     */
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    /**
      * Relationship: Supplier was created by User
      */
     public function creator(): BelongsTo
