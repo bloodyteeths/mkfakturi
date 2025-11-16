@@ -8,7 +8,6 @@ ENV PYTHONUNBUFFERED=1
 ENV OCR_LANGS=mkd+eng+srp
 
 # Install system dependencies for OCR (Tesseract) with language packs
-# and Java (for pyzxing DataMatrix decoder)
 # Macedonian (mkd), English (eng), and Serbian (srp) for regional coverage
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -16,18 +15,10 @@ RUN apt-get update \
         tesseract-ocr-mkd \
         tesseract-ocr-eng \
         tesseract-ocr-srp \
-        default-jre-headless \
-        curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Pre-download ZXing JAR for pyzxing (prevents runtime 404 errors)
-# pyzxing expects javase-3.4.1-SNAPSHOT-jar-with-dependencies.jar in ~/.local/pyzxing/
-RUN mkdir -p /root/.local/pyzxing && \
-    curl -L https://github.com/ChenjieXu/pyzxing/releases/download/v1.1.0/javase-3.4.1-SNAPSHOT-jar-with-dependencies.jar \
-    -o /root/.local/pyzxing/javase-3.4.1-SNAPSHOT-jar-with-dependencies.jar
 
 COPY . .
 

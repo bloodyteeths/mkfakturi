@@ -21,11 +21,6 @@ except Exception:  # pragma: no cover - optional OCR pipeline
     Image = None  # type: ignore
     np = None  # type: ignore
 
-try:
-    from pyzxing import BarCodeReader  # type: ignore
-except Exception:  # pragma: no cover - optional DataMatrix scanning
-    BarCodeReader = None  # type: ignore
-
 app = FastAPI(title="Invoice2Data Microservice", version="1.0.0")
 
 
