@@ -333,21 +333,41 @@ async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
         os.unlink(tmp_path)
 
         if not results or len(results) == 0:
-            raise HTTPException(status_code=422, detail="No DataMatrix code detected")
+            raise HTTPException(status_code=422, detail="No barcodes detected in image")
 
-        # Return first detected code
-        # results is a list of dicts: [{'format': 'DATA_MATRIX', 'raw': '...', 'parsed': '...'}]
-        first_result = results[0] if isinstance(results, list) else results
+        # Filter for DataMatrix codes only (ignore UPC, EAN, etc.)
+        datamatrix_results = []
+        for result in results if isinstance(results, list) else [results]:
+            barcode_format = result.get('format', b'')
+            # Handle both bytes and string format
+            if isinstance(barcode_format, bytes):
+                barcode_format = barcode_format.decode('utf-8', errors='ignore')
 
-        logger.info(f"First result structure: {first_result}")
-        logger.info(f"First result keys: {first_result.keys() if isinstance(first_result, dict) else 'not a dict'}")
-        logger.info(f"Raw field: {first_result.get('raw') if isinstance(first_result, dict) else 'N/A'}")
-        logger.info(f"Parsed field: {first_result.get('parsed') if isinstance(first_result, dict) else 'N/A'}")
+            logger.info(f"Found barcode - Format: {barcode_format}, Keys: {result.keys()}")
 
-        datamatrix_text = first_result.get("raw") or first_result.get("parsed", "")
+            if barcode_format == 'DATA_MATRIX':
+                datamatrix_results.append(result)
+
+        if not datamatrix_results:
+            raise HTTPException(
+                status_code=422,
+                detail=f"No DataMatrix code found. Found {len(results)} other barcode(s): {[r.get('format') for r in (results if isinstance(results, list) else [results])]}"
+            )
+
+        # Use first DataMatrix result
+        first_result = datamatrix_results[0]
+
+        logger.info(f"DataMatrix result: {first_result}")
+
+        # pyzxing returns bytes, need to decode to string
+        raw_data = first_result.get("raw") or first_result.get("parsed", b"")
+        if isinstance(raw_data, bytes):
+            datamatrix_text = raw_data.decode('utf-8', errors='ignore')
+        else:
+            datamatrix_text = str(raw_data) if raw_data else ""
 
         if not datamatrix_text:
-            logger.error(f"DataMatrix detected but text is empty. Full result: {first_result}")
+            logger.error(f"DataMatrix found but data is empty. Full result: {first_result}")
             raise HTTPException(status_code=422, detail="DataMatrix detected but could not decode")
 
         logger.info(f"DataMatrix decoded: {datamatrix_text[:100]}...")
