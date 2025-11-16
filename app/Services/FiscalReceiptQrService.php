@@ -46,6 +46,34 @@ class FiscalReceiptQrService
             $imagePath = $temporaryImagePath;
         }
 
+        // CRITICAL: ZXing QR decoder exhausts memory on large images (3MB+).
+        // Resize images > 2MB to a reasonable size (max 1920px) before decoding.
+        // QR codes remain readable at lower resolutions and this prevents OOM.
+        $fileSize = filesize($imagePath);
+        $maxSizeBytes = 2 * 1024 * 1024; // 2MB
+
+        if ($fileSize > $maxSizeBytes) {
+            Log::info('FiscalReceiptQrService::decodeAndNormalize - Large image detected, resizing before QR decode', [
+                'original_size_bytes' => $fileSize,
+                'original_size_mb' => round($fileSize / 1024 / 1024, 2),
+            ]);
+
+            $resizedPath = $this->resizeImageForQr($imagePath, $extension);
+            if ($resizedPath) {
+                // Clean up the original temp path if it was a PDF conversion
+                if ($temporaryImagePath && $temporaryImagePath === $imagePath && file_exists($temporaryImagePath)) {
+                    @unlink($temporaryImagePath);
+                }
+                $temporaryImagePath = $resizedPath;
+                $imagePath = $resizedPath;
+
+                Log::info('FiscalReceiptQrService::decodeAndNormalize - Image resized', [
+                    'new_size_bytes' => file_exists($imagePath) ? filesize($imagePath) : null,
+                    'new_size_mb' => file_exists($imagePath) ? round(filesize($imagePath) / 1024 / 1024, 2) : null,
+                ]);
+            }
+        }
+
         $maxRetries = (int) env('FISCAL_QR_MAX_RETRIES', 2);
 
         // STRATEGY: Try QR decoding in this order for best results:
@@ -54,7 +82,23 @@ class FiscalReceiptQrService
         // This ensures we don't break QR-only images with enhancement errors.
 
         // Attempt 1: Decode original image directly
+        Log::info('FiscalReceiptQrService::decodeAndNormalize - Attempting QR decode on original image', [
+            'image_path' => $imagePath,
+            'file_exists' => file_exists($imagePath),
+            'file_size' => file_exists($imagePath) ? filesize($imagePath) : null,
+            'extension' => $extension,
+        ]);
+
         $text = $this->decodeImagePath($imagePath);
+
+        if ($text) {
+            Log::info('FiscalReceiptQrService::decodeAndNormalize - QR decoded successfully from original image', [
+                'text_length' => strlen($text),
+                'text_preview' => substr($text, 0, 50),
+            ]);
+        } else {
+            Log::info('FiscalReceiptQrService::decodeAndNormalize - No QR code found in original image');
+        }
 
         // Attempt 2: If decode failed and we have retries enabled, enhance
         // the image (grayscale, higher DPI, contrast) and retry. This
@@ -62,13 +106,30 @@ class FiscalReceiptQrService
         // with low contrast or narrow QR modules, BUT can fail on some PNGs
         // with color space issues, so we only do this as a fallback.
         if (! $text && $maxRetries > 1) {
-            Log::info('FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, trying image enhancement');
+            Log::info('FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, trying image enhancement', [
+                'max_retries' => $maxRetries,
+            ]);
 
             try {
                 $enhancedPath = $this->enhanceImageForQr($path, $extension);
 
                 if ($enhancedPath) {
+                    Log::info('FiscalReceiptQrService::decodeAndNormalize - Attempting QR decode on enhanced image', [
+                        'enhanced_path' => $enhancedPath,
+                        'file_exists' => file_exists($enhancedPath),
+                        'file_size' => file_exists($enhancedPath) ? filesize($enhancedPath) : null,
+                    ]);
+
                     $text = $this->decodeImagePath($enhancedPath);
+
+                    if ($text) {
+                        Log::info('FiscalReceiptQrService::decodeAndNormalize - QR decoded successfully from enhanced image', [
+                            'text_length' => strlen($text),
+                            'text_preview' => substr($text, 0, 50),
+                        ]);
+                    } else {
+                        Log::info('FiscalReceiptQrService::decodeAndNormalize - No QR code found in enhanced image');
+                    }
                 }
 
                 if ($enhancedPath && file_exists($enhancedPath)) {
@@ -119,6 +180,93 @@ class FiscalReceiptQrService
         $imagick->destroy();
 
         return $temporaryImagePath;
+    }
+
+    protected function resizeImageForQr(string $imagePath, string $extension): ?string
+    {
+        // Target max dimension (width or height) to keep QR codes readable
+        // while reducing memory usage for ZXing decoder
+        $maxDimension = 1920;
+
+        // Prefer Imagick for better quality and memory handling
+        if (class_exists(\Imagick::class)) {
+            try {
+                $imagick = new \Imagick();
+                $imagick->readImage($imagePath);
+
+                $width = $imagick->getImageWidth();
+                $height = $imagick->getImageHeight();
+
+                // Only resize if image is larger than max dimension
+                if ($width > $maxDimension || $height > $maxDimension) {
+                    if ($width > $height) {
+                        $imagick->scaleImage($maxDimension, 0);
+                    } else {
+                        $imagick->scaleImage(0, $maxDimension);
+                    }
+                }
+
+                $imagick->setImageFormat('png');
+                $imagick->setImageCompressionQuality(90);
+
+                $resizedPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('qr_resized_', true).'.png';
+                $imagick->writeImage($resizedPath);
+                $imagick->clear();
+                $imagick->destroy();
+
+                return $resizedPath;
+            } catch (\Throwable $e) {
+                Log::warning('FiscalReceiptQrService::resizeImageForQr - Imagick resize failed', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Fallback to GD if Imagick is not available
+        if (extension_loaded('gd')) {
+            try {
+                $contents = @file_get_contents($imagePath);
+                if ($contents === false) {
+                    return null;
+                }
+
+                $image = @imagecreatefromstring($contents);
+                if (! $image) {
+                    return null;
+                }
+
+                $width = imagesx($image);
+                $height = imagesy($image);
+
+                // Only resize if image is larger than max dimension
+                if ($width > $maxDimension || $height > $maxDimension) {
+                    if ($width > $height) {
+                        $newWidth = $maxDimension;
+                        $newHeight = (int) ($height * ($maxDimension / $width));
+                    } else {
+                        $newHeight = $maxDimension;
+                        $newWidth = (int) ($width * ($maxDimension / $height));
+                    }
+
+                    $resized = imagecreatetruecolor($newWidth, $newHeight);
+                    imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                    imagedestroy($image);
+                    $image = $resized;
+                }
+
+                $resizedPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('qr_resized_', true).'.png';
+                imagepng($image, $resizedPath, 9);
+                imagedestroy($image);
+
+                return $resizedPath;
+            } catch (\Throwable $e) {
+                Log::warning('FiscalReceiptQrService::resizeImageForQr - GD resize failed', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return null;
     }
 
     protected function enhanceImageForQr(string $path, string $extension): ?string
