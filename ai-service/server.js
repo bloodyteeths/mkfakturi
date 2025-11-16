@@ -8,7 +8,7 @@ const { runAgent } = require('./orchestrator');
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, port: process.env.MCP_PORT || 3002 });
+const wss = new WebSocketServer({ server });
 
 // Security middleware
 app.use(helmet());
@@ -30,8 +30,6 @@ app.get('/health', (req, res) => {
     environment: process.env.NODE_ENV
   });
 });
-
-const { runAgent } = require('./orchestrator');
 
 // AI Financial Analysis endpoints
 app.get('/api/financial-summary', async (req, res) => {

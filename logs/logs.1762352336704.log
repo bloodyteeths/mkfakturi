@@ -1,116 +1,1854 @@
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-15 23:49:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-15 23:49:58] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-15 23:49:58] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-15 23:50:06] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-15 23:50:06] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-15 23:50:10] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:10] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_company_header":true,"company_header":"2"} 
-[2025-11-15 23:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:50:11] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:50:11] production.WARNING: Slow operation detected {"operation":"req_691911b2c138e","execution_time_ms":612.69,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
-[2025-11-15 23:50:11] production.WARNING: Slow request detected {"operation":"req_691911b2c138e","execution_time_ms":612.69,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"79.125.212.114","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-15 23:50:11] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:11] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:50:22] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:22] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":3229070,"file_mime":"image/jpeg"} 
-[2025-11-15 23:50:22] production.INFO: ReceiptScannerController::scan - File details {"original_name":"IMG_9781.JPG","size_bytes":3229070,"size_kb":3153.39,"size_mb":3.08,"mime_type":"image/jpeg"} 
-[2025-11-15 23:50:30] production.INFO: FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, converting to high-contrast image and retrying  
-[2025-11-15 23:50:36] production.WARNING: ReceiptScannerController::scan - QR decode failed, falling back to parser {"user_id":2,"company_id":2,"error":"imagecreatefromstring(): gd-png: libpng warning: iCCP: profile 'icc': 'RGB ': RGB color space not permitted on grayscale PNG","exception":"ErrorException"} 
-[2025-11-15 23:50:36] production.INFO: ReceiptScannerController::scan - Fallback OCR parse initiated {"company_id":2} 
-[2025-11-15 23:50:42] production.INFO: ReceiptScannerController::scan - Bill created via parser fallback {"bill_id":11,"company_id":2,"supplier_id":3,"parsed_source":"invoice2data-service"} 
-[2025-11-15 23:50:42] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:50:42] production.WARNING: Slow operation detected {"operation":"req_691911be23b5d","execution_time_ms":20754.42,"memory_used_bytes":5328896,"memory_used_mb":5.08} 
-[2025-11-15 23:50:42] production.WARNING: Slow request detected {"operation":"req_691911be23b5d","execution_time_ms":20754.42,"memory_used_bytes":5328896,"memory_used_mb":5.08,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"79.125.212.114","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":201} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/currencies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/tax-types","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bills/11","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/suppliers","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:50:43] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:50:43] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:51:06] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-15 23:51:06] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:52:02] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bills/11","method":"PUT","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:52:02] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bills","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:52:02] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:02] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:02] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:03] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:52:03] production.WARNING: Slow operation detected {"operation":"req_69191222a6281","execution_time_ms":1161.23,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
-[2025-11-15 23:52:03] production.WARNING: Slow request detected {"operation":"req_69191222a6281","execution_time_ms":1161.23,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bills","route":"bills.index","user_id":2,"company_id":"2","ip":"79.125.212.114","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-15 23:52:23] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:52:23] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":1386361,"file_mime":"image/jpeg"} 
-[2025-11-15 23:52:23] production.INFO: ReceiptScannerController::scan - File details {"original_name":"ccfa20cf-1ad6-4c83-956b-f79f379e9672.jpg","size_bytes":1386361,"size_kb":1353.87,"size_mb":1.32,"mime_type":"image/jpeg"} 
-[2025-11-15 23:52:26] production.INFO: FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, converting to high-contrast image and retrying  
-[2025-11-15 23:52:32] production.WARNING: ReceiptScannerController::scan - QR decode failed, falling back to parser {"user_id":2,"company_id":2,"error":"QR code not detected in receipt; please upload a clear image or PDF","exception":"RuntimeException"} 
-[2025-11-15 23:52:32] production.INFO: ReceiptScannerController::scan - Fallback OCR parse initiated {"company_id":2} 
-[2025-11-15 23:52:37] production.INFO: ReceiptScannerController::scan - Bill created via parser fallback {"bill_id":12,"company_id":2,"supplier_id":2,"parsed_source":"invoice2data-service"} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:52:37] production.WARNING: Slow operation detected {"operation":"req_6919123704d47","execution_time_ms":14107.36,"memory_used_bytes":12582912,"memory_used_mb":12.0} 
-[2025-11-15 23:52:37] production.WARNING: Slow request detected {"operation":"req_6919123704d47","execution_time_ms":14107.36,"memory_used_bytes":12582912,"memory_used_mb":12.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"79.125.212.114","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":201} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bills/12","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/tax-types","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/suppliers","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:52:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:52:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:53:36] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/suppliers","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:53:36] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:53:51] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bills","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:53:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-15 23:53:52] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:53:52] production.WARNING: Slow operation detected {"operation":"req_6919128f63f62","execution_time_ms":1191.57,"memory_used_bytes":0,"memory_used_mb":0.0} 
-[2025-11-15 23:53:52] production.WARNING: Slow request detected {"operation":"req_6919128f63f62","execution_time_ms":1191.57,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bills","route":"bills.index","user_id":2,"company_id":"2","ip":"79.125.212.114","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-15 23:54:03] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"q4z5Y7s7acHg0ULNoJ9vJCClQLeBSU20COLIZDib","has_session_cookie":true} 
-[2025-11-15 23:54:03] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":119937,"file_mime":"image/jpeg"} 
-[2025-11-15 23:54:03] production.INFO: ReceiptScannerController::scan - File details {"original_name":"0440e159-39b3-4246-b962-70e7b78c6437.jpg","size_bytes":119937,"size_kb":117.13,"size_mb":0.11,"mime_type":"image/jpeg"} 
-[2025-11-15 23:54:03] production.INFO: FiscalReceiptQrService::decodeAndNormalize - Initial QR decode failed, converting to high-contrast image and retrying  
-[2025-11-15 23:54:03] production.WARNING: ReceiptScannerController::scan - QR decode failed, falling back to parser {"user_id":2,"company_id":2,"error":"QR code not detected in receipt; please upload a clear image or PDF","exception":"RuntimeException"} 
-[2025-11-15 23:54:03] production.INFO: ReceiptScannerController::scan - Fallback OCR parse initiated {"company_id":2} 
-[2025-11-15 23:54:05] production.ERROR: ReceiptScannerController::scan - Parser fallback failed {"user_id":2,"company_id":2,"error":"HTTP request returned status code 422:
-{\"detail\":\"No text detected in image\"}
-","exception":"Illuminate\\Http\\Client\\RequestException"} 
-[2025-11-15 23:54:05] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-15 23:54:05] production.WARNING: Slow operation detected {"operation":"req_6919129b6878e","execution_time_ms":1681.49,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
-[2025-11-15 23:54:05] production.WARNING: Slow request detected {"operation":"req_6919129b6878e","execution_time_ms":1681.49,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"79.125.212.114","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":422} 
-[2025-11-15 23:54:14] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+ [intlify] Not found 'dashboard.quick_actions' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+rt @ main-CBrKO3G4.js:22
+(anonymous) @ main-CBrKO3G4.js:109
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'dashboard.quick_actions' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+rt @ main-CBrKO3G4.js:22
+(anonymous) @ main-CBrKO3G4.js:109
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.quick_actions' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+rt @ main-CBrKO3G4.js:22
+(anonymous) @ main-CBrKO3G4.js:109
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.create_invoice_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'dashboard.create_invoice_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.create_invoice_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.create_customer_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'dashboard.create_customer_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.create_customer_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'imports.import_data' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'imports.import_data' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'imports.import_data' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.import_data_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'dashboard.import_data_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.import_data_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'reports.reports' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'reports.reports' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'reports.reports' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.view_reports_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'dashboard.view_reports_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.view_reports_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+(anonymous) @ main-CBrKO3G4.js:38
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.overdue_invoices' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+rt @ main-CBrKO3G4.js:22
+(anonymous) @ main-CBrKO3G4.js:109
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Fall back to translate 'dashboard.overdue_invoices' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+rt @ main-CBrKO3G4.js:22
+(anonymous) @ main-CBrKO3G4.js:109
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [intlify] Not found 'dashboard.overdue_invoices' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+lg @ main-CBrKO3G4.js:75
+YC @ main-CBrKO3G4.js:75
+PK @ main-CBrKO3G4.js:75
+(anonymous) @ main-CBrKO3G4.js:105
+La @ main-CBrKO3G4.js:105
+Uo @ main-CBrKO3G4.js:105
+(anonymous) @ Dashboard-bz5Pxm5_.js:1
+n @ main-CBrKO3G4.js:20
+rt @ main-CBrKO3G4.js:22
+(anonymous) @ main-CBrKO3G4.js:109
+pf @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+Y @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+N @ main-CBrKO3G4.js:22
+T @ main-CBrKO3G4.js:22
+A @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+fe @ main-CBrKO3G4.js:22
+ze @ main-CBrKO3G4.js:22
+re @ main-CBrKO3G4.js:22
+v @ main-CBrKO3G4.js:22
+G @ main-CBrKO3G4.js:22
+run @ main-CBrKO3G4.js:16
+runIfDirty @ main-CBrKO3G4.js:16
+uc @ main-CBrKO3G4.js:20
+JA @ main-CBrKO3G4.js:20
+ [AI Insights] Fetching insights...
+ [AI Insights] Fetch response: Object
+ [intlify] Not found 'dashboard.overdue_invoices' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'dashboard.overdue_invoices' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'dashboard.overdue_invoices' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'dashboard.total_overdue' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'dashboard.total_overdue' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'dashboard.total_overdue' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+ [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.view_all_overdue' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.view_all_overdue' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.view_all_overdue' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.quick_actions' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.quick_actions' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.quick_actions' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.create_invoice_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.create_invoice_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.create_invoice_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.create_customer_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.create_customer_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.create_customer_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'imports.import_data' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'imports.import_data' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'imports.import_data' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.import_data_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.import_data_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.import_data_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'reports.reports' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'reports.reports' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'reports.reports' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.view_reports_desc' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.view_reports_desc' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.view_reports_desc' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.overdue_invoices' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.overdue_invoices' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.overdue_invoices' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+Dashboard-bz5Pxm5_.js:1 [AI Insights] Fetching insights...
+Dashboard-bz5Pxm5_.js:1 [AI Insights] Fetch response: Object
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.quick_actions' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.quick_actions' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.quick_actions' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.overdue_invoices' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.overdue_invoices' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.overdue_invoices' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.total_overdue' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.total_overdue' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.total_overdue' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'invoices.overdue_by' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'general.days' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.view_all_overdue' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'dashboard.view_all_overdue' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'dashboard.view_all_overdue' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+Scan-BhGLei77.js:1 Receipt scan response: Object
+Scan-BhGLei77.js:1 Response data: Object
+Scan-BhGLei77.js:1 scanResult set to: Proxy(Object)
+Scan-BhGLei77.js:1 Has hOCR: false
+Scan-BhGLei77.js:1 ocrText set to: ey Фискална СМЕТКА fe;
+да назза Ж
+ДИ ДРОГЕРИЕ MAPKT Д,0,0,Е, А, ѓ
+| ДАМЕ ГРЧЕВ 7 СКОПЈЕ BY
+ПОД 029 Р
+main-CBrKO3G4.js:72 [intlify] Not found 'bills.bill_number_placeholder' key in 'mk' locale messages.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Fall back to translate 'bills.bill_number_placeholder' key with 'en' locale.
+Id @ main-CBrKO3G4.js:72
+main-CBrKO3G4.js:72 [intlify] Not found 'bills.bill_number_placeholder' key in 'en' locale messages.
+Id @ main-CBrKO3G4.js:72
+Scan-BhGLei77.js:1 Image loaded successfully: 1324 x 3955
