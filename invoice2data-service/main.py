@@ -1,3 +1,7 @@
+"""
+invoice2data microservice with smart OCR preprocessing
+Version: 1.1.0 - Adaptive preprocessing for high-quality images
+"""
 import io
 import os
 import re
