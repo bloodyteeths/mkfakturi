@@ -20,6 +20,10 @@ const agents = {
     path: './agents/cashFlowForecastAgent.js',
     function: 'generateCashFlowForecast',
   },
+  comprehensiveFinancialReport: {
+    path: './agents/comprehensiveFinancialReportAgent.js',
+    function: 'generateComprehensiveFinancialReport',
+  },
 };
 
 /**

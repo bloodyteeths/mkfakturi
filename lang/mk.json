@@ -375,6 +375,7 @@
         "confirm_delete": "Нема да можете да ја вратите оваа сметка | Нема да можете да ги вратите овие сметки",
         "vendor": "Продавач",
         "vendor_placeholder": "Внеси име на продавач",
+        "bill_number_placeholder": "Внеси број на сметка",
         "amount": "Износ",
         "amount_placeholder": "0.00",
         "tax_amount": "Износ на данок",

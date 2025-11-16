@@ -62,6 +62,17 @@ app.get('/api/cash-flow-forecast', async (req, res) => {
   }
 });
 
+// New endpoint for comprehensive financial report
+app.get('/api/comprehensive-financial-report', async (req, res) => {
+  try {
+    const report = await runAgent('comprehensiveFinancialReport');
+    res.json(report);
+  } catch (error) {
+    console.error('Error in comprehensive-financial-report endpoint:', error);
+    res.status(500).json({ error: 'Failed to generate comprehensive financial report' });
+  }
+});
+
 // MCP WebSocket for real-time communication
 wss.on('connection', (ws) => {
   console.log('MCP client connected');
