@@ -310,28 +310,18 @@ async def extract_text(file: UploadFile = File(...), format: str = "text") -> JS
             )
 
         # Open image
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        original_image = Image.open(io.BytesIO(contents)).convert("RGB")
 
         # Get image dimensions for frontend
-        width, height = image.size
-
-        # Apply preprocessing
-        if np is not None:
-            import cv2
-            img_array = np.array(image)
-            gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-            binary = cv2.adaptiveThreshold(
-                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
-            )
-            denoised = cv2.fastNlMeansDenoising(binary, h=10)
-            image = Image.fromarray(denoised)
+        width, height = original_image.size
 
         langs = os.getenv("OCR_LANGS", "eng")
 
         if format == "hocr":
-            # Extract hOCR with word-level coordinates
+            # For hOCR, use the original image without preprocessing
+            # hOCR needs accurate coordinates, preprocessing can shift them
             custom_config = r'--oem 3 --psm 6 hocr'
-            hocr_html = pytesseract.image_to_pdf_or_hocr(image, lang=langs, config=custom_config, extension='hocr')
+            hocr_html = pytesseract.image_to_pdf_or_hocr(original_image, lang=langs, config=custom_config, extension='hocr')
             hocr_text = hocr_html.decode('utf-8')
 
             logger.info(f"hOCR extracted, length: {len(hocr_text)} chars")
@@ -344,11 +334,58 @@ async def extract_text(file: UploadFile = File(...), format: str = "text") -> JS
                 "image_height": height
             })
         else:
-            # Extract plain text
-            custom_config = r'--oem 3 --psm 6'
-            text = pytesseract.image_to_string(image, lang=langs, config=custom_config).strip()
+            # Extract plain text with smart preprocessing
+            # Try multiple PSM modes and keep best result
+            psm_modes = [3, 6, 4]  # 3=auto, 6=uniform block, 4=single column
+            best_text = ""
+            best_length = 0
 
-            logger.info(f"Text extracted: {len(text)} chars")
+            for psm in psm_modes:
+                custom_config = f'--oem 3 --psm {psm}'
+
+                # First attempt: Try with original image (best for high-quality images)
+                logger.info(f"Attempting OCR with original image (PSM {psm})")
+                text = pytesseract.image_to_string(original_image, lang=langs, config=custom_config)
+
+                if len(text.strip()) > best_length:
+                    best_text = text
+                    best_length = len(text.strip())
+                    logger.info(f"PSM {psm} (original): extracted {len(text.strip())} chars")
+
+                # Second attempt: Try with preprocessing only if numpy/cv2 available
+                # Only apply preprocessing if the original attempt yielded poor results
+                if np is not None and len(text.strip()) < 100:
+                    import cv2
+                    img_array = np.array(original_image)
+                    gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+
+                    # Check image quality using variance
+                    variance = cv2.Laplacian(gray, cv2.CV_64F).var()
+                    logger.info(f"Image variance (sharpness): {variance:.2f}")
+
+                    # Only apply aggressive preprocessing if variance is low (blurry/low-quality image)
+                    if variance < 100:
+                        logger.info("Low-quality image detected, applying preprocessing")
+
+                        # Apply adaptive thresholding
+                        binary = cv2.adaptiveThreshold(
+                            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+                        )
+
+                        # Denoise
+                        denoised = cv2.fastNlMeansDenoising(binary, h=10)
+                        preprocessed_image = Image.fromarray(denoised)
+
+                        text_preprocessed = pytesseract.image_to_string(preprocessed_image, lang=langs, config=custom_config)
+
+                        if len(text_preprocessed.strip()) > best_length:
+                            best_text = text_preprocessed
+                            best_length = len(text_preprocessed.strip())
+                            logger.info(f"PSM {psm} (preprocessed): extracted {len(text_preprocessed.strip())} chars")
+
+            # Log best result
+            logger.info(f"Best OCR result: {best_length} chars")
+            text = best_text.strip()
 
             return JSONResponse(content={
                 "success": True,
@@ -358,6 +395,7 @@ async def extract_text(file: UploadFile = File(...), format: str = "text") -> JS
                 "image_width": width,
                 "image_height": height
             })
+    # CLAUDE-CHECKPOINT
 
     except HTTPException:
         raise
