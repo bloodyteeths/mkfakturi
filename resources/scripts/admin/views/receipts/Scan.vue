@@ -35,13 +35,21 @@
           </BaseHeading>
 
           <!-- Full-width, full-size image -->
-          <div class="border rounded-lg overflow-auto bg-gray-50" style="max-height: 80vh;">
+          <div class="border rounded-lg overflow-auto" style="max-height: 80vh; background: #f9fafb;">
             <img
               :src="scanResult.image_url"
               :alt="$t('receipts.receipt_image')"
-              class="w-full h-auto"
+              class="w-full h-auto mx-auto block"
+              @load="onImageLoad"
+              @error="onImageError"
             />
           </div>
+          <p v-if="imageLoadError" class="text-red-600 text-sm mt-2">
+            Failed to load image: {{ imageLoadError }}
+          </p>
+          <p v-else-if="imageLoaded" class="text-green-600 text-sm mt-2">
+            Image loaded: {{ imageWidth }}x{{ imageHeight }}px
+          </p>
 
           <!-- OCR text below image -->
           <div class="mt-4">
@@ -157,6 +165,12 @@ const files = ref([])
 const scanResult = ref(null)
 const ocrText = ref('')
 
+// Image loading debug
+const imageLoaded = ref(false)
+const imageLoadError = ref(null)
+const imageWidth = ref(0)
+const imageHeight = ref(0)
+
 // Bill form data
 const billForm = ref({
   vendor: '',
@@ -177,6 +191,20 @@ function onFileChange(fieldName, fileOrFiles) {
   // Reset results when a new file is selected
   scanResult.value = null
   ocrText.value = ''
+  imageLoaded.value = false
+  imageLoadError.value = null
+}
+
+function onImageLoad(event) {
+  imageLoaded.value = true
+  imageWidth.value = event.target.naturalWidth
+  imageHeight.value = event.target.naturalHeight
+  console.log('Image loaded successfully:', imageWidth.value, 'x', imageHeight.value)
+}
+
+function onImageError(event) {
+  imageLoadError.value = event.target.src
+  console.error('Failed to load image:', event.target.src)
 }
 
 function scan() {
