@@ -84,7 +84,6 @@ use App\Http\Controllers\V1\Admin\Settings\GetUserSettingsController;
 use App\Http\Controllers\V1\Admin\Settings\MailConfigurationController;
 use App\Http\Controllers\V1\Admin\Settings\PDFConfigurationController;
 use App\Http\Controllers\V1\Admin\Settings\TaxTypesController;
-use App\Http\Controllers\V1\Admin\Settings\TwoFactorController;
 use App\Http\Controllers\V1\Admin\Settings\UpdateCompanySettingsController;
 use App\Http\Controllers\V1\Admin\Settings\UpdateSettingsController;
 use App\Http\Controllers\V1\Admin\Settings\UpdateUserSettingsController;
@@ -474,19 +473,6 @@ Route::prefix('/v1')->group(function () {
             Route::post('/settings/feature-flags/{flag}/toggle', [FeatureFlagsController::class, 'toggle']);
 
             Route::get('/company/has-transactions', CompanyCurrencyCheckTransactionsController::class);
-
-            // Two-Factor Authentication
-            // ----------------------------------
-
-            Route::prefix('/two-factor')->group(function () {
-                Route::get('/status', [TwoFactorController::class, 'status']);
-                Route::post('/enable', [TwoFactorController::class, 'enable']);
-                Route::post('/confirm', [TwoFactorController::class, 'confirm']);
-                Route::delete('/disable', [TwoFactorController::class, 'disable']);
-                Route::get('/qr-code', [TwoFactorController::class, 'qrCode']);
-                Route::get('/recovery-codes', [TwoFactorController::class, 'recoveryCodes']);
-                Route::post('/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes']);
-            });
 
             // Certificates
             // ----------------------------------
@@ -895,13 +881,19 @@ Route::prefix('/v1')->group(function () {
             Route::post('/switch', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'switchCompany']);
         });
     });
+});
 
-    // Public image serving route (no auth required - images are in private storage)
-    // This route uses Sanctum session cookies automatically for authenticated requests
+// Public image serving route (outside auth:sanctum to allow browser img tags with session cookies)
+// This route is intentionally outside the auth middleware to support standard browser <img> tags
+// Security: Path validation in controller ensures only scanned-receipts/ images are served
+Route::prefix('/v1')->group(function () {
     Route::get('/receipts/image/{path}', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'getImage'])
         ->where('path', '.*')
-        ->middleware(['web']); // Use web middleware for session support
+        ->middleware(['web']); // Use web middleware for session cookie support
+});
 
+// Continue with v1 routes
+Route::prefix('/v1')->group(function () {
     Route::prefix('/{company:slug}/customer')->group(function () {
 
         // Authentication & Password Reset
