@@ -305,11 +305,25 @@ async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
 
         logger.info(f"Scanning DataMatrix from image: {tmp_path}")
 
+        # Check if JAR exists before initializing
+        import glob as glob_module
+        jar_path = os.path.expanduser("~/.local/pyzxing")
+        jars = glob_module.glob(os.path.join(jar_path, "javase-*-jar-with-dependencies.jar"))
+        logger.info(f"JAR check before BarCodeReader init: path={jar_path}, jars_found={jars}")
+
         # Initialize ZXing reader
-        reader = BarCodeReader()
+        logger.info("Initializing BarCodeReader...")
+        try:
+            reader = BarCodeReader()
+            logger.info(f"BarCodeReader initialized successfully, lib_path={reader.lib_path}")
+        except Exception as e:
+            logger.error(f"BarCodeReader initialization failed: {e}", exc_info=True)
+            raise
 
         # Scan for DataMatrix codes
+        logger.info("Calling reader.decode...")
         results = reader.decode(tmp_path)
+        logger.info(f"Decode completed")
 
         logger.info(f"ZXing scan results: {results}")
 
