@@ -1,117 +1,200 @@
-2025-11-16T01:47:30.000000000Z [inf]  Mounting volume on: /var/lib/containers/railwayapp/bind-mounts/82123a5f-9f5b-4190-ab27-a00b96764bdc/vol_fbj0jmd9ow95b1he
-2025-11-16T01:47:31.000000000Z [inf]  Starting Container
-2025-11-16T01:47:31.678292703Z [inf]  === Application Startup ===
-2025-11-16T01:47:31.678299748Z [inf]  Railway detected: Parsing MYSQL_URL...
-2025-11-16T01:47:31.678313260Z [inf]  DB configured from MYSQL_URL
-2025-11-16T01:47:31.678321272Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
-2025-11-16T01:47:31.678327447Z [inf]  Waiting for database... (1/30)
-2025-11-16T01:47:33.658873193Z [inf]  Waiting for database... (2/30)
-2025-11-16T01:47:35.628855675Z [inf]  Waiting for database... (3/30)
-2025-11-16T01:47:37.809118998Z [inf]  Waiting for database... (4/30)
-2025-11-16T01:47:39.909579591Z [inf]  Waiting for database... (5/30)
-2025-11-16T01:47:42.078590233Z [inf]  Waiting for database... (6/30)
-2025-11-16T01:47:44.736425704Z [inf]  Waiting for database... (7/30)
-2025-11-16T01:47:46.670893903Z [inf]  Waiting for database... (8/30)
-2025-11-16T01:47:48.709821970Z [inf]  Waiting for database... (9/30)
-2025-11-16T01:47:50.773533872Z [inf]  Waiting for database... (10/30)
-2025-11-16T01:47:52.919772929Z [inf]  Waiting for database... (11/30)
-2025-11-16T01:47:55.083129536Z [inf]  Waiting for database... (12/30)
-2025-11-16T01:47:57.246425149Z [inf]  Waiting for database... (13/30)
-2025-11-16T01:47:59.839354921Z [inf]  Waiting for database... (14/30)
-2025-11-16T01:48:01.861504805Z [inf]  Waiting for database... (15/30)
-2025-11-16T01:48:03.840177845Z [inf]  Waiting for database... (16/30)
-2025-11-16T01:48:05.930744169Z [inf]  Waiting for database... (17/30)
-2025-11-16T01:48:08.079007755Z [inf]  Waiting for database... (18/30)
-2025-11-16T01:48:10.249453083Z [inf]  Waiting for database... (19/30)
-2025-11-16T01:48:12.446039574Z [inf]  Waiting for database... (20/30)
-2025-11-16T01:48:14.983934504Z [inf]  Waiting for database... (21/30)
-2025-11-16T01:48:17.070110571Z [inf]  Waiting for database... (22/30)
-2025-11-16T01:48:18.997318560Z [inf]  Waiting for database... (23/30)
-2025-11-16T01:48:21.107347199Z [inf]  Waiting for database... (24/30)
-2025-11-16T01:48:23.255921205Z [inf]  Waiting for database... (25/30)
-2025-11-16T01:48:25.426024554Z [inf]  Waiting for database... (26/30)
-2025-11-16T01:48:28.060056629Z [inf]  Waiting for database... (27/30)
-2025-11-16T01:48:30.067676253Z [inf]  Waiting for database... (28/30)
-2025-11-16T01:48:32.153049176Z [inf]  Waiting for database... (29/30)
-2025-11-16T01:48:34.097886783Z [inf]  Waiting for database... (30/30)
-2025-11-16T01:48:36.172460610Z [inf]  ✅ Permissions set for www user
-2025-11-16T01:48:36.172468551Z [inf]  Nginx configured to listen on ports 80 and 8080
-2025-11-16T01:48:36.172472998Z [inf]  Clearing caches...
-2025-11-16T01:48:37.205217011Z [inf]  
-2025-11-16T01:48:37.205244000Z [inf]  
-2025-11-16T01:48:37.205251583Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-16T01:48:37.205270192Z [inf]     INFO  Application cache cleared successfully.  
-2025-11-16T01:48:37.205277879Z [inf]  
-2025-11-16T01:48:37.205415329Z [inf]  
-2025-11-16T01:48:37.276898722Z [inf]  
-2025-11-16T01:48:37.276904634Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-16T01:48:37.276910860Z [inf]  
-2025-11-16T01:48:37.618940739Z [inf]  
-2025-11-16T01:48:37.618947797Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-16T01:48:37.618953308Z [inf]  
-2025-11-16T01:48:37.626962380Z [inf]  Running migrations...
-2025-11-16T01:48:38.166805549Z [inf]  
-2025-11-16T01:48:38.166812286Z [inf]     INFO  Nothing to migrate.  
-2025-11-16T01:48:38.166817905Z [inf]  
-2025-11-16T01:48:38.348676115Z [inf]  Profile status: COMPLETED
-2025-11-16T01:48:39.163937633Z [inf]  Database marker exists: YES
-2025-11-16T01:48:39.163947030Z [inf]  Already installed (profile_complete = COMPLETED)
-2025-11-16T01:48:39.163952361Z [inf]  ✅ Installation complete, all markers in place
-2025-11-16T01:48:39.180199304Z [inf]  
-2025-11-16T01:48:39.180209163Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
-2025-11-16T01:48:39.180216104Z [inf]  
-2025-11-16T01:48:39.196695363Z [inf]  Verifying Laravel application...
-2025-11-16T01:48:39.522589815Z [inf]  Laravel Framework 12.12.0
-2025-11-16T01:48:39.522594987Z [inf]  Testing PHP bootstrap...
-2025-11-16T01:48:40.210469436Z [inf]  Testing database connection...
-2025-11-16T01:48:40.210639416Z [inf]  
-2025-11-16T01:48:40.210653848Z [inf]    GET|HEAD        / ..................................................... home
-2025-11-16T01:48:40.210661142Z [inf]    GET|HEAD        admin/{vue?} ............................... admin.dashboard
-2025-11-16T01:48:40.210668419Z [inf]    GET|HEAD        api/ai/risk .................... AiSummaryController@getRisk
-2025-11-16T01:48:40.210675060Z [inf]    GET|HEAD        api/ai/summary .............. AiSummaryController@getSummary
-2025-11-16T01:48:40.379457185Z [inf]  DB OK
-2025-11-16T01:48:40.379468367Z [inf]  Enabling verbose PHP errors for debugging...
-2025-11-16T01:48:40.387299773Z [inf]  Testing home route...
-2025-11-16T01:48:41.266553470Z [inf]  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-2025-11-16T01:48:41.266565723Z [inf]  nginx: configuration file /etc/nginx/nginx.conf test is successful
-2025-11-16T01:48:41.266572970Z [inf]  Validating PHP-FPM configuration...
-2025-11-16T01:48:41.266579692Z [inf]  [16-Nov-2025 01:48:40] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
-2025-11-16T01:48:41.266586051Z [inf]  
-2025-11-16T01:48:41.266592820Z [inf]  [16-Nov-2025 01:48:40] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
-2025-11-16T01:48:41.266597491Z [inf]  
-2025-11-16T01:48:41.266602320Z [inf]  Setting final permissions before starting services...
-2025-11-16T01:48:41.266606786Z [inf]  ✅ Final permissions set for www user
-2025-11-16T01:48:41.266611953Z [inf]  Starting application services in background...
-2025-11-16T01:48:41.266616988Z [inf]  Waiting for services to be ready...
-2025-11-16T01:48:41.266622432Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-2025-11-16T01:48:41.266628201Z [err]    import pkg_resources
-2025-11-16T01:48:41.266634271Z [inf]  2025-11-16 01:48:41,182 INFO Set uid to user 0 succeeded
-2025-11-16T01:48:41.266641866Z [inf]  2025-11-16 01:48:41,185 INFO supervisord started with pid 118
-2025-11-16T01:48:41.266834006Z [inf]  Home route test passed
-2025-11-16T01:48:41.266838724Z [inf]  Validating nginx configuration...
-2025-11-16T01:48:42.195151989Z [inf]  2025-11-16 01:48:42,187 INFO spawned: 'nginx' with pid 120
-2025-11-16T01:48:42.195164320Z [inf]  2025-11-16 01:48:42,190 INFO spawned: 'php-fpm' with pid 121
-2025-11-16T01:48:42.195173689Z [inf]  2025-11-16 01:48:42,191 INFO spawned: 'scheduler' with pid 122
-2025-11-16T01:48:42.247240930Z [err]  [16-Nov-2025 01:48:42] NOTICE: fpm is running, pid 121
-2025-11-16T01:48:42.247249548Z [err]  [16-Nov-2025 01:48:42] NOTICE: ready to handle connections
-2025-11-16T01:48:43.674827137Z [inf]  2025-11-16 01:48:43,671 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-16T01:48:43.674845233Z [inf]  2025-11-16 01:48:43,671 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-16T01:48:43.674856402Z [inf]  2025-11-16 01:48:43,671 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-16T01:48:46.259278374Z [inf]  Checking if PHP-FPM is listening on port 9000...
-2025-11-16T01:48:46.259287631Z [inf]  tcp        0      0 :::9000                 :::*                    LISTEN      
-2025-11-16T01:48:46.259296423Z [inf]  Checking if nginx is listening on port 8080...
-2025-11-16T01:48:46.259304718Z [inf]  tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      
-2025-11-16T01:48:46.259316752Z [inf]  Testing HTTP request through nginx/php-fpm...
-2025-11-16T01:48:46.670639486Z [err]  127.0.0.1 -  16/Nov/2025:01:48:45 +0000 "GET /index.php" 200
-2025-11-16T01:48:46.672318185Z [inf]  ✅ Health check passed (HTTP 200)
-2025-11-16T01:48:46.672325586Z [inf]  Testing home route through HTTP...
-2025-11-16T01:48:47.241749667Z [inf]  Application ready to serve requests.
-2025-11-16T01:48:47.241780237Z [err]  127.0.0.1 -  16/Nov/2025:01:48:46 +0000 "GET /index.php" 200
-2025-11-16T01:48:47.241790803Z [inf]  ✅ Home route accessible (HTTP 200)
-2025-11-16T01:48:47.241797773Z [inf]  All startup checks complete. Supervisor running with PID 118
-2025-11-16T01:48:54.367663707Z [err]  127.0.0.1 -  16/Nov/2025:01:48:53 +0000 "GET /index.php" 200
-2025-11-16T01:51:25.347026589Z [err]  127.0.0.1 -  16/Nov/2025:01:51:16 +0000 "GET /index.php" 200
-2025-11-16T01:51:25.347033437Z [err]  127.0.0.1 -  16/Nov/2025:01:51:17 +0000 "GET /index.php" 200
-2025-11-16T01:51:25.347040017Z [err]  127.0.0.1 -  16/Nov/2025:01:51:18 +0000 "GET /index.php" 200
-2025-11-16T01:51:27.718494290Z [err]  127.0.0.1 -  16/Nov/2025:01:51:23 +0000 "POST /index.php" 422
-2025-11-16T01:51:32.588250125Z [err]  127.0.0.1 -  16/Nov/2025:01:51:32 +0000 "GET /index.php" 200
+[2025-11-16 23:18:41] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 23:18:41] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 23:18:41] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 23:18:41] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 23:18:41] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 23:18:41] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 23:18:41] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 23:18:41] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 23:18:41] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 23:18:48] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 23:18:48] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 23:18:56] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 23:18:56] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 23:19:36] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:36] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_company_header":true,"company_header":"2"} 
+[2025-11-16 23:19:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:36] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:36] production.WARNING: Slow operation detected {"operation":"req_691a5c084102d","execution_time_ms":568.53,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-16 23:19:36] production.WARNING: Slow request detected {"operation":"req_691a5c084102d","execution_time_ms":568.53,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 23:19:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:42] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:42] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":1386361,"file_mime":"image/jpeg"} 
+[2025-11-16 23:19:42] production.INFO: ReceiptScannerController::scan - File details {"original_name":"ccfa20cf-1ad6-4c83-956b-f79f379e9672.jpg","size_bytes":1386361,"size_kb":1353.87,"size_mb":1.32,"mime_type":"image/jpeg"} 
+[2025-11-16 23:19:42] production.INFO: ReceiptScannerController::scan - Calling OCR endpoint {"company_id":2,"stored_path":"scanned-receipts/2/d1DB0ZSZ3Er6iRKjUjW38qITy9VhokRXrf9UOwtO.jpg"} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_company_header":true,"company_header":"2"} 
+[2025-11-16 23:19:45] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/dashboard","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/certificates/current","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/ai/insights","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/tax/vat-status/2","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:45] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:45] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:46] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:19:47] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:47] production.WARNING: Slow operation detected {"operation":"req_691a5c11a1dfe","execution_time_ms":2296.15,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
+[2025-11-16 23:19:47] production.WARNING: Slow request detected {"operation":"req_691a5c11a1dfe","execution_time_ms":2296.15,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 23:19:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/ai/insights/generate","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:19:49] production.INFO: AI insights generation started (synchronous) {"company_id":2,"user_id":2} 
+[2025-11-16 23:19:49] production.INFO: [AiInsightsService] Starting financial analysis {"company_id":2,"company_name":"Teknomed DOO"} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Fetching trial balance {"company_id":2} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Trial balance calculated {"debits":16706616.0,"credits":5133000.0,"balance":11573616.0} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Fetching company stats {"company_id":2,"company_name":"Teknomed DOO"} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Raw invoices query result {"company_id":2,"total_invoices":33,"invoice_statuses":["SENT","DRAFT","DRAFT","DRAFT","DRAFT","COMPLETED","DRAFT","DRAFT","DRAFT","SENT","SENT","SENT","COMPLETED","DRAFT","SENT","VIEWED","SENT","SENT","SENT","SENT","DRAFT","SENT","VIEWED","DRAFT","DRAFT","DRAFT","SENT","COMPLETED","DRAFT","DRAFT","SENT","SENT","SENT"],"invoice_ids":[1,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35]} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Company stats calculated {"company_id":2,"company_name":"Teknomed DOO","revenue":5133000.0,"expenses":1003500.0,"outstanding":11572236.0,"customers":19,"invoices_count":33,"payments_received":434180.0,"payment_variance":4698820.0,"pending_invoices":14,"overdue_invoices":14,"draft_invoices":14} 
+[2025-11-16 23:19:49] production.INFO: [AiInsightsService] Data fetched from provider {"company_id":2,"trial_balance":{"debits":16706616.0,"credits":5133000.0,"balance":11573616.0},"company_stats":{"company_id":2,"company_name":"Teknomed DOO","revenue":5133000.0,"expenses":1003500.0,"outstanding":11572236.0,"customers":19,"invoices_count":33,"payments_received":434180.0,"payment_variance":4698820.0,"pending_invoices":14,"overdue_invoices":14,"draft_invoices":14}} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Fetching monthly trends {"company_id":2,"months":6} 
+[2025-11-16 23:19:49] production.INFO: [McpDataProvider] Monthly trends calculated {"months_returned":6} 
+[2025-11-16 23:19:49] production.INFO: [AiInsightsService] Prompt built {"company_id":2,"prompt_length":3224,"prompt_preview":"Ти си македонски финансиски советник кој анализира финансиското здравје на компанијата.
+
+Компанија: Teknomed DOO
+
+�..."} 
+[2025-11-16 23:19:56] production.INFO: AI API Call {"provider":"gemini","model":"gemini-2.0-flash-exp","method":"generate","status_code":200,"duration_seconds":7.466,"input_length":7937,"output_length":5614,"timestamp":"2025-11-16 23:19:56","prompt_feedback":null} 
+[2025-11-16 23:19:56] production.INFO: [AiInsightsService] AI provider response received {"company_id":2,"response_length":5614,"response_preview":"```json
+[
+  {
+    \"type\": \"warning\",
+    \"title\": \"Критичен проблем со наплата и паричен тек\",
+    \"description\": \"Иако имате импресивна проф�..."} 
+[2025-11-16 23:19:56] production.INFO: AI insights generated {"company_id":2,"insights_count":5,"provider":"gemini"} 
+[2025-11-16 23:19:56] production.INFO: AI insights generated successfully {"company_id":2,"insights_count":5,"provider":"gemini","model":"gemini-2.0-flash-exp"} 
+[2025-11-16 23:19:56] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:19:56] production.WARNING: Slow operation detected {"operation":"req_691a5c154439d","execution_time_ms":7549.56,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-16 23:19:56] production.WARNING: Slow request detected {"operation":"req_691a5c154439d","execution_time_ms":7549.56,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://app.facturino.mk/api/v1/ai/insights/generate","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 23:20:00] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/ai/insights","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:20:00] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:02] production.INFO: ReceiptScannerController::scan - OCR completed {"company_id":2,"text_length":1409} 
+[2025-11-16 23:20:02] production.INFO: ReceiptScannerController::scan - Returning response {"response":{"image_url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/d1DB0ZSZ3Er6iRKjUjW38qITy9VhokRXrf9UOwtO.jpg","stored_path":"scanned-receipts/2/d1DB0ZSZ3Er6iRKjUjW38qITy9VhokRXrf9UOwtO.jpg","ocr_text":"ey Фискална СМЕТКА fe;
+да назза Ж
+ДИ ДРОГЕРИЕ MAPKT Д,0,0,Е, А, ѓ
+| ДАМЕ ГРЧЕВ 7 СКОПЈЕ BY
+ПОД 029 РЕТАИЛ ПАРК ПЕРОН ВЕЛЕС 795
+ј МЛЕКСО ДЕМНИЕВСКИ - BAYMAH 53
+a NAH. BPOJ: 4888012526359 > а
+ies ДДВ БРОЈ: k4@8812526359 io
+ox ме МУЛТИВИТАМОЛ (=>
+Та ПАСТИЛИ Ser ИНИ
+BANEA КР.ГЕЛ ЗА ни:
+ТУШ. ВАНИЛА/КОКОС 59,000 ЕИ
+\"ЧЕ ПАЛЕТЕ ФАРБА ЗА КОСА ИЦ 3A
+= 10-1 169,000 Eee
+<4 Д ПИНК СТАО RS
+SS) MY/THOUHK.CNPEJ 750M 155,000 БИК
+== 7) ПРОМЕТ ОД МАКЕДОНСКИ ГР. да | =
+\"МЕЈ ВКУПНО ДДВ A=18, 80% 0,0 ЕЈ
+224 ВКУПНО ДДВ b= 5,00“ 0,00 52
+Oe BAUNHO ДИВ T= 8,00“ ПОР
+Sq BKYNHO ДДВ 0,00 en
+aS i) Sas
+ef ВКЧПЕН ПРОМЕТ 532,00 =e
+ЧА вано див 71,9 =
+Bag ВКУПНО ДДВ A=18, 00% 58,42 =
+ЕШ ВКУПНО PNB b= 5,00“ ПИС
+ШИ ВКУПНО ANB B=10, 60% 13,55 МА
+Sy BAYMHO ДДВ f= 0,00“ 008 BY
+ne ee . 78 ВИА Ean ли am hee ae ow ar mm - atts
+#2902/339-915 Ке
+НА КРЕДИТ 532,00 ae
+ни Pay пије pe | BS
+„67 47 Tat 7
+0152755 _ ДАТУМ 25-88-2025 18:49:54 7
+ДИ КУТЧВИМЕ МАКЕДОНСКИ ПРОИЗВОДИ aca: Е
+20 НАШЕ ДОБРО Peete ota (и
+ДА) 40155885259 |
+___рискелна СМЕТКА -
+9164456 7
+: ae ah","hocr":null,"image_width":1324,"image_height":3955},"image_url_length":110,"ocr_text_length":1409,"has_hocr":false} 
+[2025-11-16 23:20:02] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:02] production.WARNING: Slow operation detected {"operation":"req_691a5c0e3b239","execution_time_ms":20552.22,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-16 23:20:02] production.WARNING: Slow request detected {"operation":"req_691a5c0e3b239","execution_time_ms":20552.22,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 23:20:03] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/d1DB0ZSZ3Er6iRKjUjW38qITy9VhokRXrf9UOwtO.jpg","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:20:03] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:04] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/ai/insights/chat","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"yhZso1q6XygMOpH8Kgn430yqchV2o8EgKLE2YPry","has_session_cookie":true} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Chat question received {"company_id":2,"company_name":"Teknomed DOO","question":"kolku imam klienti"} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Detecting query context {"question":"kolku imam klienti","question_lower":"kolku imam klienti"} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] No specific context detected, using basic  
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Final detected contexts {"contexts":["basic"]} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Query context detected {"company_id":2,"question":"kolku imam klienti","detected_contexts":["basic"]} 
+[2025-11-16 23:20:04] production.INFO: [McpDataProvider] Fetching company stats {"company_id":2,"company_name":"Teknomed DOO"} 
+[2025-11-16 23:20:04] production.INFO: [McpDataProvider] Raw invoices query result {"company_id":2,"total_invoices":33,"invoice_statuses":["SENT","DRAFT","DRAFT","DRAFT","DRAFT","COMPLETED","DRAFT","DRAFT","DRAFT","SENT","SENT","SENT","COMPLETED","DRAFT","SENT","VIEWED","SENT","SENT","SENT","SENT","DRAFT","SENT","VIEWED","DRAFT","DRAFT","DRAFT","SENT","COMPLETED","DRAFT","DRAFT","SENT","SENT","SENT"],"invoice_ids":[1,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35]} 
+[2025-11-16 23:20:04] production.INFO: [McpDataProvider] Company stats calculated {"company_id":2,"company_name":"Teknomed DOO","revenue":5133000.0,"expenses":1003500.0,"outstanding":11572236.0,"customers":19,"invoices_count":33,"payments_received":434180.0,"payment_variance":4698820.0,"pending_invoices":14,"overdue_invoices":14,"draft_invoices":14} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Fetching data for contexts {"company_id":2,"contexts":["basic"]} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Using basic stats only  
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] All contextual data fetched successfully {"company_id":2,"data_keys":["company_stats"]} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Contextual data fetched {"company_id":2,"context_types":["basic"],"data_keys":["company_stats"]} 
+[2025-11-16 23:20:04] production.INFO: [AiInsightsService] Chat prompt built {"company_id":2,"prompt_length":1401,"full_prompt":"Ти си македонски финансиски советник кој помага на корисниците со нивните финансиски прашања.
+
+Контекст на компанијата:
+- Име: Teknomed DOO
+- Вкупно фактури: 33
+- Фактури во изработка: 14
+- Чекај на наплата: 14
+- Задоцнети фактури: 14
+- Приходи: 5,133,000.00 MKD
+- Трошоци: 1,003,500.00 MKD
+- Профит: 4,129,500.00 MKD
+- Наплатени плаќања: 434,180.00 MKD
+- Неплатени фактури (износ): 11,572,236.00 MKD
+- Број на клиенти: 19
+
+Прашање од корисникот:
+kolku imam klienti
+
+Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот. Користи ги детаљните податоци погоре за да дадеш прецизен и релевантен одговор."} 
+[2025-11-16 23:20:05] production.INFO: AI API Call {"provider":"gemini","model":"gemini-2.0-flash-exp","method":"generate","status_code":200,"duration_seconds":0.958,"input_length":3749,"output_length":248,"timestamp":"2025-11-16 23:20:05","prompt_feedback":null} 
+[2025-11-16 23:20:05] production.INFO: [AiInsightsService] Chat response received {"company_id":2,"question_length":18,"response_length":248,"response":"Здраво! Според податоците, Teknomed DOO има вкупно **19 клиенти**. Исто така, имате креирано **33 фактури** досега. Се надевам дека ова ви е корисно.
+"} 
+[2025-11-16 23:20:05] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:05] production.WARNING: Slow operation detected {"operation":"req_691a5c248ef89","execution_time_ms":1016.06,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-16 23:20:05] production.WARNING: Slow request detected {"operation":"req_691a5c248ef89","execution_time_ms":1016.06,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://app.facturino.mk/api/v1/ai/insights/chat","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/customers","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/expenses","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/categories","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/categories","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:39] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:39] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:39] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:39] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:39] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:39] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:40] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:40] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:40] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:40] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:40] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 23:20:40] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 23:20:40] production.WARNING: Slow operation detected {"operation":"req_691a5c47556e2","execution_time_ms":1094.71,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-16 23:20:40] production.WARNING: Slow request detected {"operation":"req_691a5c47556e2","execution_time_ms":1094.71,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 23:20:41] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
