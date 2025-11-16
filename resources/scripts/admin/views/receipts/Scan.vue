@@ -35,11 +35,12 @@
           </BaseHeading>
 
           <!-- Full-width, full-size image -->
-          <div class="border rounded-lg overflow-auto" style="max-height: 80vh; background: #f9fafb;">
+          <div class="border rounded-lg overflow-auto flex justify-center items-start" style="max-height: 80vh; background: #f9fafb;">
             <img
               :src="scanResult.image_url"
               :alt="$t('receipts.receipt_image')"
-              class="w-full h-auto mx-auto block"
+              class="h-full w-auto mx-auto"
+              style="max-height: none;"
               @load="onImageLoad"
               @error="onImageError"
             />

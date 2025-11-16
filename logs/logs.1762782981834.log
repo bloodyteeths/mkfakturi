@@ -1,105 +1,83 @@
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:21] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-16 19:59:21] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-16 19:59:28] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-16 19:59:28] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-16 19:59:35] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-16 19:59:35] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-16 20:00:25] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-16 20:00:25] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-16 20:05:13] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-16 20:05:13] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_company_header":true,"company_header":"2"} 
-[2025-11-16 20:05:14] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:14] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:14] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:14] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-16 20:05:14] production.WARNING: Slow operation detected {"operation":"req_691a2e79d9230","execution_time_ms":643.91,"memory_used_bytes":12582912,"memory_used_mb":12.0} 
-[2025-11-16 20:05:14] production.WARNING: Slow request detected {"operation":"req_691a2e79d9230","execution_time_ms":643.91,"memory_used_bytes":12582912,"memory_used_mb":12.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-16 20:05:14] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-16 20:05:14] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-16 20:05:14] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/customers","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-16 20:05:14] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-16 20:05:16] production.WARNING: Slow operation detected {"operation":"req_691a2e7abed1f","execution_time_ms":1585.15,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
-[2025-11-16 20:05:16] production.WARNING: Slow request detected {"operation":"req_691a2e7abed1f","execution_time_ms":1585.15,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:16] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:17] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-16 20:05:17] production.WARNING: Slow operation detected {"operation":"req_691a2e7ac5178","execution_time_ms":3029.84,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
-[2025-11-16 20:05:17] production.WARNING: Slow request detected {"operation":"req_691a2e7ac5178","execution_time_ms":3029.84,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-16 20:05:21] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bills","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-16 20:05:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-16 20:05:22] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-16 20:05:22] production.WARNING: Slow operation detected {"operation":"req_691a2e81464c5","execution_time_ms":1567.91,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
-[2025-11-16 20:05:22] production.WARNING: Slow request detected {"operation":"req_691a2e81464c5","execution_time_ms":1567.91,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bills","route":"bills.index","user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-16 20:06:07] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
-[2025-11-16 20:06:07] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":643874,"file_mime":"image/png"} 
-[2025-11-16 20:06:07] production.INFO: ReceiptScannerController::scan - File details {"original_name":"79fc24f8d54fb054f198c8870461ec0bdbbd8585229391d89893c0eda0346d95.png","size_bytes":643874,"size_kb":628.78,"size_mb":0.61,"mime_type":"image/png"} 
-[2025-11-16 20:06:07] production.INFO: ReceiptScannerController::scan - Calling OCR endpoint {"company_id":2,"stored_path":"scanned-receipts/2/Ujki2U0uDOM1wEOphruv0aSzZWbkisAh34NV1sHH.png"} 
-[2025-11-16 20:06:10] production.INFO: ReceiptScannerController::scan - OCR completed {"company_id":2,"text_length":312} 
-[2025-11-16 20:06:10] production.INFO: ReceiptScannerController::scan - Returning response {"response":{"image_url":"/storage/scanned-receipts/2/Ujki2U0uDOM1wEOphruv0aSzZWbkisAh34NV1sHH.png","stored_path":"scanned-receipts/2/Ujki2U0uDOM1wEOphruv0aSzZWbkisAh34NV1sHH.png","ocr_text":"во |: ПИ ge И ДРАТКА СЕ
-ЗА РЕ SOS иавбА ол Етно Ра
-ЧИ рН: У ON Be BeBe BBY oes Ue
-а TYR po Nes со
-а. RATA AB BAR pe РАТНИКА ee
-ОВЧЕ оо оо ЕЕ ене,
-зо ВИДЕ ee МА ЕН
-Фото ВИТА ОС
-C2 СИДНИ TOU 25-61-28 ВЕРА 6 a
-A TSE) кома |"},"image_url_length":72,"ocr_text_length":312} 
-[2025-11-16 20:06:10] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
-[2025-11-16 20:06:10] production.WARNING: Slow operation detected {"operation":"req_691a2eaf967f8","execution_time_ms":2841.28,"memory_used_bytes":6291456,"memory_used_mb":6.0} 
-[2025-11-16 20:06:10] production.WARNING: Slow request detected {"operation":"req_691a2eaf967f8","execution_time_ms":2841.28,"memory_used_bytes":6291456,"memory_used_mb":6.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-16 20:08:22] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:46] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 22:30:46] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 22:30:53] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 22:30:53] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 22:31:00] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 22:31:00] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 22:46:29] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"qMWieFrbzn8v0q8LvurA0pmwSKNPxISHsbV4ZXiF","has_session_cookie":true} 
+[2025-11-16 22:46:29] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"qMWieFrbzn8v0q8LvurA0pmwSKNPxISHsbV4ZXiF","has_company_header":true,"company_header":"2"} 
+[2025-11-16 22:46:29] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 22:46:30] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 22:46:30] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 22:46:30] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 22:46:30] production.WARNING: Slow operation detected {"operation":"req_691a544591931","execution_time_ms":671.25,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-16 22:46:30] production.WARNING: Slow request detected {"operation":"req_691a544591931","execution_time_ms":671.25,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 22:46:30] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"qMWieFrbzn8v0q8LvurA0pmwSKNPxISHsbV4ZXiF","has_session_cookie":true} 
+[2025-11-16 22:46:30] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 22:46:35] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"qMWieFrbzn8v0q8LvurA0pmwSKNPxISHsbV4ZXiF","has_session_cookie":true} 
+[2025-11-16 22:46:36] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":1386361,"file_mime":"image/jpeg"} 
+[2025-11-16 22:46:36] production.INFO: ReceiptScannerController::scan - File details {"original_name":"ccfa20cf-1ad6-4c83-956b-f79f379e9672.jpg","size_bytes":1386361,"size_kb":1353.87,"size_mb":1.32,"mime_type":"image/jpeg"} 
+[2025-11-16 22:46:36] production.INFO: ReceiptScannerController::scan - Calling OCR endpoint {"company_id":2,"stored_path":"scanned-receipts/2/aGs44YGpgt76WHTOxDxFXO5vN4fBI6LgBniY44n9.jpg"} 
+[2025-11-16 22:46:56] production.INFO: ReceiptScannerController::scan - OCR completed {"company_id":2,"text_length":1409} 
+[2025-11-16 22:46:56] production.INFO: ReceiptScannerController::scan - Returning response {"response":{"image_url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/aGs44YGpgt76WHTOxDxFXO5vN4fBI6LgBniY44n9.jpg","stored_path":"scanned-receipts/2/aGs44YGpgt76WHTOxDxFXO5vN4fBI6LgBniY44n9.jpg","ocr_text":"ey Фискална СМЕТКА fe;
+да назза Ж
+ДИ ДРОГЕРИЕ MAPKT Д,0,0,Е, А, ѓ
+| ДАМЕ ГРЧЕВ 7 СКОПЈЕ BY
+ПОД 029 РЕТАИЛ ПАРК ПЕРОН ВЕЛЕС 795
+ј МЛЕКСО ДЕМНИЕВСКИ - BAYMAH 53
+a NAH. BPOJ: 4888012526359 > а
+ies ДДВ БРОЈ: k4@8812526359 io
+ox ме МУЛТИВИТАМОЛ (=>
+Та ПАСТИЛИ Ser ИНИ
+BANEA КР.ГЕЛ ЗА ни:
+ТУШ. ВАНИЛА/КОКОС 59,000 ЕИ
+\"ЧЕ ПАЛЕТЕ ФАРБА ЗА КОСА ИЦ 3A
+= 10-1 169,000 Eee
+<4 Д ПИНК СТАО RS
+SS) MY/THOUHK.CNPEJ 750M 155,000 БИК
+== 7) ПРОМЕТ ОД МАКЕДОНСКИ ГР. да | =
+\"МЕЈ ВКУПНО ДДВ A=18, 80% 0,0 ЕЈ
+224 ВКУПНО ДДВ b= 5,00“ 0,00 52
+Oe BAUNHO ДИВ T= 8,00“ ПОР
+Sq BKYNHO ДДВ 0,00 en
+aS i) Sas
+ef ВКЧПЕН ПРОМЕТ 532,00 =e
+ЧА вано див 71,9 =
+Bag ВКУПНО ДДВ A=18, 00% 58,42 =
+ЕШ ВКУПНО PNB b= 5,00“ ПИС
+ШИ ВКУПНО ANB B=10, 60% 13,55 МА
+Sy BAYMHO ДДВ f= 0,00“ 008 BY
+ne ee . 78 ВИА Ean ли am hee ae ow ar mm - atts
+#2902/339-915 Ке
+НА КРЕДИТ 532,00 ae
+ни Pay пије pe | BS
+„67 47 Tat 7
+0152755 _ ДАТУМ 25-88-2025 18:49:54 7
+ДИ КУТЧВИМЕ МАКЕДОНСКИ ПРОИЗВОДИ aca: Е
+20 НАШЕ ДОБРО Peete ota (и
+ДА) 40155885259 |
+___рискелна СМЕТКА -
+9164456 7
+: ae ah","hocr":null,"image_width":1324,"image_height":3955},"image_url_length":110,"ocr_text_length":1409,"has_hocr":false} 
+[2025-11-16 22:46:56] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 22:46:56] production.WARNING: Slow operation detected {"operation":"req_691a544be7c8d","execution_time_ms":21027.63,"memory_used_bytes":6291456,"memory_used_mb":6.0} 
+[2025-11-16 22:46:56] production.WARNING: Slow request detected {"operation":"req_691a544be7c8d","execution_time_ms":21027.63,"memory_used_bytes":6291456,"memory_used_mb":6.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 22:46:57] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/aGs44YGpgt76WHTOxDxFXO5vN4fBI6LgBniY44n9.jpg","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"qMWieFrbzn8v0q8LvurA0pmwSKNPxISHsbV4ZXiF","has_session_cookie":true} 
+[2025-11-16 22:46:57] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 22:49:09] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
