@@ -206,6 +206,7 @@ const bill = reactive({
   currency_id: null,
   exchange_rate: 1,
   discount: 0,
+  scanned_receipt_path: null,
 })
 
 const items = reactive([
@@ -236,6 +237,7 @@ function hydrateForm(data) {
   bill.currency_id = data.currency_id
   bill.exchange_rate = data.exchange_rate || 1
   bill.discount = data.discount || 0
+  bill.scanned_receipt_path = data.scanned_receipt_path || null
 
   if (data.items && data.items.length) {
     items.splice(0, items.length, ...data.items.map((i) => ({
@@ -388,6 +390,11 @@ onMounted(() => {
     billsStore.fetchBill(route.params.id).then((response) => {
       hydrateForm(response.data.data)
     })
+  } else {
+    // Pre-fill from query params (e.g., from receipt scanner)
+    if (route.query.scanned_receipt_path) {
+      bill.scanned_receipt_path = route.query.scanned_receipt_path
+    }
   }
 })
 </script>

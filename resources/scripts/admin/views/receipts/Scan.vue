@@ -232,7 +232,7 @@ function resetForm() {
 }
 
 function createBill() {
-  // Navigate to bill creation page with pre-filled data
+  // Navigate to bill creation page with pre-filled data and scanned receipt attachment
   router.push({
     name: 'bills.create',
     query: {
@@ -243,7 +243,7 @@ function createBill() {
       amount: billForm.value.amount,
       tax_amount: billForm.value.tax_amount,
       notes: billForm.value.notes,
-      attachment: scanResult.value?.stored_path
+      scanned_receipt_path: scanResult.value?.stored_path
     }
   })
 }

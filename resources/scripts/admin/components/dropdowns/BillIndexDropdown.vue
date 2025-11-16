@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { useBillStore } from '@/scripts/admin/stores/bill'
+import { useBillsStore as useBillStore } from '@/scripts/admin/stores/bills'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useModalStore } from '@/scripts/stores/modal'
