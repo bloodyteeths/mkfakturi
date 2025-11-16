@@ -70,11 +70,19 @@ class ReceiptScannerController extends Controller
                 // Generate the image URL
                 $imageUrl = Storage::disk($disk)->url($storedPath);
 
-                return response()->json([
+                $responsePayload = [
                     'image_url' => $imageUrl,
                     'stored_path' => $storedPath,
                     'ocr_text' => $ocrResult['text'] ?? '',
-                ], 200);
+                ];
+
+                \Log::info('ReceiptScannerController::scan - Returning response', [
+                    'response' => $responsePayload,
+                    'image_url_length' => strlen($imageUrl),
+                    'ocr_text_length' => strlen($ocrResult['text'] ?? ''),
+                ]);
+
+                return response()->json($responsePayload, 200);
 
             } catch (\Throwable $ocrException) {
                 \Log::error('ReceiptScannerController::scan - OCR failed', [
