@@ -67,7 +67,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/suppliers/${params.id}`, { params })
+            .get(`/api/v1/suppliers/${params.id}/stats`, { params })
             .then((response) => {
               this.selectedSupplier = response.data.data
               this.isFetchingView = false

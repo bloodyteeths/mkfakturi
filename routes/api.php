@@ -546,6 +546,7 @@ Route::prefix('/v1')->group(function () {
             // Suppliers, Bills, Bill Payments (Accounts Payable)
             // ----------------------------------
             Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
+            Route::get('suppliers/{supplier}/stats', \App\Http\Controllers\V1\Admin\AccountsPayable\SupplierStatsController::class);
             Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
 
             Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
