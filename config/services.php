@@ -133,7 +133,7 @@ return [
 
     'invoice2data' => [
         'url' => env('INVOICE2DATA_URL', 'http://invoice2data-service:8000'),
-        'timeout' => env('INVOICE2DATA_TIMEOUT', 30),
+        'timeout' => env('INVOICE2DATA_TIMEOUT', 90),
     ],
 
 ];
