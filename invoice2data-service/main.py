@@ -244,7 +244,37 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
 
 @app.get("/health")
 def health() -> Dict[str, str]:
-    return {"status": "ok"}
+    """Health check endpoint with diagnostic info."""
+    import os
+    import glob
+
+    # Check for ZXing JAR in common locations
+    jar_locations = [
+        "/root/.local/pyzxing",
+        os.path.expanduser("~/.local/pyzxing"),
+        os.path.join(os.getcwd(), ".local/pyzxing"),
+    ]
+
+    jar_status = {}
+    for location in jar_locations:
+        if os.path.exists(location):
+            jars = glob.glob(os.path.join(location, "*.jar"))
+            jar_status[location] = {
+                "exists": True,
+                "jars": [os.path.basename(j) for j in jars],
+                "files": os.listdir(location) if os.path.isdir(location) else []
+            }
+        else:
+            jar_status[location] = {"exists": False}
+
+    return {
+        "status": "ok",
+        "pyzxing_available": BarCodeReader is not None,
+        "jar_locations": jar_status,
+        "home": os.path.expanduser("~"),
+        "user": os.environ.get("USER", "unknown"),
+        "cwd": os.getcwd()
+    }
 
 
 @app.post("/scan-datamatrix")
