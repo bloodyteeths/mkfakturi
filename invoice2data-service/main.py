@@ -141,10 +141,16 @@ def _extract_text_from_image(contents: bytes) -> str:
     langs = os.getenv("OCR_LANGS", "eng")
     logger.info(f"Running Tesseract OCR with languages: {langs}")
 
-    text = pytesseract.image_to_string(image, lang=langs)
+    # Configure Tesseract for better Cyrillic text recognition
+    custom_config = r'--oem 3 --psm 6'  # OEM 3 = Default, PSM 6 = Assume uniform block of text
+
+    text = pytesseract.image_to_string(image, lang=langs, config=custom_config)
 
     # Log extracted text for debugging
     logger.info(f"OCR extracted text ({len(text)} chars):\n{text[:500]}..." if len(text) > 500 else f"OCR extracted text:\n{text}")
+
+    # Strip whitespace but don't return empty string if only whitespace detected
+    text = text.strip()
 
     return text or ""
 
@@ -385,6 +391,39 @@ async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
         import logging
         logging.exception("DataMatrix scanning failed")
         raise HTTPException(status_code=500, detail=f"Scan error: {str(exc)}")
+
+
+@app.post("/ocr")
+async def extract_text(file: UploadFile = File(...)) -> JSONResponse:
+    """
+    Extract raw text from an image using OCR.
+    Returns only the text, no parsing.
+    """
+    try:
+        contents = await file.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="Empty file")
+
+        if pytesseract is None or Image is None:
+            raise HTTPException(
+                status_code=500,
+                detail="OCR not available on service (pytesseract/Pillow missing)",
+            )
+
+        text = _extract_text_from_image(contents)
+
+        return JSONResponse(content={
+            "success": True,
+            "text": text,
+            "length": len(text)
+        })
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        import logging
+        logging.exception("OCR extraction failed")
+        raise HTTPException(status_code=500, detail=f"OCR error: {str(exc)}")
 
 
 @app.post("/parse")
