@@ -103,6 +103,7 @@ def normalize_invoice_data(raw: Optional[Dict[str, Any]]) -> Dict[str, Any]:
 def _extract_text_from_image(contents: bytes) -> str:
     """
     Run OCR on an image using Tesseract (via pytesseract).
+    Uses smart preprocessing - only applies heavy processing to low-quality images.
     """
     import logging
     logger = logging.getLogger(__name__)
@@ -111,43 +112,69 @@ def _extract_text_from_image(contents: bytes) -> str:
         raise RuntimeError("OCR is not available (pytesseract/Pillow not installed)")
 
     image = Image.open(io.BytesIO(contents)).convert("RGB")
-
-    # Image preprocessing for better OCR accuracy
-    if np is not None:
-        import cv2
-        img_array = np.array(image)
-
-        # Convert to grayscale
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-
-        # Apply adaptive thresholding to improve contrast
-        binary = cv2.adaptiveThreshold(
-            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
-        )
-
-        # Denoise
-        denoised = cv2.fastNlMeansDenoising(binary, h=10)
-
-        # Convert back to PIL Image
-        image = Image.fromarray(denoised)
-
-        logger.info(f"OCR preprocessing applied - image size: {image.size}")
+    original_image = image.copy()
 
     langs = os.getenv("OCR_LANGS", "eng")
     logger.info(f"Running Tesseract OCR with languages: {langs}")
 
-    # Configure Tesseract for better Cyrillic text recognition
-    custom_config = r'--oem 3 --psm 6'  # OEM 3 = Default, PSM 6 = Assume uniform block of text
+    # Try multiple PSM modes for better accuracy
+    # PSM 3 = Fully automatic page segmentation (best for receipts)
+    # PSM 6 = Assume uniform block of text
+    # PSM 4 = Assume single column of text
+    psm_modes = [3, 6, 4]
 
-    text = pytesseract.image_to_string(image, lang=langs, config=custom_config)
+    best_text = ""
+    best_length = 0
 
-    # Log extracted text for debugging
-    logger.info(f"OCR extracted text ({len(text)} chars):\n{text[:500]}..." if len(text) > 500 else f"OCR extracted text:\n{text}")
+    for psm in psm_modes:
+        custom_config = f'--oem 3 --psm {psm}'
 
-    # Strip whitespace but don't return empty string if only whitespace detected
-    text = text.strip()
+        # First attempt: Try with original image (best for high-quality images)
+        logger.info(f"Attempting OCR with original image (PSM {psm})")
+        text = pytesseract.image_to_string(original_image, lang=langs, config=custom_config)
 
-    return text or ""
+        if len(text.strip()) > best_length:
+            best_text = text
+            best_length = len(text.strip())
+            logger.info(f"PSM {psm} (original): extracted {len(text.strip())} chars")
+
+        # Second attempt: Try with preprocessing only if numpy/cv2 available
+        # Only apply preprocessing if the original attempt yielded poor results
+        if np is not None and len(text.strip()) < 100:
+            import cv2
+            img_array = np.array(original_image)
+            gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+
+            # Check image quality using variance
+            variance = cv2.Laplacian(gray, cv2.CV_64F).var()
+            logger.info(f"Image variance (sharpness): {variance:.2f}")
+
+            # Only apply aggressive preprocessing if variance is low (blurry/low-quality image)
+            if variance < 100:
+                logger.info("Low-quality image detected, applying preprocessing")
+
+                # Apply adaptive thresholding
+                binary = cv2.adaptiveThreshold(
+                    gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+                )
+
+                # Denoise
+                denoised = cv2.fastNlMeansDenoising(binary, h=10)
+                preprocessed_image = Image.fromarray(denoised)
+
+                text_preprocessed = pytesseract.image_to_string(preprocessed_image, lang=langs, config=custom_config)
+
+                if len(text_preprocessed.strip()) > best_length:
+                    best_text = text_preprocessed
+                    best_length = len(text_preprocessed.strip())
+                    logger.info(f"PSM {psm} (preprocessed): extracted {len(text_preprocessed.strip())} chars")
+
+    # Log best result
+    logger.info(f"Best OCR result: {best_length} chars")
+    logger.info(f"OCR extracted text:\n{best_text[:500]}..." if len(best_text) > 500 else f"OCR extracted text:\n{best_text}")
+
+    return best_text.strip() or ""
+# CLAUDE-CHECKPOINT
 
 
 def _parse_text_to_raw(text: str) -> Dict[str, Any]:
