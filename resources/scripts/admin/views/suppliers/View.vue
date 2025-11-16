@@ -36,55 +36,140 @@
       </template>
     </BasePageHeader>
 
-    <BaseCard v-if="supplier" class="mt-6">
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <BaseDescriptionList>
-          <BaseDescriptionListItem :label="$t('suppliers.name')">
-            {{ supplier.name }}
-          </BaseDescriptionListItem>
-          <BaseDescriptionListItem :label="$t('suppliers.email')">
-            {{ supplier.email || '-' }}
-          </BaseDescriptionListItem>
-          <BaseDescriptionListItem :label="$t('suppliers.tax_id')">
-            {{ supplier.tax_id || '-' }}
-          </BaseDescriptionListItem>
-        </BaseDescriptionList>
+    <!-- Statistics Cards -->
+    <div v-if="supplier" class="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3">
+      <BaseCard>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500 uppercase">{{ $t('dashboard.chart_info.total_sales') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-gray-900">
+                <BaseFormatMoney
+                  :amount="supplierStats.totalPurchases"
+                  :currency="supplier.currency"
+                />
+              </p>
+            </div>
+            <div class="p-3 bg-blue-100 rounded-full">
+              <BaseIcon name="ShoppingCartIcon" class="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+      </BaseCard>
 
-        <BaseDescriptionList>
-          <BaseDescriptionListItem :label="$t('suppliers.phone')">
-            {{ supplier.phone || '-' }}
-          </BaseDescriptionListItem>
-          <BaseDescriptionListItem :label="$t('suppliers.website')">
-            <a
-              v-if="supplier.website"
-              :href="supplier.website"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-primary-500 hover:underline"
+      <BaseCard>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500 uppercase">{{ $t('dashboard.chart_info.total_receipts') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-green-600">
+                <BaseFormatMoney
+                  :amount="supplierStats.totalPayments"
+                  :currency="supplier.currency"
+                />
+              </p>
+            </div>
+            <div class="p-3 bg-green-100 rounded-full">
+              <BaseIcon name="CreditCardIcon" class="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+      </BaseCard>
+
+      <BaseCard>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500 uppercase">{{ $t('customers.amount_due') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-red-600">
+                <BaseFormatMoney
+                  :amount="supplierStats.totalDue"
+                  :currency="supplier.currency"
+                />
+              </p>
+            </div>
+            <div class="p-3 bg-red-100 rounded-full">
+              <BaseIcon name="ExclamationTriangleIcon" class="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+        </div>
+      </BaseCard>
+    </div>
+
+    <!-- Main Content Card -->
+    <BaseCard v-if="supplier" class="mt-6">
+      <!-- Basic Info Section -->
+      <div class="pt-6 mt-5 border-t border-solid border-gray-200">
+        <BaseHeading>{{ $t('customers.basic_info') }}</BaseHeading>
+
+        <div class="grid grid-cols-1 gap-6 mt-5 md:grid-cols-2">
+          <BaseDescriptionList>
+            <BaseDescriptionListItem
+              :label="$t('suppliers.name')"
+              :content-loading="isLoading"
             >
-              {{ supplier.website }}
-            </a>
-            <span v-else>-</span>
-          </BaseDescriptionListItem>
-          <BaseDescriptionListItem
-            v-if="supplier.created_at"
-            :label="$t('items.added_on')"
-          >
-            {{ supplier.formatted_created_at || supplier.created_at }}
-          </BaseDescriptionListItem>
-        </BaseDescriptionList>
+              {{ supplier.name }}
+            </BaseDescriptionListItem>
+            <BaseDescriptionListItem
+              :label="$t('suppliers.email')"
+              :content-loading="isLoading"
+            >
+              {{ supplier.email || '-' }}
+            </BaseDescriptionListItem>
+            <BaseDescriptionListItem
+              :label="$t('suppliers.tax_id')"
+              :content-loading="isLoading"
+            >
+              {{ supplier.tax_id || '-' }}
+            </BaseDescriptionListItem>
+          </BaseDescriptionList>
+
+          <BaseDescriptionList>
+            <BaseDescriptionListItem
+              :label="$t('wizard.currency')"
+              :content-loading="isLoading"
+            >
+              {{
+                supplier.currency
+                  ? `${supplier.currency.code} (${supplier.currency.symbol})`
+                  : '-'
+              }}
+            </BaseDescriptionListItem>
+            <BaseDescriptionListItem
+              :label="$t('suppliers.phone')"
+              :content-loading="isLoading"
+            >
+              {{ supplier.phone || '-' }}
+            </BaseDescriptionListItem>
+            <BaseDescriptionListItem
+              :label="$t('suppliers.website')"
+              :content-loading="isLoading"
+            >
+              <a
+                v-if="supplier.website"
+                :href="supplier.website"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary-500 hover:underline"
+              >
+                {{ supplier.website }}
+              </a>
+              <span v-else>-</span>
+            </BaseDescriptionListItem>
+          </BaseDescriptionList>
+        </div>
       </div>
 
-      <!-- Address Information -->
-      <div v-if="hasAddress" class="mt-6 pt-6 border-t border-gray-200">
-        <h3 class="text-lg font-medium mb-4">{{ $t('general.address') }}</h3>
-        <BaseDescriptionList>
+      <!-- Address Section -->
+      <div v-if="hasAddress" class="pt-6 mt-8 border-t border-gray-200">
+        <BaseHeading>{{ $t('customers.address') }}</BaseHeading>
+        <BaseDescriptionList class="mt-5">
           <BaseDescriptionListItem
-            v-if="supplier.address_street_1"
-            :label="$t('customers.address')"
+            :label="$t('customers.billing_address')"
+            :content-loading="isLoading"
           >
-            <div>
-              <p v-if="supplier.address_street_1">{{ supplier.address_street_1 }}</p>
+            <div v-if="supplier.address_street_1">
+              <p>{{ supplier.address_street_1 }}</p>
               <p v-if="supplier.address_street_2">{{ supplier.address_street_2 }}</p>
               <p>
                 <span v-if="supplier.city">{{ supplier.city }}</span>
@@ -93,6 +178,7 @@
               </p>
               <p v-if="supplier.country">{{ supplier.country }}</p>
             </div>
+            <span v-else>-</span>
           </BaseDescriptionListItem>
         </BaseDescriptionList>
       </div>
@@ -133,6 +219,28 @@ const hasAddress = computed(() => {
     supplier.value.zip ||
     supplier.value.country
   )
+})
+
+const supplierStats = computed(() => {
+  if (!supplier.value) {
+    return {
+      totalPurchases: 0,
+      totalPayments: 0,
+      totalDue: 0,
+    }
+  }
+
+  // Calculate stats from bills if available
+  const bills = supplier.value.bills || []
+  const totalPurchases = bills.reduce((sum, bill) => sum + (bill.total || 0), 0)
+  const totalPayments = bills.reduce((sum, bill) => sum + (bill.paid_amount || 0), 0)
+  const totalDue = totalPurchases - totalPayments
+
+  return {
+    totalPurchases,
+    totalPayments,
+    totalDue,
+  }
 })
 
 function hasAtleastOneAbility() {

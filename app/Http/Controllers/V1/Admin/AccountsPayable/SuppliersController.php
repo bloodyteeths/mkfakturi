@@ -51,6 +51,8 @@ class SuppliersController extends Controller
     {
         $this->authorize('view', $supplier);
 
+        $supplier->load(['bills', 'currency']);
+
         return (new SupplierResource($supplier))
             ->response();
     }
@@ -82,4 +84,5 @@ class SuppliersController extends Controller
         ]);
     }
 }
+// CLAUDE-CHECKPOINT
 
