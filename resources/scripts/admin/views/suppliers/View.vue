@@ -1,5 +1,5 @@
 <template>
-  <BasePage>
+  <BasePage class="xl:pl-96">
     <BasePageHeader :title="pageTitle">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
@@ -36,6 +36,9 @@
       </template>
     </BasePageHeader>
 
+    <!-- Supplier View Sidebar -->
+    <SupplierViewSidebar />
+
     <!-- Chart -->
     <SupplierChart />
   </BasePage>
@@ -47,6 +50,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import SupplierDropdown from '@/scripts/admin/components/dropdowns/SupplierIndexDropdown.vue'
+import SupplierViewSidebar from './partials/SupplierViewSidebar.vue'
 import SupplierChart from './partials/SupplierChart.vue'
 import abilities from '@/scripts/admin/stub/abilities'
 
