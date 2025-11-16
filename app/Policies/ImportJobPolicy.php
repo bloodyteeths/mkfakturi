@@ -11,201 +11,90 @@ class ImportJobPolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can view any import jobs.
+     * Determine whether the user can view any models.
      *
      * @param  \App\Models\User  $user
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-import-job', ImportJob::class)) {
-            return true;
-        }
-
-        return false;
+        // For now, allow any authenticated user.
+        // In the future, this could be restricted to admins or specific roles.
+        return $user->id > 0;
     }
 
     /**
-     * Determine whether the user can view the import job.
+     * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\ImportJob  $importJob
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, ImportJob $importJob): bool
+    public function view(User $user, ImportJob $importJob)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission and belongs to the same company
-        if ($user->can('view-import-job', $importJob) && $user->hasCompany($importJob->company_id)) {
-            return true;
-        }
-
-        return false;
+        // Users can only view their own import jobs.
+        return $user->id === $importJob->user_id;
     }
 
     /**
-     * Determine whether the user can create import jobs.
+     * Determine whether the user can create models.
      *
      * @param  \App\Models\User  $user
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create(User $user): bool
+    public function create(User $user)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission to create import jobs
-        if ($user->can('create-import-job', ImportJob::class)) {
-            return true;
-        }
-
-        return false;
+        // Any authenticated user can create an import job.
+        return $user->id > 0;
     }
 
     /**
-     * Determine whether the user can update the import job.
-     * This includes updating mapping configuration and validation rules.
+     * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\ImportJob  $importJob
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, ImportJob $importJob): bool
+    public function update(User $user, ImportJob $importJob)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission and belongs to the same company
-        if ($user->can('edit-import-job', $importJob) && $user->hasCompany($importJob->company_id)) {
-            return true;
-        }
-
-        return false;
+        // Users can only update their own import jobs.
+        return $user->id === $importJob->user_id;
     }
 
     /**
-     * Determine whether the user can delete the import job.
+     * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\ImportJob  $importJob
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, ImportJob $importJob): bool
+    public function delete(User $user, ImportJob $importJob)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission and belongs to the same company
-        if ($user->can('delete-import-job', $importJob) && $user->hasCompany($importJob->company_id)) {
-            return true;
-        }
-
-        return false;
+        // Users can only delete their own import jobs.
+        return $user->id === $importJob->user_id;
     }
 
     /**
-     * Determine whether the user can restore the import job.
+     * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\ImportJob  $importJob
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, ImportJob $importJob): bool
+    public function restore(User $user, ImportJob $importJob)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission and belongs to the same company
-        if ($user->can('delete-import-job', $importJob) && $user->hasCompany($importJob->company_id)) {
-            return true;
-        }
-
-        return false;
+        return false; // Not implemented
     }
 
     /**
-     * Determine whether the user can permanently delete the import job.
+     * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\ImportJob  $importJob
-     * @return bool
+     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, ImportJob $importJob): bool
+    public function forceDelete(User $user, ImportJob $importJob)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission and belongs to the same company
-        if ($user->can('delete-import-job', $importJob) && $user->hasCompany($importJob->company_id)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Determine whether the user can commit the import to production.
-     * This is a critical action that transforms temporary data into production data.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\ImportJob  $importJob
-     * @return bool
-     */
-    public function commit(User $user, ImportJob $importJob): bool
-    {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission to commit imports and belongs to the same company
-        if ($user->can('commit-import-job', $importJob) && $user->hasCompany($importJob->company_id)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete multiple import jobs.
-     *
-     * @param  \App\Models\User  $user
-     * @return bool
-     */
-    public function deleteMultiple(User $user): bool
-    {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
-            return true;
-        }
-
-        // Check if user has permission to delete import jobs
-        if ($user->can('delete-import-job', ImportJob::class)) {
-            return true;
-        }
-
-        return false;
+        return false; // Not implemented
     }
 }
-
-// CLAUDE-CHECKPOINT

@@ -170,10 +170,8 @@ if [ ! -z "$STOPANSKA_MTLS_KEY_BASE64" ]; then
     echo "✅ Stopanska private key decoded successfully"
 fi
 
-# Force cache/queue to file-based (override any defaults)
-export CACHE_STORE=file
-export CACHE_DRIVER=file
-export QUEUE_CONNECTION=sync
+# Set session driver to database for persistence on Railway
+export SESSION_DRIVER=database
 export BROADCAST_DRIVER=log
 export REDIS_CLIENT=
 

@@ -28,44 +28,34 @@
 
         <BaseSpinner v-if="scannerStore.isScanning" class="mt-4" />
 
-        <!-- Results Layout: Image with Selectable Text Overlay -->
+        <!-- Results Layout: Full-size Image -->
         <div v-if="scanResult" class="mt-6">
           <BaseHeading tag="h3" size="sm" class="mb-3">
             {{ $t('receipts.scanned_receipt') }}
           </BaseHeading>
 
-          <!-- Full-width image with selectable text overlay (like macOS Preview) -->
-          <div class="border rounded-lg overflow-auto bg-gray-50 max-h-screen">
-            <div class="relative inline-block min-w-full">
-              <img
-                :src="scanResult.image_url"
-                :alt="$t('receipts.receipt_image')"
-                class="w-full h-auto"
-                style="display: block;"
-              />
-              <!-- hOCR text overlay (if available) - selectable text on top of image -->
-              <div
-                v-if="scanResult.hocr"
-                v-html="scanResult.hocr"
-                class="absolute inset-0 pointer-events-auto"
-                style="user-select: text; -webkit-user-select: text;"
-              ></div>
-            </div>
+          <!-- Full-width, full-size image -->
+          <div class="border rounded-lg overflow-auto bg-gray-50" style="max-height: 80vh;">
+            <img
+              :src="scanResult.image_url"
+              :alt="$t('receipts.receipt_image')"
+              class="w-full h-auto"
+            />
           </div>
 
-          <!-- Collapsible OCR text for debugging/copying -->
-          <details class="mt-4">
-            <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-900">
-              {{ $t('receipts.show_ocr_text') }}
-            </summary>
+          <!-- OCR text below image -->
+          <div class="mt-4">
+            <BaseHeading tag="h3" size="sm" class="mb-2">
+              {{ $t('receipts.ocr_text') }}
+            </BaseHeading>
             <BaseTextarea
               v-model="ocrText"
-              :rows="15"
+              :rows="10"
               :readonly="true"
-              class="font-mono text-sm mt-2"
+              class="font-mono text-sm"
               :placeholder="$t('receipts.no_text_extracted')"
             />
-          </details>
+          </div>
 
           <!-- Bottom: Bill Creation Form -->
           <div class="mt-8">

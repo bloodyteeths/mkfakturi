@@ -61,7 +61,7 @@ class Invoice2DataClient implements InvoiceParserClient
             ->post($baseUrl.'/ocr', [
                 'company_id' => $companyId,
                 'request_id' => (string) Str::uuid(),
-                'format' => 'hocr', // Request hOCR format for selectable text overlay
+                // Use plain text format for better compatibility
             ]);
 
         $response->throw();
