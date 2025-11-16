@@ -4,28 +4,16 @@ namespace App\Http\Controllers\V1\Admin\AccountsPayable;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReceiptScanRequest;
-use App\Http\Resources\BillResource;
-use App\Http\Resources\ExpenseResource;
 use App\Models\Bill;
-use App\Models\CompanySetting;
-use App\Models\Expense;
-use App\Models\ExpenseCategory;
-use App\Models\Supplier;
-use App\Services\FiscalReceiptQrService;
 use App\Services\InvoiceParsing\InvoiceParserClient;
-use App\Services\InvoiceParsing\ParsedInvoiceMapper;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ReceiptScannerController extends Controller
 {
     public function scan(
         ReceiptScanRequest $request,
-        FiscalReceiptQrService $qrService,
         InvoiceParserClient $parserClient,
-        ParsedInvoiceMapper $mapper,
     ): JsonResponse
     {
         try {
@@ -55,148 +43,51 @@ class ReceiptScannerController extends Controller
                 'mime_type' => $file->getMimeType(),
             ]);
 
-            // Authorize based on Bill creation, since we now always
-            // create Bills from parsed images/PDFs.
+            // Authorize based on Bill creation
             $this->authorize('create', Bill::class);
 
             $disk = config('filesystems.default', 'local');
             $storedPath = $file->store('scanned-receipts/'.$companyId, ['disk' => $disk]);
 
-            // First, try QR decoding for fiscal receipts
+            // Call the OCR endpoint to extract text from the image
             try {
-                $normalized = $qrService->decodeAndNormalize($file);
-
-                $type = $normalized['type'] ?? 'cash';
-
-                if ($type === 'invoice') {
-                    \Log::info('ReceiptScannerController::scan - Creating bill from QR receipt');
-                    $bill = $this->createBillFromReceipt($normalized, $companyId, $storedPath, $request);
-                    \Log::info('ReceiptScannerController::scan - Bill created successfully from QR', ['bill_id' => $bill->id]);
-
-                    return (new BillResource($bill))
-                        ->additional(['document_type' => 'bill'])
-                        ->response()
-                        ->setStatusCode(201);
-                }
-
-                \Log::info('ReceiptScannerController::scan - Creating expense from QR receipt');
-                $expense = $this->createExpenseFromReceipt($normalized, $companyId, $storedPath, $request);
-                \Log::info('ReceiptScannerController::scan - Expense created successfully from QR', ['expense_id' => $expense->id]);
-
-                return (new ExpenseResource($expense))
-                    ->additional(['document_type' => 'expense'])
-                    ->response()
-                    ->setStatusCode(201);
-            } catch (\Throwable $qrException) {
-                \Log::warning('ReceiptScannerController::scan - QR decode failed, falling back to parser', [
-                    'user_id' => auth()->id(),
+                \Log::info('ReceiptScannerController::scan - Calling OCR endpoint', [
                     'company_id' => $companyId,
-                    'error' => $qrException->getMessage(),
-                    'exception' => get_class($qrException),
+                    'stored_path' => $storedPath,
                 ]);
 
-                // Fall back to invoice parser microservice (PDF or image with OCR)
-                try {
-                    \Log::info('ReceiptScannerController::scan - Fallback OCR parse initiated', [
-                        'company_id' => $companyId,
-                    ]);
+                $ocrResult = $parserClient->ocr(
+                    $companyId,
+                    $storedPath,
+                    $file->getClientOriginalName()
+                );
 
-                    $parsed = $parserClient->parse(
-                        $companyId,
-                        $storedPath,
-                        $file->getClientOriginalName(),
-                        'receipt-scan',
-                        null
-                    );
+                \Log::info('ReceiptScannerController::scan - OCR completed', [
+                    'company_id' => $companyId,
+                    'text_length' => strlen($ocrResult['text'] ?? ''),
+                ]);
 
-                    \Log::info('ReceiptScannerController::scan - Raw parser response', [
-                        'parsed_data' => $parsed,
-                    ]);
+                // Generate the image URL
+                $imageUrl = Storage::disk($disk)->url($storedPath);
 
-                    $components = $mapper->mapToBillComponents($companyId, $parsed);
+                return response()->json([
+                    'image_url' => $imageUrl,
+                    'stored_path' => $storedPath,
+                    'ocr_text' => $ocrResult['text'] ?? '',
+                ], 200);
 
-                    \Log::info('ReceiptScannerController::scan - Mapped components', [
-                        'supplier' => $components['supplier'] ?? null,
-                        'bill' => $components['bill'] ?? null,
-                        'items_count' => count($components['items'] ?? []),
-                    ]);
+            } catch (\Throwable $ocrException) {
+                \Log::error('ReceiptScannerController::scan - OCR failed', [
+                    'user_id' => auth()->id(),
+                    'company_id' => $companyId,
+                    'error' => $ocrException->getMessage(),
+                    'exception' => get_class($ocrException),
+                ]);
 
-                    $supplierData = $components['supplier'] ?? [];
-                    $billData = $components['bill'] ?? [];
-                    $items = $components['items'] ?? [];
-
-                    $supplier = Supplier::updateOrCreate(
-                        [
-                            'company_id' => $companyId,
-                            'tax_id' => $supplierData['tax_id'] ?? null,
-                            'name' => $supplierData['name'] ?? null,
-                        ],
-                        [
-                            'company_id' => $companyId,
-                            'name' => $supplierData['name'] ?? null,
-                            'tax_id' => $supplierData['tax_id'] ?? null,
-                            'email' => $supplierData['email'] ?? null,
-                        ]
-                    );
-
-                    $billData['supplier_id'] = $supplier->id;
-                    $billData['company_id'] = $companyId;
-
-                    // Ensure we always have a bill number; if the parser could not
-                    // extract one, generate a stable, per-company unique value.
-                    if (empty($billData['bill_number'])) {
-                        $billData['bill_number'] = 'SCAN-'.now()->format('Ymd-His');
-                    }
-
-                    // Ensure bill number uniqueness per company by suffixing on conflict
-                    $originalNumber = $billData['bill_number'];
-                    $counter = 1;
-                    while (Bill::where('company_id', $companyId)
-                        ->where('bill_number', $billData['bill_number'])
-                        ->exists()
-                    ) {
-                        $billData['bill_number'] = $originalNumber.'-'.$counter;
-                        $counter++;
-                    }
-
-                    $bill = Bill::create($billData);
-
-                    if (! empty($items)) {
-                        Bill::createItems($bill, $items);
-                    }
-
-                    $absolutePath = Storage::disk($disk)->path($storedPath);
-                    if (file_exists($absolutePath)) {
-                        $bill->addMedia($absolutePath)->preservingOriginal()->toMediaCollection('bills');
-                    }
-
-                    \Log::info('ReceiptScannerController::scan - Bill created via parser fallback', [
-                        'bill_id' => $bill->id,
-                        'company_id' => $companyId,
-                        'supplier_id' => $supplier->id,
-                        'parsed_source' => 'invoice2data-service',
-                    ]);
-
-                    return (new BillResource($bill))
-                        ->additional([
-                            'document_type' => 'bill',
-                            'parsed_data' => $parsed,
-                        ])
-                        ->response()
-                        ->setStatusCode(201);
-                } catch (\Throwable $parserException) {
-                    \Log::error('ReceiptScannerController::scan - Parser fallback failed', [
-                        'user_id' => auth()->id(),
-                        'company_id' => $companyId,
-                        'error' => $parserException->getMessage(),
-                        'exception' => get_class($parserException),
-                    ]);
-
-                    return response()->json([
-                        'message' => 'receipt_scan_failed',
-                        'error' => $parserException->getMessage(),
-                    ], 422);
-                }
+                return response()->json([
+                    'message' => 'ocr_failed',
+                    'error' => $ocrException->getMessage(),
+                ], 422);
             }
         } catch (\Throwable $e) {
             \Log::error('ReceiptScannerController::scan - Unhandled exception', [
@@ -220,105 +111,5 @@ class ReceiptScannerController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
-    }
-
-    protected function createExpenseFromReceipt(array $data, int $companyId, string $storedPath, Request $request): Expense
-    {
-        $companyCurrency = CompanySetting::getSetting('currency', $companyId);
-        $amount = (int) ($data['total'] ?? 0);
-
-        // Prefer an existing category for this company; if none exists,
-        // create a lightweight default so the flow never fails.
-        $category = ExpenseCategory::whereCompany($companyId)->first()
-            ?? ExpenseCategory::where('company_id', $companyId)->first();
-
-        if (! $category) {
-            $category = ExpenseCategory::create([
-                'name' => 'Scanned receipts',
-                'company_id' => $companyId,
-                'description' => 'Auto-created category for scanned fiscal receipts',
-            ]);
-        }
-
-        $expense = Expense::create([
-            'expense_date' => Carbon::parse($data['date_time'] ?? now())->toDateString(),
-            'amount' => $amount,
-            'notes' => 'Scanned receipt '.$data['fiscal_id'],
-            'expense_category_id' => $category?->id,
-            'company_id' => $companyId,
-            'creator_id' => $request->user()->id,
-            'currency_id' => $companyCurrency,
-            'exchange_rate' => 1,
-            'base_amount' => $amount,
-        ]);
-
-        $absolutePath = Storage::disk(config('filesystems.default', 'local'))->path($storedPath);
-        if (file_exists($absolutePath)) {
-            $expense->addMedia($absolutePath)->preservingOriginal()->toMediaCollection('receipts');
-        }
-
-        return $expense;
-    }
-
-    protected function createBillFromReceipt(array $data, int $companyId, string $storedPath, Request $request): Bill
-    {
-        $companyCurrency = CompanySetting::getSetting('currency', $companyId);
-        $total = (int) ($data['total'] ?? 0);
-        $vat = (int) ($data['vat_total'] ?? 0);
-        $subTotal = $total - $vat;
-
-        $supplier = Supplier::updateOrCreate(
-            [
-                'company_id' => $companyId,
-                'tax_id' => $data['issuer_tax_id'] ?? null,
-            ],
-            [
-                'company_id' => $companyId,
-                'tax_id' => $data['issuer_tax_id'] ?? null,
-                'name' => $data['issuer_tax_id'] ?? 'Supplier',
-            ]
-        );
-
-        $billNumber = $data['fiscal_id'] ?? null;
-        $originalNumber = $billNumber;
-        $counter = 1;
-        while ($billNumber && Bill::where('company_id', $companyId)
-            ->where('bill_number', $billNumber)
-            ->exists()
-        ) {
-            $billNumber = $originalNumber.'-'.$counter;
-            $counter++;
-        }
-
-        $bill = Bill::create([
-            'bill_date' => Carbon::parse($data['date_time'] ?? now())->toDateString(),
-            'due_date' => null,
-            'bill_number' => $billNumber,
-            'status' => Bill::STATUS_DRAFT,
-            'paid_status' => Bill::PAID_STATUS_UNPAID,
-            'sub_total' => $subTotal,
-            'discount' => 0,
-            'discount_val' => 0,
-            'total' => $total,
-            'tax' => $vat,
-            'due_amount' => $total,
-            'company_id' => $companyId,
-            'supplier_id' => $supplier->id,
-            'creator_id' => $request->user()->id,
-            'currency_id' => $companyCurrency,
-            'exchange_rate' => 1,
-            'base_total' => $total,
-            'base_sub_total' => $subTotal,
-            'base_tax' => $vat,
-            'base_discount_val' => 0,
-            'base_due_amount' => $total,
-        ]);
-
-        $absolutePath = Storage::disk(config('filesystems.default', 'local'))->path($storedPath);
-        if (file_exists($absolutePath)) {
-            $bill->addMedia($absolutePath)->preservingOriginal()->toMediaCollection('bills');
-        }
-
-        return $bill;
-    }
+    } // CLAUDE-CHECKPOINT
 }

@@ -245,155 +245,28 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
-    """Health check endpoint with diagnostic info."""
-    import os
-    import glob
-
-    # Check for ZXing JAR in common locations
-    jar_locations = [
-        "/root/.local/pyzxing",
-        os.path.expanduser("~/.local/pyzxing"),
-        os.path.join(os.getcwd(), ".local/pyzxing"),
-    ]
-
-    jar_status = {}
-    for location in jar_locations:
-        if os.path.exists(location):
-            jars = glob.glob(os.path.join(location, "*.jar"))
-            jar_status[location] = {
-                "exists": True,
-                "jars": [os.path.basename(j) for j in jars],
-                "files": os.listdir(location) if os.path.isdir(location) else []
-            }
-        else:
-            jar_status[location] = {"exists": False}
-
+    """Health check endpoint."""
     return {
-        "status": "ok",
-        "pyzxing_available": BarCodeReader is not None,
-        "jar_locations": jar_status,
-        "home": os.path.expanduser("~"),
-        "user": os.environ.get("USER", "unknown"),
-        "cwd": os.getcwd()
+        "status": "ok"
     }
 
 
-@app.post("/scan-datamatrix")
-async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
+@app.post("/ocr")
+async def extract_text(file: UploadFile = File(...), format: str = "text") -> JSONResponse:
     """
-    Scan DataMatrix barcode from an uploaded image (Macedonian fiscal receipts).
-    Uses ZXing Java library via pyzxing for better DataMatrix detection.
+    Extract text from an image using OCR.
+
+    Args:
+        file: Image file to process
+        format: Output format - 'text' (plain text) or 'hocr' (HTML with coordinates)
+
+    Returns:
+        - text format: Plain text extracted from image
+        - hocr format: hOCR HTML with word coordinates for selectable text overlay
     """
     import logging
-    import tempfile
-    import os
-    import glob as glob_module
     logger = logging.getLogger(__name__)
 
-    if BarCodeReader is None:
-        raise HTTPException(
-            status_code=501,
-            detail="DataMatrix scanning not available (pyzxing/Java not installed)",
-        )
-
-    try:
-        contents = await file.read()
-        if not contents:
-            raise HTTPException(status_code=400, detail="Empty file")
-
-        # pyzxing requires a file path, so write to temp file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
-            tmp.write(contents)
-            tmp_path = tmp.name
-
-        logger.info(f"Scanning DataMatrix from image: {tmp_path}")
-
-        # Check if JAR exists before initializing
-        jar_path = os.path.expanduser("~/.local/pyzxing")
-        jars = glob_module.glob(os.path.join(jar_path, "javase-*-jar-with-dependencies.jar"))
-        logger.info(f"JAR check before BarCodeReader init: path={jar_path}, jars_found={jars}")
-
-        # Initialize ZXing reader
-        logger.info("Initializing BarCodeReader...")
-        try:
-            reader = BarCodeReader()
-            logger.info(f"BarCodeReader initialized successfully, lib_path={reader.lib_path}")
-        except Exception as e:
-            logger.error(f"BarCodeReader initialization failed: {e}", exc_info=True)
-            raise
-
-        # Scan for DataMatrix codes
-        logger.info("Calling reader.decode...")
-        results = reader.decode(tmp_path)
-        logger.info(f"Decode completed")
-
-        logger.info(f"ZXing scan results: {results}")
-
-        # Clean up temp file
-        import os
-        os.unlink(tmp_path)
-
-        if not results or len(results) == 0:
-            raise HTTPException(status_code=422, detail="No barcodes detected in image")
-
-        # Filter for DataMatrix codes only (ignore UPC, EAN, etc.)
-        datamatrix_results = []
-        for result in results if isinstance(results, list) else [results]:
-            barcode_format = result.get('format', b'')
-            # Handle both bytes and string format
-            if isinstance(barcode_format, bytes):
-                barcode_format = barcode_format.decode('utf-8', errors='ignore')
-
-            logger.info(f"Found barcode - Format: {barcode_format}, Keys: {result.keys()}")
-
-            if barcode_format == 'DATA_MATRIX':
-                datamatrix_results.append(result)
-
-        if not datamatrix_results:
-            raise HTTPException(
-                status_code=422,
-                detail=f"No DataMatrix code found. Found {len(results)} other barcode(s): {[r.get('format') for r in (results if isinstance(results, list) else [results])]}"
-            )
-
-        # Use first DataMatrix result
-        first_result = datamatrix_results[0]
-
-        logger.info(f"DataMatrix result: {first_result}")
-
-        # pyzxing returns bytes, need to decode to string
-        raw_data = first_result.get("raw") or first_result.get("parsed", b"")
-        if isinstance(raw_data, bytes):
-            datamatrix_text = raw_data.decode('utf-8', errors='ignore')
-        else:
-            datamatrix_text = str(raw_data) if raw_data else ""
-
-        if not datamatrix_text:
-            logger.error(f"DataMatrix found but data is empty. Full result: {first_result}")
-            raise HTTPException(status_code=422, detail="DataMatrix detected but could not decode")
-
-        logger.info(f"DataMatrix decoded: {datamatrix_text[:100]}...")
-
-        return JSONResponse(content={
-            "success": True,
-            "format": first_result.get("format", "DATA_MATRIX"),
-            "data": datamatrix_text,
-            "length": len(datamatrix_text)
-        })
-
-    except HTTPException:
-        raise
-    except Exception as exc:
-        import logging
-        logging.exception("DataMatrix scanning failed")
-        raise HTTPException(status_code=500, detail=f"Scan error: {str(exc)}")
-
-
-@app.post("/ocr")
-async def extract_text(file: UploadFile = File(...)) -> JSONResponse:
-    """
-    Extract raw text from an image using OCR.
-    Returns only the text, no parsing.
-    """
     try:
         contents = await file.read()
         if not contents:
@@ -405,13 +278,55 @@ async def extract_text(file: UploadFile = File(...)) -> JSONResponse:
                 detail="OCR not available on service (pytesseract/Pillow missing)",
             )
 
-        text = _extract_text_from_image(contents)
+        # Open image
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
 
-        return JSONResponse(content={
-            "success": True,
-            "text": text,
-            "length": len(text)
-        })
+        # Get image dimensions for frontend
+        width, height = image.size
+
+        # Apply preprocessing
+        if np is not None:
+            import cv2
+            img_array = np.array(image)
+            gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            binary = cv2.adaptiveThreshold(
+                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+            )
+            denoised = cv2.fastNlMeansDenoising(binary, h=10)
+            image = Image.fromarray(denoised)
+
+        langs = os.getenv("OCR_LANGS", "eng")
+
+        if format == "hocr":
+            # Extract hOCR with word-level coordinates
+            custom_config = r'--oem 3 --psm 6 hocr'
+            hocr_html = pytesseract.image_to_pdf_or_hocr(image, lang=langs, config=custom_config, extension='hocr')
+            hocr_text = hocr_html.decode('utf-8')
+
+            logger.info(f"hOCR extracted, length: {len(hocr_text)} chars")
+
+            return JSONResponse(content={
+                "success": True,
+                "format": "hocr",
+                "hocr": hocr_text,
+                "image_width": width,
+                "image_height": height
+            })
+        else:
+            # Extract plain text
+            custom_config = r'--oem 3 --psm 6'
+            text = pytesseract.image_to_string(image, lang=langs, config=custom_config).strip()
+
+            logger.info(f"Text extracted: {len(text)} chars")
+
+            return JSONResponse(content={
+                "success": True,
+                "format": "text",
+                "text": text,
+                "length": len(text),
+                "image_width": width,
+                "image_height": height
+            })
 
     except HTTPException:
         raise
