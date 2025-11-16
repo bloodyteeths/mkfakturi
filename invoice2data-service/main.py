@@ -285,6 +285,8 @@ async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
     """
     import logging
     import tempfile
+    import os
+    import glob as glob_module
     logger = logging.getLogger(__name__)
 
     if BarCodeReader is None:
@@ -306,7 +308,6 @@ async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
         logger.info(f"Scanning DataMatrix from image: {tmp_path}")
 
         # Check if JAR exists before initializing
-        import glob as glob_module
         jar_path = os.path.expanduser("~/.local/pyzxing")
         jars = glob_module.glob(os.path.join(jar_path, "javase-*-jar-with-dependencies.jar"))
         logger.info(f"JAR check before BarCodeReader init: path={jar_path}, jars_found={jars}")
