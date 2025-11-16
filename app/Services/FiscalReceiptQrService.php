@@ -180,9 +180,21 @@ class FiscalReceiptQrService
         try {
             $dataMatrixUrl = config('services.invoice2data.url') . '/scan-datamatrix';
 
+            Log::info('FiscalReceiptQrService::decodeImagePath - Calling DataMatrix API', [
+                'url' => $dataMatrixUrl,
+                'image_path' => $imagePath,
+                'image_size' => file_exists($imagePath) ? filesize($imagePath) : null,
+            ]);
+
             $response = \Http::timeout(30)
                 ->attach('file', file_get_contents($imagePath), basename($imagePath))
                 ->post($dataMatrixUrl);
+
+            Log::info('FiscalReceiptQrService::decodeImagePath - DataMatrix API response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'headers' => $response->headers(),
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
