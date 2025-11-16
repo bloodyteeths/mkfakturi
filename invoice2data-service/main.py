@@ -243,7 +243,7 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
 
 
 @app.get("/health")
-def health() -> Dict[str, str]:
+def health() -> Dict[str, Any]:
     """Health check endpoint with diagnostic info."""
     import os
     import glob
