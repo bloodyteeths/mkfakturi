@@ -27,6 +27,7 @@ class Supplier extends Model
     protected $appends = [
         'formattedCreatedAt',
         'fullAddress',
+        'due_amount',
     ];
 
     protected function casts(): array
@@ -84,6 +85,22 @@ class Supplier extends Model
         }
 
         return implode("\n", $address);
+    }
+
+    /**
+     * Get the total amount due to this supplier
+     * (Total bills - Total payments made)
+     */
+    public function getDueAmountAttribute()
+    {
+        return $this->cacheComputed('due_amount', function () {
+            $totalBills = $this->bills()->sum('total');
+            $totalPayments = \App\Models\BillPayment::whereHas('bill', function ($query) {
+                $query->where('supplier_id', $this->id);
+            })->sum('amount');
+
+            return $totalBills - $totalPayments;
+        });
     }
 
     /**

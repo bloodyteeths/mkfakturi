@@ -22,7 +22,8 @@ class SuppliersController extends Controller
 
         $limit = $request->input('limit', 10);
 
-        $suppliers = Supplier::whereCompany()
+        $suppliers = Supplier::with('currency')
+            ->whereCompany()
             ->applyFilters($request->all())
             ->paginateData($limit);
 

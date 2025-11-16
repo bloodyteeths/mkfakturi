@@ -26,6 +26,7 @@ class SupplierResource extends JsonResource
             'company_id' => $this->company_id,
             'formatted_created_at' => $this->formattedCreatedAt,
             'full_address' => $this->fullAddress,
+            'due_amount' => $this->due_amount,
             'currency' => $this->whenLoaded('currency'),
             'bills' => $this->whenLoaded('bills', function () {
                 return BillResource::collection($this->bills);
