@@ -4,10 +4,17 @@ WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+# Default OCR languages: Macedonian + English + Serbian (Cyrillic support)
+ENV OCR_LANGS=mkd+eng+srp
 
-# Install system dependencies for OCR (Tesseract)
+# Install system dependencies for OCR (Tesseract) with language packs
+# Macedonian (mkd), English (eng), and Serbian (srp) for regional coverage
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends tesseract-ocr \
+    && apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        tesseract-ocr-mkd \
+        tesseract-ocr-eng \
+        tesseract-ocr-srp \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

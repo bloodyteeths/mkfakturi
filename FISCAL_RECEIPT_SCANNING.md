@@ -168,9 +168,22 @@ If DataMatrix decoding becomes required:
 INVOICE2DATA_URL=https://invoice2data-service.railway.app
 INVOICE2DATA_TIMEOUT=30000
 
+# OCR Language Support (Macedonian + English + Serbian for Cyrillic)
+OCR_LANGS=mkd+eng+srp
+
 # Memory limits for image processing
 PHP_MEMORY_LIMIT=256M  # For large image uploads
 ```
+
+### OCR Language Support
+
+The invoice2data-service uses Tesseract OCR with multi-language support:
+
+- **mkd** (Macedonian): Primary language for fiscal receipts
+- **eng** (English): For mixed-language receipts
+- **srp** (Serbian): Additional Cyrillic support
+
+These languages are installed in the Docker image and configured via the `OCR_LANGS` environment variable.
 
 ### Performance
 
