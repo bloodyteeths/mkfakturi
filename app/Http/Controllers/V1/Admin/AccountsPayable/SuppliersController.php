@@ -53,7 +53,24 @@ class SuppliersController extends Controller
 
         $supplier->load(['bills', 'currency']);
 
+        // Prepare chart data (basic structure for now)
+        $chartData = [
+            'billTotals' => array_fill(0, 12, 0),
+            'paymentTotals' => array_fill(0, 12, 0),
+            'expenseTotals' => array_fill(0, 12, 0),
+            'netProfits' => array_fill(0, 12, 0),
+            'months' => [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ],
+            'billsTotal' => 0,
+            'paymentsTotal' => 0,
+            'totalExpenses' => 0,
+            'netProfit' => 0,
+        ];
+
         return (new SupplierResource($supplier))
+            ->additional(['meta' => ['chartData' => $chartData]])
             ->response();
     }
 

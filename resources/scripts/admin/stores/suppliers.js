@@ -62,6 +62,25 @@ export const useSuppliersStore = (useWindow = false) => {
         })
       },
 
+      fetchViewSupplier(params) {
+        this.isFetchingView = true
+
+        return new Promise((resolve, reject) => {
+          axios
+            .get(`/api/v1/suppliers/${params.id}`, { params })
+            .then((response) => {
+              this.selectedSupplier = response.data.data
+              this.isFetchingView = false
+              resolve(response)
+            })
+            .catch((err) => {
+              this.isFetchingView = false
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       createSupplier(data) {
         const notificationStore = useNotificationStore()
 
@@ -173,4 +192,5 @@ export const useSuppliersStore = (useWindow = false) => {
     },
   })()
 }
+// CLAUDE-CHECKPOINT
 
