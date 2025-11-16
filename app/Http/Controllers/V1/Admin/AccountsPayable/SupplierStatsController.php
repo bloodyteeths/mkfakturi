@@ -7,7 +7,6 @@ use App\Http\Resources\SupplierResource;
 use App\Models\Bill;
 use App\Models\BillPayment;
 use App\Models\CompanySetting;
-use App\Models\Expense;
 use App\Models\Supplier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -66,13 +65,7 @@ class SupplierStatsController extends Controller
             );
             array_push(
                 $expenseTotals,
-                Expense::whereBetween(
-                    'expense_date',
-                    [$start->format('Y-m-d'), $end->format('Y-m-d')]
-                )
-                    ->whereCompany()
-                    ->where('supplier_id', $supplier->id)
-                    ->sum('amount') ?? 0
+                0 // Expenses don't have supplier_id, so we set to 0
             );
             array_push(
                 $paymentTotals,
@@ -88,7 +81,7 @@ class SupplierStatsController extends Controller
             );
             array_push(
                 $netProfits,
-                ($paymentTotals[$i] - $expenseTotals[$i])
+                ($billTotals[$i] - $paymentTotals[$i]) // Net profit = bills - payments (amount owed)
             );
             $i++;
             array_push($months, $start->translatedFormat('M'));
@@ -118,15 +111,9 @@ class SupplierStatsController extends Controller
             })
             ->sum('amount');
 
-        $totalExpenses = Expense::whereBetween(
-            'expense_date',
-            [$startDate->format('Y-m-d'), $start->format('Y-m-d')]
-        )
-            ->whereCompany()
-            ->where('supplier_id', $supplier->id)
-            ->sum('amount');
+        $totalExpenses = 0; // Expenses don't have supplier_id
 
-        $netProfit = (int) $paymentsTotal - (int) $totalExpenses;
+        $netProfit = (int) $billsTotal - (int) $paymentsTotal; // Amount still owed to supplier
 
         $chartData = [
             'months' => $months,
