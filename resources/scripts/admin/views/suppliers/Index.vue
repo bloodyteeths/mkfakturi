@@ -94,30 +94,12 @@
           {{ row.data.tax_id || '-' }}
         </template>
 
-        <template #cell-actions="{ row }">
-          <BaseDropdown>
-            <template #button="slotProps">
-              <BaseButton
-                variant="tertiary"
-                size="xs"
-                :class="slotProps.class"
-              >
-                {{ $t('general.actions') }}
-              </BaseButton>
-            </template>
-            <BaseDropdownItem
-              v-if="userStore.hasAbilities(abilities.EDIT_SUPPLIER)"
-              @click="$router.push(`/admin/suppliers/${row.data.id}/edit`)"
-            >
-              {{ $t('general.edit') }}
-            </BaseDropdownItem>
-            <BaseDropdownItem
-              v-if="userStore.hasAbilities(abilities.DELETE_SUPPLIER)"
-              @click="deleteSupplier(row.data.id)"
-            >
-              {{ $t('general.delete') }}
-            </BaseDropdownItem>
-          </BaseDropdown>
+        <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
+          <SupplierDropdown
+            :row="row.data"
+            :table="tableComponent"
+            :load-data="refreshTable"
+          />
         </template>
       </BaseTable>
     </div>
@@ -125,11 +107,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import abilities from '@/scripts/admin/stub/abilities'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import SupplierDropdown from '@/scripts/admin/components/dropdowns/SupplierIndexDropdown.vue'
 
 const { t } = useI18n()
 const suppliersStore = useSuppliersStore()
@@ -146,12 +129,20 @@ const filters = reactive({
   orderBy: undefined,
 })
 
-const columns = [
-  { key: 'name', label: t('suppliers.name') },
-  { key: 'email', label: t('suppliers.email') },
-  { key: 'tax_id', label: t('suppliers.tax_id') },
-  { key: 'actions', label: '', sortable: false, tdClass: 'text-right' },
-]
+const columns = computed(() => {
+  return [
+    { key: 'name', label: t('suppliers.name') },
+    { key: 'email', label: t('suppliers.email') },
+    { key: 'tax_id', label: t('suppliers.tax_id') },
+    {
+      key: 'actions',
+      label: '',
+      sortable: false,
+      tdClass: 'text-right text-sm font-medium pl-0',
+      thClass: 'pl-0',
+    },
+  ]
+})
 
 function fetchData(params) {
   filters.page = params?.page ?? filters.page
@@ -185,13 +176,20 @@ function toggleFilter() {
   showFilters.value = !showFilters.value
 }
 
-function deleteSupplier(id) {
-  suppliersStore.deleteSupplier(id).then(() => {
-    fetchData()
-  })
+function refreshTable() {
+  fetchData()
+}
+
+function hasAtleastOneAbility() {
+  return userStore.hasAbilities([
+    abilities.DELETE_SUPPLIER,
+    abilities.EDIT_SUPPLIER,
+    abilities.VIEW_SUPPLIER,
+  ])
 }
 
 onMounted(() => {
   fetchData()
 })
 </script>
+// CLAUDE-CHECKPOINT
