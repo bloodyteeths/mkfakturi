@@ -109,7 +109,17 @@ class ReceiptScannerController extends Controller
                         null
                     );
 
+                    \Log::info('ReceiptScannerController::scan - Raw parser response', [
+                        'parsed_data' => $parsed,
+                    ]);
+
                     $components = $mapper->mapToBillComponents($companyId, $parsed);
+
+                    \Log::info('ReceiptScannerController::scan - Mapped components', [
+                        'supplier' => $components['supplier'] ?? null,
+                        'bill' => $components['bill'] ?? null,
+                        'items_count' => count($components['items'] ?? []),
+                    ]);
 
                     $supplierData = $components['supplier'] ?? [];
                     $billData = $components['bill'] ?? [];

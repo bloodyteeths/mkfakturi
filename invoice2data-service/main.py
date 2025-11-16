@@ -104,15 +104,43 @@ def _extract_text_from_image(contents: bytes) -> str:
     """
     Run OCR on an image using Tesseract (via pytesseract).
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     if pytesseract is None or Image is None:
         raise RuntimeError("OCR is not available (pytesseract/Pillow not installed)")
 
     image = Image.open(io.BytesIO(contents)).convert("RGB")
-    # Convert to numpy array for potential future preprocessing
-    _ = np.array(image) if np is not None else None
+
+    # Image preprocessing for better OCR accuracy
+    if np is not None:
+        import cv2
+        img_array = np.array(image)
+
+        # Convert to grayscale
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+
+        # Apply adaptive thresholding to improve contrast
+        binary = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
+
+        # Denoise
+        denoised = cv2.fastNlMeansDenoising(binary, h=10)
+
+        # Convert back to PIL Image
+        image = Image.fromarray(denoised)
+
+        logger.info(f"OCR preprocessing applied - image size: {image.size}")
 
     langs = os.getenv("OCR_LANGS", "eng")
+    logger.info(f"Running Tesseract OCR with languages: {langs}")
+
     text = pytesseract.image_to_string(image, lang=langs)
+
+    # Log extracted text for debugging
+    logger.info(f"OCR extracted text ({len(text)} chars):\n{text[:500]}..." if len(text) > 500 else f"OCR extracted text:\n{text}")
+
     return text or ""
 
 
@@ -123,8 +151,15 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
     This does NOT try to be perfect; it extracts a few key fields so that
     normalize_invoice_data() can build a consistent structure.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    logger.info(f"Parser received {len(lines)} non-empty lines")
+    logger.info(f"First 10 lines: {lines[:10]}")
+
     supplier_name = lines[0] if lines else None
+    logger.info(f"Extracted supplier name: {supplier_name}")
 
     # Simple date detection (YYYY-MM-DD or DD.MM.YYYY)
     date_match = re.search(r"(\d{4}-\d{2}-\d{2})", text)
@@ -196,6 +231,8 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
         "tax": None,
         "lines": [],
     }
+
+    logger.info(f"Parser extracted data: supplier='{supplier_name}', date={invoice_date}, total_amount={total_amount}")
 
     return raw
 
