@@ -174,11 +174,34 @@ class FiscalReceiptQrService
 
     protected function decodeImagePath(string $imagePath): ?string
     {
-        // NOTE: QR/DataMatrix decoding is currently disabled as standard libraries
-        // cannot read Macedonian fiscal DataMatrix codes. This method is kept
-        // for potential future implementation when UJP provides official API/SDK.
-        //
-        // For now, receipts are processed via OCR parser (invoice2data-service).
+        // Try DataMatrix decoding via invoice2data-service (pyzxing/ZXing Java)
+        // This uses the Java ZXing library which has better DataMatrix support
+        // than PHP libraries, with Reed-Solomon error correction.
+        try {
+            $dataMatrixUrl = config('services.invoice2data.url') . '/scan-datamatrix';
+
+            $response = \Http::timeout(30)
+                ->attach('file', file_get_contents($imagePath), basename($imagePath))
+                ->post($dataMatrixUrl);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('FiscalReceiptQrService::decodeImagePath - DataMatrix decoded successfully', [
+                    'format' => $data['format'] ?? null,
+                    'data_length' => $data['length'] ?? null,
+                ]);
+                return $data['data'] ?? null;
+            }
+
+            Log::info('FiscalReceiptQrService::decodeImagePath - DataMatrix decode failed', [
+                'status' => $response->status(),
+                'error' => $response->json()['detail'] ?? 'Unknown error',
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('FiscalReceiptQrService::decodeImagePath - DataMatrix API error', [
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return null;
     }

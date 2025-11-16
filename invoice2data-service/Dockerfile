@@ -8,6 +8,7 @@ ENV PYTHONUNBUFFERED=1
 ENV OCR_LANGS=mkd+eng+srp
 
 # Install system dependencies for OCR (Tesseract) with language packs
+# and Java (for pyzxing DataMatrix decoder)
 # Macedonian (mkd), English (eng), and Serbian (srp) for regional coverage
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -15,6 +16,7 @@ RUN apt-get update \
         tesseract-ocr-mkd \
         tesseract-ocr-eng \
         tesseract-ocr-srp \
+        default-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

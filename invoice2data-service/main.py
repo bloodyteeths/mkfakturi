@@ -21,6 +21,11 @@ except Exception:  # pragma: no cover - optional OCR pipeline
     Image = None  # type: ignore
     np = None  # type: ignore
 
+try:
+    from pyzxing import BarCodeReader  # type: ignore
+except Exception:  # pragma: no cover - optional DataMatrix scanning
+    BarCodeReader = None  # type: ignore
+
 app = FastAPI(title="Invoice2Data Microservice", version="1.0.0")
 
 
@@ -240,6 +245,75 @@ def _parse_text_to_raw(text: str) -> Dict[str, Any]:
 @app.get("/health")
 def health() -> Dict[str, str]:
     return {"status": "ok"}
+
+
+@app.post("/scan-datamatrix")
+async def scan_datamatrix(file: UploadFile = File(...)) -> JSONResponse:
+    """
+    Scan DataMatrix barcode from an uploaded image (Macedonian fiscal receipts).
+    Uses ZXing Java library via pyzxing for better DataMatrix detection.
+    """
+    import logging
+    import tempfile
+    logger = logging.getLogger(__name__)
+
+    if BarCodeReader is None:
+        raise HTTPException(
+            status_code=501,
+            detail="DataMatrix scanning not available (pyzxing/Java not installed)",
+        )
+
+    try:
+        contents = await file.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="Empty file")
+
+        # pyzxing requires a file path, so write to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+            tmp.write(contents)
+            tmp_path = tmp.name
+
+        logger.info(f"Scanning DataMatrix from image: {tmp_path}")
+
+        # Initialize ZXing reader
+        reader = BarCodeReader()
+
+        # Scan for DataMatrix codes
+        results = reader.decode(tmp_path)
+
+        logger.info(f"ZXing scan results: {results}")
+
+        # Clean up temp file
+        import os
+        os.unlink(tmp_path)
+
+        if not results or len(results) == 0:
+            raise HTTPException(status_code=422, detail="No DataMatrix code detected")
+
+        # Return first detected code
+        # results is a list of dicts: [{'format': 'DATA_MATRIX', 'raw': '...', 'parsed': '...'}]
+        first_result = results[0] if isinstance(results, list) else results
+
+        datamatrix_text = first_result.get("raw") or first_result.get("parsed", "")
+
+        if not datamatrix_text:
+            raise HTTPException(status_code=422, detail="DataMatrix detected but could not decode")
+
+        logger.info(f"DataMatrix decoded: {datamatrix_text[:100]}...")
+
+        return JSONResponse(content={
+            "success": True,
+            "format": first_result.get("format", "DATA_MATRIX"),
+            "data": datamatrix_text,
+            "length": len(datamatrix_text)
+        })
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        import logging
+        logging.exception("DataMatrix scanning failed")
+        raise HTTPException(status_code=500, detail=f"Scan error: {str(exc)}")
 
 
 @app.post("/parse")
