@@ -5,7 +5,20 @@ namespace App\Services;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
 use RuntimeException;
-use Zxing\QrReader;
+
+/**
+ * Fiscal Receipt Barcode Service
+ *
+ * IMPORTANT: Macedonian fiscal receipts use DataMatrix barcodes, NOT QR codes.
+ *
+ * Current limitations:
+ * - Standard QR/DataMatrix decoders cannot read Macedonian fiscal DataMatrix codes
+ * - The codes contain encrypted payloads that require UJP server validation
+ * - See FISCAL_RECEIPT_SCANNING.md for full technical details
+ *
+ * This service attempts barcode detection but will fail on Macedonian fiscal receipts.
+ * The OCR parser (invoice2data-service) is the recommended and working solution.
+ */
 
 class FiscalReceiptQrService
 {
@@ -161,9 +174,13 @@ class FiscalReceiptQrService
 
     protected function decodeImagePath(string $imagePath): ?string
     {
-        $qr = new QrReader($imagePath, QrReader::SOURCE_TYPE_FILE, false);
+        // NOTE: QR/DataMatrix decoding is currently disabled as standard libraries
+        // cannot read Macedonian fiscal DataMatrix codes. This method is kept
+        // for potential future implementation when UJP provides official API/SDK.
+        //
+        // For now, receipts are processed via OCR parser (invoice2data-service).
 
-        return $qr->text() ?: null;
+        return null;
     }
 
     protected function convertPdfToPng(string $pdfPath): string
