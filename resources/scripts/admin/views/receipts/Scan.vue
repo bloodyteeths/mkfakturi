@@ -28,37 +28,44 @@
 
         <BaseSpinner v-if="scannerStore.isScanning" class="mt-4" />
 
-        <!-- Results Layout: Image + OCR Text -->
+        <!-- Results Layout: Image with Selectable Text Overlay -->
         <div v-if="scanResult" class="mt-6">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Left Side: Image Preview -->
-            <div>
-              <BaseHeading tag="h3" size="sm" class="mb-3">
-                {{ $t('receipts.uploaded_image') }}
-              </BaseHeading>
-              <div class="border rounded-lg overflow-hidden bg-gray-50">
-                <img
-                  :src="scanResult.image_url"
-                  :alt="$t('receipts.receipt_image')"
-                  class="w-full h-auto max-h-96 object-contain"
-                />
-              </div>
-            </div>
+          <BaseHeading tag="h3" size="sm" class="mb-3">
+            {{ $t('receipts.scanned_receipt') }}
+          </BaseHeading>
 
-            <!-- Right Side: OCR Text -->
-            <div>
-              <BaseHeading tag="h3" size="sm" class="mb-3">
-                {{ $t('receipts.ocr_text') }}
-              </BaseHeading>
-              <BaseTextarea
-                v-model="ocrText"
-                :rows="15"
-                :readonly="true"
-                class="font-mono text-sm"
-                :placeholder="$t('receipts.no_text_extracted')"
+          <!-- Full-width image with selectable text overlay (like macOS Preview) -->
+          <div class="border rounded-lg overflow-auto bg-gray-50 max-h-screen">
+            <div class="relative inline-block min-w-full">
+              <img
+                :src="scanResult.image_url"
+                :alt="$t('receipts.receipt_image')"
+                class="w-full h-auto"
+                style="display: block;"
               />
+              <!-- hOCR text overlay (if available) - selectable text on top of image -->
+              <div
+                v-if="scanResult.hocr"
+                v-html="scanResult.hocr"
+                class="absolute inset-0 pointer-events-auto"
+                style="user-select: text; -webkit-user-select: text;"
+              ></div>
             </div>
           </div>
+
+          <!-- Collapsible OCR text for debugging/copying -->
+          <details class="mt-4">
+            <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-900">
+              {{ $t('receipts.show_ocr_text') }}
+            </summary>
+            <BaseTextarea
+              v-model="ocrText"
+              :rows="15"
+              :readonly="true"
+              class="font-mono text-sm mt-2"
+              :placeholder="$t('receipts.no_text_extracted')"
+            />
+          </details>
 
           <!-- Bottom: Bill Creation Form -->
           <div class="mt-8">
@@ -193,13 +200,18 @@ function scan() {
     scanResult.value = {
       image_url: response.data.image_url,
       stored_path: response.data.stored_path,
-      ocr_text: response.data.ocr_text || ''
+      ocr_text: response.data.ocr_text || '',
+      hocr: response.data.hocr || null,
+      image_width: response.data.image_width || null,
+      image_height: response.data.image_height || null,
     }
 
     console.log('scanResult set to:', scanResult.value)
 
     // Set OCR text for display
     ocrText.value = response.data.ocr_text || ''
+
+    console.log('Has hOCR:', !!response.data.hocr)
 
     console.log('ocrText set to:', ocrText.value ? ocrText.value.substring(0, 100) : '(empty)')
 

@@ -1,103 +1,122 @@
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:31:35] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 11:31:35] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 11:47:59] production.WARNING: Slow operation detected {"operation":"req_691716eeebd04","execution_time_ms":318.83,"memory_used_bytes":0,"memory_used_mb":0.0} 
-[2025-11-14 11:47:59] production.WARNING: Slow request detected {"operation":"req_691716eeebd04","execution_time_ms":318.83,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://app.facturino.mk/login","route":null,"user_id":2,"company_id":"2","ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":302} 
-[2025-11-14 11:48:00] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-14 11:48:00] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-14 11:48:00] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-14 11:48:00] production.WARNING: Slow operation detected {"operation":"req_691716ef9aa29","execution_time_ms":767.26,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
-[2025-11-14 11:48:00] production.WARNING: Slow request detected {"operation":"req_691716ef9aa29","execution_time_ms":767.26,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-14 11:48:06] production.WARNING: Slow operation detected {"operation":"req_691716f627901","execution_time_ms":423.37,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
-[2025-11-14 11:48:06] production.WARNING: Slow request detected {"operation":"req_691716f627901","execution_time_ms":423.37,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://app.facturino.mk/reports/sales/customers/YLzOPURRVj3c1AsWiCSo","route":null,"user_id":2,"company_id":null,"ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-14 11:48:17] production.WARNING: Slow operation detected {"operation":"req_6917170166335","execution_time_ms":440.65,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
-[2025-11-14 11:48:17] production.WARNING: Slow request detected {"operation":"req_6917170166335","execution_time_ms":440.65,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://app.facturino.mk/reports/sales/customers/YLzOPURRVj3c1AsWiCSo","route":null,"user_id":2,"company_id":null,"ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-14 11:48:26] production.ERROR: Failed to generate trial balance {"company_id":2,"error":"Attempt to read property \"id\" on null","trace":"#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Attempt to read...', '/var/www/html/v...', 33)
-#1 /var/www/html/vendor/ekmungai/eloquent-ifrs/src/Scopes/EntityScope.php(33): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'Attempt to read...', '/var/www/html/v...', 33)
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(1543): IFRS\\Scopes\\EntityScope->apply(Object(Illuminate\\Database\\Eloquent\\Builder), Object(IFRS\\Models\\Account))
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(1571): Illuminate\\Database\\Eloquent\\Builder->Illuminate\\Database\\Eloquent\\{closure}(Object(Illuminate\\Database\\Eloquent\\Builder))
-#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(1531): Illuminate\\Database\\Eloquent\\Builder->callScope(Object(Closure))
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(1973): Illuminate\\Database\\Eloquent\\Builder->applyScopes()
-#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(2204): Illuminate\\Database\\Eloquent\\Builder->toBase()
-#7 /var/www/html/app/Domain/Accounting/IfrsAdapter.php(419): Illuminate\\Database\\Eloquent\\Builder->__call('count', Array)
-#8 /var/www/html/app/Http/Controllers/V1/Admin/Report/TrialBalanceReportController.php(45): App\\Domain\\Accounting\\IfrsAdapter->getTrialBalance(Object(App\\Models\\Company), '2025-11-14')
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Report\\TrialBalanceReportController->__invoke(Object(Illuminate\\Http\\Request), 'YLzOPURRVj3c1As...')
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('__invoke', Array)
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Report\\TrialBalanceReportController), '__invoke')
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
-#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#23 /var/www/html/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
-#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
-#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
-#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
-#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
-#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
-#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
-#39 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#41 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#43 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
-#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
-#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
-#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
-#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
-#72 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
-#73 {main}"} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:30:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:30:51] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 21:30:51] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 21:30:57] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 21:30:57] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 21:36:18] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:36:18] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_company_header":true,"company_header":"2"} 
+[2025-11-16 21:36:18] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 21:36:18] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 21:36:18] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 21:36:18] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:36:18] production.WARNING: Slow operation detected {"operation":"req_691a43d20ce3d","execution_time_ms":858.23,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-16 21:36:18] production.WARNING: Slow request detected {"operation":"req_691a43d20ce3d","execution_time_ms":858.23,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 21:36:19] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:36:19] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:36:26] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:36:26] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":1386361,"file_mime":"image/jpeg"} 
+[2025-11-16 21:36:26] production.INFO: ReceiptScannerController::scan - File details {"original_name":"ccfa20cf-1ad6-4c83-956b-f79f379e9672.jpg","size_bytes":1386361,"size_kb":1353.87,"size_mb":1.32,"mime_type":"image/jpeg"} 
+[2025-11-16 21:36:26] production.INFO: ReceiptScannerController::scan - Calling OCR endpoint {"company_id":2,"stored_path":"scanned-receipts/2/TAru9doRAnLPVvswenybAqaZLXduORckTtZMuIs2.jpg"} 
+[2025-11-16 21:36:41] production.INFO: ReceiptScannerController::scan - OCR completed {"company_id":2,"text_length":4340} 
+[2025-11-16 21:36:41] production.INFO: ReceiptScannerController::scan - Returning response {"response":{"image_url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/TAru9doRAnLPVvswenybAqaZLXduORckTtZMuIs2.jpg","stored_path":"scanned-receipts/2/TAru9doRAnLPVvswenybAqaZLXduORckTtZMuIs2.jpg","ocr_text":"ee
+ок АНА Сочи
+SPAN é КЕ / 6 Ќ ote
+40 4- te 5: WAL оо : | : “ обеси
+НА ња a es 5 СЕ | = = ni BY
+2 а Мм : но } ne Ки st Me ри у а: НАЈ ЊВ ~ : и | ~ ДЕ
+Se ye Нај AY ate 2 АА I UAT | Ој 5 | СМЕ ee os eR
+ae. Ars НС ја и oF Е воа US 4. oe ee “а ак ! Сон Fj КАЈ И :
+255 2 ќ ЕУ ah у а ae 5 oF | аи Tar dat anh 53) Me wed о ко У У
+а oan Е те Cains ens У: дра Ко Ge vee a 2 rs ) ба
+Е aes Ale ѓ nite 1 oe ња жа i „а oe у ~ : У Е, vy
+= ae afi Wea \" Mags У oa (А a oe at > ~ ~ WE) >
+ЈУД mie a ea pat era ЊЕ КЕ ae we Aes + 55 РА Ки | es
+ZZ 3 15 у a ee ae | Харе yer : па pa ee 22 = Кај oe 5: а 5 јер rhe Ју
+СА ee ay =“ Das: ee We 55 ; : A nae НО Бо ру: еее
+Геј: BAD atts а i РЕН ГА oe AR iE · “- eae fa Не eine 1 => 3 2 5
+fe За ATi | Ви е 8 Ни је О ve vee На ra МЕ: а
+ДА sey = а aay | Ена а На Ps we ae : БОК ЕУ б ge He uy a 2
+a : ој оа Ка a = у
+— 3 АН fi 10 ке ВО oH ay ane ie 5 КЕ “00 Ѓ Ноќ 5523,
+a5 ae sn 5 Села и ка КА ee Be Syn а
+А М до иа i reek Д у Bete? ue ЊУ КЕ sat за ee 152 пазе ihe NS =
+a Мо ek: 4 |: Мао See = Tee 55 22, raat ss a Fey Bees а
+Се Бе ae ТЕ vane i enn ee ee до иа en НЕ Sy. =
+ait ~ ЕУ } ee Бо за ! oe и oe et : +: mate | геј : Ко ee то
+= Sie au Зе Нај INE ey ae oe Са 754 па СО Ај = у
+ЈНА ХА 4 af ask RIE es rae 1 а ЕЕ Bay ye ae КОА Js: ње 2 2 6 Beet
+hi ae Nas enue: Pus Ни Send es 56 – ЈА: = бо а 5
+= “7 ae fee tert АА Pies aa icy ae te ae Со “aie ate Ie ќ 255 : ка |
+5 ча ee oe gloat Њу sy На АА, Кај i ee (Se He : 227 ian aes А us Gx 255 ;
+===> ЈЕ ИМ др 7 fae begin | ЈЕ fog a saad ets Gas ја sige ЕНА оо а
+522 То и oe ie 2 а oe а > =
+a) Ај ија 4 АЕ see BEE oy ба: ДЕЛ ќи Вуди mit Se oan а
+oe ЕС И Ј р ae bey nee ee fee ae | if a eae) a ре
+(а ја | 56 en 2 S ene a ay 1 SS
+aS at : a oo aa es >
+== ќи ЈЕ 8 H пи i a GS САН [2 Ала х ју
+==: | а a ate
+= noe a Bees He ee >=
+es > Wie Хај НО og Ni 5 На АЈ > о 255 fi = а 1 <4
+сој Ој fe oe co ЌЕ Са > ока ј
+ој а. eo ee Ye ја =
+4 Ко На КЕ: НЕ а је КИ; [о и re! а а ae eat | | 2
+у 5 4 С а ce 7 a ea ae
+a ee ee 225: фат 4 5 pr , ~ ЕН mast Oak ae ОТ >
+РОЈ Le ЕЕ Беј ја 2: At nil 4 У ОН oe les НИ ae
+2: ЗА ЈЕНИ oe oe Ne 5 ree, vw a (55 ae pine feats 3 Си
+Hip у и ey, oe rab Ки ќ у: 18 -: : а seats a seeks |: ae Va И > ќ
+ка ME or hati He а a's ДА = ки, 5 Ко Соја 7. oe с ЛЕ а
+7 АА __ <> у Be q Со ДО“ а НА re ке ae Dest FERS 5 > АА
+ѓ ма 1 ла Lie о у пе ј 1 ANG aS oS КА
+ки аа pee tas AS Ко и i ae ДА: Ке
+4 у МА bie. EN 1 а оо ГА до. i: ~ јо Ку ae МЕ НАТО У) ка fs =
+4 4] НЕ ee КАН У; ne: hook 5; Py nics i 4 НА at А кра, ais As АА Pats: he, а и >>
+a a (2 Гор | и (=>) пар iby Sait 4 2 АА eae re hes ќа ора 2 2:22 и
+25 9 Пе ae i -А У а ге: ка Bj 5 et = ШЕ | МА ae #44. Wes BON НА fee 32
+ЈА у 4 го if ЈК a ГР ei а “ ко rs ae ee oy ave nos => 4
+И МУ и У Or х 2B, 58 На а Ка АК, ДО с о. Ги ХАН oe СЕ ts eee zante €' =>
+Ка Ка НЕ ee ae и || ey ar ae а. ae | | eet ae Ss
+ee 7 рање ey 4] ae Ee nt ae ae VAs Sie НА oo ed ~ ј
+UA \"ЈЕ у Ди ihe as = МЕ ЌЕ :
+ко Ко > YU Ќ ШО: Та Eee Ќе 49 Ру јо со Sy
+ae Pa Нај Руј 556, ада 0 ка е | iP ра hag
+te > ee es Dh, ат 4 dae ћ ор 56 “at 18. a 35 о; |
+ја we oe i (У ~ ~ 4 2 ty и та до i) As ae a ee es
+fan Oe - КЕ => У Е Ц ЕНА > 38 И ЕН 7 и Со а ти, LE га oa Poe =
+ape eg “ До | H то Bes Bes (И Н he, a ae | АА
+wee Кр Боји ЊЕ sf иа Кон ae ќа arabe 55 Те + Wye ee Це aay oo, 4 СИ Аз
+ни ae a Me oe ae ie ae 8 oe ae 2,
+= БЕЈ = 3: Са i ВАН one Еј оа 4 Re 5 sts x x 2: rf 53 fay ќ а Н
+133 ~ 15 oe Ка КИ КА ne ЧА 2 ћ, ifr ee Ва ee ои ја
+vhs eee Кин ШЕ НЕ Ва Eo ~ А ee nA =
+At} нии НЕ oo ae
+У ЕН ЈЕ ЗЛИ LE af ae ue 4
+a >:
+с 3
+NS"},"image_url_length":110,"ocr_text_length":4340} 
+[2025-11-16 21:36:41] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:36:41] production.WARNING: Slow operation detected {"operation":"req_691a43da4c222","execution_time_ms":15423.21,"memory_used_bytes":6291456,"memory_used_mb":6.0} 
+[2025-11-16 21:36:41] production.WARNING: Slow request detected {"operation":"req_691a43da4c222","execution_time_ms":15423.21,"memory_used_bytes":6291456,"memory_used_mb":6.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 21:36:42] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/TAru9doRAnLPVvswenybAqaZLXduORckTtZMuIs2.jpg","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:36:42] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:36:47] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:36:47] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:36:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 

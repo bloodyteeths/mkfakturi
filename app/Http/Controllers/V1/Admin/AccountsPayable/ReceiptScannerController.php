@@ -75,12 +75,16 @@ class ReceiptScannerController extends Controller
                     'image_url' => $imageUrl,
                     'stored_path' => $storedPath,
                     'ocr_text' => $ocrResult['text'] ?? '',
+                    'hocr' => $ocrResult['hocr'] ?? null, // Include hOCR for selectable text overlay
+                    'image_width' => $ocrResult['image_width'] ?? null,
+                    'image_height' => $ocrResult['image_height'] ?? null,
                 ];
 
                 \Log::info('ReceiptScannerController::scan - Returning response', [
                     'response' => $responsePayload,
                     'image_url_length' => strlen($imageUrl),
                     'ocr_text_length' => strlen($ocrResult['text'] ?? ''),
+                    'has_hocr' => isset($ocrResult['hocr']),
                 ]);
 
                 return response()->json($responsePayload, 200);

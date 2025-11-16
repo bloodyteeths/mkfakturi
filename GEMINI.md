@@ -52,3 +52,63 @@ Example ROADMAP.md Interaction:
 **After ` @developer` completes Task 1:**
 - [x] **Task 1: Implement User Auth** - * @AGENT_DEVELOPER_ROADMAP.md
   - *Audit Note: Auth module created and tested. No regressions detected in adjacent modules. Ready for @auditor's full review.*
+
+### Codebase Summary
+
+*   **Primary Purpose & Tech Stack:**
+    *   **Purpose:** A comprehensive, multi-tenant invoicing and accounting application designed for small to medium-sized businesses. It includes features for invoicing, expense tracking, payments, customer management, and advanced functionalities like accounts payable automation, e-invoicing, and financial reporting.
+    *   **Tech Stack:**
+        *   **Backend:** Laravel (PHP)
+        *   **Frontend:** Vue.js (v3) with Vite
+        *   **Database:** MySQL/PostgreSQL
+        *   **Key Libraries:**
+            *   `laravel/cashier-paddle` for subscription billing.
+            *   `barryvdh/laravel-dompdf` for PDF generation.
+            *   `maatwebsite/excel` for CSV/XLSX imports.
+            *   `spatie/laravel-medialibrary` for file and media management.
+            *   `spatie/laravel-backup` for creating backups.
+            *   `silber/bouncer` for role-based access control.
+            *   `ekmungai/eloquent-ifrs` for IFRS-compliant accounting.
+
+*   **Directory Structure:**
+    *   `app/`: Contains the core application logic, including Models, Controllers, Services, Jobs, and more.
+        *   `app/Http/Controllers/`: Handles incoming HTTP requests.
+        *   `app/Models/`: Defines the application's data models (Eloquent ORM).
+        *   `app/Services/`: Contains business logic services.
+        *   `app/Jobs/`: Defines queued jobs for background processing.
+    *   `config/`: Stores all application configuration files.
+    *   `database/`: Contains database migrations, seeders, and factories.
+    *   `resources/`: Holds frontend assets, including Vue components (`scripts`), SASS files, and Blade views (`views`).
+    *   `routes/`: Defines all application routes (`web.php` for web, `api.php` for API).
+    *   `tests/`: Contains all automated tests (Feature and Unit).
+    *   `Modules/`: A directory for modular components, suggesting a modular architecture.
+
+*   **Key Data Models & Relationships:**
+    *   `User`: Represents an application user. A user can belong to multiple `Company` instances.
+    *   `Company`: The central model for multi-tenancy. Each `Company` has its own set of customers, invoices, expenses, etc. It has a `Billable` trait for subscriptions.
+    *   `Customer`: Belongs to a `Company` and has many `Invoices` and `Estimates`.
+    *   `Invoice`: The core of the invoicing system. It belongs to a `Company` and a `Customer`, and has many `InvoiceItem` records.
+    *   `Bill`: Represents a bill from a supplier (Accounts Payable). It belongs to a `Company` and a `Supplier`.
+    *   `Supplier`: A vendor or supplier to the company.
+    *   `Payment`: Records a payment made against an `Invoice`.
+    *   `Expense`: Tracks company expenses.
+    *   `Item`: A product or service that can be added to invoices and estimates.
+
+*   **Core Application Logic ("Happy Path"):**
+    1.  A `User` logs in and selects a `Company` to work with.
+    2.  The user creates a `Customer`.
+    3.  The user creates an `Invoice`, adding `Item`s to it. The invoice is assigned to the `Customer`.
+    4.  The invoice is sent to the customer via email.
+    5.  The customer views the invoice and makes a `Payment` (e.g., via Paddle or another payment gateway).
+    6.  The application records the `Payment`, and the `Invoice` status is updated to "Paid".
+    7.  The user can also create `Expense` records to track costs.
+    8.  The system provides various reports, such as profit & loss, sales, and tax summaries.
+
+*   **Major Dependencies & External APIs:**
+    *   **Paddle:** Used for subscription management and payment processing.
+    *   **CPAY:** Another payment gateway integration.
+    *   **Exchange Rate Providers:** The application integrates with external services to fetch currency exchange rates.
+    *   **Gotenberg:** Used for converting HTML to PDF for invoices and other documents.
+    *   **Prometheus:** For monitoring and metrics.
+    *   **Spatie Packages:** `laravel-backup`, `laravel-medialibrary` are key dependencies for core functionalities.
+    *   **invoice2data-service**: A Python-based microservice for parsing invoices from PDF files.

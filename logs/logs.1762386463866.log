@@ -1,117 +1,120 @@
-[2025-11-13 12:33:03] production.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'where clause' (Connection: mysql, SQL: update `users` set `company_id` = 1 where `role` = super admin and `company_id` is null) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'where clause' (Connection: mysql, SQL: update `users` set `company_id` = 1 where `role` = super admin and `company_id` is null) at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
-[stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('update `users` ...', Array, Object(Closure))
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(581): Illuminate\\Database\\Connection->run('update `users` ...', Array, Object(Closure))
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(533): Illuminate\\Database\\Connection->affectingStatement('update `users` ...', Array)
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3843): Illuminate\\Database\\Connection->update('update `users` ...', Array)
-#4 /var/www/html/database/migrations/2025_11_13_000000_assign_super_admin_to_company.php(20): Illuminate\\Database\\Query\\Builder->update(Object(Illuminate\\Support\\Collection))
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
-#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_11_13_0000...', Object(Closure))
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_11_13_0000...', Object(Closure))
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 25, false)
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
-#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
-#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
-#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
-#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
-#24 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#26 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#27 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#28 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#31 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#32 {main}
-
-[previous exception] [object] (PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'where clause' at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:589)
-[stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(589): PDO->prepare('update `users` ...')
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('update `users` ...', Array)
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('update `users` ...', Array, Object(Closure))
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(581): Illuminate\\Database\\Connection->run('update `users` ...', Array, Object(Closure))
-#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(533): Illuminate\\Database\\Connection->affectingStatement('update `users` ...', Array)
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3843): Illuminate\\Database\\Connection->update('update `users` ...', Array)
-#6 /var/www/html/database/migrations/2025_11_13_000000_assign_super_admin_to_company.php(20): Illuminate\\Database\\Query\\Builder->update(Object(Illuminate\\Support\\Collection))
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_11_13_0000...', Object(Closure))
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_11_13_0000...', Object(Closure))
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 25, false)
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
-#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
-#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
-#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
-#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
-#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
-#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
-#26 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#28 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#29 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#30 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#33 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#34 {main}
-"} 
-[2025-11-13 12:40:28] production.WARNING: Slow operation detected {"operation":"req_6915d1bbd0fb9","execution_time_ms":305.71,"memory_used_bytes":0,"memory_used_mb":0.0} 
-[2025-11-13 12:40:28] production.WARNING: Slow request detected {"operation":"req_6915d1bbd0fb9","execution_time_ms":305.71,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://www.facturino.mk/login","route":null,"user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":302} 
-[2025-11-13 12:40:28] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:29] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:29] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:29] production.WARNING: Slow operation detected {"operation":"req_6915d1bc74ceb","execution_time_ms":670.72,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
-[2025-11-13 12:40:29] production.WARNING: Slow request detected {"operation":"req_6915d1bc74ceb","execution_time_ms":670.72,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-13 12:40:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:36] production.WARNING: Slow operation detected {"operation":"req_6915d1c44dcad","execution_time_ms":502.98,"memory_used_bytes":0,"memory_used_mb":0.0} 
-[2025-11-13 12:40:36] production.WARNING: Slow request detected {"operation":"req_6915d1c44dcad","execution_time_ms":502.98,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://www.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-13 12:40:36] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 12:40:38] production.WARNING: Slow operation detected {"operation":"req_6915d1c44e217","execution_time_ms":2609.96,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
-[2025-11-13 12:40:38] production.WARNING: Slow request detected {"operation":"req_6915d1c44e217","execution_time_ms":2609.96,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://www.facturino.mk/api/v1/invoices","route":"invoices.index","user_id":2,"company_id":"2","ip":"46.217.85.1","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-13 12:41:02] production.INFO: [ImportController] Upload started {"has_file":true,"type":"universal_migration","user_id":2} 
-[2025-11-13 12:41:02] production.INFO: [ImportController] User and company loaded {"user_id":2,"company_id":"2"} 
-[2025-11-13 12:41:02] production.INFO: [ImportController] Storing file {"filename":"604c4e87-c2fb-4795-a617-5ffa6b8a7664.csv","original_name":"01_happy_path_customers.csv","size":523} 
-[2025-11-13 12:41:02] production.INFO: [ImportController] File stored successfully {"path":"imports/2/604c4e87-c2fb-4795-a617-5ffa6b8a7664.csv"} 
-[2025-11-13 12:41:02] production.INFO: [ImportController] ImportJob created {"id":7} 
-[2025-11-13 12:41:02] production.INFO: [ImportController] Upload completed successfully {"import_id":7,"response_data":{"id":7,"name":"Import from 01_happy_path_customers.csv","type":"complete","status":"pending","source_system":null,"file_type":"csv","file_info":{"size":523,"mime_type":"text/csv","original_name":"01_happy_path_customers.csv"},"file_path":"imports/2/604c4e87-c2fb-4795-a617-5ffa6b8a7664.csv","mapping_config":null,"validation_rules":null,"total_records":0,"processed_records":0,"successful_records":0,"failed_records":0,"started_at":null,"completed_at":null,"error_message":null,"error_details":null,"summary":null,"company_id":2,"creator_id":2,"created_at":"2025-11-13T12:41:02.000000Z","updated_at":"2025-11-13T12:41:02.000000Z","formattedCreatedAt":"13.11.2025","formattedStartedAt":null,"formattedCompletedAt":null,"progressPercentage":0,"duration":null,"isInProgress":false,"canRetry":false}} 
-[2025-11-13 12:41:04] production.INFO: [ImportController] show() - detecting fields {"import_id":"7","file_path":"imports/2/604c4e87-c2fb-4795-a617-5ffa6b8a7664.csv"} 
-[2025-11-13 12:41:04] production.INFO: [ImportController] File path constructed {"file_path":"/var/www/html/storage/app/imports/2/604c4e87-c2fb-4795-a617-5ffa6b8a7664.csv","exists":true} 
-[2025-11-13 12:41:04] production.INFO: [ImportController] Fields detected successfully {"count":7,"field_names":["name","email","phone","address","vat_number","website","currency"]} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-16 21:08:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-16 21:08:51] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 21:08:51] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 21:08:58] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-16 21:08:58] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-16 21:25:33] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:25:33] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_company_header":true,"company_header":"2"} 
+[2025-11-16 21:25:33] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 21:25:33] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 21:25:33] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-16 21:25:33] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:25:33] production.WARNING: Slow operation detected {"operation":"req_691a414d1528c","execution_time_ms":691.71,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-16 21:25:33] production.WARNING: Slow request detected {"operation":"req_691a414d1528c","execution_time_ms":691.71,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 21:25:34] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:25:34] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:25:40] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/scan","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:25:40] production.INFO: ReceiptScannerController::scan - Starting {"user_id":2,"company_id":"2","has_file":true,"file_size":1386361,"file_mime":"image/jpeg"} 
+[2025-11-16 21:25:40] production.INFO: ReceiptScannerController::scan - File details {"original_name":"ccfa20cf-1ad6-4c83-956b-f79f379e9672.jpg","size_bytes":1386361,"size_kb":1353.87,"size_mb":1.32,"mime_type":"image/jpeg"} 
+[2025-11-16 21:25:40] production.INFO: ReceiptScannerController::scan - Calling OCR endpoint {"company_id":2,"stored_path":"scanned-receipts/2/fNklfaxxUdWEcuP8gNIoSOAJ2BAkZuYQ8OZIh3dz.jpg"} 
+[2025-11-16 21:25:55] production.INFO: ReceiptScannerController::scan - OCR completed {"company_id":2,"text_length":4340} 
+[2025-11-16 21:25:55] production.INFO: ReceiptScannerController::scan - Returning response {"response":{"image_url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/fNklfaxxUdWEcuP8gNIoSOAJ2BAkZuYQ8OZIh3dz.jpg","stored_path":"scanned-receipts/2/fNklfaxxUdWEcuP8gNIoSOAJ2BAkZuYQ8OZIh3dz.jpg","ocr_text":"ee
+ок АНА Сочи
+SPAN é КЕ / 6 Ќ ote
+40 4- te 5: WAL оо : | : “ обеси
+НА ња a es 5 СЕ | = = ni BY
+2 а Мм : но } ne Ки st Me ри у а: НАЈ ЊВ ~ : и | ~ ДЕ
+Se ye Нај AY ate 2 АА I UAT | Ој 5 | СМЕ ee os eR
+ae. Ars НС ја и oF Е воа US 4. oe ee “а ак ! Сон Fj КАЈ И :
+255 2 ќ ЕУ ah у а ae 5 oF | аи Tar dat anh 53) Me wed о ко У У
+а oan Е те Cains ens У: дра Ко Ge vee a 2 rs ) ба
+Е aes Ale ѓ nite 1 oe ња жа i „а oe у ~ : У Е, vy
+= ae afi Wea \" Mags У oa (А a oe at > ~ ~ WE) >
+ЈУД mie a ea pat era ЊЕ КЕ ae we Aes + 55 РА Ки | es
+ZZ 3 15 у a ee ae | Харе yer : па pa ee 22 = Кај oe 5: а 5 јер rhe Ју
+СА ee ay =“ Das: ee We 55 ; : A nae НО Бо ру: еее
+Геј: BAD atts а i РЕН ГА oe AR iE · “- eae fa Не eine 1 => 3 2 5
+fe За ATi | Ви е 8 Ни је О ve vee На ra МЕ: а
+ДА sey = а aay | Ена а На Ps we ae : БОК ЕУ б ge He uy a 2
+a : ој оа Ка a = у
+— 3 АН fi 10 ке ВО oH ay ane ie 5 КЕ “00 Ѓ Ноќ 5523,
+a5 ae sn 5 Села и ка КА ee Be Syn а
+А М до иа i reek Д у Bete? ue ЊУ КЕ sat за ee 152 пазе ihe NS =
+a Мо ek: 4 |: Мао See = Tee 55 22, raat ss a Fey Bees а
+Се Бе ae ТЕ vane i enn ee ee до иа en НЕ Sy. =
+ait ~ ЕУ } ee Бо за ! oe и oe et : +: mate | геј : Ко ee то
+= Sie au Зе Нај INE ey ae oe Са 754 па СО Ај = у
+ЈНА ХА 4 af ask RIE es rae 1 а ЕЕ Bay ye ae КОА Js: ње 2 2 6 Beet
+hi ae Nas enue: Pus Ни Send es 56 – ЈА: = бо а 5
+= “7 ae fee tert АА Pies aa icy ae te ae Со “aie ate Ie ќ 255 : ка |
+5 ча ee oe gloat Њу sy На АА, Кај i ee (Se He : 227 ian aes А us Gx 255 ;
+===> ЈЕ ИМ др 7 fae begin | ЈЕ fog a saad ets Gas ја sige ЕНА оо а
+522 То и oe ie 2 а oe а > =
+a) Ај ија 4 АЕ see BEE oy ба: ДЕЛ ќи Вуди mit Se oan а
+oe ЕС И Ј р ae bey nee ee fee ae | if a eae) a ре
+(а ја | 56 en 2 S ene a ay 1 SS
+aS at : a oo aa es >
+== ќи ЈЕ 8 H пи i a GS САН [2 Ала х ју
+==: | а a ate
+= noe a Bees He ee >=
+es > Wie Хај НО og Ni 5 На АЈ > о 255 fi = а 1 <4
+сој Ој fe oe co ЌЕ Са > ока ј
+ој а. eo ee Ye ја =
+4 Ко На КЕ: НЕ а је КИ; [о и re! а а ae eat | | 2
+у 5 4 С а ce 7 a ea ae
+a ee ee 225: фат 4 5 pr , ~ ЕН mast Oak ae ОТ >
+РОЈ Le ЕЕ Беј ја 2: At nil 4 У ОН oe les НИ ae
+2: ЗА ЈЕНИ oe oe Ne 5 ree, vw a (55 ae pine feats 3 Си
+Hip у и ey, oe rab Ки ќ у: 18 -: : а seats a seeks |: ae Va И > ќ
+ка ME or hati He а a's ДА = ки, 5 Ко Соја 7. oe с ЛЕ а
+7 АА __ <> у Be q Со ДО“ а НА re ке ae Dest FERS 5 > АА
+ѓ ма 1 ла Lie о у пе ј 1 ANG aS oS КА
+ки аа pee tas AS Ко и i ae ДА: Ке
+4 у МА bie. EN 1 а оо ГА до. i: ~ јо Ку ae МЕ НАТО У) ка fs =
+4 4] НЕ ee КАН У; ne: hook 5; Py nics i 4 НА at А кра, ais As АА Pats: he, а и >>
+a a (2 Гор | и (=>) пар iby Sait 4 2 АА eae re hes ќа ора 2 2:22 и
+25 9 Пе ae i -А У а ге: ка Bj 5 et = ШЕ | МА ae #44. Wes BON НА fee 32
+ЈА у 4 го if ЈК a ГР ei а “ ко rs ae ee oy ave nos => 4
+И МУ и У Or х 2B, 58 На а Ка АК, ДО с о. Ги ХАН oe СЕ ts eee zante €' =>
+Ка Ка НЕ ee ae и || ey ar ae а. ae | | eet ae Ss
+ee 7 рање ey 4] ae Ee nt ae ae VAs Sie НА oo ed ~ ј
+UA \"ЈЕ у Ди ihe as = МЕ ЌЕ :
+ко Ко > YU Ќ ШО: Та Eee Ќе 49 Ру јо со Sy
+ae Pa Нај Руј 556, ада 0 ка е | iP ра hag
+te > ee es Dh, ат 4 dae ћ ор 56 “at 18. a 35 о; |
+ја we oe i (У ~ ~ 4 2 ty и та до i) As ae a ee es
+fan Oe - КЕ => У Е Ц ЕНА > 38 И ЕН 7 и Со а ти, LE га oa Poe =
+ape eg “ До | H то Bes Bes (И Н he, a ae | АА
+wee Кр Боји ЊЕ sf иа Кон ae ќа arabe 55 Те + Wye ee Це aay oo, 4 СИ Аз
+ни ae a Me oe ae ie ae 8 oe ae 2,
+= БЕЈ = 3: Са i ВАН one Еј оа 4 Re 5 sts x x 2: rf 53 fay ќ а Н
+133 ~ 15 oe Ка КИ КА ne ЧА 2 ћ, ifr ee Ва ee ои ја
+vhs eee Кин ШЕ НЕ Ва Eo ~ А ee nA =
+At} нии НЕ oo ae
+У ЕН ЈЕ ЗЛИ LE af ae ue 4
+a >:
+с 3
+NS"},"image_url_length":110,"ocr_text_length":4340} 
+[2025-11-16 21:25:55] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:25:55] production.WARNING: Slow operation detected {"operation":"req_691a4154abc65","execution_time_ms":15159.26,"memory_used_bytes":6291456,"memory_used_mb":6.0} 
+[2025-11-16 21:25:55] production.WARNING: Slow request detected {"operation":"req_691a4154abc65","execution_time_ms":15159.26,"memory_used_bytes":6291456,"memory_used_mb":6.0,"method":"POST","url":"https://app.facturino.mk/api/v1/receipts/scan","route":null,"user_id":2,"company_id":"2","ip":"46.217.83.17","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-16 21:25:56] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/receipts/image/scanned-receipts/2/fNklfaxxUdWEcuP8gNIoSOAJ2BAkZuYQ8OZIh3dz.jpg","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
+[2025-11-16 21:25:56] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-16 21:26:35] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"W8tRnbQpWrtAcvBCeeFahBwYcJjwXUewo6eY7yFo","has_session_cookie":true} 
