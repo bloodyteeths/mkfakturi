@@ -26,7 +26,7 @@ export const useAuthStore = (useWindow = false) => {
           axios.get(window.location.origin + '/sanctum/csrf-cookie').then((response) => {
             if (response) {
               axios
-                .post('/api/v1/auth/login', data)
+                .post('/auth/login', data)
                 .then((response) => {
                   resolve(response)
 
