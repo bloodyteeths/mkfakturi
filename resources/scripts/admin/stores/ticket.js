@@ -97,7 +97,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .post('/api/v1/support/tickets', data)
+          .post('/support/tickets', data)
           .then((response) => {
             this.tickets.unshift(response.data.data)
             this.ticketTotalCount++
