@@ -134,7 +134,9 @@
       "the_list_is_empty": "The list is empty",
       "no_results_found": "No results found"
     },
-    "copy_to_clipboard": "Copy to Clipboard"
+    "copy_to_clipboard": "Copy to Clipboard",
+    "created_at": "Created At",
+    "characters": "characters"
   },
   "dashboard": {
     "select_year": "Select year",

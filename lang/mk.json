@@ -139,7 +139,9 @@
         "next_navigation": "Следно",
         "close_calendar": "Затвори календар",
         "select_date": "Избери датум",
-        "days": "Денови"
+        "days": "Денови",
+        "created_at": "Креирано на",
+        "characters": "знаци"
     },
     "dashboard": {
         "select_year": "Избери година",

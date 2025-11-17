@@ -438,10 +438,12 @@ const getPriorityBadgeClass = (priority) => {
 }
 
 const getStatusLabel = (status) => {
+  if (!status) return t('tickets.open') // Default to 'open' if no status
   return t(`tickets.${status}`)
 }
 
 const getPriorityLabel = (priority) => {
+  if (!priority) return t('tickets.normal') // Default to 'normal' if no priority
   return t(`tickets.${priority}`)
 }
 

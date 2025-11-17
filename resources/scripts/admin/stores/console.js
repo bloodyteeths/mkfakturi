@@ -68,8 +68,8 @@ export const useConsoleStore = defineStore('console', {
       this.error = null
 
       try {
-        const response = await axios.get('/api/v1/console/companies')
-        
+        const response = await axios.get('/console/companies')
+
         this.partner = response.data.partner
         this.companies = response.data.companies
         
@@ -96,7 +96,7 @@ export const useConsoleStore = defineStore('console', {
       this.error = null
 
       try {
-        const response = await axios.post('/api/v1/console/switch', {
+        const response = await axios.post('/console/switch', {
           company_id: companyId
         })
 
