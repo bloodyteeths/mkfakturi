@@ -38,7 +38,7 @@ class PartnerUserSeeder extends Seeder
         $company = Company::first();
 
         if ($company) {
-            $user->companies()->attach($company->id, ['is_owner' => false]);
+            $user->companies()->attach($company->id);
             $this->command->info("✓ Partner attached to company: {$company->name}");
         } else {
             $this->command->warn('⚠ No company found to attach partner to');
