@@ -22,7 +22,8 @@ export const useAuthStore = (useWindow = false) => {
     actions: {
       login(data) {
         return new Promise((resolve, reject) => {
-          axios.get('/sanctum/csrf-cookie').then((response) => {
+          // Use absolute URL to bypass axios baseURL (/api/v1)
+          axios.get(window.location.origin + '/sanctum/csrf-cookie').then((response) => {
             if (response) {
               axios
                 .post('/api/v1/auth/login', data)

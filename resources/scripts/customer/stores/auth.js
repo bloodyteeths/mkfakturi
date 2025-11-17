@@ -20,7 +20,8 @@ export const useAuthStore = defineStore({
     login(data) {
       const notificationStore = useNotificationStore(true)
       return new Promise((resolve, reject) => {
-        axios.get('/sanctum/csrf-cookie').then((response) => {
+        // Use absolute URL to bypass axios baseURL (/api/v1)
+        axios.get(window.location.origin + '/sanctum/csrf-cookie').then((response) => {
           if (response) {
             axios
               .post(`/${data.company}/customer/login`, data)
