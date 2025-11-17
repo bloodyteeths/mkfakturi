@@ -50,7 +50,7 @@ export const useGlobalStore = (useWindow = false) => {
       bootstrap() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/bootstrap')
+            .get('/bootstrap')
             .then((response) => {
               const companyStore = useCompanyStore()
               const userStore = useUserStore()

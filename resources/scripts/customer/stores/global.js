@@ -23,7 +23,7 @@ export const useGlobalStore = defineStore({
       const userStore = useUserStore()
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${data}/customer/bootstrap`)
+          .get(`/${data}/customer/bootstrap`)
           .then((response) => {
             this.currentUser = response.data.data
             this.mainMenu = response.data.meta.menu
