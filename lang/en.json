@@ -172,7 +172,8 @@
       "amount_due": "Amount Due",
       "actions": "Actions",
       "view_all": "View All"
-    }
+    },
+    "no_overdue_invoices": "No overdue invoices"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Recent Commissions",

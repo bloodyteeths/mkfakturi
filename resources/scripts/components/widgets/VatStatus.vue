@@ -165,7 +165,7 @@ export default {
         isLoading.value = true
         error.value = null
 
-        const response = await axios.get(`/api/v1/tax/vat-status/${currentCompany.value.id}`)
+        const response = await axios.get(`/tax/vat-status/${currentCompany.value.id}`)
         
         if (response.data && response.data.data) {
           vatStatus.value = response.data.data.status

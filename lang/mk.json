@@ -185,7 +185,8 @@
         "view_reports_desc": "Прегледај финансиски извештаи и аналитика",
         "overdue_invoices": "Доцнети Фактури",
         "total_overdue": "Вкупно Доцнети",
-        "view_all_overdue": "Прикажи Сите Доцнети"
+        "view_all_overdue": "Прикажи Сите Доцнети",
+        "no_overdue_invoices": "Нема доцнети фактури"
     },
     "partner_dashboard": {
         "recent_commissions_title": "Најнови Провизии",
