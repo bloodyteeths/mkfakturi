@@ -1,134 +1,177 @@
-2025-11-17T13:22:25.112815240Z [inf]  scheduling build on Metal builder "builder-zwnsbu"
-2025-11-17T13:22:44.961325630Z [inf]  [snapshot] received sha256:a6a9dcc24aa57eb0846032c8d43cf53278b05988fa47d36f2545f71089b5713c md5:f6508906ee0d15696dead4930aa7e198
-2025-11-17T13:22:44.961483567Z [inf]  [snapshot] receiving snapshot, complete 108 MB [took 23.078836765s]
-2025-11-17T13:22:45.703714084Z [inf]  [snapshot] analyzing snapshot, complete 108 MB [took 734.10072ms]
-2025-11-17T13:22:47.927598036Z [inf]  [snapshot] uploading snapshot, complete 108 MB [took 2.224051783s]
-2025-11-17T13:22:58.216511103Z [inf]  fetched snapshot sha256:a6a9dcc24aa57eb0846032c8d43cf53278b05988fa47d36f2545f71089b5713c (108 MB bytes)
-2025-11-17T13:22:58.216548089Z [inf]  [snapshot] fetching snapshot, complete 108 MB [took 1.597003504s]
-2025-11-17T13:22:59.589372529Z [inf]  scheduling build on Metal builder "builder-zwnsbu"
-2025-11-17T13:23:00.015021376Z [inf]  [snapshot] unpacking archive, complete 146 MB [took 1.111183943s]
-2025-11-17T13:23:02.053881619Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-17T13:23:02.054048539Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-17T13:23:02.054829791Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-17T13:23:02.069347153Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
-2025-11-17T13:23:02.074511642Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
-2025-11-17T13:23:02.074688126Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
-2025-11-17T13:23:02.074690931Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
-2025-11-17T13:23:02.754954654Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
-2025-11-17T13:23:02.767358124Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
-2025-11-17T13:23:02.771238536Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
-2025-11-17T13:23:02.772264936Z [inf]  [internal] load .dockerignore
-2025-11-17T13:23:02.772282733Z [inf]  [internal] load .dockerignore
-2025-11-17T13:23:02.773033639Z [inf]  [internal] load .dockerignore
-2025-11-17T13:23:02.784805882Z [inf]  [internal] load .dockerignore
-2025-11-17T13:23:02.793100768Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
-2025-11-17T13:23:02.793103432Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-2025-11-17T13:23:02.793104143Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-17T13:23:02.793104484Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-17T13:23:02.793104794Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
-2025-11-17T13:23:02.793105395Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-17T13:23:02.793196902Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
-2025-11-17T13:23:02.793207058Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
-2025-11-17T13:23:02.793207608Z [inf]  [composer-deps 1/5] COPY composer.json composer.lock ./
-2025-11-17T13:23:02.793208039Z [inf]  [internal] load build context
-2025-11-17T13:23:02.793208460Z [inf]  [frontend-builder  4/10] COPY package*.json ./
-2025-11-17T13:23:02.793208810Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-17T13:23:02.793209121Z [inf]  [frontend-builder  3/10] WORKDIR /app
-2025-11-17T13:23:02.793209431Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
-2025-11-17T13:23:02.793209962Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
-2025-11-17T13:23:02.793210433Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
-2025-11-17T13:23:02.793210763Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-2025-11-17T13:23:02.793211074Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
-2025-11-17T13:23:02.793211424Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-17T13:23:02.793211745Z [inf]  [production  7/16] WORKDIR /var/www/html
-2025-11-17T13:23:02.793212095Z [inf]  [composer-deps 3/5] COPY . .
-2025-11-17T13:23:02.793212406Z [inf]  [php-base 5/5] WORKDIR /var/www/html
-2025-11-17T13:23:02.793212826Z [inf]  [composer-deps 2/5] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
-2025-11-17T13:23:02.793385405Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-2025-11-17T13:23:02.793397964Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
-2025-11-17T13:23:02.793398635Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
-2025-11-17T13:23:02.793399106Z [inf]  [production 11/16] RUN cp .env.example .env
-2025-11-17T13:23:02.793399456Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache/data     storage/framework/sessions     storage/framework/views     storage/framework/testing     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
-2025-11-17T13:23:02.793399897Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
-2025-11-17T13:23:02.793400217Z [inf]  [frontend-builder 10/10] RUN npm run build
-2025-11-17T13:23:02.793400518Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
-2025-11-17T13:23:02.793400889Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
-2025-11-17T13:23:02.793401199Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
-2025-11-17T13:23:02.793401509Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
-2025-11-17T13:23:02.793402000Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
-2025-11-17T13:23:02.793402431Z [inf]  [frontend-builder  5/10] RUN if [ -f package-lock.json ]; then         echo "package-lock.json detected -> running npm ci";         npm ci --prefer-offline --no-audit;     else         echo "package-lock.json missing -> running npm install";         npm install --prefer-offline --no-audit;     fi
-2025-11-17T13:23:02.793402861Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
-2025-11-17T13:23:02.793458925Z [inf]  [internal] load build context
-2025-11-17T13:23:02.794755902Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-17T13:23:02.794760378Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-17T13:23:02.794934079Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-17T13:23:02.816160657Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
-2025-11-17T13:23:02.817854539Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
-2025-11-17T13:23:02.818274028Z [inf]  [internal] load build context
-2025-11-17T13:23:02.818383172Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
-2025-11-17T13:23:03.392371420Z [inf]  [internal] load build context
-2025-11-17T13:23:03.637205197Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
-2025-11-17T13:23:03.637207721Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-2025-11-17T13:23:03.637208722Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
-2025-11-17T13:23:03.637209013Z [inf]  [php-base 5/5] WORKDIR /var/www/html
-2025-11-17T13:23:03.637209453Z [inf]  [composer-deps 1/5] COPY composer.json composer.lock ./
-2025-11-17T13:23:03.637210114Z [inf]  [composer-deps 2/5] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
-2025-11-17T13:23:03.637898768Z [inf]  [composer-deps 3/5] COPY . .
-2025-11-17T13:23:03.637903995Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
-2025-11-17T13:23:03.637904937Z [inf]  [frontend-builder  3/10] WORKDIR /app
-2025-11-17T13:23:03.637905227Z [inf]  [frontend-builder  4/10] COPY package*.json ./
-2025-11-17T13:23:03.637905618Z [inf]  [frontend-builder  5/10] RUN if [ -f package-lock.json ]; then         echo "package-lock.json detected -> running npm ci";         npm ci --prefer-offline --no-audit;     else         echo "package-lock.json missing -> running npm install";         npm install --prefer-offline --no-audit;     fi
-2025-11-17T13:23:03.637906119Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
-2025-11-17T13:23:03.637911276Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
-2025-11-17T13:23:03.638331797Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
-2025-11-17T13:23:04.423072767Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
-2025-11-17T13:23:04.425557866Z [inf]  [composer-deps 3/5] COPY . .
-2025-11-17T13:23:04.428059289Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
-2025-11-17T13:23:04.431717658Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
-2025-11-17T13:23:04.577175001Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
-2025-11-17T13:23:04.580193040Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
-2025-11-17T13:23:04.663177349Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
-2025-11-17T13:23:04.666463820Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
-2025-11-17T13:23:04.670482639Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
-2025-11-17T13:23:04.674181529Z [inf]  [frontend-builder 10/10] RUN npm run build
-2025-11-17T13:23:05.056381299Z [inf]  Composer plugins have been disabled for safety in this non-interactive session.
-Set COMPOSER_ALLOW_SUPERUSER=1 if you want to allow plugins to run as root/super user.
-Do not run Composer as root/super user! See https://getcomposer.org/root for details
-
-2025-11-17T13:23:05.188943665Z [inf]  Generating optimized autoload files
-
-2025-11-17T13:23:05.299816538Z [inf]  
-> build
-> vite build
-
-
-2025-11-17T13:23:05.740476271Z [inf]  vite v6.4.1 building for production...
-
-2025-11-17T13:23:06.190401095Z [inf]  transforming...
-
-2025-11-17T13:23:07.765476808Z [inf]  ✓ 75 modules transformed.
-
-2025-11-17T13:23:07.770527787Z [inf]  ✗ Build failed in 2.00s
-
-2025-11-17T13:23:07.770549119Z [inf]  error during build:
-[vite:json] [plugin vite:json] lang/mk.json (2063:7): Failed to parse JSON file, invalid JSON syntax found at position 100596
-file: /app/lang/mk.json:2063:7
-
-2061:         "create_new_ticket": "Креирај нов билет"
-2062:     }
-2063:         "progress": "Напредок",
-             ^
-2064:         "overall_progress": "Вкупен напредок",
-2065:         "upload_file": "Прикачи фајл",
-
-    at getRollupError (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
-    at error (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
-    at Object.error (file:///app/node_modules/rollup/dist/es/shared/node-entry.js:22115:20)
-    at Object.error (file:///app/node_modules/rollup/dist/es/shared/node-entry.js:21172:42)
-    at Object.handler (file:///app/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:12175:16)
-    at Object.handler (file:///app/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46537:15)
-    at file:///app/node_modules/rollup/dist/es/shared/node-entry.js:22437:40
-
-2025-11-17T13:23:07.866208776Z [err]  [frontend-builder 10/10] RUN npm run build
-2025-11-17T13:23:07.936772650Z [err]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
-2025-11-17T13:23:07.961821723Z [err]  Build Failed: bc.Build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-17 22:17:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-17 22:17:11] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-17 22:17:11] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-17 22:17:18] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-17 22:17:18] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-17 22:18:20] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:20] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_company_header":true,"company_header":"2"} 
+[2025-11-17 22:18:20] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:21] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:21] production.WARNING: Slow operation detected {"operation":"req_691b9f2c9327c","execution_time_ms":674.55,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-17 22:18:21] production.WARNING: Slow request detected {"operation":"req_691b9f2c9327c","execution_time_ms":674.55,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-17 22:18:21] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:21] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:21] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:21] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:22] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:23] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:23] production.WARNING: Slow operation detected {"operation":"req_691b9f2d7879c","execution_time_ms":2357.36,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-17 22:18:23] production.WARNING: Slow request detected {"operation":"req_691b9f2d7879c","execution_time_ms":2357.36,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":2,"company_id":"2","ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-17 22:18:28] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/auth/logout","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:28] production.ERROR: Call to undefined method Laravel\Sanctum\TransientToken::delete() {"userId":2,"exception":"[object] (Error(code: 0): Call to undefined method Laravel\\Sanctum\\TransientToken::delete() at /var/www/html/app/Http/Controllers/V1/Admin/Mobile/AuthController.php:33)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Admin\\Mobile\\AuthController->logout(Object(Illuminate\\Http\\Request))
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('logout', Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Admin\\Mobile\\AuthController), 'logout')
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(126): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(88): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter(Object(Illuminate\\Http\\Request), Object(Closure), 'auth', Object(Closure))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'auth')
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/app/Http/Middleware/Authenticate.php(29): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#18 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(41): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/app/Http/Middleware/SecurityHeaders.php(28): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\SecurityHeaders->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#73 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#74 {main}
+"} 
+[2025-11-17 22:18:28] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/dashboard","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/certificates/current","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/tax/vat-status/2","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/ai/insights","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:18:49] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_company_header":true,"company_header":"2"} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:49] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:50] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:51] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:52] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-17 22:18:52] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:18:52] production.WARNING: Slow operation detected {"operation":"req_691b9f493f959","execution_time_ms":2869.0,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
+[2025-11-17 22:18:52] production.WARNING: Slow request detected {"operation":"req_691b9f493f959","execution_time_ms":2869.0,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":2,"company_id":"2","ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-17 22:19:48] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
+[2025-11-17 22:19:48] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-17 22:19:50] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"uBXWeDifFKJA102mrWIyRnnEAF7qfsOkPuHzB2dh","has_session_cookie":true} 
