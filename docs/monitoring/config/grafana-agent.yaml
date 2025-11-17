@@ -1,0 +1,118 @@
+# Grafana Agent Configuration for Facturino Monitoring
+# This file configures the Grafana Agent to scrape metrics from Facturino
+# and send them to Grafana Cloud.
+#
+# Usage:
+# 1. Replace YOUR_PROMETHEUS_USERNAME with your Grafana Cloud username
+# 2. Replace YOUR_GRAFANA_CLOUD_API_KEY with your API key
+# 3. Replace YOUR_PROMETHEUS_ENDPOINT with your Grafana Cloud endpoint
+# 4. Adjust target addresses to match your deployment
+
+server:
+  log_level: info
+  log_format: logfmt
+
+# Metrics configuration
+metrics:
+  # Directory to store the Write-Ahead Log
+  wal_directory: /tmp/agent/wal
+
+  # Global configuration
+  global:
+    scrape_interval: 60s      # Scrape metrics every 60 seconds
+    external_labels:
+      cluster: 'facturino-production'
+      environment: 'production'
+
+    # Remote write configuration - sends metrics to Grafana Cloud
+    remote_write:
+      - url: https://prometheus-prod-XX-XXX.grafana.net/api/prom/push
+        basic_auth:
+          username: YOUR_PROMETHEUS_USERNAME  # e.g., "123456"
+          password: YOUR_GRAFANA_CLOUD_API_KEY
+
+        # Retry configuration
+        queue_config:
+          capacity: 10000
+          max_shards: 50
+          min_shards: 1
+          max_samples_per_send: 5000
+          batch_send_deadline: 5s
+          min_backoff: 30ms
+          max_backoff: 100ms
+
+  # Scrape configurations
+  configs:
+    - name: facturino-metrics
+      scrape_configs:
+
+        # Main application metrics from /metrics endpoint
+        - job_name: 'facturino-app'
+          metrics_path: '/metrics'
+          scrape_interval: 60s
+          scrape_timeout: 30s
+          static_configs:
+            - targets:
+                - 'localhost:8000'  # Change to your app URL/port
+                # For Railway: use internal service URL
+                # - 'facturino-app.railway.internal:8000'
+              labels:
+                app: 'facturino'
+                component: 'application'
+                tier: 'backend'
+
+        # Health check endpoint (converted to metrics)
+        - job_name: 'facturino-health'
+          metrics_path: '/health'
+          scrape_interval: 30s
+          scrape_timeout: 10s
+          static_configs:
+            - targets:
+                - 'localhost:8000'
+              labels:
+                app: 'facturino'
+                component: 'health-check'
+
+          # Convert health check JSON to Prometheus metrics
+          metric_relabel_configs:
+            - source_labels: [__name__]
+              regex: '.*'
+              target_label: __name__
+              replacement: 'facturino_health_check'
+
+        # Optional: Database metrics (if you have a separate exporter)
+        # - job_name: 'postgres-exporter'
+        #   static_configs:
+        #     - targets:
+        #         - 'postgres-exporter:9187'
+        #       labels:
+        #         app: 'facturino'
+        #         component: 'database'
+
+        # Optional: Redis metrics (if you have a separate exporter)
+        # - job_name: 'redis-exporter'
+        #   static_configs:
+        #     - targets:
+        #         - 'redis-exporter:9121'
+        #       labels:
+        #         app: 'facturino'
+        #         component: 'cache'
+
+# Integrations (optional - for host-level metrics)
+integrations:
+  # Agent self-monitoring
+  agent:
+    enabled: true
+    relabel_configs:
+      - action: replace
+        source_labels:
+          - agent_hostname
+        target_label: instance
+
+  # Node exporter integration (system metrics)
+  # Uncomment if running on a VM (not needed for Railway)
+  # node_exporter:
+  #   enabled: true
+  #   rootfs_path: /host/root
+  #   sysfs_path: /host/sys
+  #   procfs_path: /host/proc

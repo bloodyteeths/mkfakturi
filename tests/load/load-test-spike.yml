@@ -1,0 +1,129 @@
+# Artillery Load Test - Spike Testing
+# Purpose: Test Facturino application behavior under sudden traffic spikes
+# Duration: 8 minutes
+# Expected Load: Sudden spikes from 5 to 200 users and back
+
+config:
+  target: "{{ $processEnvironment.LOAD_TEST_URL || 'https://staging.facturino.mk' }}"
+  phases:
+    # Baseline: Normal traffic
+    - duration: 60
+      arrivalRate: 5
+      name: "Baseline: Normal traffic"
+
+    # Spike 1: Sudden increase to high load
+    - duration: 120
+      arrivalRate: 100
+      name: "Spike 1: Sudden traffic surge"
+
+    # Recovery 1: Return to normal
+    - duration: 60
+      arrivalRate: 5
+      name: "Recovery 1: Back to normal"
+
+    # Spike 2: Even larger spike
+    - duration: 120
+      arrivalRate: 200
+      name: "Spike 2: Extreme surge"
+
+    # Recovery 2: Return to normal
+    - duration: 60
+      arrivalRate: 5
+      name: "Recovery 2: Final cooldown"
+
+    # Sustained high after spike
+    - duration: 60
+      arrivalRate: 50
+      name: "Sustained load after spike"
+
+  # Thresholds for spike testing
+  ensure:
+    maxErrorRate: 10       # Max 10% error rate during spikes
+    p95: 8000             # 95th percentile response time < 8s
+    p99: 15000            # 99th percentile response time < 15s
+
+  # HTTP configuration
+  http:
+    timeout: 60
+    pool: 300             # Very large pool for spike handling
+
+  # Variables for test scenarios
+  variables:
+    testCompanyId: 1
+    testCurrency: "MKD"
+
+  # Custom metrics
+  plugins:
+    metrics-by-endpoint:
+      stripQueryString: true
+
+scenarios:
+  # Most common user flow during spike (50% of traffic)
+  - name: "Quick Dashboard Check"
+    weight: 50
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - get:
+          url: "/api/v1/dashboard"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+
+      - think: 1
+
+      - post:
+          url: "/api/v1/auth/logout"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+
+  # Invoice viewing during spike (30% of traffic)
+  - name: "View Invoices"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - get:
+          url: "/api/v1/invoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 20
+
+      - think: 2
+
+  # Static asset requests (20% of traffic)
+  - name: "Static Assets and Health Checks"
+    weight: 20
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+
+      - think: 0.5
+
+      - get:
+          url: "/api/version"
+          expect:
+            - statusCode: 200
+# CLAUDE-CHECKPOINT

@@ -1,0 +1,265 @@
+# Artillery Load Test - Basic Traffic Simulation
+# Purpose: Simulate normal production traffic patterns for Facturino application
+# Duration: 10 minutes
+# Expected Load: Low to moderate (5-50 concurrent users)
+
+config:
+  target: "{{ $processEnvironment.LOAD_TEST_URL || 'https://staging.facturino.mk' }}"
+  phases:
+    # Warm-up phase: Gradually ramp up to normal traffic
+    - duration: 120
+      arrivalRate: 2
+      name: "Warm-up: Light traffic"
+
+    # Normal traffic: Simulate typical business hours
+    - duration: 300
+      arrivalRate: 5
+      name: "Normal traffic: Business hours"
+
+    # Peak traffic: Simulate end-of-month invoice rush
+    - duration: 180
+      arrivalRate: 10
+      name: "Peak traffic: Invoice rush"
+
+    # Cool-down: Return to normal
+    - duration: 120
+      arrivalRate: 3
+      name: "Cool-down: Normal traffic"
+
+  # Performance thresholds (baseline expectations)
+  ensure:
+    maxErrorRate: 1        # Max 1% error rate
+    p95: 2000             # 95th percentile response time < 2s
+    p99: 5000             # 99th percentile response time < 5s
+
+  # HTTP configuration
+  http:
+    timeout: 30
+    pool: 50              # Connection pool size
+
+  # Payload configuration
+  payload:
+    path: "tests/load/test-data.csv"
+    fields:
+      - email
+      - password
+    skipHeader: true
+    order: sequence
+
+  # Variables for test scenarios
+  variables:
+    testCompanyId: 1
+    testCurrency: "MKD"
+
+  # Custom metrics
+  plugins:
+    metrics-by-endpoint:
+      # Track metrics per endpoint
+      stripQueryString: true
+
+scenarios:
+  # Scenario 1: Public user authentication (30% of traffic)
+  - name: "Authentication Flow"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: token
+
+      - get:
+          url: "/api/v1/auth/me"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      - post:
+          url: "/api/v1/auth/logout"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+  # Scenario 2: Dashboard and reports (25% of traffic)
+  - name: "Dashboard Usage"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - get:
+          url: "/api/v1/dashboard"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+      - think: 3
+
+      - get:
+          url: "/api/v1/accounting/reports/balance-sheet"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      - get:
+          url: "/api/v1/accounting/reports/income-statement"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+  # Scenario 3: Invoice operations (20% of traffic)
+  - name: "Invoice Management"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - get:
+          url: "/api/v1/invoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 10
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      - get:
+          url: "/api/v1/customers"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            limit: 10
+          expect:
+            - statusCode: 200
+
+      - think: 3
+
+      - get:
+          url: "/api/v1/items"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            limit: 10
+          expect:
+            - statusCode: 200
+
+  # Scenario 4: Customer/Item browsing (15% of traffic)
+  - name: "Browse Customers and Items"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - get:
+          url: "/api/v1/customers"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 20
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      - get:
+          url: "/api/v1/items"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 20
+          expect:
+            - statusCode: 200
+
+  # Scenario 5: Search operations (10% of traffic)
+  - name: "Search Functionality"
+    weight: 10
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - get:
+          url: "/api/v1/search"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            search: "test"
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      - get:
+          url: "/api/v1/invoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            search: "paid"
+          expect:
+            - statusCode: 200
+# CLAUDE-CHECKPOINT

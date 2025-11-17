@@ -1,0 +1,134 @@
+2025-11-17T13:22:25.112815240Z [inf]  scheduling build on Metal builder "builder-zwnsbu"
+2025-11-17T13:22:44.961325630Z [inf]  [snapshot] received sha256:a6a9dcc24aa57eb0846032c8d43cf53278b05988fa47d36f2545f71089b5713c md5:f6508906ee0d15696dead4930aa7e198
+2025-11-17T13:22:44.961483567Z [inf]  [snapshot] receiving snapshot, complete 108 MB [took 23.078836765s]
+2025-11-17T13:22:45.703714084Z [inf]  [snapshot] analyzing snapshot, complete 108 MB [took 734.10072ms]
+2025-11-17T13:22:47.927598036Z [inf]  [snapshot] uploading snapshot, complete 108 MB [took 2.224051783s]
+2025-11-17T13:22:58.216511103Z [inf]  fetched snapshot sha256:a6a9dcc24aa57eb0846032c8d43cf53278b05988fa47d36f2545f71089b5713c (108 MB bytes)
+2025-11-17T13:22:58.216548089Z [inf]  [snapshot] fetching snapshot, complete 108 MB [took 1.597003504s]
+2025-11-17T13:22:59.589372529Z [inf]  scheduling build on Metal builder "builder-zwnsbu"
+2025-11-17T13:23:00.015021376Z [inf]  [snapshot] unpacking archive, complete 146 MB [took 1.111183943s]
+2025-11-17T13:23:02.053881619Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-17T13:23:02.054048539Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-17T13:23:02.054829791Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-17T13:23:02.069347153Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-11-17T13:23:02.074511642Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
+2025-11-17T13:23:02.074688126Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-11-17T13:23:02.074690931Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-11-17T13:23:02.754954654Z [inf]  [internal] load metadata for docker.io/library/composer:2.7
+2025-11-17T13:23:02.767358124Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-11-17T13:23:02.771238536Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-11-17T13:23:02.772264936Z [inf]  [internal] load .dockerignore
+2025-11-17T13:23:02.772282733Z [inf]  [internal] load .dockerignore
+2025-11-17T13:23:02.773033639Z [inf]  [internal] load .dockerignore
+2025-11-17T13:23:02.784805882Z [inf]  [internal] load .dockerignore
+2025-11-17T13:23:02.793100768Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-11-17T13:23:02.793103432Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+2025-11-17T13:23:02.793104143Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-17T13:23:02.793104484Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-17T13:23:02.793104794Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-11-17T13:23:02.793105395Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-17T13:23:02.793196902Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
+2025-11-17T13:23:02.793207058Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+2025-11-17T13:23:02.793207608Z [inf]  [composer-deps 1/5] COPY composer.json composer.lock ./
+2025-11-17T13:23:02.793208039Z [inf]  [internal] load build context
+2025-11-17T13:23:02.793208460Z [inf]  [frontend-builder  4/10] COPY package*.json ./
+2025-11-17T13:23:02.793208810Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-17T13:23:02.793209121Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-11-17T13:23:02.793209431Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
+2025-11-17T13:23:02.793209962Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
+2025-11-17T13:23:02.793210433Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+2025-11-17T13:23:02.793210763Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+2025-11-17T13:23:02.793211074Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
+2025-11-17T13:23:02.793211424Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-17T13:23:02.793211745Z [inf]  [production  7/16] WORKDIR /var/www/html
+2025-11-17T13:23:02.793212095Z [inf]  [composer-deps 3/5] COPY . .
+2025-11-17T13:23:02.793212406Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-11-17T13:23:02.793212826Z [inf]  [composer-deps 2/5] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-11-17T13:23:02.793385405Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+2025-11-17T13:23:02.793397964Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+2025-11-17T13:23:02.793398635Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
+2025-11-17T13:23:02.793399106Z [inf]  [production 11/16] RUN cp .env.example .env
+2025-11-17T13:23:02.793399456Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache/data     storage/framework/sessions     storage/framework/views     storage/framework/testing     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
+2025-11-17T13:23:02.793399897Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
+2025-11-17T13:23:02.793400217Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-11-17T13:23:02.793400518Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-11-17T13:23:02.793400889Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-11-17T13:23:02.793401199Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-11-17T13:23:02.793401509Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-11-17T13:23:02.793402000Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
+2025-11-17T13:23:02.793402431Z [inf]  [frontend-builder  5/10] RUN if [ -f package-lock.json ]; then         echo "package-lock.json detected -> running npm ci";         npm ci --prefer-offline --no-audit;     else         echo "package-lock.json missing -> running npm install";         npm install --prefer-offline --no-audit;     fi
+2025-11-17T13:23:02.793402861Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+2025-11-17T13:23:02.793458925Z [inf]  [internal] load build context
+2025-11-17T13:23:02.794755902Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-17T13:23:02.794760378Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-17T13:23:02.794934079Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-17T13:23:02.816160657Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-11-17T13:23:02.817854539Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+2025-11-17T13:23:02.818274028Z [inf]  [internal] load build context
+2025-11-17T13:23:02.818383172Z [inf]  FROM docker.io/library/composer:2.7@sha256:cb3483dc851665462a66c59982577dfbbde0ae2059e8b5550c2f49f44b8c333e
+2025-11-17T13:23:03.392371420Z [inf]  [internal] load build context
+2025-11-17T13:23:03.637205197Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-11-17T13:23:03.637207721Z [inf]  [php-base 3/5] COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+2025-11-17T13:23:03.637208722Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-11-17T13:23:03.637209013Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-11-17T13:23:03.637209453Z [inf]  [composer-deps 1/5] COPY composer.json composer.lock ./
+2025-11-17T13:23:03.637210114Z [inf]  [composer-deps 2/5] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-11-17T13:23:03.637898768Z [inf]  [composer-deps 3/5] COPY . .
+2025-11-17T13:23:03.637903995Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-11-17T13:23:03.637904937Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-11-17T13:23:03.637905227Z [inf]  [frontend-builder  4/10] COPY package*.json ./
+2025-11-17T13:23:03.637905618Z [inf]  [frontend-builder  5/10] RUN if [ -f package-lock.json ]; then         echo "package-lock.json detected -> running npm ci";         npm ci --prefer-offline --no-audit;     else         echo "package-lock.json missing -> running npm install";         npm install --prefer-offline --no-audit;     fi
+2025-11-17T13:23:03.637906119Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-11-17T13:23:03.637911276Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-11-17T13:23:03.638331797Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-11-17T13:23:04.423072767Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-11-17T13:23:04.425557866Z [inf]  [composer-deps 3/5] COPY . .
+2025-11-17T13:23:04.428059289Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-11-17T13:23:04.431717658Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+2025-11-17T13:23:04.577175001Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-11-17T13:23:04.580193040Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-11-17T13:23:04.663177349Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+2025-11-17T13:23:04.666463820Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
+2025-11-17T13:23:04.670482639Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-11-17T13:23:04.674181529Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-11-17T13:23:05.056381299Z [inf]  Composer plugins have been disabled for safety in this non-interactive session.
+Set COMPOSER_ALLOW_SUPERUSER=1 if you want to allow plugins to run as root/super user.
+Do not run Composer as root/super user! See https://getcomposer.org/root for details
+
+2025-11-17T13:23:05.188943665Z [inf]  Generating optimized autoload files
+
+2025-11-17T13:23:05.299816538Z [inf]  
+> build
+> vite build
+
+
+2025-11-17T13:23:05.740476271Z [inf]  vite v6.4.1 building for production...
+
+2025-11-17T13:23:06.190401095Z [inf]  transforming...
+
+2025-11-17T13:23:07.765476808Z [inf]  ✓ 75 modules transformed.
+
+2025-11-17T13:23:07.770527787Z [inf]  ✗ Build failed in 2.00s
+
+2025-11-17T13:23:07.770549119Z [inf]  error during build:
+[vite:json] [plugin vite:json] lang/mk.json (2063:7): Failed to parse JSON file, invalid JSON syntax found at position 100596
+file: /app/lang/mk.json:2063:7
+
+2061:         "create_new_ticket": "Креирај нов билет"
+2062:     }
+2063:         "progress": "Напредок",
+             ^
+2064:         "overall_progress": "Вкупен напредок",
+2065:         "upload_file": "Прикачи фајл",
+
+    at getRollupError (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Object.error (file:///app/node_modules/rollup/dist/es/shared/node-entry.js:22115:20)
+    at Object.error (file:///app/node_modules/rollup/dist/es/shared/node-entry.js:21172:42)
+    at Object.handler (file:///app/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:12175:16)
+    at Object.handler (file:///app/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46537:15)
+    at file:///app/node_modules/rollup/dist/es/shared/node-entry.js:22437:40
+
+2025-11-17T13:23:07.866208776Z [err]  [frontend-builder 10/10] RUN npm run build
+2025-11-17T13:23:07.936772650Z [err]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
+2025-11-17T13:23:07.961821723Z [err]  Build Failed: bc.Build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1

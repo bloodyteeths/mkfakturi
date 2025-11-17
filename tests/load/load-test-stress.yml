@@ -1,0 +1,196 @@
+# Artillery Load Test - Stress Testing
+# Purpose: Find the breaking point of the Facturino application
+# Duration: 15 minutes
+# Expected Load: High to extreme (50-200+ concurrent users)
+
+config:
+  target: "{{ $processEnvironment.LOAD_TEST_URL || 'https://staging.facturino.mk' }}"
+  phases:
+    # Phase 1: Ramp up to moderate load
+    - duration: 180
+      arrivalRate: 10
+      rampTo: 30
+      name: "Ramp-up: Moderate load"
+
+    # Phase 2: Increase to high load
+    - duration: 180
+      arrivalRate: 30
+      rampTo: 60
+      name: "High load: Sustained stress"
+
+    # Phase 3: Push to extreme load
+    - duration: 180
+      arrivalRate: 60
+      rampTo: 100
+      name: "Extreme load: Finding limits"
+
+    # Phase 4: Maximum stress
+    - duration: 120
+      arrivalRate: 100
+      rampTo: 150
+      name: "Maximum stress: Breaking point"
+
+    # Phase 5: Cool-down and recovery
+    - duration: 180
+      arrivalRate: 150
+      rampTo: 10
+      name: "Cool-down: Recovery test"
+
+  # Relaxed thresholds for stress testing (expect degradation)
+  ensure:
+    maxErrorRate: 5        # Max 5% error rate acceptable under stress
+    p95: 5000             # 95th percentile response time < 5s
+    p99: 10000            # 99th percentile response time < 10s
+
+  # HTTP configuration optimized for high load
+  http:
+    timeout: 60
+    pool: 200             # Large connection pool
+
+  # Variables for test scenarios
+  variables:
+    testCompanyId: 1
+    testCurrency: "MKD"
+
+  # Custom metrics
+  plugins:
+    metrics-by-endpoint:
+      stripQueryString: true
+
+scenarios:
+  # Heavy database read operations (40% of traffic)
+  - name: "Heavy Database Reads"
+    weight: 40
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # Fetch large invoice list
+      - get:
+          url: "/api/v1/invoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 50
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # Fetch large customer list
+      - get:
+          url: "/api/v1/customers"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 50
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # Complex accounting report
+      - get:
+          url: "/api/v1/accounting/reports/trial-balance"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+  # Complex report generation (30% of traffic)
+  - name: "Report Generation Stress"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # Multiple concurrent report requests
+      - parallel:
+          - get:
+              url: "/api/v1/accounting/reports/balance-sheet"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+              qs:
+                company_id: "{{ companyId }}"
+
+          - get:
+              url: "/api/v1/accounting/reports/income-statement"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+              qs:
+                company_id: "{{ companyId }}"
+
+          - get:
+              url: "/api/v1/dashboard"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+
+  # Search and filter operations (20% of traffic)
+  - name: "Complex Search Operations"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      - loop:
+          - get:
+              url: "/api/v1/search"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+              qs:
+                search: "{{ $randomString() }}"
+                company_id: "{{ companyId }}"
+          count: 5
+
+  # Authentication stress (10% of traffic)
+  - name: "Authentication Stress"
+    weight: 10
+    flow:
+      - loop:
+          - post:
+              url: "/api/v1/auth/login"
+              json:
+                email: "admin@facturino.mk"
+                password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+              capture:
+                - json: "$.token"
+                  as: "authToken"
+
+          - think: 0.5
+
+          - post:
+              url: "/api/v1/auth/logout"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+          count: 3
+# CLAUDE-CHECKPOINT

@@ -1,0 +1,232 @@
+# Artillery Load Test - Critical Endpoint Testing
+# Purpose: Test all critical business endpoints for Facturino
+# Duration: 12 minutes
+# Focus: Bank feeds, E-faktura, Payment processing, IFRS accounting
+
+config:
+  target: "{{ $processEnvironment.LOAD_TEST_URL || 'https://staging.facturino.mk' }}"
+  phases:
+    - duration: 720
+      arrivalRate: 10
+      name: "Steady load on critical endpoints"
+
+  ensure:
+    maxErrorRate: 2
+    p95: 3000
+    p99: 6000
+
+  http:
+    timeout: 45
+    pool: 100
+
+  variables:
+    testCompanyId: 1
+    testCurrency: "MKD"
+
+  plugins:
+    metrics-by-endpoint:
+      stripQueryString: true
+
+scenarios:
+  # E-Faktura submission workflow (25% of traffic)
+  - name: "E-Faktura Submission"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # List e-invoices
+      - get:
+          url: "/api/v1/einvoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      # Check submission status
+      - get:
+          url: "/api/v1/einvoices/submissions"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+  # IFRS Accounting Reports (20% of traffic)
+  - name: "IFRS Accounting Operations"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # Trial Balance
+      - get:
+          url: "/api/v1/accounting/reports/trial-balance"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      # Balance Sheet
+      - get:
+          url: "/api/v1/accounting/reports/balance-sheet"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      # Income Statement
+      - get:
+          url: "/api/v1/accounting/reports/income-statement"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+  # Payment processing (20% of traffic)
+  - name: "Payment Processing"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # List payments
+      - get:
+          url: "/api/v1/payments"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 20
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      # Get payment methods
+      - get:
+          url: "/api/v1/payment-methods"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+  # Import/Export operations (15% of traffic)
+  - name: "Import Export Operations"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # Check import job status
+      - get:
+          url: "/api/v1/import-jobs"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+  # Certificate management (10% of traffic)
+  - name: "Certificate Management"
+    weight: 10
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # List certificates
+      - get:
+          url: "/api/v1/certificates"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+  # Support ticket system (10% of traffic)
+  - name: "Support Tickets"
+    weight: 10
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+
+      # List support tickets
+      - get:
+          url: "/api/v1/tickets"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+# CLAUDE-CHECKPOINT

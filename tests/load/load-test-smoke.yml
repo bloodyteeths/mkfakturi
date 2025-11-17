@@ -1,0 +1,145 @@
+# Artillery Load Test - Smoke Test
+# Purpose: Quick validation that all endpoints are accessible and responding
+# Duration: 2 minutes
+# Expected Load: Very light (1-2 concurrent users)
+
+config:
+  target: "{{ $processEnvironment.LOAD_TEST_URL || 'https://staging.facturino.mk' }}"
+  phases:
+    - duration: 120
+      arrivalRate: 1
+      name: "Smoke test: Quick validation"
+
+  ensure:
+    maxErrorRate: 0        # Zero tolerance for smoke test
+    p99: 3000             # All requests should be fast
+
+  http:
+    timeout: 30
+    pool: 10
+
+scenarios:
+  # Test all critical endpoints once
+  - name: "Critical Endpoints Smoke Test"
+    weight: 100
+    flow:
+      # 1. Health check
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 2. Authentication
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "admin@facturino.mk"
+            password: "{{ $processEnvironment.ADMIN_PASSWORD || 'password123' }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.companies[0].id"
+              as: "companyId"
+          expect:
+            - statusCode: 200
+            - hasProperty: token
+
+      - think: 1
+
+      # 3. Dashboard
+      - get:
+          url: "/api/v1/dashboard"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 4. Invoices
+      - get:
+          url: "/api/v1/invoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            page: 1
+            limit: 5
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 5. Customers
+      - get:
+          url: "/api/v1/customers"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            limit: 5
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 6. Items
+      - get:
+          url: "/api/v1/items"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            limit: 5
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 7. IFRS Balance Sheet
+      - get:
+          url: "/api/v1/accounting/reports/balance-sheet"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 8. E-Invoices
+      - get:
+          url: "/api/v1/einvoices"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 9. Payments
+      - get:
+          url: "/api/v1/payments"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            company_id: "{{ companyId }}"
+            limit: 5
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # 10. Logout
+      - post:
+          url: "/api/v1/auth/logout"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+# CLAUDE-CHECKPOINT
