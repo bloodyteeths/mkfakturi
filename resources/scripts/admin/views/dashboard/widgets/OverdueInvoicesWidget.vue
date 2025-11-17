@@ -133,24 +133,15 @@ const totalOverdueAmount = computed(() => {
   if (!overdueInvoices.value.length) return 0
   
   // Extract the raw amount from each invoice, handling different possible formats
-  const total = overdueInvoices.value.reduce((sum, invoice) => {
+  return overdueInvoices.value.reduce((sum, invoice) => {
     // Try different possible amount properties
     const amount = invoice.due_amount || invoice.amount_due || invoice.total || 0
     const numericAmount = typeof amount === 'string' 
       ? parseFloat(amount.replace(/[^0-9.,]/g, '').replace(',', '.')) 
       : Number(amount)
-      
-    console.log(`Invoice ${invoice.invoice_number} amount:`, { 
-      raw: amount, 
-      parsed: numericAmount,
-      currency: invoice.currency
-    })
     
     return sum + (isNaN(numericAmount) ? 0 : numericAmount)
   }, 0)
-  
-  console.log('Calculated total:', total)
-  return total
 })
 
 function getDaysOverdue(dueDate) {
@@ -175,7 +166,6 @@ function getDaysOverdue(dueDate) {
 async function fetchOverdueInvoices() {
   isLoading.value = true
   try {
-    console.log('Fetching overdue invoices...')
     // Fetch invoices with DUE status (overdue)
     const response = await invoiceStore.fetchInvoices({
       status: 'DUE',
@@ -183,11 +173,9 @@ async function fetchOverdueInvoices() {
       orderBy: 'asc',
       limit: 10, // Fetch top 10 overdue
     })
-    
-    console.log('API Response:', JSON.parse(JSON.stringify(response)))
 
     if (!response?.data?.data) {
-      console.error('Invalid response format:', response)
+      console.error('Error: Invalid response format from server')
       overdueInvoices.value = []
       return
     }
@@ -213,14 +201,10 @@ async function fetchOverdueInvoices() {
       }
     })
     
-    console.log('Processed Invoices:', JSON.parse(JSON.stringify(processedInvoices)))
-    
     // Filter to only show truly overdue invoices with positive amounts
     overdueInvoices.value = processedInvoices.filter(invoice => {
       return invoice._processed.isOverdue && invoice._processed.amount > 0
     })
-    
-    console.log('Filtered Overdue Invoices:', JSON.parse(JSON.stringify(overdueInvoices.value)))
   } catch (error) {
     console.error('Error fetching overdue invoices:', error)
     overdueInvoices.value = []

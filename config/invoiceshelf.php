@@ -475,6 +475,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'Support Tickets',
+            'group' => 3,
+            'link' => '/admin/support/tickets',
+            'icon' => 'TruckIcon',
+            'name' => 'Support Tickets',
+            'owner_only' => false,
+            'ability' => 'view-ticket',
+            'model' => 'App\\Models\\Support\\Ticket',
+        ],
+        [
             'title' => 'navigation.users',
             'group' => 3,
             'link' => '/admin/users',
