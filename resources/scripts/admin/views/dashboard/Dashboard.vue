@@ -52,12 +52,6 @@ onMounted(() => {
     <!-- Top Stats Cards (always visible) -->
     <DashboardStats />
 
-    <!-- Quick Actions & Overdue Alerts Row (Mobile: stack, Desktop: side-by-side) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <QuickActionsWidget />
-      <OverdueInvoicesWidget />
-    </div>
-
     <!-- Main Revenue Chart (full width) -->
     <div class="mb-6">
       <DashboardChart />
@@ -74,6 +68,12 @@ onMounted(() => {
       <BankStatus />
       <VatStatus />
       <CertExpiry />
+    </div>
+
+    <!-- Quick Actions & Overdue Alerts Row (Mobile: stack, Desktop: side-by-side) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <QuickActionsWidget />
+      <OverdueInvoicesWidget />
     </div>
 
     <!-- Recent Invoices Table -->
