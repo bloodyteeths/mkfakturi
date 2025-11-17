@@ -48,7 +48,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/suppliers/${id}`)
+            .get(`/suppliers/${id}`)
             .then((response) => {
               this.selectedSupplier = response.data.data
               this.isFetchingView = false
@@ -67,7 +67,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/suppliers/${params.id}/stats`, { params })
+            .get(`/suppliers/${params.id}/stats`, { params })
             .then((response) => {
               this.selectedSupplier = response.data.data
               this.isFetchingView = false
@@ -107,7 +107,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/suppliers/${data.id}`, data)
+            .put(`/suppliers/${data.id}`, data)
             .then((response) => {
               const updated = response.data.data
               const idx = this.suppliers.findIndex(

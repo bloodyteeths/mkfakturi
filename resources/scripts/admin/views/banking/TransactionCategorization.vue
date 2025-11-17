@@ -257,7 +257,7 @@ const saveCategorization = async () => {
   errorMessage.value = null
 
   try {
-    await axios.patch(`/api/v1/banking/transactions/${props.transaction.id}/categorize`, {
+    await axios.patch(`/banking/transactions/${props.transaction.id}/categorize`, {
       category_id: selectedCategory.value,
       notes: notes.value,
       create_expense: createExpense.value

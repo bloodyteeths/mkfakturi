@@ -38,7 +38,7 @@ export const useUserStore = defineStore({
       const globalStore = useGlobalStore()
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${globalStore.companySlug}/customer/me`)
+          .get(`/${globalStore.companySlug}/customer/me`)
           .then((response) => {
             Object.assign(this.userForm, response.data.data)
             resolve(response)
@@ -54,7 +54,7 @@ export const useUserStore = defineStore({
       const globalStore = useGlobalStore()
       return new Promise((resolve, reject) => {
         axios
-          .post(`/api/v1/${globalStore.companySlug}/customer/profile`, data)
+          .post(`/${globalStore.companySlug}/customer/profile`, data)
           .then((response) => {
             this.userForm = response.data.data
             globalStore.currentUser = response.data.data

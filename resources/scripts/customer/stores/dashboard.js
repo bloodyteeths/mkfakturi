@@ -20,7 +20,7 @@ export const useDashboardStore = defineStore({
       const globalStore = useGlobalStore()
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${globalStore.companySlug}/customer/dashboard`, {
+          .get(`/${globalStore.companySlug}/customer/dashboard`, {
             data,
           })
           .then((response) => {

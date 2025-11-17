@@ -210,7 +210,7 @@ async function confirmToggle() {
 async function toggleFeatureFlag(flag) {
   try {
     const response = await axios.post(
-      `/api/v1/settings/feature-flags/${flag.flag}/toggle`
+      `/settings/feature-flags/${flag.flag}/toggle`
     )
 
     if (response.data.success) {

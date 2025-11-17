@@ -49,7 +49,7 @@ export const useAuthStore = defineStore({
       const notificationStore = useNotificationStore(true)
       return new Promise((resolve, reject) => {
         axios
-          .post(`/api/v1/${data.company}/customer/auth/password/email`, data)
+          .post(`/${data.company}/customer/auth/password/email`, data)
 
           .then((response) => {
             if (response.data) {
@@ -77,7 +77,7 @@ export const useAuthStore = defineStore({
     resetPassword(data, company) {
       return new Promise((resolve, reject) => {
         axios
-          .post(`/api/v1/${company}/customer/auth/reset/password`, data)
+          .post(`/${company}/customer/auth/reset/password`, data)
 
           .then((response) => {
             if (response.data) {

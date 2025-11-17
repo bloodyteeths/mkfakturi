@@ -39,7 +39,7 @@ export const useExpenseStore = (useWindow = false) => {
       fetchExpenses(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/expenses`, { params })
+            .get(`/expenses`, { params })
             .then((response) => {
               this.expenses = response.data.data
               this.totalExpenses = response.data.meta.expense_total_count
@@ -55,7 +55,7 @@ export const useExpenseStore = (useWindow = false) => {
       fetchExpense(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/expenses/${id}`)
+            .get(`/expenses/${id}`)
             .then((response) => {
               if (response.data) {
                 Object.assign(this.currentExpense, response.data.data)
@@ -127,7 +127,7 @@ export const useExpenseStore = (useWindow = false) => {
         formData.append('is_attachment_receipt_removed', isAttachmentReceiptRemoved)
 
         return new Promise((resolve) => {
-          axios.post(`/api/v1/expenses/${id}`, formData).then((response) => {
+          axios.post(`/expenses/${id}`, formData).then((response) => {
             let pos = this.expenses.findIndex(
               (expense) => expense.id === response.data.id
             )
@@ -176,7 +176,7 @@ export const useExpenseStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/expenses/delete`, id)
+            .post(`/expenses/delete`, id)
             .then((response) => {
               let index = this.expenses.findIndex(
                 (expense) => expense.id === id
@@ -201,7 +201,7 @@ export const useExpenseStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/expenses/delete`, { ids: this.selectedExpenses })
+            .post(`/expenses/delete`, { ids: this.selectedExpenses })
             .then((response) => {
               this.selectedExpenses.forEach((expense) => {
                 let index = this.expenses.findIndex(
@@ -224,7 +224,7 @@ export const useExpenseStore = (useWindow = false) => {
       fetchPaymentModes(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/payment-methods`, { params })
+            .get(`/payment-methods`, { params })
             .then((response) => {
               this.paymentModes = response.data.data
               resolve(response)

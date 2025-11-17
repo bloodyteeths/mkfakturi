@@ -39,7 +39,7 @@ export const useRoleStore = (useWindow = false) => {
       fetchRoles(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/roles`, { params })
+            .get(`/roles`, { params })
             .then((response) => {
               this.roles = response.data.data
               resolve(response)
@@ -54,7 +54,7 @@ export const useRoleStore = (useWindow = false) => {
       fetchRole(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/roles/${id}`)
+            .get(`/roles/${id}`)
             .then((response) => {
               this.currentRole.name = response.data.data.name
               this.currentRole.id = response.data.data.id
@@ -102,7 +102,7 @@ export const useRoleStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/roles/${data.id}`, data)
+            .put(`/roles/${data.id}`, data)
             .then((response) => {
               if (response.data) {
                 let pos = this.roles.findIndex(
@@ -129,7 +129,7 @@ export const useRoleStore = (useWindow = false) => {
             resolve(this.allAbilities)
           } else {
             axios
-              .get(`/api/v1/abilities`, { params })
+              .get(`/abilities`, { params })
               .then((response) => {
                 this.allAbilities = response.data.abilities
 
@@ -147,7 +147,7 @@ export const useRoleStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/roles/${id}`)
+            .delete(`/roles/${id}`)
             .then((response) => {
               let index = this.roles.findIndex((role) => role.id === id)
               this.roles.splice(index, 1)

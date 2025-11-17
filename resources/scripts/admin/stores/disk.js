@@ -72,7 +72,7 @@ export const useDiskStore = (useWindow = false) => {
       fetchDiskEnv(data) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/disks/${data.disk}`)
+            .get(`/disks/${data.disk}`)
             .then((response) => {
               resolve(response)
             })
@@ -86,7 +86,7 @@ export const useDiskStore = (useWindow = false) => {
       fetchDisks(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/disks`, { params })
+            .get(`/disks`, { params })
             .then((response) => {
               this.disks = response.data.data
               resolve(response)
@@ -101,7 +101,7 @@ export const useDiskStore = (useWindow = false) => {
       fetchDiskDrivers() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/disk/drivers`)
+            .get(`/disk/drivers`)
             .then((response) => {
               this.diskConfigData = response.data
               this.diskDrivers = response.data.drivers
@@ -117,7 +117,7 @@ export const useDiskStore = (useWindow = false) => {
       deleteFileDisk(id) {
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/disks/${id}`)
+            .delete(`/disks/${id}`)
             .then((response) => {
               if (response.data.success) {
                 let index = this.disks.findIndex(
@@ -142,7 +142,7 @@ export const useDiskStore = (useWindow = false) => {
       updateDisk(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/disks/${data.id}`, data)
+            .put(`/disks/${data.id}`, data)
             .then((response) => {
               if (response.data) {
                 let pos = this.disks.findIndex(
@@ -167,7 +167,7 @@ export const useDiskStore = (useWindow = false) => {
       createDisk(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/disks`, data)
+            .post(`/disks`, data)
             .then((response) => {
               if (response.data) {
                 const notificationStore = useNotificationStore()

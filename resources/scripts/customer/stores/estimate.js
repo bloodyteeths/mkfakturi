@@ -14,7 +14,7 @@ export const useEstimateStore = defineStore({
     fetchEstimate(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/estimates`, { params })
+          .get(`/${slug}/customer/estimates`, { params })
           .then((response) => {
             this.estimates = response.data.data
             this.totalEstimates = response.data.meta.estimateTotalCount
@@ -30,7 +30,7 @@ export const useEstimateStore = defineStore({
     fetchViewEstimate(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/estimates/${params.id}`, {
+          .get(`/${slug}/customer/estimates/${params.id}`, {
             params,
           })
 
@@ -48,7 +48,7 @@ export const useEstimateStore = defineStore({
     searchEstimate(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/estimates`, { params })
+          .get(`/${slug}/customer/estimates`, { params })
           .then((response) => {
             this.estimates = response.data
             resolve(response)
@@ -63,7 +63,7 @@ export const useEstimateStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .post(`/api/v1/${slug}/customer/estimate/${id}/status`, { status })
+          .post(`/${slug}/customer/estimate/${id}/status`, { status })
           .then((response) => {
             let pos = this.estimates.findIndex(
               (estimate) => estimate.id === id
@@ -90,7 +90,7 @@ export const useEstimateStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .post(`/api/v1/${slug}/customer/estimate/${id}/status`, { status })
+          .post(`/${slug}/customer/estimate/${id}/status`, { status })
           .then((response) => {
             let pos = this.estimates.findIndex(
               (estimate) => estimate.id === id

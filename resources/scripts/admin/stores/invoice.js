@@ -351,7 +351,7 @@ export const useInvoiceStore = (useWindow = false) => {
       getNextNumber(params, setState = false) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/next-number?key=invoice`, { params })
+            .get(`/next-number?key=invoice`, { params })
             .then((response) => {
               if (setState) {
                 this.newInvoice.invoice_number = response.data.nextNumber
@@ -402,7 +402,7 @@ export const useInvoiceStore = (useWindow = false) => {
       selectCustomer(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/customers/${id}`)
+            .get(`/customers/${id}`)
             .then((response) => {
               this.newInvoice.customer = response.data.data
               this.newInvoice.customer_id = response.data.data.id

@@ -45,7 +45,7 @@ export const useTaxTypeStore = (useWindow = false) => {
       fetchTaxTypes(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/tax-types`, { params })
+            .get(`/tax-types`, { params })
             .then((response) => {
               this.taxTypes = response.data.data
               resolve(response)
@@ -60,7 +60,7 @@ export const useTaxTypeStore = (useWindow = false) => {
       fetchTaxType(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/tax-types/${id}`)
+            .get(`/tax-types/${id}`)
             .then((response) => {
               this.currentTaxType = response.data.data
               resolve(response)
@@ -96,7 +96,7 @@ export const useTaxTypeStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/tax-types/${data.id}`, data)
+            .put(`/tax-types/${data.id}`, data)
             .then((response) => {
               if (response.data) {
                 let pos = this.taxTypes.findIndex(
@@ -142,7 +142,7 @@ export const useTaxTypeStore = (useWindow = false) => {
       deleteTaxType(id) {
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/tax-types/${id}`)
+            .delete(`/tax-types/${id}`)
             .then((response) => {
               if (response.data.success) {
                 let index = this.taxTypes.findIndex(

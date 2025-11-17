@@ -810,28 +810,28 @@ const selectedPlan = ref(modulePrice.value[0])
 const installationSteps = reactive([
   {
     translationKey: 'modules.download_zip_file',
-    stepUrl: '/api/v1/modules/download',
+    stepUrl: '/modules/download',
     time: null,
     started: false,
     completed: false,
   },
   {
     translationKey: 'modules.unzipping_package',
-    stepUrl: '/api/v1/modules/unzip',
+    stepUrl: '/modules/unzip',
     time: null,
     started: false,
     completed: false,
   },
   {
     translationKey: 'modules.copying_files',
-    stepUrl: '/api/v1/modules/copy',
+    stepUrl: '/modules/copy',
     time: null,
     started: false,
     completed: false,
   },
   {
     translationKey: 'modules.completing_installation',
-    stepUrl: '/api/v1/modules/complete',
+    stepUrl: '/modules/complete',
     time: null,
     started: false,
     completed: false,

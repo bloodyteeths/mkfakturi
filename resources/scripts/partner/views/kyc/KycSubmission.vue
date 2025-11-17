@@ -273,7 +273,7 @@ const deleteDocument = async (documentId) => {
   if (!confirm('Are you sure you want to delete this document?')) return
 
   try {
-    await axios.delete(`/api/v1/partner/kyc/documents/${documentId}`)
+    await axios.delete(`/partner/kyc/documents/${documentId}`)
     successMessage.value = 'Document deleted successfully'
     await fetchKycStatus()
   } catch (error) {

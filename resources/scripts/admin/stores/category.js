@@ -28,7 +28,7 @@ export const useCategoryStore = (useWindow = false) => {
       fetchCategories(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/categories`, { params })
+            .get(`/categories`, { params })
             .then((response) => {
               this.categories = response.data.data
               resolve(response)
@@ -43,7 +43,7 @@ export const useCategoryStore = (useWindow = false) => {
       fetchCategory(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/categories/${id}`)
+            .get(`/categories/${id}`)
             .then((response) => {
               this.currentCategory = response.data.data
               resolve(response)
@@ -78,7 +78,7 @@ export const useCategoryStore = (useWindow = false) => {
       updateCategory(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/categories/${data.id}`, data)
+            .put(`/categories/${data.id}`, data)
             .then((response) => {
               if (response.data) {
                 let pos = this.categories.findIndex(
@@ -105,7 +105,7 @@ export const useCategoryStore = (useWindow = false) => {
       deleteCategory(id) {
         return new Promise((resolve) => {
           axios
-            .delete(`/api/v1/categories/${id}`)
+            .delete(`/categories/${id}`)
             .then((response) => {
               let index = this.categories.findIndex(
                 (category) => category.id === id

@@ -206,7 +206,7 @@ async function onDownloadBckup(backup) {
   window
     .axios({
       method: 'GET',
-      url: '/api/v1/download-backup',
+      url: '/download-backup',
       responseType: 'blob',
       params: {
         disk: filters.selected_disk.driver,

@@ -28,7 +28,7 @@ export const useModuleStore = (useWindow = false) => {
       fetchModules(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/modules`)
+            .get(`/modules`)
             .then((response) => {
               this.modules = response.data.data
 
@@ -44,7 +44,7 @@ export const useModuleStore = (useWindow = false) => {
       fetchModule(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/modules/${id}`)
+            .get(`/modules/${id}`)
             .then((response) => {
               if (response.data.error === 'invalid_token') {
                 this.currentModule = {},
@@ -68,7 +68,7 @@ export const useModuleStore = (useWindow = false) => {
       checkApiToken(token) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/modules/check?api_token=${token}`)
+            .get(`/modules/check?api_token=${token}`)
             .then((response) => {
               const notificationStore = useNotificationStore()
               if (response.data.error === 'invalid_token') {
@@ -89,7 +89,7 @@ export const useModuleStore = (useWindow = false) => {
       disableModule(module) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/modules/${module}/disable`)
+            .post(`/modules/${module}/disable`)
             .then((response) => {
               const notificationStore = useNotificationStore()
               if (response.data.success) {
@@ -110,7 +110,7 @@ export const useModuleStore = (useWindow = false) => {
       enableModule(module) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/modules/${module}/enable`)
+            .post(`/modules/${module}/enable`)
             .then((response) => {
               const notificationStore = useNotificationStore()
               if (response.data.success) {

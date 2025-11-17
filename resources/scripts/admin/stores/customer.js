@@ -76,7 +76,7 @@ export const useCustomerStore = (useWindow = false) => {
       fetchCustomers(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/customers`, { params })
+            .get(`/customers`, { params })
             .then((response) => {
               this.customers = response.data.data
               this.totalCustomers = response.data.meta.customer_total_count
@@ -93,7 +93,7 @@ export const useCustomerStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isFetchingViewData = true
           axios
-            .get(`/api/v1/customers/${params.id}/stats`, { params })
+            .get(`/customers/${params.id}/stats`, { params })
 
             .then((response) => {
               this.selectedViewCustomer = {}
@@ -113,7 +113,7 @@ export const useCustomerStore = (useWindow = false) => {
       fetchCustomer(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/customers/${id}`)
+            .get(`/customers/${id}`)
             .then((response) => {
               Object.assign(this.currentCustomer, response.data.data)
 
@@ -152,7 +152,7 @@ export const useCustomerStore = (useWindow = false) => {
       updateCustomer(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/customers/${data.id}`, data)
+            .put(`/customers/${data.id}`, data)
             .then((response) => {
               if (response.data) {
                 let pos = this.customers.findIndex(
@@ -178,7 +178,7 @@ export const useCustomerStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/customers/delete`, id)
+            .post(`/customers/delete`, id)
             .then((response) => {
               let index = this.customers.findIndex(
                 (customer) => customer.id === id
@@ -202,7 +202,7 @@ export const useCustomerStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/customers/delete`, { ids: this.selectedCustomers })
+            .post(`/customers/delete`, { ids: this.selectedCustomers })
             .then((response) => {
               this.selectedCustomers.forEach((customer) => {
                 let index = this.customers.findIndex(

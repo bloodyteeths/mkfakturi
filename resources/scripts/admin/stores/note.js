@@ -41,7 +41,7 @@ export const useNotesStore = (useWindow = false) => {
       fetchNotes(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/notes`, { params })
+            .get(`/notes`, { params })
             .then((response) => {
               this.notes = response.data.data
               resolve(response)
@@ -56,7 +56,7 @@ export const useNotesStore = (useWindow = false) => {
       fetchNote(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/notes/${id}`)
+            .get(`/notes/${id}`)
             .then((response) => {
               this.currentNote = response.data.data
               resolve(response)
@@ -86,7 +86,7 @@ export const useNotesStore = (useWindow = false) => {
       updateNote(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/notes/${data.id}`, data)
+            .put(`/notes/${data.id}`, data)
             .then((response) => {
               if (response.data) {
                 let pos = this.notes.findIndex(
@@ -106,7 +106,7 @@ export const useNotesStore = (useWindow = false) => {
       deleteNote(id) {
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/notes/${id}`)
+            .delete(`/notes/${id}`)
             .then((response) => {
               let index = this.notes.findIndex((note) => note.id === id)
               this.notes.splice(index, 1)

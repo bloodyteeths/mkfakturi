@@ -529,7 +529,7 @@ const formatDate = (timestamp) => {
 
 const downloadTemplate = async (type) => {
   try {
-    const response = await window.axios.get(`/api/v1/migration/templates/${type}`, {
+    const response = await window.axios.get(`/migration/templates/${type}`, {
       responseType: 'blob',
     })
 

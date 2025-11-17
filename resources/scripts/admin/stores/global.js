@@ -142,7 +142,7 @@ export const useGlobalStore = (useWindow = false) => {
       fetchConfig(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/config`, { params })
+            .get(`/config`, { params })
             .then((response) => {
               if (response.data.languages) {
                 this.languages = response.data.languages
@@ -237,7 +237,7 @@ export const useGlobalStore = (useWindow = false) => {
       fetchPlaceholders(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/number-placeholders`, { params })
+            .get(`/number-placeholders`, { params })
             .then((response) => {
               resolve(response)
             })

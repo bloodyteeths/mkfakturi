@@ -53,7 +53,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       fetchDefaultProviders() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/config?key=exchange_rate_drivers`)
+            .get(`/config?key=exchange_rate_drivers`)
             .then((response) => {
               this.drivers = response.data.exchange_rate_drivers
 
@@ -69,7 +69,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       fetchProvider(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/exchange-rate-providers/${id}`)
+            .get(`/exchange-rate-providers/${id}`)
             .then((response) => {
               this.currentExchangeRate = response.data.data
               this.currencyConverter = response.data.data.driver_config
@@ -105,7 +105,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       updateProvider(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/exchange-rate-providers/${data.id}`, data)
+            .put(`/exchange-rate-providers/${data.id}`, data)
             .then((response) => {
               notificationStore.showNotification({
                 type: 'success',
@@ -123,7 +123,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       deleteExchangeRate(id) {
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/exchange-rate-providers/${id}`)
+            .delete(`/exchange-rate-providers/${id}`)
             .then((response) => {
               let index = this.drivers.findIndex((driver) => driver.id === id)
               this.drivers.splice(index, 1)
@@ -149,7 +149,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       fetchCurrencies(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/supported-currencies`, { params })
+            .get(`/supported-currencies`, { params })
             .then((response) => {
               this.supportedCurrencies = response.data.supportedCurrencies
 
@@ -210,7 +210,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       getCurrentExchangeRate(currencyId) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/currencies/${currencyId}/exchange-rate`)
+            .get(`/currencies/${currencyId}/exchange-rate`)
             .then((response) => {
               resolve(response)
             })
@@ -235,7 +235,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       checkForActiveProvider(currency_id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/currencies/${currency_id}/active-provider`)
+            .get(`/currencies/${currency_id}/active-provider`)
             .then((response) => {
               resolve(response)
             })

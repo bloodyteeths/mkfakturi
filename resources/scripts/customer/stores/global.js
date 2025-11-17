@@ -52,7 +52,7 @@ export const useGlobalStore = defineStore({
           resolve(this.countries)
         } else {
           axios
-            .get(`/api/v1/${this.companySlug}/customer/countries`)
+            .get(`/${this.companySlug}/customer/countries`)
             .then((response) => {
               this.countries = response.data.data
               resolve(response)

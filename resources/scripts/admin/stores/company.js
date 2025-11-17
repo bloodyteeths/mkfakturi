@@ -184,7 +184,7 @@ export const useCompanyStore = (useWindow = false) => {
       deleteCompany(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/companies/delete`, data)
+            .post(`/companies/delete`, data)
             .then((response) => {
               resolve(response)
             })

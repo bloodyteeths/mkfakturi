@@ -29,7 +29,7 @@ export const useInstallationStore = (useWindow = false) => {
       fetchInstallationLanguages() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/installation/languages`)
+            .get(`/installation/languages`)
             .then((response) => {
               resolve(response)
             })
@@ -43,7 +43,7 @@ export const useInstallationStore = (useWindow = false) => {
       fetchInstallationRequirements() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/installation/requirements`)
+            .get(`/installation/requirements`)
             .then((response) => {
               resolve(response)
             })
@@ -57,7 +57,7 @@ export const useInstallationStore = (useWindow = false) => {
       fetchInstallationStep() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/installation/wizard-step`)
+            .get(`/installation/wizard-step`)
             .then((response) => {
               resolve(response)
             })
@@ -71,7 +71,7 @@ export const useInstallationStore = (useWindow = false) => {
       addInstallationStep(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/installation/wizard-step`, data)
+            .post(`/installation/wizard-step`, data)
             .then((response) => {
               resolve(response)
             })
@@ -85,7 +85,7 @@ export const useInstallationStore = (useWindow = false) => {
       addInstallationLanguage(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/installation/wizard-language`, data)
+            .post(`/installation/wizard-language`, data)
             .then((response) => {
               resolve(response)
             })
@@ -99,7 +99,7 @@ export const useInstallationStore = (useWindow = false) => {
       fetchInstallationPermissions() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/installation/permissions`)
+            .get(`/installation/permissions`)
             .then((response) => {
               resolve(response)
             })
@@ -113,7 +113,7 @@ export const useInstallationStore = (useWindow = false) => {
       fetchInstallationDatabase(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/installation/database/config`, { params })
+            .get(`/installation/database/config`, { params })
             .then((response) => {
               resolve(response)
             })
@@ -127,7 +127,7 @@ export const useInstallationStore = (useWindow = false) => {
       addInstallationDatabase(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/installation/database/config`, data)
+            .post(`/installation/database/config`, data)
             .then((response) => {
               resolve(response)
             })
@@ -141,7 +141,7 @@ export const useInstallationStore = (useWindow = false) => {
       addInstallationFinish() {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/installation/finish`)
+            .post(`/installation/finish`)
             .then((response) => {
               resolve(response)
             })
@@ -155,7 +155,7 @@ export const useInstallationStore = (useWindow = false) => {
       setInstallationDomain(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/installation/set-domain`, data)
+            .put(`/installation/set-domain`, data)
             .then((response) => {
               resolve(response)
             })
@@ -195,7 +195,7 @@ export const useInstallationStore = (useWindow = false) => {
       checkAutheticated() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/auth/check`)
+            .get(`/auth/check`)
             .then((response) => {
               resolve(response)
             })

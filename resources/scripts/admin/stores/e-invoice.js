@@ -32,7 +32,7 @@ export const useEInvoiceStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isLoading = true
           axios
-            .post(`/api/v1/e-invoices/generate/${invoiceId}`)
+            .post(`/e-invoices/generate/${invoiceId}`)
             .then((response) => {
               this.currentEInvoice = response.data.data
               this.submissions = response.data.submissions || []
@@ -62,7 +62,7 @@ export const useEInvoiceStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isLoading = true
           axios
-            .post(`/api/v1/e-invoices/${eInvoiceId}/sign`, { passphrase })
+            .post(`/e-invoices/${eInvoiceId}/sign`, { passphrase })
             .then((response) => {
               this.currentEInvoice = response.data.data
               this.submissions = response.data.submissions || []
@@ -91,7 +91,7 @@ export const useEInvoiceStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isLoading = true
           axios
-            .post(`/api/v1/e-invoices/${eInvoiceId}/submit`)
+            .post(`/e-invoices/${eInvoiceId}/submit`)
             .then((response) => {
               this.currentEInvoice = response.data.data
               this.submissions = response.data.submissions || []
@@ -120,7 +120,7 @@ export const useEInvoiceStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isLoading = true
           axios
-            .post(`/api/v1/e-invoices/${eInvoiceId}/simulate`)
+            .post(`/e-invoices/${eInvoiceId}/simulate`)
             .then((response) => {
               notificationStore.showNotification({
                 type: 'success',
@@ -146,7 +146,7 @@ export const useEInvoiceStore = (useWindow = false) => {
       fetchEInvoiceStatus(invoiceId) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/e-invoices/by-invoice/${invoiceId}`)
+            .get(`/e-invoices/by-invoice/${invoiceId}`)
             .then((response) => {
               this.currentEInvoice = response.data.data
               this.submissions = response.data.submissions || []
@@ -174,7 +174,7 @@ export const useEInvoiceStore = (useWindow = false) => {
       fetchSubmissions(eInvoiceId) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/e-invoices/${eInvoiceId}/submissions`)
+            .get(`/e-invoices/${eInvoiceId}/submissions`)
             .then((response) => {
               this.submissions = response.data.data
               resolve(response)
@@ -194,7 +194,7 @@ export const useEInvoiceStore = (useWindow = false) => {
       downloadXml(eInvoiceId) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/e-invoices/${eInvoiceId}/download-xml`, {
+            .get(`/e-invoices/${eInvoiceId}/download-xml`, {
               responseType: 'blob',
             })
             .then((response) => {
@@ -230,7 +230,7 @@ export const useEInvoiceStore = (useWindow = false) => {
       checkPortalStatus() {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/e-invoices/portal-status`)
+            .get(`/e-invoices/portal-status`)
             .then((response) => {
               this.portalStatus = response.data.data
               resolve(response)
@@ -251,7 +251,7 @@ export const useEInvoiceStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isLoading = true
           axios
-            .post(`/api/v1/e-invoices/submissions/${submissionId}/resubmit`)
+            .post(`/e-invoices/submissions/${submissionId}/resubmit`)
             .then((response) => {
               this.currentEInvoice = response.data.data
               this.submissions = response.data.submissions || []

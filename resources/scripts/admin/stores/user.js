@@ -53,7 +53,7 @@ export const useUserStore = (useWindow = false) => {
       fetchCurrentUser(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/me`, params)
+            .get(`/me`, params)
             .then((response) => {
               this.currentUser = response.data.data
               this.userForm = response.data.data

@@ -14,7 +14,7 @@ export const usePaymentStore = defineStore({
     fetchPayments(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/payments`, { params })
+          .get(`/${slug}/customer/payments`, { params })
           .then((response) => {
             this.payments = response.data.data
             this.totalPayments = response.data.meta.paymentTotalCount
@@ -30,7 +30,7 @@ export const usePaymentStore = defineStore({
     fetchViewPayment(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/payments/${params.id}`)
+          .get(`/${slug}/customer/payments/${params.id}`)
 
           .then((response) => {
             this.selectedViewPayment = response.data.data
@@ -46,7 +46,7 @@ export const usePaymentStore = defineStore({
     searchPayment(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/payments`, { params })
+          .get(`/${slug}/customer/payments`, { params })
           .then((response) => {
             this.payments = response.data
             resolve(response)
@@ -61,7 +61,7 @@ export const usePaymentStore = defineStore({
     fetchPaymentModes(params, slug) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/${slug}/customer/payment-method`, { params })
+          .get(`/${slug}/customer/payment-method`, { params })
           .then((response) => {
             resolve(response)
           })

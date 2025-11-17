@@ -49,7 +49,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/bills/${id}`)
+            .get(`/bills/${id}`)
             .then((response) => {
               this.selectedBill = response.data.data
               this.isFetchingView = false
@@ -89,7 +89,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/bills/${data.id}`, data)
+            .put(`/bills/${data.id}`, data)
             .then((response) => {
               const updated = response.data.data
               const idx = this.bills.findIndex((b) => b.id === updated.id)
@@ -159,7 +159,7 @@ export const useBillsStore = (useWindow = false) => {
       fetchBillPayments(billId, params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/bills/${billId}/payments`, { params })
+            .get(`/bills/${billId}/payments`, { params })
             .then((response) => {
               this.billPayments = response.data.data
               resolve(response)
@@ -176,7 +176,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/bills/${billId}/payments`, data)
+            .post(`/bills/${billId}/payments`, data)
             .then((response) => {
               this.billPayments.push(response.data.data)
               notificationStore.showNotification({
@@ -197,7 +197,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/bills/${billId}/payments/${paymentId}`, data)
+            .put(`/bills/${billId}/payments/${paymentId}`, data)
             .then((response) => {
               const updated = response.data.data
               const idx = this.billPayments.findIndex(
@@ -224,7 +224,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/bills/${billId}/payments/${paymentId}`)
+            .delete(`/bills/${billId}/payments/${paymentId}`)
             .then((response) => {
               this.billPayments = this.billPayments.filter(
                 (p) => p.id !== paymentId
@@ -253,7 +253,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/bills/${bill.id}/send`, {
+            .post(`/bills/${bill.id}/send`, {
               to,
               subject,
               body,
@@ -277,7 +277,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/bills/${data.id}/mark-as-sent`, { status: data.status })
+            .post(`/bills/${data.id}/mark-as-sent`, { status: data.status })
             .then((response) => {
               if (this.selectedBill && this.selectedBill.id === data.id) {
                 this.selectedBill.status = 'SENT'
@@ -300,7 +300,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/bills/${billId}/mark-as-viewed`)
+            .post(`/bills/${billId}/mark-as-viewed`)
             .then((response) => {
               if (this.selectedBill && this.selectedBill.id === billId) {
                 this.selectedBill.status = 'VIEWED'
@@ -323,7 +323,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/bills/${billId}/mark-as-completed`)
+            .post(`/bills/${billId}/mark-as-completed`)
             .then((response) => {
               if (this.selectedBill && this.selectedBill.id === billId) {
                 this.selectedBill.status = 'COMPLETED'
@@ -375,7 +375,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/bills/${id}/clone`)
+            .post(`/bills/${id}/clone`)
             .then((response) => {
               notificationStore.showNotification({
                 type: 'success',

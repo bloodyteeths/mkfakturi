@@ -419,7 +419,7 @@ export const useImportStore = defineStore('import', {
         this.resetErrors()
 
         try {
-          const response = await axios.get(`/api/v1/admin/imports/${this.importId}`)
+          const response = await axios.get(`/admin/imports/${this.importId}`)
           const jobData = response.data.data
 
           // Update importJob with latest data including type
@@ -506,7 +506,7 @@ export const useImportStore = defineStore('import', {
         this.resetErrors()
 
         try {
-          const response = await axios.post(`/api/v1/admin/imports/${this.importId}/mapping`, {
+          const response = await axios.post(`/admin/imports/${this.importId}/mapping`, {
             mappings: this.fieldMappings,
           })
 
@@ -539,7 +539,7 @@ export const useImportStore = defineStore('import', {
         this.resetErrors()
 
         try {
-          const response = await axios.post(`/api/v1/admin/imports/${this.importId}/validate`)
+          const response = await axios.post(`/admin/imports/${this.importId}/validate`)
 
           this.validationResults = response.data.data
           this.validationErrors = response.data.data.errors || []
@@ -577,7 +577,7 @@ export const useImportStore = defineStore('import', {
         this.resetErrors()
 
         try {
-          const response = await axios.post(`/api/v1/admin/imports/${this.importId}/commit`, {
+          const response = await axios.post(`/admin/imports/${this.importId}/commit`, {
             conflict_resolutions: this.conflictResolutions,
           })
 
@@ -624,7 +624,7 @@ export const useImportStore = defineStore('import', {
         if (!this.importId) return
 
         try {
-          const response = await axios.get(`/api/v1/admin/imports/${this.importId}/progress`)
+          const response = await axios.get(`/admin/imports/${this.importId}/progress`)
           const progress = response.data.data
 
           // Update progress based on current step
@@ -706,7 +706,7 @@ export const useImportStore = defineStore('import', {
         if (!this.importId) return
 
         try {
-          await axios.delete(`/api/v1/admin/imports/${this.importId}`)
+          await axios.delete(`/admin/imports/${this.importId}`)
 
           const notificationStore = useNotificationStore()
           const { global } = window.i18n
@@ -728,7 +728,7 @@ export const useImportStore = defineStore('import', {
         if (!this.importId) return []
 
         try {
-          const response = await axios.get(`/api/v1/admin/imports/${this.importId}/logs`)
+          const response = await axios.get(`/admin/imports/${this.importId}/logs`)
           return response.data.data
         } catch (error) {
           handleError(error)

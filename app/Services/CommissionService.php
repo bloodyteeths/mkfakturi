@@ -14,6 +14,44 @@ use Carbon\Carbon;
 class CommissionService
 {
     /**
+     * Calculate multi-level commission (AC-18)
+     */
+    public function calculateMultiLevel(Company $company, float $amount): array
+    {
+        $commissions = [];
+        $directPartner = $this->getDirectPartner($company);
+
+        if ($directPartner) {
+            $directRate = $directPartner->isPartnerPlus() ? 0.22 : 0.20;
+            $commissions[] = ['partner_id' => $directPartner->id, 'level' => 'direct', 'amount' => $amount * $directRate];
+
+            $upline = $this->getUplinePartner($directPartner);
+            if ($upline) $commissions[] = ['partner_id' => $upline->id, 'level' => 'upline', 'amount' => $amount * 0.05];
+        }
+
+        return $commissions;
+    }
+
+    private function getDirectPartner(Company $company): ?Partner
+    {
+        $link = DB::table('partner_company_links')
+            ->where('company_id', $company->id)
+            ->where('is_active', true)
+            ->where('is_primary', true)
+            ->first();
+        return $link ? Partner::find($link->partner_id) : null;
+    }
+
+    private function getUplinePartner(Partner $partner): ?Partner
+    {
+        $uplineId = DB::table('partner_referrals')
+            ->where('invitee_partner_id', $partner->id)
+            ->where('status', 'accepted')
+            ->value('inviter_partner_id');
+        return $uplineId ? Partner::find($uplineId) : null;
+    }
+
+    /**
      * Record recurring commission from a company subscription payment
      *
      * @param int $companyId

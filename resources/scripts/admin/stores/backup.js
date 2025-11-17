@@ -22,7 +22,7 @@ export const useBackupStore = (useWindow = false) => {
       fetchBackups(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/backups`, { params })
+            .get(`/backups`, { params })
             .then((response) => {
               this.backups = response.data.data
               resolve(response)
@@ -37,7 +37,7 @@ export const useBackupStore = (useWindow = false) => {
       createBackup(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/backups`, data)
+            .post(`/backups`, data)
             .then((response) => {
               const notificationStore = useNotificationStore()
               notificationStore.showNotification({
@@ -56,7 +56,7 @@ export const useBackupStore = (useWindow = false) => {
       removeBackup(params) {
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/backups/${params.disk}`, { params })
+            .delete(`/backups/${params.disk}`, { params })
             .then((response) => {
               const notificationStore = useNotificationStore()
               notificationStore.showNotification({

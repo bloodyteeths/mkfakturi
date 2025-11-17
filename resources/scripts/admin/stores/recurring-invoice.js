@@ -142,7 +142,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
         return new Promise((resolve, reject) => {
           this.isFetchingViewData = true
           axios
-            .get(`/api/v1/recurring-invoices/${id}`)
+            .get(`/recurring-invoices/${id}`)
             .then((response) => {
               Object.assign(this.newRecurringInvoice, response.data.data)
               this.newRecurringInvoice.invoices =
@@ -162,7 +162,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       updateRecurringInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/recurring-invoices/${data.id}`, data)
+            .put(`/recurring-invoices/${data.id}`, data)
             .then((response) => {
               resolve(response)
 
@@ -189,7 +189,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       selectCustomer(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/customers/${id}`)
+            .get(`/customers/${id}`)
             .then((response) => {
               this.newRecurringInvoice.customer = response.data.data
               this.newRecurringInvoice.customer_id = response.data.data.id
@@ -205,7 +205,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       searchRecurringInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/recurring-invoices?${data}`)
+            .get(`/recurring-invoices?${data}`)
             .then((response) => {
               resolve(response)
             })
@@ -219,7 +219,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       fetchRecurringInvoices(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/recurring-invoices`, { params })
+            .get(`/recurring-invoices`, { params })
             .then((response) => {
               this.recurringInvoices = response.data.data
               this.totalRecurringInvoices =
@@ -237,7 +237,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       deleteRecurringInvoice(id) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/recurring-invoices/delete`, id)
+            .post(`/recurring-invoices/delete`, id)
             .then((response) => {
               let index = this.recurringInvoices.findIndex(
                 (invoice) => invoice.id === id
@@ -259,7 +259,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
             ids = [id]
           }
           axios
-            .post(`/api/v1/recurring-invoices/delete`, {
+            .post(`/recurring-invoices/delete`, {
               ids: ids,
             })
             .then((response) => {

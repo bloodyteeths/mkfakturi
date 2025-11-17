@@ -43,7 +43,7 @@ export const useUsersStore = (useWindow = false) => {
       fetchUsers(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/users`, { params })
+            .get(`/users`, { params })
             .then((response) => {
               this.users = response.data.data
               this.totalUsers = response.data.meta.total
@@ -59,7 +59,7 @@ export const useUsersStore = (useWindow = false) => {
       fetchUser(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/users/${id}`)
+            .get(`/users/${id}`)
             .then((response) => {
               this.userData = response.data.data
               if (this.userData?.companies?.length) {
@@ -83,7 +83,7 @@ export const useUsersStore = (useWindow = false) => {
       fetchRoles(state) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/roles`)
+            .get(`/roles`)
             .then((response) => {
               this.roles = response.data.data
               resolve(response)
@@ -119,7 +119,7 @@ export const useUsersStore = (useWindow = false) => {
       updateUser(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/users/${data.id}`, data)
+            .put(`/users/${data.id}`, data)
             .then((response) => {
               if (response) {
                 let pos = this.users.findIndex(
@@ -146,7 +146,7 @@ export const useUsersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/users/delete`, { users: id.ids })
+            .post(`/users/delete`, { users: id.ids })
             .then((response) => {
               let index = this.users.findIndex((user) => user.id === id)
               this.users.splice(index, 1)
@@ -166,7 +166,7 @@ export const useUsersStore = (useWindow = false) => {
       deleteMultipleUsers() {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/users/delete`, { users: this.selectedUsers })
+            .post(`/users/delete`, { users: this.selectedUsers })
             .then((response) => {
               this.selectedUsers.forEach((user) => {
                 let index = this.users.findIndex(
@@ -191,7 +191,7 @@ export const useUsersStore = (useWindow = false) => {
       searchUsers(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/search`, { params })
+            .get(`/search`, { params })
             .then((response) => {
               this.userList = response.data.users.data
               this.customerList = response.data.customers.data

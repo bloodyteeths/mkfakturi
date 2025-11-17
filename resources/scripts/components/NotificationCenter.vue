@@ -286,7 +286,7 @@ function startPolling() {
  */
 async function markAsRead(notificationId) {
   try {
-    await axios.post(`/api/v1/notifications/${notificationId}/read`)
+    await axios.post(`/notifications/${notificationId}/read`)
 
     // Update local state
     const notification = notifications.value.find(n => n.id === notificationId)
@@ -319,7 +319,7 @@ async function markAllAsRead() {
  */
 async function removeNotification(notificationId) {
   try {
-    await axios.delete(`/api/v1/notifications/${notificationId}`)
+    await axios.delete(`/notifications/${notificationId}`)
 
     // Remove from local state
     notifications.value = notifications.value.filter(n => n.id !== notificationId)

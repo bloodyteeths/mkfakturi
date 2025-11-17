@@ -42,7 +42,7 @@ export const useCustomFieldStore = (useWindow = false) => {
       fetchCustomFields(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/custom-fields`, { params })
+            .get(`/custom-fields`, { params })
             .then((response) => {
               this.customFields = response.data.data
               resolve(response)
@@ -64,7 +64,7 @@ export const useCustomFieldStore = (useWindow = false) => {
           this.isRequestOngoing = true
 
           axios
-            .get(`/api/v1/custom-fields`, { params })
+            .get(`/custom-fields`, { params })
             .then((response) => {
               this.customFields = response.data.data
               this.isRequestOngoing = false
@@ -81,7 +81,7 @@ export const useCustomFieldStore = (useWindow = false) => {
       fetchCustomField(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/custom-fields/${id}`)
+            .get(`/custom-fields/${id}`)
             .then((response) => {
               this.currentCustomField = response.data.data
 
@@ -108,7 +108,7 @@ export const useCustomFieldStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/custom-fields`, params)
+            .post(`/custom-fields`, params)
             .then((response) => {
               let data = {
                 ...response.data.data,
@@ -140,7 +140,7 @@ export const useCustomFieldStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/custom-fields/${params.id}`, params)
+            .put(`/custom-fields/${params.id}`, params)
             .then((response) => {
               let data = {
                 ...response.data.data,
@@ -175,7 +175,7 @@ export const useCustomFieldStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .delete(`/api/v1/custom-fields/${id}`)
+            .delete(`/custom-fields/${id}`)
             .then((response) => {
               let index = this.customFields.findIndex(
                 (field) => field.id === id

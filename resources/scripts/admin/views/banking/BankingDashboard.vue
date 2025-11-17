@@ -279,7 +279,7 @@ const syncAccount = async (accountId) => {
       message: t('banking.syncing_account')
     })
 
-    await axios.post(`/api/v1/banking/sync/${accountId}`)
+    await axios.post(`/banking/sync/${accountId}`)
 
     notificationStore.showNotification({
       type: 'success',
@@ -303,7 +303,7 @@ const disconnectBank = async (accountId) => {
   }
 
   try {
-    await axios.delete(`/api/v1/banking/accounts/${accountId}`)
+    await axios.delete(`/banking/accounts/${accountId}`)
 
     notificationStore.showNotification({
       type: 'success',
