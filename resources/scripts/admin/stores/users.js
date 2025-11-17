@@ -98,7 +98,7 @@ export const useUsersStore = (useWindow = false) => {
       addUser(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/users', data)
+            .post('/users', data)
             .then((response) => {
               this.users.push(response.data)
               const notificationStore = useNotificationStore()

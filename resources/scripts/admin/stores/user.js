@@ -32,7 +32,7 @@ export const useUserStore = (useWindow = false) => {
       updateCurrentUser(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put('/api/v1/me', data)
+            .put('/me', data)
             .then((response) => {
               this.currentUser = response.data.data
               Object.assign(this.userForm, response.data.data)
@@ -69,7 +69,7 @@ export const useUserStore = (useWindow = false) => {
       uploadAvatar(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/me/upload-avatar', data)
+            .post('/me/upload-avatar', data)
             .then((response) => {
               this.currentUser.avatar = response.data.data.avatar
               resolve(response)
@@ -84,7 +84,7 @@ export const useUserStore = (useWindow = false) => {
       fetchUserSettings(settings) {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/me/settings', {
+            .get('/me/settings', {
               params: {
                 settings,
               },
@@ -102,7 +102,7 @@ export const useUserStore = (useWindow = false) => {
       updateUserSettings(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put('/api/v1/me/settings', data)
+            .put('/me/settings', data)
             .then((response) => {
               if (data.settings.language) {
                 this.currentUserSettings.language = data.settings.language

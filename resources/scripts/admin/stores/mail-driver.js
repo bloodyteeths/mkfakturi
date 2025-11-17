@@ -59,7 +59,7 @@ export const useMailDriverStore = (useWindow = false) => {
       fetchMailDrivers() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/mail/drivers')
+            .get('/mail/drivers')
             .then((response) => {
               if (response.data) {
                 this.mail_drivers = response.data
@@ -76,7 +76,7 @@ export const useMailDriverStore = (useWindow = false) => {
       fetchMailConfig() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/mail/config')
+            .get('/mail/config')
             .then((response) => {
               if (response.data) {
                 this.mailConfigData = response.data
@@ -94,7 +94,7 @@ export const useMailDriverStore = (useWindow = false) => {
       updateMailConfig(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/mail/config', data)
+            .post('/mail/config', data)
             .then((response) => {
               const notificationStore = useNotificationStore()
               if (response.data.success) {
@@ -120,7 +120,7 @@ export const useMailDriverStore = (useWindow = false) => {
       sendTestMail(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/mail/test', data)
+            .post('/mail/test', data)
             .then((response) => {
               const notificationStore = useNotificationStore()
               if (response.data.success) {

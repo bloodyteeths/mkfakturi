@@ -58,7 +58,7 @@ export const useCategoryStore = (useWindow = false) => {
       addCategory(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/categories', data)
+            .post('/categories', data)
             .then((response) => {
               this.categories.push(response.data.data)
               const notificationStore = useNotificationStore()

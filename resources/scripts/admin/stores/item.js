@@ -85,7 +85,7 @@ export const useItemStore = (useWindow = false) => {
       addItem(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/items', data)
+            .post('/items', data)
             .then((response) => {
               const notificationStore = useNotificationStore()
 

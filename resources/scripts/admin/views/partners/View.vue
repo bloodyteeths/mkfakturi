@@ -389,10 +389,19 @@ function onCompanyAssigned() {
 async function unassignCompany(companyId) {
   if (!confirm(t('partners.confirm_unassign'))) return
 
-  notificationStore.showNotification({
-    type: 'info',
-    message: 'Unassign Company - Coming in AC-09',
-  })
+  try {
+    await axios.delete(`/partners/${partner.value.id}/companies/${companyId}`)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('partners.company_unassigned_successfully'),
+    })
+    fetchPartner()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('partners.unassign_failed'),
+    })
+  }
 }
 
 onMounted(() => {

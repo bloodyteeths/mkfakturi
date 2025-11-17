@@ -98,7 +98,7 @@ export const useExpenseStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/expenses', formData)
+            .post('/expenses', formData)
             .then((response) => {
               this.expenses.push(response.data)
 

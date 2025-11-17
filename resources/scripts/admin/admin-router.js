@@ -144,6 +144,7 @@ const InvoicePublicPage = () =>
 
 // Console
 const ConsoleHome = () => import('@/js/pages/console/ConsoleHome.vue')
+const ConsoleCommissions = () => import('@/js/pages/console/Commissions.vue')
 
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
@@ -640,8 +641,14 @@ export default [
       {
         path: 'console',
         name: 'console.home',
-        meta: { isOwner: true }, // Partner/accountant console requires owner access
+        meta: { isOwner: true },
         component: ConsoleHome,
+      },
+      {
+        path: 'console/commissions',
+        name: 'console.commissions',
+        meta: { isOwner: true },
+        component: ConsoleCommissions,
       },
 
       // Banking

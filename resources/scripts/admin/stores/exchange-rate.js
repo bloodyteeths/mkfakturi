@@ -38,7 +38,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       fetchProviders(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/exchange-rate-providers', { params })
+            .get('/exchange-rate-providers', { params })
             .then((response) => {
               this.providers = response.data.data
               resolve(response)
@@ -85,7 +85,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       addProvider(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/exchange-rate-providers', data)
+            .post('/exchange-rate-providers', data)
             .then((response) => {
               notificationStore.showNotification({
                 type: 'success',
@@ -164,7 +164,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       fetchActiveCurrency(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/used-currencies', { params })
+            .get('/used-currencies', { params })
             .then((response) => {
               this.activeUsedCurrencies = response.data.activeUsedCurrencies
 
@@ -179,7 +179,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       fetchBulkCurrencies() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/currencies/used')
+            .get('/currencies/used')
             .then((response) => {
               this.bulkCurrencies = response.data.currencies.map((_m) => {
                 _m.exchange_rate = null
@@ -197,7 +197,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       updateBulkExchangeRate(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/currencies/bulk-update-exchange-rate', data)
+            .post('/currencies/bulk-update-exchange-rate', data)
             .then((response) => {
               resolve(response)
             })
@@ -222,7 +222,7 @@ export const useExchangeRateStore = (useWindow = false) => {
       getCurrencyConverterServers() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/config?key=currency_converter_servers')
+            .get('/config?key=currency_converter_servers')
             .then((response) => {
               resolve(response)
             })

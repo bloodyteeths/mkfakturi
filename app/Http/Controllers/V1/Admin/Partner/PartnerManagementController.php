@@ -306,6 +306,188 @@ class PartnerManagementController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Get available companies for assignment (AC-09)
+     * Returns companies not yet assigned to this partner
+     *
+     * @param int $partnerId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function availableCompanies($partnerId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+
+        // Get IDs of already assigned companies
+        $assignedCompanyIds = $partner->companies()->pluck('companies.id')->toArray();
+
+        // Get all companies except those already assigned
+        $companies = \App\Models\Company::whereNotIn('id', $assignedCompanyIds)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($companies);
+    }
+
+    /**
+     * Assign company to partner with permissions (AC-09)
+     *
+     * @param Request $request
+     * @param int $partnerId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function assignCompany(Request $request, $partnerId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+
+        $validated = $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'is_primary' => 'boolean',
+            'override_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'permissions' => 'required|array|min:1',
+            'permissions.*' => 'string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Check if already assigned
+            $exists = $partner->companies()->where('companies.id', $validated['company_id'])->exists();
+            if ($exists) {
+                return response()->json([
+                    'message' => 'Company is already assigned to this partner'
+                ], 422);
+            }
+
+            // If setting as primary, unset other primary flags
+            if ($validated['is_primary'] ?? false) {
+                DB::table('partner_company_links')
+                    ->where('partner_id', $partnerId)
+                    ->update(['is_primary' => false]);
+            }
+
+            // Assign company with permissions
+            $partner->companies()->attach($validated['company_id'], [
+                'is_primary' => $validated['is_primary'] ?? false,
+                'override_commission_rate' => $validated['override_commission_rate'],
+                'permissions' => json_encode($validated['permissions']),
+                'is_active' => true,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Company assigned successfully',
+                'partner' => $partner->fresh()->load('companies')
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to assign company',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update company assignment permissions (AC-09)
+     *
+     * @param Request $request
+     * @param int $partnerId
+     * @param int $companyId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCompanyAssignment(Request $request, $partnerId, $companyId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+
+        $validated = $request->validate([
+            'is_primary' => 'boolean',
+            'override_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'permissions' => 'required|array|min:1',
+            'permissions.*' => 'string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Check if company is assigned
+            $link = $partner->companies()->where('companies.id', $companyId)->first();
+            if (!$link) {
+                return response()->json([
+                    'message' => 'Company is not assigned to this partner'
+                ], 404);
+            }
+
+            // If setting as primary, unset other primary flags
+            if ($validated['is_primary'] ?? false) {
+                DB::table('partner_company_links')
+                    ->where('partner_id', $partnerId)
+                    ->where('company_id', '!=', $companyId)
+                    ->update(['is_primary' => false]);
+            }
+
+            // Update assignment
+            $partner->companies()->updateExistingPivot($companyId, [
+                'is_primary' => $validated['is_primary'] ?? false,
+                'override_commission_rate' => $validated['override_commission_rate'],
+                'permissions' => json_encode($validated['permissions']),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Company assignment updated successfully',
+                'partner' => $partner->fresh()->load('companies')
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to update assignment',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Unassign company from partner (AC-09)
+     *
+     * @param int $partnerId
+     * @param int $companyId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unassignCompany($partnerId, $companyId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+
+        DB::beginTransaction();
+        try {
+            // Check if company is assigned
+            $link = $partner->companies()->where('companies.id', $companyId)->first();
+            if (!$link) {
+                return response()->json([
+                    'message' => 'Company is not assigned to this partner'
+                ], 404);
+            }
+
+            // Detach company
+            $partner->companies()->detach($companyId);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Company unassigned successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to unassign company',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
 // CLAUDE-CHECKPOINT

@@ -131,7 +131,7 @@ export const usePaymentStore = (useWindow = false) => {
       addPayment(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/payments', data)
+            .post('/payments', data)
             .then((response) => {
               this.payments.push(response.data)
               const notificationStore = useNotificationStore()

@@ -130,7 +130,7 @@ export const useCustomerStore = (useWindow = false) => {
       addCustomer(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/customers', data)
+            .post('/customers', data)
             .then((response) => {
               this.customers.push(response.data.data)
 

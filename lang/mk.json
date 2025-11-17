@@ -141,7 +141,9 @@
         "select_date": "Избери датум",
         "days": "Денови",
         "created_at": "Креирано на",
-        "characters": "знаци"
+        "characters": "знаци",
+        "next": "Следно",
+        "paid": "Платено"
     },
     "dashboard": {
         "select_year": "Избери година",
@@ -186,6 +188,9 @@
         "overdue_invoices": "Доцнети Фактури",
         "total_overdue": "Вкупно Доцнети",
         "view_all_overdue": "Прикажи Сите Доцнети",
+        "recent_bills_card": {
+            "amount_due": "Износ за плаќање"
+        },
         "no_overdue_invoices": "Нема доцнети фактури"
     },
     "partner_dashboard": {
@@ -402,7 +407,17 @@
         "payment_history": "Историја на плаќања",
         "no_payments_yet": "Нема плаќања уште!",
         "view_all_payments": "Прикажи ги сите плаќања",
-        "record_payment": "Забележи плаќање"
+        "record_payment": "Забележи плаќање",
+        "action": "Акција",
+        "completed": "Завршено",
+        "date": "Датум",
+        "list_of_bills": "Листа на сметки",
+        "number": "Број",
+        "paid": "Платено",
+        "partially_paid": "Делумно платено",
+        "type_or_click": "Внеси или кликни",
+        "unpaid": "Неплатено",
+        "viewed": "Прегледано"
     },
     "receipts": {
         "scan_title": "Скенирање фискална сметка",
@@ -444,7 +459,8 @@
         "confirm_delete": "You will not be able to recover this Item | You will not be able to recover these Items",
         "created_message": "Item created successfully",
         "updated_message": "Item updated successfully",
-        "deleted_message": "Item deleted successfully | Items deleted successfully"
+        "deleted_message": "Item deleted successfully | Items deleted successfully",
+        "sku": "Шифра"
     },
     "estimates": {
         "title": "Estimates",
@@ -2313,7 +2329,20 @@
         "type_payments": "Плаќања",
         "type_expenses": "Трошоци",
         "auto_detected_with_confidence": "Автоматски детектирано со {confidence}% сигурност",
-        "manual_type_override": "Рачно избран тип"
+        "manual_type_override": "Рачно избран тип",
+        "auto_mapped": "Автоматски мапирано",
+        "customer_template": "Шаблон за клиенти",
+        "download_csv_templates": "Преземи CSV шаблони",
+        "download_csv_templates_description": "Преземи CSV шаблон датотеки за увоз на податоци",
+        "field_address": "Адреса",
+        "field_email": "Е-пошта",
+        "field_name": "Име",
+        "field_phone": "Телефон",
+        "field_vat_number": "ДДВ број",
+        "invoice_template": "Шаблон за фактури",
+        "invoice_with_items_template": "Шаблон за фактури со ставки",
+        "items_template": "Шаблон за артикли",
+        "start_tour": "Започни тура"
     },
     "import": {
         "csv_wizard_title": "CSV Увозник",

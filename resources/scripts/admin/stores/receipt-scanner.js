@@ -21,7 +21,7 @@ export const useReceiptScannerStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/receipts/scan', formData, {
+            .post('/receipts/scan', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data',
               },

@@ -23,7 +23,7 @@ export const useBillsInboxStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/bills', { params: query })
+            .get('/bills', { params: query })
             .then((response) => {
               this.drafts = response.data.data
               this.totalDrafts =

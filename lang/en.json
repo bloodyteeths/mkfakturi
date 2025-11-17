@@ -136,7 +136,9 @@
     },
     "copy_to_clipboard": "Copy to Clipboard",
     "created_at": "Created At",
-    "characters": "characters"
+    "characters": "characters",
+    "next": "Next",
+    "paid": "Paid"
   },
   "dashboard": {
     "select_year": "Select year",
@@ -172,6 +174,9 @@
       "amount_due": "Amount Due",
       "actions": "Actions",
       "view_all": "View All"
+    },
+    "recent_bills_card": {
+      "amount_due": "Amount Due"
     },
     "no_overdue_invoices": "No overdue invoices"
   },
@@ -383,7 +388,17 @@
     "payment_history": "Payment History",
     "no_payments_yet": "No payments yet!",
     "view_all_payments": "View All Payments",
-    "record_payment": "Record Payment"
+    "record_payment": "Record Payment",
+    "action": "Action",
+    "completed": "Completed",
+    "date": "Date",
+    "list_of_bills": "List of Bills",
+    "number": "Number",
+    "paid": "Paid",
+    "partially_paid": "Partially Paid",
+    "type_or_click": "Type or click",
+    "unpaid": "Unpaid",
+    "viewed": "Viewed"
   },
   "receipts": {
     "scan_title": "Scan Fiscal Receipt",
@@ -425,7 +440,8 @@
     "confirm_delete": "You will not be able to recover this Item | You will not be able to recover these Items",
     "created_message": "Item created successfully",
     "updated_message": "Item updated successfully",
-    "deleted_message": "Item deleted successfully | Items deleted successfully"
+    "deleted_message": "Item deleted successfully | Items deleted successfully",
+    "sku": "SKU"
   },
   "estimates": {
     "title": "Estimates",
@@ -2749,7 +2765,20 @@
     "clear_all": "Clear All",
     "mapping_saved_successfully": "Field mapping saved successfully",
     "import_completed_successfully": "Import completed successfully!",
-    "import_cancelled_successfully": "Import cancelled successfully"
+    "import_cancelled_successfully": "Import cancelled successfully",
+    "auto_mapped": "Auto Mapped",
+    "customer_template": "Customer Template",
+    "download_csv_templates": "Download CSV Templates",
+    "download_csv_templates_description": "Download CSV template files for importing data",
+    "field_address": "Address",
+    "field_email": "Email",
+    "field_name": "Name",
+    "field_phone": "Phone",
+    "field_vat_number": "VAT Number",
+    "invoice_template": "Invoice Template",
+    "invoice_with_items_template": "Invoice with Items Template",
+    "items_template": "Items Template",
+    "start_tour": "Start Tour"
   },
   "tour": {
     "previous": "Previous",

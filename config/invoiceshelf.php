@@ -485,7 +485,7 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'Support Tickets',
+            'title' => 'navigation.support_tickets',
             'group' => 3,
             'link' => '/admin/support/tickets',
             'icon' => 'TruckIcon',

@@ -26,7 +26,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/bills', { params })
+            .get('/bills', { params })
             .then((response) => {
               this.bills = response.data.data
               this.billTotalCount =
@@ -68,7 +68,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/bills', data)
+            .post('/bills', data)
             .then((response) => {
               this.bills.push(response.data.data)
               notificationStore.showNotification({
@@ -114,7 +114,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/bills/delete', { ids: [id] })
+            .post('/bills/delete', { ids: [id] })
             .then((response) => {
               const index = this.bills.findIndex((bill) => bill.id === id)
               this.bills.splice(index, 1)
@@ -136,7 +136,7 @@ export const useBillsStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/bills/delete', { ids: this.selectedBills })
+            .post('/bills/delete', { ids: this.selectedBills })
             .then((response) => {
               this.selectedBills.forEach((bill) => {
                 const index = this.bills.findIndex((_b) => _b.id === bill.id)

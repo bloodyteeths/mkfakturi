@@ -117,7 +117,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       addRecurringInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/recurring-invoices', data)
+            .post('/recurring-invoices', data)
             .then((response) => {
               this.recurringInvoices = [
                 ...this.recurringInvoices,
@@ -441,7 +441,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       fetchRecurringInvoiceFrequencyDate(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/recurring-invoice-frequency', { params })
+            .get('/recurring-invoice-frequency', { params })
             .then((response) => {
               this.newRecurringInvoice.next_invoice_at =
                 response.data.next_invoice_at

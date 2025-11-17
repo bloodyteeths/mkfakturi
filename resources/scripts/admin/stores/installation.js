@@ -172,7 +172,7 @@ export const useInstallationStore = (useWindow = false) => {
           axios.get(window.location.origin + '/sanctum/csrf-cookie').then((response) => {
             if (response) {
               axios
-                .post('/api/v1/installation/login')
+                .post('/installation/login')
                 .then((response) => {
                   companyStore.setSelectedCompany(response.data.company)
                   

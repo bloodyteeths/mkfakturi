@@ -234,7 +234,7 @@ export const useEstimateStore = (useWindow = false) => {
       addEstimate(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/estimates', data)
+            .post('/estimates', data)
             .then((response) => {
               this.estimates = [...this.estimates, response.data.estimate]
               const notificationStore = useNotificationStore()

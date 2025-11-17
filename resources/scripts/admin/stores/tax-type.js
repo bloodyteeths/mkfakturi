@@ -76,7 +76,7 @@ export const useTaxTypeStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/tax-types', data)
+            .post('/tax-types', data)
             .then((response) => {
               this.taxTypes.push(response.data.data)
               notificationStore.showNotification({

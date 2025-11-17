@@ -24,7 +24,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/suppliers', { params })
+            .get('/suppliers', { params })
             .then((response) => {
               this.suppliers = response.data.data
               this.supplierTotalCount =
@@ -86,7 +86,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/suppliers', data)
+            .post('/suppliers', data)
             .then((response) => {
               this.suppliers.push(response.data.data)
               notificationStore.showNotification({
@@ -134,7 +134,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/suppliers/delete', { ids: [id] })
+            .post('/suppliers/delete', { ids: [id] })
             .then((response) => {
               const idx = this.suppliers.findIndex((s) => s.id === id)
               if (idx !== -1) {
@@ -158,7 +158,7 @@ export const useSuppliersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/suppliers/delete', {
+            .post('/suppliers/delete', {
               ids: this.selectedSupplierIds,
             })
             .then((response) => {

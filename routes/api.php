@@ -879,6 +879,7 @@ Route::prefix('/v1')->group(function () {
             Route::get('/', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'index']);
             Route::get('/companies', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'companies']);
             Route::post('/switch', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'switchCompany']);
+            Route::get('/commissions', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'commissions']); // AC-10
         });
 
         // Partner Management Routes (AC-08)
@@ -892,7 +893,21 @@ Route::prefix('/v1')->group(function () {
             Route::get('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'show']);
             Route::put('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'update']);
             Route::delete('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'destroy']);
+
+            // AC-09: Company Assignment
+            Route::get('/{partner}/available-companies', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'availableCompanies']);
+            Route::post('/{partner}/companies', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'assignCompany']);
+            Route::put('/{partner}/companies/{company}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'updateCompanyAssignment']);
+            Route::delete('/{partner}/companies/{company}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'unassignCompany']);
         });
+
+        // Partner Invitation Routes (AC-11, AC-12, AC-14, AC-15)
+        // ----------------------------------
+        Route::post('/invitations/company-to-partner', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'companyInvitesPartner']);
+        Route::post('/invitations/{linkId}/respond', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'respondToInvitation']);
+        Route::post('/invitations/partner-to-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'partnerInvitesCompany']);
+        Route::post('/invitations/company-to-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'companyInvitesCompany']);
+        Route::post('/invitations/partner-to-partner', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'partnerInvitesPartner']);
     });
 });
 

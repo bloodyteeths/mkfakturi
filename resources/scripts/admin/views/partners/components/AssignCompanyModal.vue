@@ -173,15 +173,16 @@ function loadEditData() {
 }
 
 async function loadAvailableCompanies() {
-  // AC-09: Will implement full company loading
-  // For now, this is a stub
   loadingCompanies.value = true
   try {
-    // const response = await axios.get('/companies')
-    // availableCompanies.value = response.data
-    availableCompanies.value = []
+    const response = await axios.get(`/partners/${props.partnerId}/available-companies`)
+    availableCompanies.value = response.data
   } catch (error) {
     console.error('Failed to load companies:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partners.failed_to_load_companies'),
+    })
   } finally {
     loadingCompanies.value = false
   }
@@ -191,12 +192,28 @@ async function submitAssignment() {
   saving.value = true
 
   try {
-    // AC-09: Will implement actual API calls
-    // For now, just show success
-    notificationStore.showNotification({
-      type: 'info',
-      message: 'AC-09: Full implementation coming - assign/unassign endpoints',
-    })
+    const data = {
+      is_primary: formData.is_primary,
+      override_commission_rate: formData.override_commission_rate || null,
+      permissions: formData.permissions,
+    }
+
+    if (isEdit.value) {
+      // Update existing assignment
+      await axios.put(`/partners/${props.partnerId}/companies/${props.company.id}`, data)
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('partners.assignment_updated_successfully'),
+      })
+    } else {
+      // Create new assignment
+      data.company_id = formData.company_id
+      await axios.post(`/partners/${props.partnerId}/companies`, data)
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('partners.company_assigned_successfully'),
+      })
+    }
 
     emit('saved')
     closeModal()

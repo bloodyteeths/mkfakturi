@@ -71,7 +71,7 @@ export const useNotesStore = (useWindow = false) => {
       addNote(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/notes', data)
+            .post('/notes', data)
             .then((response) => {
               this.notes.push(response.data)
               resolve(response)

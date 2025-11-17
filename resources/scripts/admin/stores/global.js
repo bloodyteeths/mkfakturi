@@ -122,7 +122,7 @@ export const useGlobalStore = (useWindow = false) => {
           } else {
             this.areCurrenciesLoading = true
             axios
-              .get('/api/v1/currencies')
+              .get('/currencies')
               .then((response) => {
                 this.currencies = response.data.data.filter((currency) => {
                   return (currency.name = `${currency.code} - ${currency.name}`)
@@ -164,7 +164,7 @@ export const useGlobalStore = (useWindow = false) => {
             resolve(this.dateFormats)
           } else {
             axios
-              .get('/api/v1/date/formats')
+              .get('/date/formats')
               .then((response) => {
                 this.dateFormats = response.data.date_formats
                 resolve(response)
@@ -183,7 +183,7 @@ export const useGlobalStore = (useWindow = false) => {
             resolve(this.timeFormats)
           } else {
             axios
-              .get('/api/v1/time/formats')
+              .get('/time/formats')
               .then((response) => {
                 this.timeFormats = response.data.time_formats
                 resolve(response)
@@ -202,7 +202,7 @@ export const useGlobalStore = (useWindow = false) => {
             resolve(this.timeZones)
           } else {
             axios
-              .get('/api/v1/timezones')
+              .get('/timezones')
               .then((response) => {
                 this.timeZones = response.data.time_zones
                 resolve(response)
@@ -221,7 +221,7 @@ export const useGlobalStore = (useWindow = false) => {
             resolve(this.countries)
           } else {
             axios
-              .get('/api/v1/countries')
+              .get('/countries')
               .then((response) => {
                 this.countries = response.data.data
                 resolve(response)
@@ -259,7 +259,7 @@ export const useGlobalStore = (useWindow = false) => {
       updateGlobalSettings({ data, message }) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/settings', data)
+            .post('/settings', data)
             .then((response) => {
               Object.assign(this.globalSettings, data.settings)
 

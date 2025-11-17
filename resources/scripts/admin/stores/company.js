@@ -32,7 +32,7 @@ export const useCompanyStore = (useWindow = false) => {
       fetchBasicMailConfig() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/company/mail/config')
+            .get('/company/mail/config')
             .then((response) => {
               resolve(response)
             })
@@ -46,7 +46,7 @@ export const useCompanyStore = (useWindow = false) => {
       updateCompany(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put('/api/v1/company', data)
+            .put('/company', data)
             .then((response) => {
               const notificationStore = useNotificationStore()
 
@@ -72,7 +72,7 @@ export const useCompanyStore = (useWindow = false) => {
       updateCompanyLogo(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/company/upload-logo', data)
+            .post('/company/upload-logo', data)
             .then((response) => {
               resolve(response)
             })
@@ -86,7 +86,7 @@ export const useCompanyStore = (useWindow = false) => {
       addNewCompany(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/companies', data)
+            .post('/companies', data)
             .then((response) => {
               const notificationStore = useNotificationStore()
               notificationStore.showNotification({
@@ -105,7 +105,7 @@ export const useCompanyStore = (useWindow = false) => {
       fetchCompany(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/current-company', params)
+            .get('/current-company', params)
             .then((response) => {
               if (response.data.data) {
                 if (response.data.data.address) {
@@ -127,7 +127,7 @@ export const useCompanyStore = (useWindow = false) => {
       fetchUserCompanies() {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/companies')
+            .get('/companies')
             .then((response) => {
               resolve(response)
             })
@@ -141,7 +141,7 @@ export const useCompanyStore = (useWindow = false) => {
       fetchCompanySettings(settings) {
         return new Promise((resolve, reject) => {
           axios
-            .get('/api/v1/company/settings', {
+            .get('/company/settings', {
               params: {
                 settings,
               },
@@ -159,7 +159,7 @@ export const useCompanyStore = (useWindow = false) => {
       updateCompanySettings({ data, message }) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/company/settings', data)
+            .post('/company/settings', data)
             .then((response) => {
               Object.assign(this.selectedCompanySettings, data.settings)
 

@@ -82,7 +82,7 @@ export const useRoleStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/roles', data)
+            .post('/roles', data)
             .then((response) => {
               this.roles.push(response.data.role)
               notificationStore.showNotification({
