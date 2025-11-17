@@ -116,7 +116,7 @@ async function onSubmit() {
 
     // Redirect based on user role
     if (userRole === 'partner') {
-      router.push('/console')
+      router.push('/admin/console')
     } else {
       router.push('/admin/dashboard')
     }
