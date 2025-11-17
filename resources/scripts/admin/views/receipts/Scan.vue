@@ -34,15 +34,18 @@
             {{ $t('receipts.scanned_receipt') }}
           </BaseHeading>
 
-          <!-- Full-width, full-size image -->
-          <div class="border rounded-lg p-4" style="max-height: 80vh; overflow-y: scroll; background: #f9fafb;">
-            <img
-              :src="scanResult.image_url"
-              :alt="$t('receipts.receipt_image')"
-              style="width: 400px; height: auto; display: block; margin: 0 auto;"
-              @load="onImageLoad"
-              @error="onImageError"
-            />
+          <!-- Full-width, full-size image with better display for tall receipts -->
+          <div class="border rounded-lg overflow-hidden bg-gray-50">
+            <div class="overflow-auto" style="max-height: 70vh;">
+              <img
+                :src="scanResult.image_url"
+                :alt="$t('receipts.receipt_image')"
+                class="max-w-full h-auto mx-auto"
+                style="max-width: 600px;"
+                @load="onImageLoad"
+                @error="onImageError"
+              />
+            </div>
           </div>
           <p v-if="imageLoadError" class="text-red-600 text-sm mt-2">
             Failed to load image: {{ imageLoadError }}

@@ -137,7 +137,8 @@
         "previous_navigation": "Претходно",
         "next_navigation": "Следно",
         "close_calendar": "Затвори календар",
-        "select_date": "Избери датум"
+        "select_date": "Избери датум",
+        "days": "Денови"
     },
     "dashboard": {
         "select_year": "Избери година",
@@ -173,7 +174,15 @@
             "amount_due": "Доспеан износ",
             "actions": "Акции",
             "view_all": "Прикажи сè"
-        }
+        },
+        "quick_actions": "Брзи Акции",
+        "create_invoice_desc": "Креирај нова фактура за твоите клиенти",
+        "create_customer_desc": "Додај нов клиент на твојата листа",
+        "import_data_desc": "Увези податоци од CSV или други извори",
+        "view_reports_desc": "Прегледај финансиски извештаи и аналитика",
+        "overdue_invoices": "Доцнети Фактури",
+        "total_overdue": "Вкупно Доцнети",
+        "view_all_overdue": "Прикажи Сите Доцнети"
     },
     "partner_dashboard": {
         "recent_commissions_title": "Најнови Провизии",
@@ -635,7 +644,8 @@
         "xml_export_failed": "Неуспешен извез на XML фактура",
         "xml_validation_failed": "XML валидацијата не успеа",
         "xml_generation_failed": "Генерирањето на XML не успеа",
-        "details": "Детали"
+        "details": "Детали",
+        "overdue_by": "Доцнети за"
     },
     "e_invoice": {
         "title": "Е-Фактура",
@@ -990,6 +1000,7 @@
     },
     "reports": {
         "title": "Report",
+        "reports": "Извештаи",
         "from_date": "From Date",
         "to_date": "To Date",
         "status": "Status",
@@ -1990,6 +2001,7 @@
         "progress": "Напредок",
         "overall_progress": "Вкупен напредок",
         "upload_file": "Прикачи фајл",
+        "import_data": "Увези Податоци",
         "upload_file_description": "Изберете фајл за увоз од вашиот компјутер",
         "upload_file_description_detailed": "Изберете фајл со податоци од вашиот постоечки сметководствен систем. Поддржуваме CSV, Excel и XML формати од Onivo, Megasoft, Pantheon и други системи.",
         "map_fields": "Мапирај полиња",
