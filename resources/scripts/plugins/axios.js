@@ -4,6 +4,7 @@ import Ls from '@/scripts/services/ls.js'
 window.Ls = Ls
 window.axios = axios
 axios.defaults.withCredentials = true
+axios.defaults.baseURL = '/api/v1'
 
 axios.defaults.headers.common = {
   'X-Requested-With': 'XMLHttpRequest',

@@ -50,7 +50,7 @@ export const useTicketStore = defineStore({
         this.isFetchingTickets = true
 
         axios
-          .get('/api/v1/support/tickets', { params })
+          .get('/support/tickets', { params })
           .then((response) => {
             this.tickets = response.data.data
             this.ticketTotalCount = response.data.meta.ticket_total_count
@@ -74,7 +74,7 @@ export const useTicketStore = defineStore({
         this.isFetchingTicket = true
 
         axios
-          .get(`/api/v1/support/tickets/${id}`)
+          .get(`/support/tickets/${id}`)
           .then((response) => {
             this.currentTicket = response.data.data
             resolve(response)
@@ -97,7 +97,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .post('/api/v1/support/tickets', data)
+          .post('/support/tickets', data)
           .then((response) => {
             this.tickets.unshift(response.data.data)
             this.ticketTotalCount++
@@ -124,7 +124,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .put(`/api/v1/support/tickets/${id}`, data)
+          .put(`/support/tickets/${id}`, data)
           .then((response) => {
             const index = this.tickets.findIndex((t) => t.id === id)
             if (index !== -1) {
@@ -157,7 +157,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .delete(`/api/v1/support/tickets/${id}`)
+          .delete(`/support/tickets/${id}`)
           .then((response) => {
             const index = this.tickets.findIndex((t) => t.id === id)
             if (index !== -1) {
@@ -187,7 +187,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .post('/api/v1/support/tickets/delete', { ids })
+          .post('/support/tickets/delete', { ids })
           .then((response) => {
             ids.forEach((id) => {
               const index = this.tickets.findIndex((t) => t.id === id)
@@ -219,7 +219,7 @@ export const useTicketStore = defineStore({
     fetchTicketMessages(ticketId) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/v1/support/tickets/${ticketId}/messages`)
+          .get(`/support/tickets/${ticketId}/messages`)
           .then((response) => {
             if (this.currentTicket && this.currentTicket.id === ticketId) {
               this.currentTicket.messages = response.data.data
@@ -241,7 +241,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .post(`/api/v1/support/tickets/${ticketId}/messages`, data)
+          .post(`/support/tickets/${ticketId}/messages`, data)
           .then((response) => {
             if (this.currentTicket && this.currentTicket.id === ticketId) {
               if (!this.currentTicket.messages) {
@@ -272,7 +272,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .put(`/api/v1/support/tickets/${ticketId}/messages/${messageId}`, data)
+          .put(`/support/tickets/${ticketId}/messages/${messageId}`, data)
           .then((response) => {
             if (this.currentTicket && this.currentTicket.id === ticketId) {
               const index = this.currentTicket.messages.findIndex((m) => m.id === messageId)
@@ -303,7 +303,7 @@ export const useTicketStore = defineStore({
 
       return new Promise((resolve, reject) => {
         axios
-          .delete(`/api/v1/support/tickets/${ticketId}/messages/${messageId}`)
+          .delete(`/support/tickets/${ticketId}/messages/${messageId}`)
           .then((response) => {
             if (this.currentTicket && this.currentTicket.id === ticketId) {
               const index = this.currentTicket.messages.findIndex((m) => m.id === messageId)
