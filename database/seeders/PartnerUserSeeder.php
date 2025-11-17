@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Partner;
 
 class PartnerUserSeeder extends Seeder
 {
@@ -34,14 +35,32 @@ class PartnerUserSeeder extends Seeder
 
         $this->command->info('✓ Partner user created successfully');
 
-        // Attach to first company
+        // Create Partner record
+        $partner = Partner::create([
+            'user_id' => $user->id,
+            'name' => 'Partner Demo',
+            'email' => 'partner@demo.mk',
+            'company_name' => 'Demo Accounting Bureau',
+            'commission_rate' => 10.00,
+            'is_active' => true,
+            'kyc_status' => 'approved',
+        ]);
+
+        $this->command->info('✓ Partner record created successfully');
+
+        // Link partner to first company (as accountant managing that company)
         $company = Company::first();
 
         if ($company) {
-            $user->companies()->attach($company->id);
-            $this->command->info("✓ Partner attached to company: {$company->name}");
+            $partner->companies()->attach($company->id, [
+                'is_primary' => true,
+                'is_active' => true,
+                'override_commission_rate' => null,
+                'permissions' => json_encode(['view_all', 'create_invoices', 'manage_customers']),
+            ]);
+            $this->command->info("✓ Partner linked to company: {$company->name}");
         } else {
-            $this->command->warn('⚠ No company found to attach partner to');
+            $this->command->warn('⚠ No company found to link partner to');
         }
 
         $this->command->info('');
