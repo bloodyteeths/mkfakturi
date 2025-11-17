@@ -259,7 +259,7 @@ const accountOptions = computed(() => {
 const fetchConnectedAccounts = async () => {
   isLoadingAccounts.value = true
   try {
-    const response = await axios.get('/api/v1/banking/accounts')
+    const response = await axios.get('/banking/accounts')
     connectedAccounts.value = response.data.data || []
   } catch (error) {
     console.error('Failed to fetch connected accounts:', error)

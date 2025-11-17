@@ -265,7 +265,7 @@ const fetchTransactions = async ({ page, limit, search, orderByField, orderBy })
       ...props.filters
     }
 
-    const response = await axios.get('/api/v1/banking/transactions', { params })
+    const response = await axios.get('/banking/transactions', { params })
 
     return {
       data: response.data.data || [],

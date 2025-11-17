@@ -244,7 +244,7 @@ const statusColor = computed(() => {
 // Methods
 async function loadAiSettings() {
   try {
-    const response = await axios.get('/api/v1/ai/settings')
+    const response = await axios.get('/ai/settings')
 
     // Update settings from API response
     if (response.data.settings) {
@@ -275,7 +275,7 @@ async function loadAiSettings() {
 
 async function updateAiSettings() {
   try {
-    await axios.post('/api/v1/ai/settings', {
+    await axios.post('/ai/settings', {
       settings: aiSettings.value
     })
     
@@ -295,7 +295,7 @@ async function updateAiSettings() {
 async function runAnalysis() {
   isRunningAnalysis.value = true
   try {
-    await axios.post('/api/v1/ai/insights/generate')
+    await axios.post('/ai/insights/generate')
 
     notificationStore.showNotification({
       type: 'success',

@@ -347,7 +347,7 @@ export const useImportStore = defineStore('import', {
           formData.append('file', file)
           formData.append('type', importType)
 
-          const response = await axios.post('/api/v1/admin/imports', formData, {
+          const response = await axios.post('/admin/imports', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },

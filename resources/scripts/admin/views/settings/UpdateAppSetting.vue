@@ -289,7 +289,7 @@ window.addEventListener('beforeunload', (event) => {
 
 // Created
 
-axios.get('/api/v1/app/version').then((res) => {
+axios.get('/app/version').then((res) => {
   currentVersion.value = res.data.version
   insiderChannel.value = res.data.channel === 'insider'
 })
@@ -332,7 +332,7 @@ function statusClass(step) {
 async function checkUpdate() {
   try {
     isCheckingforUpdate.value = true
-    let response = await axios.get('/api/v1/check/update', {
+    let response = await axios.get('/check/update', {
       params: {
         channel: insiderChannel ? 'insider' : ''
       }

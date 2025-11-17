@@ -147,7 +147,7 @@ const startOAuthFlow = async () => {
 
   try {
     // Get the OAuth authorization URL from backend
-    const response = await axios.get('/api/v1/banking/oauth/start', {
+    const response = await axios.get('/banking/oauth/start', {
       params: {
         provider: selectedBank.value
       }

@@ -141,7 +141,7 @@ async function onSubmit(e) {
         token: route.params.token,
       }
       isLoading.value = true
-      let res = await axios.post('/api/v1/auth/reset/password', data)
+      let res = await axios.post('/auth/reset/password', data)
       isLoading.value = false
       if (res.data) {
         notificationStore.showNotification({

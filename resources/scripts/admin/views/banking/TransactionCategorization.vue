@@ -200,7 +200,7 @@ const categoryOptions = computed(() => {
 const fetchCategories = async () => {
   isLoadingCategories.value = true
   try {
-    const response = await axios.get('/api/v1/categories')
+    const response = await axios.get('/categories')
     categories.value = response.data.data || []
   } catch (error) {
     console.error('Failed to fetch categories:', error)
@@ -221,7 +221,7 @@ const fetchAiSuggestion = async () => {
 
   try {
     // Call AI categorization endpoint (using MCP tool or internal AI)
-    const response = await axios.post('/api/v1/banking/transactions/suggest-category', {
+    const response = await axios.post('/banking/transactions/suggest-category', {
       transaction_id: props.transaction.id,
       description: props.transaction.description,
       amount: props.transaction.amount,

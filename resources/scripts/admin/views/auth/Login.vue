@@ -111,7 +111,7 @@ async function onSubmit() {
     await authStore.login(authStore.loginData)
 
     // Fetch user data to check role and determine redirect
-    const response = await axios.get('/api/v1/bootstrap')
+    const response = await axios.get('/bootstrap')
     const userRole = response.data?.user?.role
 
     // Redirect based on user role

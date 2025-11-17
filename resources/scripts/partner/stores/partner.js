@@ -22,7 +22,7 @@ export const usePartnerStore = defineStore('partner', () => {
   const loadDashboardStats = async () => {
     isLoading.value = true
     try {
-      const { data } = await axios.get('/api/v1/partner/dashboard')
+      const { data } = await axios.get('/partner/dashboard')
 
       // Check if data is mocked
       if (data.mocked) {
@@ -61,7 +61,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const loadRecentCommissions = async () => {
     try {
-      const { data } = await axios.get('/api/v1/partner/commissions')
+      const { data } = await axios.get('/partner/commissions')
 
       if (data.mocked) {
         console.warn('⚠️ Partner commissions using mocked data')
@@ -77,7 +77,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const loadClients = async () => {
     try {
-      const { data } = await axios.get('/api/v1/partner/clients')
+      const { data } = await axios.get('/partner/clients')
 
       if (data.mocked) {
         console.warn('⚠️ Partner clients using mocked data')

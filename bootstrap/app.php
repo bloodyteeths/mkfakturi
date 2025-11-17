@@ -97,6 +97,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'performance' => \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
             'redirect-if-installed' => \App\Http\Middleware\RedirectIfInstalled::class,
             'redirect-if-unauthenticated' => \App\Http\Middleware\RedirectIfUnauthorized::class,
+            'super-admin' => \App\Http\Middleware\SuperAdminMiddleware::class, // AC-08: Super admin only routes
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
         ]);
         // CLAUDE-CHECKPOINT

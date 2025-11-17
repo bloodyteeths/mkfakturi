@@ -184,6 +184,74 @@ class Partner extends Model
             ->where('is_clawed_back', false)
             ->sum('amount');
     }
+
+    /**
+     * Check if partner has specific permission for a company (AC-13)
+     *
+     * @param int $companyId
+     * @param \App\Enums\PartnerPermission $permission
+     * @return bool
+     */
+    public function hasPermission(int $companyId, \App\Enums\PartnerPermission $permission): bool
+    {
+        $link = $this->companies()
+            ->where('companies.id', $companyId)
+            ->first();
+
+        if (!$link) {
+            return false;
+        }
+
+        $permissions = $link->pivot->permissions ?? [];
+
+        // Decode JSON if it's a string
+        if (is_string($permissions)) {
+            $permissions = json_decode($permissions, true) ?? [];
+        }
+
+        // Full access overrides everything
+        if (in_array(\App\Enums\PartnerPermission::FULL_ACCESS->value, $permissions)) {
+            return true;
+        }
+
+        return in_array($permission->value, $permissions);
+    }
+
+    /**
+     * Check if partner has any of the specified permissions for a company
+     *
+     * @param int $companyId
+     * @param array<\App\Enums\PartnerPermission> $permissions
+     * @return bool
+     */
+    public function hasAnyPermission(int $companyId, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($companyId, $permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if partner has all of the specified permissions for a company
+     *
+     * @param int $companyId
+     * @param array<\App\Enums\PartnerPermission> $permissions
+     * @return bool
+     */
+    public function hasAllPermissions(int $companyId, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if (!$this->hasPermission($companyId, $permission)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 // CLAUDE-CHECKPOINT

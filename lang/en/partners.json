@@ -1,0 +1,104 @@
+{
+  "title": "Partner | Partners",
+  "name": "Partner Name",
+  "email": "Email",
+  "phone": "Phone Number",
+  "company_name": "Company Name",
+  "tax_id": "Tax ID",
+  "registration_number": "Registration Number",
+  "bank_account": "Bank Account",
+  "bank_name": "Bank Name",
+  "commission_rate": "Commission Rate",
+  "commission_rate_help": "Default commission rate for this partner (can be overridden per company)",
+  "commission_rate_override": "Commission Rate Override",
+  "commission_rate_override_help": "Leave empty to use partner's default rate",
+  "kyc_status": "KYC Status",
+  "notes": "Internal Notes",
+  "internal_notes": "Internal Notes",
+  "notes_placeholder": "Add notes about this partner (visible only to admins)",
+
+  "basic_info": "Basic Information",
+  "banking_info": "Banking Information",
+  "commission_status": "Commission & Status",
+  "credentials": "Login Credentials",
+  "password": "Password",
+  "password_confirmation": "Confirm Password",
+
+  "new_partner": "New Partner",
+  "add_new_partner": "Add New Partner",
+  "edit_partner": "Edit Partner",
+  "save_partner": "Save Partner",
+  "update_partner": "Update Partner",
+  "deactivate_partner": "Deactivate Partner",
+  "confirm_deactivate": "Are you sure you want to deactivate this partner?",
+  "created_successfully": "Partner created successfully",
+  "updated_successfully": "Partner updated successfully",
+  "deactivated_successfully": "Partner deactivated successfully",
+  "deactivate_failed": "Failed to deactivate partner",
+  "fetch_failed": "Failed to load partner",
+  "save_failed": "Failed to save partner",
+
+  "no_partners": "No Partners Yet",
+  "list_description": "Create and manage your accounting partners",
+  "search_placeholder": "Search by name, email, or company name",
+
+  "total_earnings": "Total Earnings",
+  "pending_payout": "Pending Payout",
+  "companies_managed": "Companies Managed",
+  "effective_commission_rate": "Effective Commission Rate",
+
+  "stats": {
+    "total_partners": "Total Partners",
+    "active_partners": "Active Partners",
+    "partner_plus": "Partner Plus",
+    "pending_kyc": "Pending KYC"
+  },
+
+  "kyc": {
+    "pending": "Pending",
+    "under_review": "Under Review",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+
+  "tabs": {
+    "info": "Information",
+    "companies": "Companies",
+    "commissions": "Commissions",
+    "payouts": "Payouts"
+  },
+
+  "assign_company": "Assign Company",
+  "edit_company_assignment": "Edit Company Assignment",
+  "unassign": "Unassign",
+  "confirm_unassign": "Are you sure you want to unassign this company?",
+  "select_company": "Select Company",
+  "search_company": "Search for a company",
+  "use_default_rate": "Use default rate",
+  "set_as_primary_company": "Set as Primary Company",
+  "primary": "Primary",
+  "edit_permissions": "Edit Permissions",
+  "update_assignment": "Update Assignment",
+  "assignment_failed": "Failed to update company assignment",
+  "no_companies_assigned": "No companies assigned yet",
+  "permissions_label": "permissions",
+
+  "permissions": {
+    "full_access": "Full Access",
+    "full_access_description": "Grant complete access to all features and data",
+    "selected_permissions": "Selected Permissions",
+    "invoices": "Invoices",
+    "customers": "Customers",
+    "banking": "Banking",
+    "reports": "Reports",
+    "payroll": "Payroll",
+    "settings": "Settings"
+  },
+
+  "monthly_commissions": "Monthly Commissions",
+  "no_commissions": "No commission data available",
+  "month": "Month",
+  "amount": "Amount",
+  "date": "Date",
+  "no_payouts": "No payout history available"
+}

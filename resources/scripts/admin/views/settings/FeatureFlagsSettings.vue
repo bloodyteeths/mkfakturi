@@ -163,7 +163,7 @@ async function fetchFeatureFlags() {
   isLoading.value = true
 
   try {
-    const response = await axios.get('/api/v1/settings/feature-flags')
+    const response = await axios.get('/settings/feature-flags')
     featureFlags.value = response.data.flags || []
   } catch (error) {
     handleError(error)

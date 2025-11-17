@@ -880,6 +880,19 @@ Route::prefix('/v1')->group(function () {
             Route::get('/companies', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'companies']);
             Route::post('/switch', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'switchCompany']);
         });
+
+        // Partner Management Routes (AC-08)
+        // Super Admin only - manage partners, assign companies, set permissions
+        // ----------------------------------
+        Route::prefix('/partners')->middleware(['super-admin'])->group(function () {
+            Route::get('/stats', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'stats']);
+            Route::get('/permissions', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'permissions']); // AC-13
+            Route::get('/', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'store']);
+            Route::get('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'show']);
+            Route::put('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'update']);
+            Route::delete('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'destroy']);
+        });
     });
 });
 

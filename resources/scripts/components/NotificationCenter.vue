@@ -258,7 +258,7 @@ function togglePanel() {
 async function fetchNotifications() {
   try {
     loading.value = true
-    const response = await axios.get('/api/v1/notifications')
+    const response = await axios.get('/notifications')
     notifications.value = response.data.data || []
   } catch (error) {
     console.error('Failed to fetch notifications:', error)
@@ -303,7 +303,7 @@ async function markAsRead(notificationId) {
  */
 async function markAllAsRead() {
   try {
-    await axios.post('/api/v1/notifications/mark-all-read')
+    await axios.post('/notifications/mark-all-read')
 
     // Update local state
     notifications.value.forEach(n => {
@@ -333,7 +333,7 @@ async function removeNotification(notificationId) {
  */
 async function clearAll() {
   try {
-    await axios.post('/api/v1/notifications/clear')
+    await axios.post('/notifications/clear')
     notifications.value = []
   } catch (error) {
     console.error('Failed to clear notifications:', error)

@@ -165,7 +165,7 @@ async function loadCertificates() {
   loadingCertificates.value = true
   try {
     console.log('[EInvoiceSignModal] Loading certificates...')
-    const response = await axios.get('/api/v1/certificates/current')
+    const response = await axios.get('/certificates/current')
     console.log('[EInvoiceSignModal] API Response:', response.data)
 
     certificates.value = response.data.data || []

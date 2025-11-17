@@ -74,7 +74,7 @@ async function onSubmit(e) {
   if (!v$.value.$invalid) {
     try {
       isLoading.value = true
-      let res = await axios.post('/api/v1/auth/password/email', formData)
+      let res = await axios.post('/auth/password/email', formData)
       if (res.data) {
         notificationStore.showNotification({
           type: 'success',

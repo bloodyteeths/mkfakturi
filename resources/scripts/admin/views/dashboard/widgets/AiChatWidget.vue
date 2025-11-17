@@ -144,7 +144,7 @@ async function sendMessage() {
   isLoading.value = true
   try {
     console.log('[AI Chat] Sending message:', messageToSend)
-    const response = await axios.post('/api/v1/ai/insights/chat', {
+    const response = await axios.post('/ai/insights/chat', {
       message: messageToSend
     })
     console.log('[AI Chat] Chat response:', response.data)
