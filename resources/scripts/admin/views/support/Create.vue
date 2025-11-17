@@ -310,7 +310,14 @@ const submitTicket = async () => {
     const data = new FormData()
     data.append('title', formData.title)
     data.append('message', formData.message)
-    data.append('priority', formData.priority.value)
+
+    // Extract priority value - handle both object and string cases
+    const priorityValue = formData.priority?.value || formData.priority || 'normal'
+
+    // Only append priority if it's a valid value
+    if (priorityValue && ['low', 'normal', 'high', 'urgent'].includes(priorityValue)) {
+      data.append('priority', priorityValue)
+    }
 
     // Add categories
     if (formData.categories.length) {
