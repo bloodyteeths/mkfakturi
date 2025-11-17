@@ -107,17 +107,30 @@ const displayedInvoices = computed(() => {
 })
 
 const totalOverdueAmount = computed(() => {
-  return overdueInvoices.value.reduce((sum, invoice) => {
+  const total = overdueInvoices.value.reduce((sum, invoice) => {
     return sum + parseFloat(invoice.due_amount || 0)
   }, 0)
+  // Ensure we return a clean number without any formatting
+  return parseFloat(total.toFixed(2))
 })
 
 function getDaysOverdue(dueDate) {
+  if (!dueDate) return 0
+  
+  // Ensure the date is in the correct format (handle both string and Date objects)
   const due = new Date(dueDate)
   const today = new Date()
-  const diffTime = today - due
+  
+  // Set both dates to the same time to compare just the dates
+  today.setHours(0, 0, 0, 0)
+  due.setHours(0, 0, 0, 0)
+  
+  // Calculate difference in days
+  const diffTime = today.getTime() - due.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays > 0 ? diffDays : 0
+  
+  // Return 0 if the invoice is not yet due
+  return Math.max(0, diffDays)
 }
 
 async function fetchOverdueInvoices() {
@@ -131,11 +144,24 @@ async function fetchOverdueInvoices() {
       limit: 10, // Fetch top 10 overdue
     })
 
+    if (!response?.data?.data) {
+      console.error('Invalid response format:', response)
+      overdueInvoices.value = []
+      return
+    }
+
     // Filter to only truly overdue invoices (due_date < today)
     const today = new Date()
+    today.setHours(0, 0, 0, 0) // Normalize to start of day
+    
     overdueInvoices.value = response.data.data.filter(invoice => {
+      if (!invoice.due_date) return false
+      
       const dueDate = new Date(invoice.due_date)
-      return dueDate < today && parseFloat(invoice.due_amount) > 0
+      dueDate.setHours(0, 0, 0, 0) // Normalize to start of day
+      
+      const amount = parseFloat(invoice.due_amount || 0)
+      return dueDate < today && amount > 0
     })
   } catch (error) {
     console.error('Error fetching overdue invoices:', error)
