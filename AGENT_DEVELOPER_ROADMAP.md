@@ -142,6 +142,15 @@ MAX_TOKENS_HINT: 500
   - LastUpdate: 2025-11-17T10:00:00Z
   - Notes: Implemented multi-agent orchestration for parallel AI task execution, demonstrating a comprehensive financial report workflow.
 
+- Task: Make Support Ticket System visible in UI
+  - Subtasks:
+    - Add 'Support Tickets' entry to `config/invoiceshelf.php` main menu.
+    - Add 'navigation.support_tickets' translation key to `lang/en.json`.
+    - Add 'navigation.support_tickets' translation key to `lang/mk.json`.
+  - Status: Completed
+  - LastUpdate: 2025-11-17T10:00:00Z
+  - Notes: Added menu item to config and translations to language files to enable UI visibility.
+
 ## Self-Audit Report
 
 - TOKEN_ESTIMATE: 900

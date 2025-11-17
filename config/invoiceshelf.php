@@ -524,6 +524,16 @@ return [
             'ability' => '',
             'model' => '',
         ],
+        [
+            'title' => 'navigation.support_tickets',
+            'group' => 3,
+            'link' => '/admin/support',
+            'icon' => 'LifebuoyIcon',
+            'name' => 'Support Tickets',
+            'owner_only' => false,
+            'ability' => 'viewAny',
+            'model' => \Coderflex\LaravelTicket\Models\Ticket::class,
+        ],
     ],
 
     /*

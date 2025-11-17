@@ -22,7 +22,8 @@
     "modules": "Modules",
     "migration_wizard": "Migration Wizard",
     "tax_tools": "Tax Tools",
-    "tax_reports": "Tax Reports"
+    "tax_reports": "Tax Reports",
+    "support_tickets": "Support Tickets"
   },
   "general": {
     "company_name": "Company Name",

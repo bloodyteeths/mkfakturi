@@ -22,9 +22,9 @@
         "modules": "Модули",
         "migration_wizard": "Мастер за миграција",
         "tax_tools": "Даночни алатки",
-        "tax_reports": "Даночни извештаи"
-    },
-    "general": {
+            "tax_reports": "Даночни извештаи",
+            "support_tickets": "Поддршка"
+          },    "general": {
         "company_name": "Име на компанија",
         "no_company_selected": "Нема избрано компанија",
         "add_company": "Додај компанија",
