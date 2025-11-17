@@ -34,11 +34,17 @@
             </p>
           </div>
           <div class="text-right">
-            <BaseFormatMoney
-              :amount="totalOverdueAmount"
-              :currency="defaultCurrency"
-              class="text-lg font-bold text-red-700"
-            />
+            <div>
+              <div v-if="totalOverdueAmount !== null" class="text-lg font-bold text-red-700">
+                {{ formatAmount(totalOverdueAmount) }}
+              </div>
+              <div v-else class="text-sm text-gray-500">
+                Calculating...
+              </div>
+              <div class="text-xs text-gray-500">
+                {{ overdueInvoices.length }} {{ $t('invoices.invoice', overdueInvoices.length) }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -92,6 +98,23 @@ import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import LoadingSkeleton from '@/scripts/admin/components/LoadingSkeleton.vue'
 
+// Helper function to format amounts with currency
+function formatAmount(amount) {
+  if (amount === null || amount === undefined) return '0.00'
+  
+  const numericAmount = typeof amount === 'string' 
+    ? parseFloat(amount.replace(/[^0-9.,]/g, '').replace(',', '.'))
+    : Number(amount)
+    
+  if (isNaN(numericAmount)) return '0.00'
+  
+  // Format with 2 decimal places and thousand separators
+  return numericAmount.toLocaleString('mk-MK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
 const invoiceStore = useInvoiceStore()
 const globalStore = useGlobalStore()
 
@@ -107,11 +130,27 @@ const displayedInvoices = computed(() => {
 })
 
 const totalOverdueAmount = computed(() => {
+  if (!overdueInvoices.value.length) return 0
+  
+  // Extract the raw amount from each invoice, handling different possible formats
   const total = overdueInvoices.value.reduce((sum, invoice) => {
-    return sum + parseFloat(invoice.due_amount || 0)
+    // Try different possible amount properties
+    const amount = invoice.due_amount || invoice.amount_due || invoice.total || 0
+    const numericAmount = typeof amount === 'string' 
+      ? parseFloat(amount.replace(/[^0-9.,]/g, '').replace(',', '.')) 
+      : Number(amount)
+      
+    console.log(`Invoice ${invoice.invoice_number} amount:`, { 
+      raw: amount, 
+      parsed: numericAmount,
+      currency: invoice.currency
+    })
+    
+    return sum + (isNaN(numericAmount) ? 0 : numericAmount)
   }, 0)
-  // Ensure we return a clean number without any formatting
-  return parseFloat(total.toFixed(2))
+  
+  console.log('Calculated total:', total)
+  return total
 })
 
 function getDaysOverdue(dueDate) {
@@ -136,6 +175,7 @@ function getDaysOverdue(dueDate) {
 async function fetchOverdueInvoices() {
   isLoading.value = true
   try {
+    console.log('Fetching overdue invoices...')
     // Fetch invoices with DUE status (overdue)
     const response = await invoiceStore.fetchInvoices({
       status: 'DUE',
@@ -143,6 +183,8 @@ async function fetchOverdueInvoices() {
       orderBy: 'asc',
       limit: 10, // Fetch top 10 overdue
     })
+    
+    console.log('API Response:', JSON.parse(JSON.stringify(response)))
 
     if (!response?.data?.data) {
       console.error('Invalid response format:', response)
@@ -154,15 +196,31 @@ async function fetchOverdueInvoices() {
     const today = new Date()
     today.setHours(0, 0, 0, 0) // Normalize to start of day
     
-    overdueInvoices.value = response.data.data.filter(invoice => {
-      if (!invoice.due_date) return false
-      
-      const dueDate = new Date(invoice.due_date)
-      dueDate.setHours(0, 0, 0, 0) // Normalize to start of day
-      
+    const processedInvoices = response.data.data.map(invoice => {
+      const dueDate = invoice.due_date ? new Date(invoice.due_date) : null
       const amount = parseFloat(invoice.due_amount || 0)
-      return dueDate < today && amount > 0
+      const isOverdue = dueDate ? (new Date(dueDate) < today) : false
+      
+      return {
+        ...invoice,
+        _processed: {
+          dueDate: dueDate,
+          formattedDueDate: dueDate ? dueDate.toISOString().split('T')[0] : 'N/A',
+          amount: amount,
+          isOverdue: isOverdue,
+          daysOverdue: isOverdue ? getDaysOverdue(dueDate) : 0
+        }
+      }
     })
+    
+    console.log('Processed Invoices:', JSON.parse(JSON.stringify(processedInvoices)))
+    
+    // Filter to only show truly overdue invoices with positive amounts
+    overdueInvoices.value = processedInvoices.filter(invoice => {
+      return invoice._processed.isOverdue && invoice._processed.amount > 0
+    })
+    
+    console.log('Filtered Overdue Invoices:', JSON.parse(JSON.stringify(overdueInvoices.value)))
   } catch (error) {
     console.error('Error fetching overdue invoices:', error)
     overdueInvoices.value = []
