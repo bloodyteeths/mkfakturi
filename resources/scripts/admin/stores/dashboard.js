@@ -41,7 +41,7 @@ export const useDashboardStore = (useWindow = false) => {
       loadData(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/dashboard`, { params })
+            .get(`/dashboard`, { params })
             .then((response) => {
               if (response.data) {
                 // Stats

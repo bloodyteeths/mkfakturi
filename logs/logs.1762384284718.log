@@ -1,87 +1,786 @@
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:17] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:17] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:43] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 22:45:43] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 22:45:43] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 22:45:43] production.WARNING: Slow operation detected {"operation":"req_69165f96eee2b","execution_time_ms":626.04,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
-[2025-11-13 22:45:43] production.WARNING: Slow request detected {"operation":"req_69165f96eee2b","execution_time_ms":626.04,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-13 22:45:52] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:52] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:52] production.INFO: [ImportController] Upload started {"has_file":true,"type":"invoices","user_id":2} 
-[2025-11-13 22:45:52] production.INFO: [ImportController] User and company loaded {"user_id":2,"company_id":"2"} 
-[2025-11-13 22:45:52] production.INFO: [ImportController] Storing file {"filename":"50577f75-9049-44bf-8e91-af495a1ec265.csv","original_name":"07_happy_path_invoices.csv","size":789} 
-[2025-11-13 22:45:52] production.INFO: [ImportController] File stored successfully {"path":"imports/2/50577f75-9049-44bf-8e91-af495a1ec265.csv"} 
-[2025-11-13 22:45:52] production.INFO: [ImportController] ImportJob created {"id":33} 
-[2025-11-13 22:45:52] production.INFO: [ImportController] Upload completed successfully {"import_id":33,"response_data":{"id":33,"name":"Import from 07_happy_path_invoices.csv","type":"invoices","status":"pending","source_system":null,"file_type":"csv","file_info":{"size":789,"mime_type":"text/csv","original_name":"07_happy_path_invoices.csv"},"file_path":"imports/2/50577f75-9049-44bf-8e91-af495a1ec265.csv","mapping_config":null,"validation_rules":null,"total_records":0,"processed_records":0,"successful_records":0,"failed_records":0,"started_at":null,"completed_at":null,"error_message":null,"error_details":null,"summary":null,"company_id":2,"creator_id":2,"created_at":"2025-11-13T22:45:52.000000Z","updated_at":"2025-11-13T22:45:52.000000Z","formattedCreatedAt":"13.11.2025","formattedStartedAt":null,"formattedCompletedAt":null,"progressPercentage":0,"duration":null,"isInProgress":false,"canRetry":false}} 
-[2025-11-13 22:45:53] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:45:53] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:45:53] production.INFO: [ImportController] show() - detecting fields {"import_id":"33","file_path":"imports/2/50577f75-9049-44bf-8e91-af495a1ec265.csv"} 
-[2025-11-13 22:45:53] production.INFO: [ImportController] File path constructed {"file_path":"/var/www/html/storage/app/imports/2/50577f75-9049-44bf-8e91-af495a1ec265.csv","exists":true} 
-[2025-11-13 22:45:53] production.INFO: [ImportController] Using intelligent mapping system {"import_id":"33","type":"invoices"} 
-[2025-11-13 22:45:53] production.INFO: Using intelligent field mapping system {"entity_type":"invoices","company_id":2,"fields_count":10,"sample_rows":3} 
-[2025-11-13 22:45:53] production.INFO: Starting intelligent field matching {"csv_fields":10,"sample_rows":3,"entity_type":"invoice","company_id":2} 
-[2025-11-13 22:45:53] production.DEBUG: Mapping rules loaded {"rule_count":11,"entity_type":"invoice","company_id":2} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"invoice_number","total_candidates":5,"candidates":["invoice_number","invoice_date","total","status","notes"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"customer_name","total_candidates":2,"candidates":["customer_name","notes"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"invoice_date","total_candidates":5,"candidates":["invoice_date","invoice_number","total","status","notes"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"due_date","total_candidates":2,"candidates":["due_date","invoice_date"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"total","total_candidates":5,"candidates":["total","invoice_number","subtotal","tax","discount"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"subtotal","total_candidates":5,"candidates":["subtotal","invoice_number","total","tax","discount"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"tax","total_candidates":4,"candidates":["tax","subtotal","notes","currency"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"status","total_candidates":1,"candidates":["status"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"currency","total_candidates":1,"candidates":["currency"]} 
-[2025-11-13 22:45:53] production.DEBUG: Candidates found {"csv_field":"notes","total_candidates":1,"candidates":["notes"]} 
-[2025-11-13 22:45:53] production.INFO: Field matching completed {"mapped_fields":10,"overall_confidence":1.0,"quality_score":70.0,"entity_type":"invoice"} 
-[2025-11-13 22:45:53] production.INFO: Intelligent field mapping completed {"mapped_fields":10,"overall_confidence":1.0,"quality_grade":"FAIR"} 
-[2025-11-13 22:45:53] production.INFO: [ImportController] Intelligent mapping completed {"mapped_fields":10,"confidence":1.0,"quality_grade":"FAIR"} 
-[2025-11-13 22:45:53] production.INFO: [ImportController] Fields detected successfully {"count":10,"field_names":["invoice_number","customer_name","invoice_date","due_date","total","subtotal","tax","status","currency","notes"],"suggestions_count":10,"confidence":1.0} 
-[2025-11-13 22:46:04] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:46:04] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:46:06] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:46:06] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:46:06] production.INFO: [ImportController] validateData() called {"import_id":"33","file_path":"imports/2/50577f75-9049-44bf-8e91-af495a1ec265.csv"} 
-[2025-11-13 22:46:06] production.INFO: [ImportController] Validation completed {"total_records":5,"valid_records":5,"invalid_records":0} 
-[2025-11-13 22:46:18] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:46:18] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] commit() started {"import_id":"33","type":"invoices","file_path":"imports/2/50577f75-9049-44bf-8e91-af495a1ec265.csv"} 
-[2025-11-13 22:46:18] production.ERROR: Failed to post invoice to ledger {"invoice_id":14,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.ERROR: InvoiceObserver: Failed to post invoice to ledger {"invoice_id":14,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] Invoice imported {"invoice_id":14,"invoice_number":"INV-2025-001","customer_id":4,"total":1180000} 
-[2025-11-13 22:46:18] production.ERROR: Failed to post invoice to ledger {"invoice_id":15,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.ERROR: InvoiceObserver: Failed to post invoice to ledger {"invoice_id":15,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] Invoice imported {"invoice_id":15,"invoice_number":"INV-2025-002","customer_id":5,"total":2360000} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] Invoice imported {"invoice_id":16,"invoice_number":"INV-2025-003","customer_id":6,"total":118000} 
-[2025-11-13 22:46:18] production.ERROR: Failed to post invoice to ledger {"invoice_id":17,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.ERROR: InvoiceObserver: Failed to post invoice to ledger {"invoice_id":17,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] Invoice imported {"invoice_id":17,"invoice_number":"INV-2025-004","customer_id":4,"total":590000} 
-[2025-11-13 22:46:18] production.ERROR: Failed to post invoice to ledger {"invoice_id":18,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.ERROR: InvoiceObserver: Failed to post invoice to ledger {"invoice_id":18,"error":"Attempt to read property \"id\" on null"} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] Invoice imported {"invoice_id":18,"invoice_number":"INV-2025-005","customer_id":5,"total":59000} 
-[2025-11-13 22:46:18] production.INFO: [ImportController] commit() completed {"import_id":"33","successful_records":5,"failed_records":0} 
-[2025-11-13 22:46:20] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:46:20] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:46:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:46:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:46:33] production.INFO: [ImportController] Upload started {"has_file":true,"type":"invoices","user_id":2} 
-[2025-11-13 22:46:33] production.ERROR: [ImportController] Validation failed {"error":"The file must be a file of type: csv, xls, xlsx, xml.","errors":[]} 
-[2025-11-13 22:46:41] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 22:46:44] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-13 22:46:44] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-13 22:46:44] production.INFO: [ImportController] Upload started {"has_file":true,"type":"invoices","user_id":2} 
-[2025-11-13 22:46:44] production.ERROR: [ImportController] Validation failed {"error":"The file must be a file of type: csv, xls, xlsx, xml.","errors":[]} 
+main-Bsq17_NK.js:72 [intlify] Not found 'Support Tickets' key in 'mk' locale messages.
+Id @ main-Bsq17_NK.js:72
+lg @ main-Bsq17_NK.js:75
+Yz @ main-Bsq17_NK.js:75
+PK @ main-Bsq17_NK.js:75
+(anonymous) @ main-Bsq17_NK.js:105
+La @ main-Bsq17_NK.js:105
+Uo @ main-Bsq17_NK.js:105
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+n @ main-Bsq17_NK.js:20
+(anonymous) @ main-Bsq17_NK.js:38
+pf @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+runIfDirty @ main-Bsq17_NK.js:16
+uc @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+main-Bsq17_NK.js:72 [intlify] Fall back to translate 'Support Tickets' key with 'en' locale.
+Id @ main-Bsq17_NK.js:72
+Yz @ main-Bsq17_NK.js:75
+PK @ main-Bsq17_NK.js:75
+(anonymous) @ main-Bsq17_NK.js:105
+La @ main-Bsq17_NK.js:105
+Uo @ main-Bsq17_NK.js:105
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+n @ main-Bsq17_NK.js:20
+(anonymous) @ main-Bsq17_NK.js:38
+pf @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+runIfDirty @ main-Bsq17_NK.js:16
+uc @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+main-Bsq17_NK.js:72 [intlify] Not found 'Support Tickets' key in 'en' locale messages.
+Id @ main-Bsq17_NK.js:72
+lg @ main-Bsq17_NK.js:75
+Yz @ main-Bsq17_NK.js:75
+PK @ main-Bsq17_NK.js:75
+(anonymous) @ main-Bsq17_NK.js:105
+La @ main-Bsq17_NK.js:105
+Uo @ main-Bsq17_NK.js:105
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+n @ main-Bsq17_NK.js:20
+(anonymous) @ main-Bsq17_NK.js:38
+pf @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+runIfDirty @ main-Bsq17_NK.js:16
+uc @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+Dashboard-C1slpyQl.js:1 [AI Insights] Fetching insights...
+main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/ai/insights 404 (Not Found)
+(anonymous) @ main-Bsq17_NK.js:4
+xhr @ main-Bsq17_NK.js:4
+yx @ main-Bsq17_NK.js:6
+Promise.then
+_request @ main-Bsq17_NK.js:7
+request @ main-Bsq17_NK.js:6
+Vl.<computed> @ main-Bsq17_NK.js:7
+(anonymous) @ main-Bsq17_NK.js:2
+$ @ Dashboard-C1slpyQl.js:1
+(anonymous) @ Dashboard-C1slpyQl.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+Dashboard-C1slpyQl.js:1 Failed to fetch AI insights: Tt {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+$ @ Dashboard-C1slpyQl.js:1
+await in $
+(anonymous) @ Dashboard-C1slpyQl.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/certificates/current 404 (Not Found)
+(anonymous) @ main-Bsq17_NK.js:4
+xhr @ main-Bsq17_NK.js:4
+yx @ main-Bsq17_NK.js:6
+Promise.then
+_request @ main-Bsq17_NK.js:7
+request @ main-Bsq17_NK.js:6
+Vl.<computed> @ main-Bsq17_NK.js:7
+(anonymous) @ main-Bsq17_NK.js:2
+L @ Dashboard-C1slpyQl.js:1
+(anonymous) @ Dashboard-C1slpyQl.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/dashboard 404 (Not Found)
+(anonymous) @ main-Bsq17_NK.js:4
+xhr @ main-Bsq17_NK.js:4
+yx @ main-Bsq17_NK.js:6
+Promise.then
+_request @ main-Bsq17_NK.js:7
+request @ main-Bsq17_NK.js:6
+Vl.<computed> @ main-Bsq17_NK.js:7
+(anonymous) @ main-Bsq17_NK.js:2
+(anonymous) @ Dashboard-C1slpyQl.js:1
+loadData @ Dashboard-C1slpyQl.js:1
+q @ main-Bsq17_NK.js:42
+w @ Dashboard-C1slpyQl.js:1
+ee.immediate @ Dashboard-C1slpyQl.js:1
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+s.call @ main-Bsq17_NK.js:22
+w @ main-Bsq17_NK.js:16
+G9 @ main-Bsq17_NK.js:16
+dm @ main-Bsq17_NK.js:22
+Qt @ main-Bsq17_NK.js:22
+setup @ Dashboard-C1slpyQl.js:1
+uc @ main-Bsq17_NK.js:20
+KL @ main-Bsq17_NK.js:22
+e3 @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+runIfDirty @ main-Bsq17_NK.js:16
+uc @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+Dashboard-C1slpyQl.js:1 Dashboard API not available, using default values Request failed with status code 404
+(anonymous) @ Dashboard-C1slpyQl.js:1
+Promise.catch
+(anonymous) @ Dashboard-C1slpyQl.js:1
+loadData @ Dashboard-C1slpyQl.js:1
+q @ main-Bsq17_NK.js:42
+w @ Dashboard-C1slpyQl.js:1
+ee.immediate @ Dashboard-C1slpyQl.js:1
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+s.call @ main-Bsq17_NK.js:22
+w @ main-Bsq17_NK.js:16
+G9 @ main-Bsq17_NK.js:16
+dm @ main-Bsq17_NK.js:22
+Qt @ main-Bsq17_NK.js:22
+setup @ Dashboard-C1slpyQl.js:1
+uc @ main-Bsq17_NK.js:20
+KL @ main-Bsq17_NK.js:22
+e3 @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+Y @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+fe @ main-Bsq17_NK.js:22
+Ce @ main-Bsq17_NK.js:22
+re @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+N @ main-Bsq17_NK.js:22
+T @ main-Bsq17_NK.js:22
+A @ main-Bsq17_NK.js:22
+v @ main-Bsq17_NK.js:22
+G @ main-Bsq17_NK.js:22
+run @ main-Bsq17_NK.js:16
+runIfDirty @ main-Bsq17_NK.js:16
+uc @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/invoices?status=DUE&orderByField=due_date&orderBy=asc&limit=10 404 (Not Found)
+(anonymous) @ main-Bsq17_NK.js:4
+xhr @ main-Bsq17_NK.js:4
+yx @ main-Bsq17_NK.js:6
+Promise.then
+_request @ main-Bsq17_NK.js:7
+request @ main-Bsq17_NK.js:6
+Vl.<computed> @ main-Bsq17_NK.js:7
+(anonymous) @ main-Bsq17_NK.js:2
+(anonymous) @ main-Bsq17_NK.js:151
+fetchInvoices @ main-Bsq17_NK.js:151
+q @ main-Bsq17_NK.js:42
+$ @ Dashboard-C1slpyQl.js:1
+(anonymous) @ Dashboard-C1slpyQl.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32
+Dashboard-C1slpyQl.js:1 Error fetching overdue invoices: Tt {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+$ @ Dashboard-C1slpyQl.js:1
+await in $
+(anonymous) @ Dashboard-C1slpyQl.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+ik @ main-Bsq17_NK.js:20
+oe.scheduler @ main-Bsq17_NK.js:22
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+$r @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+set @ main-Bsq17_NK.js:16
+(anonymous) @ main-Bsq17_NK.js:68
+Promise.then
+(anonymous) @ main-Bsq17_NK.js:68
+bootstrap @ main-Bsq17_NK.js:68
+q @ main-Bsq17_NK.js:42
+(anonymous) @ LayoutBasic-CY3-pF8U.js:1
+(anonymous) @ main-Bsq17_NK.js:22
+uc @ main-Bsq17_NK.js:20
+Zi @ main-Bsq17_NK.js:20
+Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
+Rf @ main-Bsq17_NK.js:20
+JA @ main-Bsq17_NK.js:20
+Promise.then
+GA @ main-Bsq17_NK.js:20
+od @ main-Bsq17_NK.js:20
+WC @ main-Bsq17_NK.js:22
+s.scheduler @ main-Bsq17_NK.js:22
+G9._.scheduler @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+Q0 @ main-Bsq17_NK.js:16
+notify @ main-Bsq17_NK.js:16
+trigger @ main-Bsq17_NK.js:16
+set value @ main-Bsq17_NK.js:16
+Y @ main-Bsq17_NK.js:38
+(anonymous) @ main-Bsq17_NK.js:38
+Promise.then
+j @ main-Bsq17_NK.js:38
+D @ main-Bsq17_NK.js:38
+install @ main-Bsq17_NK.js:38
+use @ main-Bsq17_NK.js:22
+start @ main-Bsq17_NK.js:173
+(anonymous) @ dashboard:32

@@ -102,7 +102,7 @@ export const useInvoiceStore = (useWindow = false) => {
       previewInvoice(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/invoices/${params.id}/send/preview`, { params })
+            .get(`/invoices/${params.id}/send/preview`, { params })
             .then((response) => {
               resolve(response)
             })
@@ -116,7 +116,7 @@ export const useInvoiceStore = (useWindow = false) => {
       fetchInvoices(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/invoices`, { params })
+            .get(`/invoices`, { params })
             .then((response) => {
               this.invoices = response.data.data
               this.invoiceTotalCount = response.data.meta.invoice_total_count
@@ -132,7 +132,7 @@ export const useInvoiceStore = (useWindow = false) => {
       fetchInvoice(id) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/invoices/${id}`)
+            .get(`/invoices/${id}`)
             .then((response) => {
               this.setInvoiceData(response.data.data)
               this.setCustomerAddresses(this.newInvoice.customer)
@@ -195,7 +195,7 @@ export const useInvoiceStore = (useWindow = false) => {
       sendInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/${data.id}/send`, data)
+            .post(`/invoices/${data.id}/send`, data)
             .then((response) => {
               notificationStore.showNotification({
                 type: 'success',
@@ -213,7 +213,7 @@ export const useInvoiceStore = (useWindow = false) => {
       addInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post('/api/v1/invoices', data)
+            .post('/invoices', data)
             .then((response) => {
               this.invoices = [...this.invoices, response.data.invoice]
 
@@ -234,7 +234,7 @@ export const useInvoiceStore = (useWindow = false) => {
       deleteInvoice(id) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/delete`, id)
+            .post(`/invoices/delete`, id)
             .then((response) => {
               let index = this.invoices.findIndex(
                 (invoice) => invoice.id === id
@@ -257,7 +257,7 @@ export const useInvoiceStore = (useWindow = false) => {
       deleteMultipleInvoices(id) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/delete`, { ids: this.selectedInvoices })
+            .post(`/invoices/delete`, { ids: this.selectedInvoices })
             .then((response) => {
               this.selectedInvoices.forEach((invoice) => {
                 let index = this.invoices.findIndex(
@@ -283,7 +283,7 @@ export const useInvoiceStore = (useWindow = false) => {
       updateInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .put(`/api/v1/invoices/${data.id}`, data)
+            .put(`/invoices/${data.id}`, data)
             .then((response) => {
               let pos = this.invoices.findIndex(
                 (invoice) => invoice.id === response.data.data.id
@@ -307,7 +307,7 @@ export const useInvoiceStore = (useWindow = false) => {
       cloneInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/${data.id}/clone`, data)
+            .post(`/invoices/${data.id}/clone`, data)
             .then((response) => {
               notificationStore.showNotification({
                 type: 'success',
@@ -325,7 +325,7 @@ export const useInvoiceStore = (useWindow = false) => {
       markAsSent(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/${data.id}/status`, data)
+            .post(`/invoices/${data.id}/status`, data)
             .then((response) => {
               let pos = this.invoices.findIndex(
                 (invoices) => invoices.id === data.id
@@ -368,7 +368,7 @@ export const useInvoiceStore = (useWindow = false) => {
       searchInvoice(data) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/invoices?${data}`)
+            .get(`/invoices?${data}`)
             .then((response) => {
               resolve(response)
             })
@@ -418,7 +418,7 @@ export const useInvoiceStore = (useWindow = false) => {
       fetchInvoiceTemplates(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/api/v1/invoices/templates`, { params })
+            .get(`/invoices/templates`, { params })
             .then((response) => {
               this.templates = response.data.invoiceTemplates
               resolve(response)
@@ -559,7 +559,7 @@ export const useInvoiceStore = (useWindow = false) => {
       exportXml(data) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/${data.invoice_id}/export-xml`, data, {
+            .post(`/invoices/${data.invoice_id}/export-xml`, data, {
               responseType: 'blob',
             })
             .then((response) => {
@@ -575,7 +575,7 @@ export const useInvoiceStore = (useWindow = false) => {
       initiateCpayCheckout(invoiceId) {
         return new Promise((resolve, reject) => {
           axios
-            .post(`/api/v1/invoices/${invoiceId}/payment/cpay`)
+            .post(`/invoices/${invoiceId}/payment/cpay`)
             .then((response) => {
               if (response.data.checkout_url) {
                 // Redirect to CPAY checkout

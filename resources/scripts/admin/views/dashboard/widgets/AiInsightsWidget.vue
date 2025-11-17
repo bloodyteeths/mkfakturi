@@ -119,7 +119,7 @@ const error = ref(null)
 async function fetchInsights() {
   try {
     console.log('[AI Insights] Fetching insights...')
-    const response = await axios.get('/api/v1/ai/insights')
+    const response = await axios.get('/ai/insights')
     console.log('[AI Insights] Fetch response:', response.data)
     insights.value = response.data.insights || []
     lastUpdate.value = response.data.generated_at
@@ -139,7 +139,7 @@ async function generateInsights() {
   isGenerating.value = true
   try {
     console.log('[AI Insights] Triggering generation...')
-    await axios.post('/api/v1/ai/insights/generate')
+    await axios.post('/ai/insights/generate')
     console.log('[AI Insights] Generation request acknowledged; polling for results')
     // Poll for results after a short delay
     setTimeout(() => {

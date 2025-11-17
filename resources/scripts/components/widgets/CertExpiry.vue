@@ -267,7 +267,7 @@ const fetchCertificate = async () => {
   error.value = ''
   
   try {
-    const response = await axios.get('/api/v1/certificates/current')
+    const response = await axios.get('/certificates/current')
     certificate.value = response.data.data
     lastUpdate.value = new Date()
   } catch (err) {
