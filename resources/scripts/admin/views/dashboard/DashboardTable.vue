@@ -44,7 +44,7 @@
 
           <template #cell-due_amount="{ row }">
             <BaseFormatMoney
-              :amount="row.data.due_amount"
+              :amount="row.data.base_due_amount"
               :currency="row.data.customer.currency"
             />
           </template>
