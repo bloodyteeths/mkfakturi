@@ -424,6 +424,10 @@ fi
 echo "Running PartnerSeeder to ensure Partner records exist for admin users..."
 php artisan db:seed --class=PartnerSeeder --force 2>/dev/null || echo "PartnerSeeder already run or failed"
 
+# Run PartnerUserSeeder to create demo partner user for testing
+echo "Running PartnerUserSeeder to create demo partner user..."
+php artisan db:seed --class=PartnerUserSeeder --force 2>/dev/null || echo "PartnerUserSeeder already run or failed"
+
 # Always run IFRS seeder to ensure entities and chart of accounts exist
 if [ "$FEATURE_ACCOUNTING_BACKBONE" = "true" ]; then
     echo "IFRS accounting feature enabled - ensuring chart of accounts..."

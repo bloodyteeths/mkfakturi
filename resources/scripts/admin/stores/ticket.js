@@ -93,20 +93,12 @@ export const useTicketStore = defineStore({
      * Create new ticket
      */
     createTicket(data) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .post('/support/tickets', data)
           .then((response) => {
             this.tickets.unshift(response.data.data)
             this.ticketTotalCount++
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.created_message'),
-            })
-
             resolve(response)
           })
           .catch((err) => {
@@ -120,8 +112,6 @@ export const useTicketStore = defineStore({
      * Update ticket (status, priority, etc.)
      */
     updateTicket(id, data) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .put(`/support/tickets/${id}`, data)
@@ -134,11 +124,6 @@ export const useTicketStore = defineStore({
             if (this.currentTicket && this.currentTicket.id === id) {
               this.currentTicket = response.data.data
             }
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.updated_message'),
-            })
 
             resolve(response)
           })
@@ -153,8 +138,6 @@ export const useTicketStore = defineStore({
      * Delete ticket
      */
     deleteTicket(id) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .delete(`/support/tickets/${id}`)
@@ -164,11 +147,6 @@ export const useTicketStore = defineStore({
               this.tickets.splice(index, 1)
               this.ticketTotalCount--
             }
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.deleted_message'),
-            })
 
             resolve(response)
           })
@@ -183,8 +161,6 @@ export const useTicketStore = defineStore({
      * Delete multiple tickets
      */
     deleteMultipleTickets(ids) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .post('/support/tickets/delete', { ids })
@@ -198,12 +174,6 @@ export const useTicketStore = defineStore({
             })
 
             this.selectedTickets = []
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.deleted_message'),
-            })
-
             resolve(response)
           })
           .catch((err) => {
@@ -237,8 +207,6 @@ export const useTicketStore = defineStore({
      * Reply to ticket
      */
     replyToTicket(ticketId, data) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .post(`/support/tickets/${ticketId}/messages`, data)
@@ -249,11 +217,6 @@ export const useTicketStore = defineStore({
               }
               this.currentTicket.messages.push(response.data.data)
             }
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.reply_sent_message'),
-            })
 
             resolve(response)
           })
@@ -268,8 +231,6 @@ export const useTicketStore = defineStore({
      * Update message
      */
     updateMessage(ticketId, messageId, data) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .put(`/support/tickets/${ticketId}/messages/${messageId}`, data)
@@ -280,11 +241,6 @@ export const useTicketStore = defineStore({
                 this.currentTicket.messages[index] = response.data.data
               }
             }
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.message_updated'),
-            })
 
             resolve(response)
           })
@@ -299,8 +255,6 @@ export const useTicketStore = defineStore({
      * Delete message
      */
     deleteMessage(ticketId, messageId) {
-      const notificationStore = useNotificationStore()
-
       return new Promise((resolve, reject) => {
         axios
           .delete(`/support/tickets/${ticketId}/messages/${messageId}`)
@@ -311,11 +265,6 @@ export const useTicketStore = defineStore({
                 this.currentTicket.messages.splice(index, 1)
               }
             }
-
-            notificationStore.showNotification({
-              type: 'success',
-              message: global.t('tickets.message_deleted'),
-            })
 
             resolve(response)
           })

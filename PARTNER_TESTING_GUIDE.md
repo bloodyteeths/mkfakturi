@@ -2,24 +2,32 @@
 
 ## Prerequisites
 
-### Step 1: Create Partner User in Railway Database
+### Step 1: Partner User Auto-Creation (Automated ✅)
 
-You need to execute the SQL commands to create a partner user. Here are **two methods**:
+**Good news!** The partner user is now created automatically when Railway starts up.
 
-#### Method A: Using Railway Dashboard (Recommended)
-1. Go to your Railway project dashboard
-2. Click on your MySQL database service
-3. Go to the **Data** or **Query** tab
-4. Copy and paste the SQL from `create_partner_user.sql`
-5. Execute the SQL commands
+The `PartnerUserSeeder` is now integrated into the `railway-start.sh` script and will:
+- ✅ Automatically create the partner user on Railway deployment
+- ✅ Skip creation if the user already exists (idempotent)
+- ✅ Attach the user to the first company in the database
+- ✅ Display credentials in Railway deployment logs
 
-#### Method B: Using MySQL Client
-```bash
-mysql -h mysql-y5el.railway.internal -u root -p'uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx' railway < create_partner_user.sql
-```
+**No manual SQL execution needed!**
 
-### Step 2: Verify User Creation
-Run this query to confirm the user was created:
+### Step 2: Verify User Creation (Optional)
+
+If you want to verify the partner user was created, you can:
+
+**Option A: Check Railway Logs**
+1. Go to Railway dashboard → your service → Deployments
+2. Check the deployment logs for:
+   ```
+   Running PartnerUserSeeder to create demo partner user...
+   ✓ Partner user created successfully
+   ```
+
+**Option B: Query the Database**
+Run this query in Railway MySQL:
 ```sql
 SELECT u.id, u.name, u.email, u.role, c.name as company_name
 FROM users u
