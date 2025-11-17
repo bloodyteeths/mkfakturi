@@ -145,6 +145,9 @@ const InvoicePublicPage = () =>
 // Console
 const ConsoleHome = () => import('@/js/pages/console/ConsoleHome.vue')
 const ConsoleCommissions = () => import('@/js/pages/console/Commissions.vue')
+const InviteCompany = () => import('@/js/pages/console/InviteCompany.vue')
+const InvitePartner = () => import('@/js/pages/console/InvitePartner.vue')
+const PartnerInvitations = () => import('@/js/pages/console/PartnerInvitations.vue')
 
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
@@ -649,6 +652,24 @@ export default [
         name: 'console.commissions',
         meta: { isOwner: true },
         component: ConsoleCommissions,
+      },
+      {
+        path: 'console/invite-company',
+        name: 'console.invite-company',
+        meta: { isOwner: true },
+        component: InviteCompany,
+      },
+      {
+        path: 'console/invite-partner',
+        name: 'console.invite-partner',
+        meta: { isOwner: true },
+        component: InvitePartner,
+      },
+      {
+        path: 'console/invitations',
+        name: 'console.invitations',
+        meta: { isOwner: true },
+        component: PartnerInvitations,
       },
 
       // Banking

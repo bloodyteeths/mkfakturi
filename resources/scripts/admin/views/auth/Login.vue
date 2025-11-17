@@ -107,12 +107,23 @@ async function onSubmit() {
   isLoading.value = true
 
   try {
-    isLoading.value = true
-    await authStore.login(authStore.loginData)
+    // Wait for login to complete and check if successful
+    const loginResponse = await authStore.login(authStore.loginData)
+
+    if (!loginResponse || !loginResponse.data) {
+      isLoading.value = false
+      return
+    }
 
     // Fetch user data to check role and determine redirect
     const response = await axios.get('/bootstrap')
     const userRole = response.data?.user?.role
+
+    // Show success notification
+    notificationStore.showNotification({
+      type: 'success',
+      message: 'Logged in successfully.',
+    })
 
     // Redirect based on user role
     if (userRole === 'partner') {
@@ -120,11 +131,6 @@ async function onSubmit() {
     } else {
       router.push('/admin/dashboard')
     }
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: 'Logged in successfully.',
-    })
   } catch (error) {
     isLoading.value = false
   }

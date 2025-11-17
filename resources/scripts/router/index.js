@@ -26,6 +26,21 @@ router.beforeEach((to, from, next) => {
   let ability = to.meta.ability
   const { isAppLoaded } = globalStore
 
+  // Check if route requires authentication
+  if (to.meta.requiresAuth !== false && to.name !== 'login' && to.name !== 'forgot-password' && to.name !== 'reset-password') {
+    // If user is not logged in (no currentUser), redirect to login
+    if (!userStore.currentUser && isAppLoaded) {
+      next({ name: 'login' })
+      return
+    }
+  }
+
+  // Check for redirectIfAuthenticated (login page when already logged in)
+  if (to.meta.redirectIfAuthenticated && userStore.currentUser) {
+    next({ name: 'dashboard' })
+    return
+  }
+
   // Check for partner-only routes
   if (to.meta.isPartner && isAppLoaded && userStore.currentUser) {
     const isPartner = userStore.currentUser.account_type === 'accountant' || userStore.currentUser.is_partner

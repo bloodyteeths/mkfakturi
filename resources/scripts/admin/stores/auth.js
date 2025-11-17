@@ -2,6 +2,8 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { handleError } from '@/scripts/helpers/error-handling'
+import { useUserStore } from './user'
+import { useGlobalStore } from './global'
 
 export const useAuthStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
@@ -49,19 +51,37 @@ export const useAuthStore = (useWindow = false) => {
           axios
             .post('/auth/logout')
             .then((response) => {
+              // Clear user and global state
+              const userStore = useUserStore()
+              const globalStore = useGlobalStore()
+
+              // Reset user state
+              userStore.currentUser = null
+              userStore.currentAbilities = []
+              userStore.currentUserSettings = {}
+
+              // Reset global state
+              globalStore.isAppLoaded = false
+              globalStore.mainMenu = []
+              globalStore.settingMenu = []
+
+              // Clear login data
+              this.loginData.email = ''
+              this.loginData.password = ''
+
               const notificationStore = useNotificationStore()
               notificationStore.showNotification({
                 type: 'success',
                 message: 'Logged out successfully.',
               })
 
+              // Redirect to login page
               window.router.push('/login')
-                // resetStore.clearPinia()
               resolve(response)
             })
             .catch((err) => {
               handleError(err)
-              window.router.push('/')
+              window.router.push('/login')
               reject(err)
             })
         })
