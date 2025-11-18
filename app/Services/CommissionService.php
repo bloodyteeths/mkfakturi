@@ -62,39 +62,49 @@ class CommissionService
      */
     public function recordRecurring(int $companyId, float $subscriptionAmount, string $monthRef, ?string $subscriptionId = null): array
     {
-        $company = Company::findOrFail($companyId);
+        return DB::transaction(function () use ($companyId, $subscriptionAmount, $monthRef, $subscriptionId) {
+            $company = Company::findOrFail($companyId);
 
-        // Find the accountant/partner linked to this company
-        $partnerCompanyLink = DB::table('partner_company_links')
-            ->where('company_id', $companyId)
-            ->where('is_active', true)
-            ->first();
+            // Find the accountant/partner linked to this company (prioritize primary)
+            $partnerCompanyLink = DB::table('partner_company_links')
+                ->where('company_id', $companyId)
+                ->where('is_active', true)
+                ->where('is_primary', true)
+                ->first();
 
-        if (!$partnerCompanyLink) {
-            Log::warning('No active partner link found for company', ['company_id' => $companyId]);
-            return ['success' => false, 'message' => 'No partner linked to company'];
-        }
+            // Fallback to any active partner if no primary set
+            if (!$partnerCompanyLink) {
+                $partnerCompanyLink = DB::table('partner_company_links')
+                    ->where('company_id', $companyId)
+                    ->where('is_active', true)
+                    ->first();
+            }
 
-        $partner = Partner::find($partnerCompanyLink->partner_id);
-        if (!$partner || !$partner->is_active) {
-            Log::warning('Partner not active', ['partner_id' => $partnerCompanyLink->partner_id]);
-            return ['success' => false, 'message' => 'Partner not active'];
-        }
+            if (!$partnerCompanyLink) {
+                Log::warning('No active partner link found for company', ['company_id' => $companyId]);
+                return ['success' => false, 'message' => 'No partner linked to company'];
+            }
 
-        // Check if event already exists for this month
-        $existing = AffiliateEvent::where('company_id', $companyId)
-            ->where('event_type', 'recurring_commission')
-            ->where('month_ref', $monthRef)
-            ->first();
+            $partner = Partner::find($partnerCompanyLink->partner_id);
+            if (!$partner || !$partner->is_active) {
+                Log::warning('Partner not active', ['partner_id' => $partnerCompanyLink->partner_id]);
+                return ['success' => false, 'message' => 'Partner not active'];
+            }
 
-        if ($existing) {
-            Log::info('Commission already recorded for this month', [
-                'company_id' => $companyId,
-                'month_ref' => $monthRef,
-                'event_id' => $existing->id,
-            ]);
-            return ['success' => false, 'message' => 'Commission already recorded'];
-        }
+            // Check if event already exists for this month
+            $existing = AffiliateEvent::where('company_id', $companyId)
+                ->where('event_type', 'recurring_commission')
+                ->where('month_ref', $monthRef)
+                ->first();
+
+            if ($existing) {
+                Log::info('Commission already recorded for this month', [
+                    'company_id' => $companyId,
+                    'month_ref' => $monthRef,
+                    'event_id' => $existing->id,
+                ]);
+                return ['success' => false, 'message' => 'Commission already recorded'];
+            }
 
         // Calculate commission with multi-level logic
         $commissionRate = $this->calculateCommissionRate($partner);
@@ -209,13 +219,14 @@ class CommissionService
             'split_type' => $this->getCommissionSplitType($uplineCommission, $salesRepCommission),
         ]);
 
-        return [
-            'success' => true,
-            'event_id' => $event->id,
-            'direct_commission' => $directCommission,
-            'upline_commission' => $uplineCommission,
-            'sales_rep_commission' => $salesRepCommission,
-        ];
+            return [
+                'success' => true,
+                'event_id' => $event->id,
+                'direct_commission' => $directCommission,
+                'upline_commission' => $uplineCommission,
+                'sales_rep_commission' => $salesRepCommission,
+            ];
+        }); // End DB transaction
     }
 
     /**

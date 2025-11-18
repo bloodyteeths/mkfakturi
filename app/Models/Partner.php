@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Partner extends Model
 {
     use HasFactory;
+    use \App\Traits\CachesPermissions;
 
     protected $fillable = [
         'name',
@@ -194,19 +195,10 @@ class Partner extends Model
      */
     public function hasPermission(int $companyId, \App\Enums\PartnerPermission $permission): bool
     {
-        $link = $this->companies()
-            ->where('companies.id', $companyId)
-            ->first();
+        $permissions = $this->getPermissionsForCompany($companyId);
 
-        if (!$link) {
+        if (empty($permissions)) {
             return false;
-        }
-
-        $permissions = $link->pivot->permissions ?? [];
-
-        // Decode JSON if it's a string
-        if (is_string($permissions)) {
-            $permissions = json_decode($permissions, true) ?? [];
         }
 
         // Full access overrides everything

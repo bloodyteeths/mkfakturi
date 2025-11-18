@@ -16,28 +16,45 @@ class ReferralNetworkController extends Controller
      */
     public function getNetworkGraph(Request $request)
     {
+        $includePartners = $request->input('include_partners', true);
+        $includeCompanies = $request->input('include_companies', true);
+        $includeInactive = $request->input('include_inactive', false);
+
         $nodes = [];
         $edges = [];
 
         // Partner nodes
-        $partners = Partner::where('is_active', true)->get(['id', 'name', 'email']);
-        foreach ($partners as $partner) {
-            $nodes[] = [
-                'id' => 'partner_' . $partner->id,
-                'label' => $partner->name,
-                'type' => 'partner',
-                'email' => $partner->email,
-            ];
+        if ($includePartners) {
+            $partnersQuery = Partner::query();
+            if (!$includeInactive) {
+                $partnersQuery->where('is_active', true);
+            }
+
+            $partners = $partnersQuery->get(['id', 'name', 'email', 'is_active']);
+            foreach ($partners as $partner) {
+                $nodes[] = [
+                    'id' => 'partner_' . $partner->id,
+                    'label' => $partner->name,
+                    'type' => 'partner',
+                    'email' => $partner->email,
+                    'active' => $partner->is_active,
+                    'total_clients' => $partner->activeCompanies()->count(),
+                    'tier' => $partner->isPartnerPlus() ? 'Plus' : 'Standard',
+                ];
+            }
         }
 
         // Company nodes
-        $companies = Company::get(['id', 'name']);
-        foreach ($companies as $company) {
-            $nodes[] = [
-                'id' => 'company_' . $company->id,
-                'label' => $company->name,
-                'type' => 'company',
-            ];
+        if ($includeCompanies) {
+            $companies = Company::get(['id', 'name']);
+            foreach ($companies as $company) {
+                $nodes[] = [
+                    'id' => 'company_' . $company->id,
+                    'label' => $company->name,
+                    'type' => 'company',
+                    'active' => true,
+                ];
+            }
         }
 
         // Partner→Company edges

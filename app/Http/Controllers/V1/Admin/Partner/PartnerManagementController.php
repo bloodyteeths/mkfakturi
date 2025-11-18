@@ -374,6 +374,9 @@ class PartnerManagementController extends Controller
                 'is_active' => true,
             ]);
 
+            // Clear permission cache
+            $partner->clearPermissionCache($validated['company_id']);
+
             DB::commit();
 
             return response()->json([

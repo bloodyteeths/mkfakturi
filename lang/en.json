@@ -560,6 +560,7 @@
     "ref_no": "REF NO.",
     "number": "NUMBER",
     "amount_due": "AMOUNT DUE",
+    "due_amount": "Due Amount",
     "partially_paid": "Partially Paid",
     "total": "Total",
     "discount": "Discount",
