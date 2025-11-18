@@ -111,7 +111,7 @@
         class="mt-3"
       >
         <template #cell-name="{ row }">
-          <router-link :to="{ path: `partners/${row.data.id}` }">
+          <router-link :to="{ path: `partners/${row.data.id}/view` }">
             <BaseText
               :text="row.data.name"
               tag="span"
@@ -134,10 +134,15 @@
         </template>
 
         <template #cell-total_earnings="{ row }">
-          <BaseFormatMoney
-            :amount="row.data.total_earnings || 0"
-            :currency="globalStore.companySettings?.currency || { name: 'US Dollar', code: 'USD', symbol: '$' }"
-          />
+          <span v-if="globalStore.companySettings?.currency">
+            <BaseFormatMoney
+              :amount="row.data.total_earnings || 0"
+              :currency="globalStore.companySettings.currency"
+            />
+          </span>
+          <span v-else>
+            {{ (row.data.total_earnings || 0).toFixed(2) }}
+          </span>
         </template>
 
         <template #cell-status="{ row }">
@@ -175,7 +180,7 @@
               <BaseIcon name="EllipsisHorizontalIcon" class="h-5 text-gray-500" />
             </template>
 
-            <BaseDropdownItem @click="$router.push(`/admin/partners/${row.data.id}`)">
+            <BaseDropdownItem @click="$router.push(`/admin/partners/${row.data.id}/view`)">
               <BaseIcon name="EyeIcon" class="mr-3 text-gray-600" />
               {{ $t('general.view') }}
             </BaseDropdownItem>
