@@ -40,9 +40,9 @@ class BootstrapController extends Controller
         // Partner users get minimal bootstrap data (they use partner console instead)
         if ($current_user->role === 'partner') {
             return response()->json([
-                'user' => new UserResource($current_user->load('currency', 'settings')),
-                'user_settings' => $current_user->getAllSettings(),
-                'abilities' => [],
+                'current_user' => new UserResource($current_user->load('currency', 'settings')),
+                'current_user_settings' => $current_user->getAllSettings(),
+                'current_user_abilities' => [],
                 'companies' => [],
                 'current_company' => null,
                 'current_company_currency' => null,
