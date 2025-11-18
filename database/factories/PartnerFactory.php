@@ -18,29 +18,23 @@ class PartnerFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'company_name' => $this->faker->company(),
             'phone' => $this->faker->phoneNumber(),
-            'address' => $this->faker->address(),
-            'vat_number' => 'MK' . $this->faker->numerify('##########'),
+            'tax_id' => 'MK' . $this->faker->numerify('##########'),
+            'registration_number' => $this->faker->numerify('########'),
             'bank_name' => $this->faker->randomElement(['Komercijalna Banka', 'Stopanska Banka', 'NLB Banka', 'ProCredit Bank']),
             'bank_account' => $this->faker->numerify('###-############-##'),
-            'kyc_status' => $this->faker->randomElement(['pending', 'approved', 'rejected']),
-            'kyc_submitted_at' => $this->faker->optional()->dateTimeBetween('-30 days', 'now'),
-            'kyc_approved_at' => $this->faker->optional()->dateTimeBetween('-20 days', 'now'),
+            'commission_rate' => $this->faker->randomFloat(2, 5, 25),
             'is_active' => $this->faker->boolean(80), // 80% active
-            'partner_tier' => $this->faker->randomElement(['standard', 'plus']),
-            'activation_date' => $this->faker->optional()->dateTimeBetween('-60 days', 'now'),
             'notes' => $this->faker->optional()->sentence(),
         ];
     }
 
     /**
-     * Partner with approved KYC
+     * Partner with verified KYC
      */
-    public function approved(): static
+    public function verified(): static
     {
         return $this->state(fn (array $attributes) => [
-            'kyc_status' => 'approved',
-            'kyc_submitted_at' => now()->subDays(10),
-            'kyc_approved_at' => now()->subDays(5),
+            'kyc_status' => 'verified',
             'is_active' => true,
         ]);
     }
@@ -56,13 +50,13 @@ class PartnerFactory extends Factory
     }
 
     /**
-     * Partner Plus tier
+     * High commission partner
      */
-    public function plus(): static
+    public function highCommission(): static
     {
         return $this->state(fn (array $attributes) => [
-            'partner_tier' => 'plus',
-            'kyc_status' => 'approved',
+            'commission_rate' => 25.00,
+            'kyc_status' => 'verified',
             'is_active' => true,
         ]);
     }
@@ -74,8 +68,6 @@ class PartnerFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'kyc_status' => 'pending',
-            'kyc_submitted_at' => now()->subDays(2),
-            'kyc_approved_at' => null,
         ]);
     }
 }

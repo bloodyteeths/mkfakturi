@@ -477,6 +477,46 @@ class CommissionService
             return 'direct_only'; // 20% direct (or 22% for Plus)
         }
     }
+
+    /**
+     * Test-friendly wrapper for recording commissions
+     * Used by test suite (AC18, FIX PATCH #5)
+     *
+     * @param User $user
+     * @param Partner $partner
+     * @param string $eventType
+     * @param int $subscriptionMonth
+     * @param float $amount
+     * @return array
+     */
+    public function recordCommission(User $user, Partner $partner, string $eventType, int $subscriptionMonth, float $amount): array
+    {
+        $company = $user->companies()->first() ?? Company::factory()->create(['owner_id' => $user->id]);
+
+        // Create partner-company link if doesn't exist
+        $linkExists = DB::table('partner_company_links')
+            ->where('partner_id', $partner->id)
+            ->where('company_id', $company->id)
+            ->where('is_active', true)
+            ->exists();
+
+        if (!$linkExists) {
+            DB::table('partner_company_links')->insert([
+                'partner_id' => $partner->id,
+                'company_id' => $company->id,
+                'permissions' => json_encode(['view_reports']),
+                'is_active' => true,
+                'is_primary' => true,
+                'invitation_status' => 'accepted',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $monthRef = now()->format('Y-m') . '-' . str_pad($subscriptionMonth, 2, '0', STR_PAD_LEFT);
+
+        return $this->recordRecurring($company->id, $amount, $monthRef);
+    }
 }
 
 // CLAUDE-CHECKPOINT
