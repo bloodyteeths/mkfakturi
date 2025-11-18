@@ -42,7 +42,7 @@ class PartnerManagementController extends Controller
         }
 
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             if ($request->status === 'active') {
                 $query->where('is_active', true);
             } elseif ($request->status === 'inactive') {
@@ -52,7 +52,7 @@ class PartnerManagementController extends Controller
         }
 
         // Filter by KYC status
-        if ($request->has('kyc_status')) {
+        if ($request->filled('kyc_status')) {
             $query->where('kyc_status', $request->kyc_status);
             \Log::info('[Partners Index API] KYC filter applied', ['kyc_status' => $request->kyc_status]);
         }
