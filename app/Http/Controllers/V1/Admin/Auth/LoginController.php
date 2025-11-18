@@ -95,4 +95,32 @@ class LoginController extends Controller
 
         return $this->sendFailedLoginResponse($request);
     }
+
+    /**
+     * Send the response after the user was authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        // Get the authenticated user
+        $user = $this->guard()->user();
+
+        // Return user info in the response so frontend can check role
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name,
+                'role' => $user->role,
+            ],
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
