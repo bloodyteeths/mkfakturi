@@ -118,12 +118,27 @@ class CommissionService
         // Get user for multi-level checks
         $user = $partner->user_id ? User::find($partner->user_id) : null;
 
-        // Check for upline commission
-        if ($user && $user->referrer_user_id) {
-            // Find upline partner
+        // Check for upline commission using partner_referrals table (AC-15)
+        $uplinePartner = DB::table('partner_referrals')
+            ->join('partners', 'partners.id', '=', 'partner_referrals.inviter_partner_id')
+            ->where('partner_referrals.invitee_partner_id', $partner->id)
+            ->where('partner_referrals.status', 'accepted')
+            ->where('partners.is_active', true)
+            ->select('partners.*')
+            ->first();
+
+        // Fallback to users.referrer_user_id for legacy data
+        if (!$uplinePartner && $user && $user->referrer_user_id) {
             $uplinePartner = Partner::where('user_id', $user->referrer_user_id)
                 ->where('is_active', true)
                 ->first();
+        }
+
+        if ($uplinePartner) {
+            // Convert stdClass to Partner model if from DB query
+            if (!($uplinePartner instanceof Partner)) {
+                $uplinePartner = Partner::find($uplinePartner->id);
+            }
 
             if ($uplinePartner) {
                 $uplineRate = config('affiliate.upline_rate', 0.05);
@@ -152,7 +167,7 @@ class CommissionService
                     ],
                 ]);
             }
-        }
+        } // FIX PATCH #5: Updated upline detection to use partner_referrals table (AC-15)
 
         // Check for sales rep commission
         if ($user && $user->sales_rep_id) {

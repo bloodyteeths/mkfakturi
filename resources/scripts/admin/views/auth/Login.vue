@@ -115,9 +115,9 @@ async function onSubmit() {
       return
     }
 
-    // Fetch user data to check role and determine redirect
-    const response = await axios.get('/bootstrap')
-    const userRole = response.data?.user?.role
+    // Get user data from login response to check role
+    const userData = loginResponse.data?.user
+    const userRole = userData?.role
 
     // Show success notification
     notificationStore.showNotification({
@@ -126,6 +126,7 @@ async function onSubmit() {
     })
 
     // Redirect based on user role
+    // Partner users go to console, others go to dashboard
     if (userRole === 'partner') {
       router.push('/admin/console')
     } else {

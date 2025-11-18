@@ -1,786 +1,125 @@
-main-Bsq17_NK.js:72 [intlify] Not found 'Support Tickets' key in 'mk' locale messages.
-Id @ main-Bsq17_NK.js:72
-lg @ main-Bsq17_NK.js:75
-Yz @ main-Bsq17_NK.js:75
-PK @ main-Bsq17_NK.js:75
-(anonymous) @ main-Bsq17_NK.js:105
-La @ main-Bsq17_NK.js:105
-Uo @ main-Bsq17_NK.js:105
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-n @ main-Bsq17_NK.js:20
-(anonymous) @ main-Bsq17_NK.js:38
-pf @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-runIfDirty @ main-Bsq17_NK.js:16
-uc @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-main-Bsq17_NK.js:72 [intlify] Fall back to translate 'Support Tickets' key with 'en' locale.
-Id @ main-Bsq17_NK.js:72
-Yz @ main-Bsq17_NK.js:75
-PK @ main-Bsq17_NK.js:75
-(anonymous) @ main-Bsq17_NK.js:105
-La @ main-Bsq17_NK.js:105
-Uo @ main-Bsq17_NK.js:105
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-n @ main-Bsq17_NK.js:20
-(anonymous) @ main-Bsq17_NK.js:38
-pf @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-runIfDirty @ main-Bsq17_NK.js:16
-uc @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-main-Bsq17_NK.js:72 [intlify] Not found 'Support Tickets' key in 'en' locale messages.
-Id @ main-Bsq17_NK.js:72
-lg @ main-Bsq17_NK.js:75
-Yz @ main-Bsq17_NK.js:75
-PK @ main-Bsq17_NK.js:75
-(anonymous) @ main-Bsq17_NK.js:105
-La @ main-Bsq17_NK.js:105
-Uo @ main-Bsq17_NK.js:105
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-n @ main-Bsq17_NK.js:20
-(anonymous) @ main-Bsq17_NK.js:38
-pf @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-runIfDirty @ main-Bsq17_NK.js:16
-uc @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-Dashboard-C1slpyQl.js:1 [AI Insights] Fetching insights...
-main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/ai/insights 404 (Not Found)
-(anonymous) @ main-Bsq17_NK.js:4
-xhr @ main-Bsq17_NK.js:4
-yx @ main-Bsq17_NK.js:6
-Promise.then
-_request @ main-Bsq17_NK.js:7
-request @ main-Bsq17_NK.js:6
-Vl.<computed> @ main-Bsq17_NK.js:7
-(anonymous) @ main-Bsq17_NK.js:2
-$ @ Dashboard-C1slpyQl.js:1
-(anonymous) @ Dashboard-C1slpyQl.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-Dashboard-C1slpyQl.js:1 Failed to fetch AI insights: Tt {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
-$ @ Dashboard-C1slpyQl.js:1
-await in $
-(anonymous) @ Dashboard-C1slpyQl.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/certificates/current 404 (Not Found)
-(anonymous) @ main-Bsq17_NK.js:4
-xhr @ main-Bsq17_NK.js:4
-yx @ main-Bsq17_NK.js:6
-Promise.then
-_request @ main-Bsq17_NK.js:7
-request @ main-Bsq17_NK.js:6
-Vl.<computed> @ main-Bsq17_NK.js:7
-(anonymous) @ main-Bsq17_NK.js:2
-L @ Dashboard-C1slpyQl.js:1
-(anonymous) @ Dashboard-C1slpyQl.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/dashboard 404 (Not Found)
-(anonymous) @ main-Bsq17_NK.js:4
-xhr @ main-Bsq17_NK.js:4
-yx @ main-Bsq17_NK.js:6
-Promise.then
-_request @ main-Bsq17_NK.js:7
-request @ main-Bsq17_NK.js:6
-Vl.<computed> @ main-Bsq17_NK.js:7
-(anonymous) @ main-Bsq17_NK.js:2
-(anonymous) @ Dashboard-C1slpyQl.js:1
-loadData @ Dashboard-C1slpyQl.js:1
-q @ main-Bsq17_NK.js:42
-w @ Dashboard-C1slpyQl.js:1
-ee.immediate @ Dashboard-C1slpyQl.js:1
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-s.call @ main-Bsq17_NK.js:22
-w @ main-Bsq17_NK.js:16
-G9 @ main-Bsq17_NK.js:16
-dm @ main-Bsq17_NK.js:22
-Qt @ main-Bsq17_NK.js:22
-setup @ Dashboard-C1slpyQl.js:1
-uc @ main-Bsq17_NK.js:20
-KL @ main-Bsq17_NK.js:22
-e3 @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-runIfDirty @ main-Bsq17_NK.js:16
-uc @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-Dashboard-C1slpyQl.js:1 Dashboard API not available, using default values Request failed with status code 404
-(anonymous) @ Dashboard-C1slpyQl.js:1
-Promise.catch
-(anonymous) @ Dashboard-C1slpyQl.js:1
-loadData @ Dashboard-C1slpyQl.js:1
-q @ main-Bsq17_NK.js:42
-w @ Dashboard-C1slpyQl.js:1
-ee.immediate @ Dashboard-C1slpyQl.js:1
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-s.call @ main-Bsq17_NK.js:22
-w @ main-Bsq17_NK.js:16
-G9 @ main-Bsq17_NK.js:16
-dm @ main-Bsq17_NK.js:22
-Qt @ main-Bsq17_NK.js:22
-setup @ Dashboard-C1slpyQl.js:1
-uc @ main-Bsq17_NK.js:20
-KL @ main-Bsq17_NK.js:22
-e3 @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-Y @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-fe @ main-Bsq17_NK.js:22
-Ce @ main-Bsq17_NK.js:22
-re @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-N @ main-Bsq17_NK.js:22
-T @ main-Bsq17_NK.js:22
-A @ main-Bsq17_NK.js:22
-v @ main-Bsq17_NK.js:22
-G @ main-Bsq17_NK.js:22
-run @ main-Bsq17_NK.js:16
-runIfDirty @ main-Bsq17_NK.js:16
-uc @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-main-Bsq17_NK.js:4  GET https://app.facturino.mk/api/v1/api/v1/invoices?status=DUE&orderByField=due_date&orderBy=asc&limit=10 404 (Not Found)
-(anonymous) @ main-Bsq17_NK.js:4
-xhr @ main-Bsq17_NK.js:4
-yx @ main-Bsq17_NK.js:6
-Promise.then
-_request @ main-Bsq17_NK.js:7
-request @ main-Bsq17_NK.js:6
-Vl.<computed> @ main-Bsq17_NK.js:7
-(anonymous) @ main-Bsq17_NK.js:2
-(anonymous) @ main-Bsq17_NK.js:151
-fetchInvoices @ main-Bsq17_NK.js:151
-q @ main-Bsq17_NK.js:42
-$ @ Dashboard-C1slpyQl.js:1
-(anonymous) @ Dashboard-C1slpyQl.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
-Dashboard-C1slpyQl.js:1 Error fetching overdue invoices: Tt {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
-$ @ Dashboard-C1slpyQl.js:1
-await in $
-(anonymous) @ Dashboard-C1slpyQl.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-ik @ main-Bsq17_NK.js:20
-oe.scheduler @ main-Bsq17_NK.js:22
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-$r @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-set @ main-Bsq17_NK.js:16
-(anonymous) @ main-Bsq17_NK.js:68
-Promise.then
-(anonymous) @ main-Bsq17_NK.js:68
-bootstrap @ main-Bsq17_NK.js:68
-q @ main-Bsq17_NK.js:42
-(anonymous) @ LayoutBasic-CY3-pF8U.js:1
-(anonymous) @ main-Bsq17_NK.js:22
-uc @ main-Bsq17_NK.js:20
-Zi @ main-Bsq17_NK.js:20
-Hh.t.__weh.t.__weh @ main-Bsq17_NK.js:22
-Rf @ main-Bsq17_NK.js:20
-JA @ main-Bsq17_NK.js:20
-Promise.then
-GA @ main-Bsq17_NK.js:20
-od @ main-Bsq17_NK.js:20
-WC @ main-Bsq17_NK.js:22
-s.scheduler @ main-Bsq17_NK.js:22
-G9._.scheduler @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-Q0 @ main-Bsq17_NK.js:16
-notify @ main-Bsq17_NK.js:16
-trigger @ main-Bsq17_NK.js:16
-set value @ main-Bsq17_NK.js:16
-Y @ main-Bsq17_NK.js:38
-(anonymous) @ main-Bsq17_NK.js:38
-Promise.then
-j @ main-Bsq17_NK.js:38
-D @ main-Bsq17_NK.js:38
-install @ main-Bsq17_NK.js:38
-use @ main-Bsq17_NK.js:22
-start @ main-Bsq17_NK.js:173
-(anonymous) @ dashboard:32
+[2025-11-18 01:05:24] production.ERROR: SQLSTATE[HY000]: General error: 3815 An expression of a check constraint 'chk_single_primary_per_company' contains disallowed function. (Connection: mysql, SQL: 
+                ALTER TABLE partner_company_links
+                ADD CONSTRAINT chk_single_primary_per_company
+                CHECK (
+                    is_primary = FALSE OR
+                    (SELECT COUNT(*) FROM partner_company_links AS pcl2
+                     WHERE pcl2.company_id = partner_company_links.company_id
+                     AND pcl2.is_primary = TRUE) <= 1
+                )
+            ) {"exception":"[object] (Illuminate\\Database\\QueryException(code: HY000): SQLSTATE[HY000]: General error: 3815 An expression of a check constraint 'chk_single_primary_per_company' contains disallowed function. (Connection: mysql, SQL: 
+                ALTER TABLE partner_company_links
+                ADD CONSTRAINT chk_single_primary_per_company
+                CHECK (
+                    is_primary = FALSE OR
+                    (SELECT COUNT(*) FROM partner_company_links AS pcl2
+                     WHERE pcl2.company_id = partner_company_links.company_id
+                     AND pcl2.is_primary = TRUE) <= 1
+                )
+            ) at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('\\n              ...', Array, Object(Closure))
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(557): Illuminate\\Database\\Connection->run('\\n              ...', Array, Object(Closure))
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(495): Illuminate\\Database\\Connection->statement('\\n              ...')
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\DatabaseManager->__call('statement', Array)
+#4 /var/www/html/database/migrations/2025_11_18_100006_add_unique_primary_check_to_partner_company_links.php(20): Illuminate\\Support\\Facades\\Facade::__callStatic('statement', Array)
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_11_18_1000...', Object(Closure))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_11_18_1000...', Object(Closure))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 46, false)
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#24 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#26 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#27 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#28 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#32 {main}
+
+[previous exception] [object] (PDOException(code: HY000): SQLSTATE[HY000]: General error: 3815 An expression of a check constraint 'chk_single_primary_per_company' contains disallowed function. at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:568)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(568): PDOStatement->execute()
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('\\n              ...', Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('\\n              ...', Array, Object(Closure))
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(557): Illuminate\\Database\\Connection->run('\\n              ...', Array, Object(Closure))
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(495): Illuminate\\Database\\Connection->statement('\\n              ...')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\DatabaseManager->__call('statement', Array)
+#6 /var/www/html/database/migrations/2025_11_18_100006_add_unique_primary_check_to_partner_company_links.php(20): Illuminate\\Support\\Facades\\Facade::__callStatic('statement', Array)
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_11_18_1000...', Object(Closure))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_11_18_1000...', Object(Closure))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 46, false)
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#26 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#28 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#33 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#34 {main}
+"} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:26] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-18 01:05:26] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-18 01:05:33] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 01:05:33] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 01:05:40] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 01:05:40] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 01:09:23] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/certificates/current","method":"GET","guards":["sanctum"],"authenticated_before":false,"user_id_before":null,"session_id":"e3o5NaramGRthMK1i2Qo1h2OAJ66TTYy62vJoSWY","has_session_cookie":true} 
+[2025-11-18 01:12:18] production.INFO: Login attempt {"email":"partner@demo.mk","has_password":true,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-18 01:12:18] production.WARNING: Login failed - credentials mismatch {"email":"partner@demo.mk","ip":"77.28.26.107"} 
+[2025-11-18 01:12:18] production.WARNING: Slow operation detected {"operation":"req_691bc7f28f1b1","execution_time_ms":304.88,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-18 01:12:18] production.WARNING: Slow request detected {"operation":"req_691bc7f28f1b1","execution_time_ms":304.88,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://app.facturino.mk/api/v1/auth/login","route":null,"user_id":null,"company_id":"2","ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":422} 
+[2025-11-18 01:12:47] production.INFO: Login attempt {"email":"partner@demo.mk","has_password":true,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-18 01:12:47] production.WARNING: Login failed - credentials mismatch {"email":"partner@demo.mk","ip":"77.28.26.107"} 
+[2025-11-18 01:13:22] production.INFO: Login attempt {"email":"partner@demo.mk","has_password":true,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-18 01:13:22] production.WARNING: Login failed - credentials mismatch {"email":"partner@demo.mk","ip":"77.28.26.107"} 
+[2025-11-18 01:13:28] production.INFO: Login attempt {"email":"partner@demo.mk","has_password":true,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-18 01:13:28] production.WARNING: Login failed - credentials mismatch {"email":"partner@demo.mk","ip":"77.28.26.107"} 
