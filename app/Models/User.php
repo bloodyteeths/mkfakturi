@@ -123,13 +123,27 @@ class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-
 
     public function getFormattedCreatedAtAttribute($value)
     {
-        $company_id = (CompanySetting::where('company_id', request()->header('company'))->exists())
-            ? request()->header('company')
-            : $this->companies()->first()->id;
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company_id);
+        // Default fallback format
+        $dateFormat = 'Y-m-d';
+
+        // Try to get company-specific date format
+        $company_id = request()->header('company');
+
+        if (!$company_id) {
+            $firstCompany = $this->companies()->first();
+            $company_id = $firstCompany ? $firstCompany->id : null;
+        }
+
+        if ($company_id && CompanySetting::where('company_id', $company_id)->exists()) {
+            $companyFormat = CompanySetting::getSetting('carbon_date_format', $company_id);
+            if ($companyFormat) {
+                $dateFormat = $companyFormat;
+            }
+        }
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
+    // CLAUDE-CHECKPOINT
 
     public function estimates(): HasMany
     {
