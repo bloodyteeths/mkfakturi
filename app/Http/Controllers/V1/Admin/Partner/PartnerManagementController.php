@@ -19,9 +19,16 @@ class PartnerManagementController extends Controller
      */
     public function index(Request $request)
     {
+        \Log::info('[Partners Index API] Request received', [
+            'params' => $request->all(),
+            'user_id' => auth()->id(),
+        ]);
+
         $query = Partner::query()
             ->with(['user', 'companies'])
             ->withCount(['companies', 'activeCompanies']);
+
+        \Log::info('[Partners Index API] Base query created');
 
         // Search functionality
         if ($request->has('search')) {
@@ -31,6 +38,7 @@ class PartnerManagementController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('company_name', 'like', "%{$search}%");
             });
+            \Log::info('[Partners Index API] Search filter applied', ['search' => $search]);
         }
 
         // Filter by status
@@ -40,11 +48,13 @@ class PartnerManagementController extends Controller
             } elseif ($request->status === 'inactive') {
                 $query->where('is_active', false);
             }
+            \Log::info('[Partners Index API] Status filter applied', ['status' => $request->status]);
         }
 
         // Filter by KYC status
         if ($request->has('kyc_status')) {
             $query->where('kyc_status', $request->kyc_status);
+            \Log::info('[Partners Index API] KYC filter applied', ['kyc_status' => $request->kyc_status]);
         }
 
         // Sorting
@@ -52,9 +62,21 @@ class PartnerManagementController extends Controller
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
+        \Log::info('[Partners Index API] About to execute query', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+        ]);
+
         // Pagination
         $perPage = $request->get('per_page', 15);
         $partners = $query->paginate($perPage);
+
+        \Log::info('[Partners Index API] Query executed', [
+            'total' => $partners->total(),
+            'count' => $partners->count(),
+            'per_page' => $perPage,
+            'current_page' => $partners->currentPage(),
+        ]);
 
         // Add calculated fields
         $partners->getCollection()->transform(function ($partner) {
@@ -64,6 +86,11 @@ class PartnerManagementController extends Controller
 
             return $partner;
         });
+
+        \Log::info('[Partners Index API] Returning response', [
+            'total' => $partners->total(),
+            'data_count' => count($partners->items()),
+        ]);
 
         return response()->json($partners);
     }
