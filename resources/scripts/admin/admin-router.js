@@ -149,6 +149,12 @@ const InviteCompany = () => import('@/js/pages/console/InviteCompany.vue')
 const InvitePartner = () => import('@/js/pages/console/InvitePartner.vue')
 const PartnerInvitations = () => import('@/js/pages/console/PartnerInvitations.vue')
 
+// Partners (Super Admin - AC-08, AC-17)
+const PartnerIndex = () => import('@/scripts/admin/views/partners/Index.vue')
+const PartnerCreate = () => import('@/scripts/admin/views/partners/Create.vue')
+const PartnerView = () => import('@/scripts/admin/views/partners/View.vue')
+const NetworkGraph = () => import('@/scripts/admin/views/partners/NetworkGraph.vue')
+
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
 
@@ -670,6 +676,38 @@ export default [
         name: 'console.invitations',
         meta: { isOwner: true },
         component: PartnerInvitations,
+      },
+
+      // Partners (Super Admin - AC-08)
+      {
+        path: 'partners',
+        name: 'partners.index',
+        meta: { requiresSuperAdmin: true },
+        component: PartnerIndex,
+      },
+      {
+        path: 'partners/create',
+        name: 'partners.create',
+        meta: { requiresSuperAdmin: true },
+        component: PartnerCreate,
+      },
+      {
+        path: 'partners/:id/edit',
+        name: 'partners.edit',
+        meta: { requiresSuperAdmin: true },
+        component: PartnerCreate,
+      },
+      {
+        path: 'partners/:id/view',
+        name: 'partners.view',
+        meta: { requiresSuperAdmin: true },
+        component: PartnerView,
+      },
+      {
+        path: 'partners/network',
+        name: 'partners.network',
+        meta: { requiresSuperAdmin: true },
+        component: NetworkGraph,
       },
 
       // Banking

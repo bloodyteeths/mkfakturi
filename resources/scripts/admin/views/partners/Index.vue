@@ -201,7 +201,7 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import AstronautIcon from '@/scripts/components/icon/AstronautIcon.vue'
+import AstronautIcon from '@/scripts/components/icons/empty/AstronautIcon.vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
