@@ -98,6 +98,7 @@ class LoginController extends Controller
 
     /**
      * Send the response after the user was authenticated.
+     * Returns user data including role for frontend routing.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
