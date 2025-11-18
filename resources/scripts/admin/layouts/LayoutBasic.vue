@@ -61,9 +61,26 @@ onMounted(() => {
         return
       }
     }
-    if (route.meta.isOwner && userStore.currentUser && userStore.currentUser.is_owner === false) {
-      router.push({ name: 'account.settings' })
+    // Check isPartner meta first - partners should access partner routes even if they don't have is_owner
+    if (route.meta.isPartner && userStore.currentUser) {
+      const isPartner = userStore.currentUser.role === 'partner' ||
+                        userStore.currentUser.account_type === 'accountant' ||
+                        userStore.currentUser.is_partner
+      if (!isPartner) {
+        router.push({ name: 'dashboard' })
+        return
+      }
+      // Partners can access partner routes - skip other checks
       return
+    }
+
+    // Check isOwner meta - only if not a partner route
+    if (route.meta.isOwner && userStore.currentUser) {
+      // Use optional chaining to avoid undefined errors for partners
+      if (userStore.currentUser.is_owner === false) {
+        router.push({ name: 'account.settings' })
+        return
+      }
     }
 
     if (
