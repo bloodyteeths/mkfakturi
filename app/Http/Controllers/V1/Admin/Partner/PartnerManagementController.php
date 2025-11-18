@@ -497,6 +497,56 @@ class PartnerManagementController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get current partner for a company (AC-16 helper)
+     */
+    public function getCompanyCurrentPartner(int $companyId)
+    {
+        $link = DB::table('partner_company_links')
+            ->join('partners', 'partners.id', '=', 'partner_company_links.partner_id')
+            ->join('users', 'users.id', '=', 'partners.user_id')
+            ->where('partner_company_links.company_id', $companyId)
+            ->where('partner_company_links.is_active', true)
+            ->select([
+                'partners.id',
+                'partners.name',
+                'partners.email',
+                'users.name as user_name',
+            ])
+            ->first();
+
+        if (!$link) {
+            return response()->json(['message' => 'No active partner found'], 404);
+        }
+
+        return response()->json($link);
+    }
+
+    /**
+     * Get upline partner for a partner (AC-16 helper)
+     */
+    public function getPartnerUpline(int $partnerId)
+    {
+        $referral = DB::table('partner_referrals')
+            ->join('partners', 'partners.id', '=', 'partner_referrals.inviter_partner_id')
+            ->join('users', 'users.id', '=', 'partners.user_id')
+            ->where('partner_referrals.invitee_partner_id', $partnerId)
+            ->where('partner_referrals.status', 'accepted')
+            ->select([
+                'partners.id',
+                'partners.name',
+                'partners.email',
+                'users.name as user_name',
+            ])
+            ->first();
+
+        if (!$referral) {
+            return response()->json(['message' => 'No upline partner found'], 404);
+        }
+
+        return response()->json($referral);
+    }
 }
 
 // CLAUDE-CHECKPOINT

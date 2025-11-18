@@ -899,15 +899,36 @@ Route::prefix('/v1')->group(function () {
             Route::post('/{partner}/companies', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'assignCompany']);
             Route::put('/{partner}/companies/{company}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'updateCompanyAssignment']);
             Route::delete('/{partner}/companies/{company}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'unassignCompany']);
+
+            // AC-16: Reassignment Helper Routes
+            Route::get('/{partner}/upline', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'getPartnerUpline']);
         });
+
+        // AC-16: Company Helper Routes (outside partners prefix)
+        Route::get('/companies/{company}/current-partner', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'getCompanyCurrentPartner'])->middleware('super-admin');
 
         // Partner Invitation Routes (AC-11, AC-12, AC-14, AC-15)
         // ----------------------------------
         Route::post('/invitations/company-to-partner', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'companyInvitesPartner']);
+        Route::get('/invitations/pending-for-partner', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'getPendingForPartner']);
+        Route::get('/invitations/pending', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'getPending']);
+        Route::get('/invitations/pending-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'getPendingCompany']);
         Route::post('/invitations/{linkId}/respond', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'respondToInvitation']);
         Route::post('/invitations/partner-to-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'partnerInvitesCompany']);
         Route::post('/invitations/company-to-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'companyInvitesCompany']);
         Route::post('/invitations/partner-to-partner', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'partnerInvitesPartner']);
+        Route::post('/invitations/send-email', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'sendEmailInvite']);
+        Route::post('/invitations/send-partner-email', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'sendPartnerEmailInvite']);
+
+        // Entity Reassignment Routes (AC-16)
+        // ----------------------------------
+        Route::post('/reassignments/company-partner', [\App\Http\Controllers\V1\Admin\EntityReassignmentController::class, 'reassignCompanyPartner'])->middleware('super-admin');
+        Route::post('/reassignments/partner-upline', [\App\Http\Controllers\V1\Admin\EntityReassignmentController::class, 'reassignPartnerUpline'])->middleware('super-admin');
+        Route::get('/reassignments/log', [\App\Http\Controllers\V1\Admin\EntityReassignmentController::class, 'getReassignmentLog'])->middleware('super-admin');
+
+        // Referral Network Graph Routes (AC-17)
+        // ----------------------------------
+        Route::get('/referral-network/graph', [\App\Http\Controllers\V1\Admin\ReferralNetworkController::class, 'getNetworkGraph'])->middleware('super-admin');
     });
 });
 

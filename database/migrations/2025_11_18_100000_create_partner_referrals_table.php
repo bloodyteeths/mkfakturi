@@ -16,20 +16,21 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('inviter_partner_id'); // Upline partner
             $table->foreign('inviter_partner_id')->references('id')->on('partners')->onDelete('cascade');
-            $table->unsignedBigInteger('invitee_partner_id'); // Downline partner
+            $table->unsignedBigInteger('invitee_partner_id')->nullable(); // Downline partner (nullable until signup)
             $table->foreign('invitee_partner_id')->references('id')->on('partners')->onDelete('cascade');
+            $table->string('invitee_email')->nullable(); // Email before partner signs up
+            $table->string('referral_token', 64)->unique(); // Unique token for signup link
             $table->string('status')->default('pending'); // pending, accepted, declined
             $table->timestamp('invited_at')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('declined_at')->nullable();
             $table->timestamps();
 
-            // Ensure unique inviter-invitee combinations
-            $table->unique(['inviter_partner_id', 'invitee_partner_id'], 'partner_referral_unique');
-
             // Indexes for performance
             $table->index(['invitee_partner_id', 'status']);
             $table->index(['inviter_partner_id', 'status']);
+            $table->index('invitee_email');
+            $table->index('referral_token');
         });
     }
 

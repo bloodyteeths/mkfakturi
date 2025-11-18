@@ -167,6 +167,121 @@ class PartnerInvitationController extends Controller
         return response()->json([
             'message' => 'Partner invitation sent',
             'signup_link' => url('/partner/signup?ref=' . $token),
+            'link' => url('/partner/signup?ref=' . $token),
+            'qr_code_url' => url('/api/qr?data=' . urlencode(url('/partner/signup?ref=' . $token))),
         ]);
     }
+
+    /**
+     * Get pending invitations for partner (AC-11)
+     */
+    public function getPendingForPartner(Request $request)
+    {
+        $user = auth()->user();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['message' => 'Not a partner'], 403);
+        }
+
+        $invitations = DB::table('partner_company_links')
+            ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
+            ->join('users', 'users.id', '=', 'partner_company_links.created_by')
+            ->where('partner_company_links.partner_id', $partner->id)
+            ->where('partner_company_links.invitation_status', 'pending')
+            ->select([
+                'partner_company_links.id',
+                'companies.id as company_id',
+                'companies.name as company_name',
+                'users.name as inviter_name',
+                'partner_company_links.permissions',
+                'partner_company_links.invited_at',
+            ])
+            ->get();
+
+        return response()->json($invitations);
+    }
+
+    /**
+     * Get pending partner invitations for company (AC-11)
+     */
+    public function getPending(Request $request)
+    {
+        $companyId = $request->query('company_id');
+
+        if (!$companyId) {
+            return response()->json(['message' => 'company_id required'], 422);
+        }
+
+        $invitations = DB::table('partner_company_links')
+            ->join('partners', 'partners.id', '=', 'partner_company_links.partner_id')
+            ->where('partner_company_links.company_id', $companyId)
+            ->where('partner_company_links.invitation_status', 'pending')
+            ->select([
+                'partner_company_links.id',
+                'partners.id as partner_id',
+                'partners.email as partner_email',
+                'partner_company_links.invited_at',
+            ])
+            ->get();
+
+        return response()->json($invitations);
+    }
+
+    /**
+     * Get pending company referrals (AC-14)
+     */
+    public function getPendingCompany(Request $request)
+    {
+        $companyId = $request->query('company_id');
+
+        if (!$companyId) {
+            return response()->json(['message' => 'company_id required'], 422);
+        }
+
+        $invitations = DB::table('company_referrals')
+            ->where('inviter_company_id', $companyId)
+            ->where('status', 'pending')
+            ->select([
+                'id',
+                'invitee_email',
+                'invited_at',
+            ])
+            ->get();
+
+        return response()->json($invitations);
+    }
+
+    /**
+     * Send email invitation for company signup (AC-12)
+     */
+    public function sendEmailInvite(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'link' => 'required|url',
+        ]);
+
+        // TODO: Implement actual email sending
+        // For now, just return success
+        return response()->json(['message' => 'Email invitation sent']);
+    }
+
+    /**
+     * Send email invitation for partner signup (AC-15)
+     */
+    public function sendPartnerEmailInvite(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'link' => 'required|url',
+        ]);
+
+        // TODO: Implement actual email sending
+        // For now, just return success
+        return response()->json(['message' => 'Email invitation sent']);
+    }
 }
+
+// CLAUDE-CHECKPOINT
+

@@ -16,9 +16,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedInteger('inviter_company_id'); // Company making the referral
             $table->foreign('inviter_company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->unsignedInteger('invitee_company_id'); // Company being referred
+            $table->unsignedInteger('invitee_company_id')->nullable(); // Company being referred (null until signup)
             $table->foreign('invitee_company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->string('invitee_email')->nullable(); // Email before signup
+            $table->string('invitee_email'); // Email before signup
+            $table->string('referral_token', 64)->unique(); // Unique token for signup link
             $table->string('status')->default('pending'); // pending, accepted, declined
             $table->text('message')->nullable(); // Optional referral message
             $table->timestamp('invited_at')->nullable();
@@ -26,13 +27,11 @@ return new class extends Migration
             $table->timestamp('declined_at')->nullable();
             $table->timestamps();
 
-            // Ensure unique inviter-invitee combinations
-            $table->unique(['inviter_company_id', 'invitee_company_id'], 'company_referral_unique');
-
             // Indexes for performance
             $table->index(['invitee_company_id', 'status']);
             $table->index(['inviter_company_id', 'status']);
             $table->index('invitee_email');
+            $table->index('referral_token');
         });
     }
 
