@@ -38,12 +38,22 @@ class BootstrapController extends Controller
 
         $current_user = $request->user();
 
-        // Partner users should not use this endpoint - redirect to partner portal
+        // Partner users get minimal bootstrap data (they use partner console instead)
         if ($current_user->role === 'partner') {
             return response()->json([
-                'redirect' => '/admin/console',
-                'message' => 'Partner users should use the partner console'
-            ], 302);
+                'user' => new UserResource($current_user->load('currency', 'settings')),
+                'user_settings' => $current_user->getAllSettings(),
+                'abilities' => [],
+                'companies' => [],
+                'current_company' => null,
+                'current_company_currency' => null,
+                'current_company_settings' => [],
+                'global_settings' => Setting::getSettings(['admin_portal_logo', 'copyright_text'])->toArray(),
+                'main_menu' => [],
+                'setting_menu' => [],
+                'modules' => [],
+                'is_partner' => true,
+            ]);
         }
 
         // Eager load user relationships to avoid N+1 queries

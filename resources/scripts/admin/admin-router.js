@@ -646,35 +646,35 @@ export default [
         component: ImportWizard,
       },
 
-      // Console
+      // Console - Partner routes
       {
         path: 'console',
         name: 'console.home',
-        meta: { isOwner: true },
+        meta: { isPartner: true },
         component: ConsoleHome,
       },
       {
         path: 'console/commissions',
         name: 'console.commissions',
-        meta: { isOwner: true },
+        meta: { isPartner: true },
         component: ConsoleCommissions,
       },
       {
         path: 'console/invite-company',
         name: 'console.invite-company',
-        meta: { isOwner: true },
+        meta: { isPartner: true },
         component: InviteCompany,
       },
       {
         path: 'console/invite-partner',
         name: 'console.invite-partner',
-        meta: { isOwner: true },
+        meta: { isPartner: true },
         component: InvitePartner,
       },
       {
         path: 'console/invitations',
         name: 'console.invitations',
-        meta: { isOwner: true },
+        meta: { isPartner: true },
         component: PartnerInvitations,
       },
 

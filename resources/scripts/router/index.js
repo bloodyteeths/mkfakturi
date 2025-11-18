@@ -43,7 +43,9 @@ router.beforeEach((to, from, next) => {
 
   // Check for partner-only routes
   if (to.meta.isPartner && isAppLoaded && userStore.currentUser) {
-    const isPartner = userStore.currentUser.account_type === 'accountant' || userStore.currentUser.is_partner
+    const isPartner = userStore.currentUser.role === 'partner' ||
+                      userStore.currentUser.account_type === 'accountant' ||
+                      userStore.currentUser.is_partner
     if (!isPartner) {
       // Redirect non-partner users to admin dashboard
       next({ name: 'dashboard' })
