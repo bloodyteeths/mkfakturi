@@ -73,9 +73,6 @@ class KycDocument extends Model
 
     /**
      * Approve this KYC document
-     *
-     * @param int $adminUserId
-     * @return bool
      */
     public function approve(int $adminUserId): bool
     {
@@ -89,10 +86,6 @@ class KycDocument extends Model
 
     /**
      * Reject this KYC document
-     *
-     * @param int $adminUserId
-     * @param string $reason
-     * @return bool
      */
     public function reject(int $adminUserId, string $reason): bool
     {
@@ -106,9 +99,6 @@ class KycDocument extends Model
 
     /**
      * Check if all required documents are approved for a partner
-     *
-     * @param int $partnerId
-     * @return bool
      */
     public static function allRequiredDocumentsApproved(int $partnerId): bool
     {
@@ -120,7 +110,7 @@ class KycDocument extends Model
                 ->where('status', 'approved')
                 ->exists();
 
-            if (!$hasApproved) {
+            if (! $hasApproved) {
                 return false;
             }
         }
@@ -131,12 +121,10 @@ class KycDocument extends Model
     /**
      * Get the public URL for the document (if needed)
      * Note: This should be protected and only accessible by authorized users
-     *
-     * @return string|null
      */
     public function getDocumentUrl(): ?string
     {
-        if (!$this->file_path) {
+        if (! $this->file_path) {
             return null;
         }
 

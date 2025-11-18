@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\V1\Admin\ProformaInvoices;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProformaInvoiceRequest;
 use App\Http\Requests\DeleteProformaInvoiceRequest;
+use App\Http\Requests\ProformaInvoiceRequest;
 use App\Http\Resources\ProformaInvoiceResource;
 use App\Jobs\GenerateProformaInvoicePdfJob;
 use App\Models\ProformaInvoice;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Proforma Invoice Controller
  *
  * Handles CRUD operations for proforma invoices
- *
- * @package App\Http\Controllers\V1\Admin\ProformaInvoices
  */
 class ProformaInvoicesController extends Controller
 {
@@ -52,9 +50,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Display a listing of proforma invoices.
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -77,9 +72,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Store a newly created proforma invoice.
-     *
-     * @param  ProformaInvoiceRequest  $request
-     * @return JsonResponse
      */
     public function store(ProformaInvoiceRequest $request): JsonResponse
     {
@@ -101,10 +93,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Display the specified proforma invoice.
-     *
-     * @param  Request  $request
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function show(Request $request, ProformaInvoice $proformaInvoice): JsonResponse
     {
@@ -118,10 +106,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Update the specified proforma invoice.
-     *
-     * @param  ProformaInvoiceRequest  $request
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function update(ProformaInvoiceRequest $request, ProformaInvoice $proformaInvoice): JsonResponse
     {
@@ -139,9 +123,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Delete the specified proforma invoices.
-     *
-     * @param  DeleteProformaInvoiceRequest  $request
-     * @return JsonResponse
      */
     public function delete(DeleteProformaInvoiceRequest $request): JsonResponse
     {
@@ -156,10 +137,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Send proforma invoice via email.
-     *
-     * @param  Request  $request
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function send(Request $request, ProformaInvoice $proformaInvoice): JsonResponse
     {
@@ -196,9 +173,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Mark proforma invoice as viewed.
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function markAsViewed(ProformaInvoice $proformaInvoice): JsonResponse
     {
@@ -214,9 +188,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Mark proforma invoice as expired.
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function markAsExpired(ProformaInvoice $proformaInvoice): JsonResponse
     {
@@ -232,9 +203,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Mark proforma invoice as rejected.
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function markAsRejected(ProformaInvoice $proformaInvoice): JsonResponse
     {
@@ -250,9 +218,6 @@ class ProformaInvoicesController extends Controller
 
     /**
      * Convert proforma invoice to regular invoice.
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return JsonResponse
      */
     public function convertToInvoice(ProformaInvoice $proformaInvoice): JsonResponse
     {

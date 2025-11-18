@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Log;
  * Provides API endpoints for partner dashboard with mandatory mocked data safety flag.
  * All endpoints respect FEATURE_PARTNER_MOCKED_DATA flag to prevent accidental
  * real commission processing.
- *
- * @package App\Http\Controllers\V1\Partner
  */
 class PartnerApiController extends Controller
 {
@@ -35,16 +33,15 @@ class PartnerApiController extends Controller
      * Returns mocked data when FEATURE_PARTNER_MOCKED_DATA is ON (default).
      * Only returns real data when flag is explicitly disabled.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function dashboard(Request $request)
     {
         $partner = $this->getPartnerFromRequest($request);
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json([
-                'error' => 'Partner not found'
+                'error' => 'Partner not found',
             ], 404);
         }
 
@@ -52,7 +49,7 @@ class PartnerApiController extends Controller
         if ($this->isMockedDataEnabled()) {
             Log::info('Partner dashboard accessed with mocked data', [
                 'partner_id' => $partner->id,
-                'mocked' => true
+                'mocked' => true,
             ]);
 
             return response()->json([
@@ -72,14 +69,14 @@ class PartnerApiController extends Controller
         // Real data when flag OFF (requires explicit opt-in)
         Log::info('Partner dashboard accessed with REAL data', [
             'partner_id' => $partner->id,
-            'mocked' => false
+            'mocked' => false,
         ]);
 
         $stats = $this->calculator->getStats($partner);
 
         return response()->json([
             'mocked' => false,
-            'data' => $stats
+            'data' => $stats,
         ]);
     }
 
@@ -89,16 +86,15 @@ class PartnerApiController extends Controller
      * Returns paginated list of commissions with invoice and company details.
      * Returns mocked empty data when flag is ON.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function commissions(Request $request)
     {
         $partner = $this->getPartnerFromRequest($request);
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json([
-                'error' => 'Partner not found'
+                'error' => 'Partner not found',
             ], 404);
         }
 
@@ -106,7 +102,7 @@ class PartnerApiController extends Controller
         if ($this->isMockedDataEnabled()) {
             Log::info('Partner commissions accessed with mocked data', [
                 'partner_id' => $partner->id,
-                'mocked' => true
+                'mocked' => true,
             ]);
 
             return response()->json([
@@ -136,7 +132,7 @@ class PartnerApiController extends Controller
         // Real data when flag OFF
         Log::info('Partner commissions accessed with REAL data', [
             'partner_id' => $partner->id,
-            'mocked' => false
+            'mocked' => false,
         ]);
 
         $commissions = Commission::where('partner_id', $partner->id)
@@ -160,16 +156,15 @@ class PartnerApiController extends Controller
      * Returns paginated list of companies managed by partner.
      * Returns mocked empty data when flag is ON.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function clients(Request $request)
     {
         $partner = $this->getPartnerFromRequest($request);
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json([
-                'error' => 'Partner not found'
+                'error' => 'Partner not found',
             ], 404);
         }
 
@@ -177,7 +172,7 @@ class PartnerApiController extends Controller
         if ($this->isMockedDataEnabled()) {
             Log::info('Partner clients accessed with mocked data', [
                 'partner_id' => $partner->id,
-                'mocked' => true
+                'mocked' => true,
             ]);
 
             return response()->json([
@@ -210,16 +205,16 @@ class PartnerApiController extends Controller
         // Real data when flag OFF
         Log::info('Partner clients accessed with REAL data', [
             'partner_id' => $partner->id,
-            'mocked' => false
+            'mocked' => false,
         ]);
 
         $companies = Company::whereHas('partnerLinks', function ($query) use ($partner) {
             $query->where('partner_id', $partner->id)
-                  ->where('is_active', true);
+                ->where('is_active', true);
         })
-        ->withCount('invoices')
-        ->latest()
-        ->paginate(25);
+            ->withCount('invoices')
+            ->latest()
+            ->paginate(25);
 
         return response()->json([
             'mocked' => false,
@@ -236,16 +231,15 @@ class PartnerApiController extends Controller
      *
      * Returns partner's own profile data (always real, never mocked).
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function profile(Request $request)
     {
         $partner = $this->getPartnerFromRequest($request);
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json([
-                'error' => 'Partner not found'
+                'error' => 'Partner not found',
             ], 404);
         }
 
@@ -259,21 +253,18 @@ class PartnerApiController extends Controller
                 'commission_rate' => $partner->commission_rate,
                 'is_active' => $partner->is_active,
                 'created_at' => $partner->created_at,
-            ]
+            ],
         ]);
     }
 
     /**
      * Get partner from authenticated request
-     *
-     * @param Request $request
-     * @return Partner|null
      */
     protected function getPartnerFromRequest(Request $request): ?Partner
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
@@ -282,8 +273,6 @@ class PartnerApiController extends Controller
 
     /**
      * Check if mocked data is enabled
-     *
-     * @return bool
      */
     protected function isMockedDataEnabled(): bool
     {

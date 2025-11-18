@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\Company;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +34,7 @@ class ReferralNetworkController extends Controller
         // Partner nodes
         if (($type === 'all' || $type === 'partners') && $includePartners) {
             $partnersQuery = Partner::query();
-            if (!$includeInactive) {
+            if (! $includeInactive) {
                 $partnersQuery->where('is_active', true);
             }
 
@@ -47,7 +47,7 @@ class ReferralNetworkController extends Controller
 
             foreach ($partners as $partner) {
                 $nodes[] = [
-                    'id' => 'partner_' . $partner->id,
+                    'id' => 'partner_'.$partner->id,
                     'label' => $partner->name,
                     'type' => 'partner',
                     'email' => $partner->email,
@@ -73,7 +73,7 @@ class ReferralNetworkController extends Controller
 
             foreach ($companies as $company) {
                 $nodes[] = [
-                    'id' => 'company_' . $company->id,
+                    'id' => 'company_'.$company->id,
                     'label' => $company->name,
                     'type' => 'company',
                     'active' => true,
@@ -88,8 +88,8 @@ class ReferralNetworkController extends Controller
             return (int) str_replace(['partner_', 'company_'], '', $id);
         });
 
-        $partnerIds = collect($nodes)->where('type', 'partner')->pluck('id')->map(fn($id) => (int) str_replace('partner_', '', $id));
-        $companyIds = collect($nodes)->where('type', 'company')->pluck('id')->map(fn($id) => (int) str_replace('company_', '', $id));
+        $partnerIds = collect($nodes)->where('type', 'partner')->pluck('id')->map(fn ($id) => (int) str_replace('partner_', '', $id));
+        $companyIds = collect($nodes)->where('type', 'company')->pluck('id')->map(fn ($id) => (int) str_replace('company_', '', $id));
 
         if ($partnerIds->isNotEmpty() || $companyIds->isNotEmpty()) {
             $linksQuery = DB::table('partner_company_links')->where('is_active', true);
@@ -108,8 +108,8 @@ class ReferralNetworkController extends Controller
 
             foreach ($partnerCompanyLinks as $link) {
                 $edges[] = [
-                    'from' => 'partner_' . $link->partner_id,
-                    'to' => 'company_' . $link->company_id,
+                    'from' => 'partner_'.$link->partner_id,
+                    'to' => 'company_'.$link->company_id,
                     'type' => 'manages',
                 ];
             }
@@ -121,14 +121,14 @@ class ReferralNetworkController extends Controller
                 ->where('status', 'accepted')
                 ->where(function ($q) use ($partnerIds) {
                     $q->whereIn('inviter_partner_id', $partnerIds)
-                      ->orWhereIn('invitee_partner_id', $partnerIds);
+                        ->orWhereIn('invitee_partner_id', $partnerIds);
                 })
                 ->get(['inviter_partner_id', 'invitee_partner_id']);
 
             foreach ($partnerReferrals as $ref) {
                 $edges[] = [
-                    'from' => 'partner_' . $ref->inviter_partner_id,
-                    'to' => 'partner_' . $ref->invitee_partner_id,
+                    'from' => 'partner_'.$ref->inviter_partner_id,
+                    'to' => 'partner_'.$ref->invitee_partner_id,
                     'type' => 'referred_partner',
                 ];
             }
@@ -140,14 +140,14 @@ class ReferralNetworkController extends Controller
                 ->where('status', 'accepted')
                 ->where(function ($q) use ($companyIds) {
                     $q->whereIn('inviter_company_id', $companyIds)
-                      ->orWhereIn('invitee_company_id', $companyIds);
+                        ->orWhereIn('invitee_company_id', $companyIds);
                 })
                 ->get(['inviter_company_id', 'invitee_company_id']);
 
             foreach ($companyReferrals as $ref) {
                 $edges[] = [
-                    'from' => 'company_' . $ref->inviter_company_id,
-                    'to' => 'company_' . $ref->invitee_company_id,
+                    'from' => 'company_'.$ref->inviter_company_id,
+                    'to' => 'company_'.$ref->invitee_company_id,
                     'type' => 'referred_company',
                 ];
             }

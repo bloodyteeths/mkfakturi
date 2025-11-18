@@ -36,22 +36,16 @@ class BackfillEInvoicesJob implements ShouldQueue
 
     /**
      * The company ID to backfill (null = all companies)
-     *
-     * @var int|null
      */
     protected ?int $companyId;
 
     /**
      * Number of days to consider as "old" for auto-accepting
-     *
-     * @var int
      */
     protected int $oldInvoiceDays;
 
     /**
      * Dry run mode (log only, don't create records)
-     *
-     * @var bool
      */
     protected bool $dryRun;
 
@@ -65,9 +59,9 @@ class BackfillEInvoicesJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param int|null $companyId Company to backfill (null = all companies)
-     * @param int $oldInvoiceDays Days to consider invoice as old (default: 30)
-     * @param bool $dryRun If true, only log what would be done
+     * @param  int|null  $companyId  Company to backfill (null = all companies)
+     * @param  int  $oldInvoiceDays  Days to consider invoice as old (default: 30)
+     * @param  bool  $dryRun  If true, only log what would be done
      */
     public function __construct(?int $companyId = null, int $oldInvoiceDays = 30, bool $dryRun = false)
     {
@@ -78,8 +72,6 @@ class BackfillEInvoicesJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -98,10 +90,10 @@ class BackfillEInvoicesJob implements ShouldQueue
 
         // Build base query for invoices that need e-invoices
         $query = Invoice::whereIn('status', [
-                Invoice::STATUS_SENT,
-                Invoice::STATUS_VIEWED,
-                Invoice::STATUS_COMPLETED,
-            ])
+            Invoice::STATUS_SENT,
+            Invoice::STATUS_VIEWED,
+            Invoice::STATUS_COMPLETED,
+        ])
             ->whereDoesntHave('eInvoice')
             ->with(['company:id,name', 'customer:id,name']);
 
@@ -172,7 +164,7 @@ class BackfillEInvoicesJob implements ShouldQueue
     /**
      * Process a single invoice and create e-invoice record
      *
-     * @param Invoice $invoice Invoice to process
+     * @param  Invoice  $invoice  Invoice to process
      * @return array Result with 'created' and 'skipped' flags
      */
     protected function processInvoice(Invoice $invoice): array
@@ -256,7 +248,7 @@ class BackfillEInvoicesJob implements ShouldQueue
     /**
      * Determine e-invoice status based on invoice properties
      *
-     * @param Invoice $invoice Invoice to evaluate
+     * @param  Invoice  $invoice  Invoice to evaluate
      * @return string E-invoice status
      */
     protected function determineEInvoiceStatus(Invoice $invoice): string
@@ -277,9 +269,8 @@ class BackfillEInvoicesJob implements ShouldQueue
     /**
      * Create initial submission record for accepted e-invoices
      *
-     * @param EInvoice $eInvoice E-invoice that was accepted
-     * @param Invoice $invoice Original invoice
-     * @return void
+     * @param  EInvoice  $eInvoice  E-invoice that was accepted
+     * @param  Invoice  $invoice  Original invoice
      */
     protected function createInitialSubmission(EInvoice $eInvoice, Invoice $invoice): void
     {
@@ -289,7 +280,7 @@ class BackfillEInvoicesJob implements ShouldQueue
             'submitted_by' => null, // Unknown who submitted historically
             'submitted_at' => $invoice->invoice_date,
             'portal_url' => null,
-            'receipt_number' => 'BACKFILL-' . $invoice->invoice_number, // Placeholder receipt
+            'receipt_number' => 'BACKFILL-'.$invoice->invoice_number, // Placeholder receipt
             'status' => EInvoiceSubmission::STATUS_ACCEPTED,
             'response_data' => [
                 'backfill' => true,
@@ -309,9 +300,6 @@ class BackfillEInvoicesJob implements ShouldQueue
 
     /**
      * Handle job failure
-     *
-     * @param \Throwable $exception
-     * @return void
      */
     public function failed(\Throwable $exception): void
     {

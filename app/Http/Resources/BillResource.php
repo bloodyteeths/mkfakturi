@@ -54,4 +54,3 @@ class BillResource extends JsonResource
         ];
     }
 }
-

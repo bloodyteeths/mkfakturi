@@ -21,15 +21,15 @@ return new class extends Migration
             // Foreign keys
             $table->unsignedInteger('invoice_id');
             $table->foreign('invoice_id')
-                  ->references('id')
-                  ->on('invoices')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('invoices')
+                ->onDelete('restrict');
 
             $table->unsignedInteger('company_id');
             $table->foreign('company_id')
-                  ->references('id')
-                  ->on('companies')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('companies')
+                ->onDelete('restrict');
 
             // UBL XML storage
             $table->text('ubl_xml')->nullable(); // UBL 2.1 XML content (unsigned)
@@ -42,7 +42,7 @@ return new class extends Migration
                 'SUBMITTED',  // Submitted to government portal
                 'ACCEPTED',   // Accepted by government portal
                 'REJECTED',   // Rejected by government portal
-                'FAILED'      // Submission or processing failed
+                'FAILED',      // Submission or processing failed
             ])->default('DRAFT');
 
             // Hash and file paths
@@ -59,7 +59,7 @@ return new class extends Migration
             $table->index(['company_id', 'status']);
             $table->index(['invoice_id', 'status']);
 
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
     }
 
     /**

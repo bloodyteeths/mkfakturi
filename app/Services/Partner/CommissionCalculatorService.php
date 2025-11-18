@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\Log;
  *
  * Handles commission calculation logic for partner portal.
  * Provides statistics and commission calculation methods.
- *
- * @package App\Services\Partner
  */
 class CommissionCalculatorService
 {
@@ -29,9 +27,6 @@ class CommissionCalculatorService
      * - Processed invoices count
      * - Pending payout amount
      * - Total earned (all time)
-     *
-     * @param Partner $partner
-     * @return array
      */
     public function getStats(Partner $partner): array
     {
@@ -46,7 +41,7 @@ class CommissionCalculatorService
 
         Log::info('Partner stats calculated', [
             'partner_id' => $partner->id,
-            'stats' => $stats
+            'stats' => $stats,
         ]);
 
         return $stats;
@@ -58,8 +53,7 @@ class CommissionCalculatorService
      * Uses partner's commission rate or override rate from partner-company link.
      * Default rate is 5% (0.05) if not specified.
      *
-     * @param Invoice $invoice
-     * @param float|null $rate Override commission rate (optional)
+     * @param  float|null  $rate  Override commission rate (optional)
      * @return float Commission amount in cents
      */
     public function calculateCommission(Invoice $invoice, ?float $rate = null): float
@@ -67,11 +61,12 @@ class CommissionCalculatorService
         // Get partner for this invoice's company
         $partner = $this->getPartnerForInvoice($invoice);
 
-        if (!$partner) {
+        if (! $partner) {
             Log::warning('Cannot calculate commission: no partner for invoice', [
                 'invoice_id' => $invoice->id,
-                'company_id' => $invoice->company_id
+                'company_id' => $invoice->company_id,
             ]);
+
             return 0.0;
         }
 
@@ -89,7 +84,7 @@ class CommissionCalculatorService
             'partner_id' => $partner->id,
             'invoice_total' => $invoice->total,
             'rate' => $rate,
-            'commission_amount' => $commissionAmount
+            'commission_amount' => $commissionAmount,
         ]);
 
         return $commissionAmount;
@@ -100,16 +95,12 @@ class CommissionCalculatorService
      *
      * Called when an invoice is paid to create the commission record.
      * Only creates commission if partner exists and is active.
-     *
-     * @param Invoice $invoice
-     * @param Payment $payment
-     * @return Commission|null
      */
     public function createCommissionForPayment(Invoice $invoice, Payment $payment): ?Commission
     {
         $partner = $this->getPartnerForInvoice($invoice);
 
-        if (!$partner || !$partner->is_active) {
+        if (! $partner || ! $partner->is_active) {
             return null;
         }
 
@@ -135,7 +126,7 @@ class CommissionCalculatorService
             'partner_id' => $partner->id,
             'invoice_id' => $invoice->id,
             'payment_id' => $payment->id,
-            'amount' => $amount
+            'amount' => $amount,
         ]);
 
         return $commission;
@@ -143,23 +134,17 @@ class CommissionCalculatorService
 
     /**
      * Get active clients count for partner
-     *
-     * @param Partner $partner
-     * @return int
      */
     protected function getActiveClientsCount(Partner $partner): int
     {
         return Company::whereHas('partnerLinks', function ($query) use ($partner) {
             $query->where('partner_id', $partner->id)
-                  ->where('is_active', true);
+                ->where('is_active', true);
         })->count();
     }
 
     /**
      * Get monthly commissions total (current month)
-     *
-     * @param Partner $partner
-     * @return float
      */
     protected function getMonthlyCommissions(Partner $partner): float
     {
@@ -170,23 +155,17 @@ class CommissionCalculatorService
 
     /**
      * Get processed invoices count
-     *
-     * @param Partner $partner
-     * @return int
      */
     protected function getProcessedInvoicesCount(Partner $partner): int
     {
         return Invoice::whereHas('company.partnerLinks', function ($query) use ($partner) {
             $query->where('partner_id', $partner->id)
-                  ->where('is_active', true);
+                ->where('is_active', true);
         })->count();
     }
 
     /**
      * Get pending payout amount (approved but not paid commissions)
-     *
-     * @param Partner $partner
-     * @return float
      */
     protected function getPendingPayout(Partner $partner): float
     {
@@ -197,9 +176,6 @@ class CommissionCalculatorService
 
     /**
      * Get total earned amount (all time paid commissions)
-     *
-     * @param Partner $partner
-     * @return float
      */
     protected function getTotalEarned(Partner $partner): float
     {
@@ -210,9 +186,6 @@ class CommissionCalculatorService
 
     /**
      * Get partner for an invoice
-     *
-     * @param Invoice $invoice
-     * @return Partner|null
      */
     protected function getPartnerForInvoice(Invoice $invoice): ?Partner
     {
@@ -222,7 +195,7 @@ class CommissionCalculatorService
             ->where('is_active', true)
             ->first();
 
-        if (!$partnerLink) {
+        if (! $partnerLink) {
             return null;
         }
 
@@ -231,10 +204,6 @@ class CommissionCalculatorService
 
     /**
      * Get commission rate for partner-company relationship
-     *
-     * @param Partner $partner
-     * @param int $companyId
-     * @return float
      */
     protected function getCommissionRate(Partner $partner, int $companyId): float
     {

@@ -45,7 +45,7 @@ class SystemException extends Exception
         ?Throwable $previous = null
     ) {
         parent::__construct($message, 0, $previous);
-        
+
         $this->errorCode = $errorCode;
         $this->statusCode = $statusCode;
         $this->context = $context;
@@ -117,7 +117,7 @@ class SystemException extends Exception
             errorCode: 'FILE_SYSTEM_ERROR',
             context: array_merge($context, [
                 'operation' => $operation,
-                'path' => $path
+                'path' => $path,
             ]),
             userMessage: 'A file system error occurred. Please try again or contact support if the problem persists.'
         );
@@ -134,7 +134,7 @@ class SystemException extends Exception
             statusCode: 507,
             context: array_merge($context, [
                 'memory_limit' => $memoryLimit,
-                'memory_usage' => $memoryUsage
+                'memory_usage' => $memoryUsage,
             ]),
             userMessage: 'The system is low on memory. Please try again with smaller data sets or contact support.'
         );
@@ -151,7 +151,7 @@ class SystemException extends Exception
             statusCode: 408,
             context: array_merge($context, [
                 'operation' => $operation,
-                'timeout_seconds' => $timeoutSeconds
+                'timeout_seconds' => $timeoutSeconds,
             ]),
             userMessage: 'The operation took too long to complete. Please try again with smaller data or contact support.'
         );
@@ -197,7 +197,7 @@ class SystemException extends Exception
             statusCode: 502,
             context: array_merge($context, [
                 'service' => $service,
-                'endpoint' => $endpoint
+                'endpoint' => $endpoint,
             ]),
             userMessage: 'An external service we depend on is currently unavailable. Please try again later.'
         );
@@ -247,7 +247,7 @@ class SystemException extends Exception
     /**
      * Create a maintenance mode error
      */
-    public static function maintenanceModeError(string $reason = null, \DateTime $estimatedEnd = null): self
+    public static function maintenanceModeError(?string $reason = null, ?\DateTime $estimatedEnd = null): self
     {
         $message = 'System is currently in maintenance mode';
         if ($reason) {
@@ -281,7 +281,7 @@ class SystemException extends Exception
             context: array_merge($context, [
                 'resource' => $resource,
                 'limit' => $limit,
-                'current' => $current
+                'current' => $current,
             ]),
             userMessage: "System resources for {$resource} are currently exhausted. Please try again later or contact support."
         );
@@ -298,7 +298,7 @@ class SystemException extends Exception
             context: array_merge($context, [
                 'component' => $component,
                 'current_version' => $currentVersion,
-                'required_version' => $requiredVersion
+                'required_version' => $requiredVersion,
             ]),
             userMessage: 'A system component version incompatibility was detected. Please contact support for assistance.'
         );
@@ -314,7 +314,7 @@ class SystemException extends Exception
             errorCode: 'DATA_CORRUPTION_ERROR',
             context: array_merge($context, [
                 'data_type' => $dataType,
-                'identifier' => $identifier
+                'identifier' => $identifier,
             ]),
             userMessage: 'Data corruption has been detected. Please contact support immediately for assistance.'
         );

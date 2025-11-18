@@ -21,25 +21,25 @@ return new class extends Migration
             // Foreign key to e_invoices
             $table->unsignedBigInteger('e_invoice_id');
             $table->foreign('e_invoice_id')
-                  ->references('id')
-                  ->on('e_invoices')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('e_invoices')
+                ->onDelete('restrict');
 
             // Company scope (multi-tenant)
             $table->unsignedInteger('company_id');
             $table->foreign('company_id')
-                  ->references('id')
-                  ->on('companies')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('companies')
+                ->onDelete('restrict');
 
             // Submission tracking
             $table->timestamp('submitted_at')->nullable(); // When submission was initiated
 
             $table->unsignedInteger('submitted_by')->nullable(); // User who submitted
             $table->foreign('submitted_by')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
 
             // Portal response information
             $table->string('portal_url')->nullable(); // Government portal URL
@@ -51,7 +51,7 @@ return new class extends Migration
                 'pending',   // Submission in progress
                 'accepted',  // Portal accepted the submission
                 'rejected',  // Portal rejected the submission
-                'error'      // Submission error occurred
+                'error',      // Submission error occurred
             ])->default('pending');
 
             // Response and error handling
@@ -77,7 +77,7 @@ return new class extends Migration
             $table->index(['status', 'next_retry_at']); // For retry queue processing
             $table->index(['submitted_at', 'status']);
 
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
     }
 
     /**

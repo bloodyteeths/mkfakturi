@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Certificate;
 use App\Models\EInvoice;
 use App\Models\EInvoiceSubmission;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,10 +13,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Facades\Storage;
 use Modules\Mk\Services\MkUblMapper;
 use Modules\Mk\Services\MkXmlSigner;
-use Exception;
 use Throwable;
 
 /**
@@ -82,38 +81,30 @@ class SubmitEInvoiceJob implements ShouldQueue
      */
     /**
      * E-invoice ID to submit
-     *
-     * @var int
      */
     protected int $eInvoiceId;
 
     /**
      * User ID who initiated submission (optional)
-     *
-     * @var int|null
      */
     protected ?int $userId;
 
     /**
      * Additional submission options
-     *
-     * @var array
      */
     protected array $options;
 
     /**
      * Current submission record
-     *
-     * @var EInvoiceSubmission|null
      */
     protected ?EInvoiceSubmission $submission = null;
 
     /**
      * Create a new job instance.
      *
-     * @param int $eInvoiceId E-invoice ID to submit
-     * @param int|null $userId User ID who initiated submission
-     * @param array $options Additional submission options
+     * @param  int  $eInvoiceId  E-invoice ID to submit
+     * @param  int|null  $userId  User ID who initiated submission
+     * @param  array  $options  Additional submission options
      * @return void
      */
     public function __construct(int $eInvoiceId, ?int $userId = null, array $options = [])
@@ -126,7 +117,6 @@ class SubmitEInvoiceJob implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
      * @throws Exception
      */
     public function handle(): void
@@ -147,6 +137,7 @@ class SubmitEInvoiceJob implements ShouldQueue
                     'e_invoice_id' => $eInvoice->id,
                     'status' => $eInvoice->status,
                 ]);
+
                 return;
             }
 
@@ -186,9 +177,6 @@ class SubmitEInvoiceJob implements ShouldQueue
 
     /**
      * Handle job failure.
-     *
-     * @param Throwable $exception
-     * @return void
      */
     public function failed(Throwable $exception): void
     {
@@ -202,7 +190,7 @@ class SubmitEInvoiceJob implements ShouldQueue
         // Mark submission as error if it exists
         if ($this->submission) {
             $this->submission->markAsError(
-                'Job failed after maximum retry attempts: ' . $exception->getMessage(),
+                'Job failed after maximum retry attempts: '.$exception->getMessage(),
                 ['exception' => get_class($exception)],
                 false // Don't schedule retry (already exhausted)
             );
@@ -210,7 +198,7 @@ class SubmitEInvoiceJob implements ShouldQueue
             // Also mark e-invoice as failed
             $eInvoice = EInvoice::find($this->eInvoiceId);
             if ($eInvoice) {
-                $eInvoice->markAsFailed('Submission failed after ' . $this->tries . ' attempts');
+                $eInvoice->markAsFailed('Submission failed after '.$this->tries.' attempts');
             }
         }
     }
@@ -218,7 +206,6 @@ class SubmitEInvoiceJob implements ShouldQueue
     /**
      * Load the e-invoice model.
      *
-     * @return EInvoice
      * @throws Exception
      */
     protected function loadEInvoice(): EInvoice
@@ -229,15 +216,15 @@ class SubmitEInvoiceJob implements ShouldQueue
 
         $eInvoice = EInvoice::with(['invoice', 'company', 'certificate'])->find($this->eInvoiceId);
 
-        if (!$eInvoice) {
+        if (! $eInvoice) {
             throw new Exception("E-invoice not found: {$this->eInvoiceId}");
         }
 
-        if (!$eInvoice->invoice) {
+        if (! $eInvoice->invoice) {
             throw new Exception("Invoice not found for e-invoice: {$this->eInvoiceId}");
         }
 
-        if (!$eInvoice->company) {
+        if (! $eInvoice->company) {
             throw new Exception("Company not found for e-invoice: {$this->eInvoiceId}");
         }
 
@@ -246,9 +233,6 @@ class SubmitEInvoiceJob implements ShouldQueue
 
     /**
      * Check if submission should be skipped.
-     *
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     protected function shouldSkipSubmission(EInvoice $eInvoice): bool
     {
@@ -262,8 +246,8 @@ class SubmitEInvoiceJob implements ShouldQueue
     /**
      * Generate UBL XML from invoice.
      *
-     * @param EInvoice $eInvoice
      * @return string UBL XML content
+     *
      * @throws Exception
      */
     protected function generateUblXml(EInvoice $eInvoice): string
@@ -274,7 +258,7 @@ class SubmitEInvoiceJob implements ShouldQueue
         ]);
 
         try {
-            $mapper = new MkUblMapper();
+            $mapper = new MkUblMapper;
             $ublXml = $mapper->mapInvoiceToUbl($eInvoice->invoice);
 
             // Store UBL XML in e-invoice record
@@ -293,16 +277,15 @@ class SubmitEInvoiceJob implements ShouldQueue
                 'e_invoice_id' => $eInvoice->id,
                 'error' => $e->getMessage(),
             ]);
-            throw new Exception('Failed to generate UBL XML: ' . $e->getMessage());
+            throw new Exception('Failed to generate UBL XML: '.$e->getMessage());
         }
     }
 
     /**
      * Sign XML with company's active certificate.
      *
-     * @param EInvoice $eInvoice
-     * @param string $ublXml
      * @return string Signed XML content
+     *
      * @throws Exception
      */
     protected function signXml(EInvoice $eInvoice, string $ublXml): string
@@ -350,15 +333,13 @@ class SubmitEInvoiceJob implements ShouldQueue
                 'e_invoice_id' => $eInvoice->id,
                 'error' => $e->getMessage(),
             ]);
-            throw new Exception('Failed to sign UBL XML: ' . $e->getMessage());
+            throw new Exception('Failed to sign UBL XML: '.$e->getMessage());
         }
     }
 
     /**
      * Get company's active certificate.
      *
-     * @param EInvoice $eInvoice
-     * @return Certificate
      * @throws Exception
      */
     protected function getActiveCertificate(EInvoice $eInvoice): Certificate
@@ -366,7 +347,7 @@ class SubmitEInvoiceJob implements ShouldQueue
         // Try to use the certificate already associated with the e-invoice
         if ($eInvoice->certificate_id) {
             $certificate = Certificate::find($eInvoice->certificate_id);
-            if ($certificate && $certificate->is_active && !$certificate->is_expired) {
+            if ($certificate && $certificate->is_active && ! $certificate->is_expired) {
                 return $certificate;
             }
         }
@@ -378,7 +359,7 @@ class SubmitEInvoiceJob implements ShouldQueue
             ->orderBy('valid_to', 'desc')
             ->first();
 
-        if (!$certificate) {
+        if (! $certificate) {
             throw new Exception("No active certificate found for company: {$eInvoice->company_id}");
         }
 
@@ -387,9 +368,6 @@ class SubmitEInvoiceJob implements ShouldQueue
 
     /**
      * Create submission record with idempotency key.
-     *
-     * @param EInvoice $eInvoice
-     * @return EInvoiceSubmission
      */
     protected function createSubmission(EInvoice $eInvoice): EInvoiceSubmission
     {
@@ -430,9 +408,8 @@ class SubmitEInvoiceJob implements ShouldQueue
     /**
      * Submit to tax authority portal using efaktura_upload.php tool.
      *
-     * @param EInvoice $eInvoice
-     * @param string $signedXml
      * @return array Upload result
+     *
      * @throws Exception
      */
     protected function submitToPortal(EInvoice $eInvoice, string $signedXml): array
@@ -449,7 +426,7 @@ class SubmitEInvoiceJob implements ShouldQueue
             // Path to efaktura_upload.php tool
             $uploadToolPath = base_path('tools/efaktura_upload.php');
 
-            if (!file_exists($uploadToolPath)) {
+            if (! file_exists($uploadToolPath)) {
                 throw new Exception("E-faktura upload tool not found: {$uploadToolPath}");
             }
 
@@ -458,17 +435,17 @@ class SubmitEInvoiceJob implements ShouldQueue
                 ->run([
                     'php',
                     $uploadToolPath,
-                    '--xml=' . $tempXmlPath,
-                    '--mode=' . config('mk.efaktura.mode', 'portal'),
+                    '--xml='.$tempXmlPath,
+                    '--mode='.config('mk.efaktura.mode', 'portal'),
                 ]);
 
             // Clean up temporary file
             @unlink($tempXmlPath);
 
             // Check if process was successful
-            if (!$result->successful()) {
+            if (! $result->successful()) {
                 throw new Exception(
-                    'Upload tool execution failed: ' . $result->errorOutput()
+                    'Upload tool execution failed: '.$result->errorOutput()
                 );
             }
 
@@ -488,22 +465,19 @@ class SubmitEInvoiceJob implements ShouldQueue
                 'e_invoice_id' => $eInvoice->id,
                 'error' => $e->getMessage(),
             ]);
-            throw new Exception('Portal submission failed: ' . $e->getMessage());
+            throw new Exception('Portal submission failed: '.$e->getMessage());
         }
     }
 
     /**
      * Save content to temporary file.
      *
-     * @param string $content
-     * @param string $prefix
-     * @param string $extension
      * @return string File path
      */
     protected function saveToTempFile(string $content, string $prefix = 'temp', string $extension = '.tmp'): string
     {
         $tempDir = sys_get_temp_dir();
-        $tempFile = tempnam($tempDir, $prefix) . $extension;
+        $tempFile = tempnam($tempDir, $prefix).$extension;
 
         file_put_contents($tempFile, $content);
 
@@ -513,7 +487,6 @@ class SubmitEInvoiceJob implements ShouldQueue
     /**
      * Parse output from efaktura_upload.php tool.
      *
-     * @param string $output
      * @return array Parsed result
      */
     protected function parseUploadToolOutput(string $output): array
@@ -551,9 +524,6 @@ class SubmitEInvoiceJob implements ShouldQueue
 
     /**
      * Extract receipt number from upload result.
-     *
-     * @param array $uploadResult
-     * @return string|null
      */
     protected function extractReceiptNumber(array $uploadResult): ?string
     {
@@ -562,10 +532,6 @@ class SubmitEInvoiceJob implements ShouldQueue
 
     /**
      * Update submission status based on upload result.
-     *
-     * @param array $uploadResult
-     * @param string|null $receiptNumber
-     * @return void
      */
     protected function updateSubmissionStatus(array $uploadResult, ?string $receiptNumber): void
     {
@@ -588,7 +554,7 @@ class SubmitEInvoiceJob implements ShouldQueue
         } else {
             // Mark as error and schedule retry
             $this->submission->markAsError(
-                'Unexpected upload status: ' . $status,
+                'Unexpected upload status: '.$status,
                 $uploadResult,
                 true // Schedule retry
             );
@@ -597,10 +563,6 @@ class SubmitEInvoiceJob implements ShouldQueue
 
     /**
      * Update e-invoice status based on upload result.
-     *
-     * @param EInvoice $eInvoice
-     * @param array $uploadResult
-     * @return void
      */
     protected function updateEInvoiceStatus(EInvoice $eInvoice, array $uploadResult): void
     {
@@ -632,8 +594,6 @@ class SubmitEInvoiceJob implements ShouldQueue
     /**
      * Handle exception during job execution.
      *
-     * @param Throwable $exception
-     * @return void
      * @throws Exception
      */
     protected function handleException(Throwable $exception): void

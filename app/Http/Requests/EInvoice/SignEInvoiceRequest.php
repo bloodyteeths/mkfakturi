@@ -19,8 +19,6 @@ class SignEInvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -46,8 +44,6 @@ class SignEInvoiceRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
-     *
-     * @return array
      */
     public function messages(): array
     {
@@ -61,8 +57,6 @@ class SignEInvoiceRequest extends FormRequest
     /**
      * Validate that the e-invoice has UBL XML.
      *
-     * @param EInvoice $eInvoice
-     * @return void
      * @throws \Illuminate\Validation\ValidationException
      */
     public function validateEInvoice(EInvoice $eInvoice): void
@@ -73,7 +67,7 @@ class SignEInvoiceRequest extends FormRequest
             ]);
         }
 
-        if (!empty($eInvoice->ubl_xml_signed)) {
+        if (! empty($eInvoice->ubl_xml_signed)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'e_invoice' => ['E-invoice is already signed.'],
             ]);

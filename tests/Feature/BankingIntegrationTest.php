@@ -2,27 +2,27 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\Company;
-use App\Models\User;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
+use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Customer;
-use Modules\Mk\Services\StopanskaGateway;
-use Modules\Mk\Services\NlbGateway;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Modules\Mk\Services\KomerGateway;
 use Modules\Mk\Services\Matcher;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use Modules\Mk\Services\NlbGateway;
+use Modules\Mk\Services\StopanskaGateway;
+use Tests\TestCase;
 
 /**
  * OPS-06: Banking PSD2 Integration Testing
- * 
+ *
  * Tests complete banking integration with Macedonia banks:
  * - Stopanska Banka API connections
  * - NLB Banka API connections
@@ -37,19 +37,27 @@ class BankingIntegrationTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $company;
+
     protected $stopanskaAccount;
+
     protected $nlbAccount;
+
     protected $komerAccount;
+
     protected $stopanskaGateway;
+
     protected $nlbGateway;
+
     protected $komerGateway;
+
     protected $matcher;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->setupTestEnvironment();
         $this->createTestData();
         $this->setupBankingServices();
@@ -62,12 +70,12 @@ class BankingIntegrationTest extends TestCase
         Config::set('mk.banking.stopanska.client_secret', 'test_client_secret');
         Config::set('mk.banking.stopanska.api_url', 'https://sandbox-api.ob.stb.kibs.mk/xs2a/v1');
         Config::set('mk.banking.stopanska.sandbox', true);
-        
+
         Config::set('mk.banking.nlb.client_id', 'test_nlb_client');
         Config::set('mk.banking.nlb.client_secret', 'test_nlb_secret');
         Config::set('mk.banking.nlb.api_url', 'https://developer-ob.nlb.mk/apis/xs2a/v1');
         Config::set('mk.banking.nlb.sandbox', true);
-        
+
         Config::set('mk.banking.komer.client_id', 'test_komer_client');
         Config::set('mk.banking.komer.client_secret', 'test_komer_secret');
         Config::set('mk.banking.komer.api_url', 'https://test-api.komerbank.mk');
@@ -79,13 +87,13 @@ class BankingIntegrationTest extends TestCase
         // Create company
         $this->company = Company::factory()->create([
             'name' => 'Тест Компанија за Банкарство ДОО',
-            'vat_number' => 'MK4030009501234'
+            'vat_number' => 'MK4030009501234',
         ]);
 
         // Create user
         $this->user = User::factory()->create([
             'company_id' => $this->company->id,
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
 
         // Create bank accounts for each bank
@@ -100,7 +108,7 @@ class BankingIntegrationTest extends TestCase
             'bank_code' => 'STB',
             'is_primary' => true,
             'api_enabled' => true,
-            'last_sync' => null
+            'last_sync' => null,
         ]);
 
         $this->nlbAccount = BankAccount::factory()->create([
@@ -114,7 +122,7 @@ class BankingIntegrationTest extends TestCase
             'bank_code' => 'NLB',
             'is_primary' => false,
             'api_enabled' => true,
-            'last_sync' => null
+            'last_sync' => null,
         ]);
 
         $this->komerAccount = BankAccount::factory()->create([
@@ -128,14 +136,14 @@ class BankingIntegrationTest extends TestCase
             'bank_code' => 'KOM',
             'is_primary' => false,
             'api_enabled' => true,
-            'last_sync' => null
+            'last_sync' => null,
         ]);
 
         // Create test customer with invoice for payment matching
         $customer = Customer::factory()->create([
             'name' => 'Тест Клиент ДООЕл',
             'tax_id' => 'MK4030009501235',
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         // Create test invoice for payment matching
@@ -145,16 +153,16 @@ class BankingIntegrationTest extends TestCase
             'invoice_number' => 'ТСТ-2025-001',
             'total' => 15000, // 150.00 MKD
             'status' => 'SENT',
-            'due_date' => Carbon::now()->addDays(15)
+            'due_date' => Carbon::now()->addDays(15),
         ]);
     }
 
     protected function setupBankingServices(): void
     {
-        $this->stopanskaGateway = new StopanskaGateway();
-        $this->nlbGateway = new NlbGateway();
-        $this->komerGateway = new KomerGateway();
-        $this->matcher = new Matcher();
+        $this->stopanskaGateway = new StopanskaGateway;
+        $this->nlbGateway = new NlbGateway;
+        $this->komerGateway = new KomerGateway;
+        $this->matcher = new Matcher;
     }
 
     /** @test */
@@ -166,8 +174,8 @@ class BankingIntegrationTest extends TestCase
                 'access_token' => 'test_access_token_123',
                 'token_type' => 'Bearer',
                 'expires_in' => 3600,
-                'scope' => 'account:read transaction:read'
-            ], 200)
+                'scope' => 'account:read transaction:read',
+            ], 200),
         ]);
 
         // Test authentication
@@ -200,8 +208,8 @@ class BankingIntegrationTest extends TestCase
                 'available_balance' => 125000.50,
                 'current_balance' => 125000.50,
                 'reserved_amount' => 0.00,
-                'last_update' => Carbon::now()->toISOString()
-            ], 200)
+                'last_update' => Carbon::now()->toISOString(),
+            ], 200),
         ]);
 
         // Fetch balance
@@ -235,7 +243,7 @@ class BankingIntegrationTest extends TestCase
                         'creditor_name' => 'Тест Компанија за Банкарство ДОО',
                         'creditor_iban' => 'MK07210000000012345678',
                         'remittance_info' => 'Плаќање за фактура ТСТ-2025-001',
-                        'bank_transaction_code' => 'PMNT-ICDT-INST'
+                        'bank_transaction_code' => 'PMNT-ICDT-INST',
                     ],
                     [
                         'transaction_id' => 'NLB-TXN-002',
@@ -249,15 +257,15 @@ class BankingIntegrationTest extends TestCase
                         'creditor_name' => 'Електричество на Македонија',
                         'creditor_iban' => 'MK07200000000099887766',
                         'remittance_info' => 'Сметка за електрична енергија',
-                        'bank_transaction_code' => 'PMNT-ICDT-INST'
-                    ]
+                        'bank_transaction_code' => 'PMNT-ICDT-INST',
+                    ],
                 ],
                 'pagination' => [
                     'page' => 1,
                     'per_page' => 10,
-                    'total' => 2
-                ]
-            ], 200)
+                    'total' => 2,
+                ],
+            ], 200),
         ]);
 
         // Fetch transactions
@@ -267,7 +275,7 @@ class BankingIntegrationTest extends TestCase
 
         $this->assertTrue($transactions['success']);
         $this->assertCount(2, $transactions['transactions']);
-        
+
         // Verify first transaction (incoming payment)
         $transaction1 = $transactions['transactions'][0];
         $this->assertEquals('NLB-TXN-001', $transaction1['transaction_id']);
@@ -294,7 +302,7 @@ class BankingIntegrationTest extends TestCase
                 'account' => [
                     'iban' => 'MK07240000000012345678',
                     'currency' => 'USD',
-                    'current_balance' => 2500.75
+                    'current_balance' => 2500.75,
                 ],
                 'transactions' => [
                     [
@@ -306,10 +314,10 @@ class BankingIntegrationTest extends TestCase
                         'counterparty_name' => 'International Client LLC',
                         'counterparty_iban' => 'US123456789012345678',
                         'reference' => 'INV-INT-2025-005',
-                        'description' => 'Payment for international services'
-                    ]
-                ]
-            ], 200)
+                        'description' => 'Payment for international services',
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Sync account
@@ -337,7 +345,7 @@ class BankingIntegrationTest extends TestCase
             'description' => 'Плаќање за услуги',
             'booking_date' => Carbon::now(),
             'value_date' => Carbon::now(),
-            'status' => 'PENDING'
+            'status' => 'PENDING',
         ]);
 
         // Run matching algorithm
@@ -353,7 +361,7 @@ class BankingIntegrationTest extends TestCase
             'invoice_id' => $matchResult['invoice']->id,
             'amount' => 15000,
             'payment_method' => 'bank_transfer',
-            'reference_number' => 'STB-PAY-123'
+            'reference_number' => 'STB-PAY-123',
         ]);
 
         // Verify transaction status updated
@@ -369,7 +377,7 @@ class BankingIntegrationTest extends TestCase
             'company_id' => $this->company->id,
             'invoice_number' => 'ТСТ-2025-002',
             'total' => 30000, // 300.00 MKD
-            'status' => 'SENT'
+            'status' => 'SENT',
         ]);
 
         // Create partial payment transaction
@@ -381,7 +389,7 @@ class BankingIntegrationTest extends TestCase
             'type' => 'CREDIT',
             'reference' => 'Делумно плаќање ТСТ-2025-002',
             'booking_date' => Carbon::now(),
-            'status' => 'PENDING'
+            'status' => 'PENDING',
         ]);
 
         // Match partial payment
@@ -395,7 +403,7 @@ class BankingIntegrationTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'invoice_id' => $invoice->id,
             'amount' => 15000,
-            'payment_method' => 'bank_transfer'
+            'payment_method' => 'bank_transfer',
         ]);
 
         // Verify invoice status updated to partially paid
@@ -409,7 +417,7 @@ class BankingIntegrationTest extends TestCase
     {
         // Mock all bank authentications
         $this->mockStopanskaAuth();
-        $this->mockNlbAuth(); 
+        $this->mockNlbAuth();
         $this->mockKomerAuth();
 
         // Mock responses for all banks
@@ -421,9 +429,9 @@ class BankingIntegrationTest extends TestCase
                         'amount' => 5000.00,
                         'currency' => 'MKD',
                         'type' => 'CREDIT',
-                        'booking_date' => Carbon::now()->toDateString()
-                    ]
-                ]
+                        'booking_date' => Carbon::now()->toDateString(),
+                    ],
+                ],
             ], 200),
             'developer-ob.nlb.mk/apis/xs2a/v1/accounts/*/transactions*' => Http::response([
                 'transactions' => [
@@ -432,9 +440,9 @@ class BankingIntegrationTest extends TestCase
                         'amount' => 8000.00,
                         'currency' => 'MKD',
                         'credit_debit_indicator' => 'CRDT',
-                        'booking_date' => Carbon::now()->toDateString()
-                    ]
-                ]
+                        'booking_date' => Carbon::now()->toDateString(),
+                    ],
+                ],
             ], 200),
             'test-api.komerbank.mk/psd2/accounts/*/transactions*' => Http::response([
                 'transactions' => [
@@ -443,10 +451,10 @@ class BankingIntegrationTest extends TestCase
                         'amount' => 500.00,
                         'currency' => 'USD',
                         'type' => 'CREDIT',
-                        'booking_date' => Carbon::now()->toDateString()
-                    ]
-                ]
-            ], 200)
+                        'booking_date' => Carbon::now()->toDateString(),
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Sync all accounts
@@ -475,7 +483,7 @@ class BankingIntegrationTest extends TestCase
             'company_id' => $this->company->id,
             'invoice_number' => 'USD-2025-001',
             'total' => 30000, // 300.00 MKD
-            'status' => 'SENT'
+            'status' => 'SENT',
         ]);
 
         // Create USD transaction (equivalent amount)
@@ -487,16 +495,16 @@ class BankingIntegrationTest extends TestCase
             'type' => 'CREDIT',
             'reference' => 'Payment for USD-2025-001',
             'booking_date' => Carbon::now(),
-            'status' => 'PENDING'
+            'status' => 'PENDING',
         ]);
 
         // Mock exchange rate service
         Http::fake([
             'api.exchangerate-api.com/v4/latest/USD' => Http::response([
                 'rates' => [
-                    'MKD' => 60.0
-                ]
-            ], 200)
+                    'MKD' => 60.0,
+                ],
+            ], 200),
         ]);
 
         // Match with currency conversion
@@ -514,7 +522,7 @@ class BankingIntegrationTest extends TestCase
             'payment_method' => 'bank_transfer',
             'currency' => 'USD',
             'exchange_rate' => 60.0,
-            'original_amount' => 500.00
+            'original_amount' => 500.00,
         ]);
     }
 
@@ -522,7 +530,7 @@ class BankingIntegrationTest extends TestCase
     public function it_measures_banking_sync_performance()
     {
         $this->mockStopanskaAuth();
-        
+
         // Mock large transaction response
         $transactions = [];
         for ($i = 1; $i <= 100; $i++) {
@@ -531,21 +539,21 @@ class BankingIntegrationTest extends TestCase
                 'amount' => rand(1000, 50000),
                 'currency' => 'MKD',
                 'type' => 'CREDIT',
-                'booking_date' => Carbon::now()->subDays(rand(1, 30))->toDateString()
+                'booking_date' => Carbon::now()->subDays(rand(1, 30))->toDateString(),
             ];
         }
 
         Http::fake([
             'sandbox-api.ob.stb.kibs.mk/xs2a/v1/accounts/*/transactions*' => Http::response([
-                'transactions' => $transactions
-            ], 200)
+                'transactions' => $transactions,
+            ], 200),
         ]);
 
         // Measure sync performance
         $startTime = microtime(true);
-        
+
         $syncResult = $this->stopanskaGateway->syncAccount($this->stopanskaAccount);
-        
+
         $endTime = microtime(true);
         $syncTime = ($endTime - $startTime) * 1000; // Convert to milliseconds
 
@@ -559,7 +567,7 @@ class BankingIntegrationTest extends TestCase
             'bank' => 'stopanska',
             'transaction_count' => 100,
             'sync_time_ms' => round($syncTime, 2),
-            'transactions_per_second' => round(100 / ($syncTime / 1000), 2)
+            'transactions_per_second' => round(100 / ($syncTime / 1000), 2),
         ]);
     }
 
@@ -570,7 +578,7 @@ class BankingIntegrationTest extends TestCase
         $consentResult = $this->stopanskaGateway->requestConsent([
             'account_access' => ['transactions', 'balances'],
             'valid_until' => Carbon::now()->addDays(90)->toISOString(),
-            'frequency_per_day' => 4
+            'frequency_per_day' => 4,
         ]);
 
         $this->assertTrue($consentResult['success']);
@@ -591,7 +599,7 @@ class BankingIntegrationTest extends TestCase
         // Test strong customer authentication (SCA)
         $scaResult = $this->stopanskaGateway->initiateStrongAuthentication([
             'user_id' => $this->user->id,
-            'challenge_type' => 'SMS'
+            'challenge_type' => 'SMS',
         ]);
 
         $this->assertTrue($scaResult['success']);
@@ -603,11 +611,11 @@ class BankingIntegrationTest extends TestCase
     {
         // Test network timeout
         Http::fake([
-            'sandbox-api.ob.stb.kibs.mk/**' => Http::response('', 408) // Request timeout
+            'sandbox-api.ob.stb.kibs.mk/**' => Http::response('', 408), // Request timeout
         ]);
 
         $result = $this->stopanskaGateway->getAccountBalance($this->stopanskaAccount);
-        
+
         $this->assertFalse($result['success']);
         $this->assertEquals('TIMEOUT', $result['error_code']);
         $this->assertStringContainsString('timeout', $result['error_message']);
@@ -616,12 +624,12 @@ class BankingIntegrationTest extends TestCase
         Http::fake([
             'sandbox-api.ob.stb.kibs.mk/xs2a/v1/oauth2/token' => Http::response([
                 'error' => 'invalid_client',
-                'error_description' => 'Client authentication failed'
-            ], 401)
+                'error_description' => 'Client authentication failed',
+            ], 401),
         ]);
 
         $authResult = $this->stopanskaGateway->authenticate();
-        
+
         $this->assertFalse($authResult['success']);
         $this->assertEquals('INVALID_CREDENTIALS', $authResult['error_code']);
 
@@ -629,12 +637,12 @@ class BankingIntegrationTest extends TestCase
         Http::fake([
             'developer-ob.nlb.mk/apis/xs2a/v1/**' => Http::response([
                 'error' => 'service_unavailable',
-                'message' => 'Banking service temporarily unavailable'
-            ], 503)
+                'message' => 'Banking service temporarily unavailable',
+            ], 503),
         ]);
 
         $transactionResult = $this->nlbGateway->getTransactions($this->nlbAccount, Carbon::now()->subDays(7), Carbon::now());
-        
+
         $this->assertFalse($transactionResult['success']);
         $this->assertEquals('SERVICE_UNAVAILABLE', $transactionResult['error_code']);
     }
@@ -645,8 +653,8 @@ class BankingIntegrationTest extends TestCase
         Http::fake([
             'sandbox-api.ob.stb.kibs.mk/xs2a/v1/oauth2/token' => Http::response([
                 'access_token' => 'stopanska_test_token',
-                'expires_in' => 3600
-            ], 200)
+                'expires_in' => 3600,
+            ], 200),
         ]);
     }
 
@@ -655,8 +663,8 @@ class BankingIntegrationTest extends TestCase
         Http::fake([
             'auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb/connect/token' => Http::response([
                 'access_token' => 'nlb_test_token',
-                'expires_in' => 3600
-            ], 200)
+                'expires_in' => 3600,
+            ], 200),
         ]);
     }
 
@@ -665,8 +673,8 @@ class BankingIntegrationTest extends TestCase
         Http::fake([
             'test-api.komerbank.mk/oauth/token' => Http::response([
                 'access_token' => 'komer_test_token',
-                'expires_in' => 3600
-            ], 200)
+                'expires_in' => 3600,
+            ], 200),
         ]);
     }
 

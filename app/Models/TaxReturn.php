@@ -34,30 +34,35 @@ use Illuminate\Support\Facades\DB;
  * @property int|null $amendment_of_id Original return ID if this is an amendment
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @package App\Models
  */
 class TaxReturn extends Model
 {
-    use HasFactory;
     use HasAuditing;
+    use HasFactory;
     use TenantScope;
 
     /**
      * Tax return status constants
      */
     public const STATUS_DRAFT = 'DRAFT';
+
     public const STATUS_FILED = 'FILED';
+
     public const STATUS_ACCEPTED = 'ACCEPTED';
+
     public const STATUS_REJECTED = 'REJECTED';
+
     public const STATUS_AMENDED = 'AMENDED';
 
     /**
      * Tax return type constants
      */
     public const TYPE_VAT = 'VAT';
+
     public const TYPE_INCOME = 'INCOME';
+
     public const TYPE_PAYROLL = 'PAYROLL';
+
     public const TYPE_CORPORATE = 'CORPORATE';
 
     /**
@@ -108,8 +113,6 @@ class TaxReturn extends Model
 
     /**
      * Get the company that owns the tax return.
-     *
-     * @return BelongsTo
      */
     public function company(): BelongsTo
     {
@@ -118,8 +121,6 @@ class TaxReturn extends Model
 
     /**
      * Get the tax report period this return belongs to.
-     *
-     * @return BelongsTo
      */
     public function period(): BelongsTo
     {
@@ -128,8 +129,6 @@ class TaxReturn extends Model
 
     /**
      * Get the user who submitted this return.
-     *
-     * @return BelongsTo
      */
     public function submittedBy(): BelongsTo
     {
@@ -138,8 +137,6 @@ class TaxReturn extends Model
 
     /**
      * Get the original return if this is an amendment.
-     *
-     * @return BelongsTo
      */
     public function amendmentOf(): BelongsTo
     {
@@ -148,8 +145,6 @@ class TaxReturn extends Model
 
     /**
      * Get all amendments of this return.
-     *
-     * @return HasMany
      */
     public function amendments(): HasMany
     {
@@ -162,16 +157,16 @@ class TaxReturn extends Model
      * Validates that no duplicate filing exists for the same period,
      * then marks the return as filed with submission details.
      *
-     * @param int $userId User ID of person filing the return
-     * @param string|null $reference Submission reference number
-     * @param array|null $responseData Response data from tax authority
-     * @return bool
+     * @param  int  $userId  User ID of person filing the return
+     * @param  string|null  $reference  Submission reference number
+     * @param  array|null  $responseData  Response data from tax authority
+     *
      * @throws \Exception If duplicate filing exists
      */
     public function file(int $userId, ?string $reference = null, ?array $responseData = null): bool
     {
         // Prevent duplicate filing for the same period (unless it's an amendment)
-        if (!$this->amendment_of_id && $this->hasDuplicateFiling()) {
+        if (! $this->amendment_of_id && $this->hasDuplicateFiling()) {
             throw new \Exception('A tax return has already been filed for this period');
         }
 
@@ -192,8 +187,7 @@ class TaxReturn extends Model
     /**
      * Mark the tax return as accepted by the tax authority.
      *
-     * @param array|null $responseData Response data from tax authority
-     * @return bool
+     * @param  array|null  $responseData  Response data from tax authority
      */
     public function accept(?array $responseData = null): bool
     {
@@ -225,9 +219,8 @@ class TaxReturn extends Model
     /**
      * Mark the tax return as rejected by the tax authority.
      *
-     * @param string $reason Rejection reason
-     * @param array|null $responseData Response data from tax authority
-     * @return bool
+     * @param  string  $reason  Rejection reason
+     * @param  array|null  $responseData  Response data from tax authority
      */
     public function reject(string $reason, ?array $responseData = null): bool
     {
@@ -249,12 +242,11 @@ class TaxReturn extends Model
      *
      * Creates a new return record that references this one as the original.
      *
-     * @param array $returnData New return data for the amendment
-     * @return TaxReturn
+     * @param  array  $returnData  New return data for the amendment
      */
     public function amend(array $returnData): TaxReturn
     {
-        if (!$this->canBeAmended()) {
+        if (! $this->canBeAmended()) {
             throw new \Exception('Only accepted returns can be amended');
         }
 
@@ -279,8 +271,6 @@ class TaxReturn extends Model
 
     /**
      * Check if this return can be amended.
-     *
-     * @return bool
      */
     public function canBeAmended(): bool
     {
@@ -292,8 +282,6 @@ class TaxReturn extends Model
 
     /**
      * Check if a duplicate filing exists for this period.
-     *
-     * @return bool
      */
     protected function hasDuplicateFiling(): bool
     {
@@ -312,8 +300,7 @@ class TaxReturn extends Model
      *
      * Uses request header if no company ID provided.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int|null $companyId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereCompany($query, ?int $companyId = null)
@@ -326,8 +313,7 @@ class TaxReturn extends Model
     /**
      * Scope: Filter returns by period.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $periodId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeForPeriod($query, int $periodId)
@@ -338,7 +324,7 @@ class TaxReturn extends Model
     /**
      * Scope: Filter filed returns.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFiled($query)
@@ -352,8 +338,7 @@ class TaxReturn extends Model
     /**
      * Scope: Filter by return type.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $type
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOfType($query, string $type)
@@ -364,8 +349,7 @@ class TaxReturn extends Model
     /**
      * Scope: Filter by status.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $status
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereStatus($query, string $status)
@@ -376,8 +360,7 @@ class TaxReturn extends Model
     /**
      * Scope: Order by submission date.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $direction
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderBySubmission($query, string $direction = 'desc')
@@ -388,8 +371,8 @@ class TaxReturn extends Model
     /**
      * Scope: Paginate data.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int|string $limit
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  int|string  $limit
      * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function scopePaginateData($query, $limit)
@@ -403,8 +386,6 @@ class TaxReturn extends Model
 
     /**
      * Get a human-readable status label.
-     *
-     * @return string
      */
     public function getStatusLabelAttribute(): string
     {
@@ -420,8 +401,6 @@ class TaxReturn extends Model
 
     /**
      * Check if the return is editable.
-     *
-     * @return bool
      */
     public function isEditable(): bool
     {

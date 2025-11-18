@@ -32,11 +32,11 @@ class ScopeBouncer
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        
+
         // Get company ID from header or use first company
         $tenantId = $request->header('company');
-        
-        if (!$tenantId) {
+
+        if (! $tenantId) {
             // Try to use loaded companies first to avoid query
             if ($user->relationLoaded('companies') && $user->companies->isNotEmpty()) {
                 $tenantId = $user->companies->first()->id;

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\Company;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -32,7 +32,7 @@ class EntityReassignmentController extends Controller
                 ->first();
 
             // Update affiliate_events if not preserving old commissions
-            if (!($validated['preserve_commissions'] ?? false)) {
+            if (! ($validated['preserve_commissions'] ?? false)) {
                 DB::table('affiliate_events')
                     ->where('company_id', $validated['company_id'])
                     ->where('affiliate_partner_id', $validated['old_partner_id'])
@@ -75,9 +75,11 @@ class EntityReassignmentController extends Controller
             ]);
 
             DB::commit();
+
             return response()->json(['message' => 'Company reassigned successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['message' => 'Reassignment failed', 'error' => $e->getMessage()], 500);
         }
     }

@@ -7,11 +7,11 @@ namespace App\Services\Migration;
 
 /**
  * FieldMapperService - Macedonian Language Corpus Field Mapping
- * 
+ *
  * This service provides intelligent field mapping for Macedonia accounting software migration.
  * It uses heuristic matching combined with AI scoring to map fields from various formats
  * (CSV headers, Excel columns, XML tags) to our standardized field names.
- * 
+ *
  * Features:
  * - Macedonian/Serbian language corpus with business terms
  * - Fuzzy matching for similar field names
@@ -29,7 +29,7 @@ class FieldMapperService
     protected array $macedonianCorpus = [
         // Customer/Client fields
         'customer_name' => [
-            'naziv', 'ime_klient', 'klient', 'kupuvach', 'kupac', 'ime_kupac', 
+            'naziv', 'ime_klient', 'klient', 'kupuvach', 'kupac', 'ime_kupac',
             'imeto_na_klientot', 'customer', 'client', 'customer_name', 'client_name',
             'назив', 'клиент', 'купувач', 'име_клиент', 'име_купац',
             // Onivo variations
@@ -39,7 +39,7 @@ class FieldMapperService
             'naz_kupca', 'naziv_klijenta', 'poslovni_partner', 'kupac_naziv',
             // Pantheon variations (with prefixes)
             'partner_naziv', 'partner_ime', 'prt_naziv', 'partner_name', 'kompanija_naziv',
-            'firm_naziv', 'organizacija_naziv', 'entitet_naziv'
+            'firm_naziv', 'organizacija_naziv', 'entitet_naziv',
         ],
         'customer_id' => [
             'id_klient', 'klient_id', 'customer_id', 'id_kupac', 'kupac_id',
@@ -49,7 +49,7 @@ class FieldMapperService
             // Megasoft variations
             'sifra_kupca', 'kod_kupca', 'id_partnera', 'sifra_klijenta',
             // Pantheon variations
-            'partner_sifra', 'partner_id', 'partner_kod', 'prt_id', 'prt_sifra'
+            'partner_sifra', 'partner_id', 'partner_kod', 'prt_id', 'prt_sifra',
         ],
         'tax_id' => [
             'embs', 'edb', 'danocen_broj', 'tax_number', 'vat_number', 'tax_id',
@@ -61,14 +61,14 @@ class FieldMapperService
             'maticni_broj', 'mb', 'registracijski_broj',
             // Pantheon variations
             'partner_pib', 'partner_tax_id', 'prt_pib', 'porez_broj',
-            'evidencijski_broj', 'registarski_broj'
+            'evidencijski_broj', 'registarski_broj',
         ],
         'company_id' => [
             'firma_id', 'kompanija_id', 'company_id', 'firm_id', 'preduzece_id',
-            'фирма_ид', 'компанија_ид'
+            'фирма_ид', 'компанија_ид',
         ],
-        
-        // Invoice fields  
+
+        // Invoice fields
         'invoice_number' => [
             'broj_faktura', 'faktura_broj', 'invoice_no', 'invoice_number',
             'број_фактура', 'фактура_број',
@@ -79,7 +79,7 @@ class FieldMapperService
             'dokument_broj', 'račun_id', 'faktura_id',
             // Pantheon variations
             'dokument_broj', 'dok_broj', 'dokument_id', 'dok_id',
-            'broj_dokuemnta', 'dokumenta_broj'
+            'broj_dokuemnta', 'dokumenta_broj',
         ],
         'invoice_date' => [
             'datum_faktura', 'faktura_datum', 'invoice_date', 'date_issued',
@@ -90,7 +90,7 @@ class FieldMapperService
             'datum_računa', 'račun_datum', 'dat_računa', 'datum_izdavanja',
             'datum_kreiranja', 'datum_dokumenta',
             // Pantheon variations
-            'dokument_datum', 'dok_datum', 'datum_dok', 'datum_izdavanje'
+            'dokument_datum', 'dok_datum', 'datum_dok', 'datum_izdavanje',
         ],
         'due_date' => [
             'datum_dospeanos', 'dospeanos', 'due_date', 'payment_due',
@@ -102,13 +102,13 @@ class FieldMapperService
             'rok_plaćanja', 'datum_dospeća_računa',
             // Pantheon variations
             'dokument_valuta', 'dok_valuta', 'datum_dospeće',
-            'dospeće_dokumenta'
+            'dospeće_dokumenta',
         ],
         'invoice_status' => [
             'status_faktura', 'faktura_status', 'invoice_status', 'status',
-            'статус_фактура', 'статус'
+            'статус_фактура', 'статус',
         ],
-        
+
         // Item/Product fields
         'item_name' => [
             'naziv_stavka', 'ime_proizvod', 'proizvod', 'stavka', 'item_name', 'product_name',
@@ -121,7 +121,7 @@ class FieldMapperService
             'naziv_proizvoda', 'stavka_naziv', 'artikel_naziv',
             // Pantheon variations
             'stavka_naziv', 'stavka_ime', 'stv_naziv', 'artikel_naziv',
-            'roba_naziv', 'proizvod_opis'
+            'roba_naziv', 'proizvod_opis',
         ],
         'item_code' => [
             'kod_stavka', 'sifra_proizvod', 'item_code', 'product_code', 'sku',
@@ -133,11 +133,11 @@ class FieldMapperService
             'šifra_proizvoda', 'sifra_robe',
             // Pantheon variations
             'stavka_sifra', 'stavka_kod', 'stv_sifra', 'artikel_sifra',
-            'roba_sifra', 'proizvod_kod'
+            'roba_sifra', 'proizvod_kod',
         ],
         'description' => [
             'opis', 'opis_stavka', 'description', 'item_description',
-            'опис', 'опис_ставка'
+            'опис', 'опис_ставка',
         ],
         'quantity' => [
             'kolicina', 'kolichestvo', 'qty', 'quantity',
@@ -149,11 +149,11 @@ class FieldMapperService
             'količina_artikla', 'količina_proizvoda',
             // Pantheon variations
             'stavka_kolicina', 'stavka_kol', 'stv_kolicina', 'kol_stavke',
-            'broj_stavke', 'komad_broj'
+            'broj_stavke', 'komad_broj',
         ],
         'unit' => [
             'edinica', 'mera', 'unit', 'unit_of_measure', 'uom',
-            'единица', 'мера'
+            'единица', 'мера',
         ],
         'unit_price' => [
             'edinichna_cena', 'cena_po_edinica', 'unit_price', 'price_per_unit',
@@ -166,7 +166,7 @@ class FieldMapperService
             'osnovna_cena', 'cena_proizvoda',
             // Pantheon variations
             'stavka_cena', 'stavka_jedinica_cena', 'stv_cena', 'jedinicna_cena',
-            'cena_po_jedinici', 'osnovna_stavka_cena'
+            'cena_po_jedinici', 'osnovna_stavka_cena',
         ],
         'price' => [
             'cena', 'cenata', 'price', 'unit_price',
@@ -176,9 +176,9 @@ class FieldMapperService
             // Megasoft variations
             'cena', 'cena_robe', 'vrednost', 'iznos_cene',
             // Pantheon variations
-            'cena_stavke', 'vrednost_stavke', 'cena_artikla'
+            'cena_stavke', 'vrednost_stavke', 'cena_artikla',
         ],
-        
+
         // Financial fields
         'amount' => [
             'iznos', 'suma', 'amount', 'total', 'vrednost',
@@ -191,22 +191,22 @@ class FieldMapperService
             'suma_stavke', 'ukupno_stavka', 'iznos_robe',
             // Pantheon variations
             'stavka_iznos', 'stavka_vrednost', 'stv_iznos', 'ukupno_stavka',
-            'iznos_ukupno_stavka', 'stavka_suma'
+            'iznos_ukupno_stavka', 'stavka_suma',
         ],
         'subtotal' => [
             'podvkupen_iznos', 'subtotal', 'osnovica', 'net_amount',
-            'подвкупен_износ', 'основица'
+            'подвкупен_износ', 'основица',
         ],
         'total' => [
             'vkupen_iznos', 'vkupno', 'total', 'grand_total',
             'вкупен_износ', 'вкупно',
             // Megasoft variations
-            'ukupan_iznos', 'ukupno_iznos', 'suma_ukupno', 'ukupna_vrednost'
+            'ukupan_iznos', 'ukupno_iznos', 'suma_ukupno', 'ukupna_vrednost',
         ],
         'currency' => [
-            'valuta', 'currency', 'валута'
+            'valuta', 'currency', 'валута',
         ],
-        
+
         // VAT/Tax fields
         'vat_rate' => [
             'pdv_stapka', 'ddv_stapka', 'vat_rate', 'tax_rate', 'danocna_stapka',
@@ -218,7 +218,7 @@ class FieldMapperService
             'porez_stopa', 'pdv_procenat',
             // Pantheon variations
             'stavka_pdv_stopa', 'stavka_pdv_procenat', 'stv_pdv', 'pdv_stavka',
-            'porez_stavka', 'stavka_porez_stopa'
+            'porez_stavka', 'stavka_porez_stopa',
         ],
         'vat_amount' => [
             'pdv_iznos', 'ddv_iznos', 'vat_amount', 'tax_amount', 'danocen_iznos',
@@ -230,17 +230,17 @@ class FieldMapperService
             'porez_iznos', 'vrednost_pdv',
             // Pantheon variations
             'stavka_pdv_iznos', 'stavka_pdv_vrednost', 'stv_pdv_iznos',
-            'pdv_stavka_iznos', 'porez_stavka_iznos'
+            'pdv_stavka_iznos', 'porez_stavka_iznos',
         ],
         'tax_inclusive' => [
             'so_ddv', 'vkluchuvajki_ddv', 'tax_inclusive', 'including_tax',
-            'со_ддв', 'вклучувајќи_ддв'
+            'со_ддв', 'вклучувајќи_ддв',
         ],
         'tax_exclusive' => [
             'bez_ddv', 'iskljuchuvajki_ddv', 'tax_exclusive', 'excluding_tax',
-            'без_ддв', 'исклучувајќи_ддв'
+            'без_ддв', 'исклучувајќи_ддв',
         ],
-        
+
         // Payment fields
         'payment_date' => [
             'datum_plakanje', 'plakanje_datum', 'payment_date', 'paid_date',
@@ -252,7 +252,7 @@ class FieldMapperService
             'uplata_datum', 'datum_transakcije',
             // Pantheon variations
             'uplata_datum', 'uplata_dat', 'upl_datum', 'datum_uplate',
-            'plaćanje_datum', 'transakcija_datum'
+            'plaćanje_datum', 'transakcija_datum',
         ],
         'payment_method' => [
             'nachin_plakanje', 'metod_plakanje', 'payment_method', 'pay_method',
@@ -264,7 +264,7 @@ class FieldMapperService
             'način_uplate', 'metod_uplate',
             // Pantheon variations
             'uplata_nacin', 'uplata_tip', 'upl_nacin', 'način_uplate',
-            'metod_uplate', 'tip_uplate'
+            'metod_uplate', 'tip_uplate',
         ],
         'payment_amount' => [
             'iznos_plakanje', 'platena_suma', 'payment_amount', 'paid_amount',
@@ -276,7 +276,7 @@ class FieldMapperService
             'iznos_uplate', 'uplata_iznos',
             // Pantheon variations
             'uplata_iznos', 'uplata_suma', 'upl_iznos', 'iznos_uplate',
-            'plaćanje_iznos', 'vrednost_uplate'
+            'plaćanje_iznos', 'vrednost_uplate',
         ],
         'payment_reference' => [
             'referenca_plakanje', 'payment_reference', 'reference_no',
@@ -288,83 +288,83 @@ class FieldMapperService
             'id_plaćanja', 'referenca_uplate',
             // Pantheon variations
             'uplata_referenca', 'uplata_oznaka', 'upl_referenca',
-            'referenca_uplate', 'broj_uplate'
+            'referenca_uplate', 'broj_uplate',
         ],
-        
+
         // Bank/Account fields
         'bank_account' => [
             'bankovska_smetka', 'smetka', 'account_number', 'bank_account',
-            'банковска_сметка', 'сметка'
+            'банковска_сметка', 'сметка',
         ],
         'bank_name' => [
             'ime_banka', 'banka', 'bank_name', 'bank',
-            'име_банка', 'банка'
+            'име_банка', 'банка',
         ],
-        
+
         // Address fields
         'address' => [
             'adresa', 'address', 'street', 'ulica',
-            'адреса', 'улица'
+            'адреса', 'улица',
         ],
         'city' => [
-            'grad', 'city', 'место', 'град'
+            'grad', 'city', 'место', 'град',
         ],
         'postal_code' => [
             'postanski_broj', 'zip', 'postal_code', 'zip_code',
-            'поштански_број'
+            'поштански_број',
         ],
         'country' => [
-            'zemja', 'drzava', 'country', 'земја', 'држава'
+            'zemja', 'drzava', 'country', 'земја', 'држава',
         ],
-        
+
         // Warehouse/Inventory fields
         'warehouse' => [
             'skladiste', 'magacin', 'warehouse', 'stock_location',
-            'складиште', 'магацин'
+            'складиште', 'магацин',
         ],
         'stock_quantity' => [
             'kolicina_skladiste', 'zalihа', 'stock_qty', 'inventory',
-            'количина_складиште', 'залиха'
+            'количина_складиште', 'залиха',
         ],
-        
+
         // Expense fields
         'expense_category' => [
             'kategorija_trosok', 'vid_trosok', 'expense_category', 'cost_center',
-            'категорија_трошок', 'вид_трошок'
+            'категорија_трошок', 'вид_трошок',
         ],
         'expense_date' => [
             'datum_trosok', 'trosok_datum', 'expense_date',
-            'датум_трошок', 'трошок_датум'
+            'датум_трошок', 'трошок_датум',
         ],
-        
+
         // Date formats commonly used in Macedonia
         'date' => [
-            'datum', 'data', 'date', 'датум', 'дата'
+            'datum', 'data', 'date', 'датум', 'дата',
         ],
-        
+
         // Common status fields
         'status' => [
-            'status', 'sostojba', 'condition', 'статус', 'состојба'
+            'status', 'sostojba', 'condition', 'статус', 'состојба',
         ],
-        
+
         // Notes/Comments
         'notes' => [
             'zabeleska', 'komentar', 'notes', 'comments', 'remarks',
-            'забелешка', 'коментар'
+            'забелешка', 'коментар',
         ],
-        
+
         // Contact information
         'email' => [
             'email', 'e_mail', 'elektronska_posta', 'mail',
-            'електронска_пошта', 'меил'
+            'електронска_пошта', 'меил',
         ],
         'phone' => [
-            'telefon', 'tel', 'phone', 'mobile', 'телефон'
+            'telefon', 'tel', 'phone', 'mobile', 'телефон',
         ],
         'contact_person' => [
             'kontakt_lice', 'odgovorno_lice', 'contact_person', 'representative',
-            'контакт_лице', 'одговорно_лице'
-        ]
+            'контакт_лице', 'одговорно_лице',
+        ],
     ];
 
     /**
@@ -380,7 +380,7 @@ class FieldMapperService
         'total' => ['vkupno', 'suma', 'total', 'вкупно', 'ukupno', 'ukupan_iznos'],
         'customer' => ['klient', 'kupuvach', 'купувач', 'клиент', 'kupac', 'partner', 'klijent'],
         'invoice' => ['faktura', 'fakt', 'фактура', 'račun', 'dokument'],
-        'payment' => ['plakanje', 'uplata', 'плаќање', 'уплата', 'plaćanje', 'transakcija']
+        'payment' => ['plakanje', 'uplata', 'плаќање', 'уплата', 'plaćanje', 'transakcija'],
     ];
 
     /**
@@ -421,13 +421,14 @@ class FieldMapperService
             'dok_' => 'invoice_',
             'stv_' => 'item_',
             'upl_' => 'payment_',
-        ]
+        ],
     ];
 
     /**
      * Cache configuration
      */
     protected int $cacheMinutes = 60;
+
     protected string $cachePrefix = 'field_mapper_';
 
     /**
@@ -435,9 +436,9 @@ class FieldMapperService
      * Fixed: Cache availability check with fallback
      * CLAUDE-CHECKPOINT: Safe cache handling added
      *
-     * @param array $inputFields Array of field names from source (CSV headers, XML tags, etc.)
-     * @param string $format Input format hint ('csv', 'excel', 'xml', 'json')
-     * @param array $context Additional context for mapping (e.g., software name, version)
+     * @param  array  $inputFields  Array of field names from source (CSV headers, XML tags, etc.)
+     * @param  string  $format  Input format hint ('csv', 'excel', 'xml', 'json')
+     * @param  array  $context  Additional context for mapping (e.g., software name, version)
      * @return array Mapped fields with confidence scores
      */
     public function mapFields(array $inputFields, string $format = 'csv', array $context = []): array
@@ -452,12 +453,12 @@ class FieldMapperService
             $cacheAvailable = false;
         }
 
-        if (!$cacheAvailable) {
+        if (! $cacheAvailable) {
             // Direct computation without cache
             return $this->computeFieldMappings($inputFields, $format, $context);
         }
 
-        $cacheKey = $this->cachePrefix . md5(serialize($inputFields) . $format . serialize($context));
+        $cacheKey = $this->cachePrefix.md5(serialize($inputFields).$format.serialize($context));
 
         try {
             return \Cache::remember($cacheKey, $this->cacheMinutes, function () use ($inputFields, $format, $context) {
@@ -468,6 +469,7 @@ class FieldMapperService
             if (function_exists('\\Log::warning')) {
                 \Log::warning('Field mapper cache failed, using direct computation', ['error' => $e->getMessage()]);
             }
+
             return $this->computeFieldMappings($inputFields, $format, $context);
         }
     }
@@ -502,10 +504,6 @@ class FieldMapperService
 
     /**
      * Convenience wrapper to map a single field.
-     *
-     * @param string $inputField
-     * @param string $format
-     * @param array $context
      */
     public function mapField(string $inputField, string $format = 'csv', array $context = []): array
     {
@@ -584,11 +582,6 @@ class FieldMapperService
      * Find the best matching field for an input field
      * Fix #7: Added competitor context validation
      * CLAUDE-CHECKPOINT: Validated context handling
-     *
-     * @param string $inputField
-     * @param string $format
-     * @param array $context
-     * @return array
      */
     protected function findBestMatch(string $inputField, string $format = 'csv', array $context = []): array
     {
@@ -621,7 +614,7 @@ class FieldMapperService
         }
 
         // Sort by confidence and return best match
-        usort($matches, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
+        usort($matches, fn ($a, $b) => $b['confidence'] <=> $a['confidence']);
 
         $bestMatch = $matches[0] ?? ['field' => null, 'confidence' => 0.0, 'algorithm' => 'none'];
         $alternatives = array_slice($matches, 1, 3); // Top 3 alternatives
@@ -959,7 +952,7 @@ class FieldMapperService
             $software = mb_strtolower(trim($context['software']), 'UTF-8');
 
             // Validate against known competitors
-            if (!in_array($software, $validSoftware)) {
+            if (! in_array($software, $validSoftware)) {
                 // Log if in application context (not unit tests)
                 if (function_exists('app') && app()->bound('log')) {
                     try {
@@ -975,7 +968,7 @@ class FieldMapperService
         }
 
         // Ensure context is array
-        if (!is_array($context)) {
+        if (! is_array($context)) {
             return [];
         }
 
@@ -1098,7 +1091,7 @@ class FieldMapperService
                 return [
                     'field' => $standardField,
                     'confidence' => 1.0,
-                    'algorithm' => 'exact_match'
+                    'algorithm' => 'exact_match',
                 ];
             }
         }
@@ -1113,35 +1106,35 @@ class FieldMapperService
     {
         $matches = [];
         $baseThreshold = 0.65; // Lowered base threshold for better competitor coverage
-        
+
         foreach ($this->macedonianCorpus as $standardField => $variations) {
             foreach ($variations as $variation) {
                 $similarity = $this->calculateSimilarity($inputField, strtolower($variation));
-                
+
                 // Adaptive threshold based on field length and type
                 $adaptiveThreshold = $this->getAdaptiveThreshold($inputField, $variation, $baseThreshold);
-                
+
                 if ($similarity >= $adaptiveThreshold) {
                     $matches[] = [
                         'field' => $standardField,
                         'confidence' => $similarity,
                         'algorithm' => 'fuzzy_match',
                         'matched_variation' => $variation,
-                        'threshold_used' => $adaptiveThreshold
+                        'threshold_used' => $adaptiveThreshold,
                     ];
                 }
             }
         }
 
         // Sort by confidence and remove duplicates
-        usort($matches, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
-        
+        usort($matches, fn ($a, $b) => $b['confidence'] <=> $a['confidence']);
+
         // Remove duplicate fields, keeping highest confidence
         $uniqueMatches = [];
         $seenFields = [];
-        
+
         foreach ($matches as $match) {
-            if (!in_array($match['field'], $seenFields)) {
+            if (! in_array($match['field'], $seenFields)) {
                 $uniqueMatches[] = $match;
                 $seenFields[] = $match['field'];
             }
@@ -1157,33 +1150,33 @@ class FieldMapperService
     {
         $inputLength = strlen($inputField);
         $variationLength = strlen($variation);
-        
+
         // Lower threshold for shorter fields (more prone to typos)
         if ($inputLength <= 4 || $variationLength <= 4) {
             return max(0.5, $baseThreshold - 0.1);
         }
-        
+
         // Lower threshold for very long fields (allow more variation)
         if ($inputLength > 20 || $variationLength > 20) {
             return max(0.6, $baseThreshold - 0.05);
         }
-        
+
         // Check for common prefixes/suffixes that might indicate competitor format
         $competitorPrefixes = ['customer_', 'invoice_', 'item_', 'payment_', 'partner_', 'dokument_', 'stavka_'];
         $competitorSuffixes = ['_kupca', '_robe', '_racuna', '_iznos', '_datum'];
-        
+
         foreach ($competitorPrefixes as $prefix) {
             if (strpos($inputField, $prefix) === 0 || strpos($variation, $prefix) === 0) {
                 return max(0.6, $baseThreshold - 0.05);
             }
         }
-        
+
         foreach ($competitorSuffixes as $suffix) {
             if (substr($inputField, -strlen($suffix)) === $suffix || substr($variation, -strlen($suffix)) === $suffix) {
                 return max(0.6, $baseThreshold - 0.05);
             }
         }
-        
+
         return $baseThreshold;
     }
 
@@ -1276,18 +1269,18 @@ class FieldMapperService
     {
         $ngrams1 = $this->getNgrams($str1, $n);
         $ngrams2 = $this->getNgrams($str2, $n);
-        
+
         if (empty($ngrams1) && empty($ngrams2)) {
             return 1.0;
         }
-        
+
         if (empty($ngrams1) || empty($ngrams2)) {
             return 0.0;
         }
-        
+
         $intersection = count(array_intersect($ngrams1, $ngrams2));
         $union = count(array_unique(array_merge($ngrams1, $ngrams2)));
-        
+
         return $union > 0 ? $intersection / $union : 0.0;
     }
 
@@ -1299,11 +1292,11 @@ class FieldMapperService
         $str = strtolower($str);
         $length = strlen($str);
         $ngrams = [];
-        
+
         for ($i = 0; $i <= $length - $n; $i++) {
             $ngrams[] = substr($str, $i, $n);
         }
-        
+
         return $ngrams;
     }
 
@@ -1314,49 +1307,61 @@ class FieldMapperService
     {
         $len1 = strlen($str1);
         $len2 = strlen($str2);
-        
-        if ($len1 === 0 && $len2 === 0) return 1.0;
-        if ($len1 === 0 || $len2 === 0) return 0.0;
-        
+
+        if ($len1 === 0 && $len2 === 0) {
+            return 1.0;
+        }
+        if ($len1 === 0 || $len2 === 0) {
+            return 0.0;
+        }
+
         $matchWindow = max($len1, $len2) / 2 - 1;
         $matchWindow = max(0, intval($matchWindow));
-        
+
         $str1Matches = array_fill(0, $len1, false);
         $str2Matches = array_fill(0, $len2, false);
-        
+
         $matches = 0;
         $transpositions = 0;
-        
+
         // Find matches
         for ($i = 0; $i < $len1; $i++) {
             $start = max(0, intval($i - $matchWindow));
             $end = min(intval($i + $matchWindow + 1), $len2);
-            
+
             for ($j = $start; $j < $end; $j++) {
-                if ($str2Matches[$j] || $str1[$i] !== $str2[$j]) continue;
-                
+                if ($str2Matches[$j] || $str1[$i] !== $str2[$j]) {
+                    continue;
+                }
+
                 $str1Matches[$i] = true;
                 $str2Matches[$j] = true;
                 $matches++;
                 break;
             }
         }
-        
-        if ($matches === 0) return 0.0;
-        
+
+        if ($matches === 0) {
+            return 0.0;
+        }
+
         // Find transpositions
         $k = 0;
         for ($i = 0; $i < $len1; $i++) {
-            if (!$str1Matches[$i]) continue;
-            
-            while (!$str2Matches[$k]) $k++;
-            
+            if (! $str1Matches[$i]) {
+                continue;
+            }
+
+            while (! $str2Matches[$k]) {
+                $k++;
+            }
+
             if ($str1[$i] !== $str2[$k]) {
                 $transpositions++;
             }
             $k++;
         }
-        
+
         return ($matches / $len1 + $matches / $len2 + ($matches - $transpositions / 2) / $matches) / 3;
     }
 
@@ -1370,7 +1375,9 @@ class FieldMapperService
         $longerString = strlen($str1) > strlen($str2) ? $str1 : $str2;
         $shorterString = strlen($str1) <= strlen($str2) ? $str1 : $str2;
 
-        if (strlen($shorterString) === 0) return 0.0;
+        if (strlen($shorterString) === 0) {
+            return 0.0;
+        }
 
         $position = strpos($longerString, $shorterString);
 
@@ -1412,7 +1419,9 @@ class FieldMapperService
         $longerString = strlen($str1) > strlen($str2) ? $str1 : $str2;
         $shorterString = strlen($str1) <= strlen($str2) ? $str1 : $str2;
 
-        if (strlen($shorterString) < 3) return 0.0;
+        if (strlen($shorterString) < 3) {
+            return 0.0;
+        }
 
         $maxScore = 0.0;
         $shortLen = strlen($shorterString);
@@ -1426,7 +1435,9 @@ class FieldMapperService
                     $maxScore = max($maxScore, $score);
                 }
             }
-            if ($maxScore > 0) break; // Found a match, no need to check shorter
+            if ($maxScore > 0) {
+                break;
+            } // Found a match, no need to check shorter
         }
 
         return $maxScore;
@@ -1515,6 +1526,7 @@ class FieldMapperService
                 if ($software && $this->isCompetitorSpecificPattern($inputField, $software)) {
                     $result['confidence'] = min(1.0, $result['confidence'] + 0.05);
                 }
+
                 return array_merge($result, ['algorithm' => 'heuristic_pattern']);
             }
         }
@@ -1533,7 +1545,7 @@ class FieldMapperService
      */
     protected function isCompetitorSpecificPattern(string $inputField, ?string $software): bool
     {
-        if (!$software || !isset($this->competitorPatterns[$software])) {
+        if (! $software || ! isset($this->competitorPatterns[$software])) {
             return false;
         }
 
@@ -1552,7 +1564,7 @@ class FieldMapperService
      */
     protected function matchCompetitorPattern(string $inputField, ?string $software): array
     {
-        if (!$software || !isset($this->competitorPatterns[$software])) {
+        if (! $software || ! isset($this->competitorPatterns[$software])) {
             return ['confidence' => 0.0];
         }
 
@@ -1569,7 +1581,7 @@ class FieldMapperService
                         $bestMatch = [
                             'field' => $standardField,
                             'confidence' => $confidence,
-                            'algorithm' => 'competitor_pattern'
+                            'algorithm' => 'competitor_pattern',
                         ];
                     }
                 }
@@ -1587,7 +1599,7 @@ class FieldMapperService
         // Direct mapping for simple cases
         $directMappings = [
             'customer_' => 'customer_name',
-            'invoice_' => 'invoice_number', 
+            'invoice_' => 'invoice_number',
             'item_' => 'item_name',
             'payment_' => 'payment_date',
             '_id' => '_id',
@@ -1602,7 +1614,7 @@ class FieldMapperService
 
         // More complex mapping based on full field context
         $fieldLower = strtolower($inputField);
-        
+
         if (strpos($fieldLower, 'name') !== false || strpos($fieldLower, 'naziv') !== false) {
             return 'customer_name';
         }
@@ -1626,11 +1638,11 @@ class FieldMapperService
     {
         $patternLength = strlen($pattern);
         $fieldLength = strlen($inputField);
-        
+
         // Higher confidence for patterns that match more of the field
         $coverage = $patternLength / $fieldLength;
         $baseConfidence = 0.7;
-        
+
         return min(0.95, $baseConfidence + ($coverage * 0.2));
     }
 
@@ -1642,50 +1654,50 @@ class FieldMapperService
         $semanticGroups = [
             'financial' => [
                 'basic' => ['iznos', 'suma', 'cena', 'amount', 'price', 'cost', 'value', 'vrednost'],
-                'competitor' => ['total_price', 'line_amount', 'cena_robe', 'iznos_stavke', 'stavka_iznos']
+                'competitor' => ['total_price', 'line_amount', 'cena_robe', 'iznos_stavke', 'stavka_iznos'],
             ],
             'identity' => [
                 'basic' => ['broj', 'id', 'sifra', 'number', 'code', 'reference'],
-                'competitor' => ['customer_id', 'sifra_kupca', 'partner_sifra', 'dok_broj']
+                'competitor' => ['customer_id', 'sifra_kupca', 'partner_sifra', 'dok_broj'],
             ],
             'temporal' => [
                 'basic' => ['datum', 'data', 'date', 'time', 'period'],
-                'competitor' => ['invoice_date', 'datum_racuna', 'dokument_datum', 'uplata_datum']
+                'competitor' => ['invoice_date', 'datum_racuna', 'dokument_datum', 'uplata_datum'],
             ],
             'quantity' => [
                 'basic' => ['kolicina', 'broj', 'count', 'quantity', 'amount'],
-                'competitor' => ['item_quantity', 'kolicina_robe', 'stavka_kolicina']
+                'competitor' => ['item_quantity', 'kolicina_robe', 'stavka_kolicina'],
             ],
             'descriptive' => [
                 'basic' => ['naziv', 'ime', 'opis', 'name', 'description', 'title'],
-                'competitor' => ['customer_name', 'naziv_kupca', 'partner_naziv', 'item_name']
+                'competitor' => ['customer_name', 'naziv_kupca', 'partner_naziv', 'item_name'],
             ],
             'tax' => [
                 'basic' => ['pdv', 'ddv', 'vat', 'tax', 'porez'],
-                'competitor' => ['vat_rate', 'stopa_pdv', 'stavka_pdv_stopa']
+                'competitor' => ['vat_rate', 'stopa_pdv', 'stavka_pdv_stopa'],
             ],
             'payment' => [
                 'basic' => ['plakanje', 'uplata', 'payment', 'paid'],
-                'competitor' => ['payment_date', 'datum_placanja', 'uplata_datum']
-            ]
+                'competitor' => ['payment_date', 'datum_placanja', 'uplata_datum'],
+            ],
         ];
 
         $bestMatch = ['confidence' => 0.0];
-        
+
         foreach ($semanticGroups as $group => $wordSets) {
             foreach ($wordSets as $setType => $words) {
                 foreach ($words as $word) {
                     if (strpos(strtolower($inputField), strtolower($word)) !== false) {
                         $confidence = $setType === 'competitor' ? 0.75 : 0.6;
                         $field = $this->getSemanticFieldMapping($group, $inputField, $setType);
-                        
+
                         if ($field && $confidence > $bestMatch['confidence']) {
                             $bestMatch = [
                                 'field' => $field,
                                 'confidence' => $confidence,
                                 'algorithm' => 'semantic_ai',
                                 'semantic_group' => $group,
-                                'match_type' => $setType
+                                'match_type' => $setType,
                             ];
                         }
                     }
@@ -1702,7 +1714,7 @@ class FieldMapperService
     protected function getSemanticFieldMapping(string $group, string $inputField, string $setType = 'basic'): ?string
     {
         $fieldLower = strtolower($inputField);
-        
+
         // Enhanced mappings with context-aware logic
         switch ($group) {
             case 'financial':
@@ -1715,8 +1727,9 @@ class FieldMapperService
                 if (strpos($fieldLower, 'total') !== false || strpos($fieldLower, 'ukupno') !== false) {
                     return 'total';
                 }
+
                 return 'amount';
-                
+
             case 'identity':
                 if (strpos($fieldLower, 'customer') !== false || strpos($fieldLower, 'kupac') !== false || strpos($fieldLower, 'partner') !== false) {
                     return 'customer_id';
@@ -1730,8 +1743,9 @@ class FieldMapperService
                 if (strpos($fieldLower, 'tax') !== false || strpos($fieldLower, 'pib') !== false || strpos($fieldLower, 'embs') !== false) {
                     return 'tax_id';
                 }
+
                 return 'customer_id';
-                
+
             case 'temporal':
                 if (strpos($fieldLower, 'due') !== false || strpos($fieldLower, 'dospe') !== false || strpos($fieldLower, 'valuta') !== false) {
                     return 'due_date';
@@ -1742,11 +1756,12 @@ class FieldMapperService
                 if (strpos($fieldLower, 'invoice') !== false || strpos($fieldLower, 'faktura') !== false) {
                     return 'invoice_date';
                 }
+
                 return 'date';
-                
+
             case 'quantity':
                 return 'quantity';
-                
+
             case 'descriptive':
                 if (strpos($fieldLower, 'customer') !== false || strpos($fieldLower, 'kupac') !== false || strpos($fieldLower, 'partner') !== false) {
                     return 'customer_name';
@@ -1754,14 +1769,16 @@ class FieldMapperService
                 if (strpos($fieldLower, 'item') !== false || strpos($fieldLower, 'stavka') !== false || strpos($fieldLower, 'proizvod') !== false) {
                     return 'item_name';
                 }
+
                 return 'description';
-                
+
             case 'tax':
                 if (strpos($fieldLower, 'rate') !== false || strpos($fieldLower, 'stopa') !== false || strpos($fieldLower, 'percent') !== false) {
                     return 'vat_rate';
                 }
+
                 return 'vat_amount';
-                
+
             case 'payment':
                 if (strpos($fieldLower, 'amount') !== false || strpos($fieldLower, 'iznos') !== false) {
                     return 'payment_amount';
@@ -1772,6 +1789,7 @@ class FieldMapperService
                 if (strpos($fieldLower, 'reference') !== false || strpos($fieldLower, 'referenc') !== false) {
                     return 'payment_reference';
                 }
+
                 return 'payment_date';
         }
 
@@ -1812,7 +1830,7 @@ class FieldMapperService
 
             // Store in cache for immediate use
             if (class_exists('\Illuminate\Support\Facades\Cache')) {
-                $cacheKey = $this->cachePrefix . 'learned_' . md5($inputField);
+                $cacheKey = $this->cachePrefix.'learned_'.md5($inputField);
                 \Cache::put($cacheKey, $learningData, $this->cacheMinutes * 24); // 24 hours
             }
 
@@ -1827,9 +1845,10 @@ class FieldMapperService
                 \Log::error('Failed to learn from mapping', [
                     'input_field' => $inputField,
                     'mapped_field' => $mappedField,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
+
             return false;
         }
     }
@@ -1855,7 +1874,8 @@ class FieldMapperService
         }
 
         // Sort by confidence and limit results
-        usort($suggestions, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
+        usort($suggestions, fn ($a, $b) => $b['confidence'] <=> $a['confidence']);
+
         return array_slice($suggestions, 0, $limit);
     }
 
@@ -1894,7 +1914,7 @@ class FieldMapperService
 
         // Check for invalid target fields
         foreach ($mappedToStandard as $targetField) {
-            if (!in_array($targetField, $standardFields)) {
+            if (! in_array($targetField, $standardFields)) {
                 $validationResults['errors'][] = "Invalid target field: {$targetField}";
                 $validationResults['valid'] = false;
             }
@@ -1902,7 +1922,7 @@ class FieldMapperService
 
         // Check required fields coverage
         $missingRequired = array_diff($requiredFields, $mappedToStandard);
-        if (!empty($missingRequired)) {
+        if (! empty($missingRequired)) {
             foreach ($missingRequired as $missing) {
                 $validationResults['errors'][] = "Required field missing: {$missing}";
                 $validationResults['valid'] = false;
@@ -1910,7 +1930,7 @@ class FieldMapperService
         }
 
         // Calculate coverage percentage
-        if (!empty($requiredFields)) {
+        if (! empty($requiredFields)) {
             $covered = count($requiredFields) - count($missingRequired);
             $validationResults['coverage'] = round(($covered / count($requiredFields)) * 100, 2);
         }
@@ -1937,9 +1957,9 @@ class FieldMapperService
             'mappings' => $mappings,
             'statistics' => [
                 'total_fields' => count($mappings),
-                'mapped_fields' => count(array_filter($mappings, fn($m) => !empty($m['mapped_field']))),
-                'high_confidence' => count(array_filter($mappings, fn($m) => $m['confidence'] >= 0.8)),
-            ]
+                'mapped_fields' => count(array_filter($mappings, fn ($m) => ! empty($m['mapped_field']))),
+                'high_confidence' => count(array_filter($mappings, fn ($m) => $m['confidence'] >= 0.8)),
+            ],
         ];
 
         return match ($format) {
@@ -1955,11 +1975,11 @@ class FieldMapperService
     protected function exportToCsv(array $mappings): string
     {
         $csv = "Input Field,Mapped Field,Confidence,Algorithm,Alternatives\n";
-        
+
         foreach ($mappings as $mapping) {
             $alternatives = implode(';', array_column($mapping['alternatives'] ?? [], 'field'));
             $csv .= sprintf(
-                '"%s","%s","%.2f","%s","%s"' . "\n",
+                '"%s","%s","%.2f","%s","%s"'."\n",
                 $mapping['input_field'],
                 $mapping['mapped_field'] ?? '',
                 $mapping['confidence'],
@@ -1967,7 +1987,7 @@ class FieldMapperService
                 $alternatives
             );
         }
-        
+
         return $csv;
     }
 
@@ -1993,19 +2013,21 @@ class FieldMapperService
     public function clearCache(): bool
     {
         try {
-            if (!class_exists('\Illuminate\Support\Facades\Cache')) {
+            if (! class_exists('\Illuminate\Support\Facades\Cache')) {
                 return false;
             }
 
-            $keys = \Cache::getStore()->getRedis()->keys($this->cachePrefix . '*');
-            if (!empty($keys)) {
+            $keys = \Cache::getStore()->getRedis()->keys($this->cachePrefix.'*');
+            if (! empty($keys)) {
                 \Cache::getStore()->getRedis()->del($keys);
             }
+
             return true;
         } catch (\Exception $e) {
             if (class_exists('\Illuminate\Support\Facades\Log')) {
                 \Log::error('Failed to clear field mapper cache', ['error' => $e->getMessage()]);
             }
+
             return false;
         }
     }

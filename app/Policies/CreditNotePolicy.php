@@ -11,8 +11,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
  *
  * Handles authorization for credit note operations.
  * Based on InvoicePolicy pattern with Bouncer abilities.
- *
- * @package App\Policies
  */
 class CreditNotePolicy
 {
@@ -20,9 +18,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can view any credit notes.
-     *
-     * @param \App\Models\User $user
-     * @return bool
      */
     public function viewAny(User $user): bool
     {
@@ -41,10 +36,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can view the credit note.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\CreditNote $creditNote
-     * @return bool
      */
     public function view(User $user, CreditNote $creditNote): bool
     {
@@ -62,9 +53,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can create credit notes.
-     *
-     * @param \App\Models\User $user
-     * @return bool
      */
     public function create(User $user): bool
     {
@@ -85,10 +73,6 @@ class CreditNotePolicy
      * Respects allow_edit attribute which checks:
      * - If posted to IFRS (immutable)
      * - Retrospective edit settings
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\CreditNote $creditNote
-     * @return bool
      */
     public function update(User $user, CreditNote $creditNote): bool
     {
@@ -108,10 +92,6 @@ class CreditNotePolicy
      *
      * Deletion is prevented for credit notes posted to IFRS
      * (handled in model's deleteCreditNotes method).
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\CreditNote $creditNote
-     * @return bool
      */
     public function delete(User $user, CreditNote $creditNote): bool
     {
@@ -128,10 +108,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can restore the credit note.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\CreditNote $creditNote
-     * @return bool
      */
     public function restore(User $user, CreditNote $creditNote): bool
     {
@@ -148,10 +124,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can permanently delete the credit note.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\CreditNote $creditNote
-     * @return bool
      */
     public function forceDelete(User $user, CreditNote $creditNote): bool
     {
@@ -168,10 +140,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can send email of the credit note.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\CreditNote $creditNote
-     * @return bool
      */
     public function send(User $user, CreditNote $creditNote): bool
     {
@@ -188,9 +156,6 @@ class CreditNotePolicy
 
     /**
      * Determine whether the user can delete multiple credit notes.
-     *
-     * @param \App\Models\User $user
-     * @return bool
      */
     public function deleteMultiple(User $user): bool
     {

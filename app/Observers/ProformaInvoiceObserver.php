@@ -12,8 +12,6 @@ use Vinkla\Hashids\Facades\Hashids;
  *
  * Handles automatic number generation and status updates for proforma invoices.
  * Note: Proforma invoices are NOT posted to IFRS (they're quotes, not accounting events).
- *
- * @package App\Observers
  */
 class ProformaInvoiceObserver
 {
@@ -21,16 +19,13 @@ class ProformaInvoiceObserver
      * Handle the ProformaInvoice "created" event.
      *
      * Generate proforma_invoice_number and unique_hash if not already set
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return void
      */
     public function created(ProformaInvoice $proformaInvoice): void
     {
         // Generate proforma invoice number if not set
         if (empty($proformaInvoice->proforma_invoice_number)) {
             try {
-                $serial = (new SerialNumberFormatter())
+                $serial = (new SerialNumberFormatter)
                     ->setModel($proformaInvoice)
                     ->setCompany($proformaInvoice->company_id)
                     ->setCustomer($proformaInvoice->customer_id)
@@ -38,7 +33,7 @@ class ProformaInvoiceObserver
 
                 $proformaInvoice->sequence_number = $serial->nextSequenceNumber;
                 $proformaInvoice->customer_sequence_number = $serial->nextCustomerSequenceNumber;
-                $proformaInvoice->proforma_invoice_number = 'PRO-' . str_pad($serial->nextSequenceNumber, 6, '0', STR_PAD_LEFT);
+                $proformaInvoice->proforma_invoice_number = 'PRO-'.str_pad($serial->nextSequenceNumber, 6, '0', STR_PAD_LEFT);
 
                 if (empty($proformaInvoice->unique_hash)) {
                     $proformaInvoice->unique_hash = Hashids::connection(ProformaInvoice::class)->encode($proformaInvoice->id);
@@ -58,9 +53,6 @@ class ProformaInvoiceObserver
      * Handle the ProformaInvoice "updated" event.
      *
      * Check if expiry_date has passed and auto-expire if status changed
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return void
      */
     public function updated(ProformaInvoice $proformaInvoice): void
     {
@@ -85,9 +77,6 @@ class ProformaInvoiceObserver
      * Handle the ProformaInvoice "deleting" event.
      *
      * Prevent deletion if already converted to invoice
-     *
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool|null
      */
     public function deleting(ProformaInvoice $proformaInvoice): ?bool
     {

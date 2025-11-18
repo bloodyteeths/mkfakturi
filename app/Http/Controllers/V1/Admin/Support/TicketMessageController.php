@@ -15,7 +15,6 @@ class TicketMessageController extends Controller
     /**
      * Display messages for a specific ticket.
      *
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request, Ticket $ticket)
@@ -27,7 +26,7 @@ class TicketMessageController extends Controller
         // Filter out internal notes for non-admin users
         $messages = $ticket->messages()
             ->with('user')
-            ->when(!$user->isOwner() && !$user->hasRole('support'), function ($query) {
+            ->when(! $user->isOwner() && ! $user->hasRole('support'), function ($query) {
                 // Hide internal notes from regular customers
                 $query->where('is_internal', false);
             })
@@ -40,8 +39,6 @@ class TicketMessageController extends Controller
     /**
      * Store a new reply/message on a ticket.
      *
-     * @param ReplyTicketRequest $request
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(ReplyTicketRequest $request, Ticket $ticket)
@@ -89,9 +86,6 @@ class TicketMessageController extends Controller
     /**
      * Update a message.
      *
-     * @param Request $request
-     * @param Ticket $ticket
-     * @param Message $message
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Ticket $ticket, Message $message)
@@ -102,7 +96,7 @@ class TicketMessageController extends Controller
         if ($message->user_id !== $request->user()->id) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'You can only edit your own messages'
+                'message' => 'You can only edit your own messages',
             ], 403);
         }
 
@@ -122,8 +116,6 @@ class TicketMessageController extends Controller
     /**
      * Remove a message.
      *
-     * @param Ticket $ticket
-     * @param Message $message
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Request $request, Ticket $ticket, Message $message)
@@ -131,10 +123,10 @@ class TicketMessageController extends Controller
         $this->authorize('view', $ticket);
 
         // Only allow admins or message author to delete
-        if ($message->user_id !== $request->user()->id && !$request->user()->isOwner()) {
+        if ($message->user_id !== $request->user()->id && ! $request->user()->isOwner()) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'You can only delete your own messages'
+                'message' => 'You can only delete your own messages',
             ], 403);
         }
 
@@ -142,7 +134,7 @@ class TicketMessageController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Message deleted successfully'
+            'message' => 'Message deleted successfully',
         ]);
     }
 }

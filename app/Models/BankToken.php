@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Crypt;
 
 /**
@@ -78,12 +78,12 @@ class BankToken extends Model
     /**
      * Check if the token is expiring soon
      *
-     * @param int $minutesBuffer Minutes before expiration to consider token as expiring
+     * @param  int  $minutesBuffer  Minutes before expiration to consider token as expiring
      * @return bool True if token expires within the buffer period
      */
     public function isExpiringSoon(int $minutesBuffer = 5): bool
     {
-        if (!$this->expires_at) {
+        if (! $this->expires_at) {
             return true; // No expiry = assume expired for safety
         }
 
@@ -97,7 +97,7 @@ class BankToken extends Model
      */
     public function isExpired(): bool
     {
-        if (!$this->expires_at) {
+        if (! $this->expires_at) {
             return true; // No expiry = assume expired for safety
         }
 
@@ -107,12 +107,12 @@ class BankToken extends Model
     /**
      * Check if the token is valid (not expired and not expiring soon)
      *
-     * @param int $minutesBuffer Minutes before expiration to consider token as expiring
+     * @param  int  $minutesBuffer  Minutes before expiration to consider token as expiring
      * @return bool True if token is still valid
      */
     public function isValid(int $minutesBuffer = 5): bool
     {
-        return !$this->isExpiringSoon($minutesBuffer);
+        return ! $this->isExpiringSoon($minutesBuffer);
     }
 
     /**
@@ -122,7 +122,7 @@ class BankToken extends Model
      */
     public function getMinutesUntilExpiration(): int
     {
-        if (!$this->expires_at) {
+        if (! $this->expires_at) {
             return -1;
         }
 

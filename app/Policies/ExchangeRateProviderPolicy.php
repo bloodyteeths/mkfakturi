@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\ExchangeRateProvider;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class ExchangeRateProviderPolicy
 {
@@ -21,7 +20,7 @@ class ExchangeRateProviderPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-exchange-rate-provider', ExchangeRateProvider::class)) {
             return true;
         }
@@ -39,7 +38,7 @@ class ExchangeRateProviderPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
@@ -57,7 +56,7 @@ class ExchangeRateProviderPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-exchange-rate-provider', ExchangeRateProvider::class)) {
             return true;
         }
@@ -75,7 +74,7 @@ class ExchangeRateProviderPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
@@ -93,7 +92,7 @@ class ExchangeRateProviderPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }

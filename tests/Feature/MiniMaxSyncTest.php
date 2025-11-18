@@ -1,28 +1,28 @@
 <?php
 
-use Modules\Mk\Services\MiniMaxSyncService;
-use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\Customer;
 use App\Models\Company;
 use App\Models\Currency;
-use App\Models\PaymentMethod;
+use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Item;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use App\Models\Payment;
+use App\Models\PaymentMethod;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\MiniMaxSyncService;
 
 /**
  * MiniMax Synchronization Service Test Suite
- * 
+ *
  * Tests for MiniMax accounting system integration (ROADMAP4.md AI-03)
  * Covers invoice sync, payment sync, error handling, and API mocking
- * 
+ *
  * Success criteria: API 201 Created response
  */
 describe('MiniMaxSyncService', function () {
-    
+
     beforeEach(function () {
         // Create test data
         $this->company = Company::factory()->create();
@@ -33,10 +33,10 @@ describe('MiniMaxSyncService', function () {
         $this->paymentMethod = PaymentMethod::factory()->create([
             'company_id' => $this->company->id,
         ]);
-        
+
         // Initialize service
         $this->syncService = new MiniMaxSyncService($this->company);
-        
+
         // Mock HTTP responses
         Http::fake([
             'api.minimax.mk/*' => Http::response([
@@ -50,22 +50,22 @@ describe('MiniMaxSyncService', function () {
     describe('Service Initialization', function () {
         it('can be instantiated with company', function () {
             $service = new MiniMaxSyncService($this->company);
-            
+
             expect($service)->toBeInstanceOf(MiniMaxSyncService::class);
             expect($service->getCompany())->toBe($this->company);
         });
 
         it('can be instantiated without company', function () {
-            $service = new MiniMaxSyncService();
-            
+            $service = new MiniMaxSyncService;
+
             expect($service)->toBeInstanceOf(MiniMaxSyncService::class);
             expect($service->getCompany())->toBeNull();
         });
 
         it('can set company after initialization', function () {
-            $service = new MiniMaxSyncService();
+            $service = new MiniMaxSyncService;
             $result = $service->setCompany($this->company);
-            
+
             expect($result)->toBe($service); // Fluent interface
             expect($service->getCompany())->toBe($this->company);
         });
@@ -122,7 +122,7 @@ describe('MiniMaxSyncService', function () {
                 'currency_id' => $this->currency->id,
             ]);
 
-            expect(fn() => $this->syncService->syncInvoice($invalidInvoice))
+            expect(fn () => $this->syncService->syncInvoice($invalidInvoice))
                 ->toThrow(Exception::class, 'Invoice must have a customer');
         });
 
@@ -134,7 +134,7 @@ describe('MiniMaxSyncService', function () {
                 'currency_id' => $this->currency->id,
             ]);
 
-            expect(fn() => $this->syncService->syncInvoice($invoiceWithoutItems))
+            expect(fn () => $this->syncService->syncInvoice($invoiceWithoutItems))
                 ->toThrow(Exception::class, 'Invoice must have at least one item');
         });
 
@@ -154,7 +154,7 @@ describe('MiniMaxSyncService', function () {
                 'company_id' => $this->company->id,
             ]);
 
-            expect(fn() => $this->syncService->syncInvoice($zeroTotalInvoice))
+            expect(fn () => $this->syncService->syncInvoice($zeroTotalInvoice))
                 ->toThrow(Exception::class, 'Invoice total must be greater than zero');
         });
 
@@ -169,7 +169,7 @@ describe('MiniMaxSyncService', function () {
             Log::shouldReceive('info')->once(); // Start log
             Log::shouldReceive('error')->once(); // Error log
 
-            expect(fn() => $this->syncService->syncInvoice($this->invoice))
+            expect(fn () => $this->syncService->syncInvoice($this->invoice))
                 ->toThrow(Exception::class);
         });
 
@@ -228,7 +228,7 @@ describe('MiniMaxSyncService', function () {
                 'amount' => 100.00,
             ]);
 
-            expect(fn() => $this->syncService->syncPayment($orphanPayment))
+            expect(fn () => $this->syncService->syncPayment($orphanPayment))
                 ->toThrow(Exception::class, 'Payment must be associated with a customer or invoice');
         });
 
@@ -241,7 +241,7 @@ describe('MiniMaxSyncService', function () {
                 'amount' => 0,
             ]);
 
-            expect(fn() => $this->syncService->syncPayment($zeroAmountPayment))
+            expect(fn () => $this->syncService->syncPayment($zeroAmountPayment))
                 ->toThrow(Exception::class, 'Payment amount must be greater than zero');
         });
 
@@ -254,7 +254,7 @@ describe('MiniMaxSyncService', function () {
                 'amount' => 100.00,
             ]);
 
-            expect(fn() => $this->syncService->syncPayment($noMethodPayment))
+            expect(fn () => $this->syncService->syncPayment($noMethodPayment))
                 ->toThrow(Exception::class, 'Payment method is required');
         });
 
@@ -268,7 +268,7 @@ describe('MiniMaxSyncService', function () {
             Log::shouldReceive('info')->once(); // Start log
             Log::shouldReceive('error')->once(); // Error log
 
-            expect(fn() => $this->syncService->syncPayment($this->payment))
+            expect(fn () => $this->syncService->syncPayment($this->payment))
                 ->toThrow(Exception::class);
         });
     });
@@ -341,7 +341,7 @@ describe('MiniMaxSyncService', function () {
 
             // This will test the data preparation internally
             $result = $this->syncService->syncInvoice($invoice);
-            
+
             expect($result['success'])->toBe(true);
         });
 
@@ -359,7 +359,7 @@ describe('MiniMaxSyncService', function () {
 
             // This will test the data preparation internally
             $result = $this->syncService->syncPayment($payment);
-            
+
             expect($result['success'])->toBe(true);
         });
     });
@@ -388,7 +388,7 @@ describe('MiniMaxSyncService', function () {
                 ->once()
                 ->with('MiniMax invoice sync failed', Mockery::type('array'));
 
-            expect(fn() => $this->syncService->syncInvoice($invoice))
+            expect(fn () => $this->syncService->syncInvoice($invoice))
                 ->toThrow(Exception::class);
         });
 
@@ -410,7 +410,7 @@ describe('MiniMaxSyncService', function () {
                 ->once()
                 ->with('MiniMax payment sync failed', Mockery::type('array'));
 
-            expect(fn() => $this->syncService->syncPayment($payment))
+            expect(fn () => $this->syncService->syncPayment($payment))
                 ->toThrow(Exception::class);
         });
     });
@@ -448,4 +448,3 @@ describe('MiniMaxSyncService', function () {
         Mockery::close();
     });
 });
-

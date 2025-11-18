@@ -19,7 +19,9 @@ class ApprovalRequestTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected User $approver;
+
     protected Company $company;
 
     protected function setUp(): void

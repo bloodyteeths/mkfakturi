@@ -22,9 +22,13 @@ class BankAccountTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Company $company;
+
     protected BankProvider $provider;
+
     protected BankConnection $connection;
+
     protected Currency $currency;
 
     protected function setUp(): void
@@ -88,14 +92,14 @@ class BankAccountTest extends TestCase
                         'currency' => 'MKD',
                         'balance' => 50000.00,
                         'product' => 'Current Account',
-                    ]
-                ]
+                    ],
+                ],
             ], 200),
         ]);
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/accounts');
+            ->getJson('/api/v1/'.$this->company->id.'/bank/accounts');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -109,8 +113,8 @@ class BankAccountTest extends TestCase
                         'iban',
                         'balance',
                         'currency',
-                    ]
-                ]
+                    ],
+                ],
             ]);
     }
 
@@ -122,13 +126,13 @@ class BankAccountTest extends TestCase
         // Mock API response
         Http::fake([
             'sandbox-ob-api.nlb.mk/*' => Http::response([
-                'accounts' => []
+                'accounts' => [],
             ], 200),
         ]);
 
         $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/accounts');
+            ->getJson('/api/v1/'.$this->company->id.'/bank/accounts');
 
         $this->connection->refresh();
         $this->assertNotNull($this->connection->last_synced_at);
@@ -158,14 +162,14 @@ class BankAccountTest extends TestCase
                         'transactionAmount' => ['amount' => 1000.00],
                         'creditorName' => 'Test Customer',
                         'remittanceInformationUnstructured' => 'Payment for invoice #123',
-                    ]
-                ]
+                    ],
+                ],
             ], 200),
         ]);
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/accounts/nlb_account_123/transactions?' . http_build_query([
+            ->getJson('/api/v1/'.$this->company->id.'/bank/accounts/nlb_account_123/transactions?'.http_build_query([
                 'connection_id' => $this->connection->id,
                 'date_from' => '2025-11-01',
                 'date_to' => '2025-11-10',
@@ -180,7 +184,7 @@ class BankAccountTest extends TestCase
                     'date_to',
                     'transaction_count',
                     'transactions',
-                ]
+                ],
             ]);
     }
 
@@ -189,7 +193,7 @@ class BankAccountTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/accounts/test_account/transactions?' . http_build_query([
+            ->getJson('/api/v1/'.$this->company->id.'/bank/accounts/test_account/transactions?'.http_build_query([
                 'connection_id' => $this->connection->id,
                 'date_from' => '2025-11-10',
                 'date_to' => '2025-11-01', // Invalid: to before from
@@ -204,7 +208,7 @@ class BankAccountTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/accounts/test_account/transactions');
+            ->getJson('/api/v1/'.$this->company->id.'/bank/accounts/test_account/transactions');
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['connection_id']);
@@ -239,13 +243,13 @@ class BankAccountTest extends TestCase
                         'transactionAmount' => ['amount' => -500.00],
                         'debtorName' => 'Supplier B',
                     ],
-                ]
+                ],
             ], 200),
         ]);
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->postJson('/api/v1/' . $this->company->id . '/bank/accounts/' . $account->id . '/sync', [
+            ->postJson('/api/v1/'.$this->company->id.'/bank/accounts/'.$account->id.'/sync', [
                 'date_from' => '2025-11-01',
                 'date_to' => '2025-11-10',
             ]);
@@ -256,7 +260,7 @@ class BankAccountTest extends TestCase
                 'data' => [
                     'bank_account_id' => $account->id,
                     'synced_count' => 2,
-                ]
+                ],
             ]);
 
         // Verify transactions stored in database
@@ -279,7 +283,7 @@ class BankAccountTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/accounts');
+            ->getJson('/api/v1/'.$this->company->id.'/bank/accounts');
 
         $response->assertStatus(200);
 
@@ -304,7 +308,7 @@ class BankAccountTest extends TestCase
         // Try to sync from different company context
         $response = $this->actingAs($this->user)
             ->withHeader('company', $otherCompany->id)
-            ->postJson('/api/v1/' . $otherCompany->id . '/bank/accounts/' . $account->id . '/sync');
+            ->postJson('/api/v1/'.$otherCompany->id.'/bank/accounts/'.$account->id.'/sync');
 
         $response->assertStatus(404);
     }
@@ -323,13 +327,13 @@ class BankAccountTest extends TestCase
         // Mock API to capture request
         Http::fake([
             'sandbox-ob-api.nlb.mk/accounts/*/transactions*' => Http::response([
-                'transactions' => []
+                'transactions' => [],
             ], 200),
         ]);
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->postJson('/api/v1/' . $this->company->id . '/bank/accounts/' . $account->id . '/sync');
+            ->postJson('/api/v1/'.$this->company->id.'/bank/accounts/'.$account->id.'/sync');
 
         $response->assertStatus(200);
 

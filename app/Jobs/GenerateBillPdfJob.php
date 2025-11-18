@@ -37,4 +37,3 @@ class GenerateBillPdfJob implements ShouldQueue
         $bill->getPDFData();
     }
 }
-

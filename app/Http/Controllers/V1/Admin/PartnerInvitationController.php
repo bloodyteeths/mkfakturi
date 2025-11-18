@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\Company;
-use App\Models\User;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -26,7 +25,7 @@ class PartnerInvitationController extends Controller
 
         $partner = Partner::where('email', $validated['partner_email'])->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['message' => 'Partner not found'], 404);
         }
 
@@ -65,7 +64,7 @@ class PartnerInvitationController extends Controller
 
         $link = DB::table('partner_company_links')->where('id', $linkId)->first();
 
-        if (!$link || $link->invitation_status !== 'pending') {
+        if (! $link || $link->invitation_status !== 'pending') {
             return response()->json(['message' => 'Invalid invitation'], 404);
         }
 
@@ -75,6 +74,7 @@ class PartnerInvitationController extends Controller
                 'accepted_at' => now(),
                 'is_active' => true,
             ]);
+
             return response()->json(['message' => 'Invitation accepted']);
         }
 
@@ -94,7 +94,7 @@ class PartnerInvitationController extends Controller
         $user = auth()->user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['message' => 'Not a partner'], 403);
         }
 
@@ -104,8 +104,8 @@ class PartnerInvitationController extends Controller
         );
 
         return response()->json([
-            'link' => url('/signup?ref=' . $affiliateLink->code),
-            'qr_code_url' => url('/api/qr?data=' . urlencode(url('/signup?ref=' . $affiliateLink->code))),
+            'link' => url('/signup?ref='.$affiliateLink->code),
+            'qr_code_url' => url('/api/qr?data='.urlencode(url('/signup?ref='.$affiliateLink->code))),
         ]);
     }
 
@@ -133,7 +133,7 @@ class PartnerInvitationController extends Controller
 
         return response()->json([
             'message' => 'Invitation sent',
-            'signup_link' => url('/signup?company_ref=' . $token),
+            'signup_link' => url('/signup?company_ref='.$token),
         ]);
     }
 
@@ -145,7 +145,7 @@ class PartnerInvitationController extends Controller
         $user = auth()->user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['message' => 'Not a partner'], 403);
         }
 
@@ -166,9 +166,9 @@ class PartnerInvitationController extends Controller
 
         return response()->json([
             'message' => 'Partner invitation sent',
-            'signup_link' => url('/partner/signup?ref=' . $token),
-            'link' => url('/partner/signup?ref=' . $token),
-            'qr_code_url' => url('/api/qr?data=' . urlencode(url('/partner/signup?ref=' . $token))),
+            'signup_link' => url('/partner/signup?ref='.$token),
+            'link' => url('/partner/signup?ref='.$token),
+            'qr_code_url' => url('/api/qr?data='.urlencode(url('/partner/signup?ref='.$token))),
         ]);
     }
 
@@ -180,7 +180,7 @@ class PartnerInvitationController extends Controller
         $user = auth()->user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['message' => 'Not a partner'], 403);
         }
 
@@ -209,7 +209,7 @@ class PartnerInvitationController extends Controller
     {
         $companyId = $request->query('company_id');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json(['message' => 'company_id required'], 422);
         }
 
@@ -235,7 +235,7 @@ class PartnerInvitationController extends Controller
     {
         $companyId = $request->query('company_id');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json(['message' => 'company_id required'], 422);
         }
 
@@ -284,4 +284,3 @@ class PartnerInvitationController extends Controller
 }
 
 // CLAUDE-CHECKPOINT
-

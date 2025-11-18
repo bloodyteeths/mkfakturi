@@ -8,7 +8,7 @@ use App\Models\CompanySetting;
 class ParsedInvoiceMapper
 {
     /**
-     * @param array<string,mixed> $parsed
+     * @param  array<string,mixed>  $parsed
      * @return array{
      *   supplier: array<string,mixed>,
      *   bill: array<string,mixed>,
@@ -87,4 +87,3 @@ class ParsedInvoiceMapper
         ];
     }
 }
-

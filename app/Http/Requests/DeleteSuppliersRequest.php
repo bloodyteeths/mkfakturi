@@ -19,4 +19,3 @@ class DeleteSuppliersRequest extends FormRequest
         ];
     }
 }
-

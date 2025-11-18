@@ -1,45 +1,44 @@
 <?php
 
-use Modules\Mk\Services\Matcher;
-use App\Models\Invoice;
-use App\Models\Payment;
 use App\Models\BankAccount;
 use App\Models\Company;
 use App\Models\Currency;
 use App\Models\Customer;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use App\Models\Invoice;
+use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\Matcher;
 
 /**
  * Matcher Service Test Suite
- * 
+ *
  * Tests for invoice-transaction matching service
  * Covers all scenarios: amount matching, date proximity, reference matching,
  * confidence scoring, payment creation, and edge cases
- * 
+ *
  * Target: All scenarios coverage as per ROADMAP2.md
  */
 describe('Matcher Service', function () {
-    
+
     beforeEach(function () {
         // Clear relevant tables
         DB::table('bank_transactions')->truncate();
         DB::table('payments')->truncate();
         DB::table('invoices')->truncate();
         DB::table('customers')->truncate();
-        
+
         // Create test data
         $this->company = Company::factory()->create();
         $this->currency = Currency::factory()->create(['code' => 'MKD']);
         $this->customer = Customer::factory()->create(['company_id' => $this->company->id]);
-        
+
         // Create bank account for transactions
         $this->bankAccount = BankAccount::factory()->create([
             'company_id' => $this->company->id,
             'currency_id' => $this->currency->id,
         ]);
-        
+
         $this->matcher = new Matcher($this->company->id);
     });
 
@@ -65,7 +64,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 1000.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-001'
+                'invoice_number' => 'INV-2025-001',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -97,7 +96,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 1000.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-002'
+                'invoice_number' => 'INV-2025-002',
             ]);
 
             // Transaction with 0.5% difference (within 1% default tolerance)
@@ -128,7 +127,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 1000.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-003'
+                'invoice_number' => 'INV-2025-003',
             ]);
 
             // Transaction with 15% difference (outside reasonable tolerance)
@@ -154,7 +153,7 @@ describe('Matcher Service', function () {
     describe('Date Proximity Matching', function () {
         it('gives high score for same-day payments', function () {
             $dueDate = now()->addDays(5);
-            
+
             $invoice = Invoice::factory()->create([
                 'company_id' => $this->company->id,
                 'customer_id' => $this->customer->id,
@@ -162,7 +161,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 500.00,
                 'due_date' => $dueDate,
-                'invoice_number' => 'INV-2025-004'
+                'invoice_number' => 'INV-2025-004',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -186,7 +185,7 @@ describe('Matcher Service', function () {
 
         it('gives lower score for distant dates', function () {
             $dueDate = now()->addDays(5);
-            
+
             $invoice = Invoice::factory()->create([
                 'company_id' => $this->company->id,
                 'customer_id' => $this->customer->id,
@@ -194,7 +193,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 500.00,
                 'due_date' => $dueDate,
-                'invoice_number' => 'INV-2025-005'
+                'invoice_number' => 'INV-2025-005',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -226,7 +225,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 750.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-006'
+                'invoice_number' => 'INV-2025-006',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -256,7 +255,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 600.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-007'
+                'invoice_number' => 'INV-2025-007',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -287,7 +286,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 400.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-1234'
+                'invoice_number' => 'INV-2025-1234',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -312,7 +311,7 @@ describe('Matcher Service', function () {
         it('matches customer name in creditor field', function () {
             $customer = Customer::factory()->create([
                 'company_id' => $this->company->id,
-                'name' => 'Acme Corporation Ltd'
+                'name' => 'Acme Corporation Ltd',
             ]);
 
             $invoice = Invoice::factory()->create([
@@ -322,7 +321,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 300.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-008'
+                'invoice_number' => 'INV-2025-008',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -355,7 +354,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 800.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-009'
+                'invoice_number' => 'INV-2025-009',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -404,7 +403,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 100.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-010'
+                'invoice_number' => 'INV-2025-010',
             ]);
 
             $invoice2 = Invoice::factory()->create([
@@ -414,7 +413,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 200.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-011'
+                'invoice_number' => 'INV-2025-011',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -441,7 +440,7 @@ describe('Matcher Service', function () {
                     'matched_invoice_id' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]
+                ],
             ]);
 
             $matches = $this->matcher->matchAllTransactions();
@@ -466,7 +465,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 500.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-012'
+                'invoice_number' => 'INV-2025-012',
             ]);
 
             // Create already matched transaction
@@ -496,7 +495,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 500.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-013'
+                'invoice_number' => 'INV-2025-013',
             ]);
 
             // Create negative amount transaction (outgoing payment)
@@ -526,7 +525,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 500.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-014'
+                'invoice_number' => 'INV-2025-014',
             ]);
 
             // Create old transaction (outside 7-day default window)
@@ -556,7 +555,7 @@ describe('Matcher Service', function () {
                 'status' => 'PAID', // Already paid
                 'total' => 500.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-015'
+                'invoice_number' => 'INV-2025-015',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -585,7 +584,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 1000.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-016'
+                'invoice_number' => 'INV-2025-016',
             ]);
 
             // Create two transactions that could match the same invoice
@@ -613,14 +612,14 @@ describe('Matcher Service', function () {
                     'matched_invoice_id' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]
+                ],
             ]);
 
             $matches = $this->matcher->matchAllTransactions();
 
             // Should only match one transaction to the invoice
             expect($matches)->toHaveCount(1);
-            
+
             // Invoice should only have one payment
             $payments = Payment::where('invoice_id', $invoice->id)->count();
             expect($payments)->toBe(1);
@@ -634,7 +633,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 500.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-017'
+                'invoice_number' => 'INV-2025-017',
             ]);
 
             DB::table('bank_transactions')->insert([
@@ -674,7 +673,7 @@ describe('Matcher Service', function () {
                 'status' => 'SENT',
                 'total' => 350.00,
                 'due_date' => now()->addDays(5),
-                'invoice_number' => 'INV-2025-018'
+                'invoice_number' => 'INV-2025-018',
             ]);
 
             $transactionId = DB::table('bank_transactions')->insertGetId([
@@ -759,7 +758,7 @@ describe('Matcher Service', function () {
                     'matched_invoice_id' => null, // Not matched
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]
+                ],
             ]);
 
             $stats = $this->matcher->getMatchingStats();

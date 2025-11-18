@@ -23,13 +23,13 @@ class CustomersController extends Controller
         $limit = $request->has('limit') ? $request->limit : 10;
 
         $customers = Customer::with([
-                'creator',
-                'billingAddress',
-                'shippingAddress',
-                'fields.customField',
-                'fields.company',
-                'company',
-            ])
+            'creator',
+            'billingAddress',
+            'shippingAddress',
+            'fields.customField',
+            'fields.company',
+            'company',
+        ])
             ->whereCompany()
             ->applyFilters($request->all())
             ->withSum(['invoices as base_due_amount' => function ($query) {

@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\BouncerFacade;
 
@@ -16,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        echo "=== Ensuring E-Invoice Abilities Exist ===" . PHP_EOL;
+        echo '=== Ensuring E-Invoice Abilities Exist ==='.PHP_EOL;
 
         // Step 1: Update any existing abilities with old naming
         $updates = [
@@ -32,7 +30,7 @@ return new class extends Migration
                 ->update(['name' => $newName]);
 
             if ($updated > 0) {
-                echo "  ✅ Renamed: {$oldName} → {$newName}" . PHP_EOL;
+                echo "  ✅ Renamed: {$oldName} → {$newName}".PHP_EOL;
             }
         }
 
@@ -64,14 +62,15 @@ return new class extends Migration
         $companies = \App\Models\Company::all();
 
         if ($companies->count() === 0) {
-            echo "  ⚠️ No companies found - skipping ability assignment" . PHP_EOL;
+            echo '  ⚠️ No companies found - skipping ability assignment'.PHP_EOL;
+
             return;
         }
 
-        echo "  Found {$companies->count()} companies" . PHP_EOL;
+        echo "  Found {$companies->count()} companies".PHP_EOL;
 
         foreach ($companies as $company) {
-            echo PHP_EOL . "  Processing: {$company->name} (ID: {$company->id})" . PHP_EOL;
+            echo PHP_EOL."  Processing: {$company->name} (ID: {$company->id})".PHP_EOL;
 
             // Set Bouncer scope to this company
             BouncerFacade::scope()->to($company->id);
@@ -82,12 +81,13 @@ return new class extends Migration
                 'scope' => $company->id,
             ])->first();
 
-            if (!$superAdmin) {
-                echo "    ⚠️ No super admin role found" . PHP_EOL;
+            if (! $superAdmin) {
+                echo '    ⚠️ No super admin role found'.PHP_EOL;
+
                 continue;
             }
 
-            echo "    Found super admin role (ID: {$superAdmin->id})" . PHP_EOL;
+            echo "    Found super admin role (ID: {$superAdmin->id})".PHP_EOL;
 
             // Grant all e-invoice abilities to super admin
             foreach ($eInvoiceAbilities as $abilityConfig) {
@@ -96,20 +96,20 @@ return new class extends Migration
                         $abilityConfig['ability'],
                         $abilityConfig['model']
                     );
-                    echo "    ✅ Granted: {$abilityConfig['ability']}" . PHP_EOL;
+                    echo "    ✅ Granted: {$abilityConfig['ability']}".PHP_EOL;
                 } catch (\Exception $e) {
-                    echo "    ❌ Failed to grant {$abilityConfig['ability']}: {$e->getMessage()}" . PHP_EOL;
+                    echo "    ❌ Failed to grant {$abilityConfig['ability']}: {$e->getMessage()}".PHP_EOL;
                 }
             }
         }
 
-        echo PHP_EOL . "=== E-Invoice Abilities Migration Complete ===" . PHP_EOL;
+        echo PHP_EOL.'=== E-Invoice Abilities Migration Complete ==='.PHP_EOL;
 
         // Verification
         $totalAbilities = DB::table('abilities')
             ->where('name', 'like', '%einvoice%')
             ->count();
-        echo "  Total e-invoice abilities in database: {$totalAbilities}" . PHP_EOL;
+        echo "  Total e-invoice abilities in database: {$totalAbilities}".PHP_EOL;
     }
 
     /**
@@ -118,7 +118,7 @@ return new class extends Migration
     public function down(): void
     {
         // Don't remove abilities in down() to avoid breaking permissions
-        echo "  Note: E-invoice abilities are NOT removed to preserve permissions" . PHP_EOL;
+        echo '  Note: E-invoice abilities are NOT removed to preserve permissions'.PHP_EOL;
     }
 };
 // CLAUDE-CHECKPOINT

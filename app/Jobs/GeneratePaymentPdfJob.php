@@ -17,8 +17,7 @@ class GeneratePaymentPdfJob implements ShouldQueue
     public function __construct(
         public int $paymentId,
         public bool $deleteExistingFile = false
-    ) {
-    }
+    ) {}
 
     /**
      * Create a new job instance.

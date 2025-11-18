@@ -10,7 +10,6 @@ use App\Models\Partner;
 use App\Models\Payout;
 use App\Models\User;
 use App\Services\CommissionService;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +35,9 @@ class AffiliateSystemEndToEndTest extends TestCase
     use RefreshDatabase;
 
     protected Partner $partner;
+
     protected User $partnerUser;
+
     protected CommissionService $commissionService;
 
     protected function setUp(): void
@@ -73,7 +74,7 @@ class AffiliateSystemEndToEndTest extends TestCase
         // Generate affiliate link
         $affiliateLink = AffiliateLink::create([
             'partner_id' => $this->partner->id,
-            'code' => 'ACC' . strtoupper(Str::random(6)),
+            'code' => 'ACC'.strtoupper(Str::random(6)),
             'target' => 'company',
             'is_active' => true,
         ]);
@@ -85,7 +86,7 @@ class AffiliateSystemEndToEndTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->info('✓ Affiliate link created: ' . $affiliateLink->code);
+        $this->info('✓ Affiliate link created: '.$affiliateLink->code);
 
         // ===== STEP 2: Company signs up via referral =====
         $this->info('Step 2: Company signs up via referral');
@@ -126,12 +127,12 @@ class AffiliateSystemEndToEndTest extends TestCase
         // Create Paddle subscription (mock)
         $subscription = $company->subscriptions()->create([
             'type' => 'default',
-            'paddle_id' => 'sub_test_' . Str::random(10),
+            'paddle_id' => 'sub_test_'.Str::random(10),
             'status' => 'active',
         ]);
 
         $this->assertNotNull($subscription);
-        $this->info('✓ Subscription created: ' . $subscription->paddle_id);
+        $this->info('✓ Subscription created: '.$subscription->paddle_id);
 
         // ===== STEP 4: Commission recorded automatically =====
         $this->info('Step 4: Webhook triggers commission calculation');
@@ -536,7 +537,7 @@ class AffiliateSystemEndToEndTest extends TestCase
 
     protected function info(string $message)
     {
-        echo "\n" . $message;
+        echo "\n".$message;
     }
 }
 

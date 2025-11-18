@@ -13,9 +13,13 @@ use Illuminate\Support\Facades\Log;
 class OpenAiProvider implements AiProviderInterface
 {
     private string $apiKey;
+
     private string $model;
+
     private string $apiUrl;
+
     private int $maxTokens;
+
     private float $temperature;
 
     /**
@@ -39,9 +43,10 @@ class OpenAiProvider implements AiProviderInterface
     /**
      * Generate a response from a single prompt
      *
-     * @param string $prompt The prompt to send to OpenAI
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $prompt  The prompt to send to OpenAI
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception If the API call fails
      */
     public function generate(string $prompt, array $options = []): string
@@ -68,7 +73,7 @@ class OpenAiProvider implements AiProviderInterface
 
             if ($response->failed()) {
                 $this->logApiCall('generate', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('OpenAI API request failed: ' . $response->body());
+                throw new \Exception('OpenAI API request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -91,8 +96,9 @@ class OpenAiProvider implements AiProviderInterface
     /**
      * Generate a response from a conversation with multiple messages
      *
-     * @param array<int, array{role: string, content: string}> $messages Array of messages
+     * @param  array<int, array{role: string, content: string}>  $messages  Array of messages
      * @return string The AI's response
+     *
      * @throws \Exception If the API call fails
      */
     public function chat(array $messages): string
@@ -111,7 +117,7 @@ class OpenAiProvider implements AiProviderInterface
 
             if ($response->failed()) {
                 $this->logApiCall('chat', json_encode($messages), null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('OpenAI API chat request failed: ' . $response->body());
+                throw new \Exception('OpenAI API chat request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -133,8 +139,6 @@ class OpenAiProvider implements AiProviderInterface
 
     /**
      * Get the provider name
-     *
-     * @return string
      */
     public function getProviderName(): string
     {
@@ -143,8 +147,6 @@ class OpenAiProvider implements AiProviderInterface
 
     /**
      * Get the model being used
-     *
-     * @return string
      */
     public function getModel(): string
     {
@@ -154,12 +156,12 @@ class OpenAiProvider implements AiProviderInterface
     /**
      * Log API call for cost tracking and monitoring
      *
-     * @param string $method The method called (generate or chat)
-     * @param string $input The input prompt or messages
-     * @param string|null $output The AI response
-     * @param int $statusCode HTTP status code
-     * @param float $duration Duration in seconds
-     * @param array<string, mixed> $metadata Additional metadata
+     * @param  string  $method  The method called (generate or chat)
+     * @param  string  $input  The input prompt or messages
+     * @param  string|null  $output  The AI response
+     * @param  int  $statusCode  HTTP status code
+     * @param  float  $duration  Duration in seconds
+     * @param  array<string, mixed>  $metadata  Additional metadata
      */
     private function logApiCall(
         string $method,
@@ -194,11 +196,12 @@ class OpenAiProvider implements AiProviderInterface
     /**
      * Analyze an image with optional text prompt
      *
-     * @param string $imageData Base64 encoded image data
-     * @param string $mediaType MIME type
-     * @param string $prompt Text prompt/question about the image
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $imageData  Base64 encoded image data
+     * @param  string  $mediaType  MIME type
+     * @param  string  $prompt  Text prompt/question about the image
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception Vision support not implemented for OpenAI yet
      */
     public function analyzeImage(string $imageData, string $mediaType, string $prompt, array $options = []): string
@@ -210,10 +213,11 @@ class OpenAiProvider implements AiProviderInterface
     /**
      * Analyze a document (PDF converted to images) with optional text prompt
      *
-     * @param array<int, array{data: string, media_type: string}> $images Array of image pages
-     * @param string $prompt Text prompt/question about the document
-     * @param array<string, mixed> $options Additional options
+     * @param  array<int, array{data: string, media_type: string}>  $images  Array of image pages
+     * @param  string  $prompt  Text prompt/question about the document
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception Vision support not implemented for OpenAI yet
      */
     public function analyzeDocument(array $images, string $prompt, array $options = []): string

@@ -21,9 +21,9 @@ return new class extends Migration
             // Company relationship
             $table->unsignedInteger('company_id')->index();
             $table->foreign('company_id')
-                  ->references('id')
-                  ->on('companies')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('companies')
+                ->onDelete('restrict');
 
             // Certificate identification
             $table->string('name'); // User-friendly name for the certificate
@@ -57,7 +57,7 @@ return new class extends Migration
             $table->index(['company_id', 'valid_to']);
             $table->index(['valid_to', 'is_expired']);
             $table->index('fingerprint');
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
     }
 
     /**

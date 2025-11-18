@@ -59,7 +59,6 @@ class AuditLogController extends Controller
     /**
      * Display the specified audit log.
      *
-     * @param  \App\Models\AuditLog  $auditLog
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(AuditLog $auditLog)

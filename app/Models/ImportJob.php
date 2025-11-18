@@ -14,20 +14,32 @@ class ImportJob extends Model
 
     // Job types
     public const TYPE_CUSTOMERS = 'customers';
+
     public const TYPE_INVOICES = 'invoices';
+
     public const TYPE_ITEMS = 'items';
+
     public const TYPE_PAYMENTS = 'payments';
+
     public const TYPE_EXPENSES = 'expenses';
-     public const TYPE_BILLS = 'bills';
+
+    public const TYPE_BILLS = 'bills';
+
     public const TYPE_COMPLETE = 'complete';
 
     // Job statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PARSING = 'parsing';
+
     public const STATUS_MAPPING = 'mapping';
+
     public const STATUS_VALIDATING = 'validating';
+
     public const STATUS_COMMITTING = 'committing';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
 
     protected $guarded = ['id'];
@@ -104,25 +116,28 @@ class ImportJob extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
     public function getFormattedStartedAtAttribute()
     {
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-        return Carbon::parse($this->started_at)->translatedFormat($dateFormat . ' H:i:s');
+
+        return Carbon::parse($this->started_at)->translatedFormat($dateFormat.' H:i:s');
     }
 
     public function getFormattedCompletedAtAttribute()
     {
-        if (!$this->completed_at) {
+        if (! $this->completed_at) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-        return Carbon::parse($this->completed_at)->translatedFormat($dateFormat . ' H:i:s');
+
+        return Carbon::parse($this->completed_at)->translatedFormat($dateFormat.' H:i:s');
     }
 
     public function getProgressPercentageAttribute()
@@ -130,16 +145,18 @@ class ImportJob extends Model
         if ($this->total_records === 0) {
             return 0;
         }
+
         return round(($this->processed_records / $this->total_records) * 100, 2);
     }
 
     public function getDurationAttribute()
     {
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             return null;
         }
-        
+
         $endTime = $this->completed_at ?? now();
+
         return $this->started_at->diffForHumans($endTime, true);
     }
 
@@ -252,15 +269,15 @@ class ImportJob extends Model
     public function updateProgress($processed = null, $successful = null, $failed = null)
     {
         $data = [];
-        
+
         if ($processed !== null) {
             $data['processed_records'] = $processed;
         }
-        
+
         if ($successful !== null) {
             $data['successful_records'] = $successful;
         }
-        
+
         if ($failed !== null) {
             $data['failed_records'] = $failed;
         }
@@ -300,13 +317,13 @@ class ImportJob extends Model
         if ($this->processed_records === 0) {
             return 0;
         }
-        
+
         return round(($this->successful_records / $this->processed_records) * 100, 2);
     }
 
     public function hasErrors()
     {
-        return $this->failed_records > 0 || !empty($this->error_message);
+        return $this->failed_records > 0 || ! empty($this->error_message);
     }
 
     public function canBeRetried()
@@ -317,22 +334,22 @@ class ImportJob extends Model
     public function getFileSize()
     {
         $fileInfo = $this->file_info;
-        if (!$fileInfo || !isset($fileInfo['size'])) {
+        if (! $fileInfo || ! isset($fileInfo['size'])) {
             return null;
         }
-        
+
         return $this->formatBytes($fileInfo['size']);
     }
 
     private function formatBytes($size, $precision = 2)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         for ($i = 0; $size > 1024 && $i < count($units) - 1; $i++) {
             $size /= 1024;
         }
-        
-        return round($size, $precision) . ' ' . $units[$i];
+
+        return round($size, $precision).' '.$units[$i];
     }
 
     public static function getStatusOptions()

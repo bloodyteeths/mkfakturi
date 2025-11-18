@@ -21,9 +21,9 @@ return new class extends Migration
 
             // Foreign key constraint
             $table->foreign('company_id')
-                  ->references('id')
-                  ->on('companies')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('companies')
+                ->onDelete('cascade');
 
             // Indexes for performance
             $table->index('company_id');
@@ -43,4 +43,3 @@ return new class extends Migration
         Schema::dropIfExists('minimax_tokens');
     }
 };
-

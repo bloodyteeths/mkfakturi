@@ -103,7 +103,7 @@ class Payout extends Model
     /**
      * Mark payout as failed
      */
-    public function markAsFailed(string $reason = null): void
+    public function markAsFailed(?string $reason = null): void
     {
         $details = $this->details ?? [];
         $details['failure_reason'] = $reason;
@@ -118,7 +118,7 @@ class Payout extends Model
     /**
      * Cancel the payout
      */
-    public function cancel(string $reason = null): void
+    public function cancel(?string $reason = null): void
     {
         $details = $this->details ?? [];
         $details['cancellation_reason'] = $reason;

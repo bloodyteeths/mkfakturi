@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\PaymentMethod;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PaymentMethodFactory extends Factory

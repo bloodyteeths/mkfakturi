@@ -14,7 +14,6 @@ class TicketController extends Controller
     /**
      * Display a listing of the tickets for the current company.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -37,7 +36,7 @@ class TicketController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'LIKE', "%{$search}%")
-                      ->orWhere('message', 'LIKE', "%{$search}%");
+                        ->orWhere('message', 'LIKE', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc');
@@ -57,7 +56,6 @@ class TicketController extends Controller
     /**
      * Store a newly created ticket.
      *
-     * @param CreateTicketRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(CreateTicketRequest $request)
@@ -68,10 +66,10 @@ class TicketController extends Controller
         $user = $request->user();
 
         // Ensure user belongs to this company (double check)
-        if (!$user->hasCompany($companyId)) {
+        if (! $user->hasCompany($companyId)) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'You do not have access to this company'
+                'message' => 'You do not have access to this company',
             ], 403);
         }
 
@@ -104,7 +102,6 @@ class TicketController extends Controller
     /**
      * Display the specified ticket.
      *
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Ticket $ticket)
@@ -120,8 +117,6 @@ class TicketController extends Controller
     /**
      * Update the specified ticket.
      *
-     * @param Request $request
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Ticket $ticket)
@@ -142,7 +137,6 @@ class TicketController extends Controller
     /**
      * Remove the specified ticket.
      *
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Ticket $ticket)
@@ -153,7 +147,7 @@ class TicketController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Ticket deleted successfully'
+            'message' => 'Ticket deleted successfully',
         ]);
     }
 }

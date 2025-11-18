@@ -13,4 +13,3 @@ class InvoiceParsingServiceProvider extends ServiceProvider
         $this->app->bind(InvoiceParserClient::class, Invoice2DataClient::class);
     }
 }
-

@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Estimate;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class EstimatePolicy
 {
@@ -21,7 +20,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-estimate', Estimate::class)) {
             return true;
         }
@@ -39,7 +38,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -57,7 +56,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-estimate', Estimate::class)) {
             return true;
         }
@@ -75,7 +74,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -93,7 +92,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -111,7 +110,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -129,7 +128,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -148,7 +147,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -166,7 +165,7 @@ class EstimatePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-estimate', Estimate::class)) {
             return true;
         }

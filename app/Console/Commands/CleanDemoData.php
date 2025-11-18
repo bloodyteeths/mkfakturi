@@ -29,9 +29,10 @@ class CleanDemoData extends Command
      */
     public function handle(): void
     {
-        if (!$this->option('force')) {
-            if (!$this->confirm('⚠️  This will delete the demo company and all its data. Continue?')) {
+        if (! $this->option('force')) {
+            if (! $this->confirm('⚠️  This will delete the demo company and all its data. Continue?')) {
                 $this->info('Operation cancelled');
+
                 return;
             }
         }
@@ -52,7 +53,7 @@ class CleanDemoData extends Command
 
             // Delete company (cascade will handle related data)
             $demoCompany->delete();
-            $this->info("✅ Deleted demo company and all related data");
+            $this->info('✅ Deleted demo company and all related data');
         } else {
             $this->warn('No demo company found (slug: makedonska-softver-doo)');
         }
@@ -62,7 +63,7 @@ class CleanDemoData extends Command
         if ($demoUser) {
             $this->info("Found demo user: {$demoUser->email}");
             $demoUser->delete();
-            $this->info("✅ Deleted demo user");
+            $this->info('✅ Deleted demo user');
         } else {
             $this->info('No demo user found');
         }

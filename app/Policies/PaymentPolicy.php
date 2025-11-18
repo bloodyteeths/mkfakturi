@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class PaymentPolicy
 {
@@ -21,7 +20,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class)) {
             return true;
         }
@@ -39,7 +38,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -57,7 +56,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-payment', Payment::class)) {
             return true;
         }
@@ -75,7 +74,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -93,7 +92,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -111,7 +110,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -129,7 +128,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -147,7 +146,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('send-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -165,7 +164,7 @@ class PaymentPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-payment', Payment::class)) {
             return true;
         }

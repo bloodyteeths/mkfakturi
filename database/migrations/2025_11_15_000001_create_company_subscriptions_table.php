@@ -58,7 +58,7 @@ return new class extends Migration
             // Composite indexes for common queries
             $table->index(['company_id', 'status'], 'idx_company_status');
             $table->index(['accountant_id', 'status'], 'idx_accountant_status');
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
     }
 
     /**

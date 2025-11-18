@@ -46,7 +46,7 @@ class TicketResource extends JsonResource
             }),
             'messages_count' => $this->when(
                 $this->relationLoaded('messages'),
-                fn() => $this->messages->count(),
+                fn () => $this->messages->count(),
                 0
             ),
         ];

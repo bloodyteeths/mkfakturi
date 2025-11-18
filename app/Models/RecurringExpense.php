@@ -113,7 +113,7 @@ class RecurringExpense extends Model
             'currency_id' => $this->currency_id,
             'amount' => $this->amount,
             'expense_date' => now(),
-            'notes' => $this->notes . ' (Auto-generated from recurring expense)',
+            'notes' => $this->notes.' (Auto-generated from recurring expense)',
             'creator_id' => $this->created_by,
         ]);
 

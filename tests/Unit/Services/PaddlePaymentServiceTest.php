@@ -24,16 +24,20 @@ class PaddlePaymentServiceTest extends TestCase
     use RefreshDatabase;
 
     protected $service;
+
     protected $company;
+
     protected $customer;
+
     protected $currency;
+
     protected $invoice;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->service = new PaddlePaymentService();
+        $this->service = new PaddlePaymentService;
 
         // Set up test data - currency must be created first
         $this->currency = Currency::create([
@@ -94,7 +98,7 @@ class PaddlePaymentServiceTest extends TestCase
     public function test_webhook_event_routing()
     {
         $payload = [
-            'event_id' => 'evt_test_' . uniqid(),
+            'event_id' => 'evt_test_'.uniqid(),
             'event_type' => 'transaction.completed',
             'data' => [
                 'id' => 'txn_test_456',
@@ -125,7 +129,7 @@ class PaddlePaymentServiceTest extends TestCase
     /** @test */
     public function test_idempotency_cache_works()
     {
-        $eventId = 'evt_test_' . uniqid();
+        $eventId = 'evt_test_'.uniqid();
 
         $payload = [
             'event_id' => $eventId,
@@ -164,7 +168,7 @@ class PaddlePaymentServiceTest extends TestCase
     public function test_invalid_signature_throws_exception()
     {
         $payload = [
-            'event_id' => 'evt_test_' . uniqid(),
+            'event_id' => 'evt_test_'.uniqid(),
             'event_type' => 'transaction.completed',
         ];
 
@@ -178,7 +182,7 @@ class PaddlePaymentServiceTest extends TestCase
     public function test_payment_failed_event_logged()
     {
         $payload = [
-            'event_id' => 'evt_test_' . uniqid(),
+            'event_id' => 'evt_test_'.uniqid(),
             'event_type' => 'transaction.payment_failed',
             'data' => [
                 'id' => 'txn_test_failed',

@@ -58,7 +58,7 @@ return new class extends Migration
             $table->index(['company_id', 'confidence_score']);
             $table->index('bank_transaction_id');
             $table->index('invoice_id');
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
     }
 
     /**

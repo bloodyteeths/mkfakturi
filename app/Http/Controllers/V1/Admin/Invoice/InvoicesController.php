@@ -143,8 +143,6 @@ class InvoicesController extends Controller
     /**
      * Initiate CPAY payment for an invoice
      *
-     * @param  Invoice  $invoice
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function initiateCpayPayment(Invoice $invoice, Request $request)
@@ -159,7 +157,7 @@ class InvoicesController extends Controller
         }
 
         // Check if advanced payments feature is enabled
-        if (!config('mk.features.advanced_payments', false)) {
+        if (! config('mk.features.advanced_payments', false)) {
             return response()->json([
                 'error' => 'Advanced payments feature is not enabled',
             ], 403);

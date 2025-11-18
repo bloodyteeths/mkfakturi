@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 /**
  * Bank Transaction Model
- * 
+ *
  * Represents imported bank transactions from PSD2 APIs, CSV imports, or manual entry
  * Supports automatic invoice matching and payment processing
  */
@@ -77,23 +77,32 @@ class BankTransaction extends Model
 
     // Processing status constants
     const STATUS_UNPROCESSED = 'unprocessed';
+
     const STATUS_PROCESSED = 'processed';
+
     const STATUS_FAILED = 'failed';
+
     const STATUS_IGNORED = 'ignored';
 
     // Booking status constants
     const BOOKING_BOOKED = 'booked';
+
     const BOOKING_PENDING = 'pending';
+
     const BOOKING_INFO = 'info';
 
     // Transaction type constants
     const TYPE_CREDIT = 'credit';
+
     const TYPE_DEBIT = 'debit';
+
     const TYPE_TRANSFER = 'transfer';
 
     // Source constants
     const SOURCE_PSD2 = 'psd2';
+
     const SOURCE_CSV_IMPORT = 'csv_import';
+
     const SOURCE_MANUAL = 'manual';
 
     /**
@@ -221,7 +230,7 @@ class BankTransaction extends Model
      */
     public function isMatched(): bool
     {
-        return !is_null($this->matched_invoice_id);
+        return ! is_null($this->matched_invoice_id);
     }
 
     /**
@@ -245,7 +254,7 @@ class BankTransaction extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return number_format($this->amount, 2) . ' ' . $this->currency;
+        return number_format($this->amount, 2).' '.$this->currency;
     }
 
     /**
@@ -283,7 +292,7 @@ class BankTransaction extends Model
     /**
      * Mark transaction as processed
      */
-    public function markAsProcessed(string $notes = null): void
+    public function markAsProcessed(?string $notes = null): void
     {
         $this->update([
             'processing_status' => self::STATUS_PROCESSED,
@@ -295,7 +304,7 @@ class BankTransaction extends Model
     /**
      * Mark transaction as failed
      */
-    public function markAsFailed(string $notes = null): void
+    public function markAsFailed(?string $notes = null): void
     {
         $this->update([
             'processing_status' => self::STATUS_FAILED,
@@ -307,7 +316,7 @@ class BankTransaction extends Model
     /**
      * Mark transaction as matched with invoice and payment
      */
-    public function markAsMatched(int $invoiceId, int $paymentId, float $confidence = null): void
+    public function markAsMatched(int $invoiceId, int $paymentId, ?float $confidence = null): void
     {
         $this->update([
             'matched_invoice_id' => $invoiceId,

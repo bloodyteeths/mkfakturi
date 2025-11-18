@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\TaxType;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class TaxTypePolicy
 {
@@ -21,7 +20,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-tax-type', TaxType::class)) {
             return true;
         }
@@ -39,7 +38,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
@@ -57,7 +56,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-tax-type', TaxType::class)) {
             return true;
         }
@@ -75,7 +74,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
@@ -93,7 +92,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
@@ -111,7 +110,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }
@@ -129,7 +128,7 @@ class TaxTypePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
             return true;
         }

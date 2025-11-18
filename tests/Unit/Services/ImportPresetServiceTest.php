@@ -7,8 +7,6 @@ use Tests\TestCase;
 
 /**
  * Unit tests for ImportPresetService
- *
- * @package Tests\Unit\Services
  */
 class ImportPresetServiceTest extends TestCase
 {
@@ -17,7 +15,7 @@ class ImportPresetServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new ImportPresetService();
+        $this->service = new ImportPresetService;
     }
 
     public function test_onivo_preset_structure()

@@ -5,14 +5,12 @@ namespace App\Imports;
 use App\Models\Item;
 use App\Models\Unit;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
 /**
@@ -23,36 +21,34 @@ use Maatwebsite\Excel\Validators\Failure;
  * - Chunk reading for large files (500 rows per chunk)
  * - Validation with error collection
  * - Unit lookup by name
- *
- * @package App\Imports
  */
-class ItemImport implements
-    ToModel,
-    WithHeadingRow,
-    WithValidation,
-    WithChunkReading,
-    SkipsOnFailure
+class ItemImport implements SkipsOnFailure, ToModel, WithChunkReading, WithHeadingRow, WithValidation
 {
     use Importable;
 
     private int $companyId;
+
     private int $currencyId;
+
     private int $creatorId;
+
     private array $columnMapping;
+
     private bool $isDryRun;
+
     private array $failures = [];
+
     private int $successCount = 0;
+
     private int $failureCount = 0;
+
     private array $unitCache = [];
 
     /**
      * Constructor
      *
-     * @param int $companyId
-     * @param int $currencyId
-     * @param int $creatorId
-     * @param array $columnMapping Map of our field names to CSV column names
-     * @param bool $isDryRun If true, validation only without creating records
+     * @param  array  $columnMapping  Map of our field names to CSV column names
+     * @param  bool  $isDryRun  If true, validation only without creating records
      */
     public function __construct(
         int $companyId,
@@ -71,7 +67,6 @@ class ItemImport implements
     /**
      * Convert row to Item model
      *
-     * @param array $row
      * @return Item|null
      */
     public function model(array $row)
@@ -79,6 +74,7 @@ class ItemImport implements
         // Skip if dry run
         if ($this->isDryRun) {
             $this->successCount++;
+
             return null;
         }
 
@@ -87,7 +83,7 @@ class ItemImport implements
 
         // Find unit
         $unitId = null;
-        if (!empty($mappedRow['unit_name'])) {
+        if (! empty($mappedRow['unit_name'])) {
             $unit = $this->findUnit($mappedRow['unit_name']);
             $unitId = $unit ? $unit->id : null;
         }
@@ -109,9 +105,6 @@ class ItemImport implements
 
     /**
      * Map CSV columns to our field names using column mapping
-     *
-     * @param array $row
-     * @return array
      */
     private function mapColumns(array $row): array
     {
@@ -141,9 +134,6 @@ class ItemImport implements
 
     /**
      * Find unit by name
-     *
-     * @param string $name
-     * @return Unit|null
      */
     private function findUnit(string $name): ?Unit
     {
@@ -165,12 +155,12 @@ class ItemImport implements
     /**
      * Parse amount (handle different formats: 1,000.00, 1.000,00, etc.)
      *
-     * @param mixed $value
+     * @param  mixed  $value
      * @return int Amount in cents
      */
     private function parseAmount($value): int
     {
-        if (!$value) {
+        if (! $value) {
             return 0;
         }
 
@@ -191,8 +181,6 @@ class ItemImport implements
 
     /**
      * Define validation rules
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -205,9 +193,6 @@ class ItemImport implements
 
     /**
      * Get CSV column name for our field
-     *
-     * @param string $ourField
-     * @return string
      */
     private function getColumnName(string $ourField): string
     {
@@ -220,8 +205,6 @@ class ItemImport implements
 
     /**
      * Custom validation messages
-     *
-     * @return array
      */
     public function customValidationMessages(): array
     {
@@ -233,8 +216,6 @@ class ItemImport implements
 
     /**
      * Chunk size for reading
-     *
-     * @return int
      */
     public function chunkSize(): int
     {
@@ -244,7 +225,7 @@ class ItemImport implements
     /**
      * Handle validation failures
      *
-     * @param Failure[] $failures
+     * @param  Failure[]  $failures
      */
     public function onFailure(Failure ...$failures)
     {
@@ -261,8 +242,6 @@ class ItemImport implements
 
     /**
      * Get validation failures
-     *
-     * @return array
      */
     public function getFailures(): array
     {
@@ -271,8 +250,6 @@ class ItemImport implements
 
     /**
      * Get success count
-     *
-     * @return int
      */
     public function getSuccessCount(): int
     {
@@ -281,8 +258,6 @@ class ItemImport implements
 
     /**
      * Get failure count
-     *
-     * @return int
      */
     public function getFailureCount(): int
     {

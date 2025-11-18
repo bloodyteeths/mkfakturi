@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Reconciliation;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
-use Illuminate\Http\Request;
+use App\Models\Reconciliation;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\Log;
  *
  * Manages invoice-bank transaction reconciliation with confidence scoring.
  * Supports auto-matched, suggested, and manual reconciliation workflows.
- *
- * @package App\Http\Controllers
  */
 class ReconciliationController extends Controller
 {
@@ -24,9 +22,6 @@ class ReconciliationController extends Controller
      * Get auto-matched reconciliations (confidence ≥ 0.9)
      *
      * GET /api/v1/{company}/reconciliation/auto-matched
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function autoMatched(Request $request): JsonResponse
     {
@@ -49,9 +44,6 @@ class ReconciliationController extends Controller
      * Get suggested matches requiring approval (0.5 ≤ confidence < 0.9)
      *
      * GET /api/v1/{company}/reconciliation/suggested
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function suggested(Request $request): JsonResponse
     {
@@ -75,9 +67,6 @@ class ReconciliationController extends Controller
      * Get manual reconciliation candidates (confidence < 0.5)
      *
      * GET /api/v1/{company}/reconciliation/manual
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function manual(Request $request): JsonResponse
     {
@@ -120,9 +109,6 @@ class ReconciliationController extends Controller
      * Approve a suggested reconciliation match
      *
      * POST /api/v1/{company}/reconciliation/approve
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function approve(Request $request): JsonResponse
     {
@@ -139,7 +125,7 @@ class ReconciliationController extends Controller
         if ($reconciliation->status !== Reconciliation::STATUS_PENDING) {
             return response()->json([
                 'success' => false,
-                'message' => 'This reconciliation has already been ' . $reconciliation->status,
+                'message' => 'This reconciliation has already been '.$reconciliation->status,
             ], 400);
         }
 
@@ -181,7 +167,7 @@ class ReconciliationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to approve reconciliation: ' . $e->getMessage(),
+                'message' => 'Failed to approve reconciliation: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -190,9 +176,6 @@ class ReconciliationController extends Controller
      * Reject a suggested reconciliation match
      *
      * POST /api/v1/{company}/reconciliation/reject
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function reject(Request $request): JsonResponse
     {
@@ -209,7 +192,7 @@ class ReconciliationController extends Controller
         if ($reconciliation->status !== Reconciliation::STATUS_PENDING) {
             return response()->json([
                 'success' => false,
-                'message' => 'This reconciliation has already been ' . $reconciliation->status,
+                'message' => 'This reconciliation has already been '.$reconciliation->status,
             ], 400);
         }
 
@@ -239,7 +222,7 @@ class ReconciliationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to reject reconciliation: ' . $e->getMessage(),
+                'message' => 'Failed to reject reconciliation: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -248,9 +231,6 @@ class ReconciliationController extends Controller
      * Get reconciliation statistics for the company
      *
      * GET /api/v1/{company}/reconciliation/stats
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function stats(Request $request): JsonResponse
     {

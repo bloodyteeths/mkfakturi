@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class InvoicePolicy
 {
@@ -22,7 +21,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         // Use the user instance to check abilities (respects Bouncer scope)
         if ($user->can('view-invoice', Invoice::class)) {
             return true;
@@ -42,7 +41,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
@@ -60,7 +59,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-invoice', Invoice::class)) {
             return true;
         }
@@ -78,7 +77,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return $invoice->allow_edit;
         }
-        
+
         if ($user->can('edit-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return $invoice->allow_edit;
         }
@@ -96,7 +95,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
@@ -114,7 +113,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
@@ -132,7 +131,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
@@ -151,7 +150,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('send-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
@@ -169,7 +168,7 @@ class InvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-invoice', Invoice::class)) {
             return true;
         }

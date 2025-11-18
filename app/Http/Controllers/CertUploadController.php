@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Certificate;
 use App\Models\SignatureLog;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
 /**
  * Certificate Upload Controller
- * 
+ *
  * Handles QES (Qualified Electronic Signature) certificate uploads
  * for partner bureaus. Provides secure certificate storage and validation
  * for digital signature capabilities in e-faktura compliance.
@@ -26,8 +26,11 @@ class CertUploadController extends Controller
      * Storage paths for certificates
      */
     const CERT_STORAGE_PATH = 'certificates';
+
     const PRIVATE_KEY_FILENAME = 'private.key';
+
     const CERTIFICATE_FILENAME = 'certificate.pem';
+
     const CERTIFICATE_INFO_FILENAME = 'certificate_info.json';
 
     /**
@@ -38,10 +41,10 @@ class CertUploadController extends Controller
         try {
             $companyId = request()->header('company');
 
-            if (!$companyId) {
+            if (! $companyId) {
                 return response()->json([
                     'data' => null,
-                    'message' => __('certificates.no_company_header')
+                    'message' => __('certificates.no_company_header'),
                 ], 400);
             }
 
@@ -51,20 +54,20 @@ class CertUploadController extends Controller
                 ->orderBy('created_at', 'desc') // Then most recent
                 ->first();
 
-            if (!$certificate) {
+            if (! $certificate) {
                 return response()->json([
                     'data' => [], // Return empty array for dropdown compatibility
-                    'message' => __('certificates.no_certificate_found')
+                    'message' => __('certificates.no_certificate_found'),
                 ], 200); // Return 200 with empty array instead of 404
             }
 
             // Check if certificate file still exists
-            $fileMissing = $certificate->certificate_path && !Storage::exists($certificate->certificate_path);
+            $fileMissing = $certificate->certificate_path && ! Storage::exists($certificate->certificate_path);
 
             if ($fileMissing) {
                 Log::warning('Certificate file missing for certificate', [
                     'certificate_id' => $certificate->id,
-                    'path' => $certificate->certificate_path
+                    'path' => $certificate->certificate_path,
                 ]);
             }
 
@@ -84,25 +87,25 @@ class CertUploadController extends Controller
                     'key_size' => $certificate->key_size,
                     'is_active' => $certificate->is_active,
                     'is_expired' => $certificate->is_expired,
-                    'is_valid' => !$fileMissing && $certificate->is_valid, // Mark invalid if files missing
+                    'is_valid' => ! $fileMissing && $certificate->is_valid, // Mark invalid if files missing
                     'days_until_expiry' => $certificate->days_until_expiry,
                     'last_used_at' => $certificate->last_used_at?->toISOString(),
                     'uploaded_at' => $certificate->created_at->toISOString(),
                     'file_missing' => $fileMissing, // Flag to indicate missing files
                 ]],
                 'message' => $fileMissing ? __('certificates.certificate_files_missing') : __('certificates.current_certificate_retrieved'),
-                'warning' => $fileMissing // Flag to show warning notification
+                'warning' => $fileMissing, // Flag to show warning notification
             ]);
 
         } catch (\Exception $e) {
             Log::error('Failed to retrieve current certificate', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'data' => null,
-                'message' => __('certificates.retrieval_error')
+                'message' => __('certificates.retrieval_error'),
             ], 500);
         }
     }
@@ -114,9 +117,9 @@ class CertUploadController extends Controller
     public function upload(Request $request): JsonResponse
     {
         // Check if OpenSSL extension is loaded
-        if (!extension_loaded('openssl')) {
+        if (! extension_loaded('openssl')) {
             return response()->json([
-                'message' => 'OpenSSL PHP extension is not enabled'
+                'message' => 'OpenSSL PHP extension is not enabled',
             ], 500);
         }
 
@@ -127,28 +130,28 @@ class CertUploadController extends Controller
                 'file',
                 function ($attribute, $value, $fail) {
                     $extension = strtolower($value->getClientOriginalExtension());
-                    if (!in_array($extension, ['p12', 'pfx'])) {
+                    if (! in_array($extension, ['p12', 'pfx'])) {
                         $fail(__('certificates.invalid_format'));
                     }
                 },
-                'max:5120' // 5MB max
+                'max:5120', // 5MB max
             ],
             'password' => [
                 'required',
                 'string',
                 'min:4',
-                'max:255'
+                'max:255',
             ],
             'name' => [
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ],
             'description' => [
                 'nullable',
                 'string',
-                'max:255'
-            ]
+                'max:255',
+            ],
         ], [
             'certificate.required' => __('certificates.certificate_required'),
             'certificate.file' => __('certificates.invalid_file'),
@@ -162,17 +165,17 @@ class CertUploadController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => __('certificates.validation_failed'),
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         try {
             $companyId = request()->header('company');
 
-            if (!$companyId) {
+            if (! $companyId) {
                 return response()->json([
                     'message' => __('certificates.no_company_header'),
-                    'errors' => ['company' => [__('certificates.no_company_header')]]
+                    'errors' => ['company' => [__('certificates.no_company_header')]],
                 ], 400);
             }
 
@@ -234,7 +237,7 @@ class CertUploadController extends Controller
                     'company_id' => $companyId,
                     'subject' => $certificateInfo['subject']['CN'] ?? 'Unknown',
                     'valid_until' => $certificateInfo['valid_to'],
-                    'fingerprint' => substr($certificateInfo['fingerprint'], 0, 16) . '...'
+                    'fingerprint' => substr($certificateInfo['fingerprint'], 0, 16).'...',
                 ]);
 
                 return response()->json([
@@ -254,7 +257,7 @@ class CertUploadController extends Controller
                         'is_valid' => $certificate->is_valid,
                         'days_until_expiry' => $certificate->days_until_expiry,
                     ],
-                    'message' => __('certificates.upload_success')
+                    'message' => __('certificates.upload_success'),
                 ], 201);
 
             } finally {
@@ -269,7 +272,7 @@ class CertUploadController extends Controller
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Log failed upload attempt
@@ -292,7 +295,7 @@ class CertUploadController extends Controller
             if (str_contains($e->getMessage(), 'password')) {
                 return response()->json([
                     'message' => __('certificates.invalid_password'),
-                    'errors' => ['password' => [__('certificates.invalid_password')]]
+                    'errors' => ['password' => [__('certificates.invalid_password')]],
                 ], 422);
             }
 
@@ -300,20 +303,20 @@ class CertUploadController extends Controller
             if (str_contains($e->getMessage(), 'Duplicate entry') && str_contains($e->getMessage(), 'certificates_fingerprint_unique')) {
                 return response()->json([
                     'message' => __('certificates.duplicate_certificate'),
-                    'error' => __('certificates.duplicate_certificate_details')
+                    'error' => __('certificates.duplicate_certificate_details'),
                 ], 422);
             }
 
             if (str_contains($e->getMessage(), 'certificate')) {
                 return response()->json([
-                    'message' => __('certificates.invalid_certificate')
+                    'message' => __('certificates.invalid_certificate'),
                 ], 422);
             }
 
             // Return error with useful message
             return response()->json([
                 'message' => $e->getMessage(), // Always return actual error for better debugging
-                'error' => __('certificates.upload_error')
+                'error' => __('certificates.upload_error'),
             ], 500);
         }
     }
@@ -327,9 +330,9 @@ class CertUploadController extends Controller
         try {
             $companyId = request()->header('company');
 
-            if (!$companyId) {
+            if (! $companyId) {
                 return response()->json([
-                    'message' => __('certificates.no_company_header')
+                    'message' => __('certificates.no_company_header'),
                 ], 400);
             }
 
@@ -338,9 +341,9 @@ class CertUploadController extends Controller
                 ->where('company_id', $companyId)
                 ->first();
 
-            if (!$certificate) {
+            if (! $certificate) {
                 return response()->json([
-                    'message' => __('certificates.certificate_not_found')
+                    'message' => __('certificates.certificate_not_found'),
                 ], 404);
             }
 
@@ -358,18 +361,18 @@ class CertUploadController extends Controller
             Log::info('Certificate deleted successfully', $certificateInfo);
 
             return response()->json([
-                'message' => __('certificates.delete_success')
+                'message' => __('certificates.delete_success'),
             ]);
 
         } catch (\Exception $e) {
             Log::error('Certificate deletion failed', [
                 'certificate_id' => $id ?? null,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'message' => __('certificates.delete_error')
+                'message' => __('certificates.delete_error'),
             ], 500);
         }
     }
@@ -384,9 +387,9 @@ class CertUploadController extends Controller
         try {
             $companyId = request()->header('company');
 
-            if (!$companyId) {
+            if (! $companyId) {
                 return response()->json([
-                    'message' => __('certificates.no_company_header')
+                    'message' => __('certificates.no_company_header'),
                 ], 400);
             }
 
@@ -395,9 +398,9 @@ class CertUploadController extends Controller
                 ->where('company_id', $companyId)
                 ->first();
 
-            if (!$certificate) {
+            if (! $certificate) {
                 return response()->json([
-                    'message' => __('certificates.certificate_not_found')
+                    'message' => __('certificates.certificate_not_found'),
                 ], 404);
             }
 
@@ -413,7 +416,7 @@ class CertUploadController extends Controller
                     'details' => [
                         'valid_to' => $certificate->valid_to->toISOString(),
                         'days_expired' => abs($certificate->days_until_expiry),
-                    ]
+                    ],
                 ];
                 $isValid = false;
             } else {
@@ -424,12 +427,12 @@ class CertUploadController extends Controller
                     'details' => [
                         'valid_to' => $certificate->valid_to->toISOString(),
                         'days_until_expiry' => $certificate->days_until_expiry,
-                    ]
+                    ],
                 ];
             }
 
             // Check 2: Certificate file exists
-            if (!$certificate->certificate_path || !Storage::exists($certificate->certificate_path)) {
+            if (! $certificate->certificate_path || ! Storage::exists($certificate->certificate_path)) {
                 $validationResults[] = [
                     'check' => 'file_exists',
                     'status' => 'failed',
@@ -445,7 +448,7 @@ class CertUploadController extends Controller
             }
 
             // Check 3: Encrypted key blob exists
-            if (!$certificate->encrypted_key_blob) {
+            if (! $certificate->encrypted_key_blob) {
                 $validationResults[] = [
                     'check' => 'key_blob',
                     'status' => 'failed',
@@ -477,7 +480,7 @@ class CertUploadController extends Controller
                                 'message' => __('certificates.certificate_chain_valid'),
                                 'details' => [
                                     'fingerprint_match' => true,
-                                ]
+                                ],
                             ];
                         } else {
                             $validationResults[] = [
@@ -487,7 +490,7 @@ class CertUploadController extends Controller
                                 'details' => [
                                     'expected' => $certificate->fingerprint,
                                     'actual' => $currentFingerprint,
-                                ]
+                                ],
                             ];
                             $isValid = false;
                         }
@@ -506,7 +509,7 @@ class CertUploadController extends Controller
                         'message' => __('certificates.certificate_verification_error'),
                         'details' => [
                             'error' => $e->getMessage(),
-                        ]
+                        ],
                     ];
                     $isValid = false;
                 }
@@ -521,7 +524,7 @@ class CertUploadController extends Controller
                     'details' => [
                         'algorithm' => $certificate->algorithm,
                         'key_size' => $certificate->key_size,
-                    ]
+                    ],
                 ];
             }
 
@@ -550,18 +553,18 @@ class CertUploadController extends Controller
                 ],
                 'message' => $isValid
                     ? __('certificates.verification_success')
-                    : __('certificates.verification_failed')
+                    : __('certificates.verification_failed'),
             ]);
 
         } catch (\Exception $e) {
             Log::error('Certificate verification failed', [
                 'certificate_id' => $id ?? null,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'message' => __('certificates.verification_error')
+                'message' => __('certificates.verification_error'),
             ], 500);
         }
     }
@@ -573,11 +576,11 @@ class CertUploadController extends Controller
     private function createSecureTempFile($uploadedFile): string
     {
         $tempDir = sys_get_temp_dir();
-        $tempFileName = 'cert_' . Str::random(32) . '.tmp';
-        $tempPath = $tempDir . '/' . $tempFileName;
+        $tempFileName = 'cert_'.Str::random(32).'.tmp';
+        $tempPath = $tempDir.'/'.$tempFileName;
 
         // Move uploaded file to temporary location
-        if (!$uploadedFile->move(dirname($tempPath), basename($tempPath))) {
+        if (! $uploadedFile->move(dirname($tempPath), basename($tempPath))) {
             throw new \Exception('Failed to create temporary certificate file');
         }
 
@@ -596,7 +599,7 @@ class CertUploadController extends Controller
         $certificates = [];
 
         // Extract data from P12/PFX file
-        if (!openssl_pkcs12_read($p12Content, $certificates, $password)) {
+        if (! openssl_pkcs12_read($p12Content, $certificates, $password)) {
             $openSslError = openssl_error_string();
             Log::warning('PKCS12 extraction failed', ['openssl_error' => $openSslError]);
             throw new \Exception('Invalid certificate password or corrupted certificate file');
@@ -610,7 +613,7 @@ class CertUploadController extends Controller
         return [
             'private_key' => $certificates['pkey'],
             'certificate' => $certificates['cert'],
-            'extra_certificates' => $certificates['extracerts'] ?? []
+            'extra_certificates' => $certificates['extracerts'] ?? [],
         ];
     }
 
@@ -620,14 +623,14 @@ class CertUploadController extends Controller
     private function validateCertificate(string $certificatePem): array
     {
         $x509Resource = openssl_x509_read($certificatePem);
-        
-        if (!$x509Resource) {
+
+        if (! $x509Resource) {
             throw new \Exception('Invalid certificate format');
         }
 
         $certificateData = openssl_x509_parse($x509Resource);
-        
-        if (!$certificateData) {
+
+        if (! $certificateData) {
             throw new \Exception('Unable to parse certificate data');
         }
 
@@ -648,28 +651,28 @@ class CertUploadController extends Controller
             'fingerprint' => openssl_x509_fingerprint($x509Resource, 'sha256'),
             'is_valid' => $isValid,
             'uploaded_at' => now()->toISOString(),
-            'algorithm' => 'RSA-SHA256' // Default for digital signatures
+            'algorithm' => 'RSA-SHA256', // Default for digital signatures
         ];
     }
 
     /**
      * Store certificate file in Laravel Storage
      *
-     * @param string $certificatePem PEM-encoded certificate
-     * @param int $companyId Company ID for path namespacing
+     * @param  string  $certificatePem  PEM-encoded certificate
+     * @param  int  $companyId  Company ID for path namespacing
      * @return string Storage path to the certificate file
      */
     private function storeCertificateFile(string $certificatePem, int $companyId): string
     {
         // Create company-specific directory
-        $directory = 'certificates/company_' . $companyId;
+        $directory = 'certificates/company_'.$companyId;
 
         // Generate unique filename based on certificate fingerprint
         $x509Resource = openssl_x509_read($certificatePem);
         $fingerprint = openssl_x509_fingerprint($x509Resource, 'sha256');
-        $filename = substr($fingerprint, 0, 16) . '_' . time() . '.pem';
+        $filename = substr($fingerprint, 0, 16).'_'.time().'.pem';
 
-        $path = $directory . '/' . $filename;
+        $path = $directory.'/'.$filename;
 
         // Store certificate in Laravel Storage
         Storage::put($path, $certificatePem);
@@ -680,7 +683,7 @@ class CertUploadController extends Controller
     /**
      * Extract key size from private key
      *
-     * @param string $privateKeyPem PEM-encoded private key
+     * @param  string  $privateKeyPem  PEM-encoded private key
      * @return int|null Key size in bits (e.g., 2048, 4096)
      */
     private function extractKeySize(string $privateKeyPem): ?int
@@ -688,7 +691,7 @@ class CertUploadController extends Controller
         try {
             $keyResource = openssl_pkey_get_private($privateKeyPem);
 
-            if (!$keyResource) {
+            if (! $keyResource) {
                 return null;
             }
 
@@ -697,12 +700,11 @@ class CertUploadController extends Controller
             return $keyDetails['bits'] ?? null;
         } catch (\Exception $e) {
             Log::warning('Failed to extract key size', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
-
 }
 // CLAUDE-CHECKPOINT
-

@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ProformaInvoiceItem extends Model
 {
-    use HasFactory;
     use HasCustomFieldsTrait;
+    use HasFactory;
 
     protected $fillable = [
         'name',

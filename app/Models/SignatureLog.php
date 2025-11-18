@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array|null $metadata Additional context data
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read Certificate|null $certificate
  * @property-read Model|null $signable
  * @property-read User|null $user
@@ -41,9 +40,13 @@ class SignatureLog extends Model
      * Action constants
      */
     public const ACTION_SIGN = 'SIGN';
+
     public const ACTION_VERIFY = 'VERIFY';
+
     public const ACTION_UPLOAD = 'UPLOAD';
+
     public const ACTION_DELETE = 'DELETE';
+
     public const ACTION_ROTATE = 'ROTATE';
 
     /**
@@ -93,8 +96,6 @@ class SignatureLog extends Model
 
     /**
      * Get the certificate used in this operation.
-     *
-     * @return BelongsTo
      */
     public function certificate(): BelongsTo
     {
@@ -103,8 +104,6 @@ class SignatureLog extends Model
 
     /**
      * Get the signable model (polymorphic).
-     *
-     * @return MorphTo
      */
     public function signable(): MorphTo
     {
@@ -113,8 +112,6 @@ class SignatureLog extends Model
 
     /**
      * Get the user who performed the action.
-     *
-     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -123,8 +120,6 @@ class SignatureLog extends Model
 
     /**
      * Get the company.
-     *
-     * @return BelongsTo
      */
     public function company(): BelongsTo
     {
@@ -135,8 +130,7 @@ class SignatureLog extends Model
      * Scope: filter by company.
      * Works through certificate relationship.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int|null $companyId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereCompany($query, ?int $companyId = null)
@@ -149,8 +143,7 @@ class SignatureLog extends Model
     /**
      * Scope: filter by action.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $action
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereAction($query, string $action)
@@ -161,8 +154,7 @@ class SignatureLog extends Model
     /**
      * Scope: filter by certificate.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $certificateId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereCertificate($query, int $certificateId)
@@ -173,8 +165,7 @@ class SignatureLog extends Model
     /**
      * Scope: filter by user.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $userId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereUser($query, int $userId)
@@ -185,7 +176,7 @@ class SignatureLog extends Model
     /**
      * Scope: get successful operations.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeSuccessful($query)
@@ -196,7 +187,7 @@ class SignatureLog extends Model
     /**
      * Scope: get failed operations.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFailed($query)
@@ -207,7 +198,7 @@ class SignatureLog extends Model
     /**
      * Scope: get sign operations.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeSignOperations($query)
@@ -218,7 +209,7 @@ class SignatureLog extends Model
     /**
      * Scope: get verify operations.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeVerifyOperations($query)
@@ -229,8 +220,7 @@ class SignatureLog extends Model
     /**
      * Scope: get recent operations (last N days).
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $days
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeRecent($query, int $days = 30)
@@ -240,14 +230,6 @@ class SignatureLog extends Model
 
     /**
      * Log a signature operation.
-     *
-     * @param Certificate|null $certificate
-     * @param string $action
-     * @param Model|null $signable
-     * @param bool $success
-     * @param string|null $errorMessage
-     * @param array|null $metadata
-     * @return SignatureLog
      */
     public static function logOperation(
         ?Certificate $certificate,
@@ -272,13 +254,6 @@ class SignatureLog extends Model
 
     /**
      * Log a signature.
-     *
-     * @param Certificate $certificate
-     * @param Model $signable
-     * @param bool $success
-     * @param string|null $errorMessage
-     * @param array|null $metadata
-     * @return SignatureLog
      */
     public static function logSign(
         Certificate $certificate,
@@ -292,13 +267,6 @@ class SignatureLog extends Model
 
     /**
      * Log a verification.
-     *
-     * @param Certificate|null $certificate
-     * @param Model $signable
-     * @param bool $success
-     * @param string|null $errorMessage
-     * @param array|null $metadata
-     * @return SignatureLog
      */
     public static function logVerify(
         ?Certificate $certificate,
@@ -312,12 +280,6 @@ class SignatureLog extends Model
 
     /**
      * Log a certificate upload.
-     *
-     * @param Certificate $certificate
-     * @param bool $success
-     * @param string|null $errorMessage
-     * @param array|null $metadata
-     * @return SignatureLog
      */
     public static function logUpload(
         Certificate $certificate,
@@ -330,10 +292,6 @@ class SignatureLog extends Model
 
     /**
      * Log a certificate deletion.
-     *
-     * @param Certificate $certificate
-     * @param array|null $metadata
-     * @return SignatureLog
      */
     public static function logDelete(Certificate $certificate, ?array $metadata = null): SignatureLog
     {
@@ -342,11 +300,6 @@ class SignatureLog extends Model
 
     /**
      * Log a certificate rotation.
-     *
-     * @param Certificate $oldCertificate
-     * @param Certificate $newCertificate
-     * @param array|null $metadata
-     * @return SignatureLog
      */
     public static function logRotate(
         Certificate $oldCertificate,

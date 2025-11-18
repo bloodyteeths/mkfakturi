@@ -9,8 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
  *
  * Validates email data when sending credit notes to customers.
  * Mirrors SendInvoiceRequest pattern.
- *
- * @package App\Http\Requests
  */
 class SendCreditNoteRequest extends FormRequest
 {

@@ -1,44 +1,44 @@
 <?php
 
-use Modules\Mk\Jobs\SyncStopanska;
-use Modules\Mk\Services\StopanskaGateway;
-use Modules\Mk\Http\BankAuthController;
 use App\Models\BankAccount;
 use App\Models\Company;
 use App\Models\Currency;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
+use Modules\Mk\Http\BankAuthController;
+use Modules\Mk\Jobs\SyncStopanska;
+use Modules\Mk\Services\StopanskaGateway;
 use OakLabs\Psd2\AccountDetail;
 use OakLabs\Psd2\Transaction;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Queue;
 
 /**
  * SyncStopanska Job Test Suite
- * 
+ *
  * Tests for Stopanska Bank PSD2 transaction synchronization job
  * Covers all scenarios: success, failures, rate limiting, token handling
- * 
+ *
  * Target: 80% coverage as per ROADMAP2.md
  */
 describe('SyncStopanska Job', function () {
-    
+
     beforeEach(function () {
         // Clear any existing data
         DB::table('bank_transactions')->truncate();
         DB::table('bank_accounts')->truncate();
-        
+
         // Create test company and currency
         $this->company = Company::factory()->create();
         $this->currency = Currency::factory()->create(['code' => 'MKD']);
-        
+
         // Mock queue system
         Queue::fake();
     });
 
     it('can be instantiated with required parameters', function () {
         $job = new SyncStopanska($this->company->id);
-        
+
         expect($job)->toBeInstanceOf(SyncStopanska::class);
     });
 
@@ -49,7 +49,7 @@ describe('SyncStopanska Job', function () {
             60,  // days back
             200  // max transactions
         );
-        
+
         expect($job)->toBeInstanceOf(SyncStopanska::class);
     });
 
@@ -62,11 +62,11 @@ describe('SyncStopanska Job', function () {
 
         // Create job with mocked controller
         $job = new SyncStopanska($this->company->id);
-        
+
         // We expect this to throw an exception
-        expect(fn() => $job->handle())->toThrow(
-            Exception::class, 
-            'No Stopanska bank connection found for company ' . $this->company->id
+        expect(fn () => $job->handle())->toThrow(
+            Exception::class,
+            'No Stopanska bank connection found for company '.$this->company->id
         );
     });
 
@@ -74,7 +74,7 @@ describe('SyncStopanska Job', function () {
         // Mock expired tokens
         $expiredTokens = [
             'access_token' => 'expired_token',
-            'expires_at' => Carbon::now()->subHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->subHour()->toDateTimeString(),
         ];
 
         $mockAuthController = Mockery::mock(BankAuthController::class);
@@ -83,10 +83,10 @@ describe('SyncStopanska Job', function () {
             ->andReturn($expiredTokens);
 
         $job = new SyncStopanska($this->company->id);
-        
-        expect(fn() => $job->handle())->toThrow(
-            Exception::class, 
-            'Stopanska bank token has expired for company ' . $this->company->id
+
+        expect(fn () => $job->handle())->toThrow(
+            Exception::class,
+            'Stopanska bank token has expired for company '.$this->company->id
         );
     });
 
@@ -94,7 +94,7 @@ describe('SyncStopanska Job', function () {
         // Mock valid tokens
         $validTokens = [
             'access_token' => 'valid_token_123',
-            'expires_at' => Carbon::now()->addHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->addHour()->toDateTimeString(),
         ];
 
         // Mock account details
@@ -147,25 +147,25 @@ describe('SyncStopanska Job', function () {
         });
 
         $job = new SyncStopanska($this->company->id);
-        
+
         // This should not throw an exception
-        expect(fn() => $job->handle())->not->toThrow();
-        
+        expect(fn () => $job->handle())->not->toThrow();
+
         // Verify bank account was created
         $bankAccount = BankAccount::where('company_id', $this->company->id)
             ->where('account_number', '200123456789')
             ->first();
-        
+
         expect($bankAccount)->not->toBeNull();
         expect($bankAccount->bank_name)->toBe('Stopanska Banka AD Skopje');
         expect($bankAccount->bank_code)->toBe('STB');
-        
+
         // Verify transaction was stored
         $transaction = DB::table('bank_transactions')
             ->where('bank_account_id', $bankAccount->id)
             ->where('external_reference', 'ext_12345')
             ->first();
-            
+
         expect($transaction)->not->toBeNull();
         expect($transaction->amount)->toBe(150.50);
         expect($transaction->description)->toBe('Test payment');
@@ -197,7 +197,7 @@ describe('SyncStopanska Job', function () {
         // Mock tokens and gateway to return the same transaction
         $validTokens = [
             'access_token' => 'valid_token_123',
-            'expires_at' => Carbon::now()->addHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->addHour()->toDateTimeString(),
         ];
 
         $mockAccount = Mockery::mock(AccountDetail::class);
@@ -231,14 +231,14 @@ describe('SyncStopanska Job', function () {
             ->where('bank_account_id', $bankAccount->id)
             ->where('external_reference', 'ext_duplicate')
             ->count();
-            
+
         expect($transactionCount)->toBe(1);
     });
 
     it('skips old transactions beyond cutoff date', function () {
         $validTokens = [
             'access_token' => 'valid_token_123',
-            'expires_at' => Carbon::now()->addHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->addHour()->toDateTimeString(),
         ];
 
         $mockAccount = Mockery::mock(AccountDetail::class);
@@ -272,17 +272,17 @@ describe('SyncStopanska Job', function () {
         $transactionCount = DB::table('bank_transactions')
             ->where('external_reference', 'ext_old')
             ->count();
-            
+
         expect($transactionCount)->toBe(0);
     });
 
     it('respects rate limiting with sleep between accounts', function () {
         // This test verifies the sleep(4) call for rate limiting
         // We'll test that multiple accounts trigger the rate limiting logic
-        
+
         $validTokens = [
             'access_token' => 'valid_token_123',
-            'expires_at' => Carbon::now()->addHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->addHour()->toDateTimeString(),
         ];
 
         // Mock multiple accounts
@@ -328,13 +328,13 @@ describe('SyncStopanska Job', function () {
         });
 
         $startTime = microtime(true);
-        
+
         $job = new SyncStopanska($this->company->id);
         $job->handle();
-        
+
         $endTime = microtime(true);
         $executionTime = $endTime - $startTime;
-        
+
         // Should take at least 4 seconds due to rate limiting sleep
         // (We have 2 accounts, after first account processes, it sleeps 4 seconds)
         expect($executionTime)->toBeGreaterThan(3.5); // Allow some tolerance
@@ -353,8 +353,8 @@ describe('SyncStopanska Job', function () {
         });
 
         $job = new SyncStopanska($this->company->id);
-        
-        expect(fn() => $job->handle())->toThrow(Exception::class, 'Database connection failed');
+
+        expect(fn () => $job->handle())->toThrow(Exception::class, 'Database connection failed');
     });
 
     it('handles failed job with proper logging', function () {
@@ -364,9 +364,9 @@ describe('SyncStopanska Job', function () {
 
         $job = new SyncStopanska($this->company->id);
         $exception = new Exception('Permanent failure');
-        
+
         $job->failed($exception);
-        
+
         // Test passes if no exceptions are thrown and logging is called
         expect(true)->toBeTrue();
     });
@@ -374,7 +374,7 @@ describe('SyncStopanska Job', function () {
     it('creates new bank account when none exists', function () {
         $validTokens = [
             'access_token' => 'valid_token_123',
-            'expires_at' => Carbon::now()->addHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->addHour()->toDateTimeString(),
         ];
 
         $mockAccount = Mockery::mock(AccountDetail::class);
@@ -421,7 +421,7 @@ describe('SyncStopanska Job', function () {
 
         $validTokens = [
             'access_token' => 'valid_token_123',
-            'expires_at' => Carbon::now()->addHour()->toDateTimeString()
+            'expires_at' => Carbon::now()->addHour()->toDateTimeString(),
         ];
 
         $mockAccount = Mockery::mock(AccountDetail::class);

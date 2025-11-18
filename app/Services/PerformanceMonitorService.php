@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 
 class PerformanceMonitorService
 {
     protected float $startTime;
+
     protected array $metrics = [];
 
     public function __construct()
@@ -33,13 +34,13 @@ class PerformanceMonitorService
      */
     public function endTimer(string $operation): array
     {
-        if (!isset($this->metrics[$operation])) {
+        if (! isset($this->metrics[$operation])) {
             return [];
         }
 
         $endTime = microtime(true);
         $endMemory = memory_get_usage(true);
-        
+
         $executionTime = ($endTime - $this->metrics[$operation]['start_time']) * 1000; // in milliseconds
         $memoryUsed = $endMemory - $this->metrics[$operation]['memory_start'];
 
@@ -56,7 +57,7 @@ class PerformanceMonitorService
         }
 
         unset($this->metrics[$operation]);
-        
+
         return $result;
     }
 
@@ -66,20 +67,20 @@ class PerformanceMonitorService
     public function monitorQuery(callable $callback, string $description = 'database_query'): mixed
     {
         $this->startTimer($description);
-        
+
         // Enable query logging temporarily
         DB::enableQueryLog();
-        
+
         $result = $callback();
-        
+
         $queries = DB::getQueryLog();
         $queryMetrics = $this->endTimer($description);
-        
+
         // Analyze queries for potential issues
         $this->analyzeQueries($queries, $description);
-        
+
         DB::disableQueryLog();
-        
+
         return $result;
     }
 
@@ -90,7 +91,7 @@ class PerformanceMonitorService
     {
         $requestId = uniqid('req_');
         $this->startTimer($requestId);
-        
+
         // Store request info for later analysis
         $this->metrics[$requestId]['request_info'] = [
             'method' => $request->method(),
@@ -106,22 +107,22 @@ class PerformanceMonitorService
      */
     public function endRequestMonitoring(string $requestId): void
     {
-        if (!isset($this->metrics[$requestId])) {
+        if (! isset($this->metrics[$requestId])) {
             return;
         }
 
         $metrics = $this->endTimer($requestId);
         $requestInfo = $this->metrics[$requestId]['request_info'] ?? [];
-        
+
         $fullMetrics = array_merge($metrics, $requestInfo);
-        
+
         // Store metrics for analysis
         $this->storeMetrics($fullMetrics);
-        
+
         // Add response headers for debugging
         if (config('app.debug')) {
-            response()->header('X-Execution-Time', $metrics['execution_time_ms'] . 'ms');
-            response()->header('X-Memory-Usage', $metrics['memory_used_mb'] . 'MB');
+            response()->header('X-Execution-Time', $metrics['execution_time_ms'].'ms');
+            response()->header('X-Memory-Usage', $metrics['memory_used_mb'].'MB');
         }
     }
 
@@ -132,7 +133,7 @@ class PerformanceMonitorService
     {
         foreach ($queries as $query) {
             $executionTime = $query['time'];
-            
+
             // Log slow queries
             if ($executionTime > 100) { // Queries slower than 100ms
                 Log::warning('Slow query detected', [
@@ -142,10 +143,10 @@ class PerformanceMonitorService
                     'bindings' => $query['bindings'],
                 ]);
             }
-            
+
             // Detect potential N+1 queries
-            if (str_contains(strtoupper($query['query']), 'SELECT') && 
-                !str_contains(strtoupper($query['query']), 'LIMIT')) {
+            if (str_contains(strtoupper($query['query']), 'SELECT') &&
+                ! str_contains(strtoupper($query['query']), 'LIMIT')) {
                 $this->detectPotentialN1Query($query, $context);
             }
         }
@@ -157,15 +158,15 @@ class PerformanceMonitorService
     protected function detectPotentialN1Query(array $query, string $context): void
     {
         static $queryPatterns = [];
-        
+
         $pattern = preg_replace('/\d+/', '?', $query['query']);
-        
-        if (!isset($queryPatterns[$pattern])) {
+
+        if (! isset($queryPatterns[$pattern])) {
             $queryPatterns[$pattern] = 0;
         }
-        
+
         $queryPatterns[$pattern]++;
-        
+
         // If we see the same pattern more than 10 times, it might be N+1
         if ($queryPatterns[$pattern] > 10) {
             Log::warning('Potential N+1 query detected', [
@@ -174,7 +175,7 @@ class PerformanceMonitorService
                 'count' => $queryPatterns[$pattern],
                 'original_query' => $query['query'],
             ]);
-            
+
             // Reset counter to avoid spam
             $queryPatterns[$pattern] = 0;
         }
@@ -186,15 +187,15 @@ class PerformanceMonitorService
     protected function storeMetrics(array $metrics): void
     {
         // Store in cache for recent metrics
-        $cacheKey = 'performance_metrics:' . date('Y-m-d-H');
+        $cacheKey = 'performance_metrics:'.date('Y-m-d-H');
         $existingMetrics = Cache::get($cacheKey, []);
         $existingMetrics[] = array_merge($metrics, ['timestamp' => now()->toISOString()]);
-        
+
         // Keep only last 100 requests per hour
         if (count($existingMetrics) > 100) {
             $existingMetrics = array_slice($existingMetrics, -100);
         }
-        
+
         Cache::put($cacheKey, $existingMetrics, 3600); // Store for 1 hour
     }
 
@@ -205,7 +206,7 @@ class PerformanceMonitorService
     {
         switch ($period) {
             case 'hour':
-                $cacheKey = 'performance_metrics:' . date('Y-m-d-H');
+                $cacheKey = 'performance_metrics:'.date('Y-m-d-H');
                 break;
             case 'day':
                 $metrics = [];
@@ -214,11 +215,12 @@ class PerformanceMonitorService
                     $hourMetrics = Cache::get("performance_metrics:$hour", []);
                     $metrics = array_merge($metrics, $hourMetrics);
                 }
+
                 return $this->aggregateMetrics($metrics);
             default:
-                $cacheKey = 'performance_metrics:' . date('Y-m-d-H');
+                $cacheKey = 'performance_metrics:'.date('Y-m-d-H');
         }
-        
+
         return Cache::get($cacheKey, []);
     }
 
@@ -233,7 +235,7 @@ class PerformanceMonitorService
 
         $executionTimes = array_column($metrics, 'execution_time_ms');
         $memoryUsages = array_column($metrics, 'memory_used_mb');
-        
+
         return [
             'total_requests' => count($metrics),
             'avg_execution_time_ms' => round(array_sum($executionTimes) / count($executionTimes), 2),
@@ -241,7 +243,7 @@ class PerformanceMonitorService
             'min_execution_time_ms' => min($executionTimes),
             'avg_memory_usage_mb' => round(array_sum($memoryUsages) / count($memoryUsages), 2),
             'max_memory_usage_mb' => max($memoryUsages),
-            'slow_requests' => count(array_filter($executionTimes, fn($time) => $time > 300)),
+            'slow_requests' => count(array_filter($executionTimes, fn ($time) => $time > 300)),
             'endpoints' => $this->getEndpointStats($metrics),
         ];
     }
@@ -252,32 +254,32 @@ class PerformanceMonitorService
     protected function getEndpointStats(array $metrics): array
     {
         $endpointStats = [];
-        
+
         foreach ($metrics as $metric) {
             $url = $metric['url'] ?? 'unknown';
-            
-            if (!isset($endpointStats[$url])) {
+
+            if (! isset($endpointStats[$url])) {
                 $endpointStats[$url] = [
                     'count' => 0,
                     'total_time' => 0,
                     'max_time' => 0,
                 ];
             }
-            
+
             $endpointStats[$url]['count']++;
             $endpointStats[$url]['total_time'] += $metric['execution_time_ms'];
             $endpointStats[$url]['max_time'] = max($endpointStats[$url]['max_time'], $metric['execution_time_ms']);
         }
-        
+
         // Calculate averages
         foreach ($endpointStats as $url => &$stats) {
             $stats['avg_time'] = round($stats['total_time'] / $stats['count'], 2);
             unset($stats['total_time']); // Remove to clean up response
         }
-        
+
         // Sort by average time (slowest first)
-        uasort($endpointStats, fn($a, $b) => $b['avg_time'] <=> $a['avg_time']);
-        
+        uasort($endpointStats, fn ($a, $b) => $b['avg_time'] <=> $a['avg_time']);
+
         return $endpointStats;
     }
 
@@ -287,7 +289,7 @@ class PerformanceMonitorService
     public function getSystemPerformance(): array
     {
         $loadAverage = function_exists('sys_getloadavg') ? sys_getloadavg() : [0, 0, 0];
-        
+
         return [
             'memory_usage' => [
                 'current_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
@@ -313,7 +315,7 @@ class PerformanceMonitorService
             if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
                 $redis = Cache::getStore()->connection();
                 $info = $redis->info();
-                
+
                 return [
                     'type' => 'redis',
                     'hits' => $info['keyspace_hits'] ?? 0,
@@ -322,7 +324,7 @@ class PerformanceMonitorService
                     'memory_usage' => $info['used_memory_human'] ?? 'unknown',
                 ];
             }
-            
+
             return ['type' => 'other', 'stats' => 'not_available'];
         } catch (\Exception $e) {
             return ['type' => 'error', 'message' => $e->getMessage()];
@@ -337,7 +339,7 @@ class PerformanceMonitorService
         $hits = $info['keyspace_hits'] ?? 0;
         $misses = $info['keyspace_misses'] ?? 0;
         $total = $hits + $misses;
-        
+
         return $total > 0 ? round(($hits / $total) * 100, 2) : 0.0;
     }
 
@@ -372,7 +374,7 @@ class PerformanceMonitorService
             }
         } catch (\Exception $e) {
             // Silently fail - performance monitoring shouldn't break the app
-            \Log::debug('Failed to clear old performance metrics: ' . $e->getMessage());
+            \Log::debug('Failed to clear old performance metrics: '.$e->getMessage());
         }
     }
 }

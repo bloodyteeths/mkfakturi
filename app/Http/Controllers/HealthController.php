@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 /**
  * Health Check Controller for Docker and Monitoring
@@ -32,7 +32,7 @@ class HealthController extends Controller
             'paddle' => $this->checkPaddleConfig(),
         ];
 
-        $healthy = !in_array(false, $checks, true);
+        $healthy = ! in_array(false, $checks, true);
 
         return response()->json([
             'status' => $healthy ? 'healthy' : 'degraded',
@@ -51,9 +51,11 @@ class HealthController extends Controller
         try {
             DB::connection()->getPdo();
             DB::table('users')->limit(1)->count();
+
             return true;
         } catch (\Exception $e) {
             \Log::error('Health check: Database failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -69,9 +71,11 @@ class HealthController extends Controller
             }
             Cache::store('redis')->put('health_check', 'ok', 10);
             $value = Cache::store('redis')->get('health_check');
+
             return $value === 'ok';
         } catch (\Exception $e) {
             \Log::error('Health check: Redis failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -94,22 +98,26 @@ class HealthController extends Controller
 
             if ($pendingJobs > 10000) {
                 \Log::warning('Health check: Queue backlog too large', ['pending_jobs' => $pendingJobs]);
+
                 return false;
             }
 
             if ($recentFailedJobs > 100) {
                 \Log::warning('Health check: Too many recent failed jobs', ['failed_jobs_last_hour' => $recentFailedJobs]);
+
                 return false;
             }
 
             if ($stuckJobs > 0) {
                 \Log::warning('Health check: Stuck jobs detected', ['stuck_jobs' => $stuckJobs]);
+
                 return false;
             }
 
             return true;
         } catch (\Exception $e) {
             \Log::error('Health check: Queue check failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -123,21 +131,23 @@ class HealthController extends Controller
             $certPath = config('mk.xml_signing.certificate_path');
 
             // If no certificate path configured, skip check (optional feature)
-            if (!$certPath) {
+            if (! $certPath) {
                 return true;
             }
 
             // If path configured but file doesn't exist, warn but don't fail
-            if (!file_exists($certPath)) {
+            if (! file_exists($certPath)) {
                 \Log::warning('Health check: Certificate file not found', ['path' => $certPath]);
+
                 return true; // Don't fail - certificate might not be uploaded yet
             }
 
             $certContent = file_get_contents($certPath);
             $cert = openssl_x509_read($certContent);
 
-            if (!$cert) {
+            if (! $cert) {
                 \Log::error('Health check: Invalid certificate');
+
                 return true; // Don't fail - just log error
             }
 
@@ -147,12 +157,14 @@ class HealthController extends Controller
 
             if ($daysUntilExpiry <= 7) {
                 \Log::warning('Health check: Certificate expiring soon', ['days_until_expiry' => round($daysUntilExpiry, 2)]);
+
                 return false; // This is a real issue - alert
             }
 
             return true;
         } catch (\Exception $e) {
             \Log::error('Health check: Certificate check failed', ['error' => $e->getMessage()]);
+
             return true; // Don't fail health check - just log
         }
     }
@@ -163,7 +175,7 @@ class HealthController extends Controller
     private function checkBankSync(): bool
     {
         try {
-            if (!DB::getSchemaBuilder()->hasTable('bank_transactions')) {
+            if (! DB::getSchemaBuilder()->hasTable('bank_transactions')) {
                 return true;
             }
 
@@ -177,6 +189,7 @@ class HealthController extends Controller
 
                 if ($syncErrors > 10) {
                     \Log::warning('Health check: Too many bank sync errors', ['sync_errors_24h' => $syncErrors]);
+
                     return false;
                 }
             }
@@ -184,6 +197,7 @@ class HealthController extends Controller
             return true;
         } catch (\Exception $e) {
             \Log::error('Health check: Bank sync check failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -195,7 +209,7 @@ class HealthController extends Controller
     {
         try {
             // Test storage write/read
-            $testFile = 'health_check_' . time() . '.txt';
+            $testFile = 'health_check_'.time().'.txt';
             \Storage::put($testFile, 'health check');
             if (\Storage::exists($testFile)) {
                 \Storage::delete($testFile);
@@ -210,14 +224,16 @@ class HealthController extends Controller
             if ($percentFree < 10) {
                 \Log::warning('Health check: Low disk space', [
                     'percent_free' => round($percentFree, 2),
-                    'free_gb' => round($free / 1024 / 1024 / 1024, 2)
+                    'free_gb' => round($free / 1024 / 1024 / 1024, 2),
                 ]);
+
                 return false;
             }
 
             return true;
         } catch (\Exception $e) {
             \Log::error('Health check: Storage failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -233,20 +249,21 @@ class HealthController extends Controller
             $backupPath = storage_path("app/{$backupName}");
 
             // If backup directory doesn't exist, it's a new installation
-            if (!is_dir($backupPath)) {
+            if (! is_dir($backupPath)) {
                 return true;
             }
 
             // Get all backup files
-            $backupFiles = glob($backupPath . '/*.zip');
+            $backupFiles = glob($backupPath.'/*.zip');
 
             if (empty($backupFiles)) {
                 \Log::warning('Health check: No backup files found');
+
                 return true; // Don't fail on new installations
             }
 
             // Get most recent backup
-            usort($backupFiles, function($a, $b) {
+            usort($backupFiles, function ($a, $b) {
                 return filemtime($b) - filemtime($a);
             });
 
@@ -260,12 +277,14 @@ class HealthController extends Controller
                     'max_age_hours' => round($maxAge / 3600, 2),
                     'backup_file' => basename($latestBackup),
                 ]);
+
                 return false;
             }
 
             return true;
         } catch (\Exception $e) {
             \Log::warning('Health check: Backup monitoring failed', ['error' => $e->getMessage()]);
+
             return true; // Don't fail health check for backup issues in new installations
         }
     }
@@ -277,12 +296,12 @@ class HealthController extends Controller
     {
         try {
             // Check if certificates table exists
-            if (!DB::getSchemaBuilder()->hasTable('certificates')) {
+            if (! DB::getSchemaBuilder()->hasTable('certificates')) {
                 return true; // Table doesn't exist yet
             }
 
             // Check if expires_at column exists
-            if (!DB::getSchemaBuilder()->hasColumn('certificates', 'expires_at')) {
+            if (! DB::getSchemaBuilder()->hasColumn('certificates', 'expires_at')) {
                 return true; // Column doesn't exist yet
             }
 
@@ -294,14 +313,16 @@ class HealthController extends Controller
 
             if ($expiringCerts > 0) {
                 \Log::warning('Health check: Certificates expiring soon', [
-                    'expiring_certificates' => $expiringCerts
+                    'expiring_certificates' => $expiringCerts,
                 ]);
+
                 return false;
             }
 
             return true;
         } catch (\Exception $e) {
             \Log::warning('Health check: Certificate check failed', ['error' => $e->getMessage()]);
+
             return true; // Don't fail health check if table/column doesn't exist
         }
     }
@@ -329,11 +350,12 @@ class HealthController extends Controller
             }
 
             // If any config is missing, warn but don't fail (Paddle is optional until configured)
-            if (!empty($missingConfigs)) {
+            if (! empty($missingConfigs)) {
                 \Log::warning('Health check: Missing Paddle configuration', [
                     'missing' => $missingConfigs,
-                    'note' => 'Paddle not configured yet - this is expected until production setup'
+                    'note' => 'Paddle not configured yet - this is expected until production setup',
                 ]);
+
                 return true; // Don't fail - Paddle setup is optional
             }
 
@@ -343,21 +365,23 @@ class HealthController extends Controller
                     $response = \Http::withToken(config('cashier.api_key'))
                         ->timeout(5)
                         ->get('https://api.paddle.com/products', [
-                            'per_page' => 1
+                            'per_page' => 1,
                         ]);
 
-                    if (!$response->successful()) {
+                    if (! $response->successful()) {
                         \Log::warning('Health check: Paddle API connection failed', [
                             'status' => $response->status(),
-                            'note' => 'Check Paddle credentials'
+                            'note' => 'Check Paddle credentials',
                         ]);
+
                         return true; // Warn but don't fail
                     }
                 } catch (\Exception $e) {
                     \Log::warning('Health check: Paddle API connection error', [
                         'error' => $e->getMessage(),
-                        'note' => 'Paddle API might be unreachable'
+                        'note' => 'Paddle API might be unreachable',
                     ]);
+
                     return true; // Warn but don't fail
                 }
             }
@@ -365,8 +389,9 @@ class HealthController extends Controller
             return true;
         } catch (\Exception $e) {
             \Log::warning('Health check: Paddle configuration check failed', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             // Don't fail health check if Paddle isn't configured yet
             return true;
         }
@@ -384,14 +409,14 @@ class HealthController extends Controller
             return response()->json([
                 'status' => 'ready',
                 'timestamp' => now()->toISOString(),
-                'migrations' => $migrationStatus === 0 ? 'ok' : 'pending'
+                'migrations' => $migrationStatus === 0 ? 'ok' : 'pending',
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'not ready',
                 'message' => $e->getMessage(),
-                'timestamp' => now()->toISOString()
+                'timestamp' => now()->toISOString(),
             ], 503);
         }
     }

@@ -99,4 +99,3 @@ class BillPaymentsController extends Controller
         ]);
     }
 }
-

@@ -25,14 +25,14 @@ class BankAccount extends Model
         'current_balance',
         'is_primary',
         'is_active',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
         'is_primary' => 'boolean',
         'is_active' => 'boolean',
         'opening_balance' => 'decimal:2',
-        'current_balance' => 'decimal:2'
+        'current_balance' => 'decimal:2',
     ];
 
     /**

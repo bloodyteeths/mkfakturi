@@ -2,27 +2,25 @@
 
 namespace Tests;
 
-use Tests\TestCase;
+use App\Models\Company;
+use App\Models\Customer;
+use App\Models\ImportJob;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\Partner;
+use App\Models\PartnerCompany;
+use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Company;
-use App\Models\Customer;
-use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use App\Models\Payment;
-use App\Models\User;
-use App\Models\Partner;
-use App\Models\PartnerCompany;
-use App\Models\BankTransaction;
-use App\Models\ImportJob;
 
 /**
  * TST-DB-01: Database Invariants Test Suite
- * 
+ *
  * This test validates database consistency rules and constraints as required by
  * ROADMAP-FINAL.md Section B - TST-DB-01.
- * 
+ *
  * Database invariants ensure:
  * - Referential integrity across all tables
  * - Company-scoped data isolation for partners
@@ -31,7 +29,7 @@ use App\Models\ImportJob;
  * - Partner relationship integrity
  * - Import system data consistency
  * - Macedonia-specific business rules
- * 
+ *
  * Test Coverage:
  * - Schema constraints and foreign keys
  * - Business logic invariants
@@ -41,7 +39,7 @@ use App\Models\ImportJob;
  * - Partner/company relationship integrity
  * - Import system consistency
  * - Performance constraints (indexes)
- * 
+ *
  * Success Criteria:
  * - All database constraints validated
  * - No orphaned records found
@@ -49,11 +47,13 @@ use App\Models\ImportJob;
  * - Company data isolation maintained
  * - Partner relationships valid
  * - All tests pass consistently
- * 
+ *
  * Required by Gate G2 dependency: SD-01, SD-02, SD-03 complete
- * 
+ *
  * @version 1.0.0
+ *
  * @created 2025-07-26 - TST-DB-01 implementation
+ *
  * @author Claude Code - Based on ROADMAP-FINAL requirements
  */
 class DBInvariantTest extends TestCase
@@ -63,7 +63,7 @@ class DBInvariantTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Seed minimal required data for tests
         $this->artisan('db:seed', ['--class' => 'CountriesTableSeeder']);
         $this->artisan('db:seed', ['--class' => 'CurrenciesTableSeeder']);
@@ -93,7 +93,7 @@ class DBInvariantTest extends TestCase
         // Test unique constraints
         $company = Company::factory()->create();
         $user1 = User::factory()->create(['email' => 'test@example.com', 'company_id' => $company->id]);
-        
+
         // Should fail due to unique email constraint
         $this->expectException(\Exception::class);
         User::factory()->create(['email' => 'test@example.com', 'company_id' => $company->id]);
@@ -115,11 +115,11 @@ class DBInvariantTest extends TestCase
         // Create invoices for each company
         $invoice1 = Invoice::factory()->create([
             'company_id' => $company1->id,
-            'customer_id' => $customer1->id
+            'customer_id' => $customer1->id,
         ]);
         $invoice2 = Invoice::factory()->create([
             'company_id' => $company2->id,
-            'customer_id' => $customer2->id
+            'customer_id' => $customer2->id,
         ]);
 
         // Verify data isolation: Company 1 should only see its own data
@@ -156,7 +156,7 @@ class DBInvariantTest extends TestCase
             'sub_total' => 0,
             'total' => 0,
             'tax' => 0,
-            'due_amount' => 0
+            'due_amount' => 0,
         ]);
 
         // Add invoice items
@@ -165,7 +165,7 @@ class DBInvariantTest extends TestCase
             'name' => 'Service 1',
             'quantity' => 2,
             'price' => 10000, // 100.00 MKD in cents
-            'total' => 20000  // 200.00 MKD in cents
+            'total' => 20000,  // 200.00 MKD in cents
         ]);
 
         $item2 = InvoiceItem::factory()->create([
@@ -173,7 +173,7 @@ class DBInvariantTest extends TestCase
             'name' => 'Service 2',
             'quantity' => 1,
             'price' => 15000, // 150.00 MKD in cents
-            'total' => 15000  // 150.00 MKD in cents
+            'total' => 15000,  // 150.00 MKD in cents
         ]);
 
         // Recalculate invoice totals
@@ -181,7 +181,7 @@ class DBInvariantTest extends TestCase
         $invoice->update([
             'sub_total' => $itemsTotal,
             'total' => $itemsTotal, // Simplified - no tax for this test
-            'due_amount' => $itemsTotal
+            'due_amount' => $itemsTotal,
         ]);
 
         // Verify calculations
@@ -193,7 +193,7 @@ class DBInvariantTest extends TestCase
         $payment = Payment::factory()->create([
             'invoice_id' => $invoice->id,
             'company_id' => $company->id,
-            'amount' => 20000 // 200.00 MKD partial payment
+            'amount' => 20000, // 200.00 MKD partial payment
         ]);
 
         // Verify due amount calculation
@@ -222,7 +222,7 @@ class DBInvariantTest extends TestCase
             'customer_id' => $customer->id,
             'status' => 'DRAFT',
             'total' => 10000,
-            'due_amount' => 10000
+            'due_amount' => 10000,
         ]);
 
         // Valid transition: DRAFT -> SENT
@@ -233,7 +233,7 @@ class DBInvariantTest extends TestCase
         Payment::factory()->create([
             'invoice_id' => $invoice->id,
             'company_id' => $company->id,
-            'amount' => 10000 // Full payment
+            'amount' => 10000, // Full payment
         ]);
 
         // Valid transition: SENT -> PAID (via payment)
@@ -262,13 +262,13 @@ class DBInvariantTest extends TestCase
         // Create partner user
         $partnerUser = User::factory()->create([
             'company_id' => $partnerOwnCompany->id,
-            'email' => 'partner@accounting.mk'
+            'email' => 'partner@accounting.mk',
         ]);
 
         // Create partner record
         $partner = Partner::factory()->create([
             'user_id' => $partnerUser->id,
-            'commission_rate' => 15.5 // 15.5% default commission
+            'commission_rate' => 15.5, // 15.5% default commission
         ]);
 
         // Create partner-company relationships
@@ -277,7 +277,7 @@ class DBInvariantTest extends TestCase
             'company_id' => $clientCompany1->id,
             'commission_rate' => 20.0, // Override commission for this client
             'is_primary' => true,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $partnerCompany2 = PartnerCompany::create([
@@ -285,7 +285,7 @@ class DBInvariantTest extends TestCase
             'company_id' => $clientCompany2->id,
             'commission_rate' => null, // Use default partner commission
             'is_primary' => false,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Test relationship integrity
@@ -326,12 +326,12 @@ class DBInvariantTest extends TestCase
             'mapping_config' => json_encode([
                 'name' => 'customer_name',
                 'email' => 'email_address',
-                'phone' => 'phone_number'
+                'phone' => 'phone_number',
             ]),
             'validation_rules' => json_encode([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email'
-            ])
+                'email' => 'required|email',
+            ]),
         ]);
 
         // Test import job state consistency
@@ -342,7 +342,7 @@ class DBInvariantTest extends TestCase
         // Simulate processing
         $importJob->update([
             'status' => 'processing',
-            'processed_records' => 50
+            'processed_records' => 50,
         ]);
 
         // Verify state transition
@@ -357,7 +357,7 @@ class DBInvariantTest extends TestCase
         $importJob->update([
             'status' => 'completed',
             'processed_records' => 95,
-            'failed_records' => 5
+            'failed_records' => 5,
         ]);
 
         // Verify final consistency
@@ -372,14 +372,14 @@ class DBInvariantTest extends TestCase
     {
         $company = Company::factory()->create([
             'name' => 'Македонска Компанија ДОО',
-            'tax_id' => 'MK4080003501411'
+            'tax_id' => 'MK4080003501411',
         ]);
 
         $customer = Customer::factory()->create([
             'company_id' => $company->id,
             'name' => 'Македонски Клиент',
             'tax_id' => 'MK4080003501412',
-            'phone' => '+38970123456'
+            'phone' => '+38970123456',
         ]);
 
         // Test Macedonia VAT ID format validation (would be in model validation)
@@ -395,7 +395,7 @@ class DBInvariantTest extends TestCase
             'customer_id' => $customer->id,
             'currency_id' => 134, // MKD
             'exchange_rate' => 1.0,
-            'total' => 180000 // 1800.00 MKD (with 18% VAT)
+            'total' => 180000, // 1800.00 MKD (with 18% VAT)
         ]);
 
         // Verify Macedonia currency constraint
@@ -428,10 +428,10 @@ class DBInvariantTest extends TestCase
 
         // Test query performance with large dataset
         $company = Company::factory()->create();
-        
+
         // Create multiple customers (simulate larger dataset)
         Customer::factory()->count(50)->create(['company_id' => $company->id]);
-        
+
         // Measure query performance
         $start = microtime(true);
         $customers = Customer::where('company_id', $company->id)->get();
@@ -449,10 +449,10 @@ class DBInvariantTest extends TestCase
     {
         $company = Company::factory()->create();
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        
+
         $invoice = Invoice::factory()->create([
             'company_id' => $company->id,
-            'customer_id' => $customer->id
+            'customer_id' => $customer->id,
         ]);
 
         // Test cascade relationships
@@ -482,22 +482,22 @@ class DBInvariantTest extends TestCase
     {
         // Create test data across multiple companies
         $companies = Company::factory()->count(3)->create();
-        
+
         foreach ($companies as $company) {
             $customers = Customer::factory()->count(2)->create(['company_id' => $company->id]);
-            
+
             foreach ($customers as $customer) {
                 $invoice = Invoice::factory()->create([
                     'company_id' => $company->id,
                     'customer_id' => $customer->id,
-                    'total' => 50000
+                    'total' => 50000,
                 ]);
 
                 // Add payment
                 Payment::factory()->create([
                     'invoice_id' => $invoice->id,
                     'company_id' => $company->id,
-                    'amount' => 25000 // Partial payment
+                    'amount' => 25000, // Partial payment
                 ]);
             }
         }
@@ -534,14 +534,13 @@ class DBInvariantTest extends TestCase
     private function hasIndex(string $table, string $column): bool
     {
         $indexes = DB::select("SHOW INDEX FROM {$table}");
-        
+
         foreach ($indexes as $index) {
             if ($index->Column_name === $column) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }
-

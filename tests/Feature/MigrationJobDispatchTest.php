@@ -2,25 +2,25 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Queue;
-use Tests\TestCase;
-use App\Models\User;
+use App\Jobs\Migration\CommitImportJob;
+use App\Jobs\Migration\DetectFileTypeJob;
+use App\Jobs\Migration\ValidateDataJob;
 use App\Models\Company;
 use App\Models\Currency;
 use App\Models\ImportJob;
-use App\Jobs\Migration\DetectFileTypeJob;
-use App\Jobs\Migration\ValidateDataJob;
-use App\Jobs\Migration\CommitImportJob;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 /**
  * MIG-DISPATCH Feature Test
- * 
+ *
  * Verifies that MigrationController properly dispatches background jobs to queue
  * and that the Universal Migration Wizard works end-to-end with Horizon monitoring.
- * 
+ *
  * Success Criteria:
  * - Migration jobs show in Horizon queue
  * - Background processing works end-to-end
@@ -31,16 +31,18 @@ class MigrationJobDispatchTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Company $company;
+
     protected Currency $currency;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Setup test environment
         $this->setupTestData();
-        
+
         // Setup storage for test files
         Storage::fake('private');
     }
@@ -72,7 +74,7 @@ class MigrationJobDispatchTest extends TestCase
 
     /**
      * Test that file upload dispatches DetectFileTypeJob to migration queue
-     * 
+     *
      * @test
      */
     public function file_upload_dispatches_detect_file_type_job()
@@ -83,7 +85,7 @@ class MigrationJobDispatchTest extends TestCase
         $csvContent = "name,email,phone\n";
         $csvContent .= "John Doe,john@example.com,123456789\n";
         $csvContent .= "Jane Smith,jane@example.com,987654321\n";
-        
+
         $file = UploadedFile::fake()->createWithContent('customers.csv', $csvContent);
 
         // Make authenticated request to upload file
@@ -102,16 +104,16 @@ class MigrationJobDispatchTest extends TestCase
                 'type',
                 'status',
                 'file_info',
-                'created_at'
-            ]
+                'created_at',
+            ],
         ]);
 
         // Verify DetectFileTypeJob was dispatched to migration queue
         Queue::assertPushedOn('migration', DetectFileTypeJob::class);
-        
+
         // Verify job was dispatched with correct import job
         Queue::assertPushed(DetectFileTypeJob::class, function ($job) {
-            return $job->importJob instanceof ImportJob && 
+            return $job->importJob instanceof ImportJob &&
                    $job->importJob->type === ImportJob::TYPE_CUSTOMERS &&
                    $job->importJob->status === ImportJob::STATUS_PENDING;
         });
@@ -119,7 +121,7 @@ class MigrationJobDispatchTest extends TestCase
 
     /**
      * Test that mapping submission dispatches ValidateDataJob to migration queue
-     * 
+     *
      * @test
      */
     public function mapping_submission_dispatches_validate_data_job()
@@ -135,8 +137,8 @@ class MigrationJobDispatchTest extends TestCase
             'file_info' => [
                 'original_name' => 'customers.csv',
                 'size' => 1024,
-                'headers' => ['name', 'email', 'phone']
-            ]
+                'headers' => ['name', 'email', 'phone'],
+            ],
         ]);
 
         // Submit field mappings
@@ -146,19 +148,19 @@ class MigrationJobDispatchTest extends TestCase
                 'mappings' => [
                     'name' => 'display_name',
                     'email' => 'email',
-                    'phone' => 'phone'
+                    'phone' => 'phone',
                 ],
                 'validation_rules' => [
                     'email' => 'required|email',
-                    'display_name' => 'required|string'
-                ]
+                    'display_name' => 'required|string',
+                ],
             ]);
 
         $response->assertStatus(200);
 
         // Verify ValidateDataJob was dispatched to migration queue
         Queue::assertPushedOn('migration', ValidateDataJob::class);
-        
+
         // Verify job was dispatched with correct import job
         Queue::assertPushed(ValidateDataJob::class, function ($job) use ($importJob) {
             return $job->importJob->id === $importJob->id &&
@@ -168,7 +170,7 @@ class MigrationJobDispatchTest extends TestCase
 
     /**
      * Test that commit request dispatches CommitImportJob to migration queue
-     * 
+     *
      * @test
      */
     public function commit_request_dispatches_commit_import_job()
@@ -183,26 +185,26 @@ class MigrationJobDispatchTest extends TestCase
             'status' => ImportJob::STATUS_VALIDATING,
             'mapping_config' => [
                 'name' => 'display_name',
-                'email' => 'email'
+                'email' => 'email',
             ],
             'total_records' => 10,
             'processed_records' => 10,
             'successful_records' => 8,
-            'failed_records' => 2
+            'failed_records' => 2,
         ]);
 
         // Submit commit request
         $response = $this->actingAs($this->user)
             ->withHeaders(['company' => $this->company->id])
             ->postJson("/api/v1/imports/{$importJob->id}/commit", [
-                'force_commit' => false
+                'force_commit' => false,
             ]);
 
         $response->assertStatus(200);
 
         // Verify CommitImportJob was dispatched to migration queue
         Queue::assertPushedOn('migration', CommitImportJob::class);
-        
+
         // Verify job was dispatched with correct import job
         Queue::assertPushed(CommitImportJob::class, function ($job) use ($importJob) {
             return $job->importJob->id === $importJob->id &&
@@ -212,7 +214,7 @@ class MigrationJobDispatchTest extends TestCase
 
     /**
      * Test complete migration workflow job chain
-     * 
+     *
      * @test
      */
     public function complete_migration_workflow_dispatches_job_chain()
@@ -225,7 +227,7 @@ class MigrationJobDispatchTest extends TestCase
         $csvContent .= "Петар Петровски,petar@example.mk,+38970123456,\"Македонски Херои 15, Скопје\"\n";
         $csvContent .= "Марија Николовска,marija@example.mk,+38971987654,\"Гоце Делчев 25, Битола\"\n";
         $csvContent .= "Стефан Јовановски,stefan@example.mk,+38972456789,\"Партизанска 10, Прилеп\"\n";
-        
+
         $file = UploadedFile::fake()->createWithContent('macedonian_customers.csv', $csvContent);
 
         // Step 1: Upload file
@@ -250,13 +252,13 @@ class MigrationJobDispatchTest extends TestCase
                 'mappings' => [
                     'naziv' => 'display_name',    // Macedonian "name" field
                     'email' => 'email',
-                    'telefon' => 'phone',          // Macedonian "phone" field  
-                    'adresa' => 'billing_address_1' // Macedonian "address" field
+                    'telefon' => 'phone',          // Macedonian "phone" field
+                    'adresa' => 'billing_address_1', // Macedonian "address" field
                 ],
                 'validation_rules' => [
                     'email' => 'required|email',
-                    'display_name' => 'required|string'
-                ]
+                    'display_name' => 'required|string',
+                ],
             ]);
 
         $mappingResponse->assertStatus(200);
@@ -275,7 +277,7 @@ class MigrationJobDispatchTest extends TestCase
         $commitResponse = $this->actingAs($this->user)
             ->withHeaders(['company' => $this->company->id])
             ->postJson("/api/v1/imports/{$importJobId}/commit", [
-                'force_commit' => true // Allow commit even with validation warnings
+                'force_commit' => true, // Allow commit even with validation warnings
             ]);
 
         $commitResponse->assertStatus(200);
@@ -284,15 +286,15 @@ class MigrationJobDispatchTest extends TestCase
         Queue::assertPushedOn('migration', CommitImportJob::class);
 
         // Verify complete job chain was triggered
-        $this->assertGreaterThanOrEqual(3, Queue::pushed(DetectFileTypeJob::class)->count() + 
-                                               Queue::pushed(ValidateDataJob::class)->count() + 
+        $this->assertGreaterThanOrEqual(3, Queue::pushed(DetectFileTypeJob::class)->count() +
+                                               Queue::pushed(ValidateDataJob::class)->count() +
                                                Queue::pushed(CommitImportJob::class)->count());
     }
 
     /**
      * Test that jobs are queued with proper delays for performance
-     * 
-     * @test  
+     *
+     * @test
      */
     public function jobs_are_queued_with_appropriate_delays()
     {
@@ -306,7 +308,7 @@ class MigrationJobDispatchTest extends TestCase
             ->withHeaders(['company' => $this->company->id])
             ->postJson('/api/v1/imports', [
                 'file' => $file,
-                'type' => 'customers'
+                'type' => 'customers',
             ]);
 
         // Verify DetectFileTypeJob has appropriate delay (2 seconds)
@@ -318,7 +320,7 @@ class MigrationJobDispatchTest extends TestCase
 
     /**
      * Test that migration progress can be tracked in real-time
-     * 
+     *
      * @test
      */
     public function migration_progress_can_be_tracked()
@@ -332,7 +334,7 @@ class MigrationJobDispatchTest extends TestCase
             'total_records' => 100,
             'processed_records' => 60,
             'successful_records' => 55,
-            'failed_records' => 5
+            'failed_records' => 5,
         ]);
 
         // Get progress
@@ -343,7 +345,7 @@ class MigrationJobDispatchTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'import_job_id',
-            'status', 
+            'status',
             'progress_percentage',
             'total_records',
             'processed_records',
@@ -353,7 +355,7 @@ class MigrationJobDispatchTest extends TestCase
             'is_in_progress',
             'can_retry',
             'recent_logs',
-            'last_updated'
+            'last_updated',
         ]);
 
         // Verify progress calculation
@@ -363,7 +365,7 @@ class MigrationJobDispatchTest extends TestCase
 
     /**
      * Test queue configuration and job routing
-     * 
+     *
      * @test
      */
     public function jobs_are_routed_to_correct_migration_queue()
@@ -374,7 +376,7 @@ class MigrationJobDispatchTest extends TestCase
         $importJob = ImportJob::factory()->create([
             'company_id' => $this->company->id,
             'creator_id' => $this->user->id,
-            'status' => ImportJob::STATUS_PENDING
+            'status' => ImportJob::STATUS_PENDING,
         ]);
 
         // Dispatch job directly to verify queue routing
@@ -382,9 +384,8 @@ class MigrationJobDispatchTest extends TestCase
 
         // Verify job goes to migration queue specifically
         Queue::assertPushedOn('migration', DetectFileTypeJob::class);
-        
+
         // Verify job is not on default queue
         Queue::assertNotPushedOn('default', DetectFileTypeJob::class);
     }
 }
-

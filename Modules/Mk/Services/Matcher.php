@@ -2,23 +2,24 @@
 
 namespace Modules\Mk\Services;
 
-use Illuminate\Support\Facades\Log;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\BankAccount;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Invoice-Transaction Matcher Service
- * 
+ *
  * Automatically matches bank transactions with invoices based on amount, date, and reference
  * Updates invoice status to PAID when match is found and confirmed
  */
 class Matcher
 {
     protected $companyId;
+
     protected $matchingWindow; // days to look for matching transactions
+
     protected $amountTolerance; // percentage tolerance for amount matching
 
     public function __construct(int $companyId, int $matchingWindow = 7, float $amountTolerance = 0.01)
@@ -36,31 +37,31 @@ class Matcher
         Log::info('Starting transaction matching process', [
             'company_id' => $this->companyId,
             'matching_window' => $this->matchingWindow,
-            'amount_tolerance' => $this->amountTolerance
+            'amount_tolerance' => $this->amountTolerance,
         ]);
 
         $unmatchedTransactions = $this->getUnmatchedTransactions();
         $unpaidInvoices = $this->getUnpaidInvoices();
-        
+
         $matches = [];
         $totalMatched = 0;
 
         foreach ($unmatchedTransactions as $transaction) {
             $matchedInvoice = $this->findMatchingInvoice($transaction, $unpaidInvoices);
-            
+
             if ($matchedInvoice) {
                 $success = $this->createPaymentRecord($transaction, $matchedInvoice);
-                
+
                 if ($success) {
                     $matches[] = [
                         'transaction_id' => $transaction->id,
                         'invoice_id' => $matchedInvoice->id,
                         'amount' => $transaction->amount,
-                        'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice)
+                        'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
                     ];
-                    
+
                     $totalMatched++;
-                    
+
                     // Remove matched invoice from pool to avoid duplicate matching
                     $unpaidInvoices = $unpaidInvoices->reject(function ($invoice) use ($matchedInvoice) {
                         return $invoice->id === $matchedInvoice->id;
@@ -72,7 +73,7 @@ class Matcher
         Log::info('Transaction matching completed', [
             'company_id' => $this->companyId,
             'total_matched' => $totalMatched,
-            'matches' => $matches
+            'matches' => $matches,
         ]);
 
         return $matches;
@@ -88,13 +89,13 @@ class Matcher
 
         if ($matchedInvoice) {
             $success = $this->createPaymentRecord($transaction, $matchedInvoice);
-            
+
             if ($success) {
                 return [
                     'transaction_id' => $transaction->id,
                     'invoice_id' => $matchedInvoice->id,
                     'amount' => $transaction->amount,
-                    'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice)
+                    'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
                 ];
             }
         }
@@ -138,7 +139,7 @@ class Matcher
 
         foreach ($invoices as $invoice) {
             $score = $this->calculateMatchScore($transaction, $invoice);
-            
+
             if ($score > $bestScore && $score >= 0.7) { // Minimum 70% confidence
                 $bestScore = $score;
                 $bestMatch = $invoice;
@@ -169,8 +170,8 @@ class Matcher
      * - Reference/invoice number in description: +0.3
      * - Customer IBAN match: +0.1
      *
-     * @param object $bankTxn Bank transaction object
-     * @param Invoice $invoice Invoice model instance
+     * @param  object  $bankTxn  Bank transaction object
+     * @param  Invoice  $invoice  Invoice model instance
      * @return float Score from 0.0 to 1.0
      */
     public function calculateConfidenceScore($bankTxn, Invoice $invoice): float
@@ -275,10 +276,12 @@ class Matcher
      */
     protected function calculateAmountScore(float $transactionAmount, float $invoiceAmount): float
     {
-        if ($invoiceAmount == 0) return 0;
-        
+        if ($invoiceAmount == 0) {
+            return 0;
+        }
+
         $difference = abs($transactionAmount - $invoiceAmount) / $invoiceAmount;
-        
+
         if ($difference <= $this->amountTolerance) {
             return 1.0; // Perfect match
         } elseif ($difference <= 0.05) {
@@ -286,7 +289,7 @@ class Matcher
         } elseif ($difference <= 0.1) {
             return 0.5; // Moderately close
         }
-        
+
         return 0; // Too different
     }
 
@@ -297,9 +300,9 @@ class Matcher
     {
         $transactionCarbon = Carbon::parse($transactionDate);
         $dueDateCarbon = Carbon::parse($invoiceDueDate);
-        
+
         $daysDifference = abs($transactionCarbon->diffInDays($dueDateCarbon));
-        
+
         if ($daysDifference <= 1) {
             return 1.0; // Same day or next day
         } elseif ($daysDifference <= 3) {
@@ -309,7 +312,7 @@ class Matcher
         } elseif ($daysDifference <= 14) {
             return 0.3; // Within two weeks
         }
-        
+
         return 0.1; // More than two weeks
     }
 
@@ -321,34 +324,34 @@ class Matcher
         $description = strtolower($transaction->description ?? '');
         $remittanceInfo = strtolower($transaction->remittance_info ?? '');
         $invoiceNumber = strtolower($invoice->invoice_number);
-        
+
         // Check if invoice number appears in transaction description or remittance
-        if (strpos($description, $invoiceNumber) !== false || 
+        if (strpos($description, $invoiceNumber) !== false ||
             strpos($remittanceInfo, $invoiceNumber) !== false) {
             return 1.0; // Perfect reference match
         }
-        
+
         // Check for partial matches (last 4 digits, etc.)
         $invoiceDigits = preg_replace('/[^0-9]/', '', $invoiceNumber);
         if (strlen($invoiceDigits) >= 4) {
             $lastFourDigits = substr($invoiceDigits, -4);
-            if (strpos($description, $lastFourDigits) !== false || 
+            if (strpos($description, $lastFourDigits) !== false ||
                 strpos($remittanceInfo, $lastFourDigits) !== false) {
                 return 0.7; // Partial reference match
             }
         }
-        
+
         // Check customer name matching
         if ($invoice->customer) {
             $customerName = strtolower($invoice->customer->name);
             $transactionCreditor = strtolower($transaction->creditor_name ?? '');
-            
-            if (strpos($transactionCreditor, $customerName) !== false || 
+
+            if (strpos($transactionCreditor, $customerName) !== false ||
                 strpos($customerName, $transactionCreditor) !== false) {
                 return 0.5; // Customer name match
             }
         }
-        
+
         return 0; // No reference match
     }
 
@@ -370,7 +373,7 @@ class Matcher
                 'payment_date' => Carbon::parse($transaction->transaction_date)->format('Y-m-d'),
                 'payment_number' => $this->generatePaymentNumber(),
                 'payment_method' => 'bank_transfer',
-                'notes' => 'Auto-matched from bank transaction: ' . $transaction->external_reference,
+                'notes' => 'Auto-matched from bank transaction: '.$transaction->external_reference,
                 'reference' => $transaction->external_reference,
             ]);
 
@@ -397,18 +400,18 @@ class Matcher
                 'invoice_id' => $invoice->id,
                 'payment_id' => $payment->id,
                 'transaction_id' => $transaction->id,
-                'amount' => $transaction->amount
+                'amount' => $transaction->amount,
             ]);
 
             return true;
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Failed to create payment from transaction match', [
                 'invoice_id' => $invoice->id,
                 'transaction_id' => $transaction->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return false;
@@ -431,9 +434,9 @@ class Matcher
         $prefix = 'PAY-';
         $year = date('Y');
         $month = date('m');
-        
+
         $lastPayment = Payment::where('company_id', $this->companyId)
-            ->where('payment_number', 'like', $prefix . $year . $month . '%')
+            ->where('payment_number', 'like', $prefix.$year.$month.'%')
             ->orderBy('payment_number', 'desc')
             ->first();
 
@@ -444,7 +447,7 @@ class Matcher
             $newNumber = 1;
         }
 
-        return $prefix . $year . $month . '-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        return $prefix.$year.$month.'-'.str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -469,7 +472,7 @@ class Matcher
             'total_transactions' => $totalTransactions,
             'matched_transactions' => $matchedTransactions,
             'unmatched_transactions' => $totalTransactions - $matchedTransactions,
-            'match_rate' => round($matchRate, 1)
+            'match_rate' => round($matchRate, 1),
         ];
     }
 }

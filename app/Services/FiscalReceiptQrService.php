@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -19,7 +19,6 @@ use RuntimeException;
  * This service attempts barcode detection but will fail on Macedonian fiscal receipts.
  * The OCR parser (invoice2data-service) is the recommended and working solution.
  */
-
 class FiscalReceiptQrService
 {
     /**
@@ -178,7 +177,7 @@ class FiscalReceiptQrService
         // This uses the Java ZXing library which has better DataMatrix support
         // than PHP libraries, with Reed-Solomon error correction.
         try {
-            $dataMatrixUrl = config('services.invoice2data.url') . '/scan-datamatrix';
+            $dataMatrixUrl = config('services.invoice2data.url').'/scan-datamatrix';
 
             Log::info('FiscalReceiptQrService::decodeImagePath - Calling DataMatrix API', [
                 'url' => $dataMatrixUrl,
@@ -202,6 +201,7 @@ class FiscalReceiptQrService
                     'format' => $data['format'] ?? null,
                     'data_length' => $data['length'] ?? null,
                 ]);
+
                 return $data['data'] ?? null;
             }
 
@@ -220,7 +220,7 @@ class FiscalReceiptQrService
 
     protected function convertPdfToPng(string $pdfPath): string
     {
-        $imagick = new \Imagick();
+        $imagick = new \Imagick;
         $imagick->setResolution(300, 300);
         $imagick->readImage($pdfPath.'[0]');
         $imagick->setImageFormat('png');
@@ -243,7 +243,7 @@ class FiscalReceiptQrService
         // Prefer Imagick for better quality and memory handling
         if (class_exists(\Imagick::class)) {
             try {
-                $imagick = new \Imagick();
+                $imagick = new \Imagick;
                 $imagick->readImage($imagePath);
 
                 $width = $imagick->getImageWidth();
@@ -328,7 +328,7 @@ class FiscalReceiptQrService
         // when Imagick is not installed.
         if (class_exists(\Imagick::class)) {
             try {
-                $imagick = new \Imagick();
+                $imagick = new \Imagick;
                 if ($extension === 'pdf') {
                     $imagick->setResolution(300, 300);
                     $imagick->readImage($path.'[0]');

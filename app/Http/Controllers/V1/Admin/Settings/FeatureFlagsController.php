@@ -73,7 +73,6 @@ class FeatureFlagsController extends Controller
     /**
      * Get all feature flags with their current status.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -83,13 +82,13 @@ class FeatureFlagsController extends Controller
         $flags = [];
 
         foreach (self::FEATURE_FLAGS as $flag => $metadata) {
-            $dbKey = 'feature_flag.' . $metadata['key'];
+            $dbKey = 'feature_flag.'.$metadata['key'];
             $dbValue = Setting::getSetting($dbKey);
 
             // If DB value exists, use it; otherwise fall back to config
             $enabled = $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
-                : config('features.' . $metadata['key'] . '.enabled', false);
+                : config('features.'.$metadata['key'].'.enabled', false);
 
             $flags[] = [
                 'flag' => $flag,
@@ -110,8 +109,6 @@ class FeatureFlagsController extends Controller
     /**
      * Toggle a specific feature flag.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $flag
      * @return \Illuminate\Http\JsonResponse
      */
     public function toggle(Request $request, string $flag)
@@ -119,7 +116,7 @@ class FeatureFlagsController extends Controller
         $this->authorize('manage settings');
 
         // Validate that the flag exists
-        if (!isset(self::FEATURE_FLAGS[$flag])) {
+        if (! isset(self::FEATURE_FLAGS[$flag])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid feature flag',
@@ -127,16 +124,16 @@ class FeatureFlagsController extends Controller
         }
 
         $metadata = self::FEATURE_FLAGS[$flag];
-        $dbKey = 'feature_flag.' . $metadata['key'];
+        $dbKey = 'feature_flag.'.$metadata['key'];
 
         // Get current value
         $currentValue = Setting::getSetting($dbKey);
         $currentEnabled = $currentValue !== null
             ? filter_var($currentValue, FILTER_VALIDATE_BOOLEAN)
-            : config('features.' . $metadata['key'] . '.enabled', false);
+            : config('features.'.$metadata['key'].'.enabled', false);
 
         // Toggle the value
-        $newValue = !$currentEnabled;
+        $newValue = ! $currentEnabled;
 
         // Save to database
         Setting::setSetting($dbKey, $newValue ? '1' : '0');

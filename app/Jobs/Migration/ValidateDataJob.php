@@ -2,21 +2,22 @@
 
 namespace App\Jobs\Migration;
 
+use App\Models\Customer;
+use App\Models\Expense;
 use App\Models\ImportJob;
 use App\Models\ImportLog;
 use App\Models\ImportTempCustomer;
+use App\Models\ImportTempExpense;
 use App\Models\ImportTempInvoice;
 use App\Models\ImportTempItem;
 use App\Models\ImportTempPayment;
-use App\Models\ImportTempExpense;
-use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Payment;
-use App\Models\Expense;
+use App\Services\Migration\Transformers\CurrencyTransformer;
 use App\Services\Migration\Transformers\DateTransformer;
 use App\Services\Migration\Transformers\DecimalTransformer;
-use App\Services\Migration\Transformers\CurrencyTransformer;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -24,13 +25,11 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Spatie\QueueableActions\QueueableAction;
-use Carbon\Carbon;
 
 /**
  * ValidateDataJob - Validate mapped data before commit
- * 
+ *
  * This job validates mapped data against business rules and constraints:
  * - Field validation (required, format, length constraints)
  * - Business rule validation (dates, amounts, references)
@@ -41,10 +40,10 @@ use Carbon\Carbon;
  */
 class ValidateDataJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, QueueableAction;
+    use Dispatchable, InteractsWithQueue, Queueable, QueueableAction, SerializesModels;
 
     public ImportJob $importJob;
-    
+
     /**
      * Job timeout in seconds (20 minutes)
      */
@@ -203,11 +202,11 @@ class ValidateDataJob implements ShouldQueue
     protected function validateDataInBatches(array $validationRules): void
     {
         $tempModel = $this->getTempModelClass();
-        
+
         $tempModel::where('import_job_id', $this->importJob->id)
             ->chunk($this->batchSize, function ($records) use ($validationRules) {
                 $this->validateBatch($records, $validationRules);
-                
+
                 // Update progress
                 $this->validationStats['total_records'] += count($records);
                 $this->importJob->updateProgress($this->validationStats['total_records']);
@@ -232,39 +231,42 @@ class ValidateDataJob implements ShouldQueue
         try {
             // Get mapped data or fall back to cleaned data
             $data = json_decode($record->mapped_data, true) ?: json_decode($record->cleaned_data, true);
-            
-            if (!is_array($data)) {
+
+            if (! is_array($data)) {
                 $this->markRecordInvalid($record, ['Invalid data format']);
+
                 return;
             }
 
             // Apply data transformations
             $transformedData = $this->applyDataTransformations($data);
-            
+
             // Validate against rules
             $validator = Validator::make($transformedData, $validationRules);
-            
+
             if ($validator->fails()) {
                 $this->markRecordInvalid($record, $validator->errors()->all());
+
                 return;
             }
 
             // Business rule validation
             $businessValidationErrors = $this->validateBusinessRules($transformedData);
-            if (!empty($businessValidationErrors)) {
+            if (! empty($businessValidationErrors)) {
                 $this->markRecordInvalid($record, $businessValidationErrors);
+
                 return;
             }
 
             // Duplicate detection
             $duplicateInfo = $this->checkForDuplicates($transformedData);
-            
+
             // Mark record as valid
             $this->markRecordValid($record, $transformedData, $duplicateInfo);
 
         } catch (\Exception $e) {
             $this->markRecordInvalid($record, ["Validation error: {$e->getMessage()}"]);
-            
+
             Log::warning('Record validation failed', [
                 'import_job_id' => $this->importJob->id,
                 'record_id' => $record->id,
@@ -284,7 +286,7 @@ class ValidateDataJob implements ShouldQueue
         // Apply date transformations
         $dateFields = $this->getDateFields();
         foreach ($dateFields as $field) {
-            if (isset($transformedData[$field]) && !empty($transformedData[$field])) {
+            if (isset($transformedData[$field]) && ! empty($transformedData[$field])) {
                 try {
                     $transformedData[$field] = DateTransformer::transform($transformedData[$field]);
                 } catch (\Exception $e) {
@@ -297,7 +299,7 @@ class ValidateDataJob implements ShouldQueue
         // Apply decimal transformations
         $decimalFields = $this->getDecimalFields();
         foreach ($decimalFields as $field) {
-            if (isset($transformedData[$field]) && !empty($transformedData[$field])) {
+            if (isset($transformedData[$field]) && ! empty($transformedData[$field])) {
                 try {
                     $transformedData[$field] = DecimalTransformer::transform($transformedData[$field]);
                 } catch (\Exception $e) {
@@ -309,7 +311,7 @@ class ValidateDataJob implements ShouldQueue
         // Apply currency transformations if needed
         $currencyFields = $this->getCurrencyFields();
         foreach ($currencyFields as $field) {
-            if (isset($transformedData[$field]) && !empty($transformedData[$field])) {
+            if (isset($transformedData[$field]) && ! empty($transformedData[$field])) {
                 try {
                     $transformedData[$field] = CurrencyTransformer::transform($transformedData[$field], 'MKD', 'EUR');
                 } catch (\Exception $e) {
@@ -332,19 +334,19 @@ class ValidateDataJob implements ShouldQueue
             case ImportJob::TYPE_CUSTOMERS:
                 $errors = array_merge($errors, $this->validateCustomerBusinessRules($data));
                 break;
-                
+
             case ImportJob::TYPE_INVOICES:
                 $errors = array_merge($errors, $this->validateInvoiceBusinessRules($data));
                 break;
-                
+
             case ImportJob::TYPE_ITEMS:
                 $errors = array_merge($errors, $this->validateItemBusinessRules($data));
                 break;
-                
+
             case ImportJob::TYPE_PAYMENTS:
                 $errors = array_merge($errors, $this->validatePaymentBusinessRules($data));
                 break;
-                
+
             case ImportJob::TYPE_EXPENSES:
                 $errors = array_merge($errors, $this->validateExpenseBusinessRules($data));
                 break;
@@ -361,15 +363,15 @@ class ValidateDataJob implements ShouldQueue
         $errors = [];
 
         // Validate Macedonian tax ID format (EMBS)
-        if (!empty($data['tax_id'])) {
-            if (!$this->isValidMacedonianTaxId($data['tax_id'])) {
+        if (! empty($data['tax_id'])) {
+            if (! $this->isValidMacedonianTaxId($data['tax_id'])) {
                 $errors[] = 'Invalid Macedonian tax ID (EMBS) format';
             }
         }
 
         // Validate phone number format
-        if (!empty($data['phone'])) {
-            if (!$this->isValidMacedonianPhone($data['phone'])) {
+        if (! empty($data['phone'])) {
+            if (! $this->isValidMacedonianPhone($data['phone'])) {
                 $errors[] = 'Invalid Macedonian phone number format';
             }
         }
@@ -385,7 +387,7 @@ class ValidateDataJob implements ShouldQueue
         $errors = [];
 
         // Validate invoice date is not in future
-        if (!empty($data['invoice_date'])) {
+        if (! empty($data['invoice_date'])) {
             $invoiceDate = Carbon::parse($data['invoice_date']);
             if ($invoiceDate->isFuture()) {
                 $errors[] = 'Invoice date cannot be in the future';
@@ -393,7 +395,7 @@ class ValidateDataJob implements ShouldQueue
         }
 
         // Validate due date is after invoice date
-        if (!empty($data['due_date']) && !empty($data['invoice_date'])) {
+        if (! empty($data['due_date']) && ! empty($data['invoice_date'])) {
             $invoiceDate = Carbon::parse($data['invoice_date']);
             $dueDate = Carbon::parse($data['due_date']);
             if ($dueDate->lt($invoiceDate)) {
@@ -439,7 +441,7 @@ class ValidateDataJob implements ShouldQueue
         $errors = [];
 
         // Validate payment date is not in future
-        if (!empty($data['payment_date'])) {
+        if (! empty($data['payment_date'])) {
             $paymentDate = Carbon::parse($data['payment_date']);
             if ($paymentDate->isFuture()) {
                 $errors[] = 'Payment date cannot be in the future';
@@ -457,7 +459,7 @@ class ValidateDataJob implements ShouldQueue
         $errors = [];
 
         // Validate expense date is not in future
-        if (!empty($data['expense_date'])) {
+        if (! empty($data['expense_date'])) {
             $expenseDate = Carbon::parse($data['expense_date']);
             if ($expenseDate->isFuture()) {
                 $errors[] = 'Expense date cannot be in the future';
@@ -492,7 +494,7 @@ class ValidateDataJob implements ShouldQueue
         $query = Customer::where('company_id', $this->importJob->company_id);
 
         // Check by email first
-        if (!empty($data['email'])) {
+        if (! empty($data['email'])) {
             $existing = $query->where('email', $data['email'])->first();
             if ($existing) {
                 return [
@@ -505,7 +507,7 @@ class ValidateDataJob implements ShouldQueue
         }
 
         // Check by tax ID
-        if (!empty($data['tax_id'])) {
+        if (! empty($data['tax_id'])) {
             $existing = $query->where('tax_id', $data['tax_id'])->first();
             if ($existing) {
                 return [
@@ -518,8 +520,8 @@ class ValidateDataJob implements ShouldQueue
         }
 
         // Check by name (fuzzy match)
-        if (!empty($data['name'])) {
-            $existing = $query->where('name', 'LIKE', '%' . $data['name'] . '%')->first();
+        if (! empty($data['name'])) {
+            $existing = $query->where('name', 'LIKE', '%'.$data['name'].'%')->first();
             if ($existing) {
                 return [
                     'exists' => true,
@@ -570,7 +572,7 @@ class ValidateDataJob implements ShouldQueue
         $query = Item::where('company_id', $this->importJob->company_id);
 
         // Check by SKU first
-        if (!empty($data['sku'])) {
+        if (! empty($data['sku'])) {
             $existing = $query->where('sku', $data['sku'])->first();
             if ($existing) {
                 return [
@@ -609,10 +611,10 @@ class ValidateDataJob implements ShouldQueue
         ]);
 
         $this->validationStats['valid_records']++;
-        
+
         if ($duplicateInfo && $duplicateInfo['exists']) {
             $this->validationStats['duplicate_records']++;
-            
+
             ImportLog::logDuplicateDetected(
                 $this->importJob,
                 $this->importJob->type,
@@ -716,7 +718,7 @@ class ValidateDataJob implements ShouldQueue
     {
         // Remove any non-numeric characters
         $cleanTaxId = preg_replace('/[^0-9]/', '', $taxId);
-        
+
         // EMBS should be 13 digits
         return strlen($cleanTaxId) === 13 && is_numeric($cleanTaxId);
     }
@@ -728,7 +730,7 @@ class ValidateDataJob implements ShouldQueue
     {
         // Remove any non-numeric characters except +
         $cleanPhone = preg_replace('/[^+0-9]/', '', $phone);
-        
+
         // Macedonian phone patterns
         $patterns = [
             '/^\+38970\d{6}$/',  // Mobile +38970XXXXXX
@@ -760,7 +762,7 @@ class ValidateDataJob implements ShouldQueue
             'log_type' => $this->validationStats['valid_records'] > 0 ? ImportLog::LOG_VALIDATION_PASSED : ImportLog::LOG_VALIDATION_FAILED,
             'severity' => $this->validationStats['invalid_records'] > 0 ? ImportLog::SEVERITY_WARNING : ImportLog::SEVERITY_INFO,
             'message' => "Validation completed: {$this->validationStats['valid_records']} valid, {$this->validationStats['invalid_records']} invalid",
-            'detailed_message' => "Data validation completed in " . round($processingTime, 2) . " seconds. {$this->validationStats['duplicate_records']} duplicates detected.",
+            'detailed_message' => 'Data validation completed in '.round($processingTime, 2)." seconds. {$this->validationStats['duplicate_records']} duplicates detected.",
             'process_stage' => 'validating',
             'processing_time' => $processingTime,
             'records_processed' => $this->validationStats['total_records'],
@@ -797,7 +799,7 @@ class ValidateDataJob implements ShouldQueue
 
         // Mark import job as failed
         $this->importJob->markAsFailed(
-            'Data validation failed: ' . $exception->getMessage(),
+            'Data validation failed: '.$exception->getMessage(),
             [
                 'error' => $exception->getMessage(),
                 'file' => $exception->getFile(),

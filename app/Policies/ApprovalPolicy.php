@@ -11,8 +11,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
  *
  * Manages permissions for document approval requests.
  * Requires specific abilities for requesting and approving documents.
- *
- * @package App\Policies
  */
 class ApprovalPolicy
 {
@@ -20,9 +18,6 @@ class ApprovalPolicy
 
     /**
      * Determine whether the user can view any approval requests.
-     *
-     * @param User $user
-     * @return bool
      */
     public function viewAny(User $user): bool
     {
@@ -42,10 +37,6 @@ class ApprovalPolicy
 
     /**
      * Determine whether the user can view the approval request.
-     *
-     * @param User $user
-     * @param ApprovalRequest $approval
-     * @return bool
      */
     public function view(User $user, ApprovalRequest $approval): bool
     {
@@ -74,9 +65,6 @@ class ApprovalPolicy
     /**
      * Determine whether the user can request approval for a document.
      * Requires create permission for the document type.
-     *
-     * @param User $user
-     * @return bool
      */
     public function requestApproval(User $user): bool
     {
@@ -100,10 +88,6 @@ class ApprovalPolicy
     /**
      * Determine whether the user can approve a document.
      * Requires approve-document ability.
-     *
-     * @param User $user
-     * @param ApprovalRequest|null $approval
-     * @return bool
      */
     public function approve(User $user, ?ApprovalRequest $approval = null): bool
     {
@@ -134,10 +118,6 @@ class ApprovalPolicy
     /**
      * Determine whether the user can reject a document.
      * Requires approve-document ability (same as approve).
-     *
-     * @param User $user
-     * @param ApprovalRequest|null $approval
-     * @return bool
      */
     public function reject(User $user, ?ApprovalRequest $approval = null): bool
     {
@@ -148,10 +128,6 @@ class ApprovalPolicy
     /**
      * Determine whether the user can delete the approval request.
      * Only the requester or owner can delete pending requests.
-     *
-     * @param User $user
-     * @param ApprovalRequest $approval
-     * @return bool
      */
     public function delete(User $user, ApprovalRequest $approval): bool
     {

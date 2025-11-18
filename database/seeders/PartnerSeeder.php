@@ -21,8 +21,8 @@ class PartnerSeeder extends Seeder
         // Check both the 'role' column and Bouncer assigned_roles
         $adminUsers = User::where(function ($query) {
             $query->where('role', 'super admin')
-                  ->orWhere('role', 'admin')
-                  ->orWhere('role', 'accountant');
+                ->orWhere('role', 'admin')
+                ->orWhere('role', 'accountant');
         })->get();
 
         // CLAUDE-CHECKPOINT: Retrieved users with admin/accountant roles from users table
@@ -37,6 +37,7 @@ class PartnerSeeder extends Seeder
             if ($existingPartner) {
                 $this->command->warn("Partner already exists for user {$user->email} (ID: {$user->id})");
                 $skippedCount++;
+
                 continue;
             }
 
@@ -73,7 +74,7 @@ class PartnerSeeder extends Seeder
         // CLAUDE-CHECKPOINT: Completed partner creation loop
 
         $this->command->info('Partner seeding completed!');
-        $this->command->info("Total users processed: " . $adminUsers->count());
+        $this->command->info('Total users processed: '.$adminUsers->count());
         $this->command->info("Partners created: {$createdCount}");
         $this->command->info("Partners skipped (already exist): {$skippedCount}");
     }

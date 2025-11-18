@@ -88,7 +88,7 @@ class ExportController extends Controller
         }
 
         // Check if file exists
-        if (!Storage::exists($exportJob->file_path)) {
+        if (! Storage::exists($exportJob->file_path)) {
             abort(404, 'Export file not found');
         }
 

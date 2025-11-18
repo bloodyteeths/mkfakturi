@@ -55,7 +55,7 @@ return new class extends Migration
             $table->index(['approvable_type', 'approvable_id']);
             $table->index('requested_by');
             $table->index('approved_by');
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
     }
 
     /**

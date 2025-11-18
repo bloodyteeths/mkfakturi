@@ -26,7 +26,7 @@ class LoginController extends Controller
             'success' => true,
             'user' => $user,
             'company' => $user->companies()->first(),
-            'token' => 'Bearer ' . $token,
+            'token' => 'Bearer '.$token,
         ]);
     }
 }

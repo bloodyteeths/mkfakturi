@@ -20,6 +20,7 @@ trait CachesPermissions
     protected function getCachedPermissions(int $companyId): ?array
     {
         $key = $this->getPermissionCacheKey($companyId);
+
         return request()->attributes->get($key);
     }
 
@@ -57,8 +58,9 @@ trait CachesPermissions
             ->where('companies.id', $companyId)
             ->first();
 
-        if (!$link) {
+        if (! $link) {
             $this->setCachedPermissions($companyId, []);
+
             return [];
         }
 

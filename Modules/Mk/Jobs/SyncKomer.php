@@ -2,21 +2,20 @@
 
 namespace Modules\Mk\Jobs;
 
+use App\Models\BankAccount;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Modules\Mk\Services\KomerGateway;
 use Modules\Mk\Http\BankAuthController;
-use OakLabs\Psd2\Authorization;
-use App\Models\BankAccount;
-use Carbon\Carbon;
+use Modules\Mk\Services\KomerGateway;
 
 /**
  * Sync Komercijalna Bank Transactions Job
- * 
+ *
  * Fetches transactions from Komercijalna Banka via PSD2 API and stores them in database
  * Respects 15 req/min rate limit as noted in roadmap
  */
@@ -25,8 +24,11 @@ class SyncKomer implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $companyId;
+
     protected $bankAccountId;
+
     protected $daysBack;
+
     protected $maxTransactions;
 
     /**
@@ -48,32 +50,33 @@ class SyncKomer implements ShouldQueue
         Log::info('Starting Komercijalna Bank sync', [
             'company_id' => $this->companyId,
             'bank_account_id' => $this->bankAccountId,
-            'days_back' => $this->daysBack
+            'days_back' => $this->daysBack,
         ]);
 
         try {
             // Get stored bank tokens
-            $authController = new BankAuthController();
+            $authController = new BankAuthController;
             $tokens = $authController->getStoredTokens('komercijalna', $this->companyId);
 
-            if (!$tokens) {
-                throw new \Exception('No Komercijalna bank connection found for company ' . $this->companyId);
+            if (! $tokens) {
+                throw new \Exception('No Komercijalna bank connection found for company '.$this->companyId);
             }
 
             // Check if token is expired
             if ($tokens['expires_at'] && Carbon::parse($tokens['expires_at'])->isPast()) {
-                throw new \Exception('Komercijalna bank token has expired for company ' . $this->companyId);
+                throw new \Exception('Komercijalna bank token has expired for company '.$this->companyId);
             }
 
             // Initialize Komercijalna gateway
-            $gateway = new KomerGateway();
+            $gateway = new KomerGateway;
             $gateway->setAccessToken($tokens['access_token']);
 
             // Get account details first
             $accounts = $gateway->getAccountDetails();
-            
+
             if (empty($accounts)) {
                 Log::warning('No accounts found for Komercijalna sync', ['company_id' => $this->companyId]);
+
                 return;
             }
 
@@ -85,8 +88,8 @@ class SyncKomer implements ShouldQueue
                     $bankAccount = BankAccount::where('company_id', $this->companyId)
                         ->where('id', $this->bankAccountId)
                         ->first();
-                    
-                    if (!$bankAccount || $bankAccount->account_number !== $account->getAccountNumber()) {
+
+                    if (! $bankAccount || $bankAccount->account_number !== $account->getAccountNumber()) {
                         continue;
                     }
                 }
@@ -103,14 +106,14 @@ class SyncKomer implements ShouldQueue
 
             Log::info('Komercijalna Bank sync completed', [
                 'company_id' => $this->companyId,
-                'total_synced' => $totalSynced
+                'total_synced' => $totalSynced,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Komercijalna Bank sync failed', [
                 'company_id' => $this->companyId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             throw $e;
@@ -154,7 +157,7 @@ class SyncKomer implements ShouldQueue
 
             Log::info('Account transactions synced', [
                 'account_id' => $account->getId(),
-                'synced_count' => $syncedCount
+                'synced_count' => $syncedCount,
             ]);
 
             return $syncedCount;
@@ -162,7 +165,7 @@ class SyncKomer implements ShouldQueue
         } catch (\Exception $e) {
             Log::error('Failed to sync account transactions', [
                 'account_id' => $account->getId(),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -178,7 +181,7 @@ class SyncKomer implements ShouldQueue
             ->where('account_number', $account->getAccountNumber())
             ->first();
 
-        if (!$bankAccount) {
+        if (! $bankAccount) {
             $bankAccount = BankAccount::create([
                 'company_id' => $this->companyId,
                 'currency_id' => $this->getCurrencyId($account->getCurrency()),
@@ -196,7 +199,7 @@ class SyncKomer implements ShouldQueue
 
             Log::info('Created new bank account', [
                 'bank_account_id' => $bankAccount->id,
-                'account_number' => $account->getAccountNumber()
+                'account_number' => $account->getAccountNumber(),
             ]);
         }
 
@@ -270,10 +273,9 @@ class SyncKomer implements ShouldQueue
         Log::error('Komercijalna sync job failed permanently', [
             'company_id' => $this->companyId,
             'error' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString()
+            'trace' => $exception->getTraceAsString(),
         ]);
 
         // Could send notification to company admin here
     }
 }
-

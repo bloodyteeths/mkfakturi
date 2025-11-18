@@ -3,18 +3,17 @@
 namespace Modules\Mk\Partner\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\AffiliateEvent;
+use App\Models\Partner;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class PartnerDashboardController extends Controller
 {
     /**
      * Get partner dashboard data including KPIs, earnings history, and recent commissions
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -56,7 +55,7 @@ class PartnerDashboardController extends Controller
 
             $earningsHistory[] = [
                 'month' => $month->format('M Y'),
-                'amount' => number_format($amount, 2, '.', '')
+                'amount' => number_format($amount, 2, '.', ''),
             ];
         }
 
@@ -95,7 +94,6 @@ class PartnerDashboardController extends Controller
      * Get pending earnings (current month)
      * AC-01-50: Dashboard endpoint
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getPendingEarnings(Request $request)
@@ -128,7 +126,6 @@ class PartnerDashboardController extends Controller
      * Get monthly earnings (last 12 months)
      * AC-01-50: Dashboard charts
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getMonthlyEarnings(Request $request)
@@ -163,7 +160,6 @@ class PartnerDashboardController extends Controller
      * Get lifetime earnings
      * AC-01-50: Dashboard KPI
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getLifetimeEarnings(Request $request)
@@ -189,7 +185,6 @@ class PartnerDashboardController extends Controller
      * Get active companies count and details
      * AC-01-50: Referrals overview
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getActiveCompanies(Request $request)
@@ -212,7 +207,6 @@ class PartnerDashboardController extends Controller
      * Get next payout estimate
      * AC-01-50: Payout estimate
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getNextPayoutEstimate(Request $request)
@@ -240,7 +234,6 @@ class PartnerDashboardController extends Controller
      * Get referral list (companies brought by this partner)
      * AC-01-51: Referrals page
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getReferrals(Request $request)
@@ -279,7 +272,6 @@ class PartnerDashboardController extends Controller
      * Get earnings (paginated event history)
      * AC-01-52: Earnings page
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getEarnings(Request $request)
@@ -328,7 +320,6 @@ class PartnerDashboardController extends Controller
      * Get payout history
      * AC-01-53: Payouts page
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getPayouts(Request $request)
@@ -370,7 +361,6 @@ class PartnerDashboardController extends Controller
      * Generate referral link
      * AC-01-54: Referral link generator
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function generateReferralLink(Request $request)
@@ -379,7 +369,7 @@ class PartnerDashboardController extends Controller
         $partner = Partner::where('user_id', $user->id)->firstOrFail();
 
         // Ensure user has a ref_code
-        if (!$user->ref_code) {
+        if (! $user->ref_code) {
             $user->ref_code = \Str::upper(\Str::random(8));
             $user->save();
         }

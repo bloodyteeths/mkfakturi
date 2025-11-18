@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\CustomField;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class CustomFieldPolicy
 {
@@ -21,7 +20,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-custom-field', CustomField::class)) {
             return true;
         }
@@ -39,7 +38,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
@@ -57,7 +56,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-custom-field', CustomField::class)) {
             return true;
         }
@@ -75,7 +74,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
@@ -93,7 +92,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
@@ -111,7 +110,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }
@@ -129,7 +128,7 @@ class CustomFieldPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
             return true;
         }

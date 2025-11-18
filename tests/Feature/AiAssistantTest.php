@@ -2,23 +2,22 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Company;
-use App\Models\User;
 use App\Models\Customer;
-use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use App\Models\Payment;
 use App\Models\Expense;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Invoice;
+use App\Models\Payment;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
 /**
  * AI-TST-01: AI Assistant Endpoints Validation
- * 
+ *
  * Tests AI-powered business insights and risk assessment endpoints:
  * - /api/ai/summary - Business performance summaries
  * - /api/ai/risk - Financial risk assessment
@@ -32,15 +31,19 @@ class AiAssistantTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $company;
+
     protected $customer;
+
     protected $invoices;
+
     protected $expenses;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->setupTestEnvironment();
         $this->createTestData();
     }
@@ -53,7 +56,7 @@ class AiAssistantTest extends TestCase
         Config::set('ai.service_url', 'http://localhost:3001');
         Config::set('ai.enabled', true);
         Config::set('ai.cache_ttl', 300); // 5 minutes cache
-        
+
         // Macedonia-specific AI configuration
         Config::set('ai.locale', 'mk');
         Config::set('ai.currency', 'MKD');
@@ -67,26 +70,26 @@ class AiAssistantTest extends TestCase
         $this->company = Company::factory()->create([
             'name' => 'АИ Тест Компанија ДОО',
             'vat_number' => 'MK4030009501234',
-            'currency' => 'MKD'
+            'currency' => 'MKD',
         ]);
 
         // Create user
         $this->user = User::factory()->create([
             'company_id' => $this->company->id,
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
 
         // Create customers
         $this->customer = Customer::factory()->create([
             'name' => 'Голем Клиент АД',
             'tax_id' => 'MK4030009501235',
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         $smallCustomer = Customer::factory()->create([
             'name' => 'Мал Клиент ДООЕл',
             'tax_id' => 'MK4030009501236',
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         // Create invoices with different patterns for AI analysis
@@ -97,14 +100,14 @@ class AiAssistantTest extends TestCase
             $invoice = Invoice::factory()->create([
                 'company_id' => $this->company->id,
                 'customer_id' => $this->customer->id,
-                'invoice_number' => "АИ-2025-" . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'invoice_number' => 'АИ-2025-'.str_pad($i, 3, '0', STR_PAD_LEFT),
                 'invoice_date' => Carbon::now()->subDays(rand(1, 30)),
                 'due_date' => Carbon::now()->addDays(30),
                 'total' => rand(50000, 150000), // 500-1500 MKD
                 'status' => 'PAID',
-                'paid_status' => rand(50000, 150000)
+                'paid_status' => rand(50000, 150000),
             ]);
-            
+
             $this->invoices->push($invoice);
         }
 
@@ -113,14 +116,14 @@ class AiAssistantTest extends TestCase
             $invoice = Invoice::factory()->create([
                 'company_id' => $this->company->id,
                 'customer_id' => $smallCustomer->id,
-                'invoice_number' => "АИ-2025-" . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'invoice_number' => 'АИ-2025-'.str_pad($i, 3, '0', STR_PAD_LEFT),
                 'invoice_date' => Carbon::now()->subDays(60),
                 'due_date' => Carbon::now()->subDays(30), // Overdue
                 'total' => rand(10000, 30000), // 100-300 MKD
                 'status' => 'SENT',
-                'paid_status' => 0
+                'paid_status' => 0,
             ]);
-            
+
             $this->invoices->push($invoice);
         }
 
@@ -129,26 +132,26 @@ class AiAssistantTest extends TestCase
             $invoice = Invoice::factory()->create([
                 'company_id' => $this->company->id,
                 'customer_id' => rand(0, 1) ? $this->customer->id : $smallCustomer->id,
-                'invoice_number' => "АИ-2025-" . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'invoice_number' => 'АИ-2025-'.str_pad($i, 3, '0', STR_PAD_LEFT),
                 'invoice_date' => Carbon::now()->subDays(rand(1, 15)),
                 'due_date' => Carbon::now()->addDays(rand(15, 45)),
                 'total' => rand(20000, 80000), // 200-800 MKD
                 'status' => rand(0, 1) ? 'PAID' : 'SENT',
-                'paid_status' => rand(0, 1) ? rand(20000, 80000) : 0
+                'paid_status' => rand(0, 1) ? rand(20000, 80000) : 0,
             ]);
-            
+
             $this->invoices->push($invoice);
         }
 
         // Create expenses for cost analysis
         $this->expenses = collect();
-        
+
         $expenseCategories = [
             'Канцелариски материјали',
             'Телефони и интернет',
             'Електрична енергија',
             'Гориво и транспорт',
-            'Маркетинг'
+            'Маркетинг',
         ];
 
         foreach ($expenseCategories as $category) {
@@ -158,9 +161,9 @@ class AiAssistantTest extends TestCase
                     'amount' => rand(5000, 25000), // 50-250 MKD
                     'expense_date' => Carbon::now()->subDays(rand(1, 30)),
                     'category' => $category,
-                    'notes' => "Трошок за {$category} - месец " . Carbon::now()->format('m/Y')
+                    'notes' => "Трошок за {$category} - месец ".Carbon::now()->format('m/Y'),
                 ]);
-                
+
                 $this->expenses->push($expense);
             }
         }
@@ -173,7 +176,7 @@ class AiAssistantTest extends TestCase
                 'amount' => $invoice->total,
                 'payment_date' => $invoice->invoice_date->addDays(rand(1, 15)),
                 'payment_method' => 'bank_transfer',
-                'notes' => 'Плаќање извршено навремено'
+                'notes' => 'Плаќање извршено навремено',
             ]);
         }
     }
@@ -197,20 +200,20 @@ class AiAssistantTest extends TestCase
                     'key_insights' => [
                         'Големиот клиент генерира 60% од приходите',
                         'Просечното време за плаќање е 12 дена',
-                        '3 фактури се задоцнети повеќе од 30 дена'
+                        '3 фактури се задоцнети повеќе од 30 дена',
                     ],
                     'recommendations' => [
                         'Контактирајте ги клиентите со задоцнети плаќања',
                         'Разгледајте попуст за порано плаќање',
-                        'Проширете ја базата на клиенти'
-                    ]
+                        'Проширете ја базата на клиенти',
+                    ],
                 ],
                 'metadata' => [
                     'analysis_date' => Carbon::now()->toISOString(),
                     'data_quality' => 'high',
-                    'confidence_score' => 0.92
-                ]
-            ], 200)
+                    'confidence_score' => 0.92,
+                ],
+            ], 200),
         ]);
 
         // Authenticate user
@@ -220,7 +223,7 @@ class AiAssistantTest extends TestCase
         $response = $this->getJson('/api/ai/summary', [
             'period' => 'last_30_days',
             'language' => 'mk',
-            'include_recommendations' => true
+            'include_recommendations' => true,
         ]);
 
         $response->assertStatus(200);
@@ -233,12 +236,12 @@ class AiAssistantTest extends TestCase
                 'paid_invoices',
                 'overdue_invoices',
                 'key_insights',
-                'recommendations'
+                'recommendations',
             ],
             'metadata' => [
                 'analysis_date',
-                'confidence_score'
-            ]
+                'confidence_score',
+            ],
         ]);
 
         // Verify Macedonia-specific data
@@ -246,7 +249,7 @@ class AiAssistantTest extends TestCase
         $this->assertEquals('MKD', $summary['revenue_currency']);
         $this->assertStringContainsString('Голем Клиент', $summary['top_customer']);
         $this->assertGreaterThan(0, count($summary['key_insights']));
-        
+
         // Verify Macedonian language in insights
         foreach ($summary['key_insights'] as $insight) {
             $this->assertStringContainsString('клиент', strtolower($insight));
@@ -271,39 +274,39 @@ class AiAssistantTest extends TestCase
                             'factor' => 'customer_concentration',
                             'description' => 'Еден клиент претставува 60% од приходите',
                             'impact' => 'high',
-                            'recommendation' => 'Диверзифицирајте ја клиентската база'
+                            'recommendation' => 'Диверзифицирајте ја клиентската база',
                         ],
                         [
                             'factor' => 'overdue_invoices',
                             'description' => '3 фактури се задоцнети повеќе од 30 дена',
                             'impact' => 'medium',
-                            'recommendation' => 'Воспоставете систем за автоматски потсетници'
+                            'recommendation' => 'Воспоставете систем за автоматски потсетници',
                         ],
                         [
                             'factor' => 'payment_delays',
                             'description' => 'Просечно доцнење од 5 дена во последниот месец',
                             'impact' => 'low',
-                            'recommendation' => 'Понудете попуст за порано плаќање'
-                        ]
+                            'recommendation' => 'Понудете попуст за порано плаќање',
+                        ],
                     ],
                     'mitigation_strategies' => [
                         'Воведете кредитни лимити за нови клиенти',
                         'Барајте предплата за големи нарачки',
-                        'Развијте односи со повеќе клиенти'
+                        'Развијте односи со повеќе клиенти',
                     ],
                     'predicted_cash_flow' => [
                         'next_30_days' => 180000,
                         'next_60_days' => 320000,
                         'next_90_days' => 480000,
-                        'currency' => 'MKD'
-                    ]
+                        'currency' => 'MKD',
+                    ],
                 ],
                 'metadata' => [
                     'analysis_timestamp' => Carbon::now()->toISOString(),
                     'model_version' => '2.1',
-                    'confidence_interval' => 0.85
-                ]
-            ], 200)
+                    'confidence_interval' => 0.85,
+                ],
+            ], 200),
         ]);
 
         // Authenticate user
@@ -313,7 +316,7 @@ class AiAssistantTest extends TestCase
         $response = $this->postJson('/api/ai/risk', [
             'analysis_period' => 90,
             'include_predictions' => true,
-            'language' => 'mk'
+            'language' => 'mk',
         ]);
 
         $response->assertStatus(200);
@@ -326,9 +329,9 @@ class AiAssistantTest extends TestCase
                 'overdue_payment_risk',
                 'risk_factors',
                 'mitigation_strategies',
-                'predicted_cash_flow'
+                'predicted_cash_flow',
             ],
-            'metadata'
+            'metadata',
         ]);
 
         // Verify risk assessment data
@@ -336,10 +339,10 @@ class AiAssistantTest extends TestCase
         $this->assertIsFloat($riskData['overall_risk_score']);
         $this->assertContains($riskData['risk_level'], ['low', 'moderate', 'high', 'critical']);
         $this->assertGreaterThan(0, count($riskData['risk_factors']));
-        
+
         // Verify Macedonia currency in predictions
         $this->assertEquals('MKD', $riskData['predicted_cash_flow']['currency']);
-        
+
         // Verify Macedonian language in recommendations
         foreach ($riskData['mitigation_strategies'] as $strategy) {
             $this->assertMatchesRegularExpression('/[А-Яа-я]/u', $strategy);
@@ -354,17 +357,17 @@ class AiAssistantTest extends TestCase
             'localhost:3001/api/analyze' => Http::response([
                 'summary' => [
                     'total_revenue' => 500000,
-                    'revenue_currency' => 'MKD'
-                ]
-            ], 200)->delay(1500) // 1.5 second delay
+                    'revenue_currency' => 'MKD',
+                ],
+            ], 200)->delay(1500), // 1.5 second delay
         ]);
 
         $this->actingAs($this->user);
 
         $startTime = microtime(true);
-        
+
         $response = $this->getJson('/api/ai/summary');
-        
+
         $endTime = microtime(true);
         $responseTime = ($endTime - $startTime) * 1000; // Convert to milliseconds
 
@@ -381,9 +384,9 @@ class AiAssistantTest extends TestCase
             'localhost:3001/api/analyze' => Http::response([
                 'summary' => [
                     'total_revenue' => 500000,
-                    'cache_test' => true
-                ]
-            ], 200)
+                    'cache_test' => true,
+                ],
+            ], 200),
         ]);
 
         $this->actingAs($this->user);
@@ -414,8 +417,8 @@ class AiAssistantTest extends TestCase
         Http::fake([
             'localhost:3001/api/analyze' => Http::response([
                 'error' => 'AI service temporarily unavailable',
-                'code' => 'SERVICE_UNAVAILABLE'
-            ], 503)
+                'code' => 'SERVICE_UNAVAILABLE',
+            ], 503),
         ]);
 
         $this->actingAs($this->user);
@@ -425,7 +428,7 @@ class AiAssistantTest extends TestCase
         $response->assertStatus(503);
         $response->assertJson([
             'message' => 'AI service is temporarily unavailable',
-            'fallback_available' => true
+            'fallback_available' => true,
         ]);
 
         // Should provide fallback basic analytics
@@ -437,7 +440,7 @@ class AiAssistantTest extends TestCase
     {
         // Mock AI service timeout
         Http::fake([
-            'localhost:3001/*' => Http::response('', 408) // Timeout
+            'localhost:3001/*' => Http::response('', 408), // Timeout
         ]);
 
         $this->actingAs($this->user);
@@ -451,9 +454,9 @@ class AiAssistantTest extends TestCase
                 'invoice_count',
                 'paid_invoices',
                 'overdue_invoices',
-                'average_payment_time'
+                'average_payment_time',
             ],
-            'source' => ['fallback']
+            'source' => ['fallback'],
         ]);
 
         // Verify fallback calculations are correct
@@ -473,15 +476,15 @@ class AiAssistantTest extends TestCase
                     'key_insights' => [
                         'Your largest customer generates 60% of revenue',
                         'Average payment time is 12 days',
-                        '3 invoices are overdue by more than 30 days'
+                        '3 invoices are overdue by more than 30 days',
                     ],
                     'recommendations' => [
                         'Contact customers with overdue payments',
                         'Consider early payment discounts',
-                        'Expand customer base'
-                    ]
-                ]
-            ], 200)
+                        'Expand customer base',
+                    ],
+                ],
+            ], 200),
         ]);
 
         $this->actingAs($this->user);
@@ -490,7 +493,7 @@ class AiAssistantTest extends TestCase
         $response = $this->getJson('/api/ai/summary?language=en');
 
         $response->assertStatus(200);
-        
+
         $insights = $response->json('summary.key_insights');
         foreach ($insights as $insight) {
             // Should be in English (no Cyrillic characters)
@@ -503,15 +506,15 @@ class AiAssistantTest extends TestCase
                 'summary' => [
                     'key_insights' => [
                         'Големиот клиент генерира 60% од приходите',
-                        'Просечното време за плаќање е 12 дена'
-                    ]
-                ]
-            ], 200)
+                        'Просечното време за плаќање е 12 дена',
+                    ],
+                ],
+            ], 200),
         ]);
 
         $responseMk = $this->getJson('/api/ai/summary?language=mk');
         $responseMk->assertStatus(200);
-        
+
         $insightsMk = $responseMk->json('summary.key_insights');
         foreach ($insightsMk as $insight) {
             // Should contain Macedonian text
@@ -529,9 +532,9 @@ class AiAssistantTest extends TestCase
         // Test with wrong company access
         $otherCompany = Company::factory()->create();
         $otherUser = User::factory()->create(['company_id' => $otherCompany->id]);
-        
+
         $this->actingAs($otherUser);
-        
+
         // Should not access other company's data
         $response = $this->getJson('/api/ai/summary');
         $response->assertStatus(200); // Should work but with otherUser's company data
@@ -539,8 +542,8 @@ class AiAssistantTest extends TestCase
         // Verify company isolation
         Http::fake([
             'localhost:3001/api/analyze' => Http::response([
-                'summary' => ['total_revenue' => 0] // No data for other company
-            ], 200)
+                'summary' => ['total_revenue' => 0], // No data for other company
+            ], 200),
         ]);
 
         $response = $this->getJson('/api/ai/summary');
@@ -552,8 +555,8 @@ class AiAssistantTest extends TestCase
     {
         Http::fake([
             'localhost:3001/api/analyze' => Http::response([
-                'summary' => ['total_revenue' => 100000]
-            ], 200)
+                'summary' => ['total_revenue' => 100000],
+            ], 200),
         ]);
 
         $this->actingAs($this->user);
@@ -566,13 +569,13 @@ class AiAssistantTest extends TestCase
         $this->assertDatabaseHas('ai_usage_logs', [
             'user_id' => $this->user->id,
             'company_id' => $this->company->id,
-            'endpoint' => '/api/ai/summary'
+            'endpoint' => '/api/ai/summary',
         ]);
 
         $this->assertDatabaseHas('ai_usage_logs', [
             'user_id' => $this->user->id,
             'company_id' => $this->company->id,
-            'endpoint' => '/api/ai/risk'
+            'endpoint' => '/api/ai/risk',
         ]);
     }
 
@@ -584,7 +587,7 @@ class AiAssistantTest extends TestCase
             Invoice::factory()->create([
                 'company_id' => $this->company->id,
                 'customer_id' => $this->customer->id,
-                'total' => rand(10000, 100000)
+                'total' => rand(10000, 100000),
             ]);
         }
 
@@ -595,13 +598,13 @@ class AiAssistantTest extends TestCase
                     'total_revenue' => 5500000,
                     'invoice_count' => 115, // 15 original + 100 new
                     'data_volume' => 'large',
-                    'processing_time_ms' => 2500
+                    'processing_time_ms' => 2500,
                 ],
                 'performance' => [
                     'data_points_analyzed' => 115,
-                    'processing_optimized' => true
-                ]
-            ], 200)
+                    'processing_optimized' => true,
+                ],
+            ], 200),
         ]);
 
         $this->actingAs($this->user);
@@ -609,11 +612,11 @@ class AiAssistantTest extends TestCase
         $startTime = microtime(true);
         $response = $this->getJson('/api/ai/summary');
         $endTime = microtime(true);
-        
+
         $processingTime = ($endTime - $startTime) * 1000;
 
         $response->assertStatus(200);
-        
+
         // Should handle large dataset efficiently
         $this->assertLessThan(5000, $processingTime, 'Large dataset analysis should complete within 5 seconds');
         $this->assertEquals(115, $response->json('summary.invoice_count'));
@@ -627,4 +630,3 @@ class AiAssistantTest extends TestCase
         parent::tearDown();
     }
 }
-

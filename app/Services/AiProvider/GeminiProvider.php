@@ -13,9 +13,13 @@ use Illuminate\Support\Facades\Log;
 class GeminiProvider implements AiProviderInterface
 {
     private string $apiKey;
+
     private string $model;
+
     private string $apiUrl;
+
     private int $maxTokens;
+
     private float $temperature;
 
     public function __construct()
@@ -77,11 +81,7 @@ class GeminiProvider implements AiProviderInterface
     /**
      * Send request to Gemini API and return the text response.
      *
-     * @param array<string, mixed> $payload
-     * @param int $maxTokens
-     * @param float $temperature
-     * @param string $method
-     * @return string
+     * @param  array<string, mixed>  $payload
      *
      * @throws \Exception
      */
@@ -116,7 +116,7 @@ class GeminiProvider implements AiProviderInterface
 
             if ($response->failed()) {
                 $this->logApiCall($method, $requestPayload, null, $response->status(), $duration);
-                throw new \Exception('Gemini API request failed: ' . $response->body());
+                throw new \Exception('Gemini API request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -147,9 +147,8 @@ class GeminiProvider implements AiProviderInterface
     }
 
     /**
-     * @param array<string, mixed> $input
-     * @param string|null $output
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $input
+     * @param  array<string, mixed>  $metadata
      */
     private function logApiCall(
         string $method,
@@ -186,11 +185,12 @@ class GeminiProvider implements AiProviderInterface
     /**
      * Analyze an image with optional text prompt
      *
-     * @param string $imageData Base64 encoded image data
-     * @param string $mediaType MIME type
-     * @param string $prompt Text prompt/question about the image
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $imageData  Base64 encoded image data
+     * @param  string  $mediaType  MIME type
+     * @param  string  $prompt  Text prompt/question about the image
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception Vision support not implemented for Gemini yet
      */
     public function analyzeImage(string $imageData, string $mediaType, string $prompt, array $options = []): string
@@ -202,10 +202,11 @@ class GeminiProvider implements AiProviderInterface
     /**
      * Analyze a document (PDF converted to images) with optional text prompt
      *
-     * @param array<int, array{data: string, media_type: string}> $images Array of image pages
-     * @param string $prompt Text prompt/question about the document
-     * @param array<string, mixed> $options Additional options
+     * @param  array<int, array{data: string, media_type: string}>  $images  Array of image pages
+     * @param  string  $prompt  Text prompt/question about the document
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception Vision support not implemented for Gemini yet
      */
     public function analyzeDocument(array $images, string $prompt, array $options = []): string

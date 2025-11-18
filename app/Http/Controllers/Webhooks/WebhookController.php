@@ -23,8 +23,9 @@ class WebhookController extends Controller
             $eventId = $payload['event_id'] ?? null;
             $companyId = $payload['data']['custom_data']['company_id'] ?? null;
 
-            if (!$companyId) {
+            if (! $companyId) {
                 Log::warning('Paddle webhook missing company_id', ['payload' => $payload]);
+
                 return response()->json(['error' => 'Missing company_id'], 400);
             }
 
@@ -44,10 +45,11 @@ class WebhookController extends Controller
 
             return response()->json(['status' => 'received'], 200);
         } catch (\Exception $e) {
-            Log::error('Paddle webhook error: ' . $e->getMessage(), [
+            Log::error('Paddle webhook error: '.$e->getMessage(), [
                 'payload' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Internal error'], 500);
         }
     }
@@ -65,8 +67,9 @@ class WebhookController extends Controller
             $eventId = $payload['transaction_id'] ?? null;
             $companyId = $payload['merchant_data']['company_id'] ?? null;
 
-            if (!$companyId) {
+            if (! $companyId) {
                 Log::warning('CPAY webhook missing company_id', ['payload' => $payload]);
+
                 return response()->json(['error' => 'Missing company_id'], 400);
             }
 
@@ -86,10 +89,11 @@ class WebhookController extends Controller
 
             return response()->json(['status' => 'received'], 200);
         } catch (\Exception $e) {
-            Log::error('CPAY webhook error: ' . $e->getMessage(), [
+            Log::error('CPAY webhook error: '.$e->getMessage(), [
                 'payload' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Internal error'], 500);
         }
     }
@@ -107,8 +111,9 @@ class WebhookController extends Controller
             $eventId = $payload['notification_id'] ?? null;
             $companyId = $payload['account_data']['company_id'] ?? null;
 
-            if (!$companyId) {
+            if (! $companyId) {
                 Log::warning('NLB webhook missing company_id', ['payload' => $payload]);
+
                 return response()->json(['error' => 'Missing company_id'], 400);
             }
 
@@ -128,10 +133,11 @@ class WebhookController extends Controller
 
             return response()->json(['status' => 'received'], 200);
         } catch (\Exception $e) {
-            Log::error('NLB webhook error: ' . $e->getMessage(), [
+            Log::error('NLB webhook error: '.$e->getMessage(), [
                 'payload' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Internal error'], 500);
         }
     }
@@ -149,8 +155,9 @@ class WebhookController extends Controller
             $eventId = $payload['notification_id'] ?? null;
             $companyId = $payload['account_data']['company_id'] ?? null;
 
-            if (!$companyId) {
+            if (! $companyId) {
                 Log::warning('Stopanska webhook missing company_id', ['payload' => $payload]);
+
                 return response()->json(['error' => 'Missing company_id'], 400);
             }
 
@@ -170,10 +177,11 @@ class WebhookController extends Controller
 
             return response()->json(['status' => 'received'], 200);
         } catch (\Exception $e) {
-            Log::error('Stopanska webhook error: ' . $e->getMessage(), [
+            Log::error('Stopanska webhook error: '.$e->getMessage(), [
                 'payload' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Internal error'], 500);
         }
     }

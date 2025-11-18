@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\KycDocument;
-use Illuminate\Http\Request;
+use App\Models\Partner;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -15,9 +15,6 @@ class KycController extends Controller
 {
     /**
      * Submit KYC documents
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function submitKyc(Request $request): JsonResponse
     {
@@ -45,7 +42,7 @@ class KycController extends Controller
         $requiredTypes = ['id_card', 'proof_of_address'];
 
         foreach ($requiredTypes as $requiredType) {
-            if (!in_array($requiredType, $types)) {
+            if (! in_array($requiredType, $types)) {
                 return response()->json([
                     'success' => false,
                     'message' => "Missing required document: {$requiredType}",
@@ -61,11 +58,11 @@ class KycController extends Controller
                 $type = $docData['type'];
 
                 // Generate secure filename
-                $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
-                $path = 'kyc/' . $partner->id . '/' . $filename;
+                $filename = Str::random(40).'.'.$file->getClientOriginalExtension();
+                $path = 'kyc/'.$partner->id.'/'.$filename;
 
                 // Store file (encrypted storage)
-                Storage::putFileAs('kyc/' . $partner->id, $file, $filename);
+                Storage::putFileAs('kyc/'.$partner->id, $file, $filename);
 
                 // Create KYC document record
                 $document = KycDocument::create([
@@ -109,9 +106,6 @@ class KycController extends Controller
 
     /**
      * Get KYC status for authenticated partner
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function getStatus(Request $request): JsonResponse
     {
@@ -145,8 +139,6 @@ class KycController extends Controller
     /**
      * Download KYC document (partner can download their own documents)
      *
-     * @param Request $request
-     * @param int $documentId
      * @return \Illuminate\Http\Response|JsonResponse
      */
     public function downloadDocument(Request $request, int $documentId)
@@ -158,7 +150,7 @@ class KycController extends Controller
             ->where('partner_id', $partner->id)
             ->firstOrFail();
 
-        if (!Storage::exists($document->file_path)) {
+        if (! Storage::exists($document->file_path)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Document file not found',
@@ -170,10 +162,6 @@ class KycController extends Controller
 
     /**
      * Delete KYC document (only if status is pending or rejected)
-     *
-     * @param Request $request
-     * @param int $documentId
-     * @return JsonResponse
      */
     public function deleteDocument(Request $request, int $documentId): JsonResponse
     {

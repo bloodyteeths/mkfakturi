@@ -6,11 +6,11 @@ use App\Models\Company;
 use App\Services\AiProvider\AiProviderInterface;
 use App\Services\AiProvider\ClaudeProvider;
 use App\Services\AiProvider\GeminiProvider;
-use App\Services\AiProvider\OpenAiProvider;
 use App\Services\AiProvider\NullAiProvider;
+use App\Services\AiProvider\OpenAiProvider;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 /**
  * AI Insights Service
@@ -21,13 +21,15 @@ use Carbon\Carbon;
 class AiInsightsService
 {
     private AiProviderInterface $aiProvider;
+
     private McpDataProvider $dataProvider;
+
     private int $cacheTtl;
 
     /**
      * Create a new AI Insights service instance
      *
-     * @param McpDataProvider $dataProvider Direct data provider for financial data
+     * @param  McpDataProvider  $dataProvider  Direct data provider for financial data
      */
     public function __construct(McpDataProvider $dataProvider)
     {
@@ -39,8 +41,9 @@ class AiInsightsService
     /**
      * Analyze company financials and generate insights
      *
-     * @param Company $company The company to analyze
+     * @param  Company  $company  The company to analyze
      * @return array<string, mixed> Array with insights, timestamp, and expiry
+     *
      * @throws \Exception If analysis fails
      */
     public function analyzeFinancials(Company $company): array
@@ -75,7 +78,7 @@ class AiInsightsService
             Log::info('[AiInsightsService] Prompt built', [
                 'company_id' => $company->id,
                 'prompt_length' => strlen($prompt),
-                'prompt_preview' => substr($prompt, 0, 200) . '...',
+                'prompt_preview' => substr($prompt, 0, 200).'...',
             ]);
 
             // 3. Send to AI provider
@@ -84,7 +87,7 @@ class AiInsightsService
             Log::info('[AiInsightsService] AI provider response received', [
                 'company_id' => $company->id,
                 'response_length' => strlen($response),
-                'response_preview' => substr($response, 0, 200) . '...',
+                'response_preview' => substr($response, 0, 200).'...',
             ]);
 
             // 4. Parse AI response into structured insights
@@ -124,8 +127,9 @@ class AiInsightsService
     /**
      * Detect financial risks and anomalies
      *
-     * @param Company $company The company to analyze
+     * @param  Company  $company  The company to analyze
      * @return array<string, mixed> Array of detected risks
+     *
      * @throws \Exception If risk detection fails
      */
     public function detectRisks(Company $company): array
@@ -164,9 +168,10 @@ class AiInsightsService
     /**
      * Answer a financial question using AI with company context
      *
-     * @param Company $company The company context
-     * @param string $question The user's question
+     * @param  Company  $company  The company context
+     * @param  string  $question  The user's question
      * @return string The AI's answer
+     *
      * @throws \Exception If chat fails
      */
     public function answerQuestion(Company $company, string $question): string
@@ -236,7 +241,7 @@ class AiInsightsService
      * Analyzes the user's question to determine what type of data they need.
      * Supports both English and Macedonian queries.
      *
-     * @param string $question The user's question
+     * @param  string  $question  The user's question
      * @return array<string> Array of context types detected
      */
     private function detectQueryContext(string $question): array
@@ -386,8 +391,7 @@ class AiInsightsService
     /**
      * Fetch contextual data based on detected query context types
      *
-     * @param Company $company
-     * @param array<string> $contextTypes Detected context types
+     * @param  array<string>  $contextTypes  Detected context types
      * @return array<string, mixed> Contextual data for prompt building
      */
     private function fetchContextualData(Company $company, array $contextTypes): array
@@ -513,7 +517,6 @@ class AiInsightsService
     /**
      * Fetch trial balance from MCP
      *
-     * @param Company $company
      * @return array<string, mixed>
      */
     private function fetchTrialBalance(Company $company): array
@@ -524,7 +527,6 @@ class AiInsightsService
     /**
      * Fetch company statistics from MCP
      *
-     * @param Company $company
      * @return array<string, mixed>
      */
     private function fetchCompanyStats(Company $company): array
@@ -535,10 +537,8 @@ class AiInsightsService
     /**
      * Build analysis prompt in Macedonian
      *
-     * @param Company $company
-     * @param array<string, mixed> $trialBalance
-     * @param array<string, mixed> $stats
-     * @return string
+     * @param  array<string, mixed>  $trialBalance
+     * @param  array<string, mixed>  $stats
      */
     private function buildAnalysisPrompt(Company $company, array $trialBalance, array $stats): string
     {
@@ -633,9 +633,7 @@ PROMPT;
     /**
      * Build risk analysis prompt in Macedonian
      *
-     * @param Company $company
-     * @param array<string, mixed> $anomalies
-     * @return string
+     * @param  array<string, mixed>  $anomalies
      */
     private function buildRiskAnalysisPrompt(Company $company, array $anomalies): string
     {
@@ -668,10 +666,7 @@ PROMPT;
     /**
      * Build chat prompt in Macedonian with company context
      *
-     * @param Company $company
-     * @param array<string, mixed> $contextualData Data with 'company_stats' and optional contextual data
-     * @param string $question
-     * @return string
+     * @param  array<string, mixed>  $contextualData  Data with 'company_stats' and optional contextual data
      */
     private function buildChatPrompt(Company $company, array $contextualData, string $question): string
     {
@@ -715,37 +710,37 @@ PROMPT;
 BASETEXT;
 
         // Add contextual data sections based on what's available
-        if (!empty($contextualData['recent_invoices'])) {
+        if (! empty($contextualData['recent_invoices'])) {
             $invoicesText = $this->formatInvoicesForPrompt($contextualData['recent_invoices'], $currency);
             $prompt .= "\nПоследни фактури (последни 3 месеци):\n{$invoicesText}\n";
         }
 
-        if (!empty($contextualData['overdue_invoices'])) {
+        if (! empty($contextualData['overdue_invoices'])) {
             $overdueText = $this->formatInvoicesForPrompt($contextualData['overdue_invoices'], $currency, true);
             $prompt .= "\nЗадоцнети фактури:\n{$overdueText}\n";
         }
 
-        if (!empty($contextualData['customer_invoices'])) {
+        if (! empty($contextualData['customer_invoices'])) {
             $customerInvoicesText = $this->formatCustomerInvoicesForPrompt($contextualData['customer_invoices'], $currency);
             $prompt .= "\nФактури по клиент (неплатени):\n{$customerInvoicesText}\n";
         }
 
-        if (!empty($contextualData['monthly_trends'])) {
+        if (! empty($contextualData['monthly_trends'])) {
             $trendsText = $this->formatMonthlyTrends($contextualData['monthly_trends'], $currency);
             $prompt .= "\nМесечни трендови:\n{$trendsText}\n";
         }
 
-        if (!empty($contextualData['customer_growth'])) {
+        if (! empty($contextualData['customer_growth'])) {
             $growthText = $this->formatCustomerGrowth($contextualData['customer_growth']);
             $prompt .= "\nРаст на клиенти:\n{$growthText}\n";
         }
 
-        if (!empty($contextualData['payment_timing'])) {
+        if (! empty($contextualData['payment_timing'])) {
             $paymentTimingText = $this->formatPaymentTiming($contextualData['payment_timing']);
             $prompt .= "\nНавремност на наплата:\n{$paymentTimingText}\n";
         }
 
-        if (!empty($contextualData['top_customers'])) {
+        if (! empty($contextualData['top_customers'])) {
             $topCustomersText = $this->formatTopCustomers($contextualData['top_customers'], $currency);
             $prompt .= "\nТоп клиенти:\n{$topCustomersText}\n";
         }
@@ -765,7 +760,7 @@ INSTRUCTIONS;
     /**
      * Parse AI response into structured insights array
      *
-     * @param string $response The AI's JSON response
+     * @param  string  $response  The AI's JSON response
      * @return array<int, array<string, mixed>> Array of insight objects
      */
     private function parseInsights(string $response): array
@@ -800,10 +795,11 @@ INSTRUCTIONS;
             }
 
             // Sort by priority (highest first)
-            usort($validated, fn($a, $b) => $b['priority'] <=> $a['priority']);
+            usort($validated, fn ($a, $b) => $b['priority'] <=> $a['priority']);
 
             // Limit to max insights
             $maxInsights = config('ai.insights.max_insights', 5);
+
             return array_slice($validated, 0, $maxInsights);
 
         } catch (\JsonException $e) {
@@ -825,18 +821,16 @@ INSTRUCTIONS;
 
     /**
      * Resolve the AI provider instance based on configuration
-     *
-     * @return AiProviderInterface
      */
     private function resolveAiProvider(): AiProviderInterface
     {
         $provider = strtolower((string) config('ai.default_provider', 'claude'));
 
         try {
-            return match($provider) {
-                'claude' => new ClaudeProvider(),
-                'openai' => new OpenAiProvider(),
-                'gemini' => new GeminiProvider(),
+            return match ($provider) {
+                'claude' => new ClaudeProvider,
+                'openai' => new OpenAiProvider,
+                'gemini' => new GeminiProvider,
                 default => throw new \RuntimeException("Unsupported AI provider: {$provider}"),
             };
         } catch (\Throwable $e) {
@@ -851,9 +845,6 @@ INSTRUCTIONS;
 
     /**
      * Clear cached insights for a company
-     *
-     * @param Company $company
-     * @return void
      */
     public function clearCache(Company $company): void
     {
@@ -864,9 +855,7 @@ INSTRUCTIONS;
     /**
      * Format monthly trends for AI prompt
      *
-     * @param array<int, array{month: string, revenue: float, expenses: float, profit: float, invoice_count: int}> $trends
-     * @param string $currency
-     * @return string
+     * @param  array<int, array{month: string, revenue: float, expenses: float, profit: float, invoice_count: int}>  $trends
      */
     private function formatMonthlyTrends(array $trends, string $currency): string
     {
@@ -891,8 +880,7 @@ INSTRUCTIONS;
     /**
      * Format payment timing analysis for AI prompt
      *
-     * @param array{avg_days_to_payment: float, on_time_percentage: float, late_percentage: float} $timing
-     * @return string
+     * @param  array{avg_days_to_payment: float, on_time_percentage: float, late_percentage: float}  $timing
      */
     private function formatPaymentTiming(array $timing): string
     {
@@ -910,9 +898,7 @@ TEXT;
     /**
      * Format top customers for AI prompt
      *
-     * @param array<int, array{customer_name: string, revenue: float, invoice_count: int}> $customers
-     * @param string $currency
-     * @return string
+     * @param  array<int, array{customer_name: string, revenue: float, invoice_count: int}>  $customers
      */
     private function formatTopCustomers(array $customers, string $currency): string
     {
@@ -936,10 +922,8 @@ TEXT;
     /**
      * Format invoices list for AI prompt
      *
-     * @param array<int, array> $invoices Array of invoice data
-     * @param string $currency
-     * @param bool $overdueOnly Whether to filter only overdue invoices
-     * @return string
+     * @param  array<int, array>  $invoices  Array of invoice data
+     * @param  bool  $overdueOnly  Whether to filter only overdue invoices
      */
     private function formatInvoicesForPrompt(array $invoices, string $currency, bool $overdueOnly = false): string
     {
@@ -955,7 +939,7 @@ TEXT;
             // Filter overdue if requested
             if ($overdueOnly) {
                 $dueDate = isset($invoice['due_date']) ? \Carbon\Carbon::parse($invoice['due_date']) : null;
-                if (!$dueDate || $dueDate->isFuture()) {
+                if (! $dueDate || $dueDate->isFuture()) {
                     continue;
                 }
             }
@@ -984,9 +968,7 @@ TEXT;
     /**
      * Format customer invoices grouped by customer for AI prompt
      *
-     * @param array<int, array> $invoices Array of invoice data
-     * @param string $currency
-     * @return string
+     * @param  array<int, array>  $invoices  Array of invoice data
      */
     private function formatCustomerInvoicesForPrompt(array $invoices, string $currency): string
     {
@@ -998,7 +980,7 @@ TEXT;
         $byCustomer = [];
         foreach ($invoices as $invoice) {
             $customerName = $invoice['customer_name'] ?? 'Unknown';
-            if (!isset($byCustomer[$customerName])) {
+            if (! isset($byCustomer[$customerName])) {
                 $byCustomer[$customerName] = [
                     'count' => 0,
                     'total_due' => 0,
@@ -1011,7 +993,7 @@ TEXT;
         }
 
         // Sort by total due (descending)
-        uasort($byCustomer, fn($a, $b) => $b['total_due'] <=> $a['total_due']);
+        uasort($byCustomer, fn ($a, $b) => $b['total_due'] <=> $a['total_due']);
 
         $lines = [];
         $maxCustomers = 10;
@@ -1037,8 +1019,7 @@ TEXT;
     /**
      * Format customer growth for AI prompt
      *
-     * @param array<int, array{month: string, new_customers: int, total_customers: int}> $growth
-     * @return string
+     * @param  array<int, array{month: string, new_customers: int, total_customers: int}>  $growth
      */
     private function formatCustomerGrowth(array $growth): string
     {
@@ -1064,8 +1045,7 @@ TEXT;
     /**
      * Check if a specific AI feature is enabled
      *
-     * @param string $featureName Feature name from config('ai.features')
-     * @return bool
+     * @param  string  $featureName  Feature name from config('ai.features')
      */
     private function checkFeatureFlag(string $featureName): bool
     {
@@ -1081,8 +1061,6 @@ TEXT;
 
     /**
      * Check if PDF analysis feature is enabled
-     *
-     * @return bool
      */
     public function isPdfAnalysisEnabled(): bool
     {
@@ -1091,8 +1069,6 @@ TEXT;
 
     /**
      * Check if receipt scanning feature is enabled
-     *
-     * @return bool
      */
     public function isReceiptScanningEnabled(): bool
     {
@@ -1101,8 +1077,6 @@ TEXT;
 
     /**
      * Check if invoice extraction feature is enabled
-     *
-     * @return bool
      */
     public function isInvoiceExtractionEnabled(): bool
     {
@@ -1133,22 +1107,22 @@ TEXT;
     /**
      * Ensure a feature is enabled, throw exception if not
      *
-     * @param string $featureName Feature name from config
-     * @param string $macedonianName Macedonian name for error message
-     * @return void
+     * @param  string  $featureName  Feature name from config
+     * @param  string  $macedonianName  Macedonian name for error message
+     *
      * @throws \Exception If feature is disabled
      */
     private function requireFeature(string $featureName, string $macedonianName): void
     {
-        if (!$this->checkFeatureFlag($featureName)) {
+        if (! $this->checkFeatureFlag($featureName)) {
             Log::warning('[AiInsightsService] Feature access blocked', [
                 'feature' => $featureName,
                 'reason' => 'Feature flag disabled',
             ]);
 
             throw new \Exception(
-                "Функцијата \"{$macedonianName}\" не е овозможена. " .
-                "Ве молиме контактирајте го администраторот за да ја активира."
+                "Функцијата \"{$macedonianName}\" не е овозможена. ".
+                'Ве молиме контактирајте го администраторот за да ја активира.'
             );
         }
     }
@@ -1156,10 +1130,11 @@ TEXT;
     /**
      * Analyze PDF document using AI vision
      *
-     * @param string $pdfPath Path to PDF file
-     * @param string $analysisType Type of analysis (receipt, invoice, general)
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $pdfPath  Path to PDF file
+     * @param  string  $analysisType  Type of analysis (receipt, invoice, general)
+     * @param  array<string, mixed>  $options  Additional options
      * @return array<string, mixed> Analysis results
+     *
      * @throws \Exception If PDF analysis is disabled or fails
      */
     public function analyzePdf(string $pdfPath, string $analysisType = 'general', array $options = []): array
@@ -1174,7 +1149,7 @@ TEXT;
             ]);
 
             // Convert PDF to images
-            $converter = new PdfImageConverter();
+            $converter = new PdfImageConverter;
             $images = $converter->convertToImages($pdfPath, $options);
 
             // Build vision analysis prompt based on type
@@ -1209,9 +1184,10 @@ TEXT;
     /**
      * Scan receipt image and extract data
      *
-     * @param string $imagePath Path to receipt image
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $imagePath  Path to receipt image
+     * @param  array<string, mixed>  $options  Additional options
      * @return array<string, mixed> Extracted receipt data
+     *
      * @throws \Exception If receipt scanning is disabled or fails
      */
     public function scanReceipt(string $imagePath, array $options = []): array
@@ -1263,9 +1239,10 @@ TEXT;
     /**
      * Extract invoice data from document
      *
-     * @param string $documentPath Path to invoice document (PDF or image)
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $documentPath  Path to invoice document (PDF or image)
+     * @param  array<string, mixed>  $options  Additional options
      * @return array<string, mixed> Extracted invoice data
+     *
      * @throws \Exception If invoice extraction is disabled or fails
      */
     public function extractInvoiceData(string $documentPath, array $options = []): array
@@ -1283,7 +1260,7 @@ TEXT;
 
             if ($isPdf) {
                 // Convert PDF to images
-                $converter = new PdfImageConverter();
+                $converter = new PdfImageConverter;
                 $images = $converter->convertToImages($documentPath, $options);
             } else {
                 // Direct image processing
@@ -1326,12 +1303,11 @@ TEXT;
     /**
      * Build PDF analysis prompt based on analysis type
      *
-     * @param string $type Analysis type
-     * @return string
+     * @param  string  $type  Analysis type
      */
     private function buildPdfAnalysisPrompt(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             'receipt' => 'Анализирај ја оваа сметка и извлечи ги сите релевантни податоци (продавач, ставки, износи, данок, вкупно).',
             'invoice' => 'Анализирај ја оваа фактура и извлечи ги сите релевантни податоци (издавач, примач, ставки, износи, датуми).',
             default => 'Анализирај го овој документ и извлечи ги клучните финансиски информации.',
@@ -1340,12 +1316,10 @@ TEXT;
 
     /**
      * Build receipt scanning prompt in Macedonian
-     *
-     * @return string
      */
     private function buildReceiptScanningPrompt(): string
     {
-        return <<<PROMPT
+        return <<<'PROMPT'
 Анализирај ја оваа сметка и извлечи ги следните податоци во JSON формат:
 {
   "merchant_name": "Име на продавачот",
@@ -1374,12 +1348,10 @@ PROMPT;
 
     /**
      * Build invoice extraction prompt in Macedonian
-     *
-     * @return string
      */
     private function buildInvoiceExtractionPrompt(): string
     {
-        return <<<PROMPT
+        return <<<'PROMPT'
 Анализирај ја оваа фактура и извлечи ги следните податоци во JSON формат:
 {
   "invoice_number": "Број на фактура",
@@ -1421,7 +1393,7 @@ PROMPT;
     /**
      * Parse receipt data from AI response
      *
-     * @param string $response AI response
+     * @param  string  $response  AI response
      * @return array<string, mixed>
      */
     private function parseReceiptData(string $response): array
@@ -1448,7 +1420,7 @@ PROMPT;
     /**
      * Parse invoice data from AI response
      *
-     * @param string $response AI response
+     * @param  string  $response  AI response
      * @return array<string, mixed>
      */
     private function parseInvoiceData(string $response): array
@@ -1475,7 +1447,7 @@ PROMPT;
     /**
      * Detect image media type from file path
      *
-     * @param string $path File path
+     * @param  string  $path  File path
      * @return string Media type
      */
     private function detectImageMediaType(string $path): string

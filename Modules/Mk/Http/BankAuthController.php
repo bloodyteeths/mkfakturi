@@ -3,16 +3,16 @@
 namespace Modules\Mk\Http;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Modules\Mk\Services\StopanskaGateway;
+use Illuminate\Support\Facades\Log;
 use Modules\Mk\Services\NlbGateway;
+use Modules\Mk\Services\StopanskaGateway;
 
 /**
  * Bank Authentication Controller for PSD2 OAuth flows
- * 
+ *
  * Handles OAuth authentication for Macedonian banks:
  * - Stopanska Banka
  * - NLB Banka (Nova Ljubljanska Banka)
@@ -31,7 +31,7 @@ class BankAuthController extends Controller
     {
         try {
             $request->validate([
-                'bank' => 'required|in:' . implode(',', $this->supportedBanks),
+                'bank' => 'required|in:'.implode(',', $this->supportedBanks),
                 'company_id' => 'required|integer',
                 'redirect_uri' => 'required|url',
             ]);
@@ -49,7 +49,7 @@ class BankAuthController extends Controller
                 'bank' => $bank,
                 'company_id' => $companyId,
                 'redirect_uri' => $redirectUri,
-                'timestamp' => now()
+                'timestamp' => now(),
             ], 600); // 10 minutes
 
             // Get authorization URL from gateway
@@ -58,24 +58,24 @@ class BankAuthController extends Controller
             Log::info('Bank OAuth flow initiated', [
                 'bank' => $bank,
                 'company_id' => $companyId,
-                'state' => $state
+                'state' => $state,
             ]);
 
             return response()->json([
                 'success' => true,
                 'authorization_url' => $authUrl,
-                'state' => $state
+                'state' => $state,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Bank OAuth initiation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to initiate bank authentication: ' . $e->getMessage()
+                'message' => 'Failed to initiate bank authentication: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -96,7 +96,7 @@ class BankAuthController extends Controller
 
             // Retrieve and validate state
             $stateData = Cache::get("bank_oauth_state_{$state}");
-            if (!$stateData) {
+            if (! $stateData) {
                 throw new \Exception('Invalid or expired OAuth state');
             }
 
@@ -117,25 +117,25 @@ class BankAuthController extends Controller
 
             Log::info('Bank OAuth completed successfully', [
                 'bank' => $bank,
-                'company_id' => $companyId
+                'company_id' => $companyId,
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Bank authentication completed successfully',
                 'bank' => $bank,
-                'expires_at' => $tokens['expires_at'] ?? null
+                'expires_at' => $tokens['expires_at'] ?? null,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Bank OAuth callback failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'OAuth callback failed: ' . $e->getMessage()
+                'message' => 'OAuth callback failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -146,14 +146,14 @@ class BankAuthController extends Controller
     public function getStoredTokens(string $bank, int $companyId): ?array
     {
         try {
-            if (!in_array($bank, $this->supportedBanks)) {
+            if (! in_array($bank, $this->supportedBanks)) {
                 throw new \Exception("Unsupported bank: {$bank}");
             }
 
             $cacheKey = "bank_tokens_{$bank}_{$companyId}";
             $tokens = Cache::get($cacheKey);
 
-            if (!$tokens) {
+            if (! $tokens) {
                 return null;
             }
 
@@ -164,9 +164,10 @@ class BankAuthController extends Controller
                 if ($refreshedTokens) {
                     return $refreshedTokens;
                 }
-                
+
                 // Remove expired tokens
                 Cache::forget($cacheKey);
+
                 return null;
             }
 
@@ -176,9 +177,9 @@ class BankAuthController extends Controller
             Log::error('Failed to retrieve stored tokens', [
                 'bank' => $bank,
                 'company_id' => $companyId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-            
+
             return null;
         }
     }
@@ -189,7 +190,7 @@ class BankAuthController extends Controller
     protected function refreshTokens(string $bank, int $companyId, array $currentTokens): ?array
     {
         try {
-            if (!isset($currentTokens['refresh_token'])) {
+            if (! isset($currentTokens['refresh_token'])) {
                 return null;
             }
 
@@ -201,7 +202,7 @@ class BankAuthController extends Controller
 
             Log::info('Bank tokens refreshed successfully', [
                 'bank' => $bank,
-                'company_id' => $companyId
+                'company_id' => $companyId,
             ]);
 
             return $newTokens;
@@ -210,9 +211,9 @@ class BankAuthController extends Controller
             Log::error('Token refresh failed', [
                 'bank' => $bank,
                 'company_id' => $companyId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-            
+
             return null;
         }
     }
@@ -223,9 +224,9 @@ class BankAuthController extends Controller
     protected function storeTokens(string $bank, int $companyId, array $tokens): void
     {
         $cacheKey = "bank_tokens_{$bank}_{$companyId}";
-        
+
         // Add expiry timestamp if not present
-        if (!isset($tokens['expires_at']) && isset($tokens['expires_in'])) {
+        if (! isset($tokens['expires_at']) && isset($tokens['expires_in'])) {
             $tokens['expires_at'] = now()->addSeconds($tokens['expires_in']);
         }
 
@@ -245,8 +246,8 @@ class BankAuthController extends Controller
     protected function getBankGateway(string $bank): StopanskaGateway|NlbGateway
     {
         return match ($bank) {
-            'stopanska' => new StopanskaGateway(),
-            'nlb' => new NlbGateway(),
+            'stopanska' => new StopanskaGateway,
+            'nlb' => new NlbGateway,
             default => throw new \Exception("Unsupported bank: {$bank}")
         };
     }
@@ -258,7 +259,7 @@ class BankAuthController extends Controller
     {
         try {
             $request->validate([
-                'bank' => 'required|in:' . implode(',', $this->supportedBanks),
+                'bank' => 'required|in:'.implode(',', $this->supportedBanks),
                 'company_id' => 'required|integer',
             ]);
 
@@ -267,7 +268,7 @@ class BankAuthController extends Controller
 
             // Get stored tokens
             $tokens = $this->getStoredTokens($bank, $companyId);
-            
+
             if ($tokens) {
                 // Try to revoke tokens with the bank
                 try {
@@ -276,7 +277,7 @@ class BankAuthController extends Controller
                 } catch (\Exception $e) {
                     Log::warning('Token revocation at bank failed', [
                         'bank' => $bank,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
                 }
 
@@ -286,22 +287,22 @@ class BankAuthController extends Controller
 
             Log::info('Bank access revoked', [
                 'bank' => $bank,
-                'company_id' => $companyId
+                'company_id' => $companyId,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Bank access revoked successfully'
+                'message' => 'Bank access revoked successfully',
             ]);
 
         } catch (\Exception $e) {
             Log::error('Failed to revoke bank access', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to revoke bank access: ' . $e->getMessage()
+                'message' => 'Failed to revoke bank access: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -322,25 +323,25 @@ class BankAuthController extends Controller
             foreach ($this->supportedBanks as $bank) {
                 $tokens = $this->getStoredTokens($bank, $companyId);
                 $status[$bank] = [
-                    'authenticated' => !is_null($tokens),
+                    'authenticated' => ! is_null($tokens),
                     'expires_at' => $tokens['expires_at'] ?? null,
-                    'has_refresh_token' => isset($tokens['refresh_token'])
+                    'has_refresh_token' => isset($tokens['refresh_token']),
                 ];
             }
 
             return response()->json([
                 'success' => true,
-                'status' => $status
+                'status' => $status,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Failed to get auth status', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get authentication status: ' . $e->getMessage()
+                'message' => 'Failed to get authentication status: '.$e->getMessage(),
             ], 500);
         }
     }

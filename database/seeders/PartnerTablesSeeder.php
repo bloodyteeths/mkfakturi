@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Partner;
 use App\Models\BankAccount;
 use App\Models\Commission;
-use App\Models\User;
 use App\Models\Company;
 use App\Models\Currency;
+use App\Models\Partner;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class PartnerTablesSeeder extends Seeder
@@ -19,7 +19,7 @@ class PartnerTablesSeeder extends Seeder
     {
         // Get or create a sample user for partner association
         $user = User::first();
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => 'Sample Partner User',
                 'email' => 'partner@example.com',
@@ -31,10 +31,10 @@ class PartnerTablesSeeder extends Seeder
         $company = Company::first();
         $currency = Currency::first();
 
-        if (!$company || !$currency) {
+        if (! $company || ! $currency) {
             $this->command->info('Warning: No company or currency found. Creating basic records...');
-            
-            if (!$currency) {
+
+            if (! $currency) {
                 $currency = Currency::create([
                     'name' => 'Macedonian Denar',
                     'code' => 'MKD',
@@ -45,8 +45,8 @@ class PartnerTablesSeeder extends Seeder
                     'position' => 'right',
                 ]);
             }
-            
-            if (!$company) {
+
+            if (! $company) {
                 $company = Company::create([
                     'name' => 'Sample Company',
                     'email' => 'company@example.com',
@@ -74,7 +74,7 @@ class PartnerTablesSeeder extends Seeder
             ],
             [
                 'name' => 'Ана Јовановска',
-                'email' => 'ana.jovanovska@email.com', 
+                'email' => 'ana.jovanovska@email.com',
                 'phone' => '+38971987654',
                 'company_name' => 'Финанси Плус ДОО',
                 'tax_id' => '4080001234567',
@@ -148,8 +148,8 @@ class PartnerTablesSeeder extends Seeder
         }
 
         $this->command->info('Partner tables seeded successfully!');
-        $this->command->info('Created: ' . Partner::count() . ' partners');
-        $this->command->info('Created: ' . BankAccount::count() . ' bank accounts');
-        $this->command->info('Created: ' . Commission::count() . ' commissions');
+        $this->command->info('Created: '.Partner::count().' partners');
+        $this->command->info('Created: '.BankAccount::count().' bank accounts');
+        $this->command->info('Created: '.Commission::count().' commissions');
     }
 }

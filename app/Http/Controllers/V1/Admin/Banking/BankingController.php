@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Company;
-use App\Models\ExpenseCategory;
 use App\Models\Expense;
-use Illuminate\Http\Request;
+use App\Models\ExpenseCategory;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use Carbon\Carbon;
 
 /**
  * Banking Controller
@@ -26,41 +26,40 @@ class BankingController extends Controller
 
     /**
      * Get all connected bank accounts for the current company
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function accounts(Request $request): JsonResponse
     {
         try {
             Log::info('Banking accounts endpoint called', [
                 'user_id' => $request->user()?->id,
-                'company_header' => $request->header('company')
+                'company_header' => $request->header('company'),
             ]);
 
             // Check if bank_accounts table exists
-            if (!Schema::hasTable('bank_accounts')) {
+            if (! Schema::hasTable('bank_accounts')) {
                 Log::warning('bank_accounts table does not exist');
+
                 return response()->json([
                     'data' => [],
-                    'message' => 'Banking feature not yet initialized'
+                    'message' => 'Banking feature not yet initialized',
                 ]);
             }
 
             $company = $this->resolveCompany($request);
 
-            if (!$company) {
+            if (! $company) {
                 Log::warning('No company found for banking accounts request', [
-                    'user_id' => $request->user()?->id
+                    'user_id' => $request->user()?->id,
                 ]);
+
                 return response()->json([
                     'data' => [],
-                    'error' => 'No company found for user'
+                    'error' => 'No company found for user',
                 ], 200); // Return 200 with empty data instead of 404
             }
 
             Log::info('Querying bank accounts', [
-                'company_id' => $company->id
+                'company_id' => $company->id,
             ]);
 
             // Query with proper error handling
@@ -84,7 +83,7 @@ class BankingController extends Controller
                         } catch (\Throwable $e) {
                             Log::warning('Failed to load currency for bank account', [
                                 'account_id' => $account->id,
-                                'error' => $e->getMessage()
+                                'error' => $e->getMessage(),
                             ]);
                         }
 
@@ -104,8 +103,9 @@ class BankingController extends Controller
                     } catch (\Throwable $e) {
                         Log::error('Failed to map bank account', [
                             'account_id' => $account->id ?? 'unknown',
-                            'error' => $e->getMessage()
+                            'error' => $e->getMessage(),
                         ]);
+
                         return null;
                     }
                 })
@@ -114,11 +114,11 @@ class BankingController extends Controller
 
             Log::info('Bank accounts fetched successfully', [
                 'company_id' => $company->id,
-                'count' => $accounts->count()
+                'count' => $accounts->count(),
             ]);
 
             return response()->json([
-                'data' => $accounts
+                'data' => $accounts,
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to fetch bank accounts', [
@@ -126,22 +126,19 @@ class BankingController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'user_id' => $request->user()?->id,
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
                 'data' => [],
                 'error' => 'Failed to fetch bank accounts',
-                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred'
+                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ], 200); // Return 200 to prevent UI errors
         }
     }
 
     /**
      * Get transactions with optional filters
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function transactions(Request $request): JsonResponse
     {
@@ -149,12 +146,13 @@ class BankingController extends Controller
             Log::info('Banking transactions endpoint called', [
                 'user_id' => $request->user()?->id,
                 'company_header' => $request->header('company'),
-                'filters' => $request->only(['account_id', 'from_date', 'to_date', 'search'])
+                'filters' => $request->only(['account_id', 'from_date', 'to_date', 'search']),
             ]);
 
             // Check if bank_transactions table exists
-            if (!Schema::hasTable('bank_transactions')) {
+            if (! Schema::hasTable('bank_transactions')) {
                 Log::warning('bank_transactions table does not exist');
+
                 return response()->json([
                     'data' => [],
                     'meta' => [
@@ -163,16 +161,17 @@ class BankingController extends Controller
                         'per_page' => 15,
                         'total' => 0,
                     ],
-                    'message' => 'Banking feature not yet initialized'
+                    'message' => 'Banking feature not yet initialized',
                 ]);
             }
 
             $company = $this->resolveCompany($request);
 
-            if (!$company) {
+            if (! $company) {
                 Log::warning('No company found for banking transactions request', [
-                    'user_id' => $request->user()?->id
+                    'user_id' => $request->user()?->id,
                 ]);
+
                 return response()->json([
                     'data' => [],
                     'meta' => [
@@ -181,12 +180,12 @@ class BankingController extends Controller
                         'per_page' => 15,
                         'total' => 0,
                     ],
-                    'error' => 'No company found for user'
+                    'error' => 'No company found for user',
                 ], 200); // Return 200 with empty data instead of 404
             }
 
             Log::info('Querying bank transactions', [
-                'company_id' => $company->id
+                'company_id' => $company->id,
             ]);
 
             $query = BankTransaction::where('company_id', $company->id);
@@ -196,7 +195,7 @@ class BankingController extends Controller
                 $query->with(['bankAccount', 'matchedInvoice', 'matchedPayment']);
             } catch (\Throwable $e) {
                 Log::warning('Failed to eager load relationships', [
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
 
@@ -243,7 +242,7 @@ class BankingController extends Controller
             Log::info('Bank transactions queried successfully', [
                 'company_id' => $company->id,
                 'count' => $transactions->count(),
-                'total' => $transactions->total()
+                'total' => $transactions->total(),
             ]);
 
             $data = $transactions->map(function ($transaction) {
@@ -270,8 +269,9 @@ class BankingController extends Controller
                 } catch (\Throwable $e) {
                     Log::error('Failed to map transaction', [
                         'transaction_id' => $transaction->id ?? 'unknown',
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
+
                     return null;
                 }
             })->filter()->values();
@@ -283,14 +283,14 @@ class BankingController extends Controller
                     'last_page' => $transactions->lastPage(),
                     'per_page' => $transactions->perPage(),
                     'total' => $transactions->total(),
-                ]
+                ],
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to fetch transactions', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
@@ -302,26 +302,22 @@ class BankingController extends Controller
                     'total' => 0,
                 ],
                 'error' => 'Failed to fetch transactions',
-                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred'
+                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ], 200); // Return 200 to prevent UI errors
         }
     }
 
     /**
      * Trigger manual sync for a specific bank account
-     *
-     * @param Request $request
-     * @param BankAccount $account
-     * @return JsonResponse
      */
     public function syncAccount(Request $request, BankAccount $account): JsonResponse
     {
         try {
             $company = $this->resolveCompany($request);
 
-            if (!$company || $account->company_id !== $company->id) {
+            if (! $company || $account->company_id !== $company->id) {
                 return response()->json([
-                    'error' => 'Unauthorized'
+                    'error' => 'Unauthorized',
                 ], 403);
             }
 
@@ -331,48 +327,44 @@ class BankingController extends Controller
             Log::info('Manual bank sync triggered', [
                 'company_id' => $company->id,
                 'account_id' => $account->id,
-                'bank_code' => $account->bank_code
+                'bank_code' => $account->bank_code,
             ]);
 
             return response()->json([
                 'message' => 'Sync started successfully',
-                'account_id' => $account->id
+                'account_id' => $account->id,
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to sync account', [
                 'error' => $e->getMessage(),
-                'account_id' => $account->id
+                'account_id' => $account->id,
             ]);
 
             return response()->json([
                 'error' => 'Failed to start sync',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Categorize a transaction
-     *
-     * @param Request $request
-     * @param BankTransaction $transaction
-     * @return JsonResponse
      */
     public function categorize(Request $request, BankTransaction $transaction): JsonResponse
     {
         try {
             $company = $this->resolveCompany($request);
 
-            if (!$company || $transaction->company_id !== $company->id) {
+            if (! $company || $transaction->company_id !== $company->id) {
                 return response()->json([
-                    'error' => 'Unauthorized'
+                    'error' => 'Unauthorized',
                 ], 403);
             }
 
             $request->validate([
                 'category_id' => 'required|exists:expense_categories,id',
                 'notes' => 'nullable|string',
-                'create_expense' => 'nullable|boolean'
+                'create_expense' => 'nullable|boolean',
             ]);
 
             $category = ExpenseCategory::find($request->category_id);
@@ -405,42 +397,38 @@ class BankingController extends Controller
 
                 Log::info('Expense created from bank transaction', [
                     'transaction_id' => $transaction->id,
-                    'expense_id' => $expense->id
+                    'expense_id' => $expense->id,
                 ]);
             }
 
             return response()->json([
                 'message' => 'Transaction categorized successfully',
-                'transaction' => $transaction
+                'transaction' => $transaction,
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to categorize transaction', [
                 'error' => $e->getMessage(),
-                'transaction_id' => $transaction->id
+                'transaction_id' => $transaction->id,
             ]);
 
             return response()->json([
                 'error' => 'Failed to categorize transaction',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Disconnect (deactivate) a bank account
-     *
-     * @param Request $request
-     * @param BankAccount $account
-     * @return JsonResponse
      */
     public function disconnect(Request $request, BankAccount $account): JsonResponse
     {
         try {
             $company = $this->resolveCompany($request);
 
-            if (!$company || $account->company_id !== $company->id) {
+            if (! $company || $account->company_id !== $company->id) {
                 return response()->json([
-                    'error' => 'Unauthorized'
+                    'error' => 'Unauthorized',
                 ], 403);
             }
 
@@ -449,31 +437,28 @@ class BankingController extends Controller
             Log::info('Bank account disconnected', [
                 'company_id' => $company->id,
                 'account_id' => $account->id,
-                'bank_code' => $account->bank_code
+                'bank_code' => $account->bank_code,
             ]);
 
             return response()->json([
                 'message' => 'Bank account disconnected successfully',
-                'account_id' => $account->id
+                'account_id' => $account->id,
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to disconnect account', [
                 'error' => $e->getMessage(),
-                'account_id' => $account->id
+                'account_id' => $account->id,
             ]);
 
             return response()->json([
                 'error' => 'Failed to disconnect account',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Get bank logo URL based on bank code
-     *
-     * @param string|null $bankCode
-     * @return string|null
      */
     private function getBankLogo(?string $bankCode): ?string
     {
@@ -485,7 +470,7 @@ class BankingController extends Controller
 
         // Return null if no bank code provided or logo not found
         // This prevents 404 errors for missing logos
-        if (!$bankCode || !isset($logos[$bankCode])) {
+        if (! $bankCode || ! isset($logos[$bankCode])) {
             return null;
         }
 
@@ -504,7 +489,7 @@ class BankingController extends Controller
 
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
@@ -516,7 +501,7 @@ class BankingController extends Controller
             $company = $user->companies()->where('companies.id', $companyId)->first();
         }
 
-        if (!$company) {
+        if (! $company) {
             $company = $user->companies()->first();
         }
 

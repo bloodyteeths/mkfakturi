@@ -57,4 +57,3 @@ class SupplierRequest extends FormRequest
             ->toArray();
     }
 }
-

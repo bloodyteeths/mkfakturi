@@ -18,7 +18,7 @@ class PartnerFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'company_name' => $this->faker->company(),
             'phone' => $this->faker->phoneNumber(),
-            'tax_id' => 'MK' . $this->faker->numerify('##########'),
+            'tax_id' => 'MK'.$this->faker->numerify('##########'),
             'registration_number' => $this->faker->numerify('########'),
             'bank_name' => $this->faker->randomElement(['Komercijalna Banka', 'Stopanska Banka', 'NLB Banka', 'ProCredit Bank']),
             'bank_account' => $this->faker->numerify('###-############-##'),

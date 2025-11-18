@@ -2,18 +2,18 @@
 
 namespace Tests\Feature\Accounting;
 
+use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Company;
+use App\Models\Currency as AppCurrency;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Customer;
 use App\Models\User;
-use App\Models\Currency as AppCurrency;
-use App\Domain\Accounting\IfrsAdapter;
+use IFRS\Models\Account;
 use IFRS\Models\Currency as IfrsCurrency;
 use IFRS\Models\Entity;
-use IFRS\Models\Account;
-use IFRS\Models\Transaction;
 use IFRS\Models\ReportingPeriod;
+use IFRS\Models\Transaction;
 use IFRS\Reports\TrialBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,15 +36,25 @@ class MultiTenantAccountingTest extends TestCase
     protected $connectionsToTransact = [];
 
     protected Company $company1;
+
     protected Company $company2;
+
     protected User $user1;
+
     protected User $user2;
+
     protected Customer $customer1;
+
     protected Customer $customer2;
+
     protected AppCurrency $appCurrency;
+
     protected IfrsCurrency $ifrsCurrency;
+
     protected Entity $entity1;
+
     protected Entity $entity2;
+
     protected IfrsAdapter $adapter;
 
     protected function setUp(): void
@@ -54,7 +64,7 @@ class MultiTenantAccountingTest extends TestCase
         // Enable accounting feature
         config(['ifrs.enabled' => true]);
 
-        $this->adapter = new IfrsAdapter();
+        $this->adapter = new IfrsAdapter;
 
         // Create App Currency for users (separate from IFRS Currency)
         $this->appCurrency = AppCurrency::create([
@@ -264,7 +274,7 @@ class MultiTenantAccountingTest extends TestCase
         $this->assertEquals($this->entity2->id, $account2->entity_id);
 
         // Verify trial balance for Company 1 shows only Company 1 data
-        $trialBalance1 = new TrialBalance((string)now()->year, $this->entity1);
+        $trialBalance1 = new TrialBalance((string) now()->year, $this->entity1);
         $this->assertNotNull($trialBalance1);
 
         // All accounts in trial balance should belong to entity 1
@@ -274,7 +284,7 @@ class MultiTenantAccountingTest extends TestCase
         }
 
         // Verify trial balance for Company 2 shows only Company 2 data
-        $trialBalance2 = new TrialBalance((string)now()->year, $this->entity2);
+        $trialBalance2 = new TrialBalance((string) now()->year, $this->entity2);
         $this->assertNotNull($trialBalance2);
 
         // All accounts in trial balance should belong to entity 2

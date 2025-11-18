@@ -7,7 +7,6 @@ use App\Models\BankProvider;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -20,7 +19,9 @@ class BankConnectionTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Company $company;
+
     protected BankProvider $provider;
 
     protected function setUp(): void
@@ -42,7 +43,7 @@ class BankConnectionTest extends TestCase
             'supports_ais' => true,
             'supports_pis' => false,
             'is_active' => true,
-            'metadata' => ['bic' => 'NLBMKMK2XXX']
+            'metadata' => ['bic' => 'NLBMKMK2XXX'],
         ]);
     }
 
@@ -51,7 +52,7 @@ class BankConnectionTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->postJson('/api/v1/' . $this->company->id . '/bank/oauth/start', [
+            ->postJson('/api/v1/'.$this->company->id.'/bank/oauth/start', [
                 'bank_provider_key' => 'nlb',
             ]);
 
@@ -62,7 +63,7 @@ class BankConnectionTest extends TestCase
                     'authorization_url',
                     'connection_id',
                     'bank_provider',
-                ]
+                ],
             ]);
 
         // Verify connection record created
@@ -96,7 +97,7 @@ class BankConnectionTest extends TestCase
         // Try to access from different company context
         $response = $this->actingAs($this->user)
             ->withHeader('company', $otherCompany->id)
-            ->getJson('/api/v1/' . $otherCompany->id . '/bank/connections');
+            ->getJson('/api/v1/'.$otherCompany->id.'/bank/connections');
 
         // Should not see the first company's connection
         $response->assertStatus(200);
@@ -125,7 +126,7 @@ class BankConnectionTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/connections');
+            ->getJson('/api/v1/'.$this->company->id.'/bank/connections');
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data')
@@ -138,8 +139,8 @@ class BankConnectionTest extends TestCase
                         'status',
                         'is_active',
                         'is_expired',
-                    ]
-                ]
+                    ],
+                ],
             ]);
     }
 
@@ -155,14 +156,14 @@ class BankConnectionTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->deleteJson('/api/v1/' . $this->company->id . '/bank/connections/' . $connection->id);
+            ->deleteJson('/api/v1/'.$this->company->id.'/bank/connections/'.$connection->id);
 
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'status' => BankConnection::STATUS_REVOKED
-                ]
+                    'status' => BankConnection::STATUS_REVOKED,
+                ],
             ]);
 
         // Verify database updated
@@ -187,7 +188,7 @@ class BankConnectionTest extends TestCase
         // Try to revoke from different company context
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->deleteJson('/api/v1/' . $this->company->id . '/bank/connections/' . $connection->id);
+            ->deleteJson('/api/v1/'.$this->company->id.'/bank/connections/'.$connection->id);
 
         $response->assertStatus(404);
 
@@ -203,7 +204,7 @@ class BankConnectionTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->postJson('/api/v1/' . $this->company->id . '/bank/oauth/start', [
+            ->postJson('/api/v1/'.$this->company->id.'/bank/oauth/start', [
                 'bank_provider_key' => 'invalid_bank',
             ]);
 
@@ -214,7 +215,7 @@ class BankConnectionTest extends TestCase
     /** @test */
     public function test_oauth_start_requires_authentication()
     {
-        $response = $this->postJson('/api/v1/' . $this->company->id . '/bank/oauth/start', [
+        $response = $this->postJson('/api/v1/'.$this->company->id.'/bank/oauth/start', [
             'bank_provider_key' => 'nlb',
         ]);
 
@@ -235,7 +236,7 @@ class BankConnectionTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->getJson('/api/v1/' . $this->company->id . '/bank/connections');
+            ->getJson('/api/v1/'.$this->company->id.'/bank/connections');
 
         $response->assertStatus(200);
 
@@ -252,7 +253,7 @@ class BankConnectionTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
-            ->postJson('/api/v1/' . $this->company->id . '/bank/oauth/start', [
+            ->postJson('/api/v1/'.$this->company->id.'/bank/oauth/start', [
                 'bank_provider_key' => 'nlb',
             ]);
 
@@ -270,7 +271,7 @@ class BankConnectionTest extends TestCase
             'metadata' => [
                 'consent_id' => 'test-consent-123',
                 'accounts_count' => 2,
-            ]
+            ],
         ]);
 
         $this->assertEquals('test-consent-123', $connection->metadata['consent_id']);

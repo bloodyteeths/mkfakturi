@@ -2,9 +2,9 @@
 
 namespace Modules\Mk\Services;
 
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Exception;
@@ -34,22 +34,29 @@ class QrCodeService
      * H = 30% error correction
      */
     const ERROR_CORRECTION_LOW = 'L';
+
     const ERROR_CORRECTION_MEDIUM = 'M';
+
     const ERROR_CORRECTION_QUARTILE = 'Q';
+
     const ERROR_CORRECTION_HIGH = 'H';
 
     /**
      * QR code sizes (in pixels)
      */
     const SIZE_SMALL = 150;
+
     const SIZE_MEDIUM = 250;
+
     const SIZE_LARGE = 400;
 
     /**
      * Default QR code settings
      */
     const DEFAULT_SIZE = self::SIZE_MEDIUM;
+
     const DEFAULT_ERROR_CORRECTION = self::ERROR_CORRECTION_MEDIUM;
+
     const DEFAULT_MARGIN = 2;
 
     /**
@@ -58,18 +65,19 @@ class QrCodeService
      * Creates a QR code for payment information following Macedonian payment standards.
      * Supports CASYS and standard bank transfer formats.
      *
-     * @param array $paymentData Payment information array
-     *   - amount: string Payment amount
-     *   - currency: string Currency code (default: MKD)
-     *   - recipient: string Recipient name
-     *   - iban: string|null Recipient IBAN
-     *   - reference: string|null Payment reference
-     *   - purpose: string|null Payment purpose/description
-     *   - model: string|null Payment model (for Macedonian payments)
-     * @param string $format Output format: svg, png, eps (default: svg)
-     * @param int|null $size QR code size in pixels (default: 250)
-     * @param string|null $errorCorrection Error correction level (default: M)
+     * @param  array  $paymentData  Payment information array
+     *                              - amount: string Payment amount
+     *                              - currency: string Currency code (default: MKD)
+     *                              - recipient: string Recipient name
+     *                              - iban: string|null Recipient IBAN
+     *                              - reference: string|null Payment reference
+     *                              - purpose: string|null Payment purpose/description
+     *                              - model: string|null Payment model (for Macedonian payments)
+     * @param  string  $format  Output format: svg, png, eps (default: svg)
+     * @param  int|null  $size  QR code size in pixels (default: 250)
+     * @param  string|null  $errorCorrection  Error correction level (default: M)
      * @return string The generated QR code
+     *
      * @throws Exception If QR code generation fails
      *
      * @example
@@ -107,7 +115,7 @@ class QrCodeService
                 'amount' => $paymentData['amount'] ?? null,
                 'currency' => $paymentData['currency'] ?? 'MKD',
                 'recipient' => $paymentData['recipient'] ?? null,
-                'format' => $format
+                'format' => $format,
             ]);
 
             return $qrCode;
@@ -115,10 +123,10 @@ class QrCodeService
         } catch (Exception $e) {
             Log::error('Payment QR code generation failed', [
                 'error' => $e->getMessage(),
-                'payment_data' => $paymentData
+                'payment_data' => $paymentData,
             ]);
 
-            throw new Exception('Failed to generate payment QR code: ' . $e->getMessage());
+            throw new Exception('Failed to generate payment QR code: '.$e->getMessage());
         }
     }
 
@@ -128,16 +136,17 @@ class QrCodeService
      * Creates a QR code for item/product information.
      * Can be used for inventory management, product tracking, etc.
      *
-     * @param array $itemData Item information array
-     *   - sku: string Product SKU/code
-     *   - name: string Product name
-     *   - price: string|null Product price
-     *   - url: string|null Product URL
-     *   - description: string|null Product description
-     * @param string $format Output format: svg, png, eps (default: svg)
-     * @param int|null $size QR code size in pixels (default: 250)
-     * @param string|null $errorCorrection Error correction level (default: M)
+     * @param  array  $itemData  Item information array
+     *                           - sku: string Product SKU/code
+     *                           - name: string Product name
+     *                           - price: string|null Product price
+     *                           - url: string|null Product URL
+     *                           - description: string|null Product description
+     * @param  string  $format  Output format: svg, png, eps (default: svg)
+     * @param  int|null  $size  QR code size in pixels (default: 250)
+     * @param  string|null  $errorCorrection  Error correction level (default: M)
      * @return string The generated QR code
+     *
      * @throws Exception If QR code generation fails
      *
      * @example
@@ -172,7 +181,7 @@ class QrCodeService
             Log::info('Item QR code generated', [
                 'sku' => $itemData['sku'] ?? null,
                 'name' => $itemData['name'] ?? null,
-                'format' => $format
+                'format' => $format,
             ]);
 
             return $qrCode;
@@ -180,10 +189,10 @@ class QrCodeService
         } catch (Exception $e) {
             Log::error('Item QR code generation failed', [
                 'error' => $e->getMessage(),
-                'item_data' => $itemData
+                'item_data' => $itemData,
             ]);
 
-            throw new Exception('Failed to generate item QR code: ' . $e->getMessage());
+            throw new Exception('Failed to generate item QR code: '.$e->getMessage());
         }
     }
 
@@ -193,14 +202,14 @@ class QrCodeService
      * Creates a QR code for invoice information.
      * Can link to invoice URL or contain invoice summary data.
      *
-     * @param array $invoiceData Invoice information array
-     *   - invoice_number: string Invoice number
-     *   - amount: string Invoice total amount
-     *   - currency: string Currency code
-     *   - date: string Invoice date
-     *   - url: string|null Invoice view URL
-     * @param string $format Output format: svg, png, eps (default: svg)
-     * @param int|null $size QR code size in pixels (default: 250)
+     * @param  array  $invoiceData  Invoice information array
+     *                              - invoice_number: string Invoice number
+     *                              - amount: string Invoice total amount
+     *                              - currency: string Currency code
+     *                              - date: string Invoice date
+     *                              - url: string|null Invoice view URL
+     * @param  string  $format  Output format: svg, png, eps (default: svg)
+     * @param  int|null  $size  QR code size in pixels (default: 250)
      * @return string The generated QR code
      *
      * @example
@@ -219,7 +228,7 @@ class QrCodeService
     ): string {
         try {
             // If URL is provided, use it directly for easy access
-            if (!empty($invoiceData['url'])) {
+            if (! empty($invoiceData['url'])) {
                 $data = $invoiceData['url'];
             } else {
                 // Build structured invoice data
@@ -235,7 +244,7 @@ class QrCodeService
 
             Log::info('Invoice QR code generated', [
                 'invoice_number' => $invoiceData['invoice_number'] ?? null,
-                'format' => $format
+                'format' => $format,
             ]);
 
             return $qrCode;
@@ -243,10 +252,10 @@ class QrCodeService
         } catch (Exception $e) {
             Log::error('Invoice QR code generation failed', [
                 'error' => $e->getMessage(),
-                'invoice_data' => $invoiceData
+                'invoice_data' => $invoiceData,
             ]);
 
-            throw new Exception('Failed to generate invoice QR code: ' . $e->getMessage());
+            throw new Exception('Failed to generate invoice QR code: '.$e->getMessage());
         }
     }
 
@@ -255,12 +264,13 @@ class QrCodeService
      *
      * Creates a QR code from any string data.
      *
-     * @param string $data The data to encode
-     * @param string $format Output format: svg, png, eps (default: svg)
-     * @param int $size QR code size in pixels (default: 250)
-     * @param string $errorCorrection Error correction level (default: M)
-     * @param int|null $margin Margin size (default: 2)
+     * @param  string  $data  The data to encode
+     * @param  string  $format  Output format: svg, png, eps (default: svg)
+     * @param  int  $size  QR code size in pixels (default: 250)
+     * @param  string  $errorCorrection  Error correction level (default: M)
+     * @param  int|null  $margin  Margin size (default: 2)
      * @return string The generated QR code
+     *
      * @throws Exception If QR code generation fails
      *
      * @example
@@ -285,7 +295,7 @@ class QrCodeService
             $margin = $margin ?? self::DEFAULT_MARGIN;
 
             // Map error correction levels to bacon-qr-code v3
-            $ecLevel = match($errorCorrection) {
+            $ecLevel = match ($errorCorrection) {
                 'L' => \BaconQrCode\Common\ErrorCorrectionLevel::L(),
                 'M' => \BaconQrCode\Common\ErrorCorrectionLevel::M(),
                 'Q' => \BaconQrCode\Common\ErrorCorrectionLevel::Q(),
@@ -297,12 +307,12 @@ class QrCodeService
             if ($format === 'svg') {
                 $renderer = new ImageRenderer(
                     new RendererStyle($size, $margin, null, null, $ecLevel),
-                    new SvgImageBackEnd()
+                    new SvgImageBackEnd
                 );
             } else { // png (ImagickImageBackEnd requires Imagick extension)
                 $renderer = new ImageRenderer(
                     new RendererStyle($size, $margin, null, null, $ecLevel),
-                    new ImagickImageBackEnd()
+                    new ImagickImageBackEnd
                 );
             }
 
@@ -313,7 +323,7 @@ class QrCodeService
                 'format' => $format,
                 'size' => $size,
                 'error_correction' => $errorCorrection,
-                'data_length' => strlen($data)
+                'data_length' => strlen($data),
             ]);
 
             return $qr;
@@ -322,10 +332,10 @@ class QrCodeService
             Log::error('QR code generation failed', [
                 'error' => $e->getMessage(),
                 'format' => $format,
-                'size' => $size
+                'size' => $size,
             ]);
 
-            throw new Exception('Failed to generate QR code: ' . $e->getMessage());
+            throw new Exception('Failed to generate QR code: '.$e->getMessage());
         }
     }
 
@@ -334,9 +344,9 @@ class QrCodeService
      *
      * Returns the QR code as a complete data URI that can be used directly in HTML img src.
      *
-     * @param string $data The data to encode
-     * @param string $format Output format: svg, png (default: svg)
-     * @param int|null $size QR code size in pixels
+     * @param  string  $data  The data to encode
+     * @param  string  $format  Output format: svg, png (default: svg)
+     * @param  int|null  $size  QR code size in pixels
      * @return string Data URI (e.g., "data:image/svg+xml;base64,...")
      *
      * @example
@@ -351,17 +361,18 @@ class QrCodeService
         $qrCode = $this->generate($data, $format, $size ?? self::DEFAULT_SIZE);
 
         if ($format === 'svg') {
-            return 'data:image/svg+xml;base64,' . base64_encode($qrCode);
+            return 'data:image/svg+xml;base64,'.base64_encode($qrCode);
         } else {
             // For PNG, the QR code is already binary data
-            return 'data:image/png;base64,' . base64_encode($qrCode);
+            return 'data:image/png;base64,'.base64_encode($qrCode);
         }
     }
 
     /**
      * Validate payment data
      *
-     * @param array $paymentData Payment data to validate
+     * @param  array  $paymentData  Payment data to validate
+     *
      * @throws Exception If required fields are missing
      */
     protected function validatePaymentData(array $paymentData): void
@@ -375,7 +386,7 @@ class QrCodeService
         }
 
         // Validate amount is numeric
-        if (!is_numeric($paymentData['amount'])) {
+        if (! is_numeric($paymentData['amount'])) {
             throw new Exception('Payment amount must be numeric');
         }
     }
@@ -383,7 +394,8 @@ class QrCodeService
     /**
      * Validate item data
      *
-     * @param array $itemData Item data to validate
+     * @param  array  $itemData  Item data to validate
+     *
      * @throws Exception If required fields are missing
      */
     protected function validateItemData(array $itemData): void
@@ -400,16 +412,17 @@ class QrCodeService
     /**
      * Validate output format
      *
-     * @param string $format Format to validate
+     * @param  string  $format  Format to validate
+     *
      * @throws Exception If format is not supported
      */
     protected function validateFormat(string $format): void
     {
         $validFormats = ['svg', 'png', 'eps'];
 
-        if (!in_array($format, $validFormats)) {
+        if (! in_array($format, $validFormats)) {
             throw new Exception(
-                "Invalid QR code format '$format'. Supported formats: " . implode(', ', $validFormats)
+                "Invalid QR code format '$format'. Supported formats: ".implode(', ', $validFormats)
             );
         }
     }
@@ -417,7 +430,8 @@ class QrCodeService
     /**
      * Validate error correction level
      *
-     * @param string $errorCorrection Error correction level to validate
+     * @param  string  $errorCorrection  Error correction level to validate
+     *
      * @throws Exception If error correction level is not valid
      */
     protected function validateErrorCorrection(string $errorCorrection): void
@@ -426,12 +440,12 @@ class QrCodeService
             self::ERROR_CORRECTION_LOW,
             self::ERROR_CORRECTION_MEDIUM,
             self::ERROR_CORRECTION_QUARTILE,
-            self::ERROR_CORRECTION_HIGH
+            self::ERROR_CORRECTION_HIGH,
         ];
 
-        if (!in_array($errorCorrection, $validLevels)) {
+        if (! in_array($errorCorrection, $validLevels)) {
             throw new Exception(
-                "Invalid error correction level '$errorCorrection'. Valid levels: " .
+                "Invalid error correction level '$errorCorrection'. Valid levels: ".
                 implode(', ', $validLevels)
             );
         }
@@ -442,7 +456,7 @@ class QrCodeService
      *
      * Formats payment data according to Macedonian payment standards.
      *
-     * @param array $paymentData Payment data
+     * @param  array  $paymentData  Payment data
      * @return string Formatted payment string
      */
     protected function buildPaymentString(array $paymentData): string
@@ -453,30 +467,30 @@ class QrCodeService
         $lines = [];
 
         // Add recipient
-        $lines[] = 'RECIPIENT: ' . $paymentData['recipient'];
+        $lines[] = 'RECIPIENT: '.$paymentData['recipient'];
 
         // Add IBAN if provided
-        if (!empty($paymentData['iban'])) {
-            $lines[] = 'IBAN: ' . $paymentData['iban'];
+        if (! empty($paymentData['iban'])) {
+            $lines[] = 'IBAN: '.$paymentData['iban'];
         }
 
         // Add amount with currency
         $currency = $paymentData['currency'] ?? 'MKD';
-        $lines[] = 'AMOUNT: ' . $paymentData['amount'] . ' ' . $currency;
+        $lines[] = 'AMOUNT: '.$paymentData['amount'].' '.$currency;
 
         // Add reference if provided
-        if (!empty($paymentData['reference'])) {
-            $lines[] = 'REFERENCE: ' . $paymentData['reference'];
+        if (! empty($paymentData['reference'])) {
+            $lines[] = 'REFERENCE: '.$paymentData['reference'];
         }
 
         // Add purpose/description if provided
-        if (!empty($paymentData['purpose'])) {
-            $lines[] = 'PURPOSE: ' . $paymentData['purpose'];
+        if (! empty($paymentData['purpose'])) {
+            $lines[] = 'PURPOSE: '.$paymentData['purpose'];
         }
 
         // Add payment model if provided (Macedonian specific)
-        if (!empty($paymentData['model'])) {
-            $lines[] = 'MODEL: ' . $paymentData['model'];
+        if (! empty($paymentData['model'])) {
+            $lines[] = 'MODEL: '.$paymentData['model'];
         }
 
         return implode("\n", $lines);
@@ -485,28 +499,28 @@ class QrCodeService
     /**
      * Build item string for QR code
      *
-     * @param array $itemData Item data
+     * @param  array  $itemData  Item data
      * @return string Formatted item string
      */
     protected function buildItemString(array $itemData): string
     {
         // If URL is provided, use it for direct linking
-        if (!empty($itemData['url'])) {
+        if (! empty($itemData['url'])) {
             return $itemData['url'];
         }
 
         // Otherwise, create structured data
         $lines = [];
 
-        $lines[] = 'SKU: ' . $itemData['sku'];
-        $lines[] = 'NAME: ' . $itemData['name'];
+        $lines[] = 'SKU: '.$itemData['sku'];
+        $lines[] = 'NAME: '.$itemData['name'];
 
-        if (!empty($itemData['price'])) {
-            $lines[] = 'PRICE: ' . $itemData['price'];
+        if (! empty($itemData['price'])) {
+            $lines[] = 'PRICE: '.$itemData['price'];
         }
 
-        if (!empty($itemData['description'])) {
-            $lines[] = 'DESC: ' . $itemData['description'];
+        if (! empty($itemData['description'])) {
+            $lines[] = 'DESC: '.$itemData['description'];
         }
 
         return implode("\n", $lines);
@@ -515,21 +529,21 @@ class QrCodeService
     /**
      * Build invoice string for QR code
      *
-     * @param array $invoiceData Invoice data
+     * @param  array  $invoiceData  Invoice data
      * @return string Formatted invoice string
      */
     protected function buildInvoiceString(array $invoiceData): string
     {
         $lines = [];
 
-        $lines[] = 'INVOICE: ' . ($invoiceData['invoice_number'] ?? 'N/A');
+        $lines[] = 'INVOICE: '.($invoiceData['invoice_number'] ?? 'N/A');
 
-        if (!empty($invoiceData['amount']) && !empty($invoiceData['currency'])) {
-            $lines[] = 'AMOUNT: ' . $invoiceData['amount'] . ' ' . $invoiceData['currency'];
+        if (! empty($invoiceData['amount']) && ! empty($invoiceData['currency'])) {
+            $lines[] = 'AMOUNT: '.$invoiceData['amount'].' '.$invoiceData['currency'];
         }
 
-        if (!empty($invoiceData['date'])) {
-            $lines[] = 'DATE: ' . $invoiceData['date'];
+        if (! empty($invoiceData['date'])) {
+            $lines[] = 'DATE: '.$invoiceData['date'];
         }
 
         return implode("\n", $lines);
@@ -546,23 +560,23 @@ class QrCodeService
             self::ERROR_CORRECTION_LOW => [
                 'level' => 'L',
                 'recovery' => '7%',
-                'description' => 'Low - suitable for clean environments'
+                'description' => 'Low - suitable for clean environments',
             ],
             self::ERROR_CORRECTION_MEDIUM => [
                 'level' => 'M',
                 'recovery' => '15%',
-                'description' => 'Medium - balanced option (default)'
+                'description' => 'Medium - balanced option (default)',
             ],
             self::ERROR_CORRECTION_QUARTILE => [
                 'level' => 'Q',
                 'recovery' => '25%',
-                'description' => 'Quartile - good for moderate damage tolerance'
+                'description' => 'Quartile - good for moderate damage tolerance',
             ],
             self::ERROR_CORRECTION_HIGH => [
                 'level' => 'H',
                 'recovery' => '30%',
-                'description' => 'High - best for harsh environments (recommended for payments)'
-            ]
+                'description' => 'High - best for harsh environments (recommended for payments)',
+            ],
         ];
     }
 
@@ -576,16 +590,16 @@ class QrCodeService
         return [
             self::SIZE_SMALL => [
                 'size' => 150,
-                'use_case' => 'Email signatures, small printed materials'
+                'use_case' => 'Email signatures, small printed materials',
             ],
             self::SIZE_MEDIUM => [
                 'size' => 250,
-                'use_case' => 'Invoices, receipts, standard documents (default)'
+                'use_case' => 'Invoices, receipts, standard documents (default)',
             ],
             self::SIZE_LARGE => [
                 'size' => 400,
-                'use_case' => 'Posters, banners, large displays'
-            ]
+                'use_case' => 'Posters, banners, large displays',
+            ],
         ];
     }
 }

@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Note;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class NotePolicy
 {
@@ -16,7 +15,7 @@ class NotePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('manage-all-notes', Note::class)) {
             return true;
         }
@@ -29,7 +28,7 @@ class NotePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-all-notes', Note::class)) {
             return true;
         }

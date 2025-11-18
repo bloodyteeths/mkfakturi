@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
 
 class MiniMaxToken extends Model
@@ -49,7 +49,7 @@ class MiniMaxToken extends Model
         if ($value) {
             return Crypt::decrypt($value);
         }
-        
+
         return null;
     }
 
@@ -101,4 +101,3 @@ class MiniMaxToken extends Model
         return $this->update(['is_active' => false]);
     }
 }
-

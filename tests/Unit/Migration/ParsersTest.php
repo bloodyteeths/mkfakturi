@@ -9,16 +9,15 @@ use App\Services\Migration\Parsers\ExcelParserService;
 use App\Services\Migration\Parsers\XmlParserService;
 use App\Services\Migration\Transformers\DateTransformer;
 use App\Services\Migration\Transformers\DecimalTransformer;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 /**
  * ParsersTest - Test file parser services with Macedonia-specific data
- * 
+ *
  * This test suite validates the three parser services (CSV, Excel, XML)
  * with Macedonia-specific data formats, encodings, and business scenarios.
- * 
+ *
  * Test Coverage:
  * - Macedonia-specific encodings (UTF-8, Windows-1251)
  * - Date formats (dd.mm.yyyy, dd/mm/yyyy)
@@ -28,27 +27,28 @@ use Illuminate\Support\Facades\Storage;
  * - Error handling and recovery
  * - Field mapping accuracy with Macedonian terms
  * - Progress callback functionality
- * 
- * @package Tests\Unit\Migration
  */
 class ParsersTest extends TestCase
 {
     use RefreshDatabase;
 
     private CsvParserService $csvParser;
+
     private ExcelParserService $excelParser;
+
     private XmlParserService $xmlParser;
+
     private ImportJob $importJob;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create parser instances
         $fieldMapper = app(FieldMapperService::class);
         $dateTransformer = app(DateTransformer::class);
         $decimalTransformer = app(DecimalTransformer::class);
-        
+
         $this->csvParser = new CsvParserService($fieldMapper, $dateTransformer, $decimalTransformer);
         $this->excelParser = new ExcelParserService($fieldMapper, $dateTransformer, $decimalTransformer);
         $this->xmlParser = new XmlParserService($fieldMapper, $dateTransformer, $decimalTransformer);
@@ -75,7 +75,7 @@ class ParsersTest extends TestCase
     public function csv_parser_handles_macedonia_customer_data()
     {
         // Create test CSV with Macedonia customer data
-        $csvContent = <<<CSV
+        $csvContent = <<<'CSV'
 naziv,embs,адреса,град,телефон,email
 "Трговија ДООЕЛ",4030998123000,"ул. Маршал Тито бр.15","Скопje","+38970123456","info@trgovija.mk"
 "Mega Trade",4030998456000,"Partizanska 25","Bitola","+38975987654","contact@megatrade.mk"
@@ -83,27 +83,27 @@ naziv,embs,адреса,град,телефон,email
 CSV;
 
         $testFile = $this->createTestFile('macedonia_customers.csv', $csvContent);
-        
+
         $result = $this->csvParser->parse($this->importJob, $testFile);
-        
+
         // Validate structure
         $this->assertArrayHasKey('headers', $result);
         $this->assertArrayHasKey('field_mappings', $result);
         $this->assertArrayHasKey('rows', $result);
         $this->assertArrayHasKey('metadata', $result);
-        
+
         // Validate data processing
         $this->assertCount(3, $result['rows']);
-        
+
         // Check if Macedonia-specific fields are mapped correctly
         $mappings = $result['field_mappings'];
         $this->assertGreaterThan(0.7, $mappings['naziv']['confidence']); // "naziv" should map to customer_name
         $this->assertGreaterThan(0.7, $mappings['embs']['confidence']); // "embs" should map to tax_id
-        
+
         // Validate Cyrillic text preservation
         $firstRow = $result['rows'][0];
         $this->assertStringContainsString('Трговија', $firstRow['customer_name'] ?? $firstRow['naziv']);
-        
+
         $this->cleanupTestFile($testFile);
     }
 
@@ -111,7 +111,7 @@ CSV;
     public function csv_parser_handles_macedonia_decimal_formats()
     {
         // CSV with Macedonia decimal formats (comma separators)
-        $csvContent = <<<CSV
+        $csvContent = <<<'CSV'
 stavka,količina,cena,iznos,pdv_stapka
 "Лаптоп HP","2","45.500,00","91.000,00","18,00"
 "Миш","5","850,50","4.252,50","18,00"  
@@ -119,16 +119,16 @@ stavka,količina,cena,iznos,pdv_stapka
 CSV;
 
         $testFile = $this->createTestFile('macedonia_items.csv', $csvContent);
-        
+
         $result = $this->csvParser->parse($this->importJob, $testFile);
-        
+
         // Validate decimal transformation
         $this->assertCount(3, $result['rows']);
-        
+
         // Check that decimal separators are converted properly
         $firstRow = $result['rows'][0];
         $this->assertIsNumeric($firstRow['unit_price'] ?? $firstRow['cena']);
-        
+
         $this->cleanupTestFile($testFile);
     }
 
@@ -139,24 +139,24 @@ CSV;
         $csvContent = "naziv,opis,cena\n";
         $csvContent .= "Производ,Опис на производот,1250.50\n";
         $csvContent .= "Услуга,Консултантски услуги,3500.00\n";
-        
+
         // Convert to Windows-1251 encoding
         $encodedContent = mb_convert_encoding($csvContent, 'Windows-1251', 'UTF-8');
-        
+
         $testFile = $this->createTestFile('cyrillic_products.csv', $encodedContent);
-        
+
         $result = $this->csvParser->parse($this->importJob, $testFile, [
-            'encoding' => 'Windows-1251'
+            'encoding' => 'Windows-1251',
         ]);
-        
+
         // Validate encoding conversion worked
         $this->assertCount(2, $result['rows']);
-        
+
         // Check Cyrillic text is properly decoded
         $firstRow = $result['rows'][0];
         $productName = $firstRow['item_name'] ?? $firstRow['naziv'];
         $this->assertStringContainsString('Производ', $productName);
-        
+
         $this->cleanupTestFile($testFile);
     }
 
@@ -172,7 +172,7 @@ CSV;
     public function xml_parser_handles_ubl_invoice_format()
     {
         // Create test UBL invoice XML
-        $xmlContent = <<<XML
+        $xmlContent = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -218,20 +218,20 @@ CSV;
 XML;
 
         $testFile = $this->createTestFile('test_invoice.xml', $xmlContent);
-        
+
         $result = $this->xmlParser->parse($this->importJob, $testFile);
-        
+
         // Validate XML parsing
         $this->assertArrayHasKey('headers', $result);
         $this->assertArrayHasKey('rows', $result);
         $this->assertArrayHasKey('metadata', $result);
-        
+
         // Check UBL format detection
         $this->assertEquals('ubl_invoice', $result['metadata']['xml_format']);
-        
+
         // Validate data extraction
         $this->assertGreaterThan(0, count($result['rows']));
-        
+
         // Check Cyrillic text preservation in XML
         $hasLaptop = false;
         foreach ($result['rows'] as $row) {
@@ -241,7 +241,7 @@ XML;
             }
         }
         $this->assertTrue($hasLaptop, 'Cyrillic text not properly preserved in XML parsing');
-        
+
         $this->cleanupTestFile($testFile);
     }
 
@@ -249,7 +249,7 @@ XML;
     public function xml_parser_handles_onivo_export_format()
     {
         // Create test Onivo export XML format
-        $xmlContent = <<<XML
+        $xmlContent = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <OnivoExport xmlns="http://www.onivo.mk/export/schema">
     <Customer>
@@ -282,25 +282,25 @@ XML;
 XML;
 
         $testFile = $this->createTestFile('onivo_export.xml', $xmlContent);
-        
+
         $result = $this->xmlParser->parse($this->importJob, $testFile);
-        
+
         // Validate Onivo format detection
         $this->assertEquals('onivo_export', $result['metadata']['xml_format']);
-        
+
         // Validate data extraction
         $this->assertGreaterThan(0, count($result['rows']));
-        
+
         // Check field mapping worked
         $this->assertArrayHasKey('field_mappings', $result);
-        
+
         $this->cleanupTestFile($testFile);
     }
 
     /** @test */
     public function parsers_handle_progress_callbacks()
     {
-        $csvContent = <<<CSV
+        $csvContent = <<<'CSV'
 naziv,iznos
 "Item 1","100.50"
 "Item 2","200.75"
@@ -310,33 +310,33 @@ naziv,iznos
 CSV;
 
         $testFile = $this->createTestFile('progress_test.csv', $csvContent);
-        
+
         $progressUpdates = [];
-        $progressCallback = function($progress) use (&$progressUpdates) {
+        $progressCallback = function ($progress) use (&$progressUpdates) {
             $progressUpdates[] = $progress;
         };
-        
+
         $result = $this->csvParser->parse(
-            $this->importJob, 
-            $testFile, 
+            $this->importJob,
+            $testFile,
             ['chunk_size' => 2], // Small chunks to trigger multiple progress updates
             $progressCallback
         );
-        
+
         // Validate progress callbacks were triggered
         $this->assertGreaterThan(0, count($progressUpdates));
-        
+
         // Check progress structure
         foreach ($progressUpdates as $progress) {
             $this->assertArrayHasKey('processed', $progress);
             $this->assertArrayHasKey('total', $progress);
             $this->assertArrayHasKey('percentage', $progress);
         }
-        
+
         // Final progress should be 100%
         $finalProgress = end($progressUpdates);
         $this->assertEquals(100, $finalProgress['percentage']);
-        
+
         $this->cleanupTestFile($testFile);
     }
 
@@ -344,35 +344,35 @@ CSV;
     public function parsers_handle_large_files_efficiently()
     {
         // Create a larger CSV file to test memory efficiency
-        $lines = ["naziv,iznos,opis"];
-        
+        $lines = ['naziv,iznos,opis'];
+
         for ($i = 1; $i <= 1000; $i++) {
-            $lines[] = "\"Item {$i}\",\"" . ($i * 10.50) . "\",\"Description for item {$i}\"";
+            $lines[] = "\"Item {$i}\",\"".($i * 10.50)."\",\"Description for item {$i}\"";
         }
-        
+
         $csvContent = implode("\n", $lines);
         $testFile = $this->createTestFile('large_test.csv', $csvContent);
-        
+
         $startMemory = memory_get_usage();
-        
+
         $result = $this->csvParser->parse($this->importJob, $testFile, [
-            'chunk_size' => 100
+            'chunk_size' => 100,
         ]);
-        
+
         $endMemory = memory_get_usage();
         $memoryUsed = $endMemory - $startMemory;
-        
+
         // Validate results
         $this->assertCount(1000, $result['rows']);
         $this->assertLessThan(50 * 1024 * 1024, $memoryUsed); // Less than 50MB memory usage
-        
+
         $this->cleanupTestFile($testFile);
     }
 
     /** @test */
     public function parsers_provide_preview_functionality()
     {
-        $csvContent = <<<CSV
+        $csvContent = <<<'CSV'
 naziv,cena,количина,опис
 "Производ 1","1250.50","10","Опис на производ 1"
 "Производ 2","2500.75","5","Опис на производ 2"
@@ -380,21 +380,21 @@ naziv,cena,количина,опис
 CSV;
 
         $testFile = $this->createTestFile('preview_test.csv', $csvContent);
-        
+
         $preview = $this->csvParser->preview($testFile);
-        
+
         // Validate preview structure
         $this->assertArrayHasKey('headers', $preview);
         $this->assertArrayHasKey('sample_rows', $preview);
         $this->assertArrayHasKey('detected_structure', $preview);
         $this->assertArrayHasKey('total_columns', $preview);
-        
+
         // Check headers include Cyrillic
         $this->assertContains('количина', $preview['headers']);
-        
+
         // Check sample data
         $this->assertCount(3, $preview['sample_rows']);
-        
+
         $this->cleanupTestFile($testFile);
     }
 
@@ -404,13 +404,13 @@ CSV;
     private function createTestFile(string $filename, string $content): string
     {
         $testPath = storage_path('testing');
-        if (!is_dir($testPath)) {
+        if (! is_dir($testPath)) {
             mkdir($testPath, 0755, true);
         }
-        
-        $filePath = $testPath . '/' . $filename;
+
+        $filePath = $testPath.'/'.$filename;
         file_put_contents($filePath, $content);
-        
+
         return $filePath;
     }
 
@@ -429,14 +429,14 @@ CSV;
         // Clean up any remaining test files
         $testPath = storage_path('testing');
         if (is_dir($testPath)) {
-            $files = glob($testPath . '/*');
+            $files = glob($testPath.'/*');
             foreach ($files as $file) {
                 if (is_file($file)) {
                     unlink($file);
                 }
             }
         }
-        
+
         parent::tearDown();
     }
 }

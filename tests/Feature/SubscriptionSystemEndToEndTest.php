@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Services\CommissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Paddle\Subscription;
 use Tests\TestCase;
@@ -29,6 +28,7 @@ class SubscriptionSystemEndToEndTest extends TestCase
     use RefreshDatabase;
 
     protected Company $company;
+
     protected User $companyUser;
 
     protected function setUp(): void
@@ -63,7 +63,7 @@ class SubscriptionSystemEndToEndTest extends TestCase
 
         $subscription = $this->company->subscriptions()->create([
             'type' => 'default',
-            'paddle_id' => 'sub_' . Str::random(16),
+            'paddle_id' => 'sub_'.Str::random(16),
             'status' => 'active',
         ]);
 
@@ -76,7 +76,7 @@ class SubscriptionSystemEndToEndTest extends TestCase
             'status' => 'active',
         ]);
 
-        $this->info('✓ Subscription created: ' . $subscription->paddle_id);
+        $this->info('✓ Subscription created: '.$subscription->paddle_id);
 
         // ===== STEP 2: Simulate Paddle webhook for subscription payment =====
         $this->info('Step 2: Process recurring payment via webhook');
@@ -135,14 +135,14 @@ class SubscriptionSystemEndToEndTest extends TestCase
 
         $this->assertEquals('canceled', $subscription->status);
         $this->assertNotNull($subscription->ends_at);
-        $this->info('✓ Subscription canceled (ends: ' . $subscription->ends_at->format('Y-m-d') . ')');
+        $this->info('✓ Subscription canceled (ends: '.$subscription->ends_at->format('Y-m-d').')');
 
         // ===== STEP 6: Verify grace period =====
         $this->info('Step 6: Verify grace period access');
 
         // During grace period, subscription is still considered active
         $this->assertTrue($subscription->onGracePeriod());
-        $this->info('✓ Grace period active until: ' . $subscription->ends_at->format('Y-m-d'));
+        $this->info('✓ Grace period active until: '.$subscription->ends_at->format('Y-m-d'));
 
         $this->info('========================================');
         $this->info('✓✓✓ SUBSCRIPTION LIFECYCLE SUCCESSFUL ✓✓✓');
@@ -422,7 +422,7 @@ class SubscriptionSystemEndToEndTest extends TestCase
 
     protected function info(string $message)
     {
-        echo "\n" . $message;
+        echo "\n".$message;
     }
 }
 

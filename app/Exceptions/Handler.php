@@ -2,19 +2,19 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
-use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -77,7 +77,7 @@ class Handler extends ExceptionHandler
         // Log critical errors to separate channel for monitoring
         if (in_array($logLevel, ['critical', 'emergency', 'alert'])) {
             Log::channel('critical')->log($logLevel, "CRITICAL: {$exception->getMessage()}", $context);
-            
+
             // Send notifications for critical errors in production
             if (app()->environment('production')) {
                 $this->notifyCriticalError($exception, $context);
@@ -111,14 +111,14 @@ class Handler extends ExceptionHandler
         if ($exception instanceof MethodNotAllowedHttpException) {
             return response()->view('errors.405', [
                 'message' => 'The method used for this request is not allowed.',
-                'allowed_methods' => $exception->getHeaders()['Allow'] ?? 'Unknown'
+                'allowed_methods' => $exception->getHeaders()['Allow'] ?? 'Unknown',
             ], 405);
         }
 
         if ($exception instanceof AuthenticationException) {
             return response()->view('errors.401', [
                 'message' => 'You need to log in to access this resource.',
-                'login_url' => route('login')
+                'login_url' => route('login'),
             ], 401);
         }
 
@@ -162,7 +162,7 @@ class Handler extends ExceptionHandler
     {
         $statusCode = $this->getStatusCode($exception);
         $errorCode = $this->getErrorCode($exception);
-        
+
         $response = [
             'success' => false,
             'error' => [
@@ -173,7 +173,7 @@ class Handler extends ExceptionHandler
             'meta' => [
                 'timestamp' => now()->toISOString(),
                 'request_id' => request()->header('X-Request-ID', Str::uuid()->toString()),
-            ]
+            ],
         ];
 
         // Add validation errors for ValidationException
@@ -182,7 +182,7 @@ class Handler extends ExceptionHandler
         }
 
         // Add debug information in development
-        if (config('app.debug') && !app()->environment('production')) {
+        if (config('app.debug') && ! app()->environment('production')) {
             $response['debug'] = [
                 'exception' => get_class($exception),
                 'file' => $exception->getFile(),
@@ -211,7 +211,7 @@ class Handler extends ExceptionHandler
                 'meta' => [
                     'timestamp' => now()->toISOString(),
                     'import_job_id' => $exception->getImportJobId(),
-                ]
+                ],
             ], $exception->getStatusCode());
         }
 
@@ -239,7 +239,7 @@ class Handler extends ExceptionHandler
                 ],
                 'meta' => [
                     'timestamp' => now()->toISOString(),
-                ]
+                ],
             ], $exception->getStatusCode());
         }
 
@@ -266,7 +266,7 @@ class Handler extends ExceptionHandler
                 ],
                 'meta' => [
                     'timestamp' => now()->toISOString(),
-                ]
+                ],
             ], $exception->getStatusCode());
         }
 
@@ -277,7 +277,6 @@ class Handler extends ExceptionHandler
             'user_message' => $exception->getUserMessage(),
         ], $exception->getStatusCode());
     }
-
 
     /**
      * Get user-friendly API error message
@@ -336,7 +335,7 @@ class Handler extends ExceptionHandler
         $sensitiveKeys = [
             'password', 'password_confirmation', 'token', 'api_key', 'secret',
             'credit_card', 'ssn', 'bank_account', 'routing_number', 'cvv',
-            'current_password', 'new_password', 'api_token', 'access_token'
+            'current_password', 'new_password', 'api_token', 'access_token',
         ];
 
         return collect($data)->map(function ($value, $key) use ($sensitiveKeys) {
@@ -403,7 +402,7 @@ class Handler extends ExceptionHandler
     {
         // Skip reporting for certain exceptions in production
         if (app()->environment('production')) {
-            if ($exception instanceof NotFoundHttpException || 
+            if ($exception instanceof NotFoundHttpException ||
                 $exception instanceof ValidationException ||
                 $exception instanceof AuthenticationException) {
                 return;
@@ -427,7 +426,7 @@ class Handler extends ExceptionHandler
                 ],
                 'meta' => [
                     'timestamp' => now()->toISOString(),
-                ]
+                ],
             ], 401);
         }
 
@@ -442,7 +441,7 @@ class Handler extends ExceptionHandler
         try {
             // Send Slack notification if configured
             if (config('logging.channels.slack_critical.url')) {
-                Log::channel('slack_critical')->critical("Critical Error Alert", [
+                Log::channel('slack_critical')->critical('Critical Error Alert', [
                     'exception' => get_class($exception),
                     'message' => $exception->getMessage(),
                     'file' => $exception->getFile(),
@@ -456,7 +455,7 @@ class Handler extends ExceptionHandler
 
             // Send email notification if configured
             if (config('logging.channels.email_critical') && env('LOG_EMAIL_RECIPIENTS')) {
-                Log::channel('email_critical')->critical("Critical System Error", [
+                Log::channel('email_critical')->critical('Critical System Error', [
                     'exception_class' => get_class($exception),
                     'message' => $exception->getMessage(),
                     'file' => $exception->getFile(),
@@ -512,26 +511,26 @@ class Handler extends ExceptionHandler
         // Enhanced SystemException handling
         if ($exception instanceof SystemException) {
             $errorCode = $exception->getErrorCode();
-            
+
             switch ($errorCode) {
                 case 'DATABASE_CONNECTION_ERROR':
                 case 'MEMORY_EXHAUSTION_ERROR':
                 case 'DATA_CORRUPTION_ERROR':
                 case 'DEPENDENCY_UNAVAILABLE_ERROR':
                     return 'critical';
-                    
+
                 case 'FILE_SYSTEM_ERROR':
                 case 'CONFIGURATION_ERROR':
                 case 'THIRD_PARTY_SERVICE_ERROR':
                     return 'error';
-                    
+
                 case 'CACHE_SYSTEM_ERROR':
                 case 'QUEUE_SYSTEM_ERROR':
                     return 'warning';
-                    
+
                 case 'SECURITY_VIOLATION_ERROR':
                     return 'alert';
-                    
+
                 default:
                     return 'error';
             }

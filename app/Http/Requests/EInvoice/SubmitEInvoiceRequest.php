@@ -19,8 +19,6 @@ class SubmitEInvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -43,8 +41,6 @@ class SubmitEInvoiceRequest extends FormRequest
     /**
      * Validate that the e-invoice is ready for submission.
      *
-     * @param EInvoice $eInvoice
-     * @return void
      * @throws \Illuminate\Validation\ValidationException
      */
     public function validateEInvoice(EInvoice $eInvoice): void
@@ -52,7 +48,7 @@ class SubmitEInvoiceRequest extends FormRequest
         $errors = [];
 
         // Check if e-invoice is signed
-        if (!$eInvoice->isSigned()) {
+        if (! $eInvoice->isSigned()) {
             $errors['e_invoice'][] = 'E-invoice must be signed before submission.';
         }
 
@@ -67,19 +63,17 @@ class SubmitEInvoiceRequest extends FormRequest
         }
 
         // Check if has active certificate
-        if (!$eInvoice->certificate_id) {
+        if (! $eInvoice->certificate_id) {
             $errors['e_invoice'][] = 'E-invoice has no associated certificate.';
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw \Illuminate\Validation\ValidationException::withMessages($errors);
         }
     }
 
     /**
      * Get custom messages for validator errors.
-     *
-     * @return array
      */
     public function messages(): array
     {

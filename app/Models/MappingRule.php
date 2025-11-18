@@ -14,20 +14,32 @@ class MappingRule extends Model
 
     // Entity types
     public const ENTITY_CUSTOMER = 'customer';
+
     public const ENTITY_INVOICE = 'invoice';
+
     public const ENTITY_ITEM = 'item';
+
     public const ENTITY_PAYMENT = 'payment';
+
     public const ENTITY_EXPENSE = 'expense';
 
     // Transformation types
     public const TRANSFORM_DIRECT = 'direct';
+
     public const TRANSFORM_REGEX = 'regex';
+
     public const TRANSFORM_LOOKUP = 'lookup';
+
     public const TRANSFORM_CALCULATION = 'calculation';
+
     public const TRANSFORM_DATE_FORMAT = 'date_format';
+
     public const TRANSFORM_CURRENCY_CONVERT = 'currency_convert';
+
     public const TRANSFORM_SPLIT = 'split';
+
     public const TRANSFORM_COMBINE = 'combine';
+
     public const TRANSFORM_CONDITIONAL = 'conditional';
 
     protected $guarded = ['id'];
@@ -82,9 +94,10 @@ class MappingRule extends Model
     // Accessors
     public function getFormattedCreatedAtAttribute()
     {
-        $dateFormat = $this->company_id 
+        $dateFormat = $this->company_id
             ? CompanySetting::getSetting('carbon_date_format', $this->company_id)
             : 'Y-m-d';
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
@@ -105,16 +118,17 @@ class MappingRule extends Model
 
     public function getHasTestCasesAttribute()
     {
-        return !empty($this->test_cases) && is_array($this->test_cases) && count($this->test_cases) > 0;
+        return ! empty($this->test_cases) && is_array($this->test_cases) && count($this->test_cases) > 0;
     }
 
     // Scopes
     public function scopeWhereCompany($query, $companyId = null)
     {
         $companyId = $companyId ?: request()->header('company');
+
         return $query->where(function ($q) use ($companyId) {
             $q->where('company_id', $companyId)
-              ->orWhereNull('company_id'); // Include global rules
+                ->orWhereNull('company_id'); // Include global rules
         });
     }
 
@@ -127,7 +141,7 @@ class MappingRule extends Model
     {
         return $query->where(function ($q) use ($sourceSystem) {
             $q->where('source_system', $sourceSystem)
-              ->orWhereNull('source_system'); // Include generic rules
+                ->orWhereNull('source_system'); // Include generic rules
         });
     }
 
@@ -193,11 +207,11 @@ class MappingRule extends Model
         }
 
         if ($filters->get('source_field')) {
-            $query->where('source_field', 'LIKE', '%' . $filters->get('source_field') . '%');
+            $query->where('source_field', 'LIKE', '%'.$filters->get('source_field').'%');
         }
 
         if ($filters->get('target_field')) {
-            $query->where('target_field', 'LIKE', '%' . $filters->get('target_field') . '%');
+            $query->where('target_field', 'LIKE', '%'.$filters->get('target_field').'%');
         }
 
         if ($filters->get('is_active') !== null) {
@@ -279,7 +293,7 @@ class MappingRule extends Model
     public function isApplicable($sourceField, $entityType, $sourceSystem = null, $conditions = [])
     {
         // Check if rule is active
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 
@@ -294,12 +308,12 @@ class MappingRule extends Model
         }
 
         // Check source field match (exact or pattern)
-        if (!$this->matchesSourceField($sourceField)) {
+        if (! $this->matchesSourceField($sourceField)) {
             return false;
         }
 
         // Check additional conditions
-        if (!empty($this->conditions) && !$this->evaluateConditions($conditions)) {
+        if (! empty($this->conditions) && ! $this->evaluateConditions($conditions)) {
             return false;
         }
 
@@ -314,7 +328,7 @@ class MappingRule extends Model
         }
 
         // Check field variations
-        if (!empty($this->field_variations)) {
+        if (! empty($this->field_variations)) {
             foreach ($this->field_variations as $variation) {
                 if (strtolower($variation) === strtolower($sourceField)) {
                     return true;
@@ -323,16 +337,16 @@ class MappingRule extends Model
         }
 
         // Check Macedonian patterns
-        if (!empty($this->macedonian_patterns)) {
+        if (! empty($this->macedonian_patterns)) {
             foreach ($this->macedonian_patterns as $pattern) {
-                if (preg_match('/' . $pattern . '/i', $sourceField)) {
+                if (preg_match('/'.$pattern.'/i', $sourceField)) {
                     return true;
                 }
             }
         }
 
         // Check language variations (nested structure: ["en" => [...], "mk" => [...]])
-        if (!empty($this->language_variations)) {
+        if (! empty($this->language_variations)) {
             foreach ($this->language_variations as $lang => $variations) {
                 if (is_array($variations)) {
                     foreach ($variations as $variation) {
@@ -359,7 +373,7 @@ class MappingRule extends Model
             $operator = $condition['operator'] ?? '=';
             $value = $condition['value'] ?? null;
 
-            if (!$field || !isset($contextData[$field])) {
+            if (! $field || ! isset($contextData[$field])) {
                 continue;
             }
 
@@ -367,22 +381,34 @@ class MappingRule extends Model
 
             switch ($operator) {
                 case '=':case '==':
-                    if ($fieldValue != $value) return false;
+                    if ($fieldValue != $value) {
+                        return false;
+                    }
                     break;
                 case '!=':
-                    if ($fieldValue == $value) return false;
+                    if ($fieldValue == $value) {
+                        return false;
+                    }
                     break;
                 case '>':
-                    if ($fieldValue <= $value) return false;
+                    if ($fieldValue <= $value) {
+                        return false;
+                    }
                     break;
                 case '<':
-                    if ($fieldValue >= $value) return false;
+                    if ($fieldValue >= $value) {
+                        return false;
+                    }
                     break;
                 case 'contains':
-                    if (strpos(strtolower($fieldValue), strtolower($value)) === false) return false;
+                    if (strpos(strtolower($fieldValue), strtolower($value)) === false) {
+                        return false;
+                    }
                     break;
                 case 'regex':
-                    if (!preg_match('/' . $value . '/i', $fieldValue)) return false;
+                    if (! preg_match('/'.$value.'/i', $fieldValue)) {
+                        return false;
+                    }
                     break;
             }
         }
@@ -431,11 +457,11 @@ class MappingRule extends Model
         $pattern = $config['pattern'] ?? null;
         $replacement = $config['replacement'] ?? '$1';
 
-        if (!$pattern) {
+        if (! $pattern) {
             return $value;
         }
 
-        return preg_replace('/' . $pattern . '/i', $replacement, $value);
+        return preg_replace('/'.$pattern.'/i', $replacement, $value);
     }
 
     private function applyLookupTransformation($value)
@@ -444,7 +470,7 @@ class MappingRule extends Model
         $lookupTable = $config['lookup_table'] ?? [];
 
         $normalizedValue = strtolower(trim($value));
-        
+
         foreach ($lookupTable as $key => $mappedValue) {
             if (strtolower($key) === $normalizedValue) {
                 return $mappedValue;
@@ -464,7 +490,7 @@ class MappingRule extends Model
         if (is_numeric($value)) {
             $multiplier = $config['multiplier'] ?? 1;
             $offset = $config['offset'] ?? 0;
-            
+
             return ($value * $multiplier) + $offset;
         }
 
@@ -479,20 +505,22 @@ class MappingRule extends Model
 
         try {
             $date = Carbon::createFromFormat($inputFormat, $value);
+
             return $date->format($outputFormat);
         } catch (\Exception $e) {
             // Try common European formats
             $commonFormats = ['d.m.Y', 'd/m/Y', 'd-m-Y', 'Y-m-d', 'm/d/Y'];
-            
+
             foreach ($commonFormats as $format) {
                 try {
                     $date = Carbon::createFromFormat($format, $value);
+
                     return $date->format($outputFormat);
                 } catch (\Exception $e) {
                     continue;
                 }
             }
-            
+
             return $value;
         }
     }
@@ -518,7 +546,7 @@ class MappingRule extends Model
         $part = $config['part'] ?? 0; // 0 = first part, 1 = second part, etc.
 
         $parts = explode($delimiter, $value);
-        
+
         return $parts[$part] ?? $value;
     }
 
@@ -529,7 +557,7 @@ class MappingRule extends Model
         $separator = $config['separator'] ?? ' ';
 
         $values = [$value]; // Start with current value
-        
+
         foreach ($fields as $field) {
             if (isset($contextData[$field])) {
                 $values[] = $contextData[$field];
@@ -566,7 +594,7 @@ class MappingRule extends Model
             case 'contains':
                 return strpos(strtolower($value), strtolower($compareValue)) !== false;
             case 'regex':
-                return preg_match('/' . $compareValue . '/i', $value);
+                return preg_match('/'.$compareValue.'/i', $value);
             default:
                 return false;
         }

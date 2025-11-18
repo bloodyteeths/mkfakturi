@@ -13,20 +13,19 @@ class ImportController extends Controller
 {
     /**
      * Import service for intelligent field mapping
-     *
-     * @var ImportService
      */
     protected ImportService $importService;
 
     /**
      * Initialize controller with dependencies
      *
-     * @param ImportService $importService Import service instance
+     * @param  ImportService  $importService  Import service instance
      */
     public function __construct(ImportService $importService)
     {
         $this->importService = $importService;
     }
+
     /**
      * Upload and create new import job
      */
@@ -47,7 +46,7 @@ class ImportController extends Controller
         } catch (\Exception $e) {
             \Log::error('[ImportController] Validation failed', [
                 'error' => $e->getMessage(),
-                'errors' => $e->errors ?? []
+                'errors' => $e->errors ?? [],
             ]);
             throw $e;
         }
@@ -65,7 +64,7 @@ class ImportController extends Controller
 
         // Store the uploaded file
         $file = $request->file('file');
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
         \Log::info('[ImportController] Storing file', [
             'filename' => $filename,
             'original_name' => $file->getClientOriginalName(),
@@ -73,12 +72,12 @@ class ImportController extends Controller
         ]);
 
         try {
-            $path = $file->storeAs('imports/' . $companyId, $filename, 'local');
+            $path = $file->storeAs('imports/'.$companyId, $filename, 'local');
             \Log::info('[ImportController] File stored successfully', ['path' => $path]);
         } catch (\Exception $e) {
             \Log::error('[ImportController] File storage failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -88,7 +87,7 @@ class ImportController extends Controller
             $importJob = ImportJob::create([
                 'company_id' => $companyId,
                 'creator_id' => $user->id,
-                'name' => 'Import from ' . $file->getClientOriginalName(),
+                'name' => 'Import from '.$file->getClientOriginalName(),
                 'type' => $importType,
                 'file_path' => $path,
                 'file_type' => $file->getClientOriginalExtension(),
@@ -103,7 +102,7 @@ class ImportController extends Controller
         } catch (\Exception $e) {
             \Log::error('[ImportController] ImportJob creation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -132,14 +131,14 @@ class ImportController extends Controller
         // Parse CSV and detect fields if not already done
         $data = $importJob->toArray();
 
-        if (!isset($data['detected_fields']) && $importJob->file_path) {
+        if (! isset($data['detected_fields']) && $importJob->file_path) {
             \Log::info('[ImportController] show() - detecting fields', [
                 'import_id' => $id,
                 'file_path' => $importJob->file_path,
             ]);
 
             try {
-                $filePath = storage_path('app/' . $importJob->file_path);
+                $filePath = storage_path('app/'.$importJob->file_path);
 
                 \Log::info('[ImportController] File path constructed', [
                     'file_path' => $filePath,
@@ -154,7 +153,7 @@ class ImportController extends Controller
 
                     // Read sample rows
                     $sampleRows = [];
-                    for ($i = 0; $i < 3 && !feof($file); $i++) {
+                    for ($i = 0; $i < 3 && ! feof($file); $i++) {
                         $row = fgetcsv($file);
                         if ($row) {
                             $sampleRows[] = $row;
@@ -318,10 +317,10 @@ class ImportController extends Controller
         ]);
 
         try {
-            $filePath = storage_path('app/' . $importJob->file_path);
+            $filePath = storage_path('app/'.$importJob->file_path);
 
-            if (!file_exists($filePath)) {
-                throw new \Exception('File not found: ' . $filePath);
+            if (! file_exists($filePath)) {
+                throw new \Exception('File not found: '.$filePath);
             }
 
             // Read and parse CSV
@@ -343,8 +342,8 @@ class ImportController extends Controller
                 $records[] = [
                     'row_number' => $rowNumber,
                     'data' => $recordData,
-                    'has_errors' => !empty($validation['errors']),
-                    'has_warnings' => !empty($validation['warnings']),
+                    'has_errors' => ! empty($validation['errors']),
+                    'has_warnings' => ! empty($validation['warnings']),
                     'errors' => $validation['errors'],
                     'warnings' => $validation['warnings'],
                 ];
@@ -356,7 +355,7 @@ class ImportController extends Controller
 
             // Calculate statistics
             $totalRecords = count($records);
-            $invalidRecords = count(array_filter($records, fn($r) => $r['has_errors']));
+            $invalidRecords = count(array_filter($records, fn ($r) => $r['has_errors']));
             $validRecords = $totalRecords - $invalidRecords;
 
             $validationResults = [
@@ -394,7 +393,7 @@ class ImportController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: ' . $e->getMessage(),
+                'message' => 'Validation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -402,9 +401,9 @@ class ImportController extends Controller
     /**
      * Validate a single record based on import type
      *
-     * @param array $data The record data to validate
-     * @param int $rowNumber The row number for error reporting
-     * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
+     * @param  array  $data  The record data to validate
+     * @param  int  $rowNumber  The row number for error reporting
+     * @param  string  $importType  The import type (customers, invoices, items, payments, expenses, complete)
      * @return array Array with 'errors' and 'warnings' keys
      */
     private function validateRecord($data, $rowNumber, $importType = 'customers')
@@ -432,7 +431,7 @@ class ImportController extends Controller
                 } else {
                     // Validate amount is numeric and positive
                     $amount = floatval($data['amount']);
-                    if (!is_numeric($data['amount'])) {
+                    if (! is_numeric($data['amount'])) {
                         $errors[] = "Row {$rowNumber}: Amount must be a valid number";
                     } elseif ($amount <= 0) {
                         $errors[] = "Row {$rowNumber}: Amount must be greater than 0";
@@ -453,7 +452,7 @@ class ImportController extends Controller
                         'cash', 'credit card', 'credit_card', 'creditcard',
                         'debit card', 'debit_card', 'debitcard',
                         'paypal', 'stripe', 'check', 'cheque',
-                        'online', 'electronic', 'eft', 'ach'
+                        'online', 'electronic', 'eft', 'ach',
                     ];
 
                     $normalizedMethod = strtolower(trim($data['payment_method']));
@@ -466,7 +465,7 @@ class ImportController extends Controller
                         }
                     }
 
-                    if (!$isValid) {
+                    if (! $isValid) {
                         $warnings[] = "Row {$rowNumber}: Payment method '{$data['payment_method']}' is uncommon. Common methods include: Bank Transfer, Cash, Credit Card, etc.";
                     }
                 }
@@ -506,7 +505,7 @@ class ImportController extends Controller
                 } else {
                     // Validate total is numeric and positive
                     $total = floatval($data['total']);
-                    if (!is_numeric($data['total'])) {
+                    if (! is_numeric($data['total'])) {
                         $errors[] = "Row {$rowNumber}: Total must be a valid number";
                     } elseif ($total <= 0) {
                         $errors[] = "Row {$rowNumber}: Total must be greater than 0";
@@ -529,7 +528,7 @@ class ImportController extends Controller
                     $warnings[] = "Row {$rowNumber}: Subtotal is missing";
                 } else {
                     // Validate subtotal is numeric
-                    if (!is_numeric($data['subtotal'])) {
+                    if (! is_numeric($data['subtotal'])) {
                         $errors[] = "Row {$rowNumber}: Subtotal must be a valid number";
                     }
                 }
@@ -538,25 +537,25 @@ class ImportController extends Controller
                     $warnings[] = "Row {$rowNumber}: Tax is missing";
                 } else {
                     // Validate tax is numeric
-                    if (!is_numeric($data['tax'])) {
+                    if (! is_numeric($data['tax'])) {
                         $errors[] = "Row {$rowNumber}: Tax must be a valid number";
                     }
                 }
 
                 // Status validation
-                if (!empty($data['status'])) {
+                if (! empty($data['status'])) {
                     $validStatuses = ['DRAFT', 'SENT', 'VIEWED', 'COMPLETED', 'PAID', 'UNPAID', 'PARTIALLY_PAID', 'OVERDUE'];
                     $normalizedStatus = strtoupper(trim($data['status']));
-                    if (!in_array($normalizedStatus, $validStatuses)) {
-                        $warnings[] = "Row {$rowNumber}: Status '{$data['status']}' is not a standard value. Valid values: " . implode(', ', $validStatuses);
+                    if (! in_array($normalizedStatus, $validStatuses)) {
+                        $warnings[] = "Row {$rowNumber}: Status '{$data['status']}' is not a standard value. Valid values: ".implode(', ', $validStatuses);
                     }
                 }
 
                 // Currency code validation
-                if (!empty($data['currency'])) {
+                if (! empty($data['currency'])) {
                     $currencyCode = strtoupper(trim($data['currency']));
                     // Standard 3-letter currency codes (ISO 4217)
-                    if (strlen($currencyCode) !== 3 || !ctype_alpha($currencyCode)) {
+                    if (strlen($currencyCode) !== 3 || ! ctype_alpha($currencyCode)) {
                         $warnings[] = "Row {$rowNumber}: Currency code '{$data['currency']}' should be a 3-letter code (e.g., MKD, USD, EUR)";
                     }
                 }
@@ -574,7 +573,7 @@ class ImportController extends Controller
                 } else {
                     // Validate price is numeric and positive
                     $price = floatval($data['price']);
-                    if (!is_numeric($data['price'])) {
+                    if (! is_numeric($data['price'])) {
                         $errors[] = "Row {$rowNumber}: Price must be a valid number";
                     } elseif ($price <= 0) {
                         $errors[] = "Row {$rowNumber}: Price must be greater than 0";
@@ -582,9 +581,9 @@ class ImportController extends Controller
                 }
 
                 // Tax rate validation (0-100 range)
-                if (!empty($data['tax_rate'])) {
+                if (! empty($data['tax_rate'])) {
                     $taxRate = floatval($data['tax_rate']);
-                    if (!is_numeric($data['tax_rate'])) {
+                    if (! is_numeric($data['tax_rate'])) {
                         $errors[] = "Row {$rowNumber}: Tax rate must be a valid number";
                     } elseif ($taxRate < 0 || $taxRate > 100) {
                         $errors[] = "Row {$rowNumber}: Tax rate must be between 0 and 100";
@@ -592,7 +591,7 @@ class ImportController extends Controller
                 }
 
                 // Unit validation (common units)
-                if (!empty($data['unit'])) {
+                if (! empty($data['unit'])) {
                     $validUnits = [
                         'hour', 'hours', 'hr', 'hrs',
                         'piece', 'pieces', 'pcs', 'pc',
@@ -622,7 +621,7 @@ class ImportController extends Controller
                     ];
 
                     $normalizedUnit = strtolower(trim($data['unit']));
-                    if (!in_array($normalizedUnit, $validUnits)) {
+                    if (! in_array($normalizedUnit, $validUnits)) {
                         $warnings[] = "Row {$rowNumber}: Unit '{$data['unit']}' is not a standard unit. Common units: hour, piece, kg, liter, meter, etc.";
                     }
                 }
@@ -645,11 +644,11 @@ class ImportController extends Controller
                 }
 
                 // Tax warnings
-                if (empty($data['tax_type']) && !empty($data['tax_rate'])) {
+                if (empty($data['tax_type']) && ! empty($data['tax_rate'])) {
                     $warnings[] = "Row {$rowNumber}: Tax rate is provided but tax type is missing";
                 }
 
-                if (!empty($data['tax_type']) && empty($data['tax_rate'])) {
+                if (! empty($data['tax_type']) && empty($data['tax_rate'])) {
                     $warnings[] = "Row {$rowNumber}: Tax type is provided but tax rate is missing";
                 }
                 break;
@@ -673,7 +672,7 @@ class ImportController extends Controller
                 } else {
                     // Validate amount is numeric and positive
                     $amount = floatval($data['amount']);
-                    if (!is_numeric($data['amount'])) {
+                    if (! is_numeric($data['amount'])) {
                         $errors[] = "Row {$rowNumber}: Amount must be a valid number";
                     } elseif ($amount <= 0) {
                         $errors[] = "Row {$rowNumber}: Amount must be greater than 0";
@@ -698,7 +697,7 @@ class ImportController extends Controller
                         'cash', 'credit card', 'credit_card', 'creditcard',
                         'debit card', 'debit_card', 'debitcard',
                         'paypal', 'stripe', 'check', 'cheque',
-                        'online', 'electronic', 'eft', 'ach'
+                        'online', 'electronic', 'eft', 'ach',
                     ];
 
                     $normalizedMethod = strtolower(trim($data['payment_method']));
@@ -711,22 +710,22 @@ class ImportController extends Controller
                         }
                     }
 
-                    if (!$isValid) {
+                    if (! $isValid) {
                         $warnings[] = "Row {$rowNumber}: Payment method '{$data['payment_method']}' is uncommon. Common methods include: Bank Transfer, Cash, Credit Card, etc.";
                     }
                 }
 
                 // Currency code validation
-                if (!empty($data['currency'])) {
+                if (! empty($data['currency'])) {
                     $currencyCode = strtoupper(trim($data['currency']));
                     // Standard 3-letter currency codes (ISO 4217)
-                    if (strlen($currencyCode) !== 3 || !ctype_alpha($currencyCode)) {
+                    if (strlen($currencyCode) !== 3 || ! ctype_alpha($currencyCode)) {
                         $warnings[] = "Row {$rowNumber}: Currency code '{$data['currency']}' should be a 3-letter code (e.g., MKD, USD, EUR)";
                     }
                 }
 
                 // Customer name validation (optional but warn if provided)
-                if (!empty($data['customer_name'])) {
+                if (! empty($data['customer_name'])) {
                     $warnings[] = "Row {$rowNumber}: Customer name provided - will attempt to link expense to customer if found";
                 }
                 break;
@@ -746,7 +745,7 @@ class ImportController extends Controller
                     $email = trim($data['email']);
 
                     // Basic email structure validation: contains @ and domain part
-                    if (!preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/', $email)) {
+                    if (! preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/', $email)) {
                         $errors[] = "Row {$rowNumber}: Invalid email format";
                     }
                 }
@@ -789,10 +788,10 @@ class ImportController extends Controller
         ]);
 
         try {
-            $filePath = storage_path('app/' . $importJob->file_path);
+            $filePath = storage_path('app/'.$importJob->file_path);
 
-            if (!file_exists($filePath)) {
-                throw new \Exception('File not found: ' . $filePath);
+            if (! file_exists($filePath)) {
+                throw new \Exception('File not found: '.$filePath);
             }
 
             // Read CSV and apply field mappings
@@ -875,7 +874,7 @@ class ImportController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Import failed: ' . $e->getMessage(),
+                'message' => 'Import failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -903,7 +902,7 @@ class ImportController extends Controller
                 return $this->importExpense($data, $companyId, $creatorId);
 
             default:
-                throw new \Exception('Unsupported import type: ' . $type);
+                throw new \Exception('Unsupported import type: '.$type);
         }
     }
 
@@ -916,7 +915,7 @@ class ImportController extends Controller
         $currencyCode = $data['currency'] ?? 'MKD';
         $currency = \App\Models\Currency::where('code', $currencyCode)->first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = \App\Models\Currency::where('code', 'MKD')->first();
         }
 
@@ -932,7 +931,7 @@ class ImportController extends Controller
         ]);
 
         // Create billing address if address data exists
-        if (!empty($data['billing_address_street_1']) || !empty($data['address'])) {
+        if (! empty($data['billing_address_street_1']) || ! empty($data['address'])) {
             \App\Models\Address::create([
                 'name' => $data['name'],
                 'address_street_1' => $data['billing_address_street_1'] ?? $data['address'] ?? null,
@@ -963,48 +962,48 @@ class ImportController extends Controller
         // Lookup customer by name or email
         $customer = null;
 
-        if (!empty($data['customer_name'])) {
+        if (! empty($data['customer_name'])) {
             $customer = \App\Models\Customer::where('company_id', $companyId)
                 ->where('name', $data['customer_name'])
                 ->first();
         }
 
-        if (!$customer && !empty($data['customer_email'])) {
+        if (! $customer && ! empty($data['customer_email'])) {
             $customer = \App\Models\Customer::where('company_id', $companyId)
                 ->where('email', $data['customer_email'])
                 ->first();
         }
 
         // Handle customer not found
-        if (!$customer) {
-            throw new \Exception('Customer not found: ' . ($data['customer_name'] ?? $data['customer_email'] ?? 'unknown'));
+        if (! $customer) {
+            throw new \Exception('Customer not found: '.($data['customer_name'] ?? $data['customer_email'] ?? 'unknown'));
         }
 
         // Get or create currency
         $currencyCode = $data['currency'] ?? 'MKD';
         $currency = \App\Models\Currency::where('code', $currencyCode)->first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = \App\Models\Currency::where('code', 'MKD')->first();
         }
 
-        if (!$currency) {
-            throw new \Exception('Currency not found: ' . $currencyCode);
+        if (! $currency) {
+            throw new \Exception('Currency not found: '.$currencyCode);
         }
 
         // Parse dates
-        $invoiceDate = !empty($data['invoice_date'])
+        $invoiceDate = ! empty($data['invoice_date'])
             ? \Carbon\Carbon::parse($data['invoice_date'])
             : now();
 
-        $dueDate = !empty($data['due_date'])
+        $dueDate = ! empty($data['due_date'])
             ? \Carbon\Carbon::parse($data['due_date'])
             : now()->addDays(30);
 
         // Convert amounts to integer (cents)
-        $total = !empty($data['total']) ? (int)round((float)$data['total'] * 100) : 0;
-        $subTotal = !empty($data['subtotal']) ? (int)round((float)$data['subtotal'] * 100) : $total;
-        $tax = !empty($data['tax']) ? (int)round((float)$data['tax'] * 100) : 0;
+        $total = ! empty($data['total']) ? (int) round((float) $data['total'] * 100) : 0;
+        $subTotal = ! empty($data['subtotal']) ? (int) round((float) $data['subtotal'] * 100) : $total;
+        $tax = ! empty($data['tax']) ? (int) round((float) $data['tax'] * 100) : 0;
 
         // Map status from CSV to valid invoice status
         $status = $this->mapInvoiceStatus($data['status'] ?? 'DRAFT');
@@ -1012,7 +1011,7 @@ class ImportController extends Controller
 
         // Create invoice
         $invoice = \App\Models\Invoice::create([
-            'invoice_number' => $data['invoice_number'] ?? 'INV-' . time(),
+            'invoice_number' => $data['invoice_number'] ?? 'INV-'.time(),
             'invoice_date' => $invoiceDate,
             'due_date' => $dueDate,
             'customer_id' => $customer->id,
@@ -1068,6 +1067,7 @@ class ImportController extends Controller
         ];
 
         $normalizedStatus = strtoupper(trim($status));
+
         return $statusMap[$normalizedStatus] ?? \App\Models\Invoice::STATUS_DRAFT;
     }
 
@@ -1088,6 +1088,7 @@ class ImportController extends Controller
         ];
 
         $normalizedStatus = strtoupper(trim($status));
+
         return $paidStatusMap[$normalizedStatus] ?? \App\Models\Invoice::STATUS_UNPAID;
     }
 
@@ -1110,15 +1111,15 @@ class ImportController extends Controller
 
         // Get or create unit
         $unitId = null;
-        if (!empty($data['unit'])) {
+        if (! empty($data['unit'])) {
             $unit = \App\Models\Unit::where('name', $data['unit'])
                 ->where(function ($q) use ($companyId) {
                     $q->where('company_id', $companyId)
-                      ->orWhereNull('company_id');
+                        ->orWhereNull('company_id');
                 })
                 ->first();
 
-            if (!$unit) {
+            if (! $unit) {
                 // Create new unit for this company
                 $unit = \App\Models\Unit::create([
                     'name' => $data['unit'],
@@ -1133,7 +1134,7 @@ class ImportController extends Controller
         $currencyCode = $data['currency'] ?? 'MKD';
         $currency = \App\Models\Currency::where('code', $currencyCode)->first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = \App\Models\Currency::where('code', 'MKD')->first();
         }
 
@@ -1152,7 +1153,7 @@ class ImportController extends Controller
         $item = \App\Models\Item::create($itemData);
 
         // Handle tax if tax_type and tax_rate are provided
-        if (!empty($data['tax_type']) && !empty($data['tax_rate'])) {
+        if (! empty($data['tax_type']) && ! empty($data['tax_rate'])) {
             $taxRate = floatval($data['tax_rate']);
 
             // Find or create tax type
@@ -1160,7 +1161,7 @@ class ImportController extends Controller
                 ->where('company_id', $companyId)
                 ->first();
 
-            if (!$taxType) {
+            if (! $taxType) {
                 $taxType = \App\Models\TaxType::create([
                     'name' => $data['tax_type'],
                     'percent' => $taxRate,
@@ -1187,12 +1188,12 @@ class ImportController extends Controller
             'name' => $item->name,
             'price' => $item->price,
             'unit' => $item->unit,
-            'has_tax' => !empty($data['tax_type']),
+            'has_tax' => ! empty($data['tax_type']),
         ]);
 
         return $item;
     }
-// CLAUDE-CHECKPOINT
+    // CLAUDE-CHECKPOINT
 
     /**
      * Import a payment record
@@ -1201,55 +1202,55 @@ class ImportController extends Controller
     {
         // Lookup customer by name
         $customer = null;
-        if (!empty($data['customer_name'])) {
+        if (! empty($data['customer_name'])) {
             $customer = \App\Models\Customer::where('company_id', $companyId)
                 ->where('name', $data['customer_name'])
                 ->first();
 
-            if (!$customer) {
+            if (! $customer) {
                 throw new \Exception("Customer not found: {$data['customer_name']}");
             }
         }
 
         // Lookup invoice by invoice_number
         $invoice = null;
-        if (!empty($data['invoice_number'])) {
+        if (! empty($data['invoice_number'])) {
             $invoice = \App\Models\Invoice::where('company_id', $companyId)
                 ->where('invoice_number', $data['invoice_number'])
                 ->first();
 
-            if (!$invoice) {
+            if (! $invoice) {
                 throw new \Exception("Invoice not found: {$data['invoice_number']}");
             }
 
             // If customer wasn't provided, use the invoice's customer
-            if (!$customer && $invoice->customer_id) {
+            if (! $customer && $invoice->customer_id) {
                 $customer = \App\Models\Customer::find($invoice->customer_id);
             }
         }
 
         // Customer is required
-        if (!$customer) {
-            throw new \Exception("Customer is required for payment import");
+        if (! $customer) {
+            throw new \Exception('Customer is required for payment import');
         }
 
         // Get or create currency
         $currencyCode = $data['currency'] ?? 'MKD';
         $currency = \App\Models\Currency::where('code', $currencyCode)->first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = \App\Models\Currency::where('code', 'MKD')->first();
         }
 
         // Get or create payment method
         $paymentMethod = null;
-        if (!empty($data['payment_method'])) {
+        if (! empty($data['payment_method'])) {
             $paymentMethod = \App\Models\PaymentMethod::where('company_id', $companyId)
                 ->where('name', $data['payment_method'])
                 ->first();
 
             // Create payment method if it doesn't exist
-            if (!$paymentMethod) {
+            if (! $paymentMethod) {
                 $paymentMethod = \App\Models\PaymentMethod::create([
                     'name' => $data['payment_method'],
                     'company_id' => $companyId,
@@ -1259,12 +1260,12 @@ class ImportController extends Controller
         }
 
         // Parse payment date
-        $paymentDate = !empty($data['payment_date'])
+        $paymentDate = ! empty($data['payment_date'])
             ? \Carbon\Carbon::parse($data['payment_date'])
             : now();
 
         // Convert amount to integer (cents)
-        $amount = !empty($data['amount']) ? (int)round((float)$data['amount'] * 100) : 0;
+        $amount = ! empty($data['amount']) ? (int) round((float) $data['amount'] * 100) : 0;
 
         // Create payment record
         $payment = \App\Models\Payment::create([
@@ -1273,7 +1274,7 @@ class ImportController extends Controller
             'payment_method_id' => $paymentMethod ? $paymentMethod->id : null,
             'invoice_id' => $invoice ? $invoice->id : null,
             'customer_id' => $customer->id,
-            'payment_number' => $data['reference'] ?? 'IMP-' . uniqid(),
+            'payment_number' => $data['reference'] ?? 'IMP-'.uniqid(),
             'notes' => $data['notes'] ?? null,
             'currency_id' => $currency ? $currency->id : null,
             'company_id' => $companyId,
@@ -1321,13 +1322,13 @@ class ImportController extends Controller
     {
         // Lookup customer (optional)
         $customer = null;
-        if (!empty($data['customer_name'])) {
+        if (! empty($data['customer_name'])) {
             $customer = \App\Models\Customer::where('company_id', $companyId)
                 ->where('name', $data['customer_name'])
                 ->first();
 
             // If customer not found, log warning but continue (customer is optional)
-            if (!$customer) {
+            if (! $customer) {
                 \Log::warning('[ImportController] Customer not found for expense', [
                     'customer_name' => $data['customer_name'],
                     'company_id' => $companyId,
@@ -1339,24 +1340,24 @@ class ImportController extends Controller
         $currencyCode = $data['currency'] ?? 'MKD';
         $currency = \App\Models\Currency::where('code', $currencyCode)->first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = \App\Models\Currency::where('code', 'MKD')->first();
         }
 
-        if (!$currency) {
-            throw new \Exception('Currency not found: ' . $currencyCode);
+        if (! $currency) {
+            throw new \Exception('Currency not found: '.$currencyCode);
         }
 
         // Lookup or create expense category
         $expenseCategory = null;
-        if (!empty($data['category'])) {
+        if (! empty($data['category'])) {
             // Try to find existing category
             $expenseCategory = \App\Models\ExpenseCategory::where('company_id', $companyId)
                 ->where('name', $data['category'])
                 ->first();
 
             // Create category if it doesn't exist
-            if (!$expenseCategory) {
+            if (! $expenseCategory) {
                 $expenseCategory = \App\Models\ExpenseCategory::create([
                     'name' => $data['category'],
                     'company_id' => $companyId,
@@ -1375,7 +1376,7 @@ class ImportController extends Controller
                 ->where('name', 'Uncategorized')
                 ->first();
 
-            if (!$expenseCategory) {
+            if (! $expenseCategory) {
                 $expenseCategory = \App\Models\ExpenseCategory::create([
                     'name' => 'Uncategorized',
                     'company_id' => $companyId,
@@ -1386,13 +1387,13 @@ class ImportController extends Controller
 
         // Get or create payment method (optional)
         $paymentMethod = null;
-        if (!empty($data['payment_method'])) {
+        if (! empty($data['payment_method'])) {
             $paymentMethod = \App\Models\PaymentMethod::where('company_id', $companyId)
                 ->where('name', $data['payment_method'])
                 ->first();
 
             // Create payment method if it doesn't exist
-            if (!$paymentMethod) {
+            if (! $paymentMethod) {
                 $paymentMethod = \App\Models\PaymentMethod::create([
                     'name' => $data['payment_method'],
                     'company_id' => $companyId,
@@ -1402,12 +1403,12 @@ class ImportController extends Controller
         }
 
         // Parse expense date
-        $expenseDate = !empty($data['expense_date'])
+        $expenseDate = ! empty($data['expense_date'])
             ? \Carbon\Carbon::parse($data['expense_date'])
             : now();
 
         // Convert amount to integer (cents)
-        $amount = !empty($data['amount']) ? (int)round((float)$data['amount'] * 100) : 0;
+        $amount = ! empty($data['amount']) ? (int) round((float) $data['amount'] * 100) : 0;
 
         // Create expense record
         $expense = \App\Models\Expense::create([
@@ -1491,15 +1492,15 @@ class ImportController extends Controller
             'payments' => "payment_date,amount,payment_method,invoice_number,customer_name,reference,currency,notes\n2025-01-20,11800.00,Bank Transfer,INV-2025-001,Example Company,BT-20250120-001,MKD,Payment for invoice INV-2025-001",
         ];
 
-        if (!isset($templates[$type])) {
+        if (! isset($templates[$type])) {
             return response()->json(['error' => 'Template not found'], 404);
         }
 
-        $filename = $type . '_import_template.csv';
+        $filename = $type.'_import_template.csv';
 
         return response($templates[$type], 200)
             ->header('Content-Type', 'text/csv; charset=UTF-8')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     /**
@@ -1522,8 +1523,8 @@ class ImportController extends Controller
      * This method provides backward compatibility for when the intelligent
      * mapping system is disabled. It uses hardcoded field mapping rules.
      *
-     * @param array $csvHeaders Array of CSV field names (not objects)
-     * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
+     * @param  array  $csvHeaders  Array of CSV field names (not objects)
+     * @param  string  $importType  The import type (customers, invoices, items, payments, expenses, complete)
      * @return array Mapping suggestions where CSV field name => target field name
      */
     private function legacyMappingSuggestions(array $csvHeaders, string $importType = 'customers'): array
@@ -1547,8 +1548,8 @@ class ImportController extends Controller
      *
      * LEGACY METHOD - Used only when intelligent mapping is disabled
      *
-     * @param array $detectedFields Array of detected CSV field objects
-     * @param string $importType The import type (customers, invoices, items, payments, expenses, complete)
+     * @param  array  $detectedFields  Array of detected CSV field objects
+     * @param  string  $importType  The import type (customers, invoices, items, payments, expenses, complete)
      * @return array Mapping suggestions where CSV field name => target field name
      */
     private function generateMappingSuggestions($detectedFields, $importType = 'customers')
@@ -1734,6 +1735,7 @@ class ImportController extends Controller
             // Direct match - exact normalized field name
             if (isset($mappingRules[$normalizedName])) {
                 $suggestions[$fieldName] = $mappingRules[$normalizedName];
+
                 continue;
             }
 

@@ -9,8 +9,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * Transforms credit note item model into JSON response.
  * Based on InvoiceItemResource pattern.
- *
- * @package App\Http\Resources
  */
 class CreditNoteItemResource extends JsonResource
 {

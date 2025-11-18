@@ -16,7 +16,7 @@ class PrometheusServiceProvider extends ServiceProvider
     {
         $this->app->singleton(PrometheusExporter::class, function ($app) {
             $namespace = config('prometheus-exporter.namespace', 'fakturino');
-            $adapter = new InMemory();
+            $adapter = new InMemory;
             $registry = new CollectorRegistry($adapter);
 
             return new PrometheusExporter($namespace, $registry);

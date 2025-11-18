@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Arquivei\LaravelPrometheusExporter\PrometheusExporter;
+use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Customer;
-use App\Models\Company;
+use Arquivei\LaravelPrometheusExporter\PrometheusExporter;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Prometheus Metrics Controller
@@ -57,23 +57,23 @@ class PrometheusController extends Controller
             $metrics = $prometheus->export();
 
             return response($metrics, 200, [
-                'Content-Type' => 'text/plain; version=0.0.4; charset=utf-8'
+                'Content-Type' => 'text/plain; version=0.0.4; charset=utf-8',
             ]);
 
         } catch (\Exception $e) {
             \Log::error('Prometheus metrics collection failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Return detailed error for debugging
             $errorDetails = "# Error collecting metrics\n";
-            $errorDetails .= "# Message: " . $e->getMessage() . "\n";
-            $errorDetails .= "# File: " . $e->getFile() . ":" . $e->getLine() . "\n";
-            $errorDetails .= "# Class: " . get_class($e) . "\n";
+            $errorDetails .= '# Message: '.$e->getMessage()."\n";
+            $errorDetails .= '# File: '.$e->getFile().':'.$e->getLine()."\n";
+            $errorDetails .= '# Class: '.get_class($e)."\n";
 
             return response($errorDetails, 500, [
-                'Content-Type' => 'text/plain; charset=utf-8'
+                'Content-Type' => 'text/plain; charset=utf-8',
             ]);
         }
     }
@@ -109,7 +109,7 @@ class PrometheusController extends Controller
             ->get();
 
         $totalRevenue30Days = $revenueData->sum('daily_revenue');
-        
+
         $prometheus->registerGauge(
             'invoiceshelf_revenue_30_days_total',
             'Total revenue in last 30 days'
@@ -159,7 +159,7 @@ class PrometheusController extends Controller
 
         // Companies count
         $totalCompanies = Company::count();
-        
+
         $prometheus->registerGauge(
             'invoiceshelf_companies_total',
             'Total number of companies'
@@ -261,7 +261,7 @@ class PrometheusController extends Controller
         try {
             $certPath = config('mk.xml_signing.certificate_path');
 
-            if (!$certPath || !file_exists($certPath)) {
+            if (! $certPath || ! file_exists($certPath)) {
                 // No certificate or file doesn't exist
                 $prometheus->registerGauge(
                     'fakturino_signer_cert_expiry_days',
@@ -271,13 +271,14 @@ class PrometheusController extends Controller
                     'fakturino_signer_cert_expiry_days',
                     -1 // Indicate missing certificate
                 );
+
                 return;
             }
 
             $certContent = file_get_contents($certPath);
             $cert = openssl_x509_read($certContent);
 
-            if (!$cert) {
+            if (! $cert) {
                 $prometheus->registerGauge(
                     'fakturino_signer_cert_expiry_days',
                     'Days until signer certificate expires'
@@ -286,6 +287,7 @@ class PrometheusController extends Controller
                     'fakturino_signer_cert_expiry_days',
                     -1 // Indicate invalid certificate
                 );
+
                 return;
             }
 
@@ -316,7 +318,7 @@ class PrometheusController extends Controller
 
         } catch (\Exception $e) {
             \Log::warning('Failed to check certificate expiry', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             // Set to -1 to indicate error
@@ -420,7 +422,7 @@ class PrometheusController extends Controller
                 ->where('created_at', '>=', Carbon::now()->subHour())
                 ->selectRaw('AVG(JSON_EXTRACT(content, "$.duration")) as avg_duration')
                 ->first();
-            
+
             $avgResponseTime = $responseTimeData->avg_duration ?? 0;
         } catch (\Exception $e) {
             // Telescope might not be installed yet
@@ -507,7 +509,7 @@ class PrometheusController extends Controller
         $health = [
             'status' => 'healthy',
             'timestamp' => now()->toISOString(),
-            'checks' => []
+            'checks' => [],
         ];
 
         // Database check

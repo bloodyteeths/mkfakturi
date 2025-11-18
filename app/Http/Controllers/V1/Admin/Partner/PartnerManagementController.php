@@ -15,7 +15,6 @@ class PartnerManagementController extends Controller
     /**
      * Display a listing of all partners with statistics
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -29,8 +28,8 @@ class PartnerManagementController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('company_name', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('company_name', 'like', "%{$search}%");
             });
         }
 
@@ -62,6 +61,7 @@ class PartnerManagementController extends Controller
             $partner->total_earnings = $partner->getLifetimeEarnings();
             $partner->pending_payout = $partner->getUnpaidCommissionsTotal();
             $partner->is_partner_plus = $partner->isPartnerPlus();
+
             return $partner;
         });
 
@@ -71,7 +71,7 @@ class PartnerManagementController extends Controller
     /**
      * Display the specified partner with detailed information
      *
-     * @param int $partnerId
+     * @param  int  $partnerId
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($partnerId)
@@ -88,7 +88,7 @@ class PartnerManagementController extends Controller
                 $query->latest()->limit(10);
             },
             'affiliateLinks',
-            'kycDocuments'
+            'kycDocuments',
         ])->findOrFail($partnerId);
 
         // Add calculated fields
@@ -113,7 +113,6 @@ class PartnerManagementController extends Controller
     /**
      * Store a newly created partner
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
@@ -157,14 +156,15 @@ class PartnerManagementController extends Controller
 
             return response()->json([
                 'message' => 'Partner created successfully',
-                'partner' => $partner->load('user')
+                'partner' => $partner->load('user'),
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to create partner',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -172,8 +172,7 @@ class PartnerManagementController extends Controller
     /**
      * Update the specified partner
      *
-     * @param Request $request
-     * @param int $partnerId
+     * @param  int  $partnerId
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $partnerId)
@@ -187,7 +186,7 @@ class PartnerManagementController extends Controller
                 'required',
                 'email',
                 Rule::unique('partners', 'email')->ignore($partnerId),
-                Rule::unique('users', 'email')->ignore($partner->user_id)
+                Rule::unique('users', 'email')->ignore($partner->user_id),
             ],
             'phone' => 'nullable|string|max:50',
             'company_name' => 'nullable|string|max:255',
@@ -218,14 +217,15 @@ class PartnerManagementController extends Controller
 
             return response()->json([
                 'message' => 'Partner updated successfully',
-                'partner' => $partner->fresh()->load('user')
+                'partner' => $partner->fresh()->load('user'),
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to update partner',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -233,7 +233,7 @@ class PartnerManagementController extends Controller
     /**
      * Deactivate the specified partner (soft delete)
      *
-     * @param int $partnerId
+     * @param  int  $partnerId
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($partnerId)
@@ -253,14 +253,15 @@ class PartnerManagementController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Partner deactivated successfully'
+                'message' => 'Partner deactivated successfully',
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to deactivate partner',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -311,7 +312,7 @@ class PartnerManagementController extends Controller
      * Get available companies for assignment (AC-09)
      * Returns companies not yet assigned to this partner
      *
-     * @param int $partnerId
+     * @param  int  $partnerId
      * @return \Illuminate\Http\JsonResponse
      */
     public function availableCompanies($partnerId)
@@ -333,8 +334,7 @@ class PartnerManagementController extends Controller
     /**
      * Assign company to partner with permissions (AC-09)
      *
-     * @param Request $request
-     * @param int $partnerId
+     * @param  int  $partnerId
      * @return \Illuminate\Http\JsonResponse
      */
     public function assignCompany(Request $request, $partnerId)
@@ -355,7 +355,7 @@ class PartnerManagementController extends Controller
             $exists = $partner->companies()->where('companies.id', $validated['company_id'])->exists();
             if ($exists) {
                 return response()->json([
-                    'message' => 'Company is already assigned to this partner'
+                    'message' => 'Company is already assigned to this partner',
                 ], 422);
             }
 
@@ -381,14 +381,15 @@ class PartnerManagementController extends Controller
 
             return response()->json([
                 'message' => 'Company assigned successfully',
-                'partner' => $partner->fresh()->load('companies')
+                'partner' => $partner->fresh()->load('companies'),
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to assign company',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -396,9 +397,8 @@ class PartnerManagementController extends Controller
     /**
      * Update company assignment permissions (AC-09)
      *
-     * @param Request $request
-     * @param int $partnerId
-     * @param int $companyId
+     * @param  int  $partnerId
+     * @param  int  $companyId
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateCompanyAssignment(Request $request, $partnerId, $companyId)
@@ -416,9 +416,9 @@ class PartnerManagementController extends Controller
         try {
             // Check if company is assigned
             $link = $partner->companies()->where('companies.id', $companyId)->first();
-            if (!$link) {
+            if (! $link) {
                 return response()->json([
-                    'message' => 'Company is not assigned to this partner'
+                    'message' => 'Company is not assigned to this partner',
                 ], 404);
             }
 
@@ -444,14 +444,15 @@ class PartnerManagementController extends Controller
 
             return response()->json([
                 'message' => 'Company assignment updated successfully',
-                'partner' => $partner->fresh()->load('companies')
+                'partner' => $partner->fresh()->load('companies'),
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to update assignment',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -459,8 +460,8 @@ class PartnerManagementController extends Controller
     /**
      * Unassign company from partner (AC-09)
      *
-     * @param int $partnerId
-     * @param int $companyId
+     * @param  int  $partnerId
+     * @param  int  $companyId
      * @return \Illuminate\Http\JsonResponse
      */
     public function unassignCompany($partnerId, $companyId)
@@ -471,9 +472,9 @@ class PartnerManagementController extends Controller
         try {
             // Check if company is assigned
             $link = $partner->companies()->where('companies.id', $companyId)->first();
-            if (!$link) {
+            if (! $link) {
                 return response()->json([
-                    'message' => 'Company is not assigned to this partner'
+                    'message' => 'Company is not assigned to this partner',
                 ], 404);
             }
 
@@ -486,14 +487,15 @@ class PartnerManagementController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Company unassigned successfully'
+                'message' => 'Company unassigned successfully',
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to unassign company',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -516,7 +518,7 @@ class PartnerManagementController extends Controller
             ])
             ->first();
 
-        if (!$link) {
+        if (! $link) {
             return response()->json(['message' => 'No active partner found'], 404);
         }
 
@@ -541,7 +543,7 @@ class PartnerManagementController extends Controller
             ])
             ->first();
 
-        if (!$referral) {
+        if (! $referral) {
             return response()->json(['message' => 'No upline partner found'], 404);
         }
 

@@ -16,9 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardMetricsService
 {
-    public function __construct(private CacheRepository $cache)
-    {
-    }
+    public function __construct(private CacheRepository $cache) {}
 
     public function getAnnualSeries(int $companyId, bool $previousYear = false): array
     {
@@ -131,7 +129,7 @@ class DashboardMetricsService
         };
 
         return $modelClass::query()
-            ->selectRaw($periodExpression . ' as period, SUM(' . $sumColumn . ') as aggregate')
+            ->selectRaw($periodExpression.' as period, SUM('.$sumColumn.') as aggregate')
             ->where('company_id', $companyId)
             ->whereBetween($dateColumn, [$start->toDateString(), $end->toDateString()])
             ->groupBy('period')

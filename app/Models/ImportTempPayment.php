@@ -13,9 +13,13 @@ class ImportTempPayment extends Model
 
     // Processing statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_MAPPED = 'mapped';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_COMMITTED = 'committed';
 
     protected $guarded = ['id'];
@@ -72,30 +76,33 @@ class ImportTempPayment extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
     public function getFormattedPaymentDateAttribute()
     {
-        if (!$this->payment_date) {
+        if (! $this->payment_date) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->payment_date)->translatedFormat($dateFormat);
     }
 
     public function getFormattedBankDateAttribute()
     {
-        if (!$this->bank_date) {
+        if (! $this->bank_date) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
-        return Carbon::parse($this->bank_date)->translatedFormat($dateFormat . ' H:i:s');
+
+        return Carbon::parse($this->bank_date)->translatedFormat($dateFormat.' H:i:s');
     }
 
     public function getHasValidationErrorsAttribute()
     {
-        return !empty($this->validation_errors);
+        return ! empty($this->validation_errors);
     }
 
     public function getIsDuplicateAttribute()
@@ -110,15 +117,16 @@ class ImportTempPayment extends Model
         }
 
         $scores = array_values($this->mapping_confidence);
+
         return count($scores) > 0 ? round(array_sum($scores) / count($scores), 2) : 0;
     }
 
     public function getFormattedAmountAttribute()
     {
-        if (!$this->amount) {
+        if (! $this->amount) {
             return null;
         }
-        
+
         return format_money_pdf($this->amount, $this->getCurrency());
     }
 
@@ -160,27 +168,27 @@ class ImportTempPayment extends Model
 
     public function scopeWherePaymentNumber($query, $paymentNumber)
     {
-        return $query->where('payment_number', 'LIKE', '%' . $paymentNumber . '%');
+        return $query->where('payment_number', 'LIKE', '%'.$paymentNumber.'%');
     }
 
     public function scopeWhereReference($query, $reference)
     {
-        return $query->where('reference', 'LIKE', '%' . $reference . '%');
+        return $query->where('reference', 'LIKE', '%'.$reference.'%');
     }
 
     public function scopeWhereCustomerEmail($query, $email)
     {
-        return $query->where('customer_email', 'LIKE', '%' . $email . '%');
+        return $query->where('customer_email', 'LIKE', '%'.$email.'%');
     }
 
     public function scopeWhereCustomerName($query, $name)
     {
-        return $query->where('customer_name', 'LIKE', '%' . $name . '%');
+        return $query->where('customer_name', 'LIKE', '%'.$name.'%');
     }
 
     public function scopeWhereInvoiceNumber($query, $invoiceNumber)
     {
-        return $query->where('invoice_number', 'LIKE', '%' . $invoiceNumber . '%');
+        return $query->where('invoice_number', 'LIKE', '%'.$invoiceNumber.'%');
     }
 
     public function scopePaymentsBetween($query, $start, $end)
@@ -262,13 +270,13 @@ class ImportTempPayment extends Model
     public function addValidationError($field, $message)
     {
         $errors = $this->validation_errors ?: [];
-        
-        if (!isset($errors[$field])) {
+
+        if (! isset($errors[$field])) {
             $errors[$field] = [];
         }
-        
+
         $errors[$field][] = $message;
-        
+
         $this->update(['validation_errors' => $errors]);
     }
 
@@ -281,14 +289,14 @@ class ImportTempPayment extends Model
     {
         $confidence = $this->mapping_confidence ?: [];
         $confidence[$field] = $score;
-        
+
         $this->update(['mapping_confidence' => $confidence]);
     }
 
     public function logTransformation($field, $originalValue, $transformedValue, $rule = null)
     {
         $log = $this->transformation_log ?: [];
-        
+
         $log[] = [
             'field' => $field,
             'original_value' => $originalValue,
@@ -296,7 +304,7 @@ class ImportTempPayment extends Model
             'rule' => $rule,
             'timestamp' => now()->toISOString(),
         ];
-        
+
         $this->update(['transformation_log' => $log]);
     }
 
@@ -322,11 +330,11 @@ class ImportTempPayment extends Model
     public function markAsFailed($errors = null)
     {
         $data = ['status' => self::STATUS_FAILED];
-        
+
         if ($errors) {
             $data['validation_errors'] = $errors;
         }
-        
+
         $this->update($data);
     }
 
@@ -337,7 +345,7 @@ class ImportTempPayment extends Model
 
     public function shouldCreateNewPayment()
     {
-        return !$this->is_duplicate && $this->status !== self::STATUS_FAILED;
+        return ! $this->is_duplicate && $this->status !== self::STATUS_FAILED;
     }
 
     public function shouldUpdateExistingPayment()
@@ -367,21 +375,23 @@ class ImportTempPayment extends Model
         if ($this->currency_code) {
             return Currency::where('code', $this->currency_code)->first();
         }
-        
+
         // Fallback to company default currency
         $companyCurrencyId = CompanySetting::getSetting('currency', $this->importJob->company_id);
+
         return Currency::find($companyCurrencyId);
     }
 
     public function getCurrencyId()
     {
         $currency = $this->getCurrency();
+
         return $currency ? $currency->id : null;
     }
 
     public function getPaymentMethodId()
     {
-        if (!$this->payment_method) {
+        if (! $this->payment_method) {
             return null;
         }
 
@@ -398,10 +408,10 @@ class ImportTempPayment extends Model
         $systemMethod = $methodMap[$normalizedMethod] ?? Payment::PAYMENT_MODE_OTHER;
 
         $paymentMethod = PaymentMethod::where('company_id', $this->importJob->company_id)
-                                    ->where('name', 'LIKE', '%' . $this->payment_method . '%')
-                                    ->first();
+            ->where('name', 'LIKE', '%'.$this->payment_method.'%')
+            ->first();
 
-        if (!$paymentMethod) {
+        if (! $paymentMethod) {
             // Create a new payment method if it doesn't exist
             $paymentMethod = PaymentMethod::create([
                 'name' => $this->payment_method,
@@ -434,7 +444,7 @@ class ImportTempPayment extends Model
 
         // Try transaction ID match (if stored in notes or custom field)
         if ($this->transaction_id) {
-            $payment = $query->where('notes', 'LIKE', '%' . $this->transaction_id . '%')->first();
+            $payment = $query->where('notes', 'LIKE', '%'.$this->transaction_id.'%')->first();
             if ($payment) {
                 return ['payment' => $payment, 'match_field' => 'transaction_id'];
             }

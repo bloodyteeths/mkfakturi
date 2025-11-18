@@ -27,9 +27,9 @@ class IncomeStatementReportController extends Controller
         $this->authorize('view report', $company);
 
         // Check if accounting backbone feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.'
+                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.',
             ]);
         }
 
@@ -37,7 +37,7 @@ class IncomeStatementReportController extends Controller
         App::setLocale($locale);
 
         // Get income statement data via IfrsAdapter
-        $adapter = new IfrsAdapter();
+        $adapter = new IfrsAdapter;
         $fromDate = $request->has('from_date')
             ? $request->from_date
             : now()->startOfMonth()->toDateString();
@@ -50,7 +50,7 @@ class IncomeStatementReportController extends Controller
         // Handle errors from adapter
         if (isset($incomeStatement['error'])) {
             return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => $incomeStatement['error']
+                'message' => $incomeStatement['error'],
             ]);
         }
 

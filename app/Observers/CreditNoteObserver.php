@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\CreditNote;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Models\CreditNote;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Log;
  * - Reduce Accounts Receivable (CR)
  * - Reduce Sales Revenue (DR)
  * - Reduce Tax Payable (DR)
- *
- * @package App\Observers
  */
 class CreditNoteObserver
 {
@@ -33,9 +31,6 @@ class CreditNoteObserver
      *
      * Post to ledger only when credit note is marked as COMPLETED
      * (not for DRAFT, SENT, or VIEWED status)
-     *
-     * @param CreditNote $creditNote
-     * @return void
      */
     public function created(CreditNote $creditNote): void
     {
@@ -43,11 +38,12 @@ class CreditNoteObserver
         if ($this->shouldPostToLedger($creditNote)) {
             try {
                 // Ensure company has IFRS entity before posting
-                if (!$this->hasIfrsEntity($creditNote)) {
+                if (! $this->hasIfrsEntity($creditNote)) {
                     Log::warning('CreditNoteObserver: Cannot post - company has no IFRS entity', [
                         'credit_note_id' => $creditNote->id,
                         'company_id' => $creditNote->company_id,
                     ]);
+
                     return;
                 }
 
@@ -67,9 +63,6 @@ class CreditNoteObserver
      *
      * If status changes to COMPLETED, post to ledger.
      * We don't re-post if already posted (idempotent check via ifrs_transaction_id).
-     *
-     * @param CreditNote $creditNote
-     * @return void
      */
     public function updated(CreditNote $creditNote): void
     {
@@ -77,15 +70,16 @@ class CreditNoteObserver
         if ($creditNote->wasChanged('status') &&
             $creditNote->status === CreditNote::STATUS_COMPLETED &&
             $this->shouldPostToLedger($creditNote) &&
-            !$creditNote->ifrs_transaction_id) {
+            ! $creditNote->ifrs_transaction_id) {
 
             try {
                 // Ensure company has IFRS entity before posting
-                if (!$this->hasIfrsEntity($creditNote)) {
+                if (! $this->hasIfrsEntity($creditNote)) {
                     Log::warning('CreditNoteObserver: Cannot post - company has no IFRS entity', [
                         'credit_note_id' => $creditNote->id,
                         'company_id' => $creditNote->company_id,
                     ]);
+
                     return;
                 }
 
@@ -101,14 +95,11 @@ class CreditNoteObserver
 
     /**
      * Determine if credit note should be posted to ledger
-     *
-     * @param CreditNote $creditNote
-     * @return bool
      */
     protected function shouldPostToLedger(CreditNote $creditNote): bool
     {
         // Check if feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return false;
         }
 
@@ -118,9 +109,6 @@ class CreditNoteObserver
 
     /**
      * Check if company has an IFRS entity (EntityGuard)
-     *
-     * @param CreditNote $creditNote
-     * @return bool
      */
     protected function hasIfrsEntity(CreditNote $creditNote): bool
     {
@@ -135,8 +123,6 @@ class CreditNoteObserver
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {

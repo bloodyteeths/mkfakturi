@@ -19,8 +19,6 @@ class NlbOAuth extends Psd2Client
 {
     /**
      * Get the bank code identifier
-     *
-     * @return string
      */
     protected function getBankCode(): string
     {
@@ -29,8 +27,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * Get the base URL for the PSD2 API
-     *
-     * @return string
      */
     protected function getBaseUrl(): string
     {
@@ -45,8 +41,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * Get the OAuth2 client ID
-     *
-     * @return string
      */
     protected function getClientId(): string
     {
@@ -55,8 +49,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * Get the OAuth2 client secret
-     *
-     * @return string
      */
     protected function getClientSecret(): string
     {
@@ -92,8 +84,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * Get BIC/SWIFT code for NLB Banka
-     *
-     * @return string
      */
     public function getBic(): string
     {
@@ -102,8 +92,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * Get bank display name
-     *
-     * @return string
      */
     public function getBankName(): string
     {
@@ -112,8 +100,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * Get bank logo URL
-     *
-     * @return string
      */
     public function getLogoUrl(): string
     {
@@ -122,8 +108,6 @@ class NlbOAuth extends Psd2Client
 
     /**
      * NLB Bank requires PKCE for OAuth
-     *
-     * @return bool
      */
     protected function requiresPkce(): bool
     {
@@ -160,13 +144,13 @@ class NlbOAuth extends Psd2Client
     {
         $certPath = config('mk.nlb.mtls_cert_path', env('NLB_MTLS_CERT_PATH'));
 
-        if (!$certPath) {
+        if (! $certPath) {
             return null;
         }
 
         // If relative path, resolve from storage directory
-        if (!str_starts_with($certPath, '/')) {
-            return storage_path('certificates/' . $certPath);
+        if (! str_starts_with($certPath, '/')) {
+            return storage_path('certificates/'.$certPath);
         }
 
         return $certPath;
@@ -181,13 +165,13 @@ class NlbOAuth extends Psd2Client
     {
         $keyPath = config('mk.nlb.mtls_key_path', env('NLB_MTLS_KEY_PATH'));
 
-        if (!$keyPath) {
+        if (! $keyPath) {
             return null;
         }
 
         // If relative path, resolve from storage directory
-        if (!str_starts_with($keyPath, '/')) {
-            return storage_path('certificates/' . $keyPath);
+        if (! str_starts_with($keyPath, '/')) {
+            return storage_path('certificates/'.$keyPath);
         }
 
         return $keyPath;

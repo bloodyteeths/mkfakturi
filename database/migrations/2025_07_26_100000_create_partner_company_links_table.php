@@ -25,7 +25,7 @@ return new class extends Migration
 
             // Ensure unique partner-company combinations
             $table->unique(['partner_id', 'company_id'], 'partner_company_unique');
-            
+
             // Index for performance
             $table->index(['partner_id', 'is_active'], 'partner_active_companies');
             $table->index(['company_id', 'is_active'], 'company_active_partners');
@@ -40,4 +40,3 @@ return new class extends Migration
         Schema::dropIfExists('partner_company_links');
     }
 };
-

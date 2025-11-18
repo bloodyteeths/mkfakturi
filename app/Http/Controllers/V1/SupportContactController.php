@@ -10,15 +10,11 @@ use App\Models\SupportContact;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 
 class SupportContactController extends Controller
 {
     /**
      * Store a new support contact submission.
-     *
-     * @param  SupportContactRequest  $request
-     * @return JsonResponse
      */
     public function store(SupportContactRequest $request): JsonResponse
     {
@@ -54,7 +50,7 @@ class SupportContactController extends Controller
             Mail::to(config('support.email'))
                 ->send(new SupportContactNotification($contact));
         } catch (\Exception $e) {
-            \Log::error('Failed to send support notification email: ' . $e->getMessage());
+            \Log::error('Failed to send support notification email: '.$e->getMessage());
         }
 
         // Send confirmation email to user
@@ -66,7 +62,7 @@ class SupportContactController extends Controller
                     url('/support')
                 ));
         } catch (\Exception $e) {
-            \Log::error('Failed to send support confirmation email: ' . $e->getMessage());
+            \Log::error('Failed to send support confirmation email: '.$e->getMessage());
         }
 
         return response()->json([
@@ -84,9 +80,6 @@ class SupportContactController extends Controller
 
     /**
      * Display a listing of support contacts (Admin only).
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -127,9 +120,6 @@ class SupportContactController extends Controller
 
     /**
      * Display the specified support contact.
-     *
-     * @param  SupportContact  $supportContact
-     * @return JsonResponse
      */
     public function show(SupportContact $supportContact): JsonResponse
     {
@@ -143,10 +133,6 @@ class SupportContactController extends Controller
 
     /**
      * Update the status of a support contact.
-     *
-     * @param  Request  $request
-     * @param  SupportContact  $supportContact
-     * @return JsonResponse
      */
     public function updateStatus(Request $request, SupportContact $supportContact): JsonResponse
     {
@@ -168,8 +154,6 @@ class SupportContactController extends Controller
 
     /**
      * Get support contact statistics (Admin only).
-     *
-     * @return JsonResponse
      */
     public function statistics(): JsonResponse
     {
@@ -195,9 +179,6 @@ class SupportContactController extends Controller
 
     /**
      * Format file size to human-readable format.
-     *
-     * @param  int  $bytes
-     * @return string
      */
     private function formatFileSize(int $bytes): string
     {
@@ -208,7 +189,7 @@ class SupportContactController extends Controller
             $i++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$i];
+        return round($bytes, 2).' '.$units[$i];
     }
 }
 // CLAUDE-CHECKPOINT

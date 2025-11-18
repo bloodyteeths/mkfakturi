@@ -34,7 +34,7 @@ class CheckInvoiceLimit
         // Get current company from request header (set by CompanyMiddleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'No company context found',
                 'message' => 'You must select a company to create invoices',
@@ -44,7 +44,7 @@ class CheckInvoiceLimit
         // Load company with subscription
         $company = \App\Models\Company::with('subscription')->find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
                 'message' => 'The specified company does not exist',
@@ -83,13 +83,11 @@ class CheckInvoiceLimit
     /**
      * Generate Paddle checkout URL for upgrade
      *
-     * @param string|null $priceId
-     * @param \App\Models\Company $company
-     * @return string|null
+     * @param  \App\Models\Company  $company
      */
     protected function generateCheckoutUrl(?string $priceId, $company): ?string
     {
-        if (!$priceId) {
+        if (! $priceId) {
             return null;
         }
 

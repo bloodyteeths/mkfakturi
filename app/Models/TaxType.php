@@ -43,7 +43,7 @@ class TaxType extends Model
         // Include both company-specific tax types AND global tax types (company_id = null)
         $query->where(function ($q) {
             $q->where('company_id', request()->header('company'))
-              ->orWhereNull('company_id');
+                ->orWhereNull('company_id');
         });
     }
 

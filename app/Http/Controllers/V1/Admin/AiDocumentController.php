@@ -5,8 +5,8 @@ namespace App\Http\Controllers\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Services\AiInsightsService;
-use App\Services\PdfImageConverter;
 use App\Services\McpDataProvider;
+use App\Services\PdfImageConverter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -38,10 +38,6 @@ class AiDocumentController extends Controller
 
     /**
      * Create a new controller instance
-     *
-     * @param AiInsightsService $aiService
-     * @param PdfImageConverter $pdfConverter
-     * @param McpDataProvider $dataProvider
      */
     public function __construct(
         private AiInsightsService $aiService,
@@ -53,9 +49,6 @@ class AiDocumentController extends Controller
      * Analyze any document or image with AI vision
      *
      * POST /api/v1/ai/analyze-document
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function analyzeDocument(Request $request): JsonResponse
     {
@@ -79,7 +72,7 @@ class AiDocumentController extends Controller
 
         // Validate request
         $validated = $request->validate([
-            'file' => 'required|file|max:' . (self::MAX_FILE_SIZE / 1024),
+            'file' => 'required|file|max:'.(self::MAX_FILE_SIZE / 1024),
             'question' => 'nullable|string|max:500',
         ]);
 
@@ -107,7 +100,7 @@ class AiDocumentController extends Controller
                 'company_id' => $company->id,
                 'file_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
-                'has_question' => !empty($validated['question']),
+                'has_question' => ! empty($validated['question']),
             ]);
 
             // Process document
@@ -139,9 +132,6 @@ class AiDocumentController extends Controller
      * Analyze receipt image/PDF and extract structured data
      *
      * POST /api/v1/ai/analyze-receipt
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function analyzeReceipt(Request $request): JsonResponse
     {
@@ -165,7 +155,7 @@ class AiDocumentController extends Controller
 
         // Validate request
         $validated = $request->validate([
-            'file' => 'required|file|max:' . (self::MAX_FILE_SIZE / 1024),
+            'file' => 'required|file|max:'.(self::MAX_FILE_SIZE / 1024),
         ]);
 
         try {
@@ -220,9 +210,6 @@ class AiDocumentController extends Controller
      * Analyze invoice image/PDF and extract structured data
      *
      * POST /api/v1/ai/extract-invoice
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function extractInvoice(Request $request): JsonResponse
     {
@@ -246,7 +233,7 @@ class AiDocumentController extends Controller
 
         // Validate request
         $validated = $request->validate([
-            'file' => 'required|file|max:' . (self::MAX_FILE_SIZE / 1024),
+            'file' => 'required|file|max:'.(self::MAX_FILE_SIZE / 1024),
         ]);
 
         try {
@@ -301,9 +288,6 @@ class AiDocumentController extends Controller
      * Get monthly trends data for chart generation
      *
      * GET /api/v1/ai/monthly-trends
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function monthlyTrends(Request $request): JsonResponse
     {
@@ -356,10 +340,9 @@ class AiDocumentController extends Controller
     /**
      * Process document (PDF or image) and get AI analysis
      *
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $prompt
-     * @param Company $company
+     * @param  \Illuminate\Http\UploadedFile  $file
      * @return string AI analysis response
+     *
      * @throws \Exception
      */
     private function processDocument($file, string $prompt, Company $company): string
@@ -378,9 +361,9 @@ class AiDocumentController extends Controller
     /**
      * Process PDF by converting to images and analyzing
      *
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $prompt
+     * @param  \Illuminate\Http\UploadedFile  $file
      * @return string AI analysis response
+     *
      * @throws \Exception
      */
     private function processPdf($file, string $prompt): string
@@ -416,9 +399,9 @@ class AiDocumentController extends Controller
     /**
      * Process image file directly
      *
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $prompt
+     * @param  \Illuminate\Http\UploadedFile  $file
      * @return string AI analysis response
+     *
      * @throws \Exception
      */
     private function processImage($file, string $prompt): string
@@ -441,9 +424,6 @@ class AiDocumentController extends Controller
 
     /**
      * Build receipt extraction prompt
-     *
-     * @param Company $company
-     * @return string
      */
     private function buildReceiptExtractionPrompt(Company $company): string
     {
@@ -477,9 +457,6 @@ PROMPT;
 
     /**
      * Build invoice extraction prompt
-     *
-     * @param Company $company
-     * @return string
      */
     private function buildInvoiceExtractionPrompt(Company $company): string
     {
@@ -521,7 +498,6 @@ PROMPT;
     /**
      * Parse receipt data from AI response
      *
-     * @param string $response
      * @return array<string, mixed>
      */
     private function parseReceiptData(string $response): array
@@ -564,7 +540,6 @@ PROMPT;
     /**
      * Parse invoice data from AI response
      *
-     * @param string $response
      * @return array<string, mixed>
      */
     private function parseInvoiceData(string $response): array
@@ -612,9 +587,6 @@ PROMPT;
 
     /**
      * Check if PDF analysis feature is enabled
-     *
-     * @param Company $company
-     * @return bool
      */
     private function isPdfAnalysisEnabled(Company $company): bool
     {
@@ -630,16 +602,17 @@ PROMPT;
      * Resolve the AI provider instance
      *
      * @return \App\Services\AiProvider\AiProviderInterface
+     *
      * @throws \Exception
      */
     private function resolveAiProvider()
     {
         $provider = strtolower((string) config('ai.default_provider', 'claude'));
 
-        return match($provider) {
-            'claude' => new \App\Services\AiProvider\ClaudeProvider(),
-            'openai' => new \App\Services\AiProvider\OpenAiProvider(),
-            'gemini' => new \App\Services\AiProvider\GeminiProvider(),
+        return match ($provider) {
+            'claude' => new \App\Services\AiProvider\ClaudeProvider,
+            'openai' => new \App\Services\AiProvider\OpenAiProvider,
+            'gemini' => new \App\Services\AiProvider\GeminiProvider,
             default => throw new \RuntimeException("Unsupported AI provider: {$provider}"),
         };
     }

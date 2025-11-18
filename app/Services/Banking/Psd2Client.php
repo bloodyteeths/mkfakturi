@@ -87,8 +87,8 @@ abstract class Psd2Client
     /**
      * Generate OAuth2 authorization URL
      *
-     * @param Company $company Company requesting authorization
-     * @param string $redirectUri Callback URL after authorization
+     * @param  Company  $company  Company requesting authorization
+     * @param  string  $redirectUri  Callback URL after authorization
      * @return string Authorization URL
      */
     public function getAuthUrl(Company $company, string $redirectUri): string
@@ -120,27 +120,28 @@ abstract class Psd2Client
                 'bank' => $this->getBankCode(),
                 'company_id' => $company->id,
                 'state' => $state,
-                'cache_key' => $cacheKey
+                'cache_key' => $cacheKey,
             ]);
         }
 
-        return rtrim($this->getAuthBaseUrl(), '/') . $this->getAuthorizePath() . '?' . http_build_query($params);
+        return rtrim($this->getAuthBaseUrl(), '/').$this->getAuthorizePath().'?'.http_build_query($params);
     }
 
     /**
      * Exchange authorization code for access token
      *
-     * @param Company $company Company receiving the token
-     * @param string $code Authorization code from OAuth callback
-     * @param string $redirectUri Same redirect URI used in authorization
-     * @param string|null $state State parameter from callback (needed for PKCE)
+     * @param  Company  $company  Company receiving the token
+     * @param  string  $code  Authorization code from OAuth callback
+     * @param  string  $redirectUri  Same redirect URI used in authorization
+     * @param  string|null  $state  State parameter from callback (needed for PKCE)
      * @return BankToken Created or updated token
+     *
      * @throws \Exception If token exchange fails
      */
     public function exchangeCode(Company $company, string $code, string $redirectUri, ?string $state = null): BankToken
     {
         try {
-            $tokenUrl = rtrim($this->getAuthBaseUrl(), '/') . $this->getTokenPath();
+            $tokenUrl = rtrim($this->getAuthBaseUrl(), '/').$this->getTokenPath();
 
             $params = [
                 'grant_type' => 'authorization_code',
@@ -160,26 +161,26 @@ abstract class Psd2Client
                     Log::info('Using PKCE code verifier for token exchange', [
                         'bank' => $this->getBankCode(),
                         'company_id' => $company->id,
-                        'cache_key' => $cacheKey
+                        'cache_key' => $cacheKey,
                     ]);
                 } else {
                     Log::warning('PKCE code verifier not found in cache', [
                         'bank' => $this->getBankCode(),
                         'company_id' => $company->id,
-                        'cache_key' => $cacheKey
+                        'cache_key' => $cacheKey,
                     ]);
                 }
             }
 
             $response = Http::asForm()->post($tokenUrl, $params);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Token exchange HTTP error', [
                     'bank' => $this->getBankCode(),
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body' => $response->body(),
                 ]);
-                throw new \Exception('Token exchange failed: ' . $response->body());
+                throw new \Exception('Token exchange failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -211,8 +212,9 @@ abstract class Psd2Client
     /**
      * Get a valid access token (auto-refresh if expiring)
      *
-     * @param Company $company Company whose token to retrieve
+     * @param  Company  $company  Company whose token to retrieve
      * @return BankToken Valid access token
+     *
      * @throws \Exception If no token found or refresh fails
      */
     public function getValidToken(Company $company): BankToken
@@ -221,8 +223,8 @@ abstract class Psd2Client
             ->where('bank_code', $this->getBankCode())
             ->first();
 
-        if (!$token) {
-            throw new \Exception('No token found for company ' . $company->id . ' and bank ' . $this->getBankCode());
+        if (! $token) {
+            throw new \Exception('No token found for company '.$company->id.' and bank '.$this->getBankCode());
         }
 
         if ($token->isExpiringSoon()) {
@@ -235,18 +237,19 @@ abstract class Psd2Client
     /**
      * Refresh an expired or expiring token
      *
-     * @param BankToken $token Token to refresh
+     * @param  BankToken  $token  Token to refresh
      * @return BankToken Refreshed token
+     *
      * @throws \Exception If refresh fails
      */
     public function refreshToken(BankToken $token): BankToken
     {
-        if (!$token->refresh_token) {
+        if (! $token->refresh_token) {
             throw new \Exception('No refresh token available');
         }
 
         try {
-            $tokenUrl = rtrim($this->getAuthBaseUrl(), '/') . $this->getTokenPath();
+            $tokenUrl = rtrim($this->getAuthBaseUrl(), '/').$this->getTokenPath();
 
             $response = Http::asForm()->post($tokenUrl, [
                 'grant_type' => 'refresh_token',
@@ -255,8 +258,8 @@ abstract class Psd2Client
                 'client_secret' => $this->getClientSecret(),
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception('Token refresh failed: ' . $response->body());
+            if (! $response->successful()) {
+                throw new \Exception('Token refresh failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -288,11 +291,12 @@ abstract class Psd2Client
     /**
      * Fetch transactions from PSD2 API
      *
-     * @param Company $company Company whose transactions to fetch
-     * @param string $accountId Bank account ID
-     * @param Carbon $from Start date
-     * @param Carbon $to End date
+     * @param  Company  $company  Company whose transactions to fetch
+     * @param  string  $accountId  Bank account ID
+     * @param  Carbon  $from  Start date
+     * @param  Carbon  $to  End date
      * @return array Array of transaction data
+     *
      * @throws \Exception If API call fails
      */
     public function getTransactions(Company $company, string $accountId, Carbon $from, Carbon $to): array
@@ -304,18 +308,18 @@ abstract class Psd2Client
             $request = Http::withToken($token->access_token);
             $request = $this->addMtlsCertificate($request);
 
-            $response = $request->get($this->getBaseUrl() . "/accounts/{$accountId}/transactions", [
+            $response = $request->get($this->getBaseUrl()."/accounts/{$accountId}/transactions", [
                 'dateFrom' => $from->format('Y-m-d'),
                 'dateTo' => $to->format('Y-m-d'),
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 // Special handling for mTLS errors
                 if ($response->status() === 401 && str_contains($response->body(), 'mTLS')) {
                     throw new \Exception('mTLS authentication failed. Please ensure you have configured valid PSD2 certificates. See BANK_CERTIFICATES.md for instructions.');
                 }
 
-                throw new \Exception('Failed to fetch transactions: ' . $response->body());
+                throw new \Exception('Failed to fetch transactions: '.$response->body());
             }
 
             $data = $response->json();
@@ -343,8 +347,9 @@ abstract class Psd2Client
     /**
      * Get list of accounts from PSD2 API
      *
-     * @param Company $company Company whose accounts to fetch
+     * @param  Company  $company  Company whose accounts to fetch
      * @return array Array of account data
+     *
      * @throws \Exception If API call fails
      */
     public function getAccounts(Company $company): array
@@ -352,14 +357,14 @@ abstract class Psd2Client
         $token = $this->getValidToken($company);
 
         try {
-            $url = $this->getBaseUrl() . '/accounts';
+            $url = $this->getBaseUrl().'/accounts';
 
             Log::info('Fetching accounts from PSD2 API', [
                 'bank' => $this->getBankCode(),
                 'company_id' => $company->id,
                 'url' => $url,
-                'has_token' => !empty($token->access_token),
-                'has_mtls_cert' => $this->hasMtlsCertificate()
+                'has_token' => ! empty($token->access_token),
+                'has_mtls_cert' => $this->hasMtlsCertificate(),
             ]);
 
             // Build HTTP request with optional mTLS certificate
@@ -375,15 +380,15 @@ abstract class Psd2Client
                 'company_id' => $company->id,
                 'status' => $response->status(),
                 'body_length' => strlen($response->body()),
-                'body_preview' => substr($response->body(), 0, 500)
+                'body_preview' => substr($response->body(), 0, 500),
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('PSD2 API returned error', [
                     'bank' => $this->getBankCode(),
                     'status' => $response->status(),
                     'body' => $response->body(),
-                    'headers' => $response->headers()
+                    'headers' => $response->headers(),
                 ]);
 
                 // Special handling for mTLS errors
@@ -391,7 +396,7 @@ abstract class Psd2Client
                     throw new \Exception('mTLS authentication failed. Please ensure you have configured valid PSD2 certificates in your NLB developer portal and added them to your .env file. See BANK_CERTIFICATES.md for instructions.');
                 }
 
-                throw new \Exception('Failed to fetch accounts (HTTP ' . $response->status() . '): ' . $response->body());
+                throw new \Exception('Failed to fetch accounts (HTTP '.$response->status().'): '.$response->body());
             }
 
             $data = $response->json();
@@ -402,7 +407,7 @@ abstract class Psd2Client
                 'bank' => $this->getBankCode(),
                 'company_id' => $company->id,
                 'count' => count($accounts),
-                'response_keys' => array_keys($data)
+                'response_keys' => array_keys($data),
             ]);
 
             return $accounts;
@@ -411,7 +416,7 @@ abstract class Psd2Client
                 'bank' => $this->getBankCode(),
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             throw $e;
@@ -421,7 +426,7 @@ abstract class Psd2Client
     /**
      * Revoke OAuth token
      *
-     * @param Company $company Company whose token to revoke
+     * @param  Company  $company  Company whose token to revoke
      * @return bool True if successful
      */
     public function revokeToken(Company $company): bool
@@ -430,14 +435,14 @@ abstract class Psd2Client
             ->where('bank_code', $this->getBankCode())
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return false;
         }
 
         try {
             // Attempt to revoke on bank side (not all banks support this)
             Http::withToken($token->access_token)
-                ->post($this->getBaseUrl() . '/oauth/revoke');
+                ->post($this->getBaseUrl().'/oauth/revoke');
 
             // Delete token from database regardless of revoke response
             $token->delete();
@@ -468,26 +473,26 @@ abstract class Psd2Client
      * Simply return the company ID as the state parameter.
      * OAuth providers return state unchanged, allowing us to extract company ID in callback.
      *
-     * @param int $companyId Company ID
+     * @param  int  $companyId  Company ID
      * @return string Company ID as string
      */
     protected function generateState(int $companyId): string
     {
-        return (string)$companyId;
+        return (string) $companyId;
     }
 
     /**
      * Verify state parameter from OAuth callback
      *
-     * @param string $state State from callback
-     * @param int $companyId Expected company ID
+     * @param  string  $state  State from callback
+     * @param  int  $companyId  Expected company ID
      * @return bool True if valid
      */
     protected function verifyState(string $state, int $companyId): bool
     {
         // Note: For production, should store state in session/cache
         // This is a simplified implementation
-        return !empty($state);
+        return ! empty($state);
     }
 
     /**
@@ -510,18 +515,20 @@ abstract class Psd2Client
     protected function generateCodeVerifier(): string
     {
         $randomBytes = random_bytes(32); // 32 bytes = 43 chars when base64url encoded
+
         return rtrim(strtr(base64_encode($randomBytes), '+/', '-_'), '=');
     }
 
     /**
      * Generate code challenge from code verifier for PKCE
      *
-     * @param string $codeVerifier The code verifier
+     * @param  string  $codeVerifier  The code verifier
      * @return string Base64url-encoded SHA256 hash of the verifier
      */
     protected function generateCodeChallenge(string $codeVerifier): string
     {
         $hash = hash('sha256', $codeVerifier, true);
+
         return rtrim(strtr(base64_encode($hash), '+/', '-_'), '=');
     }
 
@@ -571,7 +578,7 @@ abstract class Psd2Client
         $certPath = $this->getCertificatePath();
         $keyPath = $this->getCertificateKeyPath();
 
-        if (!$certPath || !$keyPath) {
+        if (! $certPath || ! $keyPath) {
             return false;
         }
 
@@ -581,17 +588,18 @@ abstract class Psd2Client
     /**
      * Add mTLS certificate to HTTP request if configured
      *
-     * @param \Illuminate\Http\Client\PendingRequest $request HTTP request builder
+     * @param  \Illuminate\Http\Client\PendingRequest  $request  HTTP request builder
      * @return \Illuminate\Http\Client\PendingRequest Modified request with certificate options
      */
     protected function addMtlsCertificate($request)
     {
-        if (!$this->hasMtlsCertificate()) {
+        if (! $this->hasMtlsCertificate()) {
             Log::debug('No mTLS certificate configured', [
                 'bank' => $this->getBankCode(),
                 'cert_path' => $this->getCertificatePath(),
-                'key_path' => $this->getCertificateKeyPath()
+                'key_path' => $this->getCertificateKeyPath(),
             ]);
+
             return $request;
         }
 
@@ -603,7 +611,7 @@ abstract class Psd2Client
             'bank' => $this->getBankCode(),
             'cert_path' => $certPath,
             'key_path' => $keyPath,
-            'has_password' => !empty($keyPassword)
+            'has_password' => ! empty($keyPassword),
         ]);
 
         // Add certificate to Guzzle options

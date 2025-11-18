@@ -21,7 +21,7 @@ class CurrencyExchangeService
         }
 
         $cacheKey = "exchange_rate:{$fromCurrency}:{$toCurrency}:{$companyId}";
-        
+
         return Cache::companyRemember(
             $cacheKey,
             CacheServiceProvider::CACHE_TTLS['MEDIUM'],
@@ -38,33 +38,34 @@ class CurrencyExchangeService
     {
         $rates = [];
         $missingPairs = [];
-        
+
         // Check cache first
         foreach ($currencyPairs as $pair) {
             $from = $pair['from'];
             $to = $pair['to'];
-            
+
             if ($from === $to) {
                 $rates["{$from}:{$to}"] = 1.0;
+
                 continue;
             }
-            
+
             $cacheKey = "exchange_rate:{$from}:{$to}:{$companyId}";
             $cachedRate = Cache::get($cacheKey);
-            
+
             if ($cachedRate !== null) {
                 $rates["{$from}:{$to}"] = $cachedRate;
             } else {
                 $missingPairs[] = $pair;
             }
         }
-        
+
         // Fetch missing rates in batch
-        if (!empty($missingPairs)) {
+        if (! empty($missingPairs)) {
             $freshRates = $this->fetchMultipleExchangeRates($missingPairs, $companyId);
             $rates = array_merge($rates, $freshRates);
         }
-        
+
         return $rates;
     }
 
@@ -92,10 +93,10 @@ class CurrencyExchangeService
         // If not found, fetch from external API
         try {
             $rate = $this->fetchFromExternalAPI($fromCurrency, $toCurrency);
-            
+
             // Log the exchange rate
             $this->logExchangeRate($fromCurrency, $toCurrency, $rate, $companyId);
-            
+
             return $rate;
         } catch (\Exception $e) {
             Log::error('Failed to fetch exchange rate', [
@@ -103,7 +104,7 @@ class CurrencyExchangeService
                 'to' => $toCurrency,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Return fallback rate of 1.0
             return 1.0;
         }
@@ -115,19 +116,19 @@ class CurrencyExchangeService
     protected function fetchMultipleExchangeRates(array $currencyPairs, int $companyId): array
     {
         $rates = [];
-        
+
         foreach ($currencyPairs as $pair) {
             $from = $pair['from'];
             $to = $pair['to'];
             $rate = $this->fetchExchangeRate($from, $to, $companyId);
-            
+
             $rates["{$from}:{$to}"] = $rate;
-            
+
             // Cache the rate
             $cacheKey = "exchange_rate:{$from}:{$to}:{$companyId}";
             Cache::put($cacheKey, $rate, CacheServiceProvider::CACHE_TTLS['MEDIUM']);
         }
-        
+
         return $rates;
     }
 
@@ -138,12 +139,13 @@ class CurrencyExchangeService
     {
         // Using ExchangeRate-API as it's free and reliable
         $response = Http::timeout(10)->get("https://api.exchangerate-api.com/v4/latest/{$fromCurrency}");
-        
+
         if ($response->successful()) {
             $data = $response->json();
+
             return $data['rates'][$toCurrency] ?? 1.0;
         }
-        
+
         throw new \Exception('Failed to fetch exchange rate from API');
     }
 
@@ -155,7 +157,7 @@ class CurrencyExchangeService
         try {
             $baseCurrency = Currency::where('code', $fromCurrency)->first();
             $targetCurrency = Currency::where('code', $toCurrency)->first();
-            
+
             if ($baseCurrency && $targetCurrency) {
                 ExchangeRateLog::create([
                     'company_id' => $companyId,
@@ -192,7 +194,7 @@ class CurrencyExchangeService
             $redis = Cache::getStore()->connection();
             $pattern = "mkaccounting_cache:company:{$companyId}:exchange_rate:*";
             $keys = $redis->keys($pattern);
-            if (!empty($keys)) {
+            if (! empty($keys)) {
                 $redis->del($keys);
             }
         }
@@ -204,7 +206,7 @@ class CurrencyExchangeService
     public function warmUpCache(int $companyId, array $currencies = ['EUR', 'USD', 'MKD']): void
     {
         $pairs = [];
-        
+
         // Generate all possible pairs
         foreach ($currencies as $from) {
             foreach ($currencies as $to) {
@@ -213,10 +215,10 @@ class CurrencyExchangeService
                 }
             }
         }
-        
+
         // Fetch rates in batch
         $this->getMultipleExchangeRates($pairs, $companyId);
-        
+
         Log::info('Exchange rate cache warmed up', [
             'company_id' => $companyId,
             'currencies' => $currencies,

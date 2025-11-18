@@ -26,15 +26,12 @@ class CpayWebhookController extends Controller
 
     /**
      * Handle subscription callbacks from CPAY
-     *
-     * @param Request $request
-     * @return Response
      */
     public function handleSubscriptionCallback(Request $request): Response
     {
         try {
             // Verify signature
-            if (!$this->cpayDriver->verifySignature($request->all())) {
+            if (! $this->cpayDriver->verifySignature($request->all())) {
                 Log::error('CPAY subscription callback signature verification failed', [
                     'data' => $request->all(),
                 ]);
@@ -66,6 +63,7 @@ class CpayWebhookController extends Controller
 
                 default:
                     Log::info('Unhandled CPAY subscription event', ['event_type' => $eventType]);
+
                     return response('OK', 200);
             }
 
@@ -82,9 +80,6 @@ class CpayWebhookController extends Controller
 
     /**
      * Handle subscription created event
-     *
-     * @param array $data
-     * @return Response
      */
     protected function handleSubscriptionCreated(array $data): Response
     {
@@ -92,15 +87,17 @@ class CpayWebhookController extends Controller
         $tier = $data['tier'] ?? 'starter';
         $subscriptionRef = $data['subscription_ref'];
 
-        if (!$companyId) {
+        if (! $companyId) {
             Log::error('Company ID missing in subscription created callback', $data);
+
             return response('Bad Request', 400);
         }
 
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             Log::error('Company not found for subscription', ['company_id' => $companyId]);
+
             return response('Company not found', 404);
         }
 
@@ -108,7 +105,7 @@ class CpayWebhookController extends Controller
         // Store CPAY subscription reference in metadata
         $subscription = $company->subscriptions()->create([
             'type' => 'default',
-            'paddle_id' => 'cpay_' . $subscriptionRef, // Prefix to distinguish from Paddle
+            'paddle_id' => 'cpay_'.$subscriptionRef, // Prefix to distinguish from Paddle
             'status' => 'active',
             'provider' => 'cpay',
             'tier' => $tier,
@@ -136,9 +133,6 @@ class CpayWebhookController extends Controller
 
     /**
      * Handle successful subscription payment
-     *
-     * @param array $data
-     * @return Response
      */
     protected function handleSubscriptionPaymentSucceeded(array $data): Response
     {
@@ -147,10 +141,11 @@ class CpayWebhookController extends Controller
         $transactionId = $data['transaction_id'];
 
         // Find subscription by CPAY reference
-        $subscription = \Laravel\Paddle\Subscription::where('paddle_id', 'cpay_' . $subscriptionRef)->first();
+        $subscription = \Laravel\Paddle\Subscription::where('paddle_id', 'cpay_'.$subscriptionRef)->first();
 
-        if (!$subscription) {
+        if (! $subscription) {
             Log::error('Subscription not found for payment', ['subscription_ref' => $subscriptionRef]);
+
             return response('Subscription not found', 404);
         }
 
@@ -173,16 +168,13 @@ class CpayWebhookController extends Controller
 
     /**
      * Handle failed subscription payment
-     *
-     * @param array $data
-     * @return Response
      */
     protected function handleSubscriptionPaymentFailed(array $data): Response
     {
         $subscriptionRef = $data['subscription_ref'];
 
         // Find subscription by CPAY reference
-        $subscription = \Laravel\Paddle\Subscription::where('paddle_id', 'cpay_' . $subscriptionRef)->first();
+        $subscription = \Laravel\Paddle\Subscription::where('paddle_id', 'cpay_'.$subscriptionRef)->first();
 
         if ($subscription) {
             // Update subscription status to past_due
@@ -201,16 +193,13 @@ class CpayWebhookController extends Controller
 
     /**
      * Handle subscription cancelled event
-     *
-     * @param array $data
-     * @return Response
      */
     protected function handleSubscriptionCancelled(array $data): Response
     {
         $subscriptionRef = $data['subscription_ref'];
 
         // Find subscription by CPAY reference
-        $subscription = \Laravel\Paddle\Subscription::where('paddle_id', 'cpay_' . $subscriptionRef)->first();
+        $subscription = \Laravel\Paddle\Subscription::where('paddle_id', 'cpay_'.$subscriptionRef)->first();
 
         if ($subscription) {
             $company = $subscription->billable;
@@ -239,9 +228,6 @@ class CpayWebhookController extends Controller
 
     /**
      * Get tier price
-     *
-     * @param string $tier
-     * @return float
      */
     private function getTierPrice(string $tier): float
     {
@@ -258,10 +244,6 @@ class CpayWebhookController extends Controller
 
     /**
      * Trigger commission calculation for partners
-     *
-     * @param Company $company
-     * @param array $paymentData
-     * @return void
      */
     private function triggerCommissionCalculation(Company $company, array $paymentData): void
     {

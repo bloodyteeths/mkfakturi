@@ -3,7 +3,6 @@
 namespace App\Services\Import\Intelligent;
 
 use App\Models\MappingRule;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Mapping Scorer Service
@@ -33,17 +32,17 @@ class MappingScorer
     /**
      * Calculate overall mapping quality score
      *
-     * @param array $mappings Field mappings with confidence scores
-     *                        Format: [
-     *                            'csv_field' => [
-     *                                'target_field' => 'name',
-     *                                'confidence' => 0.95,
-     *                                'source' => 'rule|pattern|manual'
-     *                            ]
-     *                        ]
-     * @param string $entityType Detected entity type (customer, invoice, etc.)
-     * @param int $totalFields Total CSV fields available
-     * @param int|null $companyId Optional company ID for company-specific rules
+     * @param  array  $mappings  Field mappings with confidence scores
+     *                           Format: [
+     *                           'csv_field' => [
+     *                           'target_field' => 'name',
+     *                           'confidence' => 0.95,
+     *                           'source' => 'rule|pattern|manual'
+     *                           ]
+     *                           ]
+     * @param  string  $entityType  Detected entity type (customer, invoice, etc.)
+     * @param  int  $totalFields  Total CSV fields available
+     * @param  int|null  $companyId  Optional company ID for company-specific rules
      * @return array Quality metrics and recommendations
      */
     public function calculateQuality(
@@ -97,8 +96,8 @@ class MappingScorer
     /**
      * Get critical fields from database for entity type
      *
-     * @param string $entityType Entity type
-     * @param int|null $companyId Optional company ID
+     * @param  string  $entityType  Entity type
+     * @param  int|null  $companyId  Optional company ID
      * @return array Critical field names
      */
     private function getCriticalFields(string $entityType, ?int $companyId = null): array
@@ -107,15 +106,15 @@ class MappingScorer
             ->active()
             ->where(function ($q) {
                 $q->where('validation_rules->required', true)
-                  ->orWhere('validation_rules->required', '=', 'true')
-                  ->orWhere('validation_rules->required', '=', 1);
+                    ->orWhere('validation_rules->required', '=', 'true')
+                    ->orWhere('validation_rules->required', '=', 1);
             });
 
         // Include company-specific and global rules
         if ($companyId) {
             $query->where(function ($q) use ($companyId) {
                 $q->where('company_id', $companyId)
-                  ->orWhereNull('company_id');
+                    ->orWhereNull('company_id');
             });
         } else {
             $query->whereNull('company_id');
@@ -130,9 +129,9 @@ class MappingScorer
     /**
      * Calculate core metrics from mappings
      *
-     * @param array $mappings Field mappings
-     * @param array $criticalFields Critical field names
-     * @param int $totalFields Total CSV fields
+     * @param  array  $mappings  Field mappings
+     * @param  array  $criticalFields  Critical field names
+     * @param  int  $totalFields  Total CSV fields
      * @return array Core metrics
      */
     private function calculateCoreMetrics(
@@ -193,7 +192,7 @@ class MappingScorer
      * - Field coverage: 10%
      * - Overall confidence: 10%
      *
-     * @param array $metrics Core metrics
+     * @param  array  $metrics  Core metrics
      * @return float Quality score (0-100)
      */
     private function calculateWeightedScore(array $metrics): float
@@ -211,23 +210,32 @@ class MappingScorer
     /**
      * Get grade from quality score
      *
-     * @param float $score Quality score
+     * @param  float  $score  Quality score
      * @return string Grade (EXCELLENT, GOOD, FAIR, POOR, FAILED)
      */
     private function getGrade(float $score): string
     {
-        if ($score >= 90) return 'EXCELLENT';
-        if ($score >= 75) return 'GOOD';
-        if ($score >= 60) return 'FAIR';
-        if ($score >= 40) return 'POOR';
+        if ($score >= 90) {
+            return 'EXCELLENT';
+        }
+        if ($score >= 75) {
+            return 'GOOD';
+        }
+        if ($score >= 60) {
+            return 'FAIR';
+        }
+        if ($score >= 40) {
+            return 'POOR';
+        }
+
         return 'FAILED';
     }
 
     /**
      * Get recommendation based on score and metrics
      *
-     * @param float $score Quality score
-     * @param array $metrics Core metrics
+     * @param  float  $score  Quality score
+     * @param  array  $metrics  Core metrics
      * @return string Recommendation message
      */
     private function getRecommendation(float $score, array $metrics): string
@@ -246,6 +254,7 @@ class MappingScorer
                 } elseif ($metrics['avg_confidence'] < 0.7) {
                     $message .= ' Review low-confidence optional field mappings.';
                 }
+
                 return $message;
 
             case 'FAIR':
@@ -256,6 +265,7 @@ class MappingScorer
                 if ($metrics['critical_confidence'] < 0.7) {
                     $message .= ' Critical field confidence is low.';
                 }
+
                 return $message;
 
             case 'POOR':
@@ -266,12 +276,14 @@ class MappingScorer
                 if ($metrics['field_coverage'] < 0.5) {
                     $message .= ' Low overall field coverage.';
                 }
+
                 return $message;
 
             case 'FAILED':
                 if ($metrics['critical_coverage'] < 0.5) {
                     return 'FAILED: Less than half of critical fields mapped. Manual configuration required.';
                 }
+
                 return 'FAILED: Automatic detection unsuccessful. Manual mapping required.';
 
             default:
@@ -282,7 +294,7 @@ class MappingScorer
     /**
      * Categorize mappings by confidence level
      *
-     * @param array $mappings Field mappings
+     * @param  array  $mappings  Field mappings
      * @return array Breakdown by confidence level
      */
     private function categorizeByConfidence(array $mappings): array
@@ -313,8 +325,8 @@ class MappingScorer
     /**
      * Get unmapped field names
      *
-     * @param array $mappedFieldNames Names of mapped CSV fields
-     * @param int $totalFields Total CSV fields
+     * @param  array  $mappedFieldNames  Names of mapped CSV fields
+     * @param  int  $totalFields  Total CSV fields
      * @return array Unmapped field indices/names
      */
     private function getUnmappedFields(array $mappedFieldNames, int $totalFields): array
@@ -343,9 +355,9 @@ class MappingScorer
      * - Consistency: Data type consistency
      * - Format compliance: Pattern matching
      *
-     * @param array $records Sample records from CSV
-     * @param array $mappings Field mappings
-     * @param string $entityType Entity type
+     * @param  array  $records  Sample records from CSV
+     * @param  array  $mappings  Field mappings
+     * @param  string  $entityType  Entity type
      * @return array Data quality metrics
      */
     public function calculateDataQuality(
@@ -379,8 +391,8 @@ class MappingScorer
     /**
      * Calculate completeness score
      *
-     * @param array $records Data records
-     * @param array $mappings Field mappings
+     * @param  array  $records  Data records
+     * @param  array  $mappings  Field mappings
      * @return float Completeness score (0-1)
      */
     private function calculateCompleteness(array $records, array $mappings): float
@@ -407,8 +419,8 @@ class MappingScorer
     /**
      * Calculate uniqueness score for key fields
      *
-     * @param array $records Data records
-     * @param array $mappings Field mappings
+     * @param  array  $records  Data records
+     * @param  array  $mappings  Field mappings
      * @return float Uniqueness score (0-1)
      */
     private function calculateUniqueness(array $records, array $mappings): float
@@ -435,7 +447,7 @@ class MappingScorer
 
         foreach ($keyFields as $field) {
             $values = array_column($records, $field);
-            $values = array_filter($values, fn($v) => !empty($v));
+            $values = array_filter($values, fn ($v) => ! empty($v));
 
             if (count($values) > 0) {
                 $uniqueValues = array_unique($values);
@@ -443,14 +455,14 @@ class MappingScorer
             }
         }
 
-        return !empty($uniquenessScores) ? array_sum($uniquenessScores) / count($uniquenessScores) : 1.0;
+        return ! empty($uniquenessScores) ? array_sum($uniquenessScores) / count($uniquenessScores) : 1.0;
     }
 
     /**
      * Calculate consistency score (data type consistency)
      *
-     * @param array $records Data records
-     * @param array $mappings Field mappings
+     * @param  array  $records  Data records
+     * @param  array  $mappings  Field mappings
      * @return float Consistency score (0-1)
      */
     private function calculateConsistency(array $records, array $mappings): float
@@ -463,7 +475,7 @@ class MappingScorer
 
         foreach (array_keys($mappings) as $field) {
             $values = array_column($records, $field);
-            $values = array_filter($values, fn($v) => !empty($v));
+            $values = array_filter($values, fn ($v) => ! empty($v));
 
             if (count($values) < 2) {
                 continue; // Skip fields with insufficient data
@@ -471,9 +483,16 @@ class MappingScorer
 
             // Detect dominant data type
             $types = array_map(function ($value) {
-                if (is_numeric($value)) return 'numeric';
-                if (preg_match('/^\d{2}[\.\/\-]\d{2}[\.\/\-]\d{4}$/', $value)) return 'date';
-                if (filter_var($value, FILTER_VALIDATE_EMAIL)) return 'email';
+                if (is_numeric($value)) {
+                    return 'numeric';
+                }
+                if (preg_match('/^\d{2}[\.\/\-]\d{2}[\.\/\-]\d{4}$/', $value)) {
+                    return 'date';
+                }
+                if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    return 'email';
+                }
+
                 return 'string';
             }, $values);
 
@@ -482,15 +501,15 @@ class MappingScorer
             $consistencyScores[] = $dominantTypeCount / count($values);
         }
 
-        return !empty($consistencyScores) ? array_sum($consistencyScores) / count($consistencyScores) : 1.0;
+        return ! empty($consistencyScores) ? array_sum($consistencyScores) / count($consistencyScores) : 1.0;
     }
 
     /**
      * Detect data quality issues
      *
-     * @param array $records Data records
-     * @param array $mappings Field mappings
-     * @param string $entityType Entity type
+     * @param  array  $records  Data records
+     * @param  array  $mappings  Field mappings
+     * @param  string  $entityType  Entity type
      * @return array List of detected issues
      */
     private function detectDataQualityIssues(
@@ -503,7 +522,7 @@ class MappingScorer
         // Check for high percentage of empty values
         $completeness = $this->calculateCompleteness($records, $mappings);
         if ($completeness < 0.7) {
-            $issues[] = 'High percentage of empty values detected (' . round((1 - $completeness) * 100) . '% missing).';
+            $issues[] = 'High percentage of empty values detected ('.round((1 - $completeness) * 100).'% missing).';
         }
 
         // Check for duplicate key values
@@ -522,7 +541,7 @@ class MappingScorer
         foreach ($mappings as $csvField => $mapping) {
             if ($mapping['target_field'] === 'email') {
                 $emails = array_column($records, $csvField);
-                $validEmails = array_filter($emails, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                $validEmails = array_filter($emails, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
                 $invalidCount = count($emails) - count($validEmails);
                 if ($invalidCount > 0) {
                     $issues[] = "{$invalidCount} invalid email format(s) detected.";
@@ -536,8 +555,8 @@ class MappingScorer
     /**
      * Get detailed field-level quality metrics
      *
-     * @param array $records Data records
-     * @param array $mappings Field mappings
+     * @param  array  $records  Data records
+     * @param  array  $mappings  Field mappings
      * @return array Field-level quality metrics
      */
     public function getFieldQualityMetrics(array $records, array $mappings): array
@@ -546,7 +565,7 @@ class MappingScorer
 
         foreach ($mappings as $csvField => $mapping) {
             $values = array_column($records, $csvField);
-            $nonEmptyValues = array_filter($values, fn($v) => !empty($v));
+            $nonEmptyValues = array_filter($values, fn ($v) => ! empty($v));
 
             $fieldMetrics[$csvField] = [
                 'target_field' => $mapping['target_field'],

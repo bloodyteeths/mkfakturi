@@ -21,18 +21,17 @@ use Modules\Mk\Services\CpayDriver;
  * - Comprehensive logging
  *
  * @version 1.0.0
+ *
  * @author Claude Code - CPAY Integration Agent
  */
 class CpayCallbackController extends Controller
 {
     /**
      * Get the CPAY driver instance (lazy-loaded)
-     *
-     * @return CpayDriver
      */
     protected function getCpayDriver(): CpayDriver
     {
-        return new CpayDriver();
+        return new CpayDriver;
     }
 
     /**
@@ -47,8 +46,7 @@ class CpayCallbackController extends Controller
      * - status: Payment status (APPROVED, DECLINED, etc.)
      * - signature: SHA256 signature for verification
      *
-     * @param Request $request Callback request from CPAY
-     * @return Response
+     * @param  Request  $request  Callback request from CPAY
      */
     public function __invoke(Request $request): Response
     {
@@ -60,8 +58,9 @@ class CpayCallbackController extends Controller
             ]);
 
             // Check feature flag
-            if (!config('mk.features.advanced_payments', false)) {
+            if (! config('mk.features.advanced_payments', false)) {
                 Log::warning('CPAY callback rejected - feature disabled');
+
                 return response('Feature disabled', 403);
             }
 
@@ -96,15 +95,13 @@ class CpayCallbackController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response('Callback processing failed: ' . $e->getMessage(), 400);
+            return response('Callback processing failed: '.$e->getMessage(), 400);
         }
     }
 
     /**
      * Validate callback request parameters
      *
-     * @param Request $request
-     * @return void
      * @throws \InvalidArgumentException
      */
     protected function validateCallbackRequest(Request $request): void
@@ -119,7 +116,7 @@ class CpayCallbackController extends Controller
         ];
 
         foreach ($required as $field) {
-            if (!$request->has($field)) {
+            if (! $request->has($field)) {
                 throw new \InvalidArgumentException("Missing required callback field: {$field}");
             }
         }
@@ -136,7 +133,7 @@ class CpayCallbackController extends Controller
 
         // Validate amount is numeric and positive
         $amount = $request->input('amount');
-        if (!is_numeric($amount) || $amount <= 0) {
+        if (! is_numeric($amount) || $amount <= 0) {
             throw new \InvalidArgumentException('Invalid payment amount');
         }
     }

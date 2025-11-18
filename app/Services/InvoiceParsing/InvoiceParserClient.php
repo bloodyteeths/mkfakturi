@@ -18,4 +18,3 @@ interface InvoiceParserClient
      */
     public function ocr(int $companyId, string $filePath, string $originalName): array;
 } // CLAUDE-CHECKPOINT
-

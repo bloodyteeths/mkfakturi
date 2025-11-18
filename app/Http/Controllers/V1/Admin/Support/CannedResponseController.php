@@ -16,7 +16,6 @@ class CannedResponseController extends Controller
     /**
      * List all canned responses
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -24,10 +23,10 @@ class CannedResponseController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can access canned responses
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can access canned responses'
+                'message' => 'Only admins and support agents can access canned responses',
             ], 403);
         }
 
@@ -42,7 +41,7 @@ class CannedResponseController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'LIKE', "%{$search}%")
-                      ->orWhere('content', 'LIKE', "%{$search}%");
+                        ->orWhere('content', 'LIKE', "%{$search}%");
                 });
             })
             ->orderBy('usage_count', 'desc') // Most used first
@@ -58,17 +57,16 @@ class CannedResponseController extends Controller
     /**
      * Create new canned response
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
         $user = $request->user();
 
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can create canned responses'
+                'message' => 'Only admins and support agents can create canned responses',
             ], 403);
         }
 
@@ -99,7 +97,6 @@ class CannedResponseController extends Controller
     /**
      * Show single canned response
      *
-     * @param CannedResponse $cannedResponse
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(CannedResponse $cannedResponse)
@@ -114,18 +111,16 @@ class CannedResponseController extends Controller
     /**
      * Update canned response
      *
-     * @param Request $request
-     * @param CannedResponse $cannedResponse
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, CannedResponse $cannedResponse)
     {
         $user = $request->user();
 
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can update canned responses'
+                'message' => 'Only admins and support agents can update canned responses',
             ], 403);
         }
 
@@ -155,7 +150,6 @@ class CannedResponseController extends Controller
     /**
      * Delete canned response
      *
-     * @param CannedResponse $cannedResponse
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(CannedResponse $cannedResponse)
@@ -171,7 +165,6 @@ class CannedResponseController extends Controller
     /**
      * Use canned response (increment usage count)
      *
-     * @param CannedResponse $cannedResponse
      * @return \Illuminate\Http\JsonResponse
      */
     public function use(CannedResponse $cannedResponse)

@@ -5,12 +5,11 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
  * MCP Data Provider
- * 
+ *
  * Provides direct database access to financial data for AI analysis.
  * Bypasses HTTP layer to avoid self-calling issues.
  */
@@ -185,14 +184,14 @@ class McpDataProvider
                     ];
                 })
                 ->toArray();
-                
+
             return $customers;
         } catch (\Exception $e) {
             Log::error('Failed to search customers', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [];
         }
     }
@@ -204,19 +203,19 @@ class McpDataProvider
     {
         try {
             $query = Invoice::where('company_id', $company->id);
-            
-            if (!empty($params['status'])) {
+
+            if (! empty($params['status'])) {
                 $query->where('status', $params['status']);
             }
-            
-            if (!empty($params['from_date'])) {
+
+            if (! empty($params['from_date'])) {
                 $query->where('invoice_date', '>=', $params['from_date']);
             }
-            
-            if (!empty($params['to_date'])) {
+
+            if (! empty($params['to_date'])) {
                 $query->where('invoice_date', '<=', $params['to_date']);
             }
-            
+
             $invoices = $query->limit(50)
                 ->get()
                 ->map(function ($invoice) {
@@ -233,14 +232,14 @@ class McpDataProvider
                     ];
                 })
                 ->toArray();
-                
+
             return $invoices;
         } catch (\Exception $e) {
             Log::error('Failed to search invoices', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [];
         }
     }
@@ -248,8 +247,7 @@ class McpDataProvider
     /**
      * Get monthly revenue and expense trends for the past N months
      *
-     * @param Company $company
-     * @param int $months Number of months to retrieve (default: 12)
+     * @param  int  $months  Number of months to retrieve (default: 12)
      * @return array<int, array{month: string, revenue: float, expenses: float, profit: float, invoice_count: int}>
      */
     public function getMonthlyTrends(Company $company, int $months = 12): array
@@ -322,8 +320,7 @@ class McpDataProvider
     /**
      * Get customer growth trends
      *
-     * @param Company $company
-     * @param int $months Number of months to retrieve
+     * @param  int  $months  Number of months to retrieve
      * @return array<int, array{month: string, new_customers: int, total_customers: int}>
      */
     public function getCustomerGrowth(Company $company, int $months = 12): array
@@ -374,7 +371,6 @@ class McpDataProvider
     /**
      * Get payment timing analysis
      *
-     * @param Company $company
      * @return array{avg_days_to_payment: float, on_time_percentage: float, late_percentage: float}
      */
     public function getPaymentTimingAnalysis(Company $company): array
@@ -403,7 +399,7 @@ class McpDataProvider
 
             foreach ($paidInvoices as $invoice) {
                 $lastPayment = $invoice->payments->sortByDesc('payment_date')->first();
-                if (!$lastPayment || !$lastPayment->payment_date) {
+                if (! $lastPayment || ! $lastPayment->payment_date) {
                     continue;
                 }
 
@@ -448,8 +444,7 @@ class McpDataProvider
     /**
      * Get top customers by revenue
      *
-     * @param Company $company
-     * @param int $limit Number of customers to return
+     * @param  int  $limit  Number of customers to return
      * @return array<int, array{customer_name: string, revenue: float, invoice_count: int}>
      */
     public function getTopCustomers(Company $company, int $limit = 10): array

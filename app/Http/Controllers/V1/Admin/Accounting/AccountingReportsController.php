@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\V1\Admin\Accounting;
 
-use App\Http\Controllers\Controller;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Http\Controllers\Controller;
 use App\Models\Company;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Accounting Reports Controller
@@ -15,8 +15,6 @@ use Illuminate\Http\JsonResponse;
  * - Trial Balance
  * - Balance Sheet
  * - Income Statement
- *
- * @package App\Http\Controllers\V1\Admin\Accounting
  */
 class AccountingReportsController extends Controller
 {
@@ -34,48 +32,48 @@ class AccountingReportsController extends Controller
      *   path="/api/v1/accounting/trial-balance",
      *   tags={"Accounting"},
      *   summary="Get trial balance report",
+     *
      *   @OA\Parameter(
      *     name="as_of_date",
      *     in="query",
      *     required=false,
+     *
      *     @OA\Schema(type="string", format="date")
      *   ),
+     *
      *   @OA\Response(response=200, description="Trial balance data"),
      *   @OA\Response(response=403, description="Feature disabled"),
      *   @OA\Response(response=404, description="Company not found")
      * )
      *
      * GET /api/v1/accounting/trial-balance?as_of_date=2025-08-31
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function trialBalance(Request $request): JsonResponse
     {
         // Check feature flag
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return response()->json([
                 'error' => 'Accounting backbone feature is disabled',
-                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports'
+                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports',
             ], 403);
         }
 
         // Get company from header (set by company middleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'Missing company header',
-                'message' => 'The company header is required for accounting reports'
+                'message' => 'The company header is required for accounting reports',
             ], 400);
         }
 
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
-                'message' => 'The specified company does not exist'
+                'message' => 'The specified company does not exist',
             ], 404);
         }
         // CLAUDE-CHECKPOINT
@@ -104,48 +102,48 @@ class AccountingReportsController extends Controller
      *   path="/api/v1/accounting/balance-sheet",
      *   tags={"Accounting"},
      *   summary="Get balance sheet report",
+     *
      *   @OA\Parameter(
      *     name="as_of_date",
      *     in="query",
      *     required=false,
+     *
      *     @OA\Schema(type="string", format="date")
      *   ),
+     *
      *   @OA\Response(response=200, description="Balance sheet data"),
      *   @OA\Response(response=403, description="Feature disabled"),
      *   @OA\Response(response=404, description="Company not found")
      * )
      *
      * GET /api/v1/accounting/balance-sheet?as_of_date=2025-08-31
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function balanceSheet(Request $request): JsonResponse
     {
         // Check feature flag
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return response()->json([
                 'error' => 'Accounting backbone feature is disabled',
-                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports'
+                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports',
             ], 403);
         }
 
         // Get company from header (set by company middleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'Missing company header',
-                'message' => 'The company header is required for accounting reports'
+                'message' => 'The company header is required for accounting reports',
             ], 400);
         }
 
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
-                'message' => 'The specified company does not exist'
+                'message' => 'The specified company does not exist',
             ], 404);
         }
         // CLAUDE-CHECKPOINT
@@ -174,18 +172,23 @@ class AccountingReportsController extends Controller
      *   path="/api/v1/accounting/income-statement",
      *   tags={"Accounting"},
      *   summary="Get income statement report",
+     *
      *   @OA\Parameter(
      *     name="start",
      *     in="query",
      *     required=true,
+     *
      *     @OA\Schema(type="string", format="date")
      *   ),
+     *
      *   @OA\Parameter(
      *     name="end",
      *     in="query",
      *     required=true,
+     *
      *     @OA\Schema(type="string", format="date")
      *   ),
+     *
      *   @OA\Response(response=200, description="Income statement data"),
      *   @OA\Response(response=403, description="Feature disabled"),
      *   @OA\Response(response=404, description="Company not found"),
@@ -193,36 +196,33 @@ class AccountingReportsController extends Controller
      * )
      *
      * GET /api/v1/accounting/income-statement?start=2025-01-01&end=2025-08-31
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function incomeStatement(Request $request): JsonResponse
     {
         // Check feature flag
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return response()->json([
                 'error' => 'Accounting backbone feature is disabled',
-                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports'
+                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to access accounting reports',
             ], 403);
         }
 
         // Get company from header (set by company middleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'Missing company header',
-                'message' => 'The company header is required for accounting reports'
+                'message' => 'The company header is required for accounting reports',
             ], 400);
         }
 
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
-                'message' => 'The specified company does not exist'
+                'message' => 'The specified company does not exist',
             ], 404);
         }
         // CLAUDE-CHECKPOINT
@@ -254,8 +254,6 @@ class AccountingReportsController extends Controller
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {

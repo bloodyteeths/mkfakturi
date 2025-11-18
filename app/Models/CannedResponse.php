@@ -56,7 +56,7 @@ class CannedResponse extends Model
     /**
      * Scope to only active responses
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query)
@@ -67,8 +67,8 @@ class CannedResponse extends Model
     /**
      * Scope to filter by category
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $category
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $category
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByCategory($query, $category)

@@ -33,7 +33,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $rejection_reason
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read Invoice $invoice
  * @property-read Company $company
  * @property-read Certificate|null $certificate
@@ -49,10 +48,15 @@ class EInvoice extends Model
      * Status constants
      */
     public const STATUS_DRAFT = 'DRAFT';
+
     public const STATUS_SIGNED = 'SIGNED';
+
     public const STATUS_SUBMITTED = 'SUBMITTED';
+
     public const STATUS_ACCEPTED = 'ACCEPTED';
+
     public const STATUS_REJECTED = 'REJECTED';
+
     public const STATUS_FAILED = 'FAILED';
 
     /**
@@ -122,8 +126,6 @@ class EInvoice extends Model
 
     /**
      * Get the invoice that this e-invoice belongs to.
-     *
-     * @return BelongsTo
      */
     public function invoice(): BelongsTo
     {
@@ -132,8 +134,6 @@ class EInvoice extends Model
 
     /**
      * Get the company that owns this e-invoice.
-     *
-     * @return BelongsTo
      */
     public function company(): BelongsTo
     {
@@ -142,8 +142,6 @@ class EInvoice extends Model
 
     /**
      * Get the certificate used to sign this e-invoice.
-     *
-     * @return BelongsTo
      */
     public function certificate(): BelongsTo
     {
@@ -152,8 +150,6 @@ class EInvoice extends Model
 
     /**
      * Get all submission attempts for this e-invoice.
-     *
-     * @return HasMany
      */
     public function submissions(): HasMany
     {
@@ -162,8 +158,6 @@ class EInvoice extends Model
 
     /**
      * Get the latest submission.
-     *
-     * @return EInvoiceSubmission|null
      */
     public function getLatestSubmissionAttribute(): ?EInvoiceSubmission
     {
@@ -173,12 +167,6 @@ class EInvoice extends Model
     /**
      * Sign the e-invoice with a certificate.
      * Updates status to SIGNED and stores signature metadata.
-     *
-     * @param Certificate $certificate
-     * @param string $signedXml
-     * @param array|null $subject
-     * @param array|null $issuer
-     * @return bool
      */
     public function sign(Certificate $certificate, string $signedXml, ?array $subject = null, ?array $issuer = null): bool
     {
@@ -195,8 +183,6 @@ class EInvoice extends Model
     /**
      * Submit the e-invoice to the tax authority.
      * Updates status to SUBMITTED.
-     *
-     * @return bool
      */
     public function submit(): bool
     {
@@ -212,8 +198,6 @@ class EInvoice extends Model
 
     /**
      * Mark the e-invoice as accepted by the tax authority.
-     *
-     * @return bool
      */
     public function markAsAccepted(): bool
     {
@@ -226,9 +210,6 @@ class EInvoice extends Model
 
     /**
      * Mark the e-invoice as rejected by the tax authority.
-     *
-     * @param string|null $reason
-     * @return bool
      */
     public function markAsRejected(?string $reason = null): bool
     {
@@ -241,9 +222,6 @@ class EInvoice extends Model
 
     /**
      * Mark the e-invoice as failed (error during processing).
-     *
-     * @param string|null $reason
-     * @return bool
      */
     public function markAsFailed(?string $reason = null): bool
     {
@@ -255,8 +233,6 @@ class EInvoice extends Model
 
     /**
      * Check if the e-invoice is signed.
-     *
-     * @return bool
      */
     public function isSigned(): bool
     {
@@ -270,8 +246,6 @@ class EInvoice extends Model
 
     /**
      * Check if the e-invoice is submitted.
-     *
-     * @return bool
      */
     public function isSubmitted(): bool
     {
@@ -284,8 +258,6 @@ class EInvoice extends Model
 
     /**
      * Check if the e-invoice is accepted.
-     *
-     * @return bool
      */
     public function isAccepted(): bool
     {
@@ -294,8 +266,6 @@ class EInvoice extends Model
 
     /**
      * Check if the e-invoice is rejected.
-     *
-     * @return bool
      */
     public function isRejected(): bool
     {
@@ -305,8 +275,7 @@ class EInvoice extends Model
     /**
      * Scope: filter by status.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $status
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereStatus($query, string $status)
@@ -317,8 +286,7 @@ class EInvoice extends Model
     /**
      * Scope: filter by invoice ID.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $invoiceId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereInvoice($query, int $invoiceId)
@@ -329,7 +297,7 @@ class EInvoice extends Model
     /**
      * Scope: get pending submissions (signed but not yet submitted).
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopePendingSubmission($query)
@@ -340,7 +308,7 @@ class EInvoice extends Model
     /**
      * Scope: get accepted e-invoices.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeAccepted($query)
@@ -351,7 +319,7 @@ class EInvoice extends Model
     /**
      * Scope: get rejected e-invoices.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeRejected($query)

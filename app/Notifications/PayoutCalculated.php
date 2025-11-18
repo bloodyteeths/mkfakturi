@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
-use App\Models\Payout;
 use App\Models\Partner;
+use App\Models\Payout;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +14,7 @@ class PayoutCalculated extends Notification implements ShouldQueue
     use Queueable;
 
     protected Payout $payout;
+
     protected Partner $partner;
 
     /**
@@ -45,18 +46,18 @@ class PayoutCalculated extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Affiliate Payout Scheduled - Facturino Partner')
-            ->greeting('Hello ' . $this->partner->name . ',')
+            ->greeting('Hello '.$this->partner->name.',')
             ->line('Your affiliate payout has been calculated and scheduled.')
             ->line('**Payout Details:**')
             ->line("Month: {$monthRef}")
-            ->line("Amount: €" . number_format($this->payout->amount, 2))
+            ->line('Amount: €'.number_format($this->payout->amount, 2))
             ->line("Commission events: {$eventCount}")
-            ->line("Payment method: Bank Transfer")
-            ->line("Expected payment date: " . $this->payout->payout_date->format('F d, Y'))
+            ->line('Payment method: Bank Transfer')
+            ->line('Expected payment date: '.$this->payout->payout_date->format('F d, Y'))
             ->line('**Bank Account:**')
             ->line("IBAN: {$this->partner->bank_account}")
             ->line('The funds will be transferred to your registered bank account within 3-5 business days.')
-            ->action('View Payout Details', url('/partner/payouts/' . $this->payout->id))
+            ->action('View Payout Details', url('/partner/payouts/'.$this->payout->id))
             ->line('If you have any questions about your payout, please contact our support team.')
             ->salutation('Best regards, The Facturino Team');
     }

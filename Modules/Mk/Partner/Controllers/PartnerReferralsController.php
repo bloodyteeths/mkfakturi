@@ -3,8 +3,8 @@
 namespace Modules\Mk\Partner\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\AffiliateLink;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +14,6 @@ class PartnerReferralsController extends Controller
     /**
      * Get partner referral data including active link and statistics
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -58,7 +57,6 @@ class PartnerReferralsController extends Controller
     /**
      * Generate a new referral link for the partner
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
@@ -70,7 +68,7 @@ class PartnerReferralsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'error' => 'Invalid custom code or code already exists',
-                'details' => $validator->errors()
+                'details' => $validator->errors(),
             ], 422);
         }
 
@@ -84,9 +82,10 @@ class PartnerReferralsController extends Controller
 
         if ($existingLink) {
             $existingLink->url = $existingLink->getUrl();
+
             return response()->json([
                 'link' => $existingLink,
-                'message' => 'Using existing active link'
+                'message' => 'Using existing active link',
             ]);
         }
 
@@ -109,7 +108,7 @@ class PartnerReferralsController extends Controller
 
         return response()->json([
             'link' => $link,
-            'message' => 'Referral link generated successfully'
+            'message' => 'Referral link generated successfully',
         ], 201);
     }
 }

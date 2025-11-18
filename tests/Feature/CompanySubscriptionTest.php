@@ -24,7 +24,9 @@ class CompanySubscriptionTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected $company;
+
     protected $accountant;
+
     protected $companyUser;
 
     protected function setUp(): void

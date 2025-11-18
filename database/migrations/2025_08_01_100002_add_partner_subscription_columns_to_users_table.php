@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('paddle_id')->nullable()->unique();
             $table->string('partner_subscription_tier')->default('free')
-                  ->comment('Partner subscription: free or plus');
+                ->comment('Partner subscription: free or plus');
             $table->timestamp('partner_trial_ends_at')->nullable();
         });
     }

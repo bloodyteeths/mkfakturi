@@ -30,31 +30,31 @@ trait CacheableTrait
     /**
      * Cache a query result
      */
-    public function scopeCacheFor(Builder $query, int $seconds, string $key = null): Builder
+    public function scopeCacheFor(Builder $query, int $seconds, ?string $key = null): Builder
     {
         $key = $key ?: $this->getCacheKey($query);
-        
+
         return $query->remember($seconds, $key);
     }
 
     /**
      * Cache a query result with tags
      */
-    public function scopeCacheWithTags(Builder $query, array $tags, int $seconds, string $key = null): Builder
+    public function scopeCacheWithTags(Builder $query, array $tags, int $seconds, ?string $key = null): Builder
     {
         $key = $key ?: $this->getCacheKey($query);
-        
+
         if (Cache::getStore() instanceof \Illuminate\Cache\TaggedCache) {
             return $query->remember($seconds, $key)->tags($tags);
         }
-        
+
         return $query->remember($seconds, $key);
     }
 
     /**
      * Cache for a short period (5 minutes)
      */
-    public function scopeCacheShort(Builder $query, string $key = null): Builder
+    public function scopeCacheShort(Builder $query, ?string $key = null): Builder
     {
         return $this->scopeCacheFor($query, CacheServiceProvider::CACHE_TTLS['SHORT'], $key);
     }
@@ -62,7 +62,7 @@ trait CacheableTrait
     /**
      * Cache for a medium period (1 hour)
      */
-    public function scopeCacheMedium(Builder $query, string $key = null): Builder
+    public function scopeCacheMedium(Builder $query, ?string $key = null): Builder
     {
         return $this->scopeCacheFor($query, CacheServiceProvider::CACHE_TTLS['MEDIUM'], $key);
     }
@@ -70,7 +70,7 @@ trait CacheableTrait
     /**
      * Cache for a long period (24 hours)
      */
-    public function scopeCacheLong(Builder $query, string $key = null): Builder
+    public function scopeCacheLong(Builder $query, ?string $key = null): Builder
     {
         return $this->scopeCacheFor($query, CacheServiceProvider::CACHE_TTLS['LONG'], $key);
     }
@@ -78,29 +78,30 @@ trait CacheableTrait
     /**
      * Cache for company scope
      */
-    public function scopeCacheForCompany(Builder $query, int $seconds = null, string $key = null): Builder
+    public function scopeCacheForCompany(Builder $query, ?int $seconds = null, ?string $key = null): Builder
     {
         $seconds = $seconds ?: CacheServiceProvider::CACHE_TTLS['MEDIUM'];
         $companyId = request()->header('company', 'default');
         $key = $key ?: $this->getCacheKey($query);
         $cacheKey = "company:{$companyId}:{$key}";
-        
+
         return $query->remember($seconds, $cacheKey);
     }
 
     /**
      * Cache model attributes
      */
-    public function cacheAttribute(string $attribute, $value = null, int $seconds = null): mixed
+    public function cacheAttribute(string $attribute, $value = null, ?int $seconds = null): mixed
     {
         $seconds = $seconds ?: CacheServiceProvider::CACHE_TTLS['MEDIUM'];
         $cacheKey = $this->getModelCacheKey($attribute);
-        
+
         if ($value !== null) {
             Cache::put($cacheKey, $value, $seconds);
+
             return $value;
         }
-        
+
         return Cache::remember($cacheKey, $seconds, function () use ($attribute) {
             return $this->getAttribute($attribute);
         });
@@ -109,11 +110,11 @@ trait CacheableTrait
     /**
      * Cache model relationship
      */
-    public function cacheRelation(string $relation, int $seconds = null): mixed
+    public function cacheRelation(string $relation, ?int $seconds = null): mixed
     {
         $seconds = $seconds ?: CacheServiceProvider::CACHE_TTLS['MEDIUM'];
         $cacheKey = $this->getModelCacheKey("relation_{$relation}");
-        
+
         return Cache::remember($cacheKey, $seconds, function () use ($relation) {
             return $this->getRelationValue($relation);
         });
@@ -122,11 +123,11 @@ trait CacheableTrait
     /**
      * Cache computed values
      */
-    public function cacheComputed(string $key, callable $callback, int $seconds = null): mixed
+    public function cacheComputed(string $key, callable $callback, ?int $seconds = null): mixed
     {
         $seconds = $seconds ?: CacheServiceProvider::CACHE_TTLS['MEDIUM'];
         $cacheKey = $this->getModelCacheKey("computed_{$key}");
-        
+
         return Cache::remember($cacheKey, $seconds, $callback);
     }
 
@@ -135,7 +136,8 @@ trait CacheableTrait
      */
     protected function getModelCacheKey(string $suffix = ''): string
     {
-        $modelKey = static::class . ':' . ($this->getKey() ?? 'new');
+        $modelKey = static::class.':'.($this->getKey() ?? 'new');
+
         return $suffix ? "model:{$modelKey}:{$suffix}" : "model:{$modelKey}";
     }
 
@@ -146,8 +148,8 @@ trait CacheableTrait
     {
         $sql = $query->toSql();
         $bindings = $query->getBindings();
-        
-        return 'query:' . md5($sql . serialize($bindings));
+
+        return 'query:'.md5($sql.serialize($bindings));
     }
 
     /**
@@ -156,7 +158,7 @@ trait CacheableTrait
     public function clearModelCache(): void
     {
         Cache::flushModelCache($this);
-        
+
         // Also clear company cache if this model is company-scoped
         if (method_exists($this, 'company') || isset($this->company_id)) {
             $companyId = $this->company_id ?? request()->header('company');
@@ -211,7 +213,7 @@ trait CacheableTrait
     public function isCachingEnabled(): bool
     {
         return config('cache.performance.stats_enabled', true) &&
-               !app()->environment('testing');
+               ! app()->environment('testing');
     }
 
     /**
@@ -219,12 +221,12 @@ trait CacheableTrait
      */
     public function getCacheStats(): array
     {
-        if (!$this->isCachingEnabled()) {
+        if (! $this->isCachingEnabled()) {
             return [];
         }
 
         $prefix = $this->getModelCacheKey();
-        
+
         // This would require cache store that supports pattern matching
         // For now, return basic info
         return [

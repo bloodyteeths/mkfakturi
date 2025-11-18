@@ -4,7 +4,6 @@ namespace Modules\Mk\Services;
 
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Picqer\Barcode\BarcodeGenerator;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Picqer\Barcode\BarcodeGeneratorSVG;
 use Picqer\Barcode\Types\TypeCode128;
@@ -28,13 +27,16 @@ class BarcodeService
      * Supported barcode types
      */
     const TYPE_CODE128 = 'code128';
+
     const TYPE_EAN13 = 'ean13';
+
     const TYPE_UPCA = 'upca';
 
     /**
      * Supported output formats
      */
     const FORMAT_SVG = 'svg';
+
     const FORMAT_PNG = 'png';
 
     /**
@@ -53,12 +55,13 @@ class BarcodeService
      * Generates a barcode in the specified format and type.
      * Returns the barcode as a string (SVG or base64-encoded PNG).
      *
-     * @param string $code The code to encode (must be valid for the barcode type)
-     * @param string $type Barcode type: code128, ean13, upca (default: code128)
-     * @param string $format Output format: svg or png (default: svg)
-     * @param int|null $widthFactor Width factor for barcode bars (default: 2)
-     * @param int|null $height Height in pixels for PNG format (default: 50)
+     * @param  string  $code  The code to encode (must be valid for the barcode type)
+     * @param  string  $type  Barcode type: code128, ean13, upca (default: code128)
+     * @param  string  $format  Output format: svg or png (default: svg)
+     * @param  int|null  $widthFactor  Width factor for barcode bars (default: 2)
+     * @param  int|null  $height  Height in pixels for PNG format (default: 50)
      * @return string The generated barcode (SVG string or base64-encoded PNG)
+     *
      * @throws Exception If barcode generation fails or code is invalid
      *
      * @example
@@ -93,10 +96,10 @@ class BarcodeService
 
             // Generate barcode based on format
             if ($format === self::FORMAT_SVG) {
-                $generator = new BarcodeGeneratorSVG();
+                $generator = new BarcodeGeneratorSVG;
                 $barcode = $generator->getBarcode($code, $barcodeType, $widthFactor, $height);
             } else {
-                $generator = new BarcodeGeneratorPNG();
+                $generator = new BarcodeGeneratorPNG;
                 $barcode = $generator->getBarcode($code, $barcodeType, $widthFactor, $height);
                 // Return base64-encoded PNG
                 $barcode = base64_encode($barcode);
@@ -106,7 +109,7 @@ class BarcodeService
                 'code' => $code,
                 'type' => $type,
                 'format' => $format,
-                'code_length' => strlen($code)
+                'code_length' => strlen($code),
             ]);
 
             return $barcode;
@@ -116,10 +119,10 @@ class BarcodeService
                 'code' => $code,
                 'type' => $type,
                 'format' => $format,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
-            throw new Exception('Failed to generate barcode: ' . $e->getMessage());
+            throw new Exception('Failed to generate barcode: '.$e->getMessage());
         }
     }
 
@@ -128,9 +131,10 @@ class BarcodeService
      *
      * Validates the input code according to the barcode type requirements.
      *
-     * @param string $code The code to validate
-     * @param string $type The barcode type
+     * @param  string  $code  The code to validate
+     * @param  string  $type  The barcode type
      * @return bool True if valid
+     *
      * @throws Exception If code is invalid for the specified type
      *
      * @example
@@ -142,6 +146,7 @@ class BarcodeService
         try {
             $this->validateType($type);
             $this->validateCode($code, $type);
+
             return true;
         } catch (Exception $e) {
             throw $e;
@@ -154,8 +159,8 @@ class BarcodeService
      * Convenience method to generate a barcode for invoice numbers.
      * Uses CODE128 format by default as it supports alphanumeric codes.
      *
-     * @param string $invoiceNumber The invoice number
-     * @param string $format Output format: svg or png (default: svg)
+     * @param  string  $invoiceNumber  The invoice number
+     * @param  string  $format  Output format: svg or png (default: svg)
      * @return string The generated barcode
      *
      * @example
@@ -172,8 +177,8 @@ class BarcodeService
      * Convenience method to generate a barcode for product codes.
      * Automatically selects appropriate type based on code format.
      *
-     * @param string $productCode The product code
-     * @param string $format Output format: svg or png (default: svg)
+     * @param  string  $productCode  The product code
+     * @param  string  $format  Output format: svg or png (default: svg)
      * @return string The generated barcode
      *
      * @example
@@ -183,6 +188,7 @@ class BarcodeService
     public function generateProductBarcode(string $productCode, string $format = self::FORMAT_SVG): string
     {
         $type = $this->detectBarcodeType($productCode);
+
         return $this->generate($productCode, $type, $format);
     }
 
@@ -191,9 +197,9 @@ class BarcodeService
      *
      * Returns the barcode as a complete data URI that can be used directly in HTML img src.
      *
-     * @param string $code The code to encode
-     * @param string $type Barcode type (default: code128)
-     * @param string $format Output format: svg or png (default: svg)
+     * @param  string  $code  The code to encode
+     * @param  string  $type  Barcode type (default: code128)
+     * @param  string  $format  Output format: svg or png (default: svg)
      * @return string Data URI (e.g., "data:image/svg+xml;base64,...")
      *
      * @example
@@ -208,26 +214,27 @@ class BarcodeService
         $barcode = $this->generate($code, $type, $format);
 
         if ($format === self::FORMAT_SVG) {
-            return 'data:image/svg+xml;base64,' . base64_encode($barcode);
+            return 'data:image/svg+xml;base64,'.base64_encode($barcode);
         } else {
             // Barcode is already base64-encoded
-            return 'data:image/png;base64,' . $barcode;
+            return 'data:image/png;base64,'.$barcode;
         }
     }
 
     /**
      * Validate barcode type
      *
-     * @param string $type The barcode type to validate
+     * @param  string  $type  The barcode type to validate
+     *
      * @throws Exception If type is not supported
      */
     protected function validateType(string $type): void
     {
         $validTypes = [self::TYPE_CODE128, self::TYPE_EAN13, self::TYPE_UPCA];
 
-        if (!in_array($type, $validTypes)) {
+        if (! in_array($type, $validTypes)) {
             throw new Exception(
-                "Invalid barcode type '$type'. Supported types: " . implode(', ', $validTypes)
+                "Invalid barcode type '$type'. Supported types: ".implode(', ', $validTypes)
             );
         }
     }
@@ -235,16 +242,17 @@ class BarcodeService
     /**
      * Validate output format
      *
-     * @param string $format The output format to validate
+     * @param  string  $format  The output format to validate
+     *
      * @throws Exception If format is not supported
      */
     protected function validateFormat(string $format): void
     {
         $validFormats = [self::FORMAT_SVG, self::FORMAT_PNG];
 
-        if (!in_array($format, $validFormats)) {
+        if (! in_array($format, $validFormats)) {
             throw new Exception(
-                "Invalid output format '$format'. Supported formats: " . implode(', ', $validFormats)
+                "Invalid output format '$format'. Supported formats: ".implode(', ', $validFormats)
             );
         }
     }
@@ -252,8 +260,9 @@ class BarcodeService
     /**
      * Validate code based on barcode type requirements
      *
-     * @param string $code The code to validate
-     * @param string $type The barcode type
+     * @param  string  $code  The code to validate
+     * @param  string  $type  The barcode type
+     *
      * @throws Exception If code doesn't meet type requirements
      */
     protected function validateCode(string $code, string $type): void
@@ -265,22 +274,22 @@ class BarcodeService
         switch ($type) {
             case self::TYPE_EAN13:
                 // EAN13 requires exactly 13 digits
-                if (!preg_match('/^\d{13}$/', $code)) {
+                if (! preg_match('/^\d{13}$/', $code)) {
                     throw new Exception('EAN13 barcode requires exactly 13 digits');
                 }
                 // Validate check digit
-                if (!$this->validateEan13CheckDigit($code)) {
+                if (! $this->validateEan13CheckDigit($code)) {
                     throw new Exception('Invalid EAN13 check digit');
                 }
                 break;
 
             case self::TYPE_UPCA:
                 // UPC-A requires exactly 12 digits
-                if (!preg_match('/^\d{12}$/', $code)) {
+                if (! preg_match('/^\d{12}$/', $code)) {
                     throw new Exception('UPC-A barcode requires exactly 12 digits');
                 }
                 // Validate check digit
-                if (!$this->validateUpcaCheckDigit($code)) {
+                if (! $this->validateUpcaCheckDigit($code)) {
                     throw new Exception('Invalid UPC-A check digit');
                 }
                 break;
@@ -298,15 +307,15 @@ class BarcodeService
     /**
      * Get barcode type instance
      *
-     * @param string $type The barcode type
+     * @param  string  $type  The barcode type
      * @return object The barcode type instance
      */
     protected function getBarcodeType(string $type): object
     {
         return match ($type) {
-            self::TYPE_CODE128 => new TypeCode128(),
-            self::TYPE_EAN13 => new TypeEan13(),
-            self::TYPE_UPCA => new TypeUpcA(),
+            self::TYPE_CODE128 => new TypeCode128,
+            self::TYPE_EAN13 => new TypeEan13,
+            self::TYPE_UPCA => new TypeUpcA,
             default => throw new Exception("Unsupported barcode type: $type"),
         };
     }
@@ -314,7 +323,7 @@ class BarcodeService
     /**
      * Validate EAN13 check digit
      *
-     * @param string $code The EAN13 code
+     * @param  string  $code  The EAN13 code
      * @return bool True if check digit is valid
      */
     protected function validateEan13CheckDigit(string $code): bool
@@ -336,7 +345,7 @@ class BarcodeService
     /**
      * Validate UPC-A check digit
      *
-     * @param string $code The UPC-A code
+     * @param  string  $code  The UPC-A code
      * @return bool True if check digit is valid
      */
     protected function validateUpcaCheckDigit(string $code): bool
@@ -358,7 +367,7 @@ class BarcodeService
     /**
      * Auto-detect barcode type based on code format
      *
-     * @param string $code The code to analyze
+     * @param  string  $code  The code to analyze
      * @return string The detected barcode type
      */
     protected function detectBarcodeType(string $code): string
@@ -389,20 +398,20 @@ class BarcodeService
                 'name' => 'CODE128',
                 'description' => 'Alphanumeric barcode, most flexible',
                 'pattern' => 'Up to 80 alphanumeric characters',
-                'use_case' => 'Invoice numbers, product codes, general purpose'
+                'use_case' => 'Invoice numbers, product codes, general purpose',
             ],
             self::TYPE_EAN13 => [
                 'name' => 'EAN-13',
                 'description' => 'European Article Number (13 digits)',
                 'pattern' => 'Exactly 13 digits with check digit',
-                'use_case' => 'Retail products, international trade'
+                'use_case' => 'Retail products, international trade',
             ],
             self::TYPE_UPCA => [
                 'name' => 'UPC-A',
                 'description' => 'Universal Product Code (12 digits)',
                 'pattern' => 'Exactly 12 digits with check digit',
-                'use_case' => 'North American retail products'
-            ]
+                'use_case' => 'North American retail products',
+            ],
         ];
     }
 }

@@ -30,4 +30,3 @@ class CurrencyFactory extends Factory
         ];
     }
 }
-

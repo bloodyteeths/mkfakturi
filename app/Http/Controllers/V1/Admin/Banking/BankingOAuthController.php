@@ -4,14 +4,13 @@ namespace App\Http\Controllers\V1\Admin\Banking;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
-use App\Models\BankToken;
 use App\Models\Company;
 use App\Models\Currency;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Modules\Mk\Services\StopanskaOAuth;
 use Modules\Mk\Services\NlbOAuth;
+use Modules\Mk\Services\StopanskaOAuth;
 
 /**
  * Banking OAuth Controller
@@ -25,32 +24,29 @@ class BankingOAuthController extends Controller
 
     /**
      * Initiate OAuth2 authorization flow
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function start(Request $request): JsonResponse
     {
         try {
             $request->validate([
-                'provider' => 'required|in:stopanska,nlb'
+                'provider' => 'required|in:stopanska,nlb',
             ]);
 
             $provider = $request->provider;
             $company = $this->resolveCompany($request);
 
-            if (!$company) {
+            if (! $company) {
                 return response()->json([
-                    'error' => 'No company found for user'
+                    'error' => 'No company found for user',
                 ], 404);
             }
 
             // Get the appropriate OAuth service
             $oauthService = $this->getOAuthService($provider);
 
-            if (!$oauthService) {
+            if (! $oauthService) {
                 return response()->json([
-                    'error' => 'Invalid bank provider'
+                    'error' => 'Invalid bank provider',
                 ], 400);
             }
 
@@ -63,22 +59,22 @@ class BankingOAuthController extends Controller
             Log::info('OAuth flow started', [
                 'company_id' => $company->id,
                 'provider' => $provider,
-                'redirect_uri' => $redirectUri
+                'redirect_uri' => $redirectUri,
             ]);
 
             return response()->json([
                 'authorization_url' => $authUrl,
-                'provider' => $provider
+                'provider' => $provider,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to start OAuth flow', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to start OAuth flow',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -86,15 +82,14 @@ class BankingOAuthController extends Controller
     /**
      * Handle OAuth2 callback from bank
      *
-     * @param string $provider Bank provider code
-     * @param Request $request
+     * @param  string  $provider  Bank provider code
      * @return \Illuminate\Http\RedirectResponse
      */
     public function callback(string $provider, Request $request)
     {
         try {
             // Validate provider
-            if (!in_array($provider, ['stopanska', 'nlb'])) {
+            if (! in_array($provider, ['stopanska', 'nlb'])) {
                 return redirect('/admin/banking')->with('error', 'Invalid bank provider');
             }
 
@@ -108,13 +103,13 @@ class BankingOAuthController extends Controller
                 Log::warning('OAuth callback error', [
                     'provider' => $provider,
                     'error' => $error,
-                    'description' => $request->query('error_description')
+                    'description' => $request->query('error_description'),
                 ]);
 
-                return redirect('/admin/banking')->with('error', 'Bank authorization failed: ' . $error);
+                return redirect('/admin/banking')->with('error', 'Bank authorization failed: '.$error);
             }
 
-            if (!$code) {
+            if (! $code) {
                 return redirect('/admin/banking')->with('error', 'No authorization code received');
             }
 
@@ -122,14 +117,14 @@ class BankingOAuthController extends Controller
             $companyId = (int) $state;
             $company = Company::find($companyId);
 
-            if (!$company) {
+            if (! $company) {
                 return redirect('/admin/banking')->with('error', 'Invalid company');
             }
 
             // Get OAuth service
             $oauthService = $this->getOAuthService($provider);
 
-            if (!$oauthService) {
+            if (! $oauthService) {
                 return redirect('/admin/banking')->with('error', 'Invalid bank provider');
             }
 
@@ -140,7 +135,7 @@ class BankingOAuthController extends Controller
             Log::info('OAuth token exchanged successfully', [
                 'company_id' => $company->id,
                 'provider' => $provider,
-                'token_id' => $token->id
+                'token_id' => $token->id,
             ]);
 
             // Fetch bank accounts from PSD2 API
@@ -148,7 +143,7 @@ class BankingOAuthController extends Controller
                 Log::info('Attempting to fetch bank accounts from PSD2 API', [
                     'company_id' => $company->id,
                     'provider' => $provider,
-                    'token_id' => $token->id
+                    'token_id' => $token->id,
                 ]);
 
                 $accounts = $oauthService->getAccounts($company);
@@ -157,13 +152,13 @@ class BankingOAuthController extends Controller
                     'company_id' => $company->id,
                     'provider' => $provider,
                     'count' => count($accounts),
-                    'accounts' => $accounts
+                    'accounts' => $accounts,
                 ]);
 
                 if (empty($accounts)) {
                     Log::warning('No accounts returned from PSD2 API', [
                         'company_id' => $company->id,
-                        'provider' => $provider
+                        'provider' => $provider,
                     ]);
 
                     return redirect('/admin/banking')->with('warning', 'Bank connected but no accounts found. This may be normal for sandbox. Check logs for details.');
@@ -181,7 +176,7 @@ class BankingOAuthController extends Controller
                             'provider' => $provider,
                             'account_data' => $accountData,
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
                 }
@@ -190,7 +185,7 @@ class BankingOAuthController extends Controller
                     'company_id' => $company->id,
                     'provider' => $provider,
                     'fetched' => count($accounts),
-                    'created' => $createdCount
+                    'created' => $createdCount,
                 ]);
 
                 return redirect('/admin/banking')->with('success', "Bank connected successfully! {$createdCount} account(s) added.");
@@ -199,10 +194,10 @@ class BankingOAuthController extends Controller
                     'company_id' => $company->id,
                     'provider' => $provider,
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
 
-                return redirect('/admin/banking')->with('error', 'Bank connected but failed to fetch accounts: ' . $e->getMessage());
+                return redirect('/admin/banking')->with('error', 'Bank connected but failed to fetch accounts: '.$e->getMessage());
             }
 
             // TODO: Dispatch job to sync transactions
@@ -213,17 +208,16 @@ class BankingOAuthController extends Controller
             Log::error('OAuth callback failed', [
                 'provider' => $provider,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect('/admin/banking')->with('error', 'Failed to connect bank: ' . $e->getMessage());
+            return redirect('/admin/banking')->with('error', 'Failed to connect bank: '.$e->getMessage());
         }
     }
 
     /**
      * Get OAuth service instance for provider
      *
-     * @param string $provider
      * @return StopanskaOAuth|NlbOAuth|null
      */
     private function getOAuthService(string $provider)
@@ -240,11 +234,6 @@ class BankingOAuthController extends Controller
 
     /**
      * Create BankAccount record from PSD2 account data
-     *
-     * @param Company $company
-     * @param string $bankCode
-     * @param array $accountData
-     * @return BankAccount
      */
     private function createBankAccount(Company $company, string $bankCode, array $accountData): BankAccount
     {
@@ -252,7 +241,7 @@ class BankingOAuthController extends Controller
         $currencyCode = $accountData['currency'] ?? 'MKD';
         $currency = Currency::where('code', $currencyCode)->first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = $company->currency; // Fallback to company currency
         }
 
@@ -265,7 +254,7 @@ class BankingOAuthController extends Controller
                 'account_number' => $accountData['resourceId'] ?? $accountData['id'] ?? null,
             ],
             [
-                'account_name' => $accountData['name'] ?? ($oauthService->getBankName() . ' Account'),
+                'account_name' => $accountData['name'] ?? ($oauthService->getBankName().' Account'),
                 'bank_name' => $oauthService->getBankName(),
                 'bank_code' => $bankCode,
                 'swift_code' => $oauthService->getBic(),
@@ -281,7 +270,7 @@ class BankingOAuthController extends Controller
     /**
      * Get the redirect URI for OAuth callback
      *
-     * @param string $provider Bank provider code
+     * @param  string  $provider  Bank provider code
      * @return string Redirect URI
      */
     private function getRedirectUri(string $provider): string
@@ -308,7 +297,7 @@ class BankingOAuthController extends Controller
 
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
@@ -320,7 +309,7 @@ class BankingOAuthController extends Controller
             $company = $user->companies()->where('companies.id', $companyId)->first();
         }
 
-        if (!$company) {
+        if (! $company) {
             $company = $user->companies()->first();
         }
 

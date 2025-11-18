@@ -4,8 +4,8 @@ namespace Modules\Mk\Partner\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -24,17 +24,15 @@ class PartnerSubscriptionController extends Controller
 
     /**
      * Show partner subscription status
-     *
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
         $user = Auth::user();
 
         // Check if user is a partner
-        if (!$user->partner_tier || $user->partner_tier === 'none') {
+        if (! $user->partner_tier || $user->partner_tier === 'none') {
             return response()->json([
-                'error' => 'User is not a registered partner'
+                'error' => 'User is not a registered partner',
             ], 403);
         }
 
@@ -61,39 +59,36 @@ class PartnerSubscriptionController extends Controller
 
     /**
      * Create Paddle checkout session for Partner Plus
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function checkout(Request $request): JsonResponse
     {
         $user = Auth::user();
 
         // Check if user is a partner
-        if (!$user->partner_tier || $user->partner_tier === 'none') {
+        if (! $user->partner_tier || $user->partner_tier === 'none') {
             return response()->json([
-                'error' => 'User is not a registered partner'
+                'error' => 'User is not a registered partner',
             ], 403);
         }
 
         // Check if already subscribed
         if ($user->subscription('partner_plus')?->valid()) {
             return response()->json([
-                'error' => 'Already subscribed to Partner Plus'
+                'error' => 'Already subscribed to Partner Plus',
             ], 400);
         }
 
         $priceId = config('services.paddle.prices.partner_plus');
 
-        if (!$priceId) {
+        if (! $priceId) {
             return response()->json([
-                'error' => 'Partner Plus price not configured'
+                'error' => 'Partner Plus price not configured',
             ], 400);
         }
 
         try {
             // Create or retrieve Paddle customer
-            if (!$user->paddle_id) {
+            if (! $user->paddle_id) {
                 $user->createAsCustomer([
                     'name' => $user->name,
                     'email' => $user->email,
@@ -120,15 +115,13 @@ class PartnerSubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to create checkout session'
+                'error' => 'Failed to create checkout session',
             ], 500);
         }
     }
 
     /**
      * Post-subscription success page
-     *
-     * @return JsonResponse
      */
     public function success(): JsonResponse
     {
@@ -150,8 +143,6 @@ class PartnerSubscriptionController extends Controller
 
     /**
      * Subscription management dashboard
-     *
-     * @return JsonResponse
      */
     public function manage(): JsonResponse
     {
@@ -159,9 +150,9 @@ class PartnerSubscriptionController extends Controller
 
         $subscription = $user->subscription('partner_plus');
 
-        if (!$subscription) {
+        if (! $subscription) {
             return response()->json([
-                'error' => 'No active Partner Plus subscription found'
+                'error' => 'No active Partner Plus subscription found',
             ], 404);
         }
 
@@ -183,9 +174,6 @@ class PartnerSubscriptionController extends Controller
 
     /**
      * Cancel Partner Plus subscription
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function cancel(Request $request): JsonResponse
     {
@@ -193,9 +181,9 @@ class PartnerSubscriptionController extends Controller
 
         $subscription = $user->subscription('partner_plus');
 
-        if (!$subscription || !$subscription->valid()) {
+        if (! $subscription || ! $subscription->valid()) {
             return response()->json([
-                'error' => 'No active subscription to cancel'
+                'error' => 'No active subscription to cancel',
             ], 400);
         }
 
@@ -218,15 +206,13 @@ class PartnerSubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to cancel subscription'
+                'error' => 'Failed to cancel subscription',
             ], 500);
         }
     }
 
     /**
      * Resume a cancelled subscription
-     *
-     * @return JsonResponse
      */
     public function resume(): JsonResponse
     {
@@ -234,9 +220,9 @@ class PartnerSubscriptionController extends Controller
 
         $subscription = $user->subscription('partner_plus');
 
-        if (!$subscription || !$subscription->onGracePeriod()) {
+        if (! $subscription || ! $subscription->onGracePeriod()) {
             return response()->json([
-                'error' => 'No subscription to resume'
+                'error' => 'No subscription to resume',
             ], 400);
         }
 
@@ -258,7 +244,7 @@ class PartnerSubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to resume subscription'
+                'error' => 'Failed to resume subscription',
             ], 500);
         }
     }

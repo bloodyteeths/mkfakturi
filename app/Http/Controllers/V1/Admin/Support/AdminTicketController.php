@@ -4,12 +4,12 @@ namespace App\Http\Controllers\V1\Admin\Support;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TicketResource;
+use App\Models\User;
 use App\Notifications\TicketClosedNotification;
 use App\Notifications\TicketUpdatedNotification;
-use Coderflex\LaravelTicket\Models\Ticket;
 use Coderflex\LaravelTicket\Models\Message;
+use Coderflex\LaravelTicket\Models\Ticket;
 use Illuminate\Http\Request;
-use App\Models\User;
 
 /**
  * AdminTicketController
@@ -28,7 +28,6 @@ class AdminTicketController extends Controller
      * SECURITY: This is cross-tenant! Only accessible to admin/support users.
      * Regular users should use TicketController which enforces tenant isolation.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function listAllTickets(Request $request)
@@ -37,10 +36,10 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Check if user is admin or has 'support' role
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can access this endpoint'
+                'message' => 'Only admins and support agents can access this endpoint',
             ], 403);
         }
 
@@ -64,7 +63,7 @@ class AdminTicketController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'LIKE', "%{$search}%")
-                      ->orWhere('message', 'LIKE', "%{$search}%");
+                        ->orWhere('message', 'LIKE', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc');
@@ -87,8 +86,6 @@ class AdminTicketController extends Controller
     /**
      * Assign ticket to an agent
      *
-     * @param Request $request
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function assignTicket(Request $request, Ticket $ticket)
@@ -96,10 +93,10 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can assign tickets
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can assign tickets'
+                'message' => 'Only admins and support agents can assign tickets',
             ], 403);
         }
 
@@ -109,10 +106,10 @@ class AdminTicketController extends Controller
 
         // Verify assigned user has support role or is owner
         $assignedUser = User::find($request->assigned_to);
-        if (!$assignedUser->isOwner() && !$assignedUser->hasRole('support')) {
+        if (! $assignedUser->isOwner() && ! $assignedUser->hasRole('support')) {
             return response()->json([
                 'error' => 'Invalid Assignment',
-                'message' => 'Can only assign tickets to support agents or admins'
+                'message' => 'Can only assign tickets to support agents or admins',
             ], 422);
         }
 
@@ -130,8 +127,6 @@ class AdminTicketController extends Controller
     /**
      * Change ticket status
      *
-     * @param Request $request
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function changeStatus(Request $request, Ticket $ticket)
@@ -139,10 +134,10 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can change status
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can change ticket status'
+                'message' => 'Only admins and support agents can change ticket status',
             ], 403);
         }
 
@@ -185,8 +180,6 @@ class AdminTicketController extends Controller
      *
      * Uses the messages table with is_internal=true flag
      *
-     * @param Request $request
-     * @param Ticket $ticket
      * @return \Illuminate\Http\JsonResponse
      */
     public function addInternalNote(Request $request, Ticket $ticket)
@@ -194,10 +187,10 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can add internal notes
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can add internal notes'
+                'message' => 'Only admins and support agents can add internal notes',
             ], 403);
         }
 
@@ -236,17 +229,16 @@ class AdminTicketController extends Controller
     /**
      * Get ticket statistics for admin dashboard
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getStatistics(Request $request)
     {
         $user = $request->user();
 
-        if (!$user->isOwner() && !$user->hasRole('support')) {
+        if (! $user->isOwner() && ! $user->hasRole('support')) {
             return response()->json([
                 'error' => 'Unauthorized',
-                'message' => 'Only admins and support agents can access statistics'
+                'message' => 'Only admins and support agents can access statistics',
             ], 403);
         }
 
@@ -279,15 +271,13 @@ class AdminTicketController extends Controller
 
     /**
      * Calculate average response time (time from ticket creation to first agent reply)
-     *
-     * @return float
      */
     private function calculateAverageResponseTime(): float
     {
         $tickets = Ticket::whereNotNull('assigned_to')
             ->with(['messages' => function ($query) {
                 $query->where('is_internal', false)
-                      ->orderBy('created_at', 'asc');
+                    ->orderBy('created_at', 'asc');
             }])
             ->get();
 

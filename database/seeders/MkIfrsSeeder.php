@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use IFRS\Models\Account;
+use IFRS\Models\Category;
 use IFRS\Models\Currency;
 use IFRS\Models\Entity;
-use IFRS\Models\Category;
 use IFRS\Models\ReportingPeriod;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Seeder;
 
 /**
  * Macedonian Chart of Accounts Seeder
@@ -19,15 +18,11 @@ use Illuminate\Support\Facades\Log;
  * - Equity: 3000-3999
  * - Revenue: 4000-4999
  * - Expenses: 5000-5999
- *
- * @package Database\Seeders
  */
 class MkIfrsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -38,16 +33,17 @@ class MkIfrsSeeder extends Seeder
 
         if ($companies->isEmpty()) {
             $this->command->warn('No companies found. Skipping chart of accounts seeding.');
+
             return;
         }
 
         // Create or get MKD currency (need an entity_id, so use first company's entity)
         // Create a temporary entity for currency if needed
         $firstEntity = Entity::first();
-        if (!$firstEntity) {
+        if (! $firstEntity) {
             $firstCompany = $companies->first();
             $firstEntity = Entity::create([
-                'name' => $firstCompany->name . ' (System)',
+                'name' => $firstCompany->name.' (System)',
                 'year_start' => 1,
                 'multi_currency' => false,
             ]);
@@ -55,8 +51,8 @@ class MkIfrsSeeder extends Seeder
 
         // Create or get MKD currency with entity_id
         $mkd = Currency::where('currency_code', 'MKD')->first();
-        if (!$mkd) {
-            $mkd = new Currency();
+        if (! $mkd) {
+            $mkd = new Currency;
             $mkd->currency_code = 'MKD';
             $mkd->name = 'Macedonian Denar';
             $mkd->entity_id = $firstEntity->id;
@@ -86,16 +82,16 @@ class MkIfrsSeeder extends Seeder
                 ->where('calendar_year', 2025)
                 ->first();
 
-            if (!$existingPeriod) {
-                $period = new ReportingPeriod();
+            if (! $existingPeriod) {
+                $period = new ReportingPeriod;
                 $period->period_count = 1;
                 $period->calendar_year = 2025;
                 $period->entity_id = $entity->id;
                 $period->status = 'OPEN';
                 $period->save();
-                $this->command->info("  → Created 2025 reporting period");
+                $this->command->info('  → Created 2025 reporting period');
             } else {
-                $this->command->info("  → 2025 reporting period already exists");
+                $this->command->info('  → 2025 reporting period already exists');
             }
 
             // Create account categories for this entity
@@ -114,9 +110,6 @@ class MkIfrsSeeder extends Seeder
 
     /**
      * Create account categories for an entity
-     *
-     * @param int $entityId
-     * @return array
      */
     protected function createCategories(int $entityId): array
     {
@@ -205,11 +198,6 @@ class MkIfrsSeeder extends Seeder
 
     /**
      * Seed asset accounts (1000-1999)
-     *
-     * @param int $currencyId
-     * @param array $categories
-     * @param int $entityId
-     * @return void
      */
     protected function seedAssetAccounts(int $currencyId, array $categories, int $entityId): void
     {
@@ -268,11 +256,6 @@ class MkIfrsSeeder extends Seeder
 
     /**
      * Seed liability accounts (2000-2999)
-     *
-     * @param int $currencyId
-     * @param array $categories
-     * @param int $entityId
-     * @return void
      */
     protected function seedLiabilityAccounts(int $currencyId, array $categories, int $entityId): void
     {
@@ -321,11 +304,6 @@ class MkIfrsSeeder extends Seeder
 
     /**
      * Seed equity accounts (3000-3999)
-     *
-     * @param int $currencyId
-     * @param array $categories
-     * @param int $entityId
-     * @return void
      */
     protected function seedEquityAccounts(int $currencyId, array $categories, int $entityId): void
     {
@@ -357,11 +335,6 @@ class MkIfrsSeeder extends Seeder
 
     /**
      * Seed revenue accounts (4000-4999)
-     *
-     * @param int $currencyId
-     * @param array $categories
-     * @param int $entityId
-     * @return void
      */
     protected function seedRevenueAccounts(int $currencyId, array $categories, int $entityId): void
     {
@@ -399,11 +372,6 @@ class MkIfrsSeeder extends Seeder
 
     /**
      * Seed expense accounts (5000-5999)
-     *
-     * @param int $currencyId
-     * @param array $categories
-     * @param int $entityId
-     * @return void
      */
     protected function seedExpenseAccounts(int $currencyId, array $categories, int $entityId): void
     {

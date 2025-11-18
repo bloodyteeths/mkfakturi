@@ -21,11 +21,11 @@ class CacheServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton('currency.exchange', function ($app) {
-            return new \App\Services\CurrencyExchangeService();
+            return new \App\Services\CurrencyExchangeService;
         });
 
         $this->app->singleton('performance.monitor', function ($app) {
-            return new \App\Services\PerformanceMonitorService();
+            return new \App\Services\PerformanceMonitorService;
         });
 
         // Register aliases for easier access
@@ -58,7 +58,7 @@ class CacheServiceProvider extends ServiceProvider
         Cache::macro('companyRemember', function ($key, $ttl, $callback) {
             $companyId = request()->header('company', 'default');
             $cacheKey = "company:{$companyId}:{$key}";
-            
+
             return Cache::remember($cacheKey, $ttl, $callback);
         });
 
@@ -67,22 +67,22 @@ class CacheServiceProvider extends ServiceProvider
             $userId = auth()->id() ?? 'guest';
             $companyId = request()->header('company', 'default');
             $cacheKey = "user:{$userId}:company:{$companyId}:{$key}";
-            
+
             return Cache::remember($cacheKey, $ttl, $callback);
         });
 
         // Model cache helper with automatic invalidation
         Cache::macro('modelRemember', function ($model, $key, $ttl, $callback) {
-            $modelKey = get_class($model) . ':' . $model->getKey();
+            $modelKey = get_class($model).':'.$model->getKey();
             $cacheKey = "model:{$modelKey}:{$key}";
-            
+
             return Cache::remember($cacheKey, $ttl, $callback);
         });
 
         // API response cache helper
         Cache::macro('apiRemember', function ($request, $ttl, $callback) {
             $cacheKey = $this->generateApiCacheKey($request);
-            
+
             return Cache::remember($cacheKey, $ttl, $callback);
         });
     }
@@ -117,12 +117,12 @@ class CacheServiceProvider extends ServiceProvider
         Cache::macro('flushCompanyCache', function ($companyId = null) {
             $companyId = $companyId ?? request()->header('company');
             $pattern = "company:{$companyId}:*";
-            
+
             // For Redis cache store
             if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
                 $redis = Cache::getStore()->connection();
                 $keys = $redis->keys($pattern);
-                if (!empty($keys)) {
+                if (! empty($keys)) {
                     $redis->del($keys);
                 }
             }
@@ -135,14 +135,14 @@ class CacheServiceProvider extends ServiceProvider
 
         // Flush model-specific cache
         Cache::macro('flushModelCache', function ($model) {
-            $modelKey = get_class($model) . ':' . $model->getKey();
+            $modelKey = get_class($model).':'.$model->getKey();
             $pattern = "model:{$modelKey}:*";
-            
+
             // For Redis cache store
             if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
                 $redis = Cache::getStore()->connection();
                 $keys = $redis->keys($pattern);
-                if (!empty($keys)) {
+                if (! empty($keys)) {
                     $redis->del($keys);
                 }
             }
@@ -157,9 +157,10 @@ class CacheServiceProvider extends ServiceProvider
         Cache::macro('getStats', function () {
             if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
                 $redis = Cache::getStore()->connection();
+
                 return $redis->info('stats');
             }
-            
+
             return ['message' => 'Statistics only available for Redis cache'];
         });
     }
@@ -174,12 +175,12 @@ class CacheServiceProvider extends ServiceProvider
         $company = $request->header('company', 'default');
         $user = auth()->id() ?? 'guest';
         $params = $request->query();
-        
+
         // Sort parameters for consistent cache keys
         ksort($params);
         $paramString = http_build_query($params);
-        
-        return "api:{$method}:{$company}:{$user}:" . md5($uri . $paramString);
+
+        return "api:{$method}:{$company}:{$user}:".md5($uri.$paramString);
     }
 
     /**
@@ -188,43 +189,43 @@ class CacheServiceProvider extends ServiceProvider
     public const CACHE_TTLS = [
         // Short-term cache (5 minutes)
         'SHORT' => 300,
-        
+
         // Medium-term cache (1 hour)
         'MEDIUM' => 3600,
-        
+
         // Long-term cache (24 hours)
         'LONG' => 86400,
-        
+
         // Very long-term cache (1 week)
         'VERY_LONG' => 604800,
-        
+
         // Settings cache (until manually invalidated)
         'SETTINGS' => 'forever',
-        
+
         // Company settings (1 day)
         'COMPANY_SETTINGS' => 86400,
-        
+
         // User settings (1 hour)
         'USER_SETTINGS' => 3600,
-        
+
         // API responses (15 minutes)
         'API_RESPONSE' => 900,
-        
+
         // Search results (30 minutes)
         'SEARCH_RESULTS' => 1800,
-        
+
         // Field mapping rules (1 day)
         'FIELD_MAPPING' => 86400,
-        
+
         // Migration transformation cache (1 hour)
         'MIGRATION_TRANSFORM' => 3600,
-        
+
         // Query result cache (15 minutes)
         'QUERY_RESULT' => 900,
-        
+
         // Aggregation cache (5 minutes)
         'AGGREGATION' => 300,
-        
+
         // Dashboard cache (10 minutes)
         'DASHBOARD' => 600,
     ];

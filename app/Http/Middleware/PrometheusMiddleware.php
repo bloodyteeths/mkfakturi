@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use Arquivei\LaravelPrometheusExporter\PrometheusExporter;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Arquivei\LaravelPrometheusExporter\PrometheusExporter;
 
 /**
  * Prometheus Middleware
@@ -43,7 +43,7 @@ class PrometheusMiddleware
     {
         try {
             $config = config('prometheus', []);
-            
+
             // Skip ignored routes
             if ($this->shouldIgnoreRoute($request, $config)) {
                 return;
@@ -82,7 +82,7 @@ class PrometheusMiddleware
             // Response size histogram (if available)
             if ($response->headers->has('Content-Length')) {
                 $responseSize = (int) $response->headers->get('Content-Length');
-                
+
                 $this->prometheus->registerHistogram(
                     'http_response_size_bytes',
                     'HTTP response size in bytes',
@@ -110,7 +110,7 @@ class PrometheusMiddleware
         } catch (\Exception $e) {
             // Silently fail to avoid disrupting the application
             \Log::debug('Failed to record Prometheus metrics', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -122,14 +122,14 @@ class PrometheusMiddleware
     {
         $ignoreRoutes = $config['ignore_routes'] ?? [];
         $ignoreMethods = $config['ignore_request_methods'] ?? [];
-        
+
         $method = $request->getMethod();
         if (in_array($method, $ignoreMethods)) {
             return true;
         }
 
         $route = $request->route();
-        if (!$route) {
+        if (! $route) {
             return false;
         }
 

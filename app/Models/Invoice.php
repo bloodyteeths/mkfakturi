@@ -70,7 +70,7 @@ class Invoice extends Model implements HasMedia
     protected $with = [
         'customer:id,name,email',
         'currency:id,name,code,symbol',
-        'company:id,name'
+        'company:id,name',
     ];
 
     protected function casts(): array
@@ -78,7 +78,7 @@ class Invoice extends Model implements HasMedia
         return [
             'total' => 'integer',
             'tax' => 'integer',
-             'tax_total' => 'integer',
+            'tax_total' => 'integer',
             'sub_total' => 'integer',
             'discount' => 'float',
             'discount_val' => 'integer',
@@ -847,8 +847,6 @@ class Invoice extends Model implements HasMedia
     // CLAUDE-CHECKPOINT
     /**
      * Check if invoice has an associated e-invoice
-     *
-     * @return bool
      */
     public function hasEInvoice(): bool
     {
@@ -857,12 +855,10 @@ class Invoice extends Model implements HasMedia
 
     /**
      * Check if invoice date is within a locked tax report period
-     *
-     * @return bool
      */
     public function isInLockedPeriod(): bool
     {
-        if (!$this->taxReportPeriod) {
+        if (! $this->taxReportPeriod) {
             return false;
         }
 
@@ -871,8 +867,6 @@ class Invoice extends Model implements HasMedia
 
     /**
      * Check if any credit notes have been issued for this invoice
-     *
-     * @return bool
      */
     public function hasCreditNotes(): bool
     {
@@ -881,8 +875,6 @@ class Invoice extends Model implements HasMedia
 
     /**
      * Get the total amount credited through credit notes
-     *
-     * @return int
      */
     public function getTotalCredited(): int
     {

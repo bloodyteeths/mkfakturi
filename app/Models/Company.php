@@ -19,9 +19,9 @@ use Throwable;
 
 class Company extends Model implements HasMedia
 {
+    use Billable;
     use HasFactory;
-    use InteractsWithMedia;
-    use Billable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait
+    use InteractsWithMedia; // CLAUDE-CHECKPOINT: Added Paddle Billable trait
 
     protected $guarded = [
         'id',
@@ -188,15 +188,15 @@ class Company extends Model implements HasMedia
     public function partners(): BelongsToMany
     {
         return $this->belongsToMany(Partner::class, 'partner_company_links')
-                    ->using(PartnerCompany::class)
-                    ->withPivot([
-                        'id',
-                        'is_primary',
-                        'override_commission_rate',
-                        'permissions',
-                        'is_active'
-                    ])
-                    ->withTimestamps();
+            ->using(PartnerCompany::class)
+            ->withPivot([
+                'id',
+                'is_primary',
+                'override_commission_rate',
+                'permissions',
+                'is_active',
+            ])
+            ->withTimestamps();
     }
 
     public function activePartners(): BelongsToMany
@@ -221,8 +221,6 @@ class Company extends Model implements HasMedia
 
     /**
      * Company's IFRS Entity relationship
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function ifrsEntity(): BelongsTo
     {
@@ -231,8 +229,6 @@ class Company extends Model implements HasMedia
 
     /**
      * Company's subscription relationship
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function subscription(): HasOne
     {
@@ -241,13 +237,10 @@ class Company extends Model implements HasMedia
 
     /**
      * Check if company is on a specific plan
-     *
-     * @param string $plan
-     * @return bool
      */
     public function isOnPlan(string $plan): bool
     {
-        if (!$this->relationLoaded('subscription')) {
+        if (! $this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
@@ -259,8 +252,7 @@ class Company extends Model implements HasMedia
     /**
      * Check if company can access a feature based on minimum required plan
      *
-     * @param string $feature Feature key from config
-     * @return bool
+     * @param  string  $feature  Feature key from config
      */
     public function canAccessFeature(string $feature): bool
     {
@@ -281,11 +273,11 @@ class Company extends Model implements HasMedia
 
         $requiredPlan = $featureRequirements[$feature] ?? 'free';
 
-        if (!$this->relationLoaded('subscription')) {
+        if (! $this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
-        if (!$this->subscription || !in_array($this->subscription->status, ['trial', 'active'])) {
+        if (! $this->subscription || ! in_array($this->subscription->status, ['trial', 'active'])) {
             return false;
         }
 
@@ -296,19 +288,16 @@ class Company extends Model implements HasMedia
 
     /**
      * Check if upgrade is required to access a minimum plan level
-     *
-     * @param string $minPlan
-     * @return bool
      */
     public function upgradeRequired(string $minPlan): bool
     {
         $planHierarchy = ['free' => 0, 'starter' => 1, 'standard' => 2, 'business' => 3, 'max' => 4];
 
-        if (!$this->relationLoaded('subscription')) {
+        if (! $this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
-        if (!$this->subscription) {
+        if (! $this->subscription) {
             return true; // No subscription = upgrade required
         }
 
@@ -319,12 +308,10 @@ class Company extends Model implements HasMedia
 
     /**
      * Get current plan name
-     *
-     * @return string
      */
     public function getCurrentPlanAttribute(): string
     {
-        if (!$this->relationLoaded('subscription')) {
+        if (! $this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 

@@ -33,6 +33,7 @@ class Setting extends Model
             $old->save();
 
             self::bumpCacheVersion();
+
             return;
         }
 
@@ -79,7 +80,7 @@ class Setting extends Model
     public static function getSettings($settings)
     {
         $version = self::cacheVersion();
-        $cacheKey = 'settings_batch:v'.$version.':' . md5(implode(',', $settings));
+        $cacheKey = 'settings_batch:v'.$version.':'.md5(implode(',', $settings));
 
         return Cache::remember(
             $cacheKey,

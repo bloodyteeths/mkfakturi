@@ -2,20 +2,18 @@
 
 namespace App\Imports;
 
-use App\Models\Invoice;
-use App\Models\Customer;
 use App\Models\CompanySetting;
 use App\Models\Currency;
+use App\Models\Customer;
+use App\Models\Invoice;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
 /**
@@ -27,36 +25,36 @@ use Maatwebsite\Excel\Validators\Failure;
  * - Validation with error collection
  * - Customer lookup by name or email
  * - Date parsing
- *
- * @package App\Imports
  */
-class InvoiceImport implements
-    ToModel,
-    WithHeadingRow,
-    WithValidation,
-    WithChunkReading,
-    SkipsOnFailure
+class InvoiceImport implements SkipsOnFailure, ToModel, WithChunkReading, WithHeadingRow, WithValidation
 {
     use Importable;
 
     private int $companyId;
+
     private int $creatorId;
+
     private array $columnMapping;
+
     private bool $isDryRun;
+
     private array $failures = [];
+
     private int $successCount = 0;
+
     private int $failureCount = 0;
+
     private array $customerCache = [];
+
     private ?int $companyCurrencyId = null;
+
     private float $defaultExchangeRate = 1.0;
 
     /**
      * Constructor
      *
-     * @param int $companyId
-     * @param int $creatorId
-     * @param array $columnMapping Map of our field names to CSV column names
-     * @param bool $isDryRun If true, validation only without creating records
+     * @param  array  $columnMapping  Map of our field names to CSV column names
+     * @param  bool  $isDryRun  If true, validation only without creating records
      */
     public function __construct(
         int $companyId,
@@ -76,7 +74,6 @@ class InvoiceImport implements
     /**
      * Convert row to Invoice model
      *
-     * @param array $row
      * @return Invoice|null
      */
     public function model(array $row)
@@ -84,6 +81,7 @@ class InvoiceImport implements
         // Skip if dry run
         if ($this->isDryRun) {
             $this->successCount++;
+
             return null;
         }
 
@@ -93,7 +91,7 @@ class InvoiceImport implements
         // Find or get customer
         $customer = $this->findCustomer($mappedRow['customer_name'] ?? null, $mappedRow['customer_email'] ?? null);
 
-        if (!$customer) {
+        if (! $customer) {
             $this->failures[] = [
                 'row' => null,
                 'attribute' => 'customer',
@@ -101,6 +99,7 @@ class InvoiceImport implements
                 'values' => $mappedRow,
             ];
             $this->failureCount++;
+
             return null;
         }
 
@@ -151,9 +150,6 @@ class InvoiceImport implements
 
     /**
      * Map CSV columns to our field names using column mapping
-     *
-     * @param array $row
-     * @return array
      */
     private function mapColumns(array $row): array
     {
@@ -183,10 +179,6 @@ class InvoiceImport implements
 
     /**
      * Find customer by name or email
-     *
-     * @param string|null $name
-     * @param string|null $email
-     * @return Customer|null
      */
     private function findCustomer(?string $name, ?string $email): ?Customer
     {
@@ -217,12 +209,11 @@ class InvoiceImport implements
     /**
      * Parse date from various formats
      *
-     * @param mixed $value
-     * @return Carbon|null
+     * @param  mixed  $value
      */
     private function parseDate($value): ?Carbon
     {
-        if (!$value) {
+        if (! $value) {
             return null;
         }
 
@@ -241,12 +232,12 @@ class InvoiceImport implements
     /**
      * Parse amount (handle different formats: 1,000.00, 1.000,00, etc.)
      *
-     * @param mixed $value
+     * @param  mixed  $value
      * @return int Amount in cents
      */
     private function parseAmount($value): int
     {
-        if (!$value) {
+        if (! $value) {
             return 0;
         }
 
@@ -267,8 +258,6 @@ class InvoiceImport implements
 
     /**
      * Define validation rules
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -281,9 +270,6 @@ class InvoiceImport implements
 
     /**
      * Get CSV column name for our field
-     *
-     * @param string $ourField
-     * @return string
      */
     private function getColumnName(string $ourField): string
     {
@@ -296,8 +282,6 @@ class InvoiceImport implements
 
     /**
      * Custom validation messages
-     *
-     * @return array
      */
     public function customValidationMessages(): array
     {
@@ -310,8 +294,6 @@ class InvoiceImport implements
 
     /**
      * Chunk size for reading
-     *
-     * @return int
      */
     public function chunkSize(): int
     {
@@ -321,7 +303,7 @@ class InvoiceImport implements
     /**
      * Handle validation failures
      *
-     * @param Failure[] $failures
+     * @param  Failure[]  $failures
      */
     public function onFailure(Failure ...$failures)
     {
@@ -338,8 +320,6 @@ class InvoiceImport implements
 
     /**
      * Get validation failures
-     *
-     * @return array
      */
     public function getFailures(): array
     {
@@ -348,8 +328,6 @@ class InvoiceImport implements
 
     /**
      * Get success count
-     *
-     * @return int
      */
     public function getSuccessCount(): int
     {
@@ -358,8 +336,6 @@ class InvoiceImport implements
 
     /**
      * Get failure count
-     *
-     * @return int
      */
     public function getFailureCount(): int
     {

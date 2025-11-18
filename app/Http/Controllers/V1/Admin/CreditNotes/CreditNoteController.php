@@ -16,8 +16,6 @@ use Illuminate\Http\Request;
  *
  * Handles CRUD operations for credit notes following InvoiceShelf patterns.
  * Credit notes are immutable once posted to IFRS (ifrs_transaction_id is set).
- *
- * @package App\Http\Controllers\V1\Admin\CreditNotes
  */
 class CreditNoteController extends Controller
 {
@@ -61,7 +59,6 @@ class CreditNoteController extends Controller
      * - credit_note_number
      * - search (customer name/contact/company)
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -88,7 +85,6 @@ class CreditNoteController extends Controller
      * Automatically generates credit note number (CN-YYYY-XXXXX).
      * If creditNoteSend is present, also sends email to customer.
      *
-     * @param \App\Http\Requests\CreditNoteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(CreditNoteRequest $request)
@@ -110,8 +106,6 @@ class CreditNoteController extends Controller
     /**
      * Display the specified credit note.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\CreditNote $creditNote
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, CreditNote $creditNote)
@@ -130,8 +124,6 @@ class CreditNoteController extends Controller
      * - Credit note is posted to IFRS (ifrs_transaction_id is set)
      * - Customer is being changed (enforced in model)
      *
-     * @param \App\Http\Requests\CreditNoteRequest $request
-     * @param \App\Models\CreditNote $creditNote
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(CreditNoteRequest $request, CreditNote $creditNote)
@@ -169,7 +161,6 @@ class CreditNoteController extends Controller
      * Deletion is prevented if credit note is posted to IFRS.
      * This check is handled in the model's deleteCreditNotes method.
      *
-     * @param \App\Http\Requests\DeleteCreditNoteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function delete(DeleteCreditNoteRequest $request)
@@ -188,8 +179,6 @@ class CreditNoteController extends Controller
      *
      * Updates status from DRAFT to SENT on first send.
      *
-     * @param \App\Http\Requests\SendCreditNoteRequest $request
-     * @param \App\Models\CreditNote $creditNote
      * @return \Illuminate\Http\JsonResponse
      */
     public function send(SendCreditNoteRequest $request, CreditNote $creditNote)
@@ -207,8 +196,6 @@ class CreditNoteController extends Controller
      * Updates status from SENT to VIEWED.
      * This is typically called when customer opens the credit note link.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\CreditNote $creditNote
      * @return \Illuminate\Http\JsonResponse
      */
     public function markAsViewed(Request $request, CreditNote $creditNote)
@@ -229,8 +216,6 @@ class CreditNoteController extends Controller
      * This triggers IFRS posting via CreditNoteObserver.
      * Once completed and posted, the credit note becomes immutable.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\CreditNote $creditNote
      * @return \Illuminate\Http\JsonResponse
      */
     public function markAsCompleted(Request $request, CreditNote $creditNote)
@@ -258,15 +243,12 @@ class CreditNoteController extends Controller
         return response()->json([
             'success' => true,
             'status' => $creditNote->status,
-            'ifrs_posted' => !is_null($creditNote->ifrs_transaction_id),
+            'ifrs_posted' => ! is_null($creditNote->ifrs_transaction_id),
         ]);
     }
 
     /**
      * Get human-readable error message for model error codes.
-     *
-     * @param string $errorCode
-     * @return string
      */
     private function getErrorMessage(string $errorCode): string
     {

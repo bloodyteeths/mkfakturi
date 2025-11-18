@@ -26,8 +26,6 @@ use Illuminate\Support\Facades\File;
  *
  * Usage:
  *   php artisan db:seed --class=MappingRuleSeeder
- *
- * @package Database\Seeders
  */
 class MappingRuleSeeder extends Seeder
 {
@@ -40,8 +38,11 @@ class MappingRuleSeeder extends Seeder
      * Priority levels for different matching strategies
      */
     private const PRIORITY_EXACT = 10;
+
     private const PRIORITY_REQUIRED = 20;
+
     private const PRIORITY_RECOMMENDED = 50;
+
     private const PRIORITY_OPTIONAL = 100;
 
     /**
@@ -54,13 +55,14 @@ class MappingRuleSeeder extends Seeder
         // Load synonym data from JSON file
         $synonymData = $this->loadSynonymData();
 
-        if (!$synonymData) {
-            $this->command->error('Failed to load synonym data from ' . self::SYNONYM_FILE_PATH);
+        if (! $synonymData) {
+            $this->command->error('Failed to load synonym data from '.self::SYNONYM_FILE_PATH);
+
             return;
         }
 
         $this->command->info("Loaded synonym database version {$synonymData['version']}");
-        $this->command->info("Languages: " . implode(', ', $synonymData['languages']));
+        $this->command->info('Languages: '.implode(', ', $synonymData['languages']));
 
         // Clear existing system rules (but preserve user-created rules)
         $this->command->info('Clearing existing system mapping rules...');
@@ -86,15 +88,14 @@ class MappingRuleSeeder extends Seeder
 
     /**
      * Load synonym data from JSON file
-     *
-     * @return array|null
      */
     private function loadSynonymData(): ?array
     {
         $filePath = base_path(self::SYNONYM_FILE_PATH);
 
-        if (!File::exists($filePath)) {
+        if (! File::exists($filePath)) {
             $this->command->error("Synonym file not found: {$filePath}");
+
             return null;
         }
 
@@ -102,7 +103,8 @@ class MappingRuleSeeder extends Seeder
         $data = json_decode($jsonContent, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->command->error('Invalid JSON in synonym file: ' . json_last_error_msg());
+            $this->command->error('Invalid JSON in synonym file: '.json_last_error_msg());
+
             return null;
         }
 
@@ -112,9 +114,6 @@ class MappingRuleSeeder extends Seeder
     /**
      * Process all fields for a specific entity type
      *
-     * @param string $entityType
-     * @param array $entityConfig
-     * @param array $languages
      * @return int Number of rules created
      */
     private function processEntityType(string $entityType, array $entityConfig, array $languages): int
@@ -135,12 +134,6 @@ class MappingRuleSeeder extends Seeder
 
     /**
      * Create a single mapping rule from field configuration
-     *
-     * @param string $entityType
-     * @param string $fieldName
-     * @param array $fieldConfig
-     * @param array $languages
-     * @return MappingRule|null
      */
     private function createMappingRule(string $entityType, string $fieldName, array $fieldConfig, array $languages): ?MappingRule
     {
@@ -167,9 +160,9 @@ class MappingRuleSeeder extends Seeder
             // Create the mapping rule
             $rule = MappingRule::create([
                 // Rule identification
-                'name' => ucwords(str_replace('_', ' ', $fieldName)) . " ({$entityType})",
-                'description' => "System-generated mapping rule for {$fieldName} field in {$entityType} imports. " .
-                                 "Supports " . count($allSynonyms) . " variations across " . count($languages) . " languages.",
+                'name' => ucwords(str_replace('_', ' ', $fieldName))." ({$entityType})",
+                'description' => "System-generated mapping rule for {$fieldName} field in {$entityType} imports. ".
+                                 'Supports '.count($allSynonyms).' variations across '.count($languages).' languages.',
                 'entity_type' => $entityType,
                 'source_system' => null, // Generic rule for all systems
 
@@ -213,16 +206,14 @@ class MappingRuleSeeder extends Seeder
             return $rule;
 
         } catch (\Exception $e) {
-            $this->command->error("Failed to create rule for {$entityType}.{$fieldName}: " . $e->getMessage());
+            $this->command->error("Failed to create rule for {$entityType}.{$fieldName}: ".$e->getMessage());
+
             return null;
         }
     }
 
     /**
      * Build validation rules from field configuration
-     *
-     * @param array $fieldConfig
-     * @return array
      */
     private function buildValidationRules(array $fieldConfig): array
     {
@@ -276,9 +267,6 @@ class MappingRuleSeeder extends Seeder
 
     /**
      * Build business rules from field configuration
-     *
-     * @param array $fieldConfig
-     * @return array
      */
     private function buildBusinessRules(array $fieldConfig): array
     {
@@ -316,9 +304,6 @@ class MappingRuleSeeder extends Seeder
 
     /**
      * Extract Macedonian-specific patterns from field configuration
-     *
-     * @param array $fieldConfig
-     * @return array
      */
     private function extractMacedonianPatterns(array $fieldConfig): array
     {
@@ -344,10 +329,6 @@ class MappingRuleSeeder extends Seeder
 
     /**
      * Build language-specific variations
-     *
-     * @param array $fieldConfig
-     * @param array $languages
-     * @return array
      */
     private function buildLanguageVariations(array $fieldConfig, array $languages): array
     {
@@ -364,9 +345,6 @@ class MappingRuleSeeder extends Seeder
 
     /**
      * Build test cases from field configuration
-     *
-     * @param array $fieldConfig
-     * @return array
      */
     private function buildTestCases(array $fieldConfig): array
     {
@@ -376,7 +354,7 @@ class MappingRuleSeeder extends Seeder
         if (isset($fieldConfig['examples'])) {
             foreach ($fieldConfig['examples'] as $index => $example) {
                 $testCases[] = [
-                    'name' => "Example " . ($index + 1),
+                    'name' => 'Example '.($index + 1),
                     'input' => $example,
                     'expected_output' => $example, // Direct mapping
                     'context' => [],
@@ -387,7 +365,7 @@ class MappingRuleSeeder extends Seeder
         // Add test cases for each language's first synonym
         if (isset($fieldConfig['synonyms'])) {
             foreach ($fieldConfig['synonyms'] as $lang => $synonyms) {
-                if (!empty($synonyms) && isset($fieldConfig['examples'][0])) {
+                if (! empty($synonyms) && isset($fieldConfig['examples'][0])) {
                     $testCases[] = [
                         'name' => "Language: {$lang}",
                         'input' => $fieldConfig['examples'][0],

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\V1\Admin\MigrationController;
 use App\Models\ImportJob;
 use App\Models\ImportLog;
 use App\Models\User;
@@ -9,8 +8,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 
-use function Pest\Laravel\postJson;
 use function Pest\Laravel\getJson;
+use function Pest\Laravel\postJson;
 
 beforeEach(function () {
     Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
@@ -31,14 +30,14 @@ describe('File Upload Validation', function () {
     test('uploads valid CSV file successfully', function () {
         $file = UploadedFile::fake()->createWithContent(
             'customers.csv',
-            file_get_contents(__DIR__ . '/../fixtures/sample_customers.csv')
+            file_get_contents(__DIR__.'/../fixtures/sample_customers.csv')
         );
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
             'source_system' => 'csv',
-            'description' => 'Test customer import'
+            'description' => 'Test customer import',
         ]);
 
         $response->assertOk();
@@ -53,9 +52,9 @@ describe('File Upload Validation', function () {
                     'filename',
                     'extension',
                     'size',
-                    'mime_type'
-                ]
-            ]
+                    'mime_type',
+                ],
+            ],
         ]);
 
         $importJob = ImportJob::latest()->first();
@@ -69,25 +68,25 @@ describe('File Upload Validation', function () {
         $this->assertDatabaseHas('import_logs', [
             'import_job_id' => $importJob->id,
             'log_type' => ImportLog::TYPE_INFO,
-            'message' => 'File uploaded successfully'
+            'message' => 'File uploaded successfully',
         ]);
     });
 
     test('uploads valid Excel file successfully', function () {
         $file = UploadedFile::fake()->create('customers.xlsx', 1024, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        
+
         // Copy our test Excel file
-        $testFile = __DIR__ . '/../fixtures/sample_customers.xlsx';
+        $testFile = __DIR__.'/../fixtures/sample_customers.xlsx';
         $file = new UploadedFile($testFile, 'customers.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'excel'
+            'source_system' => 'excel',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
         expect($importJob->file_info['extension'])->toBe('xlsx');
         expect($importJob->file_info['mime_type'])->toContain('spreadsheet');
@@ -96,17 +95,17 @@ describe('File Upload Validation', function () {
     test('uploads valid XML file successfully', function () {
         $file = UploadedFile::fake()->createWithContent(
             'customers.xml',
-            file_get_contents(__DIR__ . '/../fixtures/sample_customers.xml')
+            file_get_contents(__DIR__.'/../fixtures/sample_customers.xml')
         );
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'xml'
+            'source_system' => 'xml',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
         expect($importJob->file_info['extension'])->toBe('xml');
         expect($importJob->file_info['original_name'])->toBe('customers.xml');
@@ -118,21 +117,21 @@ describe('File Upload Validation', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'other'
+            'source_system' => 'other',
         ]);
 
         $response->assertStatus(422);
         $response->assertJson([
             'message' => 'Unsupported file type. Please upload CSV, Excel, or XML files.',
             'errors' => [
-                'file' => ['Invalid file type']
-            ]
+                'file' => ['Invalid file type'],
+            ],
         ]);
 
         // Ensure no import job was created
         $this->assertDatabaseMissing('import_jobs', [
             'company_id' => $this->company->id,
-            'status' => ImportJob::STATUS_PENDING
+            'status' => ImportJob::STATUS_PENDING,
         ]);
     });
 
@@ -142,7 +141,7 @@ describe('File Upload Validation', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertStatus(422);
@@ -152,13 +151,13 @@ describe('File Upload Validation', function () {
     test('rejects missing file', function () {
         $response = postJson('api/v1/imports', [
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['file']);
         $response->assertJsonFragment([
-            'message' => 'Please select a file to upload.'
+            'message' => 'Please select a file to upload.',
         ]);
     });
 
@@ -172,7 +171,7 @@ describe('File Upload Validation', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => 'invalid_type',
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertStatus(422);
@@ -185,14 +184,14 @@ describe('File Upload Validation', function () {
             ImportJob::TYPE_ITEMS,
             ImportJob::TYPE_PAYMENTS,
             ImportJob::TYPE_EXPENSES,
-            ImportJob::TYPE_COMPLETE
+            ImportJob::TYPE_COMPLETE,
         ];
 
         foreach ($validTypes as $type) {
             $response = postJson('api/v1/imports', [
                 'file' => $file,
                 'type' => $type,
-                'source_system' => 'csv'
+                'source_system' => 'csv',
             ]);
             $response->assertOk();
         }
@@ -206,14 +205,14 @@ describe('File Upload Validation', function () {
 
         $validSystems = [
             'onivo', 'megasoft', 'pantheon', 'syntegra',
-            'excel', 'csv', 'xml', 'other', 'unknown'
+            'excel', 'csv', 'xml', 'other', 'unknown',
         ];
 
         foreach ($validSystems as $system) {
             $response = postJson('api/v1/imports', [
                 'file' => $file,
                 'type' => ImportJob::TYPE_CUSTOMERS,
-                'source_system' => $system
+                'source_system' => $system,
             ]);
             $response->assertOk();
         }
@@ -222,7 +221,7 @@ describe('File Upload Validation', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'invalid_system'
+            'source_system' => 'invalid_system',
         ]);
 
         $response->assertStatus(422);
@@ -237,11 +236,11 @@ describe('File Content Validation', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
         expect($importJob->file_info['size'])->toBe(0);
     });
@@ -249,18 +248,18 @@ describe('File Content Validation', function () {
     test('handles corrupted XML file', function () {
         $file = UploadedFile::fake()->createWithContent(
             'corrupted.xml',
-            file_get_contents(__DIR__ . '/../fixtures/corrupted_file.xml')
+            file_get_contents(__DIR__.'/../fixtures/corrupted_file.xml')
         );
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'xml'
+            'source_system' => 'xml',
         ]);
 
         // File upload should succeed, but parsing will fail later in the pipeline
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
         expect($importJob->status)->toBe(ImportJob::STATUS_PENDING);
         expect($importJob->file_info['extension'])->toBe('xml');
@@ -269,17 +268,17 @@ describe('File Content Validation', function () {
     test('handles CSV with invalid headers', function () {
         $file = UploadedFile::fake()->createWithContent(
             'invalid.csv',
-            file_get_contents(__DIR__ . '/../fixtures/invalid_data.csv')
+            file_get_contents(__DIR__.'/../fixtures/invalid_data.csv')
         );
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
         expect($importJob->status)->toBe(ImportJob::STATUS_PENDING);
     });
@@ -289,20 +288,20 @@ describe('Import Job Management', function () {
     test('creates import job with correct metadata', function () {
         $file = UploadedFile::fake()->createWithContent(
             'customers.csv',
-            file_get_contents(__DIR__ . '/../fixtures/sample_customers.csv')
+            file_get_contents(__DIR__.'/../fixtures/sample_customers.csv')
         );
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
             'source_system' => 'pantheon',
-            'description' => 'Import from Pantheon system'
+            'description' => 'Import from Pantheon system',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
-        
+
         expect($importJob->company_id)->toBe($this->company->id);
         expect($importJob->creator_id)->toBe(auth()->id());
         expect($importJob->type)->toBe(ImportJob::TYPE_CUSTOMERS);
@@ -312,15 +311,15 @@ describe('Import Job Management', function () {
         expect($importJob->processed_records)->toBe(0);
         expect($importJob->successful_records)->toBe(0);
         expect($importJob->failed_records)->toBe(0);
-        
+
         expect($importJob->file_info)->toHaveKeys([
-            'original_name', 'filename', 'extension', 'size', 'mime_type'
+            'original_name', 'filename', 'extension', 'size', 'mime_type',
         ]);
     });
 
     test('stores file in correct location', function () {
         Storage::fake('private');
-        
+
         $file = UploadedFile::fake()->createWithContent(
             'test_customers.csv',
             'name,email\nTest Customer,test@example.com'
@@ -329,20 +328,20 @@ describe('Import Job Management', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
-        
+
         // Verify file was stored
         Storage::disk('private')->assertExists($importJob->file_path);
-        
+
         // Verify file path structure
-        expect($importJob->file_path)->toStartWith('imports/' . $this->company->id . '/');
+        expect($importJob->file_path)->toStartWith('imports/'.$this->company->id.'/');
         expect($importJob->file_path)->toEndWith('.csv');
-        
+
         // Verify file info
         expect($importJob->file_info['original_name'])->toBe('test_customers.csv');
         expect($importJob->file_info['extension'])->toBe('csv');
@@ -359,7 +358,7 @@ describe('Import Job Management', function () {
             postJson('api/v1/imports', [
                 'file' => $file,
                 'type' => ImportJob::TYPE_CUSTOMERS,
-                'source_system' => 'csv'
+                'source_system' => 'csv',
             ]);
         }
 
@@ -375,15 +374,15 @@ describe('Import Job Management', function () {
                     'source_system',
                     'file_info',
                     'creator',
-                    'formattedCreatedAt'
-                ]
+                    'formattedCreatedAt',
+                ],
             ],
             'meta' => [
                 'total_imports',
                 'active_imports',
                 'completed_imports',
-                'failed_imports'
-            ]
+                'failed_imports',
+            ],
         ]);
 
         expect(count($response->json('data')))->toBe(3);
@@ -395,7 +394,7 @@ describe('Import Job Management', function () {
             'customers.csv',
             'name,email\nCustomer,customer@example.com'
         );
-        
+
         $invoiceFile = UploadedFile::fake()->createWithContent(
             'invoices.csv',
             'invoice_number,amount\nINV-001,1000'
@@ -404,40 +403,40 @@ describe('Import Job Management', function () {
         postJson('api/v1/imports', [
             'file' => $customerFile,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         postJson('api/v1/imports', [
             'file' => $invoiceFile,
             'type' => ImportJob::TYPE_INVOICES,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         // Filter by customer type
         $response = getJson('api/v1/imports?type=customers');
         $response->assertOk();
-        
+
         $customerImports = collect($response->json('data'));
-        expect($customerImports->every(fn($import) => $import['type'] === 'customers'))->toBeTrue();
+        expect($customerImports->every(fn ($import) => $import['type'] === 'customers'))->toBeTrue();
 
         // Filter by pending status
         $response = getJson('api/v1/imports?status=pending');
         $response->assertOk();
-        
+
         $pendingImports = collect($response->json('data'));
-        expect($pendingImports->every(fn($import) => $import['status'] === 'pending'))->toBeTrue();
+        expect($pendingImports->every(fn ($import) => $import['status'] === 'pending'))->toBeTrue();
     });
 
     test('shows individual import job details', function () {
         $file = UploadedFile::fake()->createWithContent(
             'customers.csv',
-            file_get_contents(__DIR__ . '/../fixtures/sample_customers.csv')
+            file_get_contents(__DIR__.'/../fixtures/sample_customers.csv')
         );
 
         $createResponse = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $importJob = ImportJob::latest()->first();
@@ -455,17 +454,17 @@ describe('Import Job Management', function () {
                 'creator' => [
                     'id',
                     'name',
-                    'email'
+                    'email',
                 ],
                 'logs' => [
                     '*' => [
                         'id',
                         'log_type',
                         'message',
-                        'created_at'
-                    ]
-                ]
-            ]
+                        'created_at',
+                    ],
+                ],
+            ],
         ]);
 
         expect($response->json('data.id'))->toBe($importJob->id);
@@ -475,22 +474,22 @@ describe('Import Job Management', function () {
 describe('Large File Handling', function () {
     test('handles medium sized files efficiently', function () {
         $csvContent = "name,email,phone,address\n";
-        
+
         // Generate approximately 10MB of test data
         for ($i = 1; $i <= 100000; $i++) {
             $csvContent .= "Customer {$i},customer{$i}@example.mk,+38970{$i},Address {$i} Skopje\n";
         }
-        
+
         $file = UploadedFile::fake()->createWithContent('large_customers.csv', $csvContent);
 
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
         expect($importJob->file_info['size'])->toBeGreaterThan(1000000); // > 1MB
     });
@@ -498,29 +497,29 @@ describe('Large File Handling', function () {
     test('tracks upload progress and metadata', function () {
         $file = UploadedFile::fake()->createWithContent(
             'customers.csv',
-            file_get_contents(__DIR__ . '/../fixtures/sample_customers.csv')
+            file_get_contents(__DIR__.'/../fixtures/sample_customers.csv')
         );
 
         $startTime = now();
-        
+
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertOk();
-        
+
         $importJob = ImportJob::latest()->first();
-        
+
         // Check timing
         expect($importJob->created_at)->toBeGreaterThanOrEqual($startTime);
-        
+
         // Check progress tracking fields
         expect($importJob->progressPercentage)->toBe(0.0);
         expect($importJob->isInProgress)->toBeFalse();
         expect($importJob->canRetry)->toBeFalse();
-        
+
         // Check file metadata
         expect($importJob->file_info['original_name'])->toBe('customers.csv');
         expect($importJob->file_info['size'])->toBeGreaterThan(0);
@@ -537,12 +536,12 @@ describe('Security Validation', function () {
         $response = postJson('api/v1/imports', [
             'file' => $phpFile,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'other'
+            'source_system' => 'other',
         ]);
 
         $response->assertStatus(422);
         $response->assertJson([
-            'message' => 'Unsupported file type. Please upload CSV, Excel, or XML files.'
+            'message' => 'Unsupported file type. Please upload CSV, Excel, or XML files.',
         ]);
     });
 
@@ -556,7 +555,7 @@ describe('Security Validation', function () {
         $response = $this->withHeaders(['company' => 999999])->postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         // Should still work but with the invalid company ID
@@ -576,7 +575,7 @@ describe('Security Validation', function () {
         $response = $this->withHeaders([])->postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response->assertStatus(401);
@@ -587,7 +586,7 @@ describe('Error Handling', function () {
     test('handles storage failures gracefully', function () {
         // This would require mocking Storage to throw exceptions
         // For now, we'll test that the basic error structure is correct
-        
+
         $file = UploadedFile::fake()->createWithContent(
             'customers.csv',
             'name,email\nTest,test@example.com'
@@ -596,7 +595,7 @@ describe('Error Handling', function () {
         $response = postJson('api/v1/imports', [
             'file' => $file,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         // Should succeed in test environment
@@ -606,7 +605,7 @@ describe('Error Handling', function () {
     test('provides clear error messages', function () {
         $response = postJson('api/v1/imports', [
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
             // Missing file
         ]);
 
@@ -614,10 +613,10 @@ describe('Error Handling', function () {
         $response->assertJsonStructure([
             'message',
             'errors' => [
-                'file'
-            ]
+                'file',
+            ],
         ]);
-        
+
         $errors = $response->json('errors.file');
         expect($errors)->toContain('Please select a file to upload.');
     });
@@ -627,7 +626,7 @@ describe('Error Handling', function () {
             'customers1.csv',
             'name,email\nCustomer1,customer1@example.com'
         );
-        
+
         $file2 = UploadedFile::fake()->createWithContent(
             'customers2.csv',
             'name,email\nCustomer2,customer2@example.com'
@@ -637,13 +636,13 @@ describe('Error Handling', function () {
         $response1 = postJson('api/v1/imports', [
             'file' => $file1,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response2 = postJson('api/v1/imports', [
             'file' => $file2,
             'type' => ImportJob::TYPE_CUSTOMERS,
-            'source_system' => 'csv'
+            'source_system' => 'csv',
         ]);
 
         $response1->assertOk();
@@ -651,7 +650,7 @@ describe('Error Handling', function () {
 
         // Verify both imports were created
         expect(ImportJob::count())->toBe(2);
-        
+
         $jobs = ImportJob::latest()->take(2)->get();
         expect($jobs[0]->file_info['original_name'])->toBe('customers2.csv');
         expect($jobs[1]->file_info['original_name'])->toBe('customers1.csv');

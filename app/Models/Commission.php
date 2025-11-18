@@ -26,7 +26,7 @@ class Commission extends Model
         'paid_date',
         'payment_reference',
         'notes',
-        'creator_id'
+        'creator_id',
     ];
 
     protected $casts = [
@@ -35,17 +35,23 @@ class Commission extends Model
         'commission_amount' => 'decimal:2',
         'period_start' => 'date',
         'period_end' => 'date',
-        'paid_date' => 'date'
+        'paid_date' => 'date',
     ];
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_PAID = 'paid';
+
     const STATUS_CANCELLED = 'cancelled';
 
     const TYPE_INVOICE = 'invoice';
+
     const TYPE_PAYMENT = 'payment';
+
     const TYPE_MONTHLY = 'monthly';
+
     const TYPE_CUSTOM = 'custom';
 
     /**
@@ -126,6 +132,7 @@ class Commission extends Model
     public function calculateCommission()
     {
         $this->commission_amount = $this->base_amount * ($this->commission_rate / 100);
+
         return $this->commission_amount;
     }
 }

@@ -15,10 +15,10 @@ interface MatcherInterface
     /**
      * Find matching candidates for a CSV field
      *
-     * @param string $csvField CSV column name
-     * @param array $analysis Field analysis from FieldAnalyzer
-     * @param Collection $rules Available MappingRule records
-     * @param string $entityType Entity type being imported (customer, invoice, item, etc.)
+     * @param  string  $csvField  CSV column name
+     * @param  array  $analysis  Field analysis from FieldAnalyzer
+     * @param  Collection  $rules  Available MappingRule records
+     * @param  string  $entityType  Entity type being imported (customer, invoice, item, etc.)
      * @return array Array of candidates with confidence scores
      *
      * Expected return format:

@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
 use App\Models\Company;
 use App\Models\Partner;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class PartnerUserSeeder extends Seeder
 {
@@ -22,6 +20,7 @@ class PartnerUserSeeder extends Seeder
 
         if ($existingUser) {
             $this->command->info('Partner user already exists (partner@demo.mk)');
+
             return;
         }
 
@@ -69,7 +68,7 @@ class PartnerUserSeeder extends Seeder
         $this->command->info('===========================================');
         $this->command->info('Email:    partner@demo.mk');
         $this->command->info('Password: Partner2025!');
-        $this->command->info('User ID:  ' . $user->id);
+        $this->command->info('User ID:  '.$user->id);
         $this->command->info('===========================================');
     }
 }

@@ -3,22 +3,19 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\KycDocument;
+use App\Models\Partner;
 use App\Notifications\KycStatusChanged;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class KycReviewController extends Controller
 {
     /**
      * List all pending KYC documents
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function listPending(Request $request): JsonResponse
     {
@@ -56,9 +53,6 @@ class KycReviewController extends Controller
 
     /**
      * List all KYC documents with filter options
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function listAll(Request $request): JsonResponse
     {
@@ -107,10 +101,6 @@ class KycReviewController extends Controller
 
     /**
      * Approve KYC document
-     *
-     * @param Request $request
-     * @param int $documentId
-     * @return JsonResponse
      */
     public function approve(Request $request, int $documentId): JsonResponse
     {
@@ -176,10 +166,6 @@ class KycReviewController extends Controller
 
     /**
      * Reject KYC document
-     *
-     * @param Request $request
-     * @param int $documentId
-     * @return JsonResponse
      */
     public function reject(Request $request, int $documentId): JsonResponse
     {
@@ -246,15 +232,13 @@ class KycReviewController extends Controller
     /**
      * Download KYC document (admin only)
      *
-     * @param Request $request
-     * @param int $documentId
      * @return \Illuminate\Http\Response|JsonResponse
      */
     public function downloadDocument(Request $request, int $documentId)
     {
         $document = KycDocument::findOrFail($documentId);
 
-        if (!Storage::exists($document->file_path)) {
+        if (! Storage::exists($document->file_path)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Document file not found',
@@ -272,10 +256,6 @@ class KycReviewController extends Controller
 
     /**
      * Get partner KYC overview
-     *
-     * @param Request $request
-     * @param int $partnerId
-     * @return JsonResponse
      */
     public function getPartnerKycOverview(Request $request, int $partnerId): JsonResponse
     {

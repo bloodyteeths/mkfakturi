@@ -151,7 +151,7 @@ class RecurringExpenseController extends Controller
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to create expense: ' . $e->getMessage(),
+                'error' => 'Failed to create expense: '.$e->getMessage(),
             ], 500);
         }
     }

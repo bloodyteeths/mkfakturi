@@ -7,12 +7,12 @@ use App\Models\BankAccount;
 use App\Models\BankToken;
 use App\Models\Company;
 use App\Services\Banking\Mt940Parser;
-use Modules\Mk\Services\StopanskaOAuth;
-use Modules\Mk\Services\NlbOAuth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Modules\Mk\Services\NlbOAuth;
+use Modules\Mk\Services\StopanskaOAuth;
 
 /**
  * Bank Authentication Controller
@@ -29,15 +29,13 @@ class BankAuthController extends Controller
      *
      * POST /api/v1/admin/{company}/banking/auth/{bankCode}
      *
-     * @param Request $request
-     * @param int $companyId Company ID
-     * @param string $bankCode Bank identifier (stopanska, nlb)
-     * @return JsonResponse
+     * @param  int  $companyId  Company ID
+     * @param  string  $bankCode  Bank identifier (stopanska, nlb)
      */
     public function initiateOAuth(Request $request, int $companyId, string $bankCode): JsonResponse
     {
         // Check feature flag
-        if (!config('mk.features.psd2_banking', false)) {
+        if (! config('mk.features.psd2_banking', false)) {
             return response()->json([
                 'error' => 'PSD2 banking feature is not enabled',
             ], 403);
@@ -50,9 +48,9 @@ class BankAuthController extends Controller
 
         $client = $this->getClientForBank($bankCode);
 
-        if (!$client) {
+        if (! $client) {
             return response()->json([
-                'error' => 'Unsupported bank: ' . $bankCode,
+                'error' => 'Unsupported bank: '.$bankCode,
             ], 400);
         }
 
@@ -74,32 +72,32 @@ class BankAuthController extends Controller
      *
      * GET /banking/callback/{bank}?code=xxx&state=xxx
      *
-     * @param Request $request
-     * @param string $bankCode Bank identifier
+     * @param  string  $bankCode  Bank identifier
      * @return \Illuminate\Http\RedirectResponse
      */
     public function handleCallback(Request $request, string $bankCode)
     {
         // Check feature flag
-        if (!config('mk.features.psd2_banking', false)) {
+        if (! config('mk.features.psd2_banking', false)) {
             return redirect('/admin/settings/banking?error=feature_disabled');
         }
 
         // Extract company ID from OAuth state parameter
         $state = $request->query('state');
-        $companyId = $state ? (int)$state : null;
+        $companyId = $state ? (int) $state : null;
 
-        if (!$companyId) {
+        if (! $companyId) {
             Log::warning('OAuth callback missing state parameter', [
                 'bank' => $bankCode,
             ]);
+
             return redirect('/admin/settings/banking?error=missing_state');
         }
 
         $company = Company::findOrFail($companyId);
         $code = $request->query('code');
 
-        if (!$code) {
+        if (! $code) {
             Log::warning('OAuth callback missing authorization code', [
                 'company_id' => $companyId,
                 'bank' => $bankCode,
@@ -110,7 +108,7 @@ class BankAuthController extends Controller
 
         $client = $this->getClientForBank($bankCode);
 
-        if (!$client) {
+        if (! $client) {
             return redirect('/admin/settings/banking?error=unsupported_bank');
         }
 
@@ -126,7 +124,7 @@ class BankAuthController extends Controller
                 'token_id' => $token->id,
             ]);
 
-            return redirect('/admin/settings/banking?success=connected&bank=' . $bankCode);
+            return redirect('/admin/settings/banking?success=connected&bank='.$bankCode);
         } catch (\Exception $e) {
             Log::error('OAuth token exchange failed', [
                 'company_id' => $companyId,
@@ -143,15 +141,13 @@ class BankAuthController extends Controller
      *
      * GET /api/v1/admin/{company}/banking/status/{bankCode}
      *
-     * @param Request $request
-     * @param int $companyId Company ID
-     * @param string $bankCode Bank identifier
-     * @return JsonResponse
+     * @param  int  $companyId  Company ID
+     * @param  string  $bankCode  Bank identifier
      */
     public function getStatus(Request $request, int $companyId, string $bankCode): JsonResponse
     {
         // Check feature flag
-        if (!config('mk.features.psd2_banking', false)) {
+        if (! config('mk.features.psd2_banking', false)) {
             return response()->json([
                 'error' => 'PSD2 banking feature is not enabled',
             ], 403);
@@ -166,7 +162,7 @@ class BankAuthController extends Controller
             ->where('bank_code', $bankCode)
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'connected' => false,
                 'bank_code' => $bankCode,
@@ -188,15 +184,13 @@ class BankAuthController extends Controller
      *
      * DELETE /api/v1/admin/{company}/banking/disconnect/{bankCode}
      *
-     * @param Request $request
-     * @param int $companyId Company ID
-     * @param string $bankCode Bank identifier
-     * @return JsonResponse
+     * @param  int  $companyId  Company ID
+     * @param  string  $bankCode  Bank identifier
      */
     public function revoke(Request $request, int $companyId, string $bankCode): JsonResponse
     {
         // Check feature flag
-        if (!config('mk.features.psd2_banking', false)) {
+        if (! config('mk.features.psd2_banking', false)) {
             return response()->json([
                 'error' => 'PSD2 banking feature is not enabled',
             ], 403);
@@ -209,9 +203,9 @@ class BankAuthController extends Controller
 
         $client = $this->getClientForBank($bankCode);
 
-        if (!$client) {
+        if (! $client) {
             return response()->json([
-                'error' => 'Unsupported bank: ' . $bankCode,
+                'error' => 'Unsupported bank: '.$bankCode,
             ], 400);
         }
 
@@ -235,7 +229,7 @@ class BankAuthController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to disconnect bank: ' . $e->getMessage(),
+                'error' => 'Failed to disconnect bank: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -245,14 +239,12 @@ class BankAuthController extends Controller
      *
      * POST /api/v1/admin/{company}/banking/import-mt940
      *
-     * @param Request $request
-     * @param int $companyId Company ID
-     * @return JsonResponse
+     * @param  int  $companyId  Company ID
      */
     public function importCsv(Request $request, int $companyId): JsonResponse
     {
         // Check feature flag
-        if (!config('mk.features.psd2_banking', false)) {
+        if (! config('mk.features.psd2_banking', false)) {
             return response()->json([
                 'error' => 'PSD2 banking feature is not enabled',
             ], 403);
@@ -313,7 +305,7 @@ class BankAuthController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Import failed: ' . $e->getMessage(),
+                'error' => 'Import failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -321,8 +313,7 @@ class BankAuthController extends Controller
     /**
      * Get PSD2 client for a bank code
      *
-     * @param string $bankCode Bank identifier
-     * @return \App\Services\Banking\Psd2Client|null
+     * @param  string  $bankCode  Bank identifier
      */
     protected function getClientForBank(string $bankCode): ?\App\Services\Banking\Psd2Client
     {

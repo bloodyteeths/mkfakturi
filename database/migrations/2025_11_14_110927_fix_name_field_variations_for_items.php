@@ -59,7 +59,7 @@ return new class extends Migration
             }
 
         } catch (\Exception $e) {
-            \Log::error("Migration: Failed to update name field variations", [
+            \Log::error('Migration: Failed to update name field variations', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -73,6 +73,6 @@ return new class extends Migration
     public function down(): void
     {
         // Reversing this would reintroduce the bug, so we just log it
-        \Log::info("Migration rollback: name field variations not restored (would reintroduce bugs)");
+        \Log::info('Migration rollback: name field variations not restored (would reintroduce bugs)');
     }
 };

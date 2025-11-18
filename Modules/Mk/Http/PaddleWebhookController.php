@@ -5,15 +5,14 @@ namespace Modules\Mk\Http;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 /**
  * Paddle Webhook Controller
- * 
+ *
  * Handles webhook notifications from Paddle payment processor
  * Updates invoice status when payments are completed
  */
@@ -26,11 +25,12 @@ class PaddleWebhookController extends Controller
     {
         try {
             // Verify webhook signature
-            if (!$this->verifyWebhookSignature($request)) {
+            if (! $this->verifyWebhookSignature($request)) {
                 Log::warning('Paddle webhook signature verification failed', [
                     'ip' => $request->ip(),
-                    'user_agent' => $request->userAgent()
+                    'user_agent' => $request->userAgent(),
                 ]);
+
                 return response('Unauthorized', 401);
             }
 
@@ -39,25 +39,26 @@ class PaddleWebhookController extends Controller
 
             Log::info('Paddle webhook received', [
                 'event_type' => $eventType,
-                'paddle_id' => $data['p_order_id'] ?? null
+                'paddle_id' => $data['p_order_id'] ?? null,
             ]);
 
             // Handle different webhook events
             switch ($eventType) {
                 case 'payment_succeeded':
                     return $this->handlePaymentSucceeded($data);
-                
+
                 case 'payment_failed':
                     return $this->handlePaymentFailed($data);
-                
+
                 case 'subscription_payment_succeeded':
                     return $this->handleSubscriptionPayment($data);
-                
+
                 case 'payment_refunded':
                     return $this->handlePaymentRefunded($data);
-                
+
                 default:
                     Log::info('Unhandled Paddle webhook event', ['event_type' => $eventType]);
+
                     return response('OK', 200);
             }
 
@@ -65,7 +66,7 @@ class PaddleWebhookController extends Controller
             Log::error('Paddle webhook processing failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
+                'request_data' => $request->all(),
             ]);
 
             return response('Internal Server Error', 500);
@@ -85,18 +86,19 @@ class PaddleWebhookController extends Controller
         // Find the invoice if ID is provided in passthrough
         if ($invoiceId) {
             $invoice = Invoice::find($invoiceId);
-            
-            if (!$invoice) {
+
+            if (! $invoice) {
                 Log::warning('Invoice not found for Paddle payment', [
                     'invoice_id' => $invoiceId,
-                    'order_id' => $orderId
+                    'order_id' => $orderId,
                 ]);
+
                 return response('Invoice not found', 404);
             }
 
             // Create payment record
             $payment = $this->createPaymentRecord($invoice, $data);
-            
+
             // Update invoice status to PAID
             $invoice->update([
                 'status' => 'PAID',
@@ -108,7 +110,7 @@ class PaddleWebhookController extends Controller
                 'invoice_id' => $invoice->id,
                 'payment_id' => $payment->id,
                 'paddle_order_id' => $orderId,
-                'amount' => $data['p_sale_gross']
+                'amount' => $data['p_sale_gross'],
             ]);
         }
 
@@ -127,7 +129,7 @@ class PaddleWebhookController extends Controller
         Log::warning('Paddle payment failed', [
             'order_id' => $orderId,
             'invoice_id' => $invoiceId,
-            'reason' => $data['payment_method'] ?? 'Unknown'
+            'reason' => $data['payment_method'] ?? 'Unknown',
         ]);
 
         // Could implement retry logic or notification here
@@ -145,7 +147,7 @@ class PaddleWebhookController extends Controller
         Log::info('Paddle subscription payment received', [
             'subscription_id' => $subscriptionId,
             'order_id' => $orderId,
-            'amount' => $data['p_sale_gross']
+            'amount' => $data['p_sale_gross'],
         ]);
 
         // Handle recurring invoice payments here
@@ -162,7 +164,7 @@ class PaddleWebhookController extends Controller
 
         Log::info('Paddle payment refunded', [
             'order_id' => $orderId,
-            'refund_amount' => $refundAmount
+            'refund_amount' => $refundAmount,
         ]);
 
         // Find and update payment/invoice status
@@ -170,14 +172,14 @@ class PaddleWebhookController extends Controller
         if ($payment) {
             $payment->update([
                 'status' => 'REFUNDED',
-                'notes' => 'Refunded via Paddle webhook: ' . $refundAmount
+                'notes' => 'Refunded via Paddle webhook: '.$refundAmount,
             ]);
 
             // Update invoice status back to SENT
             if ($payment->invoice) {
                 $payment->invoice->update([
                     'status' => 'SENT',
-                    'paid_status' => 'UNPAID'
+                    'paid_status' => 'UNPAID',
                 ]);
             }
         }
@@ -199,7 +201,7 @@ class PaddleWebhookController extends Controller
             'payment_date' => Carbon::parse($data['event_time'])->format('Y-m-d'),
             'payment_number' => $this->generatePaymentNumber($invoice->company_id),
             'payment_method' => 'paddle',
-            'notes' => 'Paddle payment - Order ID: ' . $data['p_order_id'],
+            'notes' => 'Paddle payment - Order ID: '.$data['p_order_id'],
             'reference' => $data['p_order_id'],
         ]);
     }
@@ -212,9 +214,9 @@ class PaddleWebhookController extends Controller
         $prefix = 'PAY-';
         $year = date('Y');
         $month = date('m');
-        
+
         $lastPayment = Payment::where('company_id', $companyId)
-            ->where('payment_number', 'like', $prefix . $year . $month . '%')
+            ->where('payment_number', 'like', $prefix.$year.$month.'%')
             ->orderBy('payment_number', 'desc')
             ->first();
 
@@ -225,7 +227,7 @@ class PaddleWebhookController extends Controller
             $newNumber = 1;
         }
 
-        return $prefix . $year . $month . '-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        return $prefix.$year.$month.'-'.str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -234,32 +236,33 @@ class PaddleWebhookController extends Controller
     protected function verifyWebhookSignature(Request $request): bool
     {
         $webhookSecret = config('services.paddle.webhook_secret');
-        
-        if (!$webhookSecret) {
+
+        if (! $webhookSecret) {
             Log::warning('Paddle webhook secret not configured');
+
             return false;
         }
 
         // Get all POST data
         $postData = $request->all();
-        
+
         // Extract signature
         $signature = $postData['p_signature'] ?? null;
         unset($postData['p_signature']);
 
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
 
         // Sort data alphabetically by key
         ksort($postData);
-        
+
         // Build query string
         $queryString = http_build_query($postData);
-        
+
         // Verify signature
         $calculatedSignature = base64_encode(hash_hmac('sha1', $queryString, $webhookSecret, true));
-        
+
         return hash_equals($signature, $calculatedSignature);
     }
 }

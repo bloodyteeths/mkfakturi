@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         // Only add column if table exists but column doesn't
-        if (Schema::hasTable('signature_logs') && !Schema::hasColumn('signature_logs', 'company_id')) {
+        if (Schema::hasTable('signature_logs') && ! Schema::hasColumn('signature_logs', 'company_id')) {
             Schema::table('signature_logs', function (Blueprint $table) {
                 // Add company_id column after id
                 $table->unsignedInteger('company_id')->after('id')->index();
 
                 // Add foreign key constraint
                 $table->foreign('company_id')
-                      ->references('id')
-                      ->on('companies')
-                      ->onDelete('restrict');
+                    ->references('id')
+                    ->on('companies')
+                    ->onDelete('restrict');
             });
         }
     }

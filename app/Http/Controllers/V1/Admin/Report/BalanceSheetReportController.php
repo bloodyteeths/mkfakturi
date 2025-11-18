@@ -27,9 +27,9 @@ class BalanceSheetReportController extends Controller
         $this->authorize('view report', $company);
 
         // Check if accounting backbone feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.'
+                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.',
             ]);
         }
 
@@ -37,7 +37,7 @@ class BalanceSheetReportController extends Controller
         App::setLocale($locale);
 
         // Get balance sheet data via IfrsAdapter
-        $adapter = new IfrsAdapter();
+        $adapter = new IfrsAdapter;
         $asOfDate = $request->has('as_of_date')
             ? $request->as_of_date
             : now()->toDateString();
@@ -47,7 +47,7 @@ class BalanceSheetReportController extends Controller
         // Handle errors from adapter
         if (isset($balanceSheet['error'])) {
             return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => $balanceSheet['error']
+                'message' => $balanceSheet['error'],
             ]);
         }
 

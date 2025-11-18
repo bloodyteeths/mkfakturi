@@ -83,12 +83,12 @@ class ExportJob extends Model
      */
     public function getDownloadUrl(): ?string
     {
-        if (!$this->file_path || $this->status !== 'completed') {
+        if (! $this->file_path || $this->status !== 'completed') {
             return null;
         }
 
         // Check if file exists
-        if (!Storage::exists($this->file_path)) {
+        if (! Storage::exists($this->file_path)) {
             return null;
         }
 

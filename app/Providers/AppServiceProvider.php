@@ -110,7 +110,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register AI services
         $this->app->singleton(McpDataProvider::class, function ($app) {
-            return new McpDataProvider();
+            return new McpDataProvider;
         });
 
         $this->app->singleton(AiInsightsService::class, function ($app) {
@@ -121,7 +121,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Keep McpClient for external integrations if needed
         $this->app->singleton(McpClient::class, function ($app) {
-            return new McpClient();
+            return new McpClient;
         });
     }
 
@@ -211,7 +211,7 @@ class AppServiceProvider extends ServiceProvider
         $isEnabled = config('ifrs.enabled', false) || env('FEATURE_ACCOUNTING_BACKBONE', false);
 
         // Check database feature flag if available (may not exist during tests/migrations)
-        if (!$isEnabled && function_exists('feature')) {
+        if (! $isEnabled && function_exists('feature')) {
             try {
                 $isEnabled = feature('accounting_backbone');
             } catch (\Exception $e) {
@@ -252,12 +252,10 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Check if current request is a health check endpoint
-     *
-     * @return bool
      */
     protected function isHealthCheckRequest(): bool
     {
-        if (!$this->app->bound('request')) {
+        if (! $this->app->bound('request')) {
             return false;
         }
 

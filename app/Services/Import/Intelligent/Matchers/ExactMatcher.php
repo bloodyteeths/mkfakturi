@@ -22,10 +22,10 @@ class ExactMatcher implements MatcherInterface
      * 3. Check language_variations array for exact matches
      * 4. Return all matches with confidence 1.0
      *
-     * @param string $csvField CSV column name
-     * @param array $analysis Field analysis from FieldAnalyzer
-     * @param Collection $rules Available MappingRule records
-     * @param string $entityType Entity type being imported
+     * @param  string  $csvField  CSV column name
+     * @param  array  $analysis  Field analysis from FieldAnalyzer
+     * @param  Collection  $rules  Available MappingRule records
+     * @param  string  $entityType  Entity type being imported
      * @return array Array of candidates with confidence scores
      */
     public function match(
@@ -49,7 +49,7 @@ class ExactMatcher implements MatcherInterface
             }
 
             // Skip inactive rules
-            if (!$rule->is_active) {
+            if (! $rule->is_active) {
                 continue;
             }
 
@@ -60,11 +60,12 @@ class ExactMatcher implements MatcherInterface
                     $rule->source_field,
                     $rule->id
                 );
+
                 continue;
             }
 
             // Check field_variations
-            if (!empty($rule->field_variations) && is_array($rule->field_variations)) {
+            if (! empty($rule->field_variations) && is_array($rule->field_variations)) {
                 foreach ($rule->field_variations as $variation) {
                     if ($this->normalize($variation) === $normalizedCsvField) {
                         $candidates[] = $this->buildCandidate(
@@ -78,11 +79,11 @@ class ExactMatcher implements MatcherInterface
             }
 
             // Check language_variations
-            if (!empty($rule->language_variations) && is_array($rule->language_variations)) {
+            if (! empty($rule->language_variations) && is_array($rule->language_variations)) {
                 // Check if we already added this rule
                 $alreadyAdded = collect($candidates)->contains('rule_id', $rule->id);
 
-                if (!$alreadyAdded) {
+                if (! $alreadyAdded) {
                     // Flatten language_variations (it's a nested array: ["en" => [...], "mk" => [...]])
                     foreach ($rule->language_variations as $lang => $variations) {
                         if (is_array($variations)) {
@@ -110,7 +111,7 @@ class ExactMatcher implements MatcherInterface
      *
      * Converts to lowercase and handles special characters consistently
      *
-     * @param string $field Field name to normalize
+     * @param  string  $field  Field name to normalize
      * @return string Normalized field name
      */
     private function normalize(string $field): string
@@ -127,9 +128,9 @@ class ExactMatcher implements MatcherInterface
     /**
      * Build a candidate result array
      *
-     * @param string $targetField Target field name
-     * @param string $source What matched
-     * @param int $ruleId MappingRule ID
+     * @param  string  $targetField  Target field name
+     * @param  string  $source  What matched
+     * @param  int  $ruleId  MappingRule ID
      * @return array Candidate array
      */
     private function buildCandidate(string $targetField, string $source, int $ruleId): array

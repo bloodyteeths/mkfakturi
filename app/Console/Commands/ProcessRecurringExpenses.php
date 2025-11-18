@@ -33,6 +33,7 @@ class ProcessRecurringExpenses extends Command
 
         if ($dueExpenses->isEmpty()) {
             $this->info('No recurring expenses due for processing.');
+
             return 0;
         }
 

@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Models\Bill;
-use App\Models\BillPayment;
 use App\Models\CompanySetting;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -44,4 +43,3 @@ class BillPaymentRequest extends FormRequest
         ];
     }
 }
-

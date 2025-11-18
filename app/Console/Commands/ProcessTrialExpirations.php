@@ -65,7 +65,6 @@ class ProcessTrialExpirations extends Command
     /**
      * Send trial expiry reminders
      *
-     * @param int $daysBeforeExpiry
      * @return int Number of reminders sent
      */
     protected function sendReminders(int $daysBeforeExpiry): int
@@ -84,8 +83,9 @@ class ProcessTrialExpirations extends Command
             try {
                 $owner = $subscription->company->owner;
 
-                if (!$owner || !$owner->email) {
+                if (! $owner || ! $owner->email) {
                     $this->warn("Company {$subscription->company_id} has no owner or email");
+
                     continue;
                 }
 

@@ -35,4 +35,3 @@ class BillItemResource extends JsonResource
         ];
     }
 }
-

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Bill;
 use App\Models\Customer;
 use App\Models\CustomField;
 use App\Models\Estimate;
@@ -8,10 +9,9 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Note;
-use App\Models\Bill;
-use App\Models\Supplier;
 use App\Models\Payment;
 use App\Models\RecurringInvoice;
+use App\Models\Supplier;
 use App\Models\TaxType;
 
 return [

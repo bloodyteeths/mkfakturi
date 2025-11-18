@@ -129,21 +129,21 @@ echo "=================================================================\n\n";
 echo "ALBANIAN LANGUAGE SUPPORT:\n";
 echo "-------------------------\n";
 echo "Total Albanian variations added: {$albanianCount}\n";
-echo "Fields covered: " . count($albanianVariations) . "\n\n";
+echo 'Fields covered: '.count($albanianVariations)."\n\n";
 
 echo "Albanian variations by category:\n";
 foreach ($albanianVariations as $field => $variations) {
-    echo "  - {$field}: " . count($variations) . " variations\n";
+    echo "  - {$field}: ".count($variations)." variations\n";
 }
 
 echo "\n\nGENERIC MANUAL CSV PATTERNS:\n";
 echo "----------------------------\n";
 echo "Total manual CSV patterns added: {$manualCSVCount}\n";
-echo "Fields covered: " . count($manualCSVPatterns) . "\n\n";
+echo 'Fields covered: '.count($manualCSVPatterns)."\n\n";
 
 echo "Manual CSV patterns by category:\n";
 foreach ($manualCSVPatterns as $field => $patterns) {
-    echo "  - {$field}: " . count($patterns) . " variations\n";
+    echo "  - {$field}: ".count($patterns)." variations\n";
 }
 
 echo "\n\n=================================================================\n";
@@ -151,7 +151,7 @@ echo "TOTAL EXPANSIONS:\n";
 echo "=================================================================\n";
 echo "Albanian variations: {$albanianCount}\n";
 echo "Manual CSV patterns: {$manualCSVCount}\n";
-echo "Total new variations: " . ($albanianCount + $manualCSVCount) . "\n";
+echo 'Total new variations: '.($albanianCount + $manualCSVCount)."\n";
 echo "\n";
 
 // Sample test cases

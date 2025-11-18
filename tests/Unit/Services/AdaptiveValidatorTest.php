@@ -3,7 +3,6 @@
 namespace Tests\Unit\Services;
 
 use App\Models\Company;
-use App\Models\Currency;
 use App\Models\MappingRule;
 use App\Services\Import\Intelligent\AdaptiveValidator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,14 +11,13 @@ use Tests\TestCase;
 
 /**
  * Unit tests for AdaptiveValidator
- *
- * @package Tests\Unit\Services
  */
 class AdaptiveValidatorTest extends TestCase
 {
     use RefreshDatabase;
 
     private AdaptiveValidator $validator;
+
     private Company $company;
 
     protected function setUp(): void

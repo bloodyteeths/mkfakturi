@@ -17,8 +17,6 @@ class BankProviderSeeder extends Seeder
      * PIS (Payment Initiation Service) support will be added in later phases.
      *
      * Environment: Starts with sandbox for development and testing.
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -74,7 +72,7 @@ class BankProviderSeeder extends Seeder
             );
         }
 
-        $this->command->info('Seeded ' . count($providers) . ' Macedonian bank providers (sandbox environment)');
+        $this->command->info('Seeded '.count($providers).' Macedonian bank providers (sandbox environment)');
     }
 }
 

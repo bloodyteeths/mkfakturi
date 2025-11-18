@@ -86,7 +86,6 @@ class FeatureFlagTest extends TestCase
         $this->assertFalse($features['monitoring']);
         $this->assertFalse($features['redis-queues']);
     }
-
 }
 
 // CLAUDE-CHECKPOINT

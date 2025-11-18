@@ -53,12 +53,10 @@ class AuditLogResource extends JsonResource
 
     /**
      * Get display name for the audited entity.
-     *
-     * @return string
      */
     protected function getEntityName(): string
     {
-        if (!$this->auditable) {
+        if (! $this->auditable) {
             return 'N/A';
         }
 
@@ -72,7 +70,7 @@ class AuditLogResource extends JsonResource
         }
 
         // For models without a clear name, use the ID
-        return class_basename($this->auditable_type) . ' #' . $this->auditable->id;
+        return class_basename($this->auditable_type).' #'.$this->auditable->id;
     }
 }
 

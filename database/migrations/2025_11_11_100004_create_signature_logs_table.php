@@ -21,20 +21,20 @@ return new class extends Migration
             // Company relationship (multi-tenant)
             $table->unsignedInteger('company_id')->index();
             $table->foreign('company_id')
-                  ->references('id')
-                  ->on('companies')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('companies')
+                ->onDelete('restrict');
 
             // Certificate relationship
             $table->unsignedBigInteger('certificate_id')->index();
             $table->foreign('certificate_id')
-                  ->references('id')
-                  ->on('certificates')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('certificates')
+                ->onDelete('restrict');
 
             // Action performed
             $table->enum('action', ['sign', 'verify', 'upload', 'delete', 'rotate'])
-                  ->index(); // Type of operation performed
+                ->index(); // Type of operation performed
 
             // Polymorphic relationship to the signed/verified entity
             $table->string('signable_type')->nullable(); // Invoice, Estimate, etc.
@@ -43,9 +43,9 @@ return new class extends Migration
             // User and context information
             $table->unsignedInteger('user_id')->nullable()->index();
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null'); // Preserve logs even if user is deleted
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null'); // Preserve logs even if user is deleted
 
             $table->ipAddress('ip_address')->nullable(); // IP address of the request
             $table->text('user_agent')->nullable(); // Browser/client user agent
@@ -65,7 +65,7 @@ return new class extends Migration
             $table->index(['user_id', 'created_at']); // User activity timeline
             $table->index(['action', 'success', 'created_at']); // Failed operations by type
             $table->index(['certificate_id', 'action']); // Certificate usage by action type
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
     }
 
     /**

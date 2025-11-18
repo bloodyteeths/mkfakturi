@@ -5,10 +5,10 @@ namespace App\Console\Commands;
 use App\Models\AffiliateEvent;
 use App\Models\Partner;
 use App\Models\Payout;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class ProcessAffiliatePayouts extends Command
 {
@@ -38,7 +38,7 @@ class ProcessAffiliatePayouts extends Command
 
         // Determine target month
         $targetMonth = $this->option('month')
-            ? Carbon::parse($this->option('month') . '-01')
+            ? Carbon::parse($this->option('month').'-01')
             : Carbon::now()->subMonth();
 
         $monthRef = $targetMonth->format('Y-m');
@@ -58,6 +58,7 @@ class ProcessAffiliatePayouts extends Command
 
         if ($eligiblePartners->isEmpty()) {
             $this->info('No partners eligible for payout this month.');
+
             return 0;
         }
 
@@ -73,20 +74,22 @@ class ProcessAffiliatePayouts extends Command
 
         $this->newLine();
         $this->info("Total payouts: {$eligiblePartners->count()}");
-        $this->info("Total amount: €" . number_format($totalAmount, 2));
+        $this->info('Total amount: €'.number_format($totalAmount, 2));
         $this->info("Total events: {$totalEvents}");
         $this->newLine();
 
         // Handle dry-run mode
         if ($this->option('dry-run')) {
             $this->warn('DRY RUN MODE - No payouts will be created.');
+
             return 0;
         }
 
         // Confirm before processing (unless --force)
-        if (!$this->option('force')) {
-            if (!$this->confirm('Do you want to proceed with creating these payouts?')) {
+        if (! $this->option('force')) {
+            if (! $this->confirm('Do you want to proceed with creating these payouts?')) {
                 $this->warn('Payout processing cancelled.');
+
                 return 0;
             }
         }
@@ -97,7 +100,7 @@ class ProcessAffiliatePayouts extends Command
         // Display results
         $this->newLine();
         $this->info("✓ Payouts created: {$result['created']}");
-        $this->info("✓ Total amount: €" . number_format($result['total_amount'], 2));
+        $this->info('✓ Total amount: €'.number_format($result['total_amount'], 2));
 
         if ($result['failed'] > 0) {
             $this->error("✗ Failed: {$result['failed']}");
@@ -111,20 +114,18 @@ class ProcessAffiliatePayouts extends Command
     /**
      * Find all partners eligible for payout
      *
-     * @param Carbon $clawbackCutoff
-     * @param float $minPayout
      * @return \Illuminate\Support\Collection
      */
     protected function findEligiblePartners(Carbon $clawbackCutoff, float $minPayout)
     {
         return Partner::select([
-                'partners.id',
-                'partners.name',
-                'partners.email',
-                'partners.is_active',
-                DB::raw('SUM(affiliate_events.amount) as pending_amount'),
-                DB::raw('COUNT(affiliate_events.id) as pending_events')
-            ])
+            'partners.id',
+            'partners.name',
+            'partners.email',
+            'partners.is_active',
+            DB::raw('SUM(affiliate_events.amount) as pending_amount'),
+            DB::raw('COUNT(affiliate_events.id) as pending_events'),
+        ])
             ->join('affiliate_events', 'partners.id', '=', 'affiliate_events.affiliate_partner_id')
             ->whereNull('affiliate_events.paid_at')
             ->where('affiliate_events.is_clawed_back', false)
@@ -138,7 +139,7 @@ class ProcessAffiliatePayouts extends Command
     /**
      * Display table of pending payouts
      *
-     * @param \Illuminate\Support\Collection $partners
+     * @param  \Illuminate\Support\Collection  $partners
      * @return void
      */
     protected function displayPayoutTable($partners)
@@ -149,7 +150,7 @@ class ProcessAffiliatePayouts extends Command
             return [
                 $partner->name,
                 $partner->email,
-                '€' . number_format($partner->pending_amount, 2),
+                '€'.number_format($partner->pending_amount, 2),
                 $partner->pending_events,
             ];
         })->toArray();
@@ -160,9 +161,7 @@ class ProcessAffiliatePayouts extends Command
     /**
      * Process payouts for all eligible partners
      *
-     * @param \Illuminate\Support\Collection $partners
-     * @param string $monthRef
-     * @return array
+     * @param  \Illuminate\Support\Collection  $partners
      */
     protected function processPayouts($partners, string $monthRef): array
     {
@@ -187,6 +186,7 @@ class ProcessAffiliatePayouts extends Command
                 if ($events->isEmpty()) {
                     $this->warn("No events found for partner {$partner->name} (ID: {$partner->id})");
                     DB::rollBack();
+
                     continue;
                 }
 
@@ -217,7 +217,7 @@ class ProcessAffiliatePayouts extends Command
                 $created++;
                 $totalAmount += $amount;
 
-                $this->info("✓ Created payout #{$payout->id} for {$partner->name}: €" . number_format($amount, 2));
+                $this->info("✓ Created payout #{$payout->id} for {$partner->name}: €".number_format($amount, 2));
 
                 Log::info('Affiliate payout created', [
                     'payout_id' => $payout->id,

@@ -15,29 +15,23 @@ use Exception;
  * - Field requirements from MappingRule
  *
  * NO hardcoded validation rules!
- *
- * @package App\Services\Import\Intelligent
  */
 class AdaptiveValidator
 {
     /**
      * Cached mapping rules to avoid repeated DB queries
-     *
-     * @var array
      */
     private array $mappingRulesCache = [];
 
     /**
      * Company ID for scoped validation rules
-     *
-     * @var int|null
      */
     private ?int $companyId;
 
     /**
      * Constructor
      *
-     * @param int|null $companyId Company ID for scoped rules
+     * @param  int|null  $companyId  Company ID for scoped rules
      */
     public function __construct(?int $companyId = null)
     {
@@ -47,9 +41,9 @@ class AdaptiveValidator
     /**
      * Validate a record dynamically
      *
-     * @param array $record Mapped record data (CSV field => value)
-     * @param array $fieldMappings (CSV field => target field)
-     * @param int $rowNumber Row number for error messages
+     * @param  array  $record  Mapped record data (CSV field => value)
+     * @param  array  $fieldMappings  (CSV field => target field)
+     * @param  int  $rowNumber  Row number for error messages
      * @return array ['errors' => [], 'warnings' => []]
      */
     public function validate(
@@ -67,7 +61,7 @@ class AdaptiveValidator
             // Load mapping rule for this target field
             $rule = $this->getMappingRule($targetField);
 
-            if (!$rule) {
+            if (! $rule) {
                 // No validation rules defined for this field
                 continue;
             }
@@ -78,7 +72,7 @@ class AdaptiveValidator
             $warnings = array_merge($warnings, $requiredValidation['warnings']);
 
             // Skip further validation if field is empty and not required
-            if (empty($value) && !($rule->validation_rules['required'] ?? false)) {
+            if (empty($value) && ! ($rule->validation_rules['required'] ?? false)) {
                 continue;
             }
 
@@ -88,7 +82,7 @@ class AdaptiveValidator
             $warnings = array_merge($warnings, $typeValidation['warnings']);
 
             // 3. Business rules validation
-            if (!empty($rule->business_rules)) {
+            if (! empty($rule->business_rules)) {
                 $businessValidation = $this->applyBusinessRules($value, $targetField, $rule->business_rules, $rowNumber);
                 $errors = array_merge($errors, $businessValidation['errors']);
                 $warnings = array_merge($warnings, $businessValidation['warnings']);
@@ -109,11 +103,10 @@ class AdaptiveValidator
     /**
      * Validate required field
      *
-     * @param mixed $value Field value
-     * @param string $targetField Target field name
-     * @param MappingRule $rule Mapping rule
-     * @param int $rowNumber Row number
-     * @return array
+     * @param  mixed  $value  Field value
+     * @param  string  $targetField  Target field name
+     * @param  MappingRule  $rule  Mapping rule
+     * @param  int  $rowNumber  Row number
      */
     private function validateRequired($value, string $targetField, MappingRule $rule, int $rowNumber): array
     {
@@ -132,11 +125,10 @@ class AdaptiveValidator
     /**
      * Validate by data type
      *
-     * @param mixed $value Field value
-     * @param string $targetField Target field name
-     * @param MappingRule $rule Mapping rule
-     * @param int $rowNumber Row number
-     * @return array
+     * @param  mixed  $value  Field value
+     * @param  string  $targetField  Target field name
+     * @param  MappingRule  $rule  Mapping rule
+     * @param  int  $rowNumber  Row number
      */
     private function validateByDataType($value, string $targetField, MappingRule $rule, int $rowNumber): array
     {
@@ -147,45 +139,45 @@ class AdaptiveValidator
 
         switch (strtolower($dataType)) {
             case 'email':
-                if (!$this->isValidEmail($value)) {
+                if (! $this->isValidEmail($value)) {
                     $errors[] = "Row {$rowNumber}: Invalid email format in '{$targetField}': {$value}";
                 }
                 break;
 
             case 'phone':
-                if (!$this->isValidPhone($value)) {
+                if (! $this->isValidPhone($value)) {
                     $warnings[] = "Row {$rowNumber}: Phone number may be invalid in '{$targetField}': {$value}";
                 }
                 break;
 
             case 'date':
-                if (!$this->isValidDate($value)) {
+                if (! $this->isValidDate($value)) {
                     $errors[] = "Row {$rowNumber}: Invalid date in '{$targetField}': {$value}";
                 }
                 break;
 
             case 'number':
             case 'integer':
-                if (!$this->isValidNumber($value, 'integer')) {
+                if (! $this->isValidNumber($value, 'integer')) {
                     $errors[] = "Row {$rowNumber}: Must be a number in '{$targetField}': {$value}";
                 }
                 break;
 
             case 'decimal':
             case 'float':
-                if (!$this->isValidNumber($value, 'decimal')) {
+                if (! $this->isValidNumber($value, 'decimal')) {
                     $errors[] = "Row {$rowNumber}: Must be a decimal number in '{$targetField}': {$value}";
                 }
                 break;
 
             case 'url':
-                if (!$this->isValidUrl($value)) {
+                if (! $this->isValidUrl($value)) {
                     $warnings[] = "Row {$rowNumber}: Invalid URL in '{$targetField}': {$value}";
                 }
                 break;
 
             case 'boolean':
-                if (!$this->isValidBoolean($value)) {
+                if (! $this->isValidBoolean($value)) {
                     $warnings[] = "Row {$rowNumber}: Invalid boolean value in '{$targetField}': {$value}";
                 }
                 break;
@@ -202,11 +194,10 @@ class AdaptiveValidator
     /**
      * Apply business rules validation
      *
-     * @param mixed $value Field value
-     * @param string $targetField Target field name
-     * @param array $rules Business rules
-     * @param int $rowNumber Row number
-     * @return array
+     * @param  mixed  $value  Field value
+     * @param  string  $targetField  Target field name
+     * @param  array  $rules  Business rules
+     * @param  int  $rowNumber  Row number
      */
     private function applyBusinessRules($value, string $targetField, array $rules, int $rowNumber): array
     {
@@ -228,9 +219,9 @@ class AdaptiveValidator
         }
 
         // Regex pattern validation
-        if (isset($rules['regex']) && !empty($rules['regex'])) {
+        if (isset($rules['regex']) && ! empty($rules['regex'])) {
             try {
-                if (!preg_match('/' . $rules['regex'] . '/', $value)) {
+                if (! preg_match('/'.$rules['regex'].'/', $value)) {
                     $errors[] = "Row {$rowNumber}: Value in '{$targetField}' does not match required pattern: {$value}";
                 }
             } catch (Exception $e) {
@@ -240,11 +231,11 @@ class AdaptiveValidator
         }
 
         // Enum validation (allowed values list)
-        if (isset($rules['enum']) && is_array($rules['enum']) && !empty($rules['enum'])) {
+        if (isset($rules['enum']) && is_array($rules['enum']) && ! empty($rules['enum'])) {
             $normalizedValue = $this->normalizeString($value);
             $normalizedEnum = array_map([$this, 'normalizeString'], $rules['enum']);
 
-            if (!in_array($normalizedValue, $normalizedEnum, true)) {
+            if (! in_array($normalizedValue, $normalizedEnum, true)) {
                 $allowedValues = implode(', ', $rules['enum']);
                 $errors[] = "Row {$rowNumber}: Value in '{$targetField}' must be one of: {$allowedValues}, got: {$value}";
             }
@@ -277,10 +268,9 @@ class AdaptiveValidator
     /**
      * Validate cross-field relationships
      *
-     * @param array $record Full record data
-     * @param array $fieldMappings Field mappings
-     * @param int $rowNumber Row number
-     * @return array
+     * @param  array  $record  Full record data
+     * @param  array  $fieldMappings  Field mappings
+     * @param  int  $rowNumber  Row number
      */
     private function validateCrossFields(array $record, array $fieldMappings, int $rowNumber): array
     {
@@ -353,8 +343,7 @@ class AdaptiveValidator
     /**
      * Get mapping rule for target field (with caching)
      *
-     * @param string $targetField Target field name
-     * @return MappingRule|null
+     * @param  string  $targetField  Target field name
      */
     private function getMappingRule(string $targetField): ?MappingRule
     {
@@ -382,8 +371,7 @@ class AdaptiveValidator
     /**
      * Check if value is empty
      *
-     * @param mixed $value Value to check
-     * @return bool
+     * @param  mixed  $value  Value to check
      */
     private function isEmpty($value): bool
     {
@@ -406,13 +394,12 @@ class AdaptiveValidator
      * Validate email format
      * Supports internationalized domain names (IDN) and Macedonian Cyrillic characters
      *
-     * @param string $value Email address
-     * @return bool
+     * @param  string  $value  Email address
      */
     private function isValidEmail(string $value): bool
     {
         // Basic email validation
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($value, FILTER_VALIDATE_EMAIL)) {
             // Try with IDN (Internationalized Domain Names) support
             if (function_exists('idn_to_ascii')) {
                 $parts = explode('@', $value);
@@ -424,7 +411,8 @@ class AdaptiveValidator
                     $asciiDomain = idn_to_ascii($domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
 
                     if ($asciiDomain !== false) {
-                        $asciiEmail = $local . '@' . $asciiDomain;
+                        $asciiEmail = $local.'@'.$asciiDomain;
+
                         return filter_var($asciiEmail, FILTER_VALIDATE_EMAIL) !== false;
                     }
                 }
@@ -440,8 +428,7 @@ class AdaptiveValidator
      * Validate phone number format
      * Supports international formats and Macedonian numbers
      *
-     * @param string $value Phone number
-     * @return bool
+     * @param  string  $value  Phone number
      */
     private function isValidPhone(string $value): bool
     {
@@ -449,7 +436,7 @@ class AdaptiveValidator
         $cleaned = preg_replace('/[\s\-().\/]/', '', $value);
 
         // Check if it contains only valid phone characters
-        if (!preg_match('/^[+]?[0-9]{7,20}$/', $cleaned)) {
+        if (! preg_match('/^[+]?[0-9]{7,20}$/', $cleaned)) {
             return false;
         }
 
@@ -461,13 +448,13 @@ class AdaptiveValidator
      * Validate date format
      * Supports multiple date formats
      *
-     * @param string $value Date string
-     * @return bool
+     * @param  string  $value  Date string
      */
     private function isValidDate(string $value): bool
     {
         try {
             Carbon::parse($value);
+
             return true;
         } catch (Exception $e) {
             // Try common date formats
@@ -485,6 +472,7 @@ class AdaptiveValidator
             foreach ($formats as $format) {
                 try {
                     Carbon::createFromFormat($format, $value);
+
                     return true;
                 } catch (Exception $e) {
                     continue;
@@ -498,9 +486,8 @@ class AdaptiveValidator
     /**
      * Validate number format
      *
-     * @param mixed $value Value to check
-     * @param string $type 'integer' or 'decimal'
-     * @return bool
+     * @param  mixed  $value  Value to check
+     * @param  string  $type  'integer' or 'decimal'
      */
     private function isValidNumber($value, string $type = 'decimal'): bool
     {
@@ -525,18 +512,17 @@ class AdaptiveValidator
     /**
      * Validate URL format
      *
-     * @param string $value URL
-     * @return bool
+     * @param  string  $value  URL
      */
     private function isValidUrl(string $value): bool
     {
         // Basic URL validation
         $valid = filter_var($value, FILTER_VALIDATE_URL) !== false;
 
-        if (!$valid) {
+        if (! $valid) {
             // Try with http:// prefix if missing
-            if (!preg_match('/^https?:\/\//', $value)) {
-                $valid = filter_var('http://' . $value, FILTER_VALIDATE_URL) !== false;
+            if (! preg_match('/^https?:\/\//', $value)) {
+                $valid = filter_var('http://'.$value, FILTER_VALIDATE_URL) !== false;
             }
         }
 
@@ -546,8 +532,7 @@ class AdaptiveValidator
     /**
      * Validate boolean value
      *
-     * @param mixed $value Value to check
-     * @return bool
+     * @param  mixed  $value  Value to check
      */
     private function isValidBoolean($value): bool
     {
@@ -565,12 +550,11 @@ class AdaptiveValidator
      * Normalize string for comparison
      * Handles Macedonian Cyrillic characters
      *
-     * @param mixed $value Value to normalize
-     * @return string
+     * @param  mixed  $value  Value to normalize
      */
     private function normalizeString($value): string
     {
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             $value = (string) $value;
         }
 
@@ -586,8 +570,6 @@ class AdaptiveValidator
     /**
      * Clear the mapping rules cache
      * Useful when rules are updated during validation
-     *
-     * @return void
      */
     public function clearCache(): void
     {
@@ -597,8 +579,7 @@ class AdaptiveValidator
     /**
      * Set company ID for scoped validation
      *
-     * @param int|null $companyId Company ID
-     * @return void
+     * @param  int|null  $companyId  Company ID
      */
     public function setCompanyId(?int $companyId): void
     {

@@ -18,9 +18,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can view any e-invoices.
-     *
-     * @param User $user
-     * @return bool
      */
     public function viewAny(User $user): bool
     {
@@ -34,6 +31,7 @@ class EInvoicePolicy
         // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
             \Log::info('[EInvoicePolicy::viewAny] User is owner - AUTHORIZED');
+
             return true;
         }
 
@@ -46,19 +44,17 @@ class EInvoicePolicy
 
         if ($canView) {
             \Log::info('[EInvoicePolicy::viewAny] User has view-einvoice ability - AUTHORIZED');
+
             return true;
         }
 
         \Log::warning('[EInvoicePolicy::viewAny] User DENIED - no permissions');
+
         return false;
     }
 
     /**
      * Determine whether the user can view the e-invoice.
-     *
-     * @param User $user
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     public function view(User $user, EInvoice $eInvoice): bool
     {
@@ -76,9 +72,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can generate/create e-invoices.
-     *
-     * @param User $user
-     * @return bool
      */
     public function create(User $user): bool
     {
@@ -91,6 +84,7 @@ class EInvoicePolicy
 
         if ($user->isOwner()) {
             \Log::info('[EInvoicePolicy::create] User is owner - AUTHORIZED');
+
             return true;
         }
 
@@ -102,19 +96,17 @@ class EInvoicePolicy
 
         if ($canGenerate) {
             \Log::info('[EInvoicePolicy::create] User has generate-einvoice ability - AUTHORIZED');
+
             return true;
         }
 
         \Log::warning('[EInvoicePolicy::create] User DENIED - no generate permissions');
+
         return false;
     }
 
     /**
      * Determine whether the user can update/sign the e-invoice.
-     *
-     * @param User $user
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     public function update(User $user, EInvoice $eInvoice): bool
     {
@@ -123,7 +115,7 @@ class EInvoicePolicy
         }
 
         // Only allow updating if e-invoice is in DRAFT or FAILED status
-        if (!in_array($eInvoice->status, [EInvoice::STATUS_DRAFT, EInvoice::STATUS_FAILED])) {
+        if (! in_array($eInvoice->status, [EInvoice::STATUS_DRAFT, EInvoice::STATUS_FAILED])) {
             return false;
         }
 
@@ -136,10 +128,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can delete the e-invoice.
-     *
-     * @param User $user
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     public function delete(User $user, EInvoice $eInvoice): bool
     {
@@ -148,7 +136,7 @@ class EInvoicePolicy
         }
 
         // Only allow deleting if e-invoice is in DRAFT or FAILED status
-        if (!in_array($eInvoice->status, [EInvoice::STATUS_DRAFT, EInvoice::STATUS_FAILED])) {
+        if (! in_array($eInvoice->status, [EInvoice::STATUS_DRAFT, EInvoice::STATUS_FAILED])) {
             return false;
         }
 
@@ -161,10 +149,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can submit the e-invoice to tax authority.
-     *
-     * @param User $user
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     public function submit(User $user, EInvoice $eInvoice): bool
     {
@@ -186,10 +170,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can sign the e-invoice.
-     *
-     * @param User $user
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     public function sign(User $user, EInvoice $eInvoice): bool
     {
@@ -211,10 +191,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can download the e-invoice XML.
-     *
-     * @param User $user
-     * @param EInvoice $eInvoice
-     * @return bool
      */
     public function download(User $user, EInvoice $eInvoice): bool
     {
@@ -231,9 +207,6 @@ class EInvoicePolicy
 
     /**
      * Determine whether the user can delete multiple e-invoices.
-     *
-     * @param User $user
-     * @return bool
      */
     public function deleteMultiple(User $user): bool
     {

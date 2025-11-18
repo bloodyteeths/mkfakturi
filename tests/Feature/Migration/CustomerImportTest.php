@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Migration;
 
+use App\Jobs\ProcessImportJob;
 use App\Models\Company;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\ImportJob;
 use App\Models\User;
-use App\Jobs\ProcessImportJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
@@ -17,15 +17,15 @@ use Tests\TestCase;
 
 /**
  * Feature tests for Customer Import functionality
- *
- * @package Tests\Feature\Migration
  */
 class CustomerImportTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $user;
+
     private Company $company;
+
     private Currency $currency;
 
     protected function setUp(): void
@@ -33,7 +33,7 @@ class CustomerImportTest extends TestCase
         parent::setUp();
 
         // Enable feature flag
-        Feature::define('migration-wizard', fn() => true);
+        Feature::define('migration-wizard', fn () => true);
 
         // Create test user and company
         $this->company = Company::factory()->create();
@@ -52,7 +52,7 @@ class CustomerImportTest extends TestCase
         $csvContent = "name,email,phone,vat_number\nTest Customer,test@example.com,123456,VAT123\n";
         $file = UploadedFile::fake()->createWithContent('customers.csv', $csvContent);
 
-        $response = $this->postJson('/api/v1/admin/' . $this->company->id . '/migration/upload', [
+        $response = $this->postJson('/api/v1/admin/'.$this->company->id.'/migration/upload', [
             'file' => $file,
             'type' => 'customers',
             'source' => 'manual',
@@ -85,7 +85,7 @@ class CustomerImportTest extends TestCase
         }
 
         $file = UploadedFile::fake()->createWithContent('customers.csv', $csvContent);
-        $path = $file->store('imports/' . $this->company->id);
+        $path = $file->store('imports/'.$this->company->id);
 
         $importJob = ImportJob::create([
             'company_id' => $this->company->id,
@@ -99,7 +99,7 @@ class CustomerImportTest extends TestCase
         ]);
 
         $response = $this->getJson(
-            '/api/v1/admin/' . $this->company->id . '/migration/' . $importJob->id . '/preview',
+            '/api/v1/admin/'.$this->company->id.'/migration/'.$importJob->id.'/preview',
             ['company' => $this->company->id]
         );
 
@@ -119,7 +119,7 @@ class CustomerImportTest extends TestCase
     public function test_onivo_preset_maps_columns_correctly()
     {
         $response = $this->getJson(
-            '/api/v1/admin/' . $this->company->id . '/migration/presets/onivo?entity_type=customers',
+            '/api/v1/admin/'.$this->company->id.'/migration/presets/onivo?entity_type=customers',
             ['company' => $this->company->id]
         );
 
@@ -146,7 +146,7 @@ class CustomerImportTest extends TestCase
 
         $csvContent = "name,email\nTest Customer,test@example.com\n";
         $file = UploadedFile::fake()->createWithContent('customers.csv', $csvContent);
-        $path = $file->store('imports/' . $this->company->id);
+        $path = $file->store('imports/'.$this->company->id);
 
         $importJob = ImportJob::create([
             'company_id' => $this->company->id,
@@ -162,7 +162,7 @@ class CustomerImportTest extends TestCase
         $customerCountBefore = Customer::count();
 
         $response = $this->postJson(
-            '/api/v1/admin/' . $this->company->id . '/migration/' . $importJob->id . '/dry-run',
+            '/api/v1/admin/'.$this->company->id.'/migration/'.$importJob->id.'/dry-run',
             [
                 'mapping' => [
                     'name' => 'name',

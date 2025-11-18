@@ -25,7 +25,7 @@ class MappingRuleFactory extends Factory
         $targetField = $this->faker->word();
 
         return [
-            'name' => ucfirst($sourceField) . ' to ' . ucfirst($targetField), // Human-readable name
+            'name' => ucfirst($sourceField).' to '.ucfirst($targetField), // Human-readable name
             'description' => $this->faker->sentence(),
             'company_id' => function () {
                 return Company::factory()->create()->id;

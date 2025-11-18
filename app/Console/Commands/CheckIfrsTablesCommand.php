@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 class CheckIfrsTablesCommand extends Command
 {
     protected $signature = 'ifrs:check-tables';
+
     protected $description = 'Check if IFRS tables exist and report status';
 
     public function handle()
@@ -65,8 +66,9 @@ class CheckIfrsTablesCommand extends Command
 
             return 0;
         } else {
-            $this->error('❌ Missing ' . count($missing) . ' IFRS tables!');
+            $this->error('❌ Missing '.count($missing).' IFRS tables!');
             $this->warn('Run this to create missing tables: php artisan migrate --path=vendor/ekmungai/eloquent-ifrs/database/migrations');
+
             return 1;
         }
     }

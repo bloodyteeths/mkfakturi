@@ -21,6 +21,7 @@ class RailwayInstallSeeder extends Seeder
         // Check if already installed
         if (Setting::getSetting('profile_complete') === 'COMPLETED') {
             $this->command->info('App already installed, skipping...');
+
             return;
         }
 
@@ -76,7 +77,7 @@ class RailwayInstallSeeder extends Seeder
         Setting::setSetting('admin_email', env('ADMIN_EMAIL', 'admin@facturino.app'));
 
         $this->command->info('Installation complete!');
-        $this->command->info('Admin Email: ' . $admin->email);
-        $this->command->info('Admin Password: ' . env('ADMIN_PASSWORD', 'password'));
+        $this->command->info('Admin Email: '.$admin->email);
+        $this->command->info('Admin Password: '.env('ADMIN_PASSWORD', 'password'));
     }
 }

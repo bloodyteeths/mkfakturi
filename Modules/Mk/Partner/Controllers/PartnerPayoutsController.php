@@ -3,21 +3,20 @@
 namespace Modules\Mk\Partner\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AffiliateEvent;
 use App\Models\Partner;
 use App\Models\Payout;
-use App\Models\AffiliateEvent;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PartnerPayoutsController extends Controller
 {
     /**
      * Get paginated list of payouts for the partner
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -80,7 +79,6 @@ class PartnerPayoutsController extends Controller
     /**
      * Get partner's bank details
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getBankDetails(Request $request)
@@ -99,7 +97,6 @@ class PartnerPayoutsController extends Controller
     /**
      * Update partner's bank details
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateBankDetails(Request $request)
@@ -114,7 +111,7 @@ class PartnerPayoutsController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'error' => 'Validation failed',
-                'details' => $validator->errors()
+                'details' => $validator->errors(),
             ], 422);
         }
 
@@ -141,8 +138,7 @@ class PartnerPayoutsController extends Controller
     /**
      * Download payout receipt as PDF
      *
-     * @param Request $request
-     * @param int $payoutId
+     * @param  int  $payoutId
      * @return \Illuminate\Http\Response
      */
     public function downloadReceipt(Request $request, $payoutId)

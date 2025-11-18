@@ -17,15 +17,12 @@ class UserCountService
 {
     /**
      * Get the user count for a company
-     *
-     * @param int $companyId
-     * @return int
      */
     public function getUserCount(int $companyId): int
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (!$cacheEnabled) {
+        if (! $cacheEnabled) {
             return $this->queryUserCount($companyId);
         }
 
@@ -39,9 +36,6 @@ class UserCountService
 
     /**
      * Query the database for user count
-     *
-     * @param int $companyId
-     * @return int
      */
     protected function queryUserCount(int $companyId): int
     {
@@ -55,18 +49,17 @@ class UserCountService
     /**
      * Get the user limit for a company's current plan
      *
-     * @param Company $company
      * @return int|null Null means unlimited
      */
     public function getUserLimit(Company $company): ?int
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         // No subscription or inactive = default to free tier
-        if (!$company->subscription || !$company->subscription->isActive()) {
+        if (! $company->subscription || ! $company->subscription->isActive()) {
             return config('subscriptions.tiers.free.users', 1);
         }
 
@@ -79,9 +72,6 @@ class UserCountService
 
     /**
      * Check if company has reached their user limit
-     *
-     * @param Company $company
-     * @return bool
      */
     public function hasReachedLimit(Company $company): bool
     {
@@ -100,7 +90,6 @@ class UserCountService
     /**
      * Get remaining user slots
      *
-     * @param Company $company
      * @return int|null Null means unlimited
      */
     public function getRemainingCount(Company $company): ?int
@@ -119,9 +108,6 @@ class UserCountService
 
     /**
      * Get user usage statistics for a company
-     *
-     * @param Company $company
-     * @return array
      */
     public function getUsageStats(Company $company): array
     {
@@ -141,9 +127,6 @@ class UserCountService
 
     /**
      * Clear the cache for a company's user count
-     *
-     * @param int $companyId
-     * @return void
      */
     public function clearCache(int $companyId): void
     {
@@ -153,15 +136,12 @@ class UserCountService
 
     /**
      * Increment the cached count (called after user creation)
-     *
-     * @param int $companyId
-     * @return void
      */
     public function incrementCache(int $companyId): void
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (!$cacheEnabled) {
+        if (! $cacheEnabled) {
             return;
         }
 
@@ -179,15 +159,12 @@ class UserCountService
 
     /**
      * Decrement the cached count (called after user deletion)
-     *
-     * @param int $companyId
-     * @return void
      */
     public function decrementCache(int $companyId): void
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (!$cacheEnabled) {
+        if (! $cacheEnabled) {
             return;
         }
 
@@ -201,14 +178,11 @@ class UserCountService
 
     /**
      * Get the upgrade message for a company that hit their limit
-     *
-     * @param Company $company
-     * @return string
      */
     public function getUpgradeMessage(Company $company): string
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
@@ -220,14 +194,11 @@ class UserCountService
 
     /**
      * Get the Paddle price ID for the next tier upgrade
-     *
-     * @param Company $company
-     * @return string|null
      */
     public function getUpgradePriceId(Company $company): ?string
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
@@ -245,7 +216,7 @@ class UserCountService
             }
         }
 
-        if (!$nextTier) {
+        if (! $nextTier) {
             return null; // Already on highest tier
         }
 
@@ -254,9 +225,6 @@ class UserCountService
 
     /**
      * Get cache key for a company's user count
-     *
-     * @param int $companyId
-     * @return string
      */
     protected function getCacheKey(int $companyId): string
     {

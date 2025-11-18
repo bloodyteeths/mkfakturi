@@ -6,7 +6,6 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Laravel\Paddle\Cashier;
 use Laravel\Paddle\Paddle;
 use Laravel\Pennant\Feature;
 
@@ -25,7 +24,9 @@ use Laravel\Pennant\Feature;
  * - Fee tracking and deduction
  *
  * @version 1.0.0
+ *
  * @ticket B-31 series - Paddle Payment Integration
+ *
  * @author Claude Code - Paddle agent
  */
 class PaddlePaymentService
@@ -33,13 +34,13 @@ class PaddlePaymentService
     /**
      * Create a Paddle checkout session for an invoice
      *
-     * @param Invoice $invoice
      * @return array ['checkout_url' => string]
+     *
      * @throws \Exception
      */
     public function createCheckout(Invoice $invoice): array
     {
-        if (!config('services.paddle.api_key')) {
+        if (! config('services.paddle.api_key')) {
             throw new \Exception('Paddle API key not configured');
         }
 
@@ -81,9 +82,6 @@ class PaddlePaymentService
      *
      * Verifies signature, enforces idempotency, and routes to event handlers
      *
-     * @param array $payload
-     * @param string $signature
-     * @return void
      * @throws \Exception
      */
     public function handleWebhook(array $payload, string $signature): void
@@ -93,14 +91,16 @@ class PaddlePaymentService
 
         // Idempotency check
         $eventId = $payload['event_id'] ?? null;
-        if (!$eventId) {
+        if (! $eventId) {
             Log::warning('Paddle webhook missing event_id');
+
             return;
         }
 
         $cacheKey = "paddle_event_{$eventId}";
         if (Cache::has($cacheKey)) {
             Log::info('Paddle webhook already processed (idempotent)', ['event_id' => $eventId]);
+
             return; // Already processed
         }
 
@@ -109,7 +109,7 @@ class PaddlePaymentService
 
         // Process event
         $eventType = $payload['event_type'] ?? null;
-        match($eventType) {
+        match ($eventType) {
             'transaction.completed' => $this->handleTransactionCompleted($payload),
             'transaction.payment_failed' => $this->handlePaymentFailed($payload),
             default => Log::info("Unhandled Paddle event: {$eventType}", ['event_id' => $eventId]),
@@ -119,26 +119,23 @@ class PaddlePaymentService
     /**
      * Verify Paddle webhook signature
      *
-     * @param array $payload
-     * @param string $signature
-     * @return void
      * @throws \Exception
      */
     private function verifySignature(array $payload, string $signature): void
     {
         $webhookSecret = config('services.paddle.webhook_secret');
 
-        if (!$webhookSecret) {
+        if (! $webhookSecret) {
             throw new \Exception('Paddle webhook secret not configured');
         }
 
         // Paddle uses HMAC SHA256 for webhook verification
         $computedSignature = hash_hmac('sha256', json_encode($payload), $webhookSecret);
 
-        if (!hash_equals($computedSignature, $signature)) {
+        if (! hash_equals($computedSignature, $signature)) {
             Log::warning('Paddle webhook signature verification failed', [
-                'expected' => substr($computedSignature, 0, 10) . '...',
-                'received' => substr($signature, 0, 10) . '...',
+                'expected' => substr($computedSignature, 0, 10).'...',
+                'received' => substr($signature, 0, 10).'...',
             ]);
             throw new \Exception('Invalid webhook signature');
         }
@@ -151,9 +148,6 @@ class PaddlePaymentService
      *
      * Creates payment record, deducts fee, updates invoice status,
      * and optionally posts to accounting ledger
-     *
-     * @param array $payload
-     * @return void
      */
     private function handleTransactionCompleted(array $payload): void
     {
@@ -161,14 +155,16 @@ class PaddlePaymentService
             $invoiceId = $payload['data']['custom_data']['invoice_id'] ?? null;
             $transactionId = $payload['data']['id'] ?? null;
 
-            if (!$invoiceId || !$transactionId) {
+            if (! $invoiceId || ! $transactionId) {
                 Log::error('Paddle transaction missing invoice_id or transaction_id', ['payload' => $payload]);
+
                 return;
             }
 
             $invoice = Invoice::find($invoiceId);
-            if (!$invoice) {
+            if (! $invoice) {
                 Log::error('Invoice not found for Paddle payment', ['invoice_id' => $invoiceId]);
+
                 return;
             }
 
@@ -184,7 +180,7 @@ class PaddlePaymentService
                 'customer_id' => $invoice->customer_id,
                 'amount' => $net, // Net amount after fee deduction
                 'payment_date' => now(),
-                'payment_number' => 'PADDLE-' . $transactionId,
+                'payment_number' => 'PADDLE-'.$transactionId,
                 'payment_method_id' => $this->getPaddlePaymentMethodId($invoice->company_id),
                 'currency_id' => $invoice->currency_id,
                 'exchange_rate' => $invoice->exchange_rate,
@@ -227,9 +223,6 @@ class PaddlePaymentService
 
     /**
      * Handle transaction.payment_failed event
-     *
-     * @param array $payload
-     * @return void
      */
     private function handlePaymentFailed(array $payload): void
     {
@@ -249,17 +242,14 @@ class PaddlePaymentService
      * Post payment and fee to accounting ledger
      *
      * Only called when FEATURE_ACCOUNTING_BACKBONE is enabled
-     *
-     * @param Payment $payment
-     * @param float $fee
-     * @return void
      */
     private function postToLedger(Payment $payment, float $fee): void
     {
         try {
             // Check if IfrsAdapter exists (Step 1 implementation)
-            if (!class_exists('App\Services\Accounting\IfrsAdapter')) {
+            if (! class_exists('App\Services\Accounting\IfrsAdapter')) {
                 Log::warning('IfrsAdapter not found, skipping ledger posting');
+
                 return;
             }
 
@@ -290,9 +280,6 @@ class PaddlePaymentService
 
     /**
      * Get or create Paddle payment method for company
-     *
-     * @param int $companyId
-     * @return int|null
      */
     private function getPaddlePaymentMethodId(int $companyId): ?int
     {

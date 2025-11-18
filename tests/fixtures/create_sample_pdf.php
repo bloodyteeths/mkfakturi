@@ -1,12 +1,14 @@
 <?php
+
 /**
  * Simple PHP script to create a test PDF for INV-01 barcode/QR testing
  * Uses basic PDF creation without external dependencies
  */
 
 // Simple PDF creation function
-function createTestPDF($filename) {
-    $pdf_content = "%PDF-1.4
+function createTestPDF($filename)
+{
+    $pdf_content = '%PDF-1.4
 1 0 obj
 <<
 /Type /Catalog
@@ -92,20 +94,20 @@ trailer
 >>
 startxref
 891
-%%EOF";
+%%EOF';
 
     file_put_contents($filename, $pdf_content);
+
     return true;
 }
 
 // Create the test PDF
-$filename = __DIR__ . '/sample.pdf';
+$filename = __DIR__.'/sample.pdf';
 
 if (createTestPDF($filename)) {
     echo "Created test PDF: $filename\n";
-    echo "File size: " . filesize($filename) . " bytes\n";
+    echo 'File size: '.filesize($filename)." bytes\n";
 } else {
     echo "Failed to create test PDF\n";
     exit(1);
 }
-?>

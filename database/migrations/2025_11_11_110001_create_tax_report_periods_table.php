@@ -56,10 +56,10 @@ return new class extends Migration
             $table->index('due_date');
             $table->index(['company_id', 'period_type', 'year']);
             $table->index(['company_id', 'status']);
-        }) ;
+        });
     }
 
-// CLAUDE-CHECKPOINT
+    // CLAUDE-CHECKPOINT
 
     /**
      * Reverse the migrations.

@@ -2,26 +2,26 @@
 
 namespace Modules\Mk\Services;
 
+use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Company;
-use Modules\Mk\Services\MiniMaxApiClient;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 
 /**
  * MiniMax Synchronization Service
- * 
+ *
  * Handles synchronization of invoices and payments with MiniMax accounting system
  * Part of ROADMAP4.md Phase 2 - Accountant System Integrations (AI-03)
- * 
+ *
  * @version 1.0.0
+ *
  * @created 2025-07-26
  */
 class MiniMaxSyncService
 {
     protected ?MiniMaxApiClient $apiClient;
+
     protected ?Company $company;
 
     /**
@@ -30,7 +30,7 @@ class MiniMaxSyncService
     public function __construct(?Company $company = null)
     {
         $this->company = $company;
-        
+
         // Initialize MiniMaxApiClient if company is provided
         $this->apiClient = $company ? new MiniMaxApiClient($company) : null;
     }
@@ -38,8 +38,8 @@ class MiniMaxSyncService
     /**
      * Synchronize invoice with MiniMax system
      *
-     * @param Invoice $invoice
      * @return array Sync result with status and response data
+     *
      * @throws Exception When sync fails
      */
     public function syncInvoice(Invoice $invoice): array
@@ -72,7 +72,7 @@ class MiniMaxSyncService
                 'status_code' => $response['status_code'] ?? 201,
                 'minimax_id' => $response['id'] ?? null,
                 'message' => 'Invoice synchronized successfully',
-                'data' => $response
+                'data' => $response,
             ];
 
         } catch (Exception $e) {
@@ -82,15 +82,15 @@ class MiniMaxSyncService
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            throw new Exception("Failed to sync invoice {$invoice->invoice_number} with MiniMax: " . $e->getMessage());
+            throw new Exception("Failed to sync invoice {$invoice->invoice_number} with MiniMax: ".$e->getMessage());
         }
     }
 
     /**
      * Synchronize payment with MiniMax system
      *
-     * @param Payment $payment
      * @return array Sync result with status and response data
+     *
      * @throws Exception When sync fails
      */
     public function syncPayment(Payment $payment): array
@@ -124,7 +124,7 @@ class MiniMaxSyncService
                 'status_code' => $response['status_code'] ?? 201,
                 'minimax_id' => $response['id'] ?? null,
                 'message' => 'Payment synchronized successfully',
-                'data' => $response
+                'data' => $response,
             ];
 
         } catch (Exception $e) {
@@ -134,15 +134,14 @@ class MiniMaxSyncService
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            throw new Exception("Failed to sync payment {$payment->payment_number} with MiniMax: " . $e->getMessage());
+            throw new Exception("Failed to sync payment {$payment->payment_number} with MiniMax: ".$e->getMessage());
         }
     }
 
     /**
      * Get synchronization status for a given entity
      *
-     * @param string $entityType ('invoice' or 'payment')
-     * @param int $entityId
+     * @param  string  $entityType  ('invoice' or 'payment')
      * @return array Status information
      */
     public function getStatus(string $entityType, int $entityId): array
@@ -188,11 +187,11 @@ class MiniMaxSyncService
      */
     protected function validateInvoiceData(Invoice $invoice): void
     {
-        if (!$invoice->customer) {
+        if (! $invoice->customer) {
             throw new Exception('Invoice must have a customer');
         }
 
-        if (!$invoice->items || $invoice->items->isEmpty()) {
+        if (! $invoice->items || $invoice->items->isEmpty()) {
             throw new Exception('Invoice must have at least one item');
         }
 
@@ -210,7 +209,7 @@ class MiniMaxSyncService
      */
     protected function validatePaymentData(Payment $payment): void
     {
-        if (!$payment->customer && !$payment->invoice) {
+        if (! $payment->customer && ! $payment->invoice) {
             throw new Exception('Payment must be associated with a customer or invoice');
         }
 
@@ -299,14 +298,14 @@ class MiniMaxSyncService
      */
     protected function sendToMiniMax(string $endpoint, array $data): array
     {
-        if (!$this->apiClient) {
+        if (! $this->apiClient) {
             throw new Exception('MiniMax API client not initialized. Company context required.');
         }
 
         // Mock API response for testing environment
         if (config('app.env') === 'testing') {
             return [
-                'id' => 'minimax_' . uniqid(),
+                'id' => 'minimax_'.uniqid(),
                 'status' => 'created',
                 'status_code' => 201,
                 'created_at' => now()->toISOString(),
@@ -347,7 +346,7 @@ class MiniMaxSyncService
      */
     protected function queryMiniMaxStatus(string $entityType, int $entityId): array
     {
-        if (!$this->apiClient) {
+        if (! $this->apiClient) {
             throw new Exception('MiniMax API client not initialized. Company context required.');
         }
 
@@ -356,7 +355,7 @@ class MiniMaxSyncService
             return [
                 'status' => 'synced',
                 'last_sync' => now()->subMinutes(5)->toISOString(),
-                'minimax_id' => 'minimax_' . $entityId,
+                'minimax_id' => 'minimax_'.$entityId,
                 'errors' => [],
             ];
         }
@@ -364,10 +363,10 @@ class MiniMaxSyncService
         try {
             // For now, we'll use the entity ID as the MiniMax ID
             // In a real implementation, you'd map local IDs to MiniMax IDs
-            $miniMaxId = 'minimax_' . $entityId;
-            
+            $miniMaxId = 'minimax_'.$entityId;
+
             $result = $this->apiClient->getEntityStatus($entityType, $miniMaxId);
-            
+
             return [
                 'status' => $result['status'],
                 'last_sync' => $result['last_updated'],
@@ -394,6 +393,7 @@ class MiniMaxSyncService
     {
         $this->company = $company;
         $this->apiClient = new MiniMaxApiClient($company);
+
         return $this;
     }
 
@@ -405,4 +405,3 @@ class MiniMaxSyncService
         return $this->company;
     }
 }
-

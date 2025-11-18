@@ -12,9 +12,6 @@ class AuditLogPolicy
 
     /**
      * Determine whether the user can view any audit logs.
-     *
-     * @param  \App\Models\User  $user
-     * @return bool
      */
     public function viewAny(User $user): bool
     {
@@ -31,10 +28,6 @@ class AuditLogPolicy
 
     /**
      * Determine whether the user can view the audit log.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\AuditLog  $auditLog
-     * @return bool
      */
     public function view(User $user, AuditLog $auditLog): bool
     {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\CacheableTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,12 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasAuditing;
 
-class Supplier extends Model 
+class Supplier extends Model
 {
-    use HasAuditing;
     use CacheableTrait;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use SoftDeletes;
@@ -46,6 +46,7 @@ class Supplier extends Model
     {
         return $this->cacheComputed('formatted_created_at', function () {
             $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
             return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
         });
     }
@@ -76,7 +77,7 @@ class Supplier extends Model
             $cityStateZip[] = $this->zip;
         }
 
-        if (!empty($cityStateZip)) {
+        if (! empty($cityStateZip)) {
             $address[] = implode(', ', $cityStateZip);
         }
 
@@ -149,6 +150,7 @@ class Supplier extends Model
     public function scopeWhereCompany($query, $companyId = null)
     {
         $companyId = $companyId ?? request()->header('company');
+
         return $query->where('suppliers.company_id', $companyId);
     }
 

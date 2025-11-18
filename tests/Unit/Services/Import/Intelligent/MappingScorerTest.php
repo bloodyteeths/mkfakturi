@@ -12,16 +12,17 @@ use Tests\TestCase;
 
 /**
  * Unit tests for MappingScorer Service
- *
- * @package Tests\Unit\Services\Import\Intelligent
  */
 class MappingScorerTest extends TestCase
 {
     use RefreshDatabase;
 
     private MappingScorer $scorer;
+
     private Company $company;
+
     private Currency $currency;
+
     private User $user;
 
     protected function setUp(): void
@@ -47,7 +48,7 @@ class MappingScorerTest extends TestCase
             'owner_id' => $this->user->id,
         ]);
 
-        $this->scorer = new MappingScorer();
+        $this->scorer = new MappingScorer;
     }
 
     public function test_excellent_quality_score()

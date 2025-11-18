@@ -2,14 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AffiliateEvent;
 use App\Models\Partner;
 use App\Models\Payout;
-use App\Models\AffiliateEvent;
 use App\Notifications\PayoutCalculated;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class CalculatePayouts extends Command
 {
@@ -31,8 +30,6 @@ class CalculatePayouts extends Command
 
     /**
      * Minimum payout threshold (€100)
-     *
-     * @var float
      */
     protected float $minimumThreshold = 100.00;
 
@@ -48,7 +45,7 @@ class CalculatePayouts extends Command
 
         $this->info("Calculating payouts for month: {$monthRef}");
         if ($dryRun) {
-            $this->warn("DRY RUN MODE - No records will be created");
+            $this->warn('DRY RUN MODE - No records will be created');
         }
 
         $payoutsCreated = 0;
@@ -85,16 +82,18 @@ class CalculatePayouts extends Command
             if ($totalCommission < $this->minimumThreshold) {
                 $this->warn("  Below €{$this->minimumThreshold} threshold - skipping");
                 $belowThresholdPartners++;
+
                 continue;
             }
 
             // Validate bank account details
-            if (!$this->validateBankDetails($partner)) {
-                $this->error("  Missing bank details - skipping");
+            if (! $this->validateBankDetails($partner)) {
+                $this->error('  Missing bank details - skipping');
+
                 continue;
             }
 
-            if (!$dryRun) {
+            if (! $dryRun) {
                 // Create payout record
                 DB::beginTransaction();
 
@@ -147,20 +146,20 @@ class CalculatePayouts extends Command
         }
 
         // Generate CSV for bank transfer (only if not dry run)
-        if (!$dryRun && $payoutsCreated > 0) {
+        if (! $dryRun && $payoutsCreated > 0) {
             $csvPath = $this->generatePayoutCsv($monthRef);
             $this->info("\nCSV generated: {$csvPath}");
         }
 
         // Summary
         $this->newLine();
-        $this->info("=== Payout Summary ===");
+        $this->info('=== Payout Summary ===');
         $this->info("Month: {$monthRef}");
         $this->info("Verified partners: {$partners->count()}");
         $this->info("Eligible partners: {$eligiblePartners}");
         $this->info("Below threshold: {$belowThresholdPartners}");
         $this->info("Payouts created: {$payoutsCreated}");
-        $this->info("Total amount: €" . number_format($totalAmount, 2));
+        $this->info('Total amount: €'.number_format($totalAmount, 2));
 
         Log::info('Payouts calculated', [
             'month_ref' => $monthRef,
@@ -174,9 +173,6 @@ class CalculatePayouts extends Command
 
     /**
      * Validate partner bank details
-     *
-     * @param Partner $partner
-     * @return bool
      */
     protected function validateBankDetails(Partner $partner): bool
     {
@@ -194,7 +190,6 @@ class CalculatePayouts extends Command
     /**
      * Generate CSV file for bank transfer
      *
-     * @param string $monthRef
      * @return string CSV file path
      */
     protected function generatePayoutCsv(string $monthRef): string
@@ -209,7 +204,7 @@ class CalculatePayouts extends Command
         $csvPath = storage_path("app/payouts/{$csvFilename}");
 
         // Ensure directory exists
-        if (!file_exists(storage_path('app/payouts'))) {
+        if (! file_exists(storage_path('app/payouts'))) {
             mkdir(storage_path('app/payouts'), 0755, true);
         }
 
@@ -230,7 +225,7 @@ class CalculatePayouts extends Command
                 $payout->partner->name,
                 $payout->partner->bank_account,
                 number_format($payout->amount, 2, '.', ''),
-                "PAYOUT-{$monthRef}-" . str_pad($payout->id, 5, '0', STR_PAD_LEFT),
+                "PAYOUT-{$monthRef}-".str_pad($payout->id, 5, '0', STR_PAD_LEFT),
                 $payout->id,
                 $monthRef,
             ]);

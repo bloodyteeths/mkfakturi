@@ -17,29 +17,33 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * IMPORTANT: This is a stub implementation ready for ringlesoft/laravel-process-approval package.
  * When the package is installed, this model can be extended or replaced.
- *
- * @package App\Models
  */
 class ApprovalRequest extends Model
 {
-    use HasFactory;
     use HasAuditing;
+    use HasFactory;
     use TenantScope;
 
     /**
      * Status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_REJECTED = 'rejected';
 
     /**
      * Approvable types
      */
     const TYPE_INVOICE = 'App\\Models\\Invoice';
+
     const TYPE_ESTIMATE = 'App\\Models\\Estimate';
+
     const TYPE_EXPENSE = 'App\\Models\\Expense';
+
     const TYPE_BILL = 'App\\Models\\Bill';
+
     const TYPE_CREDIT_NOTE = 'App\\Models\\CreditNote';
 
     protected $fillable = [
@@ -65,7 +69,6 @@ class ApprovalRequest extends Model
     /**
      * Relationships
      */
-
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -92,10 +95,10 @@ class ApprovalRequest extends Model
     /**
      * Scopes
      */
-
     public function scopeWhereCompany($query, $companyId = null)
     {
         $companyId = $companyId ?? request()->header('company');
+
         return $query->where('company_id', $companyId);
     }
 
@@ -121,8 +124,6 @@ class ApprovalRequest extends Model
 
     /**
      * Check if approval is pending
-     *
-     * @return bool
      */
     public function isPending(): bool
     {
@@ -131,8 +132,6 @@ class ApprovalRequest extends Model
 
     /**
      * Check if approval was approved
-     *
-     * @return bool
      */
     public function isApproved(): bool
     {
@@ -141,8 +140,6 @@ class ApprovalRequest extends Model
 
     /**
      * Check if approval was rejected
-     *
-     * @return bool
      */
     public function isRejected(): bool
     {
@@ -152,9 +149,8 @@ class ApprovalRequest extends Model
     /**
      * Approve this request
      *
-     * @param int|null $userId User who approved
-     * @param string|null $note Optional approval note
-     * @return bool
+     * @param  int|null  $userId  User who approved
+     * @param  string|null  $note  Optional approval note
      */
     public function approve(?int $userId = null, ?string $note = null): bool
     {
@@ -169,9 +165,8 @@ class ApprovalRequest extends Model
     /**
      * Reject this request
      *
-     * @param string $note Rejection reason
-     * @param int|null $userId User who rejected
-     * @return bool
+     * @param  string  $note  Rejection reason
+     * @param  int|null  $userId  User who rejected
      */
     public function reject(string $note, ?int $userId = null): bool
     {
@@ -185,8 +180,6 @@ class ApprovalRequest extends Model
 
     /**
      * Get human-readable document type
-     *
-     * @return string
      */
     public function getDocumentTypeNameAttribute(): string
     {
@@ -202,22 +195,20 @@ class ApprovalRequest extends Model
 
     /**
      * Get document identifier (invoice number, etc.)
-     *
-     * @return string|null
      */
     public function getDocumentIdentifierAttribute(): ?string
     {
-        if (!$this->approvable) {
+        if (! $this->approvable) {
             return null;
         }
 
         return match ($this->approvable_type) {
             self::TYPE_INVOICE => $this->approvable->invoice_number,
             self::TYPE_ESTIMATE => $this->approvable->estimate_number,
-            self::TYPE_EXPENSE => 'EXP-' . $this->approvable->id,
+            self::TYPE_EXPENSE => 'EXP-'.$this->approvable->id,
             self::TYPE_BILL => $this->approvable->bill_number,
             self::TYPE_CREDIT_NOTE => $this->approvable->credit_note_number,
-            default => '#' . $this->approvable->id,
+            default => '#'.$this->approvable->id,
         };
     }
 }

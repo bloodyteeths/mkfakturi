@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App;
 use App\Services\SerialNumberFormatter;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
@@ -17,17 +16,22 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class ProformaInvoice extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
+    use HasFactory;
+    use SoftDeletes;
 
     // Status constants
     public const STATUS_DRAFT = 'DRAFT';
+
     public const STATUS_SENT = 'SENT';
+
     public const STATUS_VIEWED = 'VIEWED';
+
     public const STATUS_EXPIRED = 'EXPIRED';
+
     public const STATUS_CONVERTED = 'CONVERTED';
+
     public const STATUS_REJECTED = 'REJECTED';
 
     protected $fillable = [
@@ -155,7 +159,7 @@ class ProformaInvoice extends Model
 
     public function getIsExpiredAttribute(): bool
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return false;
         }
 
@@ -165,18 +169,21 @@ class ProformaInvoice extends Model
     public function getFormattedCreatedAtAttribute(): string
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
     public function getFormattedProformaInvoiceDateAttribute(): string
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->proforma_invoice_date)->translatedFormat($dateFormat);
     }
 
     public function getFormattedExpiryDateAttribute(): string
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->expiry_date)->translatedFormat($dateFormat);
     }
 
@@ -189,7 +196,7 @@ class ProformaInvoice extends Model
 
     public function scopeWhereProformaInvoiceNumber($query, string $proformaInvoiceNumber)
     {
-        return $query->where('proforma_invoices.proforma_invoice_number', 'LIKE', '%' . $proformaInvoiceNumber . '%');
+        return $query->where('proforma_invoices.proforma_invoice_number', 'LIKE', '%'.$proformaInvoiceNumber.'%');
     }
 
     public function scopeWhereExpiryDate($query, $start, $end)
@@ -230,9 +237,9 @@ class ProformaInvoice extends Model
     {
         foreach (explode(' ', $search) as $term) {
             $query->whereHas('customer', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('contact_name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('company_name', 'LIKE', '%' . $term . '%');
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
             });
         }
     }
@@ -312,8 +319,6 @@ class ProformaInvoice extends Model
 
     /**
      * Convert proforma invoice to regular invoice
-     *
-     * @return Invoice
      */
     public function convertToInvoice(): Invoice
     {
@@ -351,7 +356,7 @@ class ProformaInvoice extends Model
         $invoice = Invoice::create($invoiceData);
 
         // Generate invoice number
-        $serial = (new SerialNumberFormatter())
+        $serial = (new SerialNumberFormatter)
             ->setModel($invoice)
             ->setCompany($invoice->company_id)
             ->setCustomer($invoice->customer_id)
@@ -449,7 +454,6 @@ class ProformaInvoice extends Model
      * Create proforma invoice from request
      *
      * @param  object  $request
-     * @return ProformaInvoice
      */
     public static function createProformaInvoice($request): ProformaInvoice
     {
@@ -462,7 +466,7 @@ class ProformaInvoice extends Model
         $proformaInvoice = self::create($data);
 
         // Generate proforma invoice number
-        $serial = (new SerialNumberFormatter())
+        $serial = (new SerialNumberFormatter)
             ->setModel($proformaInvoice)
             ->setCompany($proformaInvoice->company_id)
             ->setCustomer($proformaInvoice->customer_id)
@@ -481,7 +485,7 @@ class ProformaInvoice extends Model
             ExchangeRateLog::addExchangeRateLog($proformaInvoice);
         }
 
-        if ($request->has('taxes') && (!empty($request->taxes))) {
+        if ($request->has('taxes') && (! empty($request->taxes))) {
             self::createTaxes($proformaInvoice, $request->taxes);
         }
 
@@ -502,11 +506,10 @@ class ProformaInvoice extends Model
      * Update proforma invoice from request
      *
      * @param  object  $request
-     * @return ProformaInvoice
      */
     public function updateProformaInvoice($request): ProformaInvoice
     {
-        $serial = (new SerialNumberFormatter())
+        $serial = (new SerialNumberFormatter)
             ->setModel($this)
             ->setCompany($this->company_id)
             ->setCustomer($request->customer_id)
@@ -537,7 +540,7 @@ class ProformaInvoice extends Model
 
         self::createItems($this, $request->items);
 
-        if ($request->has('taxes') && (!empty($request->taxes))) {
+        if ($request->has('taxes') && (! empty($request->taxes))) {
             self::createTaxes($this, $request->taxes);
         }
 
@@ -617,9 +620,6 @@ class ProformaInvoice extends Model
 
     /**
      * Delete multiple proforma invoices
-     *
-     * @param  array  $ids
-     * @return bool
      */
     public static function deleteProformaInvoices(array $ids): bool
     {

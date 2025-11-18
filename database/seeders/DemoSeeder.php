@@ -38,6 +38,7 @@ class DemoSeeder extends Seeder
         if (app()->environment('production')) {
             $this->command->warn('⚠️  DemoSeeder is disabled in production environment');
             $this->command->info('To seed demo data, run this seeder in local/staging environment only');
+
             return;
         }
 
@@ -45,7 +46,7 @@ class DemoSeeder extends Seeder
 
         // Get Macedonia currency (MKD)
         $mkdCurrency = Currency::where('code', 'MKD')->first();
-        if (!$mkdCurrency) {
+        if (! $mkdCurrency) {
             $mkdCurrency = Currency::create([
                 'name' => 'Macedonian Denar',
                 'code' => 'MKD',
@@ -161,7 +162,7 @@ class DemoSeeder extends Seeder
 
         // Create Macedonia units
         $units = [
-            'парче', 'комад', 'килограм', 'литар', 'метар', 'кутија', 'пакет', 'час', 'ден', 'месец'
+            'парче', 'комад', 'килограм', 'литар', 'метар', 'кутија', 'пакет', 'час', 'ден', 'месец',
         ];
 
         foreach ($units as $unit) {
@@ -293,7 +294,7 @@ class DemoSeeder extends Seeder
         $createdItems = [];
         foreach ($items as $itemData) {
             $unit = Unit::where('name', $itemData['unit'])->where('company_id', $company->id)->first();
-            
+
             $item = Item::create([
                 'name' => $itemData['name'],
                 'description' => $itemData['description'],
@@ -362,7 +363,7 @@ class DemoSeeder extends Seeder
             foreach ($invData['items'] as $invItem) {
                 $lineTotal = $invItem['item']->price * $invItem['quantity'];
                 $subTotal += $lineTotal;
-                
+
                 $tax = Tax::where('item_id', $invItem['item']->id)->first();
                 if ($tax) {
                     $taxTotal += ($lineTotal * $tax->percent) / 100;
@@ -374,8 +375,8 @@ class DemoSeeder extends Seeder
             $invoice = Invoice::create([
                 'invoice_date' => $invData['date'],
                 'due_date' => $invData['due_date'],
-                'invoice_number' => 'ФАК-' . str_pad($index + 1, 6, '0', STR_PAD_LEFT),
-                'reference_number' => 'REF-' . ($index + 1),
+                'invoice_number' => 'ФАК-'.str_pad($index + 1, 6, '0', STR_PAD_LEFT),
+                'reference_number' => 'REF-'.($index + 1),
                 'customer_id' => $invData['customer']->id,
                 'company_id' => $company->id,
                 'creator_id' => $user->id,
@@ -459,9 +460,9 @@ class DemoSeeder extends Seeder
             foreach ([$createdInvoices[0], $createdInvoices[2]] as $index => $invoice) {
                 $payment = Payment::create([
                     'payment_date' => $invoice->invoice_date->addDays(10),
-                    'payment_number' => 'ПЛА-' . str_pad($index + 1, 6, '0', STR_PAD_LEFT),
+                    'payment_number' => 'ПЛА-'.str_pad($index + 1, 6, '0', STR_PAD_LEFT),
                     'amount' => $invoice->total,
-                    'notes' => 'Плаќање за фактура ' . $invoice->invoice_number,
+                    'notes' => 'Плаќање за фактура '.$invoice->invoice_number,
                     'customer_id' => $invoice->customer_id,
                     'company_id' => $company->id,
                     'creator_id' => $user->id,

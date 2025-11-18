@@ -67,7 +67,7 @@ return new class extends Migration
                 ->where('target_field', 'category')
                 ->first();
 
-            if (!$categoryRule) {
+            if (! $categoryRule) {
                 $categoryRule = MappingRule::create([
                     'name' => 'Item Category Mapping',
                     'description' => 'Maps category field variations to item category',
@@ -115,7 +115,7 @@ return new class extends Migration
                 ->where('target_field', 'tax_type')
                 ->first();
 
-            if (!$taxTypeRule) {
+            if (! $taxTypeRule) {
                 $taxTypeRule = MappingRule::create([
                     'name' => 'Item Tax Type Mapping',
                     'description' => 'Maps tax type field variations to item tax classification',
@@ -173,11 +173,11 @@ return new class extends Migration
 
             DB::commit();
 
-            \Log::info("Migration: Item mapping rules fixed successfully");
+            \Log::info('Migration: Item mapping rules fixed successfully');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error("Migration: Failed to fix item mapping rules", [
+            \Log::error('Migration: Failed to fix item mapping rules', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -192,7 +192,7 @@ return new class extends Migration
     {
         // Note: This is a data migration, so down() is more complex
         // We'll just log that we can't easily reverse this
-        \Log::warning("Migration: Cannot automatically reverse item mapping rules changes");
+        \Log::warning('Migration: Cannot automatically reverse item mapping rules changes');
 
         // Optionally, you could restore the original 'name' variations
         // and remove the 'category' and 'tax_type' rules if needed

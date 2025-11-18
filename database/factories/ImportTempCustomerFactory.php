@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\ImportTempCustomer;
 use App\Models\ImportJob;
+use App\Models\ImportTempCustomer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ImportTempCustomerFactory extends Factory
@@ -77,16 +77,16 @@ class ImportTempCustomerFactory extends Factory
                 'Балкан Трговија ДООЕЛ',
                 'Евро Сервис ООД',
                 'Македонски Телеком АД',
-                'Скопски Саем АД'
+                'Скопски Саем АД',
             ]),
-            'email' => $this->faker->unique()->userName() . '@example.mk',
-            'phone' => '+3897' . $this->faker->numerify('#######'),
-            'vat_number' => 'MK' . $this->faker->numerify('40########'),
+            'email' => $this->faker->unique()->userName().'@example.mk',
+            'phone' => '+3897'.$this->faker->numerify('#######'),
+            'vat_number' => 'MK'.$this->faker->numerify('40########'),
             'currency_code' => 'MKD',
             'address' => [
-                'address_street_1' => 'ул. ' . $this->faker->randomElement([
-                    'Партизанска', 'Македонија', 'Јане Сандански', 'Маршал Тито', 'Кеј 13 Ноември'
-                ]) . ' ' . $this->faker->numberBetween(1, 100),
+                'address_street_1' => 'ул. '.$this->faker->randomElement([
+                    'Партизанска', 'Македонија', 'Јане Сандански', 'Маршал Тито', 'Кеј 13 Ноември',
+                ]).' '.$this->faker->numberBetween(1, 100),
                 'city' => $this->faker->randomElement(['Скопје', 'Битола', 'Куманово', 'Прилеп', 'Тетово', 'Велес', 'Штип', 'Охрид', 'Гостивар', 'Струмица']),
                 'zip' => $this->faker->numerify('####'),
                 'country_id' => 142, // Macedonia country ID

@@ -61,4 +61,3 @@ test('suppliers multi-tenant isolation prevents cross-company leakage', function
     $names = collect($response->json('data'))->pluck('name')->all();
     expect($names)->not()->toContain('Company A Supplier');
 });
-

@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Customer;
 use App\Models\RecurringInvoice;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RecurringInvoiceFactory extends Factory

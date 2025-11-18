@@ -4,14 +4,12 @@ namespace App\Imports;
 
 use App\Models\Customer;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
 /**
@@ -22,35 +20,32 @@ use Maatwebsite\Excel\Validators\Failure;
  * - Chunk reading for large files (500 rows per chunk)
  * - Validation with error collection
  * - Encoding detection (Windows-1251, UTF-8)
- *
- * @package App\Imports
  */
-class CustomerImport implements
-    ToModel,
-    WithHeadingRow,
-    WithValidation,
-    WithChunkReading,
-    SkipsOnFailure
+class CustomerImport implements SkipsOnFailure, ToModel, WithChunkReading, WithHeadingRow, WithValidation
 {
     use Importable;
 
     private int $companyId;
+
     private int $currencyId;
+
     private int $creatorId;
+
     private array $columnMapping;
+
     private bool $isDryRun;
+
     private array $failures = [];
+
     private int $successCount = 0;
+
     private int $failureCount = 0;
 
     /**
      * Constructor
      *
-     * @param int $companyId
-     * @param int $currencyId
-     * @param int $creatorId
-     * @param array $columnMapping Map of our field names to CSV column names
-     * @param bool $isDryRun If true, validation only without creating records
+     * @param  array  $columnMapping  Map of our field names to CSV column names
+     * @param  bool  $isDryRun  If true, validation only without creating records
      */
     public function __construct(
         int $companyId,
@@ -69,7 +64,6 @@ class CustomerImport implements
     /**
      * Convert row to Customer model
      *
-     * @param array $row
      * @return Customer|null
      */
     public function model(array $row)
@@ -77,6 +71,7 @@ class CustomerImport implements
         // Skip if dry run
         if ($this->isDryRun) {
             $this->successCount++;
+
             return null;
         }
 
@@ -104,9 +99,6 @@ class CustomerImport implements
 
     /**
      * Map CSV columns to our field names using column mapping
-     *
-     * @param array $row
-     * @return array
      */
     private function mapColumns(array $row): array
     {
@@ -136,8 +128,6 @@ class CustomerImport implements
 
     /**
      * Define validation rules
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -155,9 +145,6 @@ class CustomerImport implements
 
     /**
      * Get CSV column name for our field
-     *
-     * @param string $ourField
-     * @return string
      */
     private function getColumnName(string $ourField): string
     {
@@ -170,8 +157,6 @@ class CustomerImport implements
 
     /**
      * Custom validation messages
-     *
-     * @return array
      */
     public function customValidationMessages(): array
     {
@@ -184,8 +169,6 @@ class CustomerImport implements
 
     /**
      * Chunk size for reading
-     *
-     * @return int
      */
     public function chunkSize(): int
     {
@@ -195,7 +178,7 @@ class CustomerImport implements
     /**
      * Handle validation failures
      *
-     * @param Failure[] $failures
+     * @param  Failure[]  $failures
      */
     public function onFailure(Failure ...$failures)
     {
@@ -212,8 +195,6 @@ class CustomerImport implements
 
     /**
      * Get validation failures
-     *
-     * @return array
      */
     public function getFailures(): array
     {
@@ -222,8 +203,6 @@ class CustomerImport implements
 
     /**
      * Get success count
-     *
-     * @return int
      */
     public function getSuccessCount(): int
     {
@@ -232,8 +211,6 @@ class CustomerImport implements
 
     /**
      * Get failure count
-     *
-     * @return int
      */
     public function getFailureCount(): int
     {

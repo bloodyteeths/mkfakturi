@@ -6,7 +6,6 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class PaymentMethodPolicy
 {
@@ -22,7 +21,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class)) {
             return true;
         }
@@ -40,7 +39,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
@@ -58,7 +57,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class)) {
             return true;
         }
@@ -76,7 +75,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
@@ -94,7 +93,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
@@ -112,7 +111,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }
@@ -130,7 +129,7 @@ class PaymentMethodPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-payment', Payment::class) && $user->hasCompany($paymentMethod->company_id)) {
             return true;
         }

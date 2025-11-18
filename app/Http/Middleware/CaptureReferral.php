@@ -2,11 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AffiliateLink;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
-use App\Models\AffiliateLink;
 
 class CaptureReferral
 {
@@ -16,8 +16,6 @@ class CaptureReferral
      * Capture referral codes from query parameters and store them in session/cookie
      * for later attribution during user registration.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -75,7 +73,7 @@ class CaptureReferral
                     'ip' => $request->ip(),
                 ]);
             }
-        } elseif (!$request->session()->has(config('affiliate.ref_session_key', 'referral_code'))) {
+        } elseif (! $request->session()->has(config('affiliate.ref_session_key', 'referral_code'))) {
             // Check if we have a referral code in cookie
             $cookieName = config('affiliate.ref_cookie', 'facturino_ref');
             $cookieRefCode = $request->cookie($cookieName);

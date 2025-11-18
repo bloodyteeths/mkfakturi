@@ -8,17 +8,16 @@ use App\Models\TaxReportPeriod;
 use App\Models\TaxReturn;
 use App\Services\VatXmlService;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 /**
  * VAT Return Controller
- * 
+ *
  * Handles ДДВ-04 VAT return generation for Macedonia tax compliance.
  * Integrates with VatXmlService for XML generation and validation.
  */
@@ -33,9 +32,6 @@ class VatReturnController extends Controller
 
     /**
      * Preview VAT data for specified period
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function preview(Request $request): JsonResponse
     {
@@ -43,7 +39,7 @@ class VatReturnController extends Controller
             'company_id' => 'required|integer|exists:companies,id',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
-            'period_type' => 'required|string|in:MONTHLY,QUARTERLY'
+            'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
         ]);
 
         // Get company and authorize access
@@ -73,7 +69,7 @@ class VatReturnController extends Controller
                 return response()->json([
                     'error' => 'VAT number required',
                     'message' => 'Company VAT number must be set before generating VAT returns. Please update your company settings.',
-                    'action' => 'set_vat_number'
+                    'action' => 'set_vat_number',
                 ], 422);
             }
 
@@ -92,20 +88,20 @@ class VatReturnController extends Controller
                     'company' => [
                         'id' => $company->id,
                         'name' => $company->name,
-                        'vat_number' => $company->vat_number
+                        'vat_number' => $company->vat_number,
                     ],
                     'period' => [
                         'start' => $periodStart->format('Y-m-d'),
                         'end' => $periodEnd->format('Y-m-d'),
-                        'type' => $validated['period_type']
+                        'type' => $validated['period_type'],
                     ],
                     'standard' => $vatData['standard'],
                     'reduced' => $vatData['reduced'],
                     'zero' => $vatData['zero'],
                     'exempt' => $vatData['exempt'],
                     'total_output_vat' => $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'],
-                    'total_transactions' => array_sum(array_column($vatData, 'transaction_count'))
-                ]
+                    'total_transactions' => array_sum(array_column($vatData, 'transaction_count')),
+                ],
             ]);
 
         } catch (ValidationException $e) {
@@ -113,16 +109,13 @@ class VatReturnController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to preview VAT data',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Generate and download VAT return XML
-     *
-     * @param Request $request
-     * @return Response|JsonResponse
      */
     public function generate(Request $request): Response|JsonResponse
     {
@@ -137,7 +130,7 @@ class VatReturnController extends Controller
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
             'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
-            'validate_xml' => 'boolean'
+            'validate_xml' => 'boolean',
         ]);
 
         \Log::info('VatReturnController::generate - Validation passed', [
@@ -160,10 +153,11 @@ class VatReturnController extends Controller
             // Validate VAT number is set
             if (empty($company->vat_number)) {
                 \Log::warning('VatReturnController::generate - VAT number missing');
+
                 return response()->json([
                     'error' => 'VAT number required',
                     'message' => 'Company VAT number must be set before generating VAT returns. Please update your company settings.',
-                    'action' => 'set_vat_number'
+                    'action' => 'set_vat_number',
                 ], 422);
             }
 
@@ -200,11 +194,12 @@ class VatReturnController extends Controller
             if ($validated['validate_xml'] ?? true) {
                 try {
                     $isValid = $this->vatService->validateXml($xml);
-                    if (!$isValid) {
+                    if (! $isValid) {
                         $errors = $this->vatService->getValidationErrors($xml);
+
                         return response()->json([
                             'error' => 'XML validation failed',
-                            'validation_errors' => $errors
+                            'validation_errors' => $errors,
                         ], 422);
                     }
                 } catch (\Exception $e) {
@@ -230,10 +225,10 @@ class VatReturnController extends Controller
             // Return XML file as download
             return response($xml, 200, [
                 'Content-Type' => 'application/xml',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',
-                'Expires' => '0'
+                'Expires' => '0',
             ]);
 
         } catch (ValidationException $e) {
@@ -249,9 +244,10 @@ class VatReturnController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'error' => 'Failed to generate VAT return',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -267,14 +263,14 @@ class VatReturnController extends Controller
             // Allow 28-31 days for monthly periods
             if ($diffInDays < 27 || $diffInDays > 31) {
                 throw ValidationException::withMessages([
-                    'period_end' => 'Monthly period must be between 28-31 days'
+                    'period_end' => 'Monthly period must be between 28-31 days',
                 ]);
             }
         } elseif ($type === 'QUARTERLY') {
             // Allow 89-92 days for quarterly periods
             if ($diffInDays < 88 || $diffInDays > 93) {
                 throw ValidationException::withMessages([
-                    'period_end' => 'Quarterly period must be between 89-92 days'
+                    'period_end' => 'Quarterly period must be between 89-92 days',
                 ]);
             }
         }
@@ -309,9 +305,6 @@ class VatReturnController extends Controller
 
     /**
      * Get VAT compliance status for a company
-     *
-     * @param Company $company
-     * @return JsonResponse
      */
     public function status(Company $company): JsonResponse
     {
@@ -328,7 +321,7 @@ class VatReturnController extends Controller
                     'type' => 'warning',
                     'severity' => 'high',
                     'message' => 'VAT number not set for company. Please update company settings.',
-                    'action_required' => true
+                    'action_required' => true,
                 ];
             }
 
@@ -358,8 +351,8 @@ class VatReturnController extends Controller
                     $complianceAlerts[] = [
                         'type' => 'error',
                         'severity' => 'critical',
-                        'message' => 'VAT return overdue. Last filing was ' . $daysSinceLastFiling . ' days ago.',
-                        'action_required' => true
+                        'message' => 'VAT return overdue. Last filing was '.$daysSinceLastFiling.' days ago.',
+                        'action_required' => true,
                     ];
                 }
             } else {
@@ -368,7 +361,7 @@ class VatReturnController extends Controller
                     'type' => 'info',
                     'severity' => 'medium',
                     'message' => 'No VAT returns have been filed yet.',
-                    'action_required' => false
+                    'action_required' => false,
                 ];
             }
 
@@ -379,18 +372,18 @@ class VatReturnController extends Controller
                     'start' => $lastPeriod->start_date->format('Y-m-d'),
                     'end' => $lastPeriod->end_date->format('Y-m-d'),
                     'type' => strtoupper($lastPeriod->period_type),
-                    'status' => strtoupper($lastPeriod->status)
+                    'status' => strtoupper($lastPeriod->status),
                 ] : null,
                 'compliance_alerts' => $complianceAlerts,
                 'next_deadline' => $nextDeadline->toIso8601String(),
-                'vat_number' => $company->vat_number
+                'vat_number' => $company->vat_number,
             ];
 
             return response()->json($status);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch VAT status',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -400,9 +393,6 @@ class VatReturnController extends Controller
      *
      * Creates or finds the tax report period, creates a tax return record,
      * files it, and locks the period.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function file(Request $request): JsonResponse
     {
@@ -481,7 +471,7 @@ class VatReturnController extends Controller
                     'period_id' => $period->id,
                     'submission_reference' => $taxReturn->submission_reference,
                     'submitted_at' => $taxReturn->submitted_at,
-                ]
+                ],
             ], 201);
 
         } catch (ValidationException $e) {
@@ -489,16 +479,13 @@ class VatReturnController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to file tax return',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * List tax report periods
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function getPeriods(Request $request): JsonResponse
     {
@@ -521,15 +508,15 @@ class VatReturnController extends Controller
                 }]);
 
             // Apply filters
-            if (!empty($validated['status'])) {
+            if (! empty($validated['status'])) {
                 $query->where('status', $validated['status']);
             }
 
-            if (!empty($validated['period_type'])) {
+            if (! empty($validated['period_type'])) {
                 $query->where('period_type', $validated['period_type']);
             }
 
-            if (!empty($validated['year'])) {
+            if (! empty($validated['year'])) {
                 $query->where('year', $validated['year']);
             }
 
@@ -538,13 +525,13 @@ class VatReturnController extends Controller
                 ->paginateData($validated['limit'] ?? 15);
 
             return response()->json([
-                'data' => $periods
+                'data' => $periods,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch tax periods',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -554,10 +541,6 @@ class VatReturnController extends Controller
      *
      * Includes all returns for the period, including amendments.
      * Provides XML download links for each return.
-     *
-     * @param Request $request
-     * @param int $periodId
-     * @return JsonResponse
      */
     public function getReturns(Request $request, int $periodId): JsonResponse
     {
@@ -605,13 +588,13 @@ class VatReturnController extends Controller
                         'status' => $period->status,
                     ],
                     'returns' => $returns,
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch tax returns',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -621,10 +604,6 @@ class VatReturnController extends Controller
      *
      * Validates that all returns have been filed, then closes the period
      * and locks all documents within that period.
-     *
-     * @param Request $request
-     * @param int $periodId
-     * @return JsonResponse
      */
     public function closePeriod(Request $request, int $periodId): JsonResponse
     {
@@ -637,7 +616,7 @@ class VatReturnController extends Controller
             if ($period->hasUnfiledReturns()) {
                 return response()->json([
                     'error' => 'Cannot close period',
-                    'message' => 'All tax returns must be filed before closing the period'
+                    'message' => 'All tax returns must be filed before closing the period',
                 ], 422);
             }
 
@@ -651,13 +630,13 @@ class VatReturnController extends Controller
                     'status' => $period->status,
                     'closed_at' => $period->closed_at,
                     'closed_by_id' => $period->closed_by_id,
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to close tax period',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -667,10 +646,6 @@ class VatReturnController extends Controller
      *
      * Allows reopening a closed period for amendments or corrections.
      * Requires a reason for audit trail purposes.
-     *
-     * @param Request $request
-     * @param int $periodId
-     * @return JsonResponse
      */
     public function reopenPeriod(Request $request, int $periodId): JsonResponse
     {
@@ -694,22 +669,19 @@ class VatReturnController extends Controller
                     'reopened_at' => $period->reopened_at,
                     'reopened_by_id' => $period->reopened_by_id,
                     'reopen_reason' => $period->reopen_reason,
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to reopen tax period',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Download XML for a specific tax return
-     *
-     * @param int $id
-     * @return Response
      */
     public function downloadXml(int $id): Response
     {
@@ -723,9 +695,9 @@ class VatReturnController extends Controller
             // Get XML content from return_data
             $xmlContent = $taxReturn->return_data['xml_content'] ?? null;
 
-            if (!$xmlContent) {
+            if (! $xmlContent) {
                 return response()->json([
-                    'error' => 'XML content not found for this tax return'
+                    'error' => 'XML content not found for this tax return',
                 ], 404);
             }
 
@@ -747,20 +719,19 @@ class VatReturnController extends Controller
             // Return XML file as download
             return response($xmlContent, 200, [
                 'Content-Type' => 'application/xml',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',
-                'Expires' => '0'
+                'Expires' => '0',
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to download XML',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 }
 
 // CLAUDE-CHECKPOINT
-

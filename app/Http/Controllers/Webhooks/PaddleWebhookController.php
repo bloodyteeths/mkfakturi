@@ -21,7 +21,9 @@ use Laravel\Pennant\Feature;
  * - Idempotency enforced via service layer
  *
  * @version 1.0.0
+ *
  * @ticket B-31 series - Paddle Payment Integration
+ *
  * @author Claude Code - Paddle agent
  */
 class PaddleWebhookController extends Controller
@@ -33,8 +35,6 @@ class PaddleWebhookController extends Controller
 
     /**
      * Constructor
-     *
-     * @param PaddlePaymentService $paddleService
      */
     public function __construct(PaddlePaymentService $paddleService)
     {
@@ -43,23 +43,22 @@ class PaddleWebhookController extends Controller
 
     /**
      * Handle incoming Paddle webhook
-     *
-     * @param Request $request
-     * @return Response
      */
     public function handle(Request $request): Response
     {
         // Check if advanced payments feature is enabled
-        if (!Feature::active('advanced-payments')) {
+        if (! Feature::active('advanced-payments')) {
             Log::warning('Paddle webhook received but FEATURE_ADVANCED_PAYMENTS is disabled');
+
             return response('Feature disabled', 403);
         }
 
         try {
             // Get signature from header
             $signature = $request->header('Paddle-Signature');
-            if (!$signature) {
+            if (! $signature) {
                 Log::warning('Paddle webhook missing signature header');
+
                 return response('Missing signature', 400);
             }
 
@@ -84,7 +83,7 @@ class PaddleWebhookController extends Controller
 
             // Return 200 to prevent Paddle from retrying on our errors
             // (signature verification failures will throw and return 500)
-            return response('Error: ' . $e->getMessage(), 500);
+            return response('Error: '.$e->getMessage(), 500);
         }
     }
 }

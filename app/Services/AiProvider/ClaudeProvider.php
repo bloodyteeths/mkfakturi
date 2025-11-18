@@ -13,10 +13,15 @@ use Illuminate\Support\Facades\Log;
 class ClaudeProvider implements AiProviderInterface
 {
     private string $apiKey;
+
     private string $model;
+
     private string $apiUrl;
+
     private string $apiVersion;
+
     private int $maxTokens;
+
     private float $temperature;
 
     /**
@@ -41,9 +46,10 @@ class ClaudeProvider implements AiProviderInterface
     /**
      * Generate a response from a single prompt
      *
-     * @param string $prompt The prompt to send to Claude
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $prompt  The prompt to send to Claude
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception If the API call fails
      */
     public function generate(string $prompt, array $options = []): string
@@ -59,22 +65,22 @@ class ClaudeProvider implements AiProviderInterface
                 'anthropic-version' => $this->apiVersion,
                 'content-type' => 'application/json',
             ])
-            ->timeout(30)
-            ->post($this->apiUrl, [
-                'model' => $this->model,
-                'max_tokens' => $maxTokens,
-                'temperature' => $temperature,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $prompt,
+                ->timeout(30)
+                ->post($this->apiUrl, [
+                    'model' => $this->model,
+                    'max_tokens' => $maxTokens,
+                    'temperature' => $temperature,
+                    'messages' => [
+                        [
+                            'role' => 'user',
+                            'content' => $prompt,
+                        ],
                     ],
-                ],
-            ]);
+                ]);
 
             if ($response->failed()) {
                 $this->logApiCall('generate', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API request failed: ' . $response->body());
+                throw new \Exception('Claude API request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -96,8 +102,9 @@ class ClaudeProvider implements AiProviderInterface
     /**
      * Generate a response from a conversation with multiple messages
      *
-     * @param array<int, array{role: string, content: string}> $messages Array of messages
+     * @param  array<int, array{role: string, content: string}>  $messages  Array of messages
      * @return string The AI's response
+     *
      * @throws \Exception If the API call fails
      */
     public function chat(array $messages): string
@@ -110,17 +117,17 @@ class ClaudeProvider implements AiProviderInterface
                 'anthropic-version' => $this->apiVersion,
                 'content-type' => 'application/json',
             ])
-            ->timeout(30)
-            ->post($this->apiUrl, [
-                'model' => $this->model,
-                'max_tokens' => $this->maxTokens,
-                'temperature' => $this->temperature,
-                'messages' => $messages,
-            ]);
+                ->timeout(30)
+                ->post($this->apiUrl, [
+                    'model' => $this->model,
+                    'max_tokens' => $this->maxTokens,
+                    'temperature' => $this->temperature,
+                    'messages' => $messages,
+                ]);
 
             if ($response->failed()) {
                 $this->logApiCall('chat', json_encode($messages), null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API chat request failed: ' . $response->body());
+                throw new \Exception('Claude API chat request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -142,11 +149,12 @@ class ClaudeProvider implements AiProviderInterface
     /**
      * Analyze an image with optional text prompt
      *
-     * @param string $imageData Base64 encoded image data
-     * @param string $mediaType MIME type (image/png, image/jpeg, image/webp, image/gif)
-     * @param string $prompt Text prompt/question about the image
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $imageData  Base64 encoded image data
+     * @param  string  $mediaType  MIME type (image/png, image/jpeg, image/webp, image/gif)
+     * @param  string  $prompt  Text prompt/question about the image
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception If the API call fails
      */
     public function analyzeImage(string $imageData, string $mediaType, string $prompt, array $options = []): string
@@ -178,22 +186,22 @@ class ClaudeProvider implements AiProviderInterface
                 'anthropic-version' => $this->apiVersion,
                 'content-type' => 'application/json',
             ])
-            ->timeout(60) // Longer timeout for image analysis
-            ->post($this->apiUrl, [
-                'model' => $this->model,
-                'max_tokens' => $maxTokens,
-                'temperature' => $temperature,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $content,
+                ->timeout(60) // Longer timeout for image analysis
+                ->post($this->apiUrl, [
+                    'model' => $this->model,
+                    'max_tokens' => $maxTokens,
+                    'temperature' => $temperature,
+                    'messages' => [
+                        [
+                            'role' => 'user',
+                            'content' => $content,
+                        ],
                     ],
-                ],
-            ]);
+                ]);
 
             if ($response->failed()) {
                 $this->logApiCall('analyzeImage', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API image analysis request failed: ' . $response->body());
+                throw new \Exception('Claude API image analysis request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -217,10 +225,11 @@ class ClaudeProvider implements AiProviderInterface
     /**
      * Analyze a document (PDF converted to images) with optional text prompt
      *
-     * @param array<int, array{data: string, media_type: string}> $images Array of image pages
-     * @param string $prompt Text prompt/question about the document
-     * @param array<string, mixed> $options Additional options
+     * @param  array<int, array{data: string, media_type: string}>  $images  Array of image pages
+     * @param  string  $prompt  Text prompt/question about the document
+     * @param  array<string, mixed>  $options  Additional options
      * @return string The AI's response
+     *
      * @throws \Exception If the API call fails
      */
     public function analyzeDocument(array $images, string $prompt, array $options = []): string
@@ -256,22 +265,22 @@ class ClaudeProvider implements AiProviderInterface
                 'anthropic-version' => $this->apiVersion,
                 'content-type' => 'application/json',
             ])
-            ->timeout(120) // Even longer timeout for multi-page documents
-            ->post($this->apiUrl, [
-                'model' => $this->model,
-                'max_tokens' => $maxTokens,
-                'temperature' => $temperature,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $content,
+                ->timeout(120) // Even longer timeout for multi-page documents
+                ->post($this->apiUrl, [
+                    'model' => $this->model,
+                    'max_tokens' => $maxTokens,
+                    'temperature' => $temperature,
+                    'messages' => [
+                        [
+                            'role' => 'user',
+                            'content' => $content,
+                        ],
                     ],
-                ],
-            ]);
+                ]);
 
             if ($response->failed()) {
                 $this->logApiCall('analyzeDocument', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API document analysis request failed: ' . $response->body());
+                throw new \Exception('Claude API document analysis request failed: '.$response->body());
             }
 
             $data = $response->json();
@@ -293,8 +302,6 @@ class ClaudeProvider implements AiProviderInterface
 
     /**
      * Get the provider name
-     *
-     * @return string
      */
     public function getProviderName(): string
     {
@@ -303,8 +310,6 @@ class ClaudeProvider implements AiProviderInterface
 
     /**
      * Get the model being used
-     *
-     * @return string
      */
     public function getModel(): string
     {
@@ -314,12 +319,12 @@ class ClaudeProvider implements AiProviderInterface
     /**
      * Log API call for cost tracking and monitoring
      *
-     * @param string $method The method called (generate or chat)
-     * @param string $input The input prompt or messages
-     * @param string|null $output The AI response
-     * @param int $statusCode HTTP status code
-     * @param float $duration Duration in seconds
-     * @param array<string, mixed> $metadata Additional metadata
+     * @param  string  $method  The method called (generate or chat)
+     * @param  string  $input  The input prompt or messages
+     * @param  string|null  $output  The AI response
+     * @param  int  $statusCode  HTTP status code
+     * @param  float  $duration  Duration in seconds
+     * @param  array<string, mixed>  $metadata  Additional metadata
      */
     private function logApiCall(
         string $method,

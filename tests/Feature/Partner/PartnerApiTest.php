@@ -4,7 +4,6 @@ namespace Tests\Feature\Partner;
 
 use App\Models\Commission;
 use App\Models\Company;
-use App\Models\Invoice;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,7 +20,9 @@ class PartnerApiTest extends TestCase
     use RefreshDatabase;
 
     protected User $partnerUser;
+
     protected Partner $partner;
+
     protected Company $company;
 
     protected function setUp(): void
@@ -67,7 +68,7 @@ class PartnerApiTest extends TestCase
                     'active_clients' => 12,
                     'monthly_commissions' => 85000,
                     'processed_invoices' => 234,
-                ]
+                ],
             ])
             ->assertJsonStructure([
                 'mocked',
@@ -79,7 +80,7 @@ class PartnerApiTest extends TestCase
                     'commission_rate',
                     'pending_payout',
                     'total_earned',
-                ]
+                ],
             ]);
 
         $this->assertTrue($response->json('mocked'));
@@ -123,7 +124,7 @@ class PartnerApiTest extends TestCase
                     'active_clients',
                     'monthly_commissions',
                     'processed_invoices',
-                ]
+                ],
             ]);
 
         $this->assertFalse($response->json('mocked'));
@@ -192,8 +193,8 @@ class PartnerApiTest extends TestCase
                         'company_id',
                         'commission_amount',
                         'status',
-                    ]
-                ]
+                    ],
+                ],
             ]);
 
         // Verify real data is returned
@@ -307,7 +308,7 @@ class PartnerApiTest extends TestCase
                 'data' => [
                     'active_clients' => 12,  // Mocked value, not 1 from database
                     'monthly_commissions' => 85000,  // Mocked value, not 500 from database
-                ]
+                ],
             ]);
     }
 
@@ -330,7 +331,7 @@ class PartnerApiTest extends TestCase
                     'commission_rate',
                     'is_active',
                     'created_at',
-                ]
+                ],
             ])
             ->assertJson([
                 'data' => [
@@ -339,7 +340,7 @@ class PartnerApiTest extends TestCase
                     'email' => 'partner@example.com',
                     'commission_rate' => '5.00',
                     'is_active' => true,
-                ]
+                ],
             ]);
     }
 
@@ -358,7 +359,7 @@ class PartnerApiTest extends TestCase
 
         $response->assertStatus(403)
             ->assertJson([
-                'error' => 'User is not registered as a partner'
+                'error' => 'User is not registered as a partner',
             ]);
     }
 
@@ -375,7 +376,7 @@ class PartnerApiTest extends TestCase
 
         $response->assertStatus(403)
             ->assertJson([
-                'error' => 'Partner account is inactive'
+                'error' => 'Partner account is inactive',
             ]);
     }
 }

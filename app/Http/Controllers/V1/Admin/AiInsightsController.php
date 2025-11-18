@@ -19,8 +19,6 @@ class AiInsightsController extends Controller
 {
     /**
      * Create a new controller instance
-     *
-     * @param AiInsightsService $aiService
      */
     public function __construct(
         private AiInsightsService $aiService
@@ -30,9 +28,6 @@ class AiInsightsController extends Controller
      * Get cached AI insights or return empty state
      *
      * GET /api/v1/ai/insights
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -72,9 +67,6 @@ class AiInsightsController extends Controller
      * Generate AI insights (synchronous execution)
      *
      * POST /api/v1/ai/insights/generate
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function generate(Request $request): JsonResponse
     {
@@ -131,9 +123,6 @@ class AiInsightsController extends Controller
      * Refresh insights synchronously (immediate response)
      *
      * POST /api/v1/ai/insights/refresh
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function refresh(Request $request): JsonResponse
     {
@@ -179,9 +168,6 @@ class AiInsightsController extends Controller
      * Interactive AI chat for financial questions
      *
      * POST /api/v1/ai/insights/chat
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function chat(Request $request): JsonResponse
     {
@@ -196,7 +182,7 @@ class AiInsightsController extends Controller
         $this->authorize('view dashboard', $company);
 
         $validated = $request->validate([
-            'message' => 'required|string|max:' . config('ai.chat.max_message_length', 1000),
+            'message' => 'required|string|max:'.config('ai.chat.max_message_length', 1000),
         ]);
 
         try {
@@ -228,9 +214,6 @@ class AiInsightsController extends Controller
      * Get AI settings and configuration
      *
      * GET /api/v1/ai/settings
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function getSettings(Request $request): JsonResponse
     {
@@ -257,9 +240,6 @@ class AiInsightsController extends Controller
      * Update AI settings for the company
      *
      * POST /api/v1/ai/settings
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function updateSettings(Request $request): JsonResponse
     {
@@ -309,9 +289,6 @@ class AiInsightsController extends Controller
      * Get risk analysis for the company
      *
      * GET /api/v1/ai/risks
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function risks(Request $request): JsonResponse
     {

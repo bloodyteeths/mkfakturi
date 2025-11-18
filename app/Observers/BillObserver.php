@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Bill;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Models\Bill;
 use Illuminate\Support\Facades\Log;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -12,8 +12,6 @@ use Vinkla\Hashids\Facades\Hashids;
  *
  * Automatically posts bill transactions to the IFRS ledger
  * when FEATURE_ACCOUNTING_BACKBONE is enabled.
- *
- * @package App\Observers
  */
 class BillObserver
 {
@@ -28,14 +26,11 @@ class BillObserver
      * Handle the Bill "created" event.
      *
      * Generate bill number and unique hash if not set
-     *
-     * @param Bill $bill
-     * @return void
      */
     public function created(Bill $bill): void
     {
         // Generate unique hash if not set
-        if (!$bill->unique_hash) {
+        if (! $bill->unique_hash) {
             try {
                 // Use dedicated connection when configured, otherwise fall back to default
                 $connection = config('hashids.connections.'.Bill::class) ? Bill::class : null;
@@ -74,9 +69,6 @@ class BillObserver
      * Handle the Bill "updating" event.
      *
      * Prevent updates if the bill falls within a locked tax period.
-     *
-     * @param Bill $bill
-     * @return bool|null
      */
     public function updating(Bill $bill): ?bool
     {
@@ -93,9 +85,6 @@ class BillObserver
      *
      * If status changes to COMPLETED, post to ledger.
      * We don't re-post if already posted (idempotent).
-     *
-     * @param Bill $bill
-     * @return void
      */
     public function updated(Bill $bill): void
     {
@@ -103,7 +92,7 @@ class BillObserver
         if ($bill->wasChanged('status') &&
             $bill->status === Bill::STATUS_COMPLETED &&
             $this->shouldPostToLedger($bill) &&
-            !$bill->ifrs_transaction_id) {
+            ! $bill->ifrs_transaction_id) {
 
             try {
                 $this->ifrsAdapter->postBill($bill);
@@ -120,9 +109,6 @@ class BillObserver
      * Handle the Bill "deleting" event.
      *
      * Prevent deletion if the bill falls within a locked tax period.
-     *
-     * @param Bill $bill
-     * @return bool|null
      */
     public function deleting(Bill $bill): ?bool
     {
@@ -136,14 +122,11 @@ class BillObserver
 
     /**
      * Determine if bill should be posted to ledger
-     *
-     * @param Bill $bill
-     * @return bool
      */
     protected function shouldPostToLedger(Bill $bill): bool
     {
         // Check if feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return false;
         }
 
@@ -153,8 +136,6 @@ class BillObserver
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {
@@ -169,14 +150,11 @@ class BillObserver
 
     /**
      * Check if bill falls within a locked tax period.
-     *
-     * @param Bill $bill
-     * @return bool
      */
     protected function isInLockedPeriod(Bill $bill): bool
     {
         // Check if tax period locking is enabled
-        if (!config('tax.period_locking_enabled', true)) {
+        if (! config('tax.period_locking_enabled', true)) {
             return false;
         }
 

@@ -11,17 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Adds comprehensive security headers to all responses to protect against
  * common web vulnerabilities including XSS, clickjacking, and MIME-sniffing.
- *
- * @package App\Http\Middleware
  */
 class SecurityHeaders
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {

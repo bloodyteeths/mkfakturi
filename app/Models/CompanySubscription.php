@@ -168,7 +168,7 @@ class CompanySubscription extends Model
     {
         $this->status = 'active';
 
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             $this->started_at = Carbon::now();
         }
 
@@ -222,7 +222,7 @@ class CompanySubscription extends Model
      */
     public function getTrialDaysRemainingAttribute(): ?int
     {
-        if ($this->status !== 'trial' || !$this->trial_ends_at) {
+        if ($this->status !== 'trial' || ! $this->trial_ends_at) {
             return null;
         }
 

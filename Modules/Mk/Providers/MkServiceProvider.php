@@ -25,12 +25,12 @@ class MkServiceProvider extends ServiceProvider
     {
         // Register BarcodeService as singleton
         $this->app->singleton(BarcodeService::class, function ($app) {
-            return new BarcodeService();
+            return new BarcodeService;
         });
 
         // Register QrCodeService as singleton
         $this->app->singleton(QrCodeService::class, function ($app) {
-            return new QrCodeService();
+            return new QrCodeService;
         });
     }
 

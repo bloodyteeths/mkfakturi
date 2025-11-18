@@ -4,17 +4,14 @@ namespace Modules\Mk\Partner\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
-use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PartnerClientsController extends Controller
 {
     /**
      * Get paginated list of referred companies with filters
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -78,7 +75,7 @@ class PartnerClientsController extends Controller
                 'id' => $company->id,
                 'name' => $company->name,
                 'email' => $company->owner ? $company->owner->email : null,
-                'logo' => $company->logo_path ? asset('storage/' . $company->logo_path) : null,
+                'logo' => $company->logo_path ? asset('storage/'.$company->logo_path) : null,
                 'plan' => $planTier,
                 'mrr' => $mrr,
                 'status' => $subscription->status ?? 'inactive',
@@ -96,17 +93,19 @@ class PartnerClientsController extends Controller
 
         $totalMRR = $allCompanies->reduce(function ($carry, $company) {
             $subscription = $company->subscription;
+
             return $carry + ($subscription->price ?? 0);
         }, 0);
 
         $monthlyCommission = $allCompanies->reduce(function ($carry, $company) use ($partner) {
             $subscription = $company->subscription;
-            if (!$subscription || $subscription->status !== 'active') {
+            if (! $subscription || $subscription->status !== 'active') {
                 return $carry;
             }
 
             $mrr = $subscription->price ?? 0;
             $commissionRate = $company->pivot->override_commission_rate ?? $partner->commission_rate;
+
             return $carry + ($mrr * ($commissionRate / 100));
         }, 0);
 

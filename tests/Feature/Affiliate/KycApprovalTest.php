@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Affiliate;
 
-use Tests\TestCase;
-use App\Models\Partner;
 use App\Models\KycDocument;
+use App\Models\Partner;
 use App\Models\User;
 use App\Notifications\KycStatusChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 class KycApprovalTest extends TestCase
 {

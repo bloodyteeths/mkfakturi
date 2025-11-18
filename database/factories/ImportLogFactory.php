@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\ImportLog;
 use App\Models\ImportJob;
+use App\Models\ImportLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ImportLogFactory extends Factory
@@ -18,7 +18,7 @@ class ImportLogFactory extends Factory
                 ImportLog::TYPE_INFO,
                 ImportLog::TYPE_WARNING,
                 ImportLog::TYPE_ERROR,
-                ImportLog::TYPE_DEBUG
+                ImportLog::TYPE_DEBUG,
             ]),
             'message' => $this->faker->sentence(),
             'details' => [
@@ -95,8 +95,8 @@ class ImportLogFactory extends Factory
                 'Transformation applied successfully',
             ]),
             'details' => [
-                'memory_usage' => $this->faker->numberBetween(10, 100) . 'MB',
-                'execution_time' => $this->faker->randomFloat(2, 0.1, 10.0) . 's',
+                'memory_usage' => $this->faker->numberBetween(10, 100).'MB',
+                'execution_time' => $this->faker->randomFloat(2, 0.1, 10.0).'s',
             ],
         ]);
     }

@@ -19,8 +19,7 @@ class SupportContactNotification extends Mailable
     public function __construct(
         public SupportContact $contact,
         public ?string $viewUrl = null
-    ) {
-    }
+    ) {}
 
     /**
      * Get the message envelope.
@@ -28,7 +27,7 @@ class SupportContactNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Facturino Support] ' . $this->contact->category_name . ' - ' . $this->contact->subject,
+            subject: '[Facturino Support] '.$this->contact->category_name.' - '.$this->contact->subject,
         );
     }
 

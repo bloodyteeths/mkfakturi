@@ -21,7 +21,6 @@ class CheckSubscriptionTier
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string  $feature  Feature key or minimum plan
      */
@@ -30,7 +29,7 @@ class CheckSubscriptionTier
         // Get current company from request header (set by CompanyMiddleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'No company context found',
                 'message' => 'You must select a company to access this feature',
@@ -40,7 +39,7 @@ class CheckSubscriptionTier
         // Load company with subscription
         $company = \App\Models\Company::with('subscription')->find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
                 'message' => 'The specified company does not exist',
@@ -48,14 +47,14 @@ class CheckSubscriptionTier
         }
 
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         // Determine if feature is a plan name or feature key
         $requiredPlan = $this->getRequiredPlan($feature);
 
-        if (!$requiredPlan) {
+        if (! $requiredPlan) {
             return response()->json([
                 'error' => 'Invalid feature configuration',
                 'message' => 'Feature or plan not recognized',
@@ -63,7 +62,7 @@ class CheckSubscriptionTier
         }
 
         // Check if company can access this feature
-        if (!$this->canAccessFeature($company, $requiredPlan)) {
+        if (! $this->canAccessFeature($company, $requiredPlan)) {
             $upgradeMessage = $this->getUpgradeMessage($feature, $requiredPlan);
             $upgradePriceId = $this->getUpgradePriceId($requiredPlan);
 
@@ -87,9 +86,6 @@ class CheckSubscriptionTier
 
     /**
      * Get required plan for a feature
-     *
-     * @param string $feature
-     * @return string|null
      */
     protected function getRequiredPlan(string $feature): ?string
     {
@@ -107,9 +103,7 @@ class CheckSubscriptionTier
     /**
      * Check if company can access a feature
      *
-     * @param \App\Models\Company $company
-     * @param string $requiredPlan
-     * @return bool
+     * @param  \App\Models\Company  $company
      */
     protected function canAccessFeature($company, string $requiredPlan): bool
     {
@@ -119,7 +113,7 @@ class CheckSubscriptionTier
         $currentPlan = $company->subscription?->plan ?? 'free';
 
         // Check if subscription is active
-        if ($company->subscription && !$company->subscription->isActive()) {
+        if ($company->subscription && ! $company->subscription->isActive()) {
             $currentPlan = 'free'; // Inactive subscription = free tier
         }
 
@@ -137,10 +131,6 @@ class CheckSubscriptionTier
 
     /**
      * Get upgrade message for a feature
-     *
-     * @param string $feature
-     * @param string $requiredPlan
-     * @return string
      */
     protected function getUpgradeMessage(string $feature, string $requiredPlan): string
     {
@@ -159,9 +149,6 @@ class CheckSubscriptionTier
 
     /**
      * Get Paddle price ID for required plan
-     *
-     * @param string $requiredPlan
-     * @return string|null
      */
     protected function getUpgradePriceId(string $requiredPlan): ?string
     {
@@ -171,13 +158,11 @@ class CheckSubscriptionTier
     /**
      * Generate Paddle checkout URL for upgrade
      *
-     * @param string|null $priceId
-     * @param \App\Models\Company $company
-     * @return string|null
+     * @param  \App\Models\Company  $company
      */
     protected function generateCheckoutUrl(?string $priceId, $company): ?string
     {
-        if (!$priceId) {
+        if (! $priceId) {
             return null;
         }
 

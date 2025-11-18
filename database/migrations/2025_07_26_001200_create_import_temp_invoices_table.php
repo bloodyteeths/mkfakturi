@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('import_temp_invoices', function (Blueprint $table) {
             $table->id();
-            
+
             // Raw data fields (as imported)
             $table->json('raw_data'); // Original row data from import file
             $table->integer('row_number'); // Row number in source file
-            
+
             // Mapped fields (matching invoices table structure)
             $table->string('invoice_number')->nullable();
             $table->string('reference_number')->nullable();
@@ -26,13 +26,13 @@ return new class extends Migration
             $table->string('invoice_status')->nullable(); // draft, sent, viewed, overdue
             $table->string('paid_status')->nullable(); // unpaid, partial, paid
             $table->text('notes')->nullable();
-            
+
             // Customer identification fields
             $table->string('customer_name')->nullable();
             $table->string('customer_email')->nullable();
             $table->string('customer_tax_id')->nullable();
             $table->string('customer_identifier')->nullable(); // Flexible customer matching field
-            
+
             // Financial fields
             $table->string('tax_per_item')->nullable(); // YES/NO
             $table->string('discount_per_item')->nullable(); // YES/NO
@@ -43,14 +43,14 @@ return new class extends Migration
             $table->unsignedBigInteger('total')->nullable();
             $table->unsignedBigInteger('tax')->nullable();
             $table->unsignedBigInteger('due_amount')->nullable();
-            
+
             // Currency handling
             $table->string('currency_code', 3)->nullable(); // EUR, MKD, USD, etc.
             $table->decimal('exchange_rate', 10, 4)->nullable();
-            
+
             // Invoice items (stored as JSON for complex imports)
             $table->json('line_items')->nullable(); // Array of invoice items
-            
+
             // Processing fields
             $table->enum('status', ['pending', 'validated', 'mapped', 'failed', 'committed'])->default('pending');
             $table->json('validation_errors')->nullable(); // Validation error details
@@ -58,7 +58,7 @@ return new class extends Migration
             $table->boolean('is_duplicate')->default(false);
             $table->string('duplicate_match_field')->nullable(); // Field used for duplicate detection
             $table->json('transformation_log')->nullable(); // Record of transformations applied
-            
+
             // References
             $table->unsignedBigInteger('import_job_id');
             $table->foreign('import_job_id')->references('id')->on('import_jobs')->onDelete('cascade');
@@ -66,9 +66,9 @@ return new class extends Migration
             $table->foreign('temp_customer_id')->references('id')->on('import_temp_customers')->onDelete('set null');
             $table->unsignedInteger('existing_invoice_id')->nullable(); // Link to existing invoice if duplicate
             $table->foreign('existing_invoice_id')->references('id')->on('invoices')->onDelete('set null');
-            
+
             $table->timestamps();
-            
+
             // Indexes
             $table->index(['import_job_id', 'status']);
             $table->index(['import_job_id', 'row_number']);

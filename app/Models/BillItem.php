@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use App\Traits\HasAuditing;
 
-class BillItem extends Model 
+class BillItem extends Model
 {
     use HasAuditing;
     use HasCustomFieldsTrait;

@@ -24,8 +24,6 @@ class CertificateExtractionService
 {
     /**
      * Array to track temporary files created during service lifetime
-     *
-     * @var array
      */
     protected array $tempFiles = [];
 
@@ -35,21 +33,22 @@ class CertificateExtractionService
      * This method decrypts the encrypted PFX blob from the database,
      * then uses openssl_pkcs12_read to extract the private key and certificate.
      *
-     * @param Certificate $cert Certificate model with encrypted_key_blob
-     * @param string|null $passphrase PFX passphrase (required for encrypted PFX files)
+     * @param  Certificate  $cert  Certificate model with encrypted_key_blob
+     * @param  string|null  $passphrase  PFX passphrase (required for encrypted PFX files)
      * @return array ['pkey' => string, 'cert' => string, 'extracerts' => array|null]
+     *
      * @throws Exception If decryption fails or PFX is invalid
      */
     public function extractFromPfx(Certificate $cert, ?string $passphrase = null): array
     {
         Log::info('CertificateExtractionService: Extracting from PFX', [
             'certificate_id' => $cert->id,
-            'has_passphrase' => !empty($passphrase),
+            'has_passphrase' => ! empty($passphrase),
         ]);
 
         try {
             // Decrypt the encrypted PFX blob from database
-            if (!$cert->encrypted_key_blob) {
+            if (! $cert->encrypted_key_blob) {
                 throw new Exception('Certificate has no encrypted key blob');
             }
 
@@ -59,17 +58,17 @@ class CertificateExtractionService
             $certs = [];
             $success = openssl_pkcs12_read($pfxBlob, $certs, $passphrase ?? '');
 
-            if (!$success) {
+            if (! $success) {
                 $error = openssl_error_string();
                 Log::error('CertificateExtractionService: Failed to read PFX', [
                     'certificate_id' => $cert->id,
                     'error' => $error,
                 ]);
-                throw new Exception('Failed to read PFX file: ' . ($error ?: 'Invalid passphrase or corrupted file'));
+                throw new Exception('Failed to read PFX file: '.($error ?: 'Invalid passphrase or corrupted file'));
             }
 
             // Validate required components
-            if (!isset($certs['pkey']) || !isset($certs['cert'])) {
+            if (! isset($certs['pkey']) || ! isset($certs['cert'])) {
                 throw new Exception('PFX file is missing required components (private key or certificate)');
             }
 
@@ -98,14 +97,15 @@ class CertificateExtractionService
     /**
      * Decrypt the encrypted_key_blob using Laravel Crypt.
      *
-     * @param Certificate $cert Certificate model with encrypted_key_blob
+     * @param  Certificate  $cert  Certificate model with encrypted_key_blob
      * @return string Decrypted PFX blob
+     *
      * @throws Exception If decryption fails
      */
     public function decryptBlob(Certificate $cert): string
     {
         try {
-            if (!$cert->encrypted_key_blob) {
+            if (! $cert->encrypted_key_blob) {
                 throw new Exception('Certificate has no encrypted key blob');
             }
 
@@ -116,7 +116,7 @@ class CertificateExtractionService
                 'certificate_id' => $cert->id,
                 'error' => $e->getMessage(),
             ]);
-            throw new Exception('Failed to decrypt certificate blob: ' . $e->getMessage());
+            throw new Exception('Failed to decrypt certificate blob: '.$e->getMessage());
         }
     }
 
@@ -126,9 +126,10 @@ class CertificateExtractionService
      * Creates a secure temporary file containing the private key in PEM format.
      * The file is registered for cleanup.
      *
-     * @param Certificate $cert Certificate model
-     * @param string|null $passphrase PFX passphrase
+     * @param  Certificate  $cert  Certificate model
+     * @param  string|null  $passphrase  PFX passphrase
      * @return string Absolute path to temporary private key file
+     *
      * @throws Exception
      */
     public function getTempPrivateKeyPath(Certificate $cert, ?string $passphrase = null): string
@@ -139,12 +140,13 @@ class CertificateExtractionService
 
         try {
             // Check if using file-based storage
-            if ($cert->certificate_path && Storage::exists($cert->certificate_path . '/private.key')) {
-                $storagePath = Storage::path($cert->certificate_path . '/private.key');
+            if ($cert->certificate_path && Storage::exists($cert->certificate_path.'/private.key')) {
+                $storagePath = Storage::path($cert->certificate_path.'/private.key');
                 Log::info('CertificateExtractionService: Using storage-based private key', [
                     'certificate_id' => $cert->id,
                     'path' => $storagePath,
                 ]);
+
                 return $storagePath;
             }
 
@@ -182,9 +184,10 @@ class CertificateExtractionService
      * Creates a secure temporary file containing the certificate in PEM format.
      * The file is registered for cleanup.
      *
-     * @param Certificate $cert Certificate model
-     * @param string|null $passphrase PFX passphrase
+     * @param  Certificate  $cert  Certificate model
+     * @param  string|null  $passphrase  PFX passphrase
      * @return string Absolute path to temporary certificate file
+     *
      * @throws Exception
      */
     public function getTempCertificatePath(Certificate $cert, ?string $passphrase = null): string
@@ -195,12 +198,13 @@ class CertificateExtractionService
 
         try {
             // Check if using file-based storage
-            if ($cert->certificate_path && Storage::exists($cert->certificate_path . '/certificate.pem')) {
-                $storagePath = Storage::path($cert->certificate_path . '/certificate.pem');
+            if ($cert->certificate_path && Storage::exists($cert->certificate_path.'/certificate.pem')) {
+                $storagePath = Storage::path($cert->certificate_path.'/certificate.pem');
                 Log::info('CertificateExtractionService: Using storage-based certificate', [
                     'certificate_id' => $cert->id,
                     'path' => $storagePath,
                 ]);
+
                 return $storagePath;
             }
 
@@ -213,9 +217,9 @@ class CertificateExtractionService
             $certContent = $extracted['cert'];
 
             // Append extra certificates (CA chain) if present
-            if (!empty($extracted['extracerts'])) {
+            if (! empty($extracted['extracerts'])) {
                 foreach ($extracted['extracerts'] as $extraCert) {
-                    $certContent .= "\n" . $extraCert;
+                    $certContent .= "\n".$extraCert;
                 }
             }
 
@@ -229,7 +233,7 @@ class CertificateExtractionService
             Log::info('CertificateExtractionService: Temp certificate file created', [
                 'certificate_id' => $cert->id,
                 'path' => $tempFile,
-                'has_chain' => !empty($extracted['extracerts']),
+                'has_chain' => ! empty($extracted['extracerts']),
             ]);
 
             return $tempFile;
@@ -249,8 +253,9 @@ class CertificateExtractionService
      * Creates a temporary .pfx/.p12 file from the encrypted blob.
      * Useful for tools that require the full PFX file.
      *
-     * @param Certificate $cert Certificate model
+     * @param  Certificate  $cert  Certificate model
      * @return string Absolute path to temporary PFX file
+     *
      * @throws Exception
      */
     public function getTempPfxPath(Certificate $cert): string
@@ -291,8 +296,8 @@ class CertificateExtractionService
     /**
      * Create a secure temporary file.
      *
-     * @param string $prefix Filename prefix
-     * @param string $suffix Filename suffix (extension)
+     * @param  string  $prefix  Filename prefix
+     * @param  string  $suffix  Filename suffix (extension)
      * @return string Absolute path to temporary file
      */
     protected function createSecureTempFile(string $prefix = 'tmp_', string $suffix = ''): string
@@ -302,7 +307,7 @@ class CertificateExtractionService
 
         // If a suffix is provided, rename the file
         if ($suffix) {
-            $newTempFile = $tempFile . $suffix;
+            $newTempFile = $tempFile.$suffix;
             rename($tempFile, $newTempFile);
             $tempFile = $newTempFile;
         }
@@ -315,8 +320,6 @@ class CertificateExtractionService
      *
      * IMPORTANT: Always call this method after XML signing operations complete.
      * Recommended usage: try-finally block or PHP destructors.
-     *
-     * @return void
      */
     public function cleanup(): void
     {

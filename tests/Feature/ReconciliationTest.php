@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\BankTransaction;
 use App\Models\Company;
-use App\Models\Invoice;
 use App\Models\Reconciliation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +18,7 @@ class ReconciliationTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Company $company;
 
     protected function setUp(): void

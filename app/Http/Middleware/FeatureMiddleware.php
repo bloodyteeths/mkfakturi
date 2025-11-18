@@ -25,10 +25,10 @@ class FeatureMiddleware
         // Check if feature is enabled in config
         $featureEnabled = config("features.{$feature}.enabled", false);
 
-        if (!$featureEnabled) {
+        if (! $featureEnabled) {
             return response()->json([
                 'error' => 'Feature not available',
-                'message' => "The '{$feature}' feature is currently disabled."
+                'message' => "The '{$feature}' feature is currently disabled.",
             ], 403);
         }
 

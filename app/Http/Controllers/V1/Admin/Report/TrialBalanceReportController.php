@@ -27,9 +27,9 @@ class TrialBalanceReportController extends Controller
         $this->authorize('view report', $company);
 
         // Check if accounting backbone feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.'
+                'message' => 'Accounting Backbone feature is disabled. Please enable FEATURE_ACCOUNTING_BACKBONE to access IFRS reports.',
             ]);
         }
 
@@ -37,7 +37,7 @@ class TrialBalanceReportController extends Controller
         App::setLocale($locale);
 
         // Get trial balance data via IfrsAdapter
-        $adapter = new IfrsAdapter();
+        $adapter = new IfrsAdapter;
         $asOfDate = $request->has('as_of_date')
             ? $request->as_of_date
             : now()->toDateString();
@@ -47,7 +47,7 @@ class TrialBalanceReportController extends Controller
         // Handle errors from adapter
         if (isset($trialBalance['error'])) {
             return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => $trialBalance['error']
+                'message' => $trialBalance['error'],
             ]);
         }
 

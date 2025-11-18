@@ -10,8 +10,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
  * Proforma Invoice Policy
  *
  * Defines authorization rules for proforma invoice operations
- *
- * @package App\Policies
  */
 class ProformaInvoicePolicy
 {
@@ -19,9 +17,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can view any proforma invoices.
-     *
-     * @param  User  $user
-     * @return bool
      */
     public function viewAny(User $user): bool
     {
@@ -38,10 +33,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can view the proforma invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function view(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -58,9 +49,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can create proforma invoices.
-     *
-     * @param  User  $user
-     * @return bool
      */
     public function create(User $user): bool
     {
@@ -77,15 +65,11 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can update the proforma invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function update(User $user, ProformaInvoice $proformaInvoice): bool
     {
         // Cannot edit converted proforma invoices
-        if (!$proformaInvoice->allow_edit) {
+        if (! $proformaInvoice->allow_edit) {
             return false;
         }
 
@@ -102,10 +86,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can delete the proforma invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function delete(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -127,10 +107,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can restore the proforma invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function restore(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -147,10 +123,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can permanently delete the proforma invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function forceDelete(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -167,10 +139,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can send the proforma invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function send(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -187,10 +155,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can mark proforma invoice as viewed.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function markAsViewed(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -207,10 +171,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can mark proforma invoice as expired.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function markAsExpired(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -227,10 +187,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can mark proforma invoice as rejected.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function markAsRejected(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -247,10 +203,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can convert proforma invoice to invoice.
-     *
-     * @param  User  $user
-     * @param  ProformaInvoice  $proformaInvoice
-     * @return bool
      */
     public function convertToInvoice(User $user, ProformaInvoice $proformaInvoice): bool
     {
@@ -278,9 +230,6 @@ class ProformaInvoicePolicy
 
     /**
      * Determine whether the user can delete multiple proforma invoices.
-     *
-     * @param  User  $user
-     * @return bool
      */
     public function deleteMultiple(User $user): bool
     {

@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasAuditing;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasAuditing;
 
-class BillPayment extends Model 
+class BillPayment extends Model
 {
     use HasAuditing;
     use HasFactory;
@@ -47,6 +47,7 @@ class BillPayment extends Model
     public function getFormattedPaymentDateAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->payment_date)->translatedFormat($dateFormat);
     }
 
@@ -56,6 +57,7 @@ class BillPayment extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 

@@ -4,7 +4,6 @@ use App\Http\Controllers\V1\Admin\AccountsPayable\BillsController;
 use App\Http\Requests\BillRequest;
 use App\Models\Bill;
 use App\Models\BillItem;
-use App\Models\BillPayment;
 use App\Models\Company;
 use App\Models\Supplier;
 use App\Models\Tax;
@@ -156,4 +155,3 @@ test('bills multi-tenant isolation prevents cross-company access', function () {
     $ids = collect($response->json('data'))->pluck('id')->all();
     expect($ids)->not()->toContain($billA->id);
 });
-

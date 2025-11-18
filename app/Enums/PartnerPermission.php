@@ -92,7 +92,7 @@ enum PartnerPermission: string
      */
     public static function getAllValues(): array
     {
-        return array_map(fn($case) => $case->value, self::cases());
+        return array_map(fn ($case) => $case->value, self::cases());
     }
 
     /**
@@ -104,18 +104,16 @@ enum PartnerPermission: string
     {
         return array_filter(
             self::getAllValues(),
-            fn($value) => $value !== self::FULL_ACCESS->value
+            fn ($value) => $value !== self::FULL_ACCESS->value
         );
     }
 
     /**
      * Get human-readable label for permission
-     *
-     * @return string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             // Invoices
             self::VIEW_INVOICES => 'View Invoices',
             self::CREATE_INVOICES => 'Create Invoices',
@@ -156,13 +154,10 @@ enum PartnerPermission: string
 
     /**
      * Get category label
-     *
-     * @param string $category
-     * @return string
      */
     public static function getCategoryLabel(string $category): string
     {
-        return match($category) {
+        return match ($category) {
             'invoices' => 'Invoices',
             'customers' => 'Customers',
             'banking' => 'Banking',
@@ -176,8 +171,6 @@ enum PartnerPermission: string
     /**
      * Convert grouped permissions to API format
      * Returns array with permission objects including labels
-     *
-     * @return array
      */
     public static function getGroupedForApi(): array
     {
@@ -186,7 +179,7 @@ enum PartnerPermission: string
         foreach (self::getGrouped() as $category => $permissions) {
             $grouped[$category] = [
                 'label' => self::getCategoryLabel($category),
-                'permissions' => array_map(function($permission) {
+                'permissions' => array_map(function ($permission) {
                     return [
                         'value' => $permission->value,
                         'label' => $permission->label(),

@@ -22,10 +22,10 @@ class SynonymMatcher implements MatcherInterface
      * 4. Match English, Macedonian, Albanian, Serbian synonyms
      * 5. Return matches with confidence 0.90
      *
-     * @param string $csvField CSV column name
-     * @param array $analysis Field analysis from FieldAnalyzer
-     * @param Collection $rules Available MappingRule records
-     * @param string $entityType Entity type being imported
+     * @param  string  $csvField  CSV column name
+     * @param  array  $analysis  Field analysis from FieldAnalyzer
+     * @param  Collection  $rules  Available MappingRule records
+     * @param  string  $entityType  Entity type being imported
      * @return array Array of candidates with confidence scores
      */
     public function match(
@@ -49,7 +49,7 @@ class SynonymMatcher implements MatcherInterface
             }
 
             // Skip inactive rules
-            if (!$rule->is_active) {
+            if (! $rule->is_active) {
                 continue;
             }
 
@@ -67,12 +67,13 @@ class SynonymMatcher implements MatcherInterface
                     $rule->id,
                     $match['confidence']
                 );
+
                 continue;
             }
 
             // Check language_variations for multilingual synonyms
             // language_variations is nested: ["en" => [...], "mk" => [...]]
-            if (!empty($rule->language_variations) && is_array($rule->language_variations)) {
+            if (! empty($rule->language_variations) && is_array($rule->language_variations)) {
                 foreach ($rule->language_variations as $lang => $variations) {
                     if (is_array($variations)) {
                         $match = $this->findSynonymInArray($normalizedCsvField, $variations);
@@ -98,8 +99,8 @@ class SynonymMatcher implements MatcherInterface
      *
      * Uses fuzzy matching to find close variations that aren't exact matches
      *
-     * @param string $normalizedField Normalized CSV field
-     * @param array $variations Array of field variations
+     * @param  string  $normalizedField  Normalized CSV field
+     * @param  array  $variations  Array of field variations
      * @return array|null Match info or null if no match
      */
     private function findSynonymInArray(string $normalizedField, array $variations): ?array
@@ -137,8 +138,8 @@ class SynonymMatcher implements MatcherInterface
      * 3. Check for common abbreviations
      * 4. Check for singular/plural variations
      *
-     * @param string $field1 First normalized field
-     * @param string $field2 Second normalized field
+     * @param  string  $field1  First normalized field
+     * @param  string  $field2  Second normalized field
      * @return bool True if fields are synonyms
      */
     private function areSynonyms(string $field1, string $field2): bool
@@ -213,8 +214,8 @@ class SynonymMatcher implements MatcherInterface
     /**
      * Get base synonym for a field
      *
-     * @param string $field Field name
-     * @param array $synonymMap Synonym map
+     * @param  string  $field  Field name
+     * @param  array  $synonymMap  Synonym map
      * @return string|null Base synonym or null
      */
     private function getBaseSynonym(string $field, array $synonymMap): ?string
@@ -233,8 +234,8 @@ class SynonymMatcher implements MatcherInterface
     /**
      * Check if fields are abbreviations of each other
      *
-     * @param string $field1 First field
-     * @param string $field2 Second field
+     * @param  string  $field1  First field
+     * @param  string  $field2  Second field
      * @return bool True if abbreviations
      */
     private function areAbbreviations(string $field1, string $field2): bool
@@ -263,8 +264,8 @@ class SynonymMatcher implements MatcherInterface
     /**
      * Check if fields are singular/plural variations
      *
-     * @param string $field1 First field
-     * @param string $field2 Second field
+     * @param  string  $field1  First field
+     * @param  string  $field2  Second field
      * @return bool True if singular/plural
      */
     private function areSingularPlural(string $field1, string $field2): bool
@@ -280,7 +281,7 @@ class SynonymMatcher implements MatcherInterface
     /**
      * Normalize a field name for comparison
      *
-     * @param string $field Field name to normalize
+     * @param  string  $field  Field name to normalize
      * @return string Normalized field name
      */
     private function normalize(string $field): string
@@ -297,10 +298,10 @@ class SynonymMatcher implements MatcherInterface
     /**
      * Build a candidate result array
      *
-     * @param string $targetField Target field name
-     * @param string $source What matched
-     * @param int $ruleId MappingRule ID
-     * @param float $confidence Confidence score
+     * @param  string  $targetField  Target field name
+     * @param  string  $source  What matched
+     * @param  int  $ruleId  MappingRule ID
+     * @param  float  $confidence  Confidence score
      * @return array Candidate array
      */
     private function buildCandidate(string $targetField, string $source, int $ruleId, float $confidence): array

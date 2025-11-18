@@ -8,7 +8,6 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Laravel\Pennant\Feature;
 use Tests\TestCase;
@@ -26,8 +25,11 @@ class PaddleWebhookTest extends TestCase
     use RefreshDatabase;
 
     protected $company;
+
     protected $customer;
+
     protected $currency;
+
     protected $invoice;
 
     protected function setUp(): void
@@ -35,7 +37,7 @@ class PaddleWebhookTest extends TestCase
         parent::setUp();
 
         // Enable advanced payments feature
-        Feature::define('advanced-payments', fn() => true);
+        Feature::define('advanced-payments', fn () => true);
 
         // Set up test data - currency must be created first
         $this->currency = Currency::create([
@@ -169,7 +171,7 @@ class PaddleWebhookTest extends TestCase
     public function test_fee_posted_to_accounting_when_enabled()
     {
         // Enable accounting feature
-        Feature::define('accounting-backbone', fn() => true);
+        Feature::define('accounting-backbone', fn () => true);
 
         // Mock IfrsAdapter if it exists
         // Note: This test will skip ledger posting if IfrsAdapter doesn't exist yet
@@ -193,7 +195,7 @@ class PaddleWebhookTest extends TestCase
     public function test_webhook_rejected_when_feature_disabled()
     {
         // Disable advanced payments feature
-        Feature::define('advanced-payments', fn() => false);
+        Feature::define('advanced-payments', fn () => false);
 
         $payload = $this->getTransactionCompletedPayload();
         $signature = hash_hmac('sha256', json_encode($payload), 'test_webhook_secret');
@@ -221,7 +223,7 @@ class PaddleWebhookTest extends TestCase
     protected function getTransactionCompletedPayload(): array
     {
         return [
-            'event_id' => 'evt_test_' . uniqid(),
+            'event_id' => 'evt_test_'.uniqid(),
             'event_type' => 'transaction.completed',
             'data' => [
                 'id' => 'txn_test_123',

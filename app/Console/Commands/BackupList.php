@@ -41,6 +41,7 @@ class BackupList extends Command
 
         if (! Storage::disk($disk)->exists($backupDirectory)) {
             $this->info('No backups found.');
+
             return 0;
         }
 
@@ -48,10 +49,11 @@ class BackupList extends Command
 
         if (empty($backups)) {
             $this->info('No backups found.');
+
             return 0;
         }
 
-        $this->info("Found " . count($backups) . " backup(s) on disk: {$disk}");
+        $this->info('Found '.count($backups)." backup(s) on disk: {$disk}");
         $this->newLine();
 
         $backupData = collect($backups)->map(function ($backup) use ($disk) {
@@ -70,9 +72,9 @@ class BackupList extends Command
         );
 
         // Show storage usage
-        $totalSize = collect($backups)->sum(fn($backup) => Storage::disk($disk)->size($backup));
+        $totalSize = collect($backups)->sum(fn ($backup) => Storage::disk($disk)->size($backup));
         $this->newLine();
-        $this->info("Total backup storage: " . $this->formatBytes($totalSize));
+        $this->info('Total backup storage: '.$this->formatBytes($totalSize));
 
         return 0;
     }
@@ -80,21 +82,22 @@ class BackupList extends Command
     /**
      * Format bytes to human-readable format
      *
-     * @param int $bytes
+     * @param  int  $bytes
      * @return string
      */
     private function formatBytes($bytes)
     {
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         }
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         }
         if ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
-        return $bytes . ' bytes';
+
+        return $bytes.' bytes';
     }
 }
 // CLAUDE-CHECKPOINT

@@ -4,8 +4,8 @@ use App\Jobs\ProcessInboundBillEmail;
 use App\Models\Company;
 use App\Models\CompanyInboundAlias;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Bus;
 
 use function Pest\Laravel\post;
 
@@ -85,4 +85,3 @@ test('inbound mail skips non-pdf attachments', function () {
 
     Bus::assertNotDispatched(ProcessInboundBillEmail::class);
 });
-

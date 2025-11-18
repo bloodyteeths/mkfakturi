@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\DB;
  *
  * Represents individual line items on a credit note.
  * Supports both fixed and percentage discounts, with tax calculations similar to InvoiceItem.
- *
- * @package App\Models
  */
 class CreditNoteItem extends Model
 {
@@ -27,6 +25,7 @@ class CreditNoteItem extends Model
      * Discount Type Constants
      */
     public const DISCOUNT_TYPE_FIXED = 'fixed';
+
     public const DISCOUNT_TYPE_PERCENTAGE = 'percentage';
 
     protected $guarded = [
@@ -48,7 +47,6 @@ class CreditNoteItem extends Model
     /**
      * Relationships
      */
-
     public function creditNote(): BelongsTo
     {
         return $this->belongsTo(CreditNote::class);
@@ -72,7 +70,6 @@ class CreditNoteItem extends Model
     /**
      * Scopes
      */
-
     public function scopeWhereCompany($query, $company_id)
     {
         $query->where('company_id', $company_id);
@@ -108,8 +105,6 @@ class CreditNoteItem extends Model
 
     /**
      * Calculate item subtotal before tax
-     *
-     * @return float
      */
     public function calculateSubtotal(): float
     {
@@ -127,8 +122,6 @@ class CreditNoteItem extends Model
 
     /**
      * Calculate tax amount for this item
-     *
-     * @return float
      */
     public function calculateTaxAmount(): float
     {
@@ -146,8 +139,6 @@ class CreditNoteItem extends Model
 
     /**
      * Calculate total including tax
-     *
-     * @return float
      */
     public function calculateTotal(): float
     {

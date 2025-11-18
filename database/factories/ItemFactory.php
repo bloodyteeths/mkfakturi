@@ -40,7 +40,6 @@ class ItemFactory extends Factory
      * Indicate that the item should have a barcode.
      *
      * @param  string|null  $barcode  Custom barcode or null for auto-generated EAN-13
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
     public function withBarcode(?string $barcode = null): Factory
     {
@@ -55,7 +54,6 @@ class ItemFactory extends Factory
      * Indicate that the item should have a SKU.
      *
      * @param  string|null  $sku  Custom SKU or null for auto-generated
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
     public function withSku(?string $sku = null): Factory
     {
@@ -68,8 +66,6 @@ class ItemFactory extends Factory
 
     /**
      * Generate a valid EAN-13 barcode.
-     *
-     * @return string
      */
     private function generateEan13(): string
     {
@@ -86,7 +82,7 @@ class ItemFactory extends Factory
         }
         $checkDigit = (10 - ($sum % 10)) % 10;
 
-        return $code . $checkDigit;
+        return $code.$checkDigit;
     }
 
     // CLAUDE-CHECKPOINT

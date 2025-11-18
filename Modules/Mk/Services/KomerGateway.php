@@ -2,11 +2,11 @@
 
 namespace Modules\Mk\Services;
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Simple Account Detail object for Komercijalna PSD2 responses
@@ -95,7 +95,7 @@ class KomerTransaction
 
     public function getCreatedAt(): string
     {
-        return $this->data['createdAt'] ?? (new \DateTime())->format('Y-m-d H:i:s');
+        return $this->data['createdAt'] ?? (new \DateTime)->format('Y-m-d H:i:s');
     }
 
     public function getBookingStatus(): string
@@ -126,17 +126,18 @@ class KomerTransaction
 
 /**
  * Komercijalna Banka PSD2 Gateway Implementation
- * 
+ *
  * Implements PSD2 API integration for Komercijalna Banka AD Skopje
  * Third largest bank in North Macedonia by assets
- * 
+ *
  * API Documentation: Berlin Group NextGenPSD2 compliant
  * Developer Portal: https://developer.kb.mk/
  * Rate Limit: 15 requests per minute (standard PSD2)
- * 
+ *
  * @version 2.0.0
+ *
  * @updated 2025-07-26 - Enhanced for SB-04 with complete implementation and sync job
- * 
+ *
  * IMPORTANT: Actual API endpoints may vary. Register at developer portal for exact URLs.
  * Current endpoints are based on Berlin Group PSD2 standards and KB infrastructure.
  */
@@ -145,26 +146,36 @@ class KomerGateway
     // Komercijalna Banka PSD2 API endpoints (Berlin Group NextGenPSD2 compliant)
     // Based on standard KB infrastructure pattern - registration required for detailed documentation
     protected const API_ACCESS_TOKEN = 'https://api-psd2.kb.mk/xs2a/v1/oauth2/token';
+
     protected const API_ACCOUNT_DETAILS = 'https://api-psd2.kb.mk/xs2a/v1/accounts';
+
     protected const API_SEPA_TRANSACTIONS = 'https://api-psd2.kb.mk/xs2a/v1/accounts/{account-id}/transactions';
-    
+
     // Sandbox URLs (Berlin Group standard paths)
     protected const API_ACCESS_TOKEN_SANDBOX = 'https://sandbox-api-psd2.kb.mk/xs2a/v1/oauth2/token';
+
     protected const API_ACCOUNT_DETAILS_SANDBOX = 'https://sandbox-api-psd2.kb.mk/xs2a/v1/accounts';
+
     protected const API_SEPA_TRANSACTIONS_SANDBOX = 'https://sandbox-api-psd2.kb.mk/xs2a/v1/accounts/{account-id}/transactions';
 
     // Rate limiting constants
     protected const RATE_LIMIT_PER_MINUTE = 15;
+
     protected const RATE_LIMIT_DELAY_SECONDS = 4;
+
     protected const MAX_TRANSACTIONS_PER_REQUEST = 200;
+
     protected const MAX_RETRY_ATTEMPTS = 3;
 
     // Cache keys for rate limiting
     protected const CACHE_KEY_RATE_LIMIT = 'kb_api_calls';
 
     protected $accountId;
+
     protected $httpClient;
+
     protected $accessToken;
+
     protected $lastRequestTime;
 
     /**
@@ -174,7 +185,7 @@ class KomerGateway
     {
         $this->httpClient = new Client([
             'timeout' => 30,
-            'verify' => !$this->isSandbox(), // SSL verification only in production
+            'verify' => ! $this->isSandbox(), // SSL verification only in production
         ]);
         $this->lastRequestTime = 0;
     }
@@ -204,7 +215,7 @@ class KomerGateway
 
         $response = $this->httpClient->post($this->getAccessTokenUrl(), [
             'headers' => [
-                'Authorization' => 'Basic ' . base64_encode($clientId . ':' . $clientSecret),
+                'Authorization' => 'Basic '.base64_encode($clientId.':'.$clientSecret),
                 'Content-Type' => 'application/x-www-form-urlencoded',
                 'Accept' => 'application/json',
                 'X-Request-ID' => $this->generateRequestId(),
@@ -222,9 +233,9 @@ class KomerGateway
             $errorMessage = $data['error_description'] ?? $data['error'];
             Log::error('Komercijalna OAuth token retrieval failed', [
                 'error' => $data['error'],
-                'description' => $errorMessage
+                'description' => $errorMessage,
             ]);
-            throw new \Exception('OAuth token retrieval failed: ' . $errorMessage);
+            throw new \Exception('OAuth token retrieval failed: '.$errorMessage);
         }
 
         $token = (object) [
@@ -239,7 +250,7 @@ class KomerGateway
 
         Log::info('Komercijalna OAuth token retrieved successfully', [
             'expires_in' => $data['expires_in'] ?? 3600,
-            'scope' => $data['scope'] ?? null
+            'scope' => $data['scope'] ?? null,
         ]);
 
         return $token;
@@ -252,13 +263,13 @@ class KomerGateway
     {
         $this->enforceRateLimit();
 
-        if (!$this->accessToken) {
+        if (! $this->accessToken) {
             throw new \Exception('Access token not set. Call setAccessToken() first.');
         }
 
         $response = $this->makeApiRequest('GET', $this->getAccountDetailsUrl(), [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer '.$this->accessToken,
                 'Accept' => 'application/json',
                 'X-Request-ID' => $this->generateRequestId(),
                 'PSU-IP-Address' => $this->getClientIp(),
@@ -268,7 +279,7 @@ class KomerGateway
 
         $data = json_decode($response->getBody()->getContents(), true);
 
-        if (!isset($data['accounts'])) {
+        if (! isset($data['accounts'])) {
             Log::error('Invalid response format from Komercijalna API', ['response' => $data]);
             throw new \Exception('Invalid response format from Komercijalna Banka API');
         }
@@ -286,7 +297,7 @@ class KomerGateway
                 'bic' => $this->getBankBic(),
                 'usage' => $accountData['usage'] ?? 'PRIV',
                 'details' => $accountData['details'] ?? null,
-                'balance' => isset($accountData['balances'][0]['balanceAmount']['amount']) 
+                'balance' => isset($accountData['balances'][0]['balanceAmount']['amount'])
                     ? (float) $accountData['balances'][0]['balanceAmount']['amount'] : 0.0,
                 'accountNumber' => $this->extractAccountNumber($accountData['iban'] ?? $accountData['maskedPan'] ?? ''),
             ]);
@@ -306,20 +317,20 @@ class KomerGateway
     {
         $this->enforceRateLimit();
 
-        if (!$this->accessToken) {
+        if (! $this->accessToken) {
             throw new \Exception('Access token not set. Call setAccessToken() first.');
         }
 
         // Respect transaction limit per request
         $limit = min($limit, self::MAX_TRANSACTIONS_PER_REQUEST);
-        
+
         // Date range for transactions (default to last 30 days)
-        $dateFrom = (new \DateTime())->modify('-30 days')->format('Y-m-d');
-        $dateTo = (new \DateTime())->format('Y-m-d');
+        $dateFrom = (new \DateTime)->modify('-30 days')->format('Y-m-d');
+        $dateTo = (new \DateTime)->format('Y-m-d');
 
         $response = $this->makeApiRequest('GET', $this->getSepaTransactionsUrl(), [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer '.$this->accessToken,
                 'Accept' => 'application/json',
                 'X-Request-ID' => $this->generateRequestId(),
                 'PSU-IP-Address' => $this->getClientIp(),
@@ -337,14 +348,14 @@ class KomerGateway
 
         $data = json_decode($response->getBody()->getContents(), true);
 
-        if (!isset($data['transactions'])) {
+        if (! isset($data['transactions'])) {
             Log::error('Invalid transactions response from Komercijalna API', ['response' => $data]);
             throw new \Exception('Invalid transactions response from Komercijalna Banka API');
         }
 
         $transactions = [];
         $bookedTransactions = $data['transactions']['booked'] ?? [];
-        
+
         foreach ($bookedTransactions as $txData) {
             $transaction = new KomerTransaction([
                 'externalUid' => $txData['transactionId'] ?? $txData['entryReference'] ?? uniqid('kb_'),
@@ -354,7 +365,7 @@ class KomerGateway
                 'bookingStatus' => $txData['bookingDate'] ? 'booked' : 'pending',
                 'valueDate' => $txData['valueDate'] ?? $txData['bookingDate'],
                 'bookingDate' => $txData['bookingDate'] ?? null,
-                'createdAt' => $txData['bookingDate'] ?? $txData['valueDate'] ?? (new \DateTime())->format('Y-m-d H:i:s'),
+                'createdAt' => $txData['bookingDate'] ?? $txData['valueDate'] ?? (new \DateTime)->format('Y-m-d H:i:s'),
                 'description' => $txData['remittanceInformationUnstructured'] ?? $txData['additionalInformation'] ?? '',
                 'remittanceInformation' => $txData['remittanceInformationUnstructured'] ?? '',
                 'creditorName' => $txData['creditorName'] ?? $txData['counterpartyName'] ?? null,
@@ -367,7 +378,7 @@ class KomerGateway
                 'mandateId' => $txData['mandateId'] ?? null,
                 'purposeCode' => $txData['purposeCode'] ?? null,
                 'bankTransactionCode' => $txData['bankTransactionCode'] ?? null,
-                'balance' => isset($txData['balanceAfterTransaction']) ? 
+                'balance' => isset($txData['balanceAfterTransaction']) ?
                     (float) $txData['balanceAfterTransaction']['amount'] : null,
             ]);
 
@@ -378,7 +389,7 @@ class KomerGateway
             'transaction_count' => count($transactions),
             'page' => $page,
             'limit' => $limit,
-            'date_range' => [$dateFrom, $dateTo]
+            'date_range' => [$dateFrom, $dateTo],
         ]);
 
         return $transactions;
@@ -396,13 +407,13 @@ class KomerGateway
             try {
                 $attempts++;
                 $response = $this->httpClient->request($method, $url, $options);
-                
+
                 // Log successful request
                 Log::debug('Komercijalna API request successful', [
                     'method' => $method,
                     'url' => $url,
                     'attempt' => $attempts,
-                    'status_code' => $response->getStatusCode()
+                    'status_code' => $response->getStatusCode(),
                 ]);
 
                 return $response;
@@ -416,7 +427,7 @@ class KomerGateway
                     'url' => $url,
                     'attempt' => $attempts,
                     'status_code' => $statusCode,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
 
                 // Don't retry on 401/403 (auth errors) or 400 (bad request)
@@ -436,10 +447,10 @@ class KomerGateway
             'method' => $method,
             'url' => $url,
             'attempts' => $attempts,
-            'last_error' => $lastException ? $lastException->getMessage() : 'Unknown error'
+            'last_error' => $lastException ? $lastException->getMessage() : 'Unknown error',
         ]);
 
-        throw $lastException ?? new \Exception('API request failed after ' . $attempts . ' attempts');
+        throw $lastException ?? new \Exception('API request failed after '.$attempts.' attempts');
     }
 
     /**
@@ -449,19 +460,19 @@ class KomerGateway
     {
         $now = time();
         $timeSinceLastRequest = $now - $this->lastRequestTime;
-        
+
         if ($timeSinceLastRequest < self::RATE_LIMIT_DELAY_SECONDS) {
             $sleepTime = self::RATE_LIMIT_DELAY_SECONDS - $timeSinceLastRequest;
-            Log::debug('Komercijalna rate limit: sleeping for ' . $sleepTime . ' seconds');
+            Log::debug('Komercijalna rate limit: sleeping for '.$sleepTime.' seconds');
             sleep($sleepTime);
         }
-        
+
         $this->lastRequestTime = time();
 
         // Also track requests in cache for distributed rate limiting
-        $cacheKey = self::CACHE_KEY_RATE_LIMIT . '_' . date('Y-m-d-H-i');
+        $cacheKey = self::CACHE_KEY_RATE_LIMIT.'_'.date('Y-m-d-H-i');
         $requestCount = Cache::get($cacheKey, 0);
-        
+
         if ($requestCount >= self::RATE_LIMIT_PER_MINUTE) {
             Log::warning('Komercijalna rate limit exceeded, waiting 60 seconds');
             sleep(60);
@@ -480,7 +491,7 @@ class KomerGateway
         if (strlen($identifier) > 15 && substr($identifier, 0, 2) === 'MK') {
             return substr($identifier, 4); // Remove country code and check digits
         }
-        
+
         // Return as-is for masked PAN or other formats
         return $identifier;
     }
@@ -507,6 +518,7 @@ class KomerGateway
     protected function getSepaTransactionsUrl(): string
     {
         $baseUrl = $this->isSandbox() ? self::API_SEPA_TRANSACTIONS_SANDBOX : self::API_SEPA_TRANSACTIONS;
+
         return str_replace('{account-id}', $this->getAccountId(), $baseUrl);
     }
 
@@ -523,9 +535,10 @@ class KomerGateway
                 // Laravel not available, fall back to environment
             }
         }
-        
+
         // Fallback to environment variable
         $env = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'local';
+
         return $env !== 'production';
     }
 
@@ -534,7 +547,7 @@ class KomerGateway
      */
     protected function generateRequestId(): string
     {
-        return 'kb-' . uniqid() . '-' . time();
+        return 'kb-'.uniqid().'-'.time();
     }
 
     /**
@@ -546,16 +559,16 @@ class KomerGateway
         if (function_exists('request') && request() && method_exists(request(), 'ip')) {
             return request()->ip();
         }
-        
+
         // Fallback to server variables
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        if (! empty($_SERVER['HTTP_CLIENT_IP'])) {
             return $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        } elseif (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             return $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+        } elseif (! empty($_SERVER['REMOTE_ADDR'])) {
             return $_SERVER['REMOTE_ADDR'];
         }
-        
+
         return '127.0.0.1';
     }
 
@@ -584,7 +597,7 @@ class KomerGateway
             'message' => $e->getMessage(),
             'code' => $e->getCode(),
             'bank' => 'kb',
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
 
         throw $e;
@@ -619,25 +632,25 @@ class KomerGateway
      */
     public function getSandboxTestData(): array
     {
-        if (!$this->isSandbox()) {
+        if (! $this->isSandbox()) {
             throw new \Exception('Test data only available in sandbox environment');
         }
 
         // Generate test transactions for Komercijalna sandbox
         $transactions = [];
         $baseDate = Carbon::now()->subDays(30);
-        
+
         for ($i = 0; $i < 30; $i++) { // Generate 30 transactions for KB
             $date = $baseDate->copy()->addDays($i);
             $amount = rand(150, 12000) + (rand(0, 99) / 100); // Random amount between 150.00 and 12000.99
             $isCredit = $i % 3 !== 0; // 2/3 credit, 1/3 debit
-            
+
             $transactions[] = [
-                'transactionId' => 'KB_' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
-                'entryReference' => 'KB' . date('Ymd') . sprintf('%06d', $i + 1),
+                'transactionId' => 'KB_'.str_pad($i + 1, 6, '0', STR_PAD_LEFT),
+                'entryReference' => 'KB'.date('Ymd').sprintf('%06d', $i + 1),
                 'transactionAmount' => [
                     'amount' => $isCredit ? $amount : -$amount,
-                    'currency' => 'MKD'
+                    'currency' => 'MKD',
                 ],
                 'bookingDate' => $date->format('Y-m-d'),
                 'valueDate' => $date->format('Y-m-d'),
@@ -645,19 +658,19 @@ class KomerGateway
                 'creditorName' => $isCredit ? $this->generateTestCounterparty($i) : 'KB Test Account',
                 'debtorName' => $isCredit ? 'KB Test Account' : $this->generateTestCounterparty($i),
                 'creditorAccount' => [
-                    'iban' => $isCredit ? 'MK07' . rand(100000000000, 999999999999) : 'MK07150000000000001'
+                    'iban' => $isCredit ? 'MK07'.rand(100000000000, 999999999999) : 'MK07150000000000001',
                 ],
                 'debtorAccount' => [
-                    'iban' => $isCredit ? 'MK07150000000000001' : 'MK07' . rand(100000000000, 999999999999)
+                    'iban' => $isCredit ? 'MK07150000000000001' : 'MK07'.rand(100000000000, 999999999999),
                 ],
-                'endToEndId' => 'E2E' . uniqid(),
+                'endToEndId' => 'E2E'.uniqid(),
                 'proprietaryBankTransactionCode' => $isCredit ? 'RCDT' : 'PMNT',
                 'balanceAfterTransaction' => [
-                    'amount' => 25000 + array_sum(array_slice(array_map(function($tx) {
+                    'amount' => 25000 + array_sum(array_slice(array_map(function ($tx) {
                         return $tx['transactionAmount']['amount'];
                     }, array_slice($transactions, 0, $i)), 0, $i + 1)),
-                    'currency' => 'MKD'
-                ]
+                    'currency' => 'MKD',
+                ],
             ];
         }
 
@@ -676,16 +689,16 @@ class KomerGateway
                         [
                             'balanceAmount' => [
                                 'amount' => 25000.00,
-                                'currency' => 'MKD'
+                                'currency' => 'MKD',
                             ],
-                            'balanceType' => 'closingBooked'
-                        ]
-                    ]
-                ]
+                            'balanceType' => 'closingBooked',
+                        ],
+                    ],
+                ],
             ],
             'transactions' => [
-                'booked' => $transactions
-            ]
+                'booked' => $transactions,
+            ],
         ];
     }
 
@@ -714,10 +727,10 @@ class KomerGateway
             'Investment return',
             'Partner distribution',
             'Subsidy payment',
-            'Lease agreement'
+            'Lease agreement',
         ];
 
-        return $descriptions[$index % count($descriptions)] . ' #' . str_pad($index + 1, 3, '0', STR_PAD_LEFT);
+        return $descriptions[$index % count($descriptions)].' #'.str_pad($index + 1, 3, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -735,7 +748,7 @@ class KomerGateway
             'Building Construction',
             'Retail Commerce DOO',
             'Strategic Consulting',
-            'Financial Advisory DOOEL'
+            'Financial Advisory DOOEL',
         ];
 
         return $companies[$index % count($companies)];
@@ -770,7 +783,7 @@ class KomerGateway
             ],
             'rate_limiting' => [
                 'requests_per_minute' => self::RATE_LIMIT_PER_MINUTE,
-                'delay_between_requests' => self::RATE_LIMIT_DELAY_SECONDS . ' seconds',
+                'delay_between_requests' => self::RATE_LIMIT_DELAY_SECONDS.' seconds',
                 'max_transactions_per_request' => self::MAX_TRANSACTIONS_PER_REQUEST,
                 'max_retry_attempts' => self::MAX_RETRY_ATTEMPTS,
             ],
@@ -780,7 +793,7 @@ class KomerGateway
                 'developer_portal' => 'https://developer.kb.mk/',
                 'task' => 'SB-04: Complete Komercijalna gateway & sync job',
                 'target' => '20+ rows imported with enhanced functionality',
-            ]
+            ],
         ];
 
         return $status;
@@ -791,12 +804,12 @@ class KomerGateway
      */
     public function getSandboxAccountsAndTransactions(): array
     {
-        if (!$this->isSandbox()) {
+        if (! $this->isSandbox()) {
             throw new \Exception('Sandbox data only available in sandbox environment');
         }
 
         $testData = $this->getSandboxTestData();
-        
+
         // Convert raw data to objects
         $accounts = [];
         foreach ($testData['accounts'] as $accountData) {
@@ -830,7 +843,7 @@ class KomerGateway
 
         return [
             'accounts' => $accounts,
-            'transactions' => $transactions
+            'transactions' => $transactions,
         ];
     }
 
@@ -839,7 +852,7 @@ class KomerGateway
      */
     public function testConnectionAndRetrieveTransactions(): array
     {
-        if (!$this->isSandbox()) {
+        if (! $this->isSandbox()) {
             throw new \Exception('Test connection only available in sandbox environment');
         }
 
@@ -847,14 +860,13 @@ class KomerGateway
 
         // Simulate successful connection and return objects
         $result = $this->getSandboxAccountsAndTransactions();
-        
+
         Log::info('Komercijalna sandbox test completed', [
             'accounts_retrieved' => count($result['accounts']),
             'transactions_retrieved' => count($result['transactions']),
-            'task' => 'SB-04'
+            'task' => 'SB-04',
         ]);
 
         return $result;
     }
 }
-

@@ -86,4 +86,3 @@ class SuppliersController extends Controller
     }
 }
 // CLAUDE-CHECKPOINT
-

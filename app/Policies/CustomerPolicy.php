@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class CustomerPolicy
 {
@@ -22,7 +21,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         // Use the user instance to check abilities (respects Bouncer scope)
         if ($user->can('view-customer', Customer::class)) {
             return true;
@@ -41,7 +40,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-customer', $customer)) {
             return true;
         }
@@ -59,7 +58,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-customer', Customer::class)) {
             return true;
         }
@@ -77,7 +76,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-customer', $customer)) {
             return true;
         }
@@ -95,7 +94,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-customer', $customer)) {
             return true;
         }
@@ -113,7 +112,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-customer', $customer)) {
             return true;
         }
@@ -131,7 +130,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-customer', $customer)) {
             return true;
         }
@@ -149,7 +148,7 @@ class CustomerPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-customer', Customer::class)) {
             return true;
         }

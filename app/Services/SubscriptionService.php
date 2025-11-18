@@ -37,21 +37,21 @@ class SubscriptionService
     /**
      * Create a company subscription
      *
-     * @param Company $company
-     * @param string $tier Subscription tier (starter, standard, business, max)
-     * @param string $provider Payment provider (paddle or cpay)
+     * @param  string  $tier  Subscription tier (starter, standard, business, max)
+     * @param  string  $provider  Payment provider (paddle or cpay)
      * @return array Contains 'checkout_url' and provider-specific data
+     *
      * @throws \Exception
      */
     public function createCompanySubscription(Company $company, string $tier, string $provider = 'paddle'): array
     {
         // Validate tier
-        if (!in_array($tier, ['starter', 'standard', 'business', 'max'])) {
+        if (! in_array($tier, ['starter', 'standard', 'business', 'max'])) {
             throw new \InvalidArgumentException("Invalid subscription tier: {$tier}");
         }
 
         // Validate provider
-        if (!in_array($provider, ['paddle', 'cpay'])) {
+        if (! in_array($provider, ['paddle', 'cpay'])) {
             throw new \InvalidArgumentException("Invalid payment provider: {$provider}");
         }
 
@@ -74,15 +74,15 @@ class SubscriptionService
     /**
      * Create Partner Plus subscription for user
      *
-     * @param User $user
-     * @param string $provider Payment provider (paddle or cpay)
+     * @param  string  $provider  Payment provider (paddle or cpay)
      * @return array Contains 'checkout_url' and provider-specific data
+     *
      * @throws \Exception
      */
     public function createPartnerPlusSubscription(User $user, string $provider = 'paddle'): array
     {
         // Verify user is a partner
-        if (!$user->partner_tier || $user->partner_tier === 'none') {
+        if (! $user->partner_tier || $user->partner_tier === 'none') {
             throw new \Exception('User is not a registered partner');
         }
 
@@ -104,14 +104,14 @@ class SubscriptionService
     /**
      * Swap subscription plan (upgrade/downgrade)
      *
-     * @param \Laravel\Paddle\Subscription $subscription
-     * @param string $newTier
+     * @param  \Laravel\Paddle\Subscription  $subscription
      * @return bool Success status
+     *
      * @throws \Exception
      */
     public function swapPlan($subscription, string $newTier): bool
     {
-        if (!$subscription) {
+        if (! $subscription) {
             throw new \Exception('No active subscription found');
         }
 
@@ -120,7 +120,7 @@ class SubscriptionService
 
         if ($provider === 'paddle') {
             return $this->swapPaddlePlan($subscription, $newTier);
-        } else if ($provider === 'cpay') {
+        } elseif ($provider === 'cpay') {
             return $this->swapCpayPlan($subscription, $newTier);
         }
 
@@ -130,13 +130,14 @@ class SubscriptionService
     /**
      * Cancel subscription
      *
-     * @param \Laravel\Paddle\Subscription $subscription
+     * @param  \Laravel\Paddle\Subscription  $subscription
      * @return bool Success status
+     *
      * @throws \Exception
      */
     public function cancelSubscription($subscription): bool
     {
-        if (!$subscription) {
+        if (! $subscription) {
             throw new \Exception('No active subscription found');
         }
 
@@ -152,7 +153,7 @@ class SubscriptionService
 
             return true;
 
-        } else if ($provider === 'cpay') {
+        } elseif ($provider === 'cpay') {
             // Extract CPAY subscription reference from metadata
             $metadata = is_string($subscription->metadata)
                 ? json_decode($subscription->metadata, true)
@@ -160,7 +161,7 @@ class SubscriptionService
 
             $subscriptionRef = $metadata['cpay_subscription_ref'] ?? null;
 
-            if (!$subscriptionRef) {
+            if (! $subscriptionRef) {
                 throw new \Exception('CPAY subscription reference not found');
             }
 
@@ -172,22 +173,17 @@ class SubscriptionService
 
     /**
      * Create Paddle subscription for company
-     *
-     * @param Company $company
-     * @param string $tier
-     * @param float $monthlyPrice
-     * @return array
      */
     private function createPaddleSubscription(Company $company, string $tier, float $monthlyPrice): array
     {
         $priceId = config("services.paddle.prices.{$tier}");
 
-        if (!$priceId) {
+        if (! $priceId) {
             throw new \Exception("Paddle price ID not configured for tier: {$tier}");
         }
 
         // Create or retrieve Paddle customer
-        if (!$company->paddle_id) {
+        if (! $company->paddle_id) {
             $company->createAsCustomer([
                 'name' => $company->name,
                 'email' => $company->owner->email ?? auth()->user()->email,
@@ -211,11 +207,6 @@ class SubscriptionService
 
     /**
      * Create CPAY subscription for company
-     *
-     * @param Company $company
-     * @param string $tier
-     * @param float $monthlyPrice
-     * @return array
      */
     private function createCpaySubscription(Company $company, string $tier, float $monthlyPrice): array
     {
@@ -230,21 +221,17 @@ class SubscriptionService
 
     /**
      * Create Paddle Partner Plus subscription
-     *
-     * @param User $user
-     * @param float $monthlyPrice
-     * @return array
      */
     private function createPaddlePartnerSubscription(User $user, float $monthlyPrice): array
     {
         $priceId = config('services.paddle.prices.partner_plus');
 
-        if (!$priceId) {
+        if (! $priceId) {
             throw new \Exception('Paddle price ID not configured for Partner Plus');
         }
 
         // Create or retrieve Paddle customer
-        if (!$user->paddle_id) {
+        if (! $user->paddle_id) {
             $user->createAsCustomer([
                 'name' => $user->name,
                 'email' => $user->email,
@@ -269,15 +256,13 @@ class SubscriptionService
     /**
      * Swap Paddle subscription plan
      *
-     * @param \Laravel\Paddle\Subscription $subscription
-     * @param string $newTier
-     * @return bool
+     * @param  \Laravel\Paddle\Subscription  $subscription
      */
     private function swapPaddlePlan($subscription, string $newTier): bool
     {
         $newPriceId = config("services.paddle.prices.{$newTier}");
 
-        if (!$newPriceId) {
+        if (! $newPriceId) {
             throw new \Exception("Paddle price ID not configured for tier: {$newTier}");
         }
 
@@ -301,9 +286,7 @@ class SubscriptionService
     /**
      * Swap CPAY subscription plan
      *
-     * @param \Laravel\Paddle\Subscription $subscription
-     * @param string $newTier
-     * @return bool
+     * @param  \Laravel\Paddle\Subscription  $subscription
      */
     private function swapCpayPlan($subscription, string $newTier): bool
     {
@@ -314,9 +297,6 @@ class SubscriptionService
 
     /**
      * Get tier pricing
-     *
-     * @param string $tier
-     * @return float
      */
     public static function getTierPrice(string $tier): float
     {
@@ -325,8 +305,6 @@ class SubscriptionService
 
     /**
      * Get all available tiers
-     *
-     * @return array
      */
     public static function getAvailableTiers(): array
     {

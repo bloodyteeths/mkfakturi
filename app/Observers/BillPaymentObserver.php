@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\BillPayment;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Models\BillPayment;
 use Illuminate\Support\Facades\Log;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -12,8 +12,6 @@ use Vinkla\Hashids\Facades\Hashids;
  *
  * Automatically posts bill payment transactions to the IFRS ledger
  * when FEATURE_ACCOUNTING_BACKBONE is enabled.
- *
- * @package App\Observers
  */
 class BillPaymentObserver
 {
@@ -28,14 +26,11 @@ class BillPaymentObserver
      * Handle the BillPayment "created" event.
      *
      * Generate unique hash and post to ledger
-     *
-     * @param BillPayment $billPayment
-     * @return void
      */
     public function created(BillPayment $billPayment): void
     {
         // Generate unique hash if not set
-        if (!$billPayment->unique_hash) {
+        if (! $billPayment->unique_hash) {
             try {
                 // Use dedicated connection when configured, otherwise fall back to default
                 $connection = config('hashids.connections.'.BillPayment::class) ? BillPayment::class : null;
@@ -79,9 +74,6 @@ class BillPaymentObserver
      * Handle the BillPayment "updating" event.
      *
      * Prevent updates if the bill payment falls within a locked tax period.
-     *
-     * @param BillPayment $billPayment
-     * @return bool|null
      */
     public function updating(BillPayment $billPayment): ?bool
     {
@@ -97,9 +89,6 @@ class BillPaymentObserver
      * Handle the BillPayment "updated" event.
      *
      * Update bill's paid status when payment amount changes
-     *
-     * @param BillPayment $billPayment
-     * @return void
      */
     public function updated(BillPayment $billPayment): void
     {
@@ -113,9 +102,6 @@ class BillPaymentObserver
      * Handle the BillPayment "deleting" event.
      *
      * Prevent deletion if the bill payment falls within a locked tax period.
-     *
-     * @param BillPayment $billPayment
-     * @return bool|null
      */
     public function deleting(BillPayment $billPayment): ?bool
     {
@@ -131,9 +117,6 @@ class BillPaymentObserver
      * Handle the BillPayment "deleted" event.
      *
      * Update bill's paid status when payment is deleted
-     *
-     * @param BillPayment $billPayment
-     * @return void
      */
     public function deleted(BillPayment $billPayment): void
     {
@@ -145,14 +128,11 @@ class BillPaymentObserver
 
     /**
      * Determine if bill payment should be posted to ledger
-     *
-     * @param BillPayment $billPayment
-     * @return bool
      */
     protected function shouldPostToLedger(BillPayment $billPayment): bool
     {
         // Check if feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return false;
         }
 
@@ -162,8 +142,6 @@ class BillPaymentObserver
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {
@@ -178,14 +156,11 @@ class BillPaymentObserver
 
     /**
      * Check if bill payment falls within a locked tax period.
-     *
-     * @param BillPayment $billPayment
-     * @return bool
      */
     protected function isInLockedPeriod(BillPayment $billPayment): bool
     {
         // Check if tax period locking is enabled
-        if (!config('tax.period_locking_enabled', true)) {
+        if (! config('tax.period_locking_enabled', true)) {
             return false;
         }
 

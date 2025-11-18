@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Validators\Failure;
 
-class BillImport implements ToCollection, WithHeadingRow, SkipsOnFailure
+class BillImport implements SkipsOnFailure, ToCollection, WithHeadingRow
 {
     use Importable;
 
@@ -82,7 +82,7 @@ class BillImport implements ToCollection, WithHeadingRow, SkipsOnFailure
     }
 
     /**
-     * @param array<string,mixed> $row
+     * @param  array<string,mixed>  $row
      */
     private function importRow(array $row, int $rowNumber): void
     {
@@ -93,6 +93,7 @@ class BillImport implements ToCollection, WithHeadingRow, SkipsOnFailure
 
         if ($this->isDryRun) {
             $this->successCount++;
+
             return;
         }
 
@@ -181,7 +182,7 @@ class BillImport implements ToCollection, WithHeadingRow, SkipsOnFailure
     }
 
     /**
-     * @param array<string,mixed> $row
+     * @param  array<string,mixed>  $row
      * @return array<string,mixed>
      */
     private function mapColumns(array $row): array
@@ -274,4 +275,3 @@ class BillImport implements ToCollection, WithHeadingRow, SkipsOnFailure
         return $this->failures;
     }
 }
-

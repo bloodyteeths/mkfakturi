@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\CommissionService;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Paddle\Http\Controllers\WebhookController as CashierWebhookController;
@@ -21,9 +20,6 @@ class PaddleWebhookController extends CashierWebhookController
 {
     /**
      * Handle subscription created event
-     *
-     * @param array $payload
-     * @return Response
      */
     protected function handleSubscriptionCreated(array $payload): Response
     {
@@ -46,9 +42,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle subscription updated event
-     *
-     * @param array $payload
-     * @return Response
      */
     protected function handleSubscriptionUpdated(array $payload): Response
     {
@@ -71,9 +64,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle subscription payment succeeded
-     *
-     * @param array $payload
-     * @return Response
      */
     protected function handleSubscriptionPaymentSucceeded(array $payload): Response
     {
@@ -103,9 +93,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle subscription cancelled event
-     *
-     * @param array $payload
-     * @return Response
      */
     protected function handleSubscriptionCanceled(array $payload): Response
     {
@@ -118,9 +105,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle transaction completed event
-     *
-     * @param array $payload
-     * @return Response
      */
     protected function handleTransactionCompleted(array $payload): Response
     {
@@ -133,10 +117,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle company subscription created
-     *
-     * @param array $data
-     * @param array $customData
-     * @return void
      */
     private function handleCompanySubscriptionCreated(array $data, array $customData): void
     {
@@ -160,10 +140,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle company subscription updated
-     *
-     * @param array $data
-     * @param array $customData
-     * @return void
      */
     private function handleCompanySubscriptionUpdated(array $data, array $customData): void
     {
@@ -189,10 +165,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle partner subscription created
-     *
-     * @param array $data
-     * @param array $customData
-     * @return void
      */
     private function handlePartnerSubscriptionCreated(array $data, array $customData): void
     {
@@ -214,10 +186,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Handle partner subscription updated
-     *
-     * @param array $data
-     * @param array $customData
-     * @return void
      */
     private function handlePartnerSubscriptionUpdated(array $data, array $customData): void
     {
@@ -243,10 +211,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Trigger commission calculation for partners
-     *
-     * @param Company $company
-     * @param array $paymentData
-     * @return void
      */
     private function triggerCommissionCalculation(Company $company, array $paymentData): void
     {
@@ -295,8 +259,6 @@ class PaddleWebhookController extends CashierWebhookController
 
     /**
      * Return successful response
-     *
-     * @return Response
      */
     private function successMethod(): Response
     {

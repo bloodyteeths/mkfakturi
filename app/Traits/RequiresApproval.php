@@ -14,15 +14,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  *
  * Usage: Add to Invoice, Estimate, Expense, Bill, CreditNote models:
  *   use RequiresApproval;
- *
- * @package App\Traits
  */
 trait RequiresApproval
 {
     /**
      * Get all approval requests for this document
-     *
-     * @return MorphMany
      */
     public function approvalRequests(): MorphMany
     {
@@ -32,8 +28,6 @@ trait RequiresApproval
 
     /**
      * Get the latest approval request
-     *
-     * @return ApprovalRequest|null
      */
     public function latestApprovalRequest(): ?ApprovalRequest
     {
@@ -42,14 +36,12 @@ trait RequiresApproval
 
     /**
      * Check if this document type requires approval based on company settings
-     *
-     * @return bool
      */
     public function requiresApproval(): bool
     {
         $companyId = $this->company_id ?? request()->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return false;
         }
 
@@ -62,7 +54,7 @@ trait RequiresApproval
 
         // Check document-type specific setting
         $documentType = class_basename($this);
-        $settingKey = 'require_approval_' . strtolower($documentType);
+        $settingKey = 'require_approval_'.strtolower($documentType);
         $requireApproval = CompanySetting::getSetting($settingKey, $companyId);
 
         return $requireApproval === 'YES';
@@ -71,8 +63,7 @@ trait RequiresApproval
     /**
      * Request approval for this document
      *
-     * @param string|null $note Optional note from requester
-     * @return ApprovalRequest
+     * @param  string|null  $note  Optional note from requester
      */
     public function requestApproval(?string $note = null): ApprovalRequest
     {
@@ -98,13 +89,11 @@ trait RequiresApproval
 
     /**
      * Check if this document has been approved
-     *
-     * @return bool
      */
     public function isApproved(): bool
     {
         // If approvals not required, consider it approved
-        if (!$this->requiresApproval()) {
+        if (! $this->requiresApproval()) {
             return true;
         }
 
@@ -116,8 +105,6 @@ trait RequiresApproval
 
     /**
      * Check if this document has a pending approval request
-     *
-     * @return bool
      */
     public function hasPendingApproval(): bool
     {
@@ -128,25 +115,22 @@ trait RequiresApproval
 
     /**
      * Check if this document was rejected
-     *
-     * @return bool
      */
     public function wasRejected(): bool
     {
         $latest = $this->latestApprovalRequest();
+
         return $latest && $latest->isRejected();
     }
 
     /**
      * Check if this document can be sent/signed
      * Blocks sending until approved if approvals are required
-     *
-     * @return bool
      */
     public function canBeSent(): bool
     {
         // If approvals not required, can always be sent
-        if (!$this->requiresApproval()) {
+        if (! $this->requiresApproval()) {
             return true;
         }
 
@@ -156,18 +140,16 @@ trait RequiresApproval
 
     /**
      * Get approval status string
-     *
-     * @return string
      */
     public function getApprovalStatusAttribute(): string
     {
-        if (!$this->requiresApproval()) {
+        if (! $this->requiresApproval()) {
             return 'not_required';
         }
 
         $latest = $this->latestApprovalRequest();
 
-        if (!$latest) {
+        if (! $latest) {
             return 'not_requested';
         }
 
@@ -176,8 +158,6 @@ trait RequiresApproval
 
     /**
      * Get approval status color for UI
-     *
-     * @return string
      */
     public function getApprovalStatusColorAttribute(): string
     {

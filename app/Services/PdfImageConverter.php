@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Storage;
 class PdfImageConverter
 {
     private string $backend;
+
     private int $dpi;
+
     private string $format;
 
     /**
@@ -30,22 +32,23 @@ class PdfImageConverter
     /**
      * Convert PDF to array of base64 encoded images
      *
-     * @param string $pdfPath Path to PDF file (can be storage path or full path)
-     * @param array<string, mixed> $options Additional options
+     * @param  string  $pdfPath  Path to PDF file (can be storage path or full path)
+     * @param  array<string, mixed>  $options  Additional options
      * @return array<int, array{data: string, media_type: string, page: int}> Array of images
+     *
      * @throws \Exception If conversion fails or PDF analysis feature is disabled
      */
     public function convertToImages(string $pdfPath, array $options = []): array
     {
         // Guard: Check if PDF analysis is enabled
-        if (!$this->isPdfAnalysisAllowed()) {
+        if (! $this->isPdfAnalysisAllowed()) {
             Log::warning('[PdfImageConverter] PDF conversion blocked', [
                 'path' => $pdfPath,
                 'reason' => 'PDF analysis feature is disabled',
             ]);
 
             throw new \Exception(
-                'Конверзијата на PDF документи не е овозможена. ' .
+                'Конверзијата на PDF документи не е овозможена. '.
                 'Оваа функционалност бара активирање на функцијата за анализа на PDF документи.'
             );
         }
@@ -63,7 +66,7 @@ class PdfImageConverter
         // Resolve the file path
         $fullPath = $this->resolvePath($pdfPath);
 
-        if (!file_exists($fullPath)) {
+        if (! file_exists($fullPath)) {
             throw new \Exception("PDF file not found: {$pdfPath}");
         }
 
@@ -83,23 +86,24 @@ class PdfImageConverter
     /**
      * Convert PDF using Imagick extension
      *
-     * @param string $fullPath Full path to PDF
-     * @param int $dpi DPI for rendering
-     * @param string $format Output format
+     * @param  string  $fullPath  Full path to PDF
+     * @param  int  $dpi  DPI for rendering
+     * @param  string  $format  Output format
      * @return array<int, array{data: string, media_type: string, page: int}>
+     *
      * @throws \Exception If Imagick is not available or conversion fails
      */
     private function convertWithImagick(string $fullPath, int $dpi, string $format): array
     {
-        if (!extension_loaded('imagick')) {
+        if (! extension_loaded('imagick')) {
             throw new \Exception(
-                'Imagick extension is not installed. ' .
+                'Imagick extension is not installed. '.
                 'Please install it with: pecl install imagick, or configure an external PDF converter.'
             );
         }
 
         try {
-            $imagick = new \Imagick();
+            $imagick = new \Imagick;
             $imagick->setResolution($dpi, $dpi);
             $imagick->readImage($fullPath);
 
@@ -141,17 +145,18 @@ class PdfImageConverter
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            throw new \Exception('PDF conversion failed: ' . $e->getMessage());
+            throw new \Exception('PDF conversion failed: '.$e->getMessage());
         }
     }
 
     /**
      * Convert PDF using external API service
      *
-     * @param string $fullPath Full path to PDF
-     * @param int $dpi DPI for rendering
-     * @param string $format Output format
+     * @param  string  $fullPath  Full path to PDF
+     * @param  int  $dpi  DPI for rendering
+     * @param  string  $format  Output format
      * @return array<int, array{data: string, media_type: string, page: int}>
+     *
      * @throws \Exception If API call fails
      */
     private function convertWithExternalApi(string $fullPath, int $dpi, string $format): array
@@ -159,7 +164,7 @@ class PdfImageConverter
         // TODO: Implement external API conversion (e.g., Gotenberg, CloudConvert, etc.)
         // For now, throw a helpful error
         throw new \Exception(
-            'External API PDF conversion is not yet implemented. ' .
+            'External API PDF conversion is not yet implemented. '.
             'Please install Imagick extension or configure a different backend.'
         );
     }
@@ -167,7 +172,7 @@ class PdfImageConverter
     /**
      * Resolve file path from storage or full path
      *
-     * @param string $path Path to resolve
+     * @param  string  $path  Path to resolve
      * @return string Full filesystem path
      */
     private function resolvePath(string $path): string
@@ -184,7 +189,7 @@ class PdfImageConverter
         }
 
         // Try public storage
-        $publicPath = storage_path('app/public/' . $path);
+        $publicPath = storage_path('app/public/'.$path);
         if (file_exists($publicPath)) {
             return $publicPath;
         }
@@ -196,7 +201,7 @@ class PdfImageConverter
     /**
      * Get MIME type for image format
      *
-     * @param string $format Image format
+     * @param  string  $format  Image format
      * @return string MIME type
      */
     private function getMediaType(string $format): string
@@ -214,8 +219,6 @@ class PdfImageConverter
 
     /**
      * Check if PDF conversion is available
-     *
-     * @return bool
      */
     public function isAvailable(): bool
     {
@@ -234,8 +237,6 @@ class PdfImageConverter
 
     /**
      * Get the current backend name
-     *
-     * @return string
      */
     public function getBackend(): string
     {
@@ -262,8 +263,6 @@ class PdfImageConverter
 
     /**
      * Check if PDF analysis feature is allowed
-     *
-     * @return bool
      */
     private function isPdfAnalysisAllowed(): bool
     {
@@ -287,8 +286,7 @@ class PdfImageConverter
     /**
      * Check if a specific feature requiring PDF conversion is enabled
      *
-     * @param string $featureName Feature to check (pdf_analysis, receipt_scanning, invoice_extraction)
-     * @return bool
+     * @param  string  $featureName  Feature to check (pdf_analysis, receipt_scanning, invoice_extraction)
      */
     public function isFeatureEnabled(string $featureName): bool
     {

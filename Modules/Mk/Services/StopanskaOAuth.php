@@ -19,8 +19,6 @@ class StopanskaOAuth extends Psd2Client
 {
     /**
      * Get the bank code identifier
-     *
-     * @return string
      */
     protected function getBankCode(): string
     {
@@ -29,8 +27,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Get the base URL for the PSD2 API
-     *
-     * @return string
      */
     protected function getBaseUrl(): string
     {
@@ -45,8 +41,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Get the OAuth2 client ID
-     *
-     * @return string
      */
     protected function getClientId(): string
     {
@@ -55,8 +49,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Get the OAuth2 client secret
-     *
-     * @return string
      */
     protected function getClientSecret(): string
     {
@@ -78,8 +70,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Get BIC/SWIFT code for Stopanska Banka
-     *
-     * @return string
      */
     public function getBic(): string
     {
@@ -88,8 +78,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Get bank display name
-     *
-     * @return string
      */
     public function getBankName(): string
     {
@@ -98,8 +86,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Get bank logo URL
-     *
-     * @return string
      */
     public function getLogoUrl(): string
     {
@@ -108,8 +94,6 @@ class StopanskaOAuth extends Psd2Client
 
     /**
      * Check if rate limiting is enabled
-     *
-     * @return bool
      */
     protected function isRateLimitEnabled(): bool
     {
@@ -119,8 +103,6 @@ class StopanskaOAuth extends Psd2Client
     /**
      * Get rate limit interval in seconds
      * Stopanska allows 15 requests per minute = 4 second intervals
-     *
-     * @return int
      */
     protected function getRateLimitInterval(): int
     {
@@ -138,13 +120,13 @@ class StopanskaOAuth extends Psd2Client
     {
         $certPath = config('mk.stopanska.mtls_cert_path', env('STOPANSKA_MTLS_CERT_PATH'));
 
-        if (!$certPath) {
+        if (! $certPath) {
             return null;
         }
 
         // If relative path, resolve from storage directory
-        if (!str_starts_with($certPath, '/')) {
-            return storage_path('certificates/' . $certPath);
+        if (! str_starts_with($certPath, '/')) {
+            return storage_path('certificates/'.$certPath);
         }
 
         return $certPath;
@@ -159,13 +141,13 @@ class StopanskaOAuth extends Psd2Client
     {
         $keyPath = config('mk.stopanska.mtls_key_path', env('STOPANSKA_MTLS_KEY_PATH'));
 
-        if (!$keyPath) {
+        if (! $keyPath) {
             return null;
         }
 
         // If relative path, resolve from storage directory
-        if (!str_starts_with($keyPath, '/')) {
-            return storage_path('certificates/' . $keyPath);
+        if (! str_starts_with($keyPath, '/')) {
+            return storage_path('certificates/'.$keyPath);
         }
 
         return $keyPath;

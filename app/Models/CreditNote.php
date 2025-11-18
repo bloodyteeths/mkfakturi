@@ -26,8 +26,6 @@ use Vinkla\Hashids\Facades\Hashids;
  *
  * Represents a credit note issued to reduce or reverse an invoice.
  * Once posted to IFRS (ifrs_transaction_id set), the credit note becomes immutable.
- *
- * @package App\Models
  */
 class CreditNote extends Model implements HasMedia
 {
@@ -42,8 +40,11 @@ class CreditNote extends Model implements HasMedia
      * Status Constants
      */
     public const STATUS_DRAFT = 'DRAFT';
+
     public const STATUS_SENT = 'SENT';
+
     public const STATUS_VIEWED = 'VIEWED';
+
     public const STATUS_COMPLETED = 'COMPLETED';
 
     /**
@@ -74,7 +75,7 @@ class CreditNote extends Model implements HasMedia
     protected $with = [
         'customer:id,name,email',
         'currency:id,name,code,symbol',
-        'company:id,name'
+        'company:id,name',
     ];
 
     protected function casts(): array
@@ -92,7 +93,6 @@ class CreditNote extends Model implements HasMedia
     /**
      * Relationships
      */
-
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -136,7 +136,6 @@ class CreditNote extends Model implements HasMedia
     /**
      * Scopes
      */
-
     public function scopeWhereCompany($query)
     {
         $query->where('credit_notes.company_id', request()->header('company'));
@@ -217,7 +216,6 @@ class CreditNote extends Model implements HasMedia
     /**
      * Attribute Accessors
      */
-
     public function getCreditNotePdfUrlAttribute()
     {
         return url('/credit-notes/pdf/'.$this->unique_hash);
@@ -263,7 +261,7 @@ class CreditNote extends Model implements HasMedia
     /**
      * Create Credit Note with number series
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return CreditNote
      */
     public static function createCreditNote($request)
@@ -298,7 +296,7 @@ class CreditNote extends Model implements HasMedia
             ExchangeRateLog::addExchangeRateLog($creditNote);
         }
 
-        if ($request->has('taxes') && (!empty($request->taxes))) {
+        if ($request->has('taxes') && (! empty($request->taxes))) {
             self::createTaxes($creditNote, $request->taxes);
         }
 
@@ -321,7 +319,7 @@ class CreditNote extends Model implements HasMedia
     /**
      * Update Credit Note
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return CreditNote|string
      */
     public function updateCreditNote($request)
@@ -367,7 +365,7 @@ class CreditNote extends Model implements HasMedia
 
         self::createItems($this, $request->items);
 
-        if ($request->has('taxes') && (!empty($request->taxes))) {
+        if ($request->has('taxes') && (! empty($request->taxes))) {
             self::createTaxes($this, $request->taxes);
         }
 
@@ -390,8 +388,8 @@ class CreditNote extends Model implements HasMedia
     /**
      * Create Items for Credit Note
      *
-     * @param CreditNote $creditNote
-     * @param array $creditNoteItems
+     * @param  CreditNote  $creditNote
+     * @param  array  $creditNoteItems
      * @return void
      */
     public static function createItems($creditNote, $creditNoteItems)
@@ -430,8 +428,8 @@ class CreditNote extends Model implements HasMedia
     /**
      * Create Taxes for Credit Note
      *
-     * @param CreditNote $creditNote
-     * @param array $taxes
+     * @param  CreditNote  $creditNote
+     * @param  array  $taxes
      * @return void
      */
     public static function createTaxes($creditNote, $taxes)
@@ -453,7 +451,7 @@ class CreditNote extends Model implements HasMedia
     /**
      * Send Credit Note
      *
-     * @param array $data
+     * @param  array  $data
      * @return array
      */
     public function send($data)
@@ -477,7 +475,7 @@ class CreditNote extends Model implements HasMedia
     /**
      * Send Credit Note Data
      *
-     * @param array $data
+     * @param  array  $data
      * @return array
      */
     public function sendCreditNoteData($data)
@@ -532,8 +530,6 @@ class CreditNote extends Model implements HasMedia
 
     /**
      * Generate unique hash for public URL
-     *
-     * @return string
      */
     public function generateUniqueHash(): string
     {
@@ -576,13 +572,13 @@ class CreditNote extends Model implements HasMedia
         // Verify logo file exists before using it
         $logo = $company->logo_path;
 
-        if ($logo && !filter_var($logo, FILTER_VALIDATE_URL)) {
-            if (!file_exists($logo)) {
+        if ($logo && ! filter_var($logo, FILTER_VALIDATE_URL)) {
+            if (! file_exists($logo)) {
                 $logo = null;
             }
         }
 
-        if (!$logo) {
+        if (! $logo) {
             $defaultLogo = base_path('logo/facturino_logo.png');
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
         }
@@ -631,7 +627,7 @@ class CreditNote extends Model implements HasMedia
      */
     public function getCompanyAddress()
     {
-        if ($this->company && (!$this->company->address()->exists())) {
+        if ($this->company && (! $this->company->address()->exists())) {
             return false;
         }
 
@@ -647,7 +643,7 @@ class CreditNote extends Model implements HasMedia
      */
     public function getCustomerShippingAddress()
     {
-        if ($this->customer && (!$this->customer->shippingAddress()->exists())) {
+        if ($this->customer && (! $this->customer->shippingAddress()->exists())) {
             return false;
         }
 
@@ -663,7 +659,7 @@ class CreditNote extends Model implements HasMedia
      */
     public function getCustomerBillingAddress()
     {
-        if ($this->customer && (!$this->customer->billingAddress()->exists())) {
+        if ($this->customer && (! $this->customer->billingAddress()->exists())) {
             return false;
         }
 
@@ -685,7 +681,7 @@ class CreditNote extends Model implements HasMedia
     /**
      * Get Email String
      *
-     * @param string $body
+     * @param  string  $body
      * @return string
      */
     public function getEmailString($body)
@@ -715,7 +711,7 @@ class CreditNote extends Model implements HasMedia
     /**
      * Delete Credit Notes
      *
-     * @param array $ids
+     * @param  array  $ids
      * @return bool
      */
     public static function deleteCreditNotes($ids)

@@ -27,7 +27,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $error_message
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read EInvoice $eInvoice
  * @property-read User|null $submittedBy
  */
@@ -41,8 +40,11 @@ class EInvoiceSubmission extends Model
      * Status constants
      */
     public const STATUS_PENDING = 'PENDING';
+
     public const STATUS_ACCEPTED = 'ACCEPTED';
+
     public const STATUS_REJECTED = 'REJECTED';
+
     public const STATUS_ERROR = 'ERROR';
 
     /**
@@ -106,8 +108,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Get the e-invoice that this submission belongs to.
-     *
-     * @return BelongsTo
      */
     public function eInvoice(): BelongsTo
     {
@@ -116,8 +116,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Get the user who submitted this e-invoice.
-     *
-     * @return BelongsTo
      */
     public function submittedBy(): BelongsTo
     {
@@ -127,8 +125,6 @@ class EInvoiceSubmission extends Model
     /**
      * Get the company (via e-invoice relationship).
      * This scope enables the TenantScope trait to work correctly.
-     *
-     * @return int|null
      */
     public function getCompanyIdAttribute(): ?int
     {
@@ -138,8 +134,6 @@ class EInvoiceSubmission extends Model
     /**
      * Retry the submission.
      * Increments retry count and schedules next retry.
-     *
-     * @return bool
      */
     public function retry(): bool
     {
@@ -156,10 +150,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Mark the submission as accepted.
-     *
-     * @param string|null $receiptNumber
-     * @param array|null $responseData
-     * @return bool
      */
     public function markAsAccepted(?string $receiptNumber = null, ?array $responseData = null): bool
     {
@@ -182,10 +172,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Mark the submission as rejected.
-     *
-     * @param string|null $reason
-     * @param array|null $responseData
-     * @return bool
      */
     public function markAsRejected(?string $reason = null, ?array $responseData = null): bool
     {
@@ -207,11 +193,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Mark the submission as error.
-     *
-     * @param string $errorMessage
-     * @param array|null $responseData
-     * @param bool $scheduleRetry
-     * @return bool
      */
     public function markAsError(string $errorMessage, ?array $responseData = null, bool $scheduleRetry = true): bool
     {
@@ -238,8 +219,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Check if the submission can be retried.
-     *
-     * @return bool
      */
     public function canRetry(): bool
     {
@@ -249,8 +228,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Check if the submission is pending retry.
-     *
-     * @return bool
      */
     public function isPendingRetry(): bool
     {
@@ -259,8 +236,6 @@ class EInvoiceSubmission extends Model
 
     /**
      * Check if the submission is ready for retry.
-     *
-     * @return bool
      */
     public function isReadyForRetry(): bool
     {
@@ -272,8 +247,7 @@ class EInvoiceSubmission extends Model
     /**
      * Scope: filter by status.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $status
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereStatus($query, string $status)
@@ -284,7 +258,7 @@ class EInvoiceSubmission extends Model
     /**
      * Scope: get pending submissions.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopePending($query)
@@ -295,7 +269,7 @@ class EInvoiceSubmission extends Model
     /**
      * Scope: get accepted submissions.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeAccepted($query)
@@ -306,7 +280,7 @@ class EInvoiceSubmission extends Model
     /**
      * Scope: get rejected submissions.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeRejected($query)
@@ -317,7 +291,7 @@ class EInvoiceSubmission extends Model
     /**
      * Scope: get error submissions.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeError($query)
@@ -328,7 +302,7 @@ class EInvoiceSubmission extends Model
     /**
      * Scope: get submissions ready for retry.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeReadyForRetry($query)
@@ -342,8 +316,7 @@ class EInvoiceSubmission extends Model
      * Scope: filter by company.
      * Now uses direct company_id column instead of relationship join.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int|null $companyId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereCompany($query, ?int $companyId = null)

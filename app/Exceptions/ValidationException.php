@@ -51,7 +51,7 @@ class ValidationException extends Exception
         ?Throwable $previous = null
     ) {
         parent::__construct($message, 0, $previous);
-        
+
         $this->errorCode = $errorCode;
         $this->statusCode = $statusCode;
         $this->fieldErrors = $fieldErrors;
@@ -126,7 +126,7 @@ class ValidationException extends Exception
     /**
      * Create an invalid format validation error
      */
-    public static function invalidFormatError(string $field, string $expectedFormat, string $actualValue = null, array $context = []): self
+    public static function invalidFormatError(string $field, string $expectedFormat, ?string $actualValue = null, array $context = []): self
     {
         $message = "Field '{$field}' has invalid format. Expected: {$expectedFormat}";
         if ($actualValue) {
@@ -139,7 +139,7 @@ class ValidationException extends Exception
             fieldErrors: [$field => "This field must be in {$expectedFormat} format"],
             context: array_merge($context, [
                 'expected_format' => $expectedFormat,
-                'actual_value' => $actualValue
+                'actual_value' => $actualValue,
             ]),
             userMessage: "The field '{$field}' must be in {$expectedFormat} format.",
             field: $field
@@ -158,7 +158,7 @@ class ValidationException extends Exception
             context: array_merge($context, [
                 'min' => $min,
                 'max' => $max,
-                'actual_value' => $actualValue
+                'actual_value' => $actualValue,
             ]),
             userMessage: "The field '{$field}' must be between {$min} and {$max}.",
             field: $field
@@ -186,14 +186,14 @@ class ValidationException extends Exception
     public static function invalidChoiceError(string $field, array $allowedChoices, $actualValue, array $context = []): self
     {
         $choicesList = implode(', ', $allowedChoices);
-        
+
         return new self(
             message: "Field '{$field}' has invalid choice '{$actualValue}'. Allowed: {$choicesList}",
             errorCode: 'INVALID_CHOICE_ERROR',
             fieldErrors: [$field => "Please choose from: {$choicesList}"],
             context: array_merge($context, [
                 'allowed_choices' => $allowedChoices,
-                'actual_value' => $actualValue
+                'actual_value' => $actualValue,
             ]),
             userMessage: "The field '{$field}' must be one of: {$choicesList}.",
             field: $field
@@ -221,7 +221,7 @@ class ValidationException extends Exception
             context: array_merge($context, [
                 'min_length' => $minLength,
                 'max_length' => $maxLength,
-                'actual_length' => $actualLength
+                'actual_length' => $actualLength,
             ]),
             userMessage: "The field '{$field}' must be {$lengthRule}.",
             field: $field
@@ -238,7 +238,7 @@ class ValidationException extends Exception
             errorCode: 'DEPENDENCY_ERROR',
             fieldErrors: [
                 $field => "This field requires '{$dependentField}' to be provided",
-                $dependentField => "This field is required when '{$field}' is provided"
+                $dependentField => "This field is required when '{$field}' is provided",
             ],
             context: array_merge($context, ['dependent_field' => $dependentField]),
             userMessage: "The field '{$field}' requires '{$dependentField}' to be provided.",
@@ -302,7 +302,7 @@ class ValidationException extends Exception
             fieldErrors: [$field => "This field must be a valid {$expectedType}"],
             context: array_merge($context, [
                 'expected_type' => $expectedType,
-                'actual_value' => $actualValue
+                'actual_value' => $actualValue,
             ]),
             userMessage: "The field '{$field}' must be a valid {$expectedType}.",
             field: $field
@@ -315,14 +315,14 @@ class ValidationException extends Exception
     public static function batchValidationError(array $fieldErrors, array $context = []): self
     {
         $errorCount = count($fieldErrors);
-        $message = "Validation failed for {$errorCount} field(s): " . implode(', ', array_keys($fieldErrors));
+        $message = "Validation failed for {$errorCount} field(s): ".implode(', ', array_keys($fieldErrors));
 
         return new self(
             message: $message,
             errorCode: 'BATCH_VALIDATION_ERROR',
             fieldErrors: $fieldErrors,
             context: $context,
-            userMessage: "Please correct the errors in the highlighted fields."
+            userMessage: 'Please correct the errors in the highlighted fields.'
         );
     }
 
@@ -334,7 +334,7 @@ class ValidationException extends Exception
         return new self(
             message: "Field '{$field}' failed conditional validation: {$condition}",
             errorCode: 'CONDITIONAL_VALIDATION_ERROR',
-            fieldErrors: [$field => "This field is required based on other field values"],
+            fieldErrors: [$field => 'This field is required based on other field values'],
             context: array_merge($context, ['condition' => $condition]),
             userMessage: "The field '{$field}' is required based on your other selections.",
             field: $field

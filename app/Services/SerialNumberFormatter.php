@@ -11,6 +11,7 @@ use App\Models\Customer;
 class SerialNumberFormatter
 {
     public const VALID_PLACEHOLDERS = ['CUSTOMER_SERIES', 'SEQUENCE', 'DATE_FORMAT', 'SERIES', 'RANDOM_SEQUENCE', 'DELIMITER', 'CUSTOMER_SEQUENCE'];
+
     public const DEFAULT_FALLBACK_FORMAT = 'INV-{year}-{increment}';
 
     private $model;

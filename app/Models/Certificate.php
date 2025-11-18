@@ -37,7 +37,6 @@ use Illuminate\Support\Facades\Storage;
  * @property \Carbon\Carbon|null $last_used_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read Company $company
  * @property-read \Illuminate\Database\Eloquent\Collection|SignatureLog[] $signatureLogs
  */
@@ -123,8 +122,6 @@ class Certificate extends Model
 
     /**
      * Get the company that owns this certificate.
-     *
-     * @return BelongsTo
      */
     public function company(): BelongsTo
     {
@@ -133,8 +130,6 @@ class Certificate extends Model
 
     /**
      * Get all signature logs for this certificate.
-     *
-     * @return HasMany
      */
     public function signatureLogs(): HasMany
     {
@@ -145,13 +140,14 @@ class Certificate extends Model
      * Decrypt the private key blob.
      * IMPORTANT: Only use this in memory, NEVER store the result.
      *
-     * @param string|null $password Optional password for P12/PFX
+     * @param  string|null  $password  Optional password for P12/PFX
      * @return string|null Decrypted key blob
+     *
      * @throws \Illuminate\Contracts\Encryption\DecryptException
      */
     public function decrypt(?string $password = null): ?string
     {
-        if (!$this->encrypted_key_blob) {
+        if (! $this->encrypted_key_blob) {
             return null;
         }
 
@@ -168,8 +164,6 @@ class Certificate extends Model
 
     /**
      * Check if the certificate is expired.
-     *
-     * @return bool
      */
     public function isExpired(): bool
     {
@@ -178,13 +172,11 @@ class Certificate extends Model
 
     /**
      * Check if the certificate is valid (not expired and active).
-     *
-     * @return bool
      */
     public function isValid(): bool
     {
         return $this->is_active
-            && !$this->isExpired()
+            && ! $this->isExpired()
             && $this->valid_from->isPast();
     }
 
@@ -200,8 +192,6 @@ class Certificate extends Model
 
     /**
      * Accessor: is_expired attribute.
-     *
-     * @return bool
      */
     public function getIsExpiredAttribute(): bool
     {
@@ -210,8 +200,6 @@ class Certificate extends Model
 
     /**
      * Accessor: is_valid attribute.
-     *
-     * @return bool
      */
     public function getIsValidAttribute(): bool
     {
@@ -220,8 +208,6 @@ class Certificate extends Model
 
     /**
      * Accessor: days_until_expiry attribute.
-     *
-     * @return int
      */
     public function getDaysUntilExpiryAttribute(): int
     {
@@ -231,32 +217,28 @@ class Certificate extends Model
     /**
      * Update last used timestamp.
      * Called after successful signature operations.
-     *
-     * @return bool
      */
     public function markAsUsed(): bool
     {
         $this->last_used_at = now();
+
         return $this->save();
     }
 
     /**
      * Deactivate this certificate.
      * Useful when rotating certificates.
-     *
-     * @return bool
      */
     public function deactivate(): bool
     {
         $this->is_active = false;
+
         return $this->save();
     }
 
     /**
      * Activate this certificate.
      * Deactivates other certificates for the same company.
-     *
-     * @return bool
      */
     public function activate(): bool
     {
@@ -266,14 +248,13 @@ class Certificate extends Model
             ->update(['is_active' => false]);
 
         $this->is_active = true;
+
         return $this->save();
     }
 
     /**
      * Delete the certificate and its files.
      * Also logs the deletion.
-     *
-     * @return bool|null
      */
     public function delete(): ?bool
     {
@@ -304,7 +285,7 @@ class Certificate extends Model
     /**
      * Scope: get active certificates.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query)
@@ -315,7 +296,7 @@ class Certificate extends Model
     /**
      * Scope: get non-expired certificates.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeNotExpired($query)
@@ -326,8 +307,7 @@ class Certificate extends Model
     /**
      * Scope: get certificates expiring within N days.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $days
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeExpiringWithin($query, int $days)
@@ -339,7 +319,7 @@ class Certificate extends Model
     /**
      * Scope: get valid certificates (active and not expired).
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeValid($query)
@@ -351,9 +331,6 @@ class Certificate extends Model
 
     /**
      * Get the active certificate for a company.
-     *
-     * @param int $companyId
-     * @return Certificate|null
      */
     public static function getActiveCertificate(int $companyId): ?Certificate
     {

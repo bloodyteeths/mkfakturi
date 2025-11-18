@@ -6,22 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ImportJobRequest;
 use App\Http\Requests\ImportMappingRequest;
 use App\Http\Resources\ImportJobResource;
-use App\Models\ImportJob;
-use App\Models\ImportLog;
+use App\Jobs\Migration\CommitImportJob;
 use App\Jobs\Migration\DetectFileTypeJob;
 use App\Jobs\Migration\ValidateDataJob;
-use App\Jobs\Migration\CommitImportJob;
 use App\Jobs\ProcessImportJob;
+use App\Models\ImportJob;
+use App\Models\ImportLog;
 use App\Services\Migration\ImportPresetService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Pennant\Feature;
 use League\Csv\Reader;
-use League\Csv\Writer;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -30,7 +28,6 @@ class MigrationController extends Controller
     /**
      * Display a listing of import jobs for the company.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -40,8 +37,8 @@ class MigrationController extends Controller
         $limit = $request->has('limit') ? $request->limit : 10;
 
         $imports = ImportJob::with(['creator', 'logs' => function ($query) {
-                $query->where('log_type', ImportLog::TYPE_ERROR)->latest()->limit(3);
-            }])
+            $query->where('log_type', ImportLog::TYPE_ERROR)->latest()->limit(3);
+        }])
             ->whereCompany()
             ->applyFilters($request->all())
             ->paginateData($limit);
@@ -58,7 +55,6 @@ class MigrationController extends Controller
     /**
      * Create new import job (file upload).
      *
-     * @param  \App\Http\Requests\ImportJobRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(ImportJobRequest $request)
@@ -76,17 +72,17 @@ class MigrationController extends Controller
             $mimeType = $file->getMimeType();
 
             // Validate file type
-            if (!in_array(strtolower($extension), ['csv', 'xlsx', 'xls', 'xml'])) {
+            if (! in_array(strtolower($extension), ['csv', 'xlsx', 'xls', 'xml'])) {
                 return response()->json([
                     'message' => 'Unsupported file type. Please upload CSV, Excel, or XML files.',
-                    'errors' => ['file' => ['Invalid file type']]
+                    'errors' => ['file' => ['Invalid file type']],
                 ], 422);
             }
 
             // Generate unique filename and store file
-            $filename = now()->format('Y-m-d_H-i-s') . '_' . uniqid() . '.' . $extension;
+            $filename = now()->format('Y-m-d_H-i-s').'_'.uniqid().'.'.$extension;
             $filePath = $file->storeAs(
-                'imports/' . request()->header('company'),
+                'imports/'.request()->header('company'),
                 $filename,
                 'private'
             );
@@ -135,7 +131,7 @@ class MigrationController extends Controller
                 'import_job_id' => $importJob->id,
                 'file_name' => $originalName,
                 'company_id' => request()->header('company'),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
             return new ImportJobResource($importJob->load('creator'));
@@ -147,11 +143,11 @@ class MigrationController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'company_id' => request()->header('company'),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
-                'message' => 'Failed to create import job: ' . $e->getMessage()
+                'message' => 'Failed to create import job: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -159,7 +155,6 @@ class MigrationController extends Controller
     /**
      * Display the specified import job.
      *
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(ImportJob $import)
@@ -176,8 +171,6 @@ class MigrationController extends Controller
     /**
      * Submit field mappings for the import job.
      *
-     * @param  \App\Http\Requests\ImportMappingRequest  $request
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function mapping(ImportMappingRequest $request, ImportJob $import)
@@ -188,7 +181,7 @@ class MigrationController extends Controller
             // Validate import job status
             if ($import->status !== ImportJob::STATUS_PENDING && $import->status !== ImportJob::STATUS_MAPPING) {
                 return response()->json([
-                    'message' => 'Import job is not in a state that allows mapping changes.'
+                    'message' => 'Import job is not in a state that allows mapping changes.',
                 ], 422);
             }
 
@@ -227,11 +220,11 @@ class MigrationController extends Controller
             Log::error('Import mapping failed', [
                 'import_job_id' => $import->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'message' => 'Failed to update mappings: ' . $e->getMessage()
+                'message' => 'Failed to update mappings: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -239,8 +232,6 @@ class MigrationController extends Controller
     /**
      * Validate mapped data before committing.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function validateImport(Request $request, ImportJob $import)
@@ -249,9 +240,9 @@ class MigrationController extends Controller
 
         try {
             // Validate import job status
-            if (!in_array($import->status, [ImportJob::STATUS_MAPPING, ImportJob::STATUS_VALIDATING])) {
+            if (! in_array($import->status, [ImportJob::STATUS_MAPPING, ImportJob::STATUS_VALIDATING])) {
                 return response()->json([
-                    'message' => 'Import job is not ready for validation.'
+                    'message' => 'Import job is not ready for validation.',
                 ], 422);
             }
 
@@ -285,11 +276,11 @@ class MigrationController extends Controller
             Log::error('Import validation failed', [
                 'import_job_id' => $import->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'message' => 'Failed to start validation: ' . $e->getMessage()
+                'message' => 'Failed to start validation: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -297,8 +288,6 @@ class MigrationController extends Controller
     /**
      * Commit import to production data.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function commit(Request $request, ImportJob $import)
@@ -309,16 +298,16 @@ class MigrationController extends Controller
             // Validate import job status
             if ($import->status !== ImportJob::STATUS_VALIDATING) {
                 return response()->json([
-                    'message' => 'Import job must be validated before committing.'
+                    'message' => 'Import job must be validated before committing.',
                 ], 422);
             }
 
             // Check if there are validation errors
             $errorLogs = $import->logs()->where('log_type', ImportLog::TYPE_ERROR)->count();
-            if ($errorLogs > 0 && !$request->boolean('force_commit', false)) {
+            if ($errorLogs > 0 && ! $request->boolean('force_commit', false)) {
                 return response()->json([
                     'message' => 'Import has validation errors. Use force_commit=true to proceed anyway.',
-                    'errors_count' => $errorLogs
+                    'errors_count' => $errorLogs,
                 ], 422);
             }
 
@@ -356,11 +345,11 @@ class MigrationController extends Controller
             Log::error('Import commit failed', [
                 'import_job_id' => $import->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'message' => 'Failed to start commit: ' . $e->getMessage()
+                'message' => 'Failed to start commit: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -368,7 +357,6 @@ class MigrationController extends Controller
     /**
      * Cancel/delete import job.
      *
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(ImportJob $import)
@@ -379,7 +367,7 @@ class MigrationController extends Controller
             // Check if import is in progress
             if ($import->isInProgress) {
                 return response()->json([
-                    'message' => 'Cannot delete import job while it is in progress.'
+                    'message' => 'Cannot delete import job while it is in progress.',
                 ], 422);
             }
 
@@ -407,11 +395,11 @@ class MigrationController extends Controller
             Log::info('Import job deleted', [
                 'import_job_id' => $importId,
                 'company_id' => $import->company_id,
-                'deleted_by' => auth()->id()
+                'deleted_by' => auth()->id(),
             ]);
 
             return response()->json([
-                'message' => 'Import job deleted successfully.'
+                'message' => 'Import job deleted successfully.',
             ]);
 
         } catch (\Exception $e) {
@@ -420,11 +408,11 @@ class MigrationController extends Controller
             Log::error('Import job deletion failed', [
                 'import_job_id' => $import->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'message' => 'Failed to delete import job: ' . $e->getMessage()
+                'message' => 'Failed to delete import job: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -432,7 +420,6 @@ class MigrationController extends Controller
     /**
      * Get real-time progress for an import job.
      *
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function progress(ImportJob $import)
@@ -472,8 +459,6 @@ class MigrationController extends Controller
     /**
      * Get import logs with filtering.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ImportJob  $import
      * @return \Illuminate\Http\JsonResponse
      */
     public function logs(Request $request, ImportJob $import)
@@ -489,7 +474,7 @@ class MigrationController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -530,12 +515,11 @@ class MigrationController extends Controller
     /**
      * Upload file for Laravel Excel import wizard
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function upload(Request $request)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -550,15 +534,15 @@ class MigrationController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         try {
             $file = $request->file('file');
             $extension = $file->getClientOriginalExtension();
-            $filename = now()->format('Y-m-d_H-i-s') . '_' . uniqid() . '.' . $extension;
-            $path = $file->storeAs('imports/' . request()->header('company'), $filename);
+            $filename = now()->format('Y-m-d_H-i-s').'_'.uniqid().'.'.$extension;
+            $path = $file->storeAs('imports/'.request()->header('company'), $filename);
 
             // Create import job
             $importJob = ImportJob::create([
@@ -587,19 +571,19 @@ class MigrationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Upload failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Upload failed: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Upload failed: '.$e->getMessage()], 500);
         }
     }
 
     /**
      * Get preview of first 10 rows
      *
-     * @param ImportJob $job
      * @return \Illuminate\Http\JsonResponse
      */
     public function preview(ImportJob $job)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -608,7 +592,7 @@ class MigrationController extends Controller
         try {
             $filePath = $job->file_info['path'] ?? null;
 
-            if (!$filePath || !Storage::exists($filePath)) {
+            if (! $filePath || ! Storage::exists($filePath)) {
                 return response()->json(['message' => 'File not found'], 404);
             }
 
@@ -628,7 +612,9 @@ class MigrationController extends Controller
                 $preview = [];
                 $preview[] = $csv->getHeader();
                 foreach ($csv->getRecords() as $index => $record) {
-                    if ($index >= 10) break;
+                    if ($index >= 10) {
+                        break;
+                    }
                     $preview[] = array_values($record);
                 }
             }
@@ -641,19 +627,19 @@ class MigrationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Preview failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'Preview failed: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Preview failed: '.$e->getMessage()], 500);
         }
     }
 
     /**
      * Get all available preset sources
      *
-     * @param ImportPresetService $presetService
      * @return \Illuminate\Http\JsonResponse
      */
     public function availablePresets(ImportPresetService $presetService)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -668,6 +654,7 @@ class MigrationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Failed to retrieve available presets', ['error' => $e->getMessage()]);
+
             return response()->json(['message' => 'Failed to get available presets'], 500);
         }
     }
@@ -675,14 +662,11 @@ class MigrationController extends Controller
     /**
      * Get preset mapping for source system
      *
-     * @param string $source
-     * @param Request $request
-     * @param ImportPresetService $presetService
      * @return \Illuminate\Http\JsonResponse
      */
     public function presets(string $source, Request $request, ImportPresetService $presetService)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -695,6 +679,7 @@ class MigrationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Preset retrieval failed', ['source' => $source, 'error' => $e->getMessage()]);
+
             return response()->json(['message' => 'Failed to get preset'], 500);
         }
     }
@@ -702,13 +687,11 @@ class MigrationController extends Controller
     /**
      * Dry run (validation only, no database insert)
      *
-     * @param ImportJob $job
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function dryRun(ImportJob $job, Request $request)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -721,7 +704,7 @@ class MigrationController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -742,19 +725,19 @@ class MigrationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Dry run failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'Dry run failed: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Dry run failed: '.$e->getMessage()], 500);
         }
     }
 
     /**
      * Execute import (commit to database)
      *
-     * @param ImportJob $job
      * @return \Illuminate\Http\JsonResponse
      */
     public function import(ImportJob $job)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -772,19 +755,19 @@ class MigrationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Import failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'Import failed: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Import failed: '.$e->getMessage()], 500);
         }
     }
 
     /**
      * Get import status
      *
-     * @param ImportJob $job
      * @return \Illuminate\Http\JsonResponse
      */
     public function status(ImportJob $job)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -804,12 +787,11 @@ class MigrationController extends Controller
     /**
      * Download error CSV
      *
-     * @param ImportJob $job
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
      */
     public function errors(ImportJob $job)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -818,14 +800,15 @@ class MigrationController extends Controller
         try {
             $errorPath = $job->error_details['error_csv_path'] ?? null;
 
-            if (!$errorPath || !Storage::exists($errorPath)) {
+            if (! $errorPath || ! Storage::exists($errorPath)) {
                 return response()->json(['message' => 'No error file found'], 404);
             }
 
-            return Storage::download($errorPath, 'import_errors_' . $job->id . '.csv');
+            return Storage::download($errorPath, 'import_errors_'.$job->id.'.csv');
 
         } catch (\Exception $e) {
             Log::error('Error CSV download failed', ['job_id' => $job->id, 'error' => $e->getMessage()]);
+
             return response()->json(['message' => 'Download failed'], 500);
         }
     }
@@ -833,13 +816,11 @@ class MigrationController extends Controller
     /**
      * Download CSV import template
      *
-     * @param Request $request
-     * @param string $type
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
      */
     public function downloadTemplate(Request $request, string $type)
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 
@@ -852,22 +833,23 @@ class MigrationController extends Controller
             'invoice_with_items' => 'invoice_with_items_template.csv',
         ];
 
-        if (!isset($validTypes[$type])) {
+        if (! isset($validTypes[$type])) {
             return response()->json([
                 'message' => 'Invalid template type',
-                'valid_types' => array_keys($validTypes)
+                'valid_types' => array_keys($validTypes),
             ], 422);
         }
 
         try {
             $filename = $validTypes[$type];
-            $templatePath = storage_path('app/templates/' . $filename);
+            $templatePath = storage_path('app/templates/'.$filename);
 
-            if (!file_exists($templatePath)) {
+            if (! file_exists($templatePath)) {
                 Log::error('Template file not found', [
                     'type' => $type,
-                    'path' => $templatePath
+                    'path' => $templatePath,
                 ]);
+
                 return response()->json(['message' => 'Template file not found'], 404);
             }
 
@@ -875,21 +857,22 @@ class MigrationController extends Controller
                 'type' => $type,
                 'filename' => $filename,
                 'user_id' => auth()->id(),
-                'company_id' => request()->header('company')
+                'company_id' => request()->header('company'),
             ]);
 
             return response()->download($templatePath, $filename, [
                 'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ]);
 
         } catch (\Exception $e) {
             Log::error('Template download failed', [
                 'type' => $type,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            return response()->json(['message' => 'Download failed: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Download failed: '.$e->getMessage()], 500);
         }
     }
     // CLAUDE-CHECKPOINT
@@ -901,7 +884,7 @@ class MigrationController extends Controller
      */
     public function templates()
     {
-        if (!Feature::active('migration-wizard')) {
+        if (! Feature::active('migration-wizard')) {
             return response()->json(['message' => 'Migration wizard feature is disabled'], 403);
         }
 

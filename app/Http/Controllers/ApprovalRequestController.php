@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ApprovalRequest;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Log;
  *
  * Manages document approval workflow.
  * Supports Invoice, Estimate, Expense, Bill, CreditNote approval process.
- *
- * @package App\Http\Controllers
  */
 class ApprovalRequestController extends Controller
 {
@@ -21,9 +19,6 @@ class ApprovalRequestController extends Controller
      * Get all pending approval requests for the company
      *
      * GET /api/v1/{company}/approvals
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -44,9 +39,6 @@ class ApprovalRequestController extends Controller
      * Get pending approval requests only
      *
      * GET /api/v1/{company}/approvals/pending
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function pending(Request $request): JsonResponse
     {
@@ -69,10 +61,8 @@ class ApprovalRequestController extends Controller
      *
      * GET /api/v1/{company}/approvals/document/{type}/{id}
      *
-     * @param Request $request
-     * @param string $type Document type (invoice, estimate, expense, bill, credit-note)
-     * @param int $id Document ID
-     * @return JsonResponse
+     * @param  string  $type  Document type (invoice, estimate, expense, bill, credit-note)
+     * @param  int  $id  Document ID
      */
     public function documentHistory(Request $request, string $type, int $id): JsonResponse
     {
@@ -88,7 +78,7 @@ class ApprovalRequestController extends Controller
             default => null,
         };
 
-        if (!$modelClass) {
+        if (! $modelClass) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid document type',
@@ -112,9 +102,7 @@ class ApprovalRequestController extends Controller
      *
      * POST /api/v1/{company}/approvals/{id}/approve
      *
-     * @param Request $request
-     * @param int $id Approval request ID
-     * @return JsonResponse
+     * @param  int  $id  Approval request ID
      */
     public function approve(Request $request, int $id): JsonResponse
     {
@@ -126,10 +114,10 @@ class ApprovalRequestController extends Controller
         $approval = ApprovalRequest::whereCompany($companyId)->findOrFail($id);
 
         // Check if already processed
-        if (!$approval->isPending()) {
+        if (! $approval->isPending()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This approval request has already been ' . $approval->status,
+                'message' => 'This approval request has already been '.$approval->status,
             ], 400);
         }
 
@@ -167,7 +155,7 @@ class ApprovalRequestController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to approve document: ' . $e->getMessage(),
+                'message' => 'Failed to approve document: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -177,9 +165,7 @@ class ApprovalRequestController extends Controller
      *
      * POST /api/v1/{company}/approvals/{id}/reject
      *
-     * @param Request $request
-     * @param int $id Approval request ID
-     * @return JsonResponse
+     * @param  int  $id  Approval request ID
      */
     public function reject(Request $request, int $id): JsonResponse
     {
@@ -191,10 +177,10 @@ class ApprovalRequestController extends Controller
         $approval = ApprovalRequest::whereCompany($companyId)->findOrFail($id);
 
         // Check if already processed
-        if (!$approval->isPending()) {
+        if (! $approval->isPending()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This approval request has already been ' . $approval->status,
+                'message' => 'This approval request has already been '.$approval->status,
             ], 400);
         }
 
@@ -225,7 +211,7 @@ class ApprovalRequestController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to reject document: ' . $e->getMessage(),
+                'message' => 'Failed to reject document: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -234,9 +220,6 @@ class ApprovalRequestController extends Controller
      * Get approval statistics
      *
      * GET /api/v1/{company}/approvals/stats
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function stats(Request $request): JsonResponse
     {
@@ -263,6 +246,7 @@ class ApprovalRequestController extends Controller
                     'App\\Models\\CreditNote' => 'credit_notes',
                     default => 'other',
                 };
+
                 return [$typeName => $item->count];
             });
 

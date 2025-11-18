@@ -2,12 +2,12 @@
 
 namespace App\Services\Import;
 
-use App\Services\Import\Intelligent\IntelligentFieldMapper;
-use App\Services\Import\Intelligent\FieldAnalyzer;
-use App\Services\Import\Intelligent\MappingScorer;
 use App\Services\Import\Intelligent\AdaptiveValidator;
-use Illuminate\Support\Facades\Log;
+use App\Services\Import\Intelligent\FieldAnalyzer;
+use App\Services\Import\Intelligent\IntelligentFieldMapper;
+use App\Services\Import\Intelligent\MappingScorer;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Import Service Facade
@@ -24,61 +24,49 @@ use Exception;
  * - Comprehensive logging and error handling
  * - Compatible with existing ImportController API
  *
- * @package App\Services\Import
  * @version 1.0.0
+ *
  * @author Claude Code - Phase 2 Import Service Integration
  */
 class ImportService
 {
     /**
      * Intelligent field mapper service
-     *
-     * @var IntelligentFieldMapper
      */
     private IntelligentFieldMapper $fieldMapper;
 
     /**
      * Field analyzer service for data type detection
-     *
-     * @var FieldAnalyzer
      */
     private FieldAnalyzer $fieldAnalyzer;
 
     /**
      * Mapping scorer service for quality metrics
-     *
-     * @var MappingScorer
      */
     private MappingScorer $mappingScorer;
 
     /**
      * Adaptive validator service for data validation
-     *
-     * @var AdaptiveValidator
      */
     private AdaptiveValidator $validator;
 
     /**
      * Whether intelligent import is enabled
-     *
-     * @var bool
      */
     private bool $intelligentEnabled;
 
     /**
      * Whether to fallback to legacy on errors
-     *
-     * @var bool
      */
     private bool $fallbackEnabled;
 
     /**
      * Initialize the Import Service
      *
-     * @param IntelligentFieldMapper $fieldMapper Intelligent field mapper
-     * @param FieldAnalyzer $fieldAnalyzer Field analyzer
-     * @param MappingScorer $mappingScorer Mapping scorer
-     * @param AdaptiveValidator $validator Adaptive validator
+     * @param  IntelligentFieldMapper  $fieldMapper  Intelligent field mapper
+     * @param  FieldAnalyzer  $fieldAnalyzer  Field analyzer
+     * @param  MappingScorer  $mappingScorer  Mapping scorer
+     * @param  AdaptiveValidator  $validator  Adaptive validator
      */
     public function __construct(
         IntelligentFieldMapper $fieldMapper,
@@ -107,11 +95,10 @@ class ImportService
      * This is the main entry point for field mapping. It switches between
      * intelligent and legacy systems based on feature flag.
      *
-     * @param array $csvHeaders CSV column headers
-     * @param array $sampleData Sample rows for data type analysis
-     * @param string|null $entityType Entity type (customer, invoice, item, payment, expense)
-     * @param int|null $companyId Company ID for company-specific rules
-     *
+     * @param  array  $csvHeaders  CSV column headers
+     * @param  array  $sampleData  Sample rows for data type analysis
+     * @param  string|null  $entityType  Entity type (customer, invoice, item, payment, expense)
+     * @param  int|null  $companyId  Company ID for company-specific rules
      * @return array Mapping suggestions and quality metrics
      */
     public function detectFieldsAndSuggestMappings(
@@ -122,7 +109,7 @@ class ImportService
     ): array {
         // If intelligent mode is disabled, return empty suggestions
         // Legacy ImportController will handle mapping
-        if (!$this->intelligentEnabled) {
+        if (! $this->intelligentEnabled) {
             Log::info('Intelligent import disabled, returning empty suggestions', [
                 'entity_type' => $entityType,
                 'fields_count' => count($csvHeaders),
@@ -179,6 +166,7 @@ class ImportService
             // Fallback to legacy if enabled
             if ($this->fallbackEnabled) {
                 Log::warning('Falling back to legacy import system');
+
                 return $this->buildLegacyResponse($csvHeaders, $sampleData, $entityType);
             }
 
@@ -190,10 +178,9 @@ class ImportService
     /**
      * Validate import data using adaptive validator
      *
-     * @param array $records Array of records to validate
-     * @param array $fieldMappings Field mappings (csv_field => target_field)
-     * @param string $entityType Entity type
-     *
+     * @param  array  $records  Array of records to validate
+     * @param  array  $fieldMappings  Field mappings (csv_field => target_field)
+     * @param  string  $entityType  Entity type
      * @return array Validation results with errors and warnings
      */
     public function validateImportData(
@@ -202,7 +189,7 @@ class ImportService
         string $entityType
     ): array {
         // If intelligent mode is disabled, skip validation
-        if (!$this->intelligentEnabled) {
+        if (! $this->intelligentEnabled) {
             Log::info('Intelligent import disabled, skipping adaptive validation');
 
             return [
@@ -211,7 +198,7 @@ class ImportService
                 'total_records' => count($records),
                 'errors' => [],
                 'warnings' => [],
-                'records' => array_map(fn($r, $i) => [
+                'records' => array_map(fn ($r, $i) => [
                     'row_number' => $i + 1,
                     'data' => $r,
                     'has_errors' => false,
@@ -244,8 +231,8 @@ class ImportService
                     $rowNumber
                 );
 
-                $hasErrors = !empty($validation['errors']);
-                $hasWarnings = !empty($validation['warnings']);
+                $hasErrors = ! empty($validation['errors']);
+                $hasWarnings = ! empty($validation['warnings']);
 
                 if ($hasErrors) {
                     $invalidCount++;
@@ -297,7 +284,7 @@ class ImportService
                     'valid_records' => 0,
                     'invalid_records' => count($records),
                     'total_records' => count($records),
-                    'errors' => ['Validation system error: ' . $e->getMessage()],
+                    'errors' => ['Validation system error: '.$e->getMessage()],
                     'warnings' => [],
                     'records' => [],
                 ];
@@ -310,16 +297,15 @@ class ImportService
     /**
      * Get mapping quality score
      *
-     * @param array $mappings Field mappings with confidence scores
-     * @param string $entityType Entity type
-     *
+     * @param  array  $mappings  Field mappings with confidence scores
+     * @param  string  $entityType  Entity type
      * @return array Quality metrics
      */
     public function getMappingQualityScore(
         array $mappings,
         string $entityType
     ): array {
-        if (!$this->intelligentEnabled) {
+        if (! $this->intelligentEnabled) {
             return [
                 'overall_score' => 0,
                 'grade' => 'UNKNOWN',
@@ -359,7 +345,7 @@ class ImportService
                 'critical_coverage' => 0,
                 'field_coverage' => 0,
                 'avg_confidence' => 0,
-                'recommendation' => 'Quality calculation error: ' . $e->getMessage(),
+                'recommendation' => 'Quality calculation error: '.$e->getMessage(),
             ];
         }
     }
@@ -367,10 +353,9 @@ class ImportService
     /**
      * Transform intelligent mapping result to controller-compatible format
      *
-     * @param array $mappingResult Result from IntelligentFieldMapper
-     * @param array $csvHeaders Original CSV headers
-     * @param string|null $entityType Entity type
-     *
+     * @param  array  $mappingResult  Result from IntelligentFieldMapper
+     * @param  array  $csvHeaders  Original CSV headers
+     * @param  string|null  $entityType  Entity type
      * @return array Transformed response
      */
     protected function transformIntelligentResponse(
@@ -420,10 +405,9 @@ class ImportService
     /**
      * Build legacy response format when intelligent mode is disabled
      *
-     * @param array $csvHeaders CSV headers
-     * @param array $sampleData Sample data
-     * @param string|null $entityType Entity type
-     *
+     * @param  array  $csvHeaders  CSV headers
+     * @param  array  $sampleData  Sample data
+     * @param  string|null  $entityType  Entity type
      * @return array Legacy response format
      */
     protected function buildLegacyResponse(
@@ -493,9 +477,7 @@ class ImportService
     /**
      * Enable or disable intelligent import
      *
-     * @param bool $enabled Enable/disable flag
-     *
-     * @return void
+     * @param  bool  $enabled  Enable/disable flag
      */
     public function setIntelligentEnabled(bool $enabled): void
     {
@@ -545,8 +527,6 @@ class ImportService
 
     /**
      * Clear all caches in underlying services
-     *
-     * @return void
      */
     public function clearCaches(): void
     {

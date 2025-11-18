@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
 
 /**
  * Check Certificate Expiry Command
@@ -38,8 +38,9 @@ class CheckCertificateExpiry extends Command
         $this->info('Checking for expiring certificates...');
 
         // Check if certificates table exists
-        if (!DB::getSchemaBuilder()->hasTable('certificates')) {
+        if (! DB::getSchemaBuilder()->hasTable('certificates')) {
             $this->warn('Certificates table does not exist yet. Skipping check.');
+
             return 0;
         }
 
@@ -51,6 +52,7 @@ class CheckCertificateExpiry extends Command
 
         if ($expiringCerts->isEmpty()) {
             $this->info('No expiring certificates found.');
+
             return 0;
         }
 
@@ -66,16 +68,18 @@ class CheckCertificateExpiry extends Command
             try {
                 $company = DB::table('companies')->where('id', $cert->company_id)->first();
 
-                if (!$company) {
+                if (! $company) {
                     $this->error("  Company not found for certificate {$cert->id}");
+
                     continue;
                 }
 
                 // Find the company owner
                 $owner = DB::table('users')->where('id', $company->owner_id)->first();
 
-                if (!$owner) {
+                if (! $owner) {
                     $this->error("  Owner not found for company {$company->id}");
+
                     continue;
                 }
 
@@ -88,7 +92,7 @@ class CheckCertificateExpiry extends Command
                 $this->error("  Failed to process certificate {$cert->id}: {$e->getMessage()}");
                 \Log::error('Certificate expiry check failed', [
                     'certificate_id' => $cert->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -107,7 +111,7 @@ class CheckCertificateExpiry extends Command
             // Use a simple mail approach without requiring a Mailable class
             Mail::raw(
                 $this->buildEmailBody($cert, $company, $daysLeft),
-                function ($message) use ($owner, $cert, $daysLeft) {
+                function ($message) use ($owner, $daysLeft) {
                     $message->to($owner->email)
                         ->subject("⚠️ QES Certificate Expiring in {$daysLeft} Days - Action Required");
                 }
@@ -116,7 +120,7 @@ class CheckCertificateExpiry extends Command
             \Log::error('Failed to send certificate expiry email', [
                 'certificate_id' => $cert->id,
                 'owner_email' => $owner->email,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }

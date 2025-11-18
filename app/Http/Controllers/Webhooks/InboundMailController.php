@@ -8,7 +8,6 @@ use App\Models\CompanyInboundAlias;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class InboundMailController extends Controller
@@ -64,6 +63,7 @@ class InboundMailController extends Controller
                     'mime' => $mime,
                     'name' => $file->getClientOriginalName(),
                 ]);
+
                 continue;
             }
 
@@ -95,4 +95,3 @@ class InboundMailController extends Controller
         return response('Inbound email accepted', 200);
     }
 }
-

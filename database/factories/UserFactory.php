@@ -23,7 +23,7 @@ class UserFactory extends Factory
     {
         $currencyId = Currency::query()->value('id');
 
-        if (!$currencyId) {
+        if (! $currencyId) {
             $currency = Currency::create([
                 'name' => 'Macedonian Denar',
                 'code' => 'MKD',

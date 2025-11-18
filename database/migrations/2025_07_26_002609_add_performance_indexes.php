@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Add indexes for frequently queried columns
-        
+
         // Company settings - frequently queried by company_id and option
         Schema::table('company_settings', function (Blueprint $table) {
             $table->index(['company_id', 'option']);

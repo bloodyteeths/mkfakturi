@@ -14,8 +14,7 @@ class ReceiptScannerController extends Controller
     public function scan(
         ReceiptScanRequest $request,
         InvoiceParserClient $parserClient,
-    ): JsonResponse
-    {
+    ): JsonResponse {
         try {
             \Log::info('ReceiptScannerController::scan - Starting', [
                 'user_id' => auth()->id(),

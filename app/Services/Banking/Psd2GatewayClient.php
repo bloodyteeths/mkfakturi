@@ -10,9 +10,9 @@ use App\Models\BankTransaction;
 use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\KomerGateway;
 use Modules\Mk\Services\NlbGateway;
 use Modules\Mk\Services\StopanskaGateway;
-use Modules\Mk\Services\KomerGateway;
 
 /**
  * PSD2 Gateway Client
@@ -32,9 +32,10 @@ class Psd2GatewayClient
     /**
      * Get authorization URL for OAuth flow
      *
-     * @param string $bankProviderKey Bank provider key (nlb, stopanska, komercijalna)
-     * @param int $companyId Company ID
+     * @param  string  $bankProviderKey  Bank provider key (nlb, stopanska, komercijalna)
+     * @param  int  $companyId  Company ID
      * @return string Authorization URL
+     *
      * @throws \Exception If bank provider not found or not supported
      */
     public function getAuthorizationUrl(string $bankProviderKey, int $companyId): string
@@ -56,7 +57,7 @@ class Psd2GatewayClient
         Log::info('Generated OAuth authorization URL', [
             'bank' => $bankProviderKey,
             'company_id' => $companyId,
-            'redirect_uri' => $redirectUri
+            'redirect_uri' => $redirectUri,
         ]);
 
         return $authUrl;
@@ -65,10 +66,10 @@ class Psd2GatewayClient
     /**
      * Exchange authorization code for access token
      *
-     * @param int $connectionId Bank connection ID
-     * @param string $code Authorization code from OAuth callback
-     * @param string|null $state State parameter from callback
-     * @return void
+     * @param  int  $connectionId  Bank connection ID
+     * @param  string  $code  Authorization code from OAuth callback
+     * @param  string|null  $state  State parameter from callback
+     *
      * @throws \Exception If exchange fails
      */
     public function exchangeCodeForToken(int $connectionId, string $code, ?string $state = null): void
@@ -89,7 +90,7 @@ class Psd2GatewayClient
             $consent = BankConsent::updateOrCreate(
                 [
                     'bank_connection_id' => $connection->id,
-                    'consent_id' => $token->id . '_' . time(), // Unique consent ID
+                    'consent_id' => $token->id.'_'.time(), // Unique consent ID
                 ],
                 [
                     'status' => BankConsent::STATUS_ACTIVE,
@@ -112,7 +113,7 @@ class Psd2GatewayClient
             Log::info('OAuth token exchanged and consent created', [
                 'connection_id' => $connection->id,
                 'bank' => $connection->bankProvider->key,
-                'consent_id' => $consent->id
+                'consent_id' => $consent->id,
             ]);
         } catch (\Exception $e) {
             // Update connection with error status
@@ -120,13 +121,13 @@ class Psd2GatewayClient
                 'status' => BankConnection::STATUS_ERROR,
                 'metadata' => [
                     'error' => $e->getMessage(),
-                    'timestamp' => now()->toIso8601String()
-                ]
+                    'timestamp' => now()->toIso8601String(),
+                ],
             ]);
 
             Log::error('Failed to exchange OAuth code', [
                 'connection_id' => $connection->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -136,15 +137,16 @@ class Psd2GatewayClient
     /**
      * Fetch accounts from bank for a connection
      *
-     * @param int $connectionId Bank connection ID
+     * @param  int  $connectionId  Bank connection ID
      * @return array Array of account data
+     *
      * @throws \Exception If fetch fails
      */
     public function fetchAccounts(int $connectionId): array
     {
         $connection = BankConnection::with('bankProvider', 'company')->findOrFail($connectionId);
 
-        if (!$connection->isActive()) {
+        if (! $connection->isActive()) {
             throw new \Exception('Bank connection is not active');
         }
 
@@ -161,14 +163,14 @@ class Psd2GatewayClient
             Log::info('Fetched accounts from bank', [
                 'connection_id' => $connection->id,
                 'bank' => $connection->bankProvider->key,
-                'account_count' => count($accounts)
+                'account_count' => count($accounts),
             ]);
 
             return $accounts;
         } catch (\Exception $e) {
             Log::error('Failed to fetch accounts', [
                 'connection_id' => $connection->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -178,11 +180,12 @@ class Psd2GatewayClient
     /**
      * Fetch transactions from bank for a specific account
      *
-     * @param int $connectionId Bank connection ID
-     * @param string $accountId Bank account identifier
-     * @param \DateTime|string $dateFrom Start date
-     * @param \DateTime|string $dateTo End date
+     * @param  int  $connectionId  Bank connection ID
+     * @param  string  $accountId  Bank account identifier
+     * @param  \DateTime|string  $dateFrom  Start date
+     * @param  \DateTime|string  $dateTo  End date
      * @return array Array of transaction data
+     *
      * @throws \Exception If fetch fails
      */
     public function fetchTransactions(
@@ -193,7 +196,7 @@ class Psd2GatewayClient
     ): array {
         $connection = BankConnection::with('bankProvider', 'company')->findOrFail($connectionId);
 
-        if (!$connection->isActive()) {
+        if (! $connection->isActive()) {
             throw new \Exception('Bank connection is not active');
         }
 
@@ -217,7 +220,7 @@ class Psd2GatewayClient
                 'account_id' => $accountId,
                 'transaction_count' => count($transactions),
                 'date_from' => $from->toDateString(),
-                'date_to' => $to->toDateString()
+                'date_to' => $to->toDateString(),
             ]);
 
             return $transactions;
@@ -225,7 +228,7 @@ class Psd2GatewayClient
             Log::error('Failed to fetch transactions', [
                 'connection_id' => $connection->id,
                 'account_id' => $accountId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -235,7 +238,7 @@ class Psd2GatewayClient
     /**
      * Sync accounts for a connection (fetch and store in database)
      *
-     * @param int $connectionId Bank connection ID
+     * @param  int  $connectionId  Bank connection ID
      * @return int Number of accounts synchronized
      */
     public function syncAccounts(int $connectionId): int
@@ -267,7 +270,7 @@ class Psd2GatewayClient
                         'cashAccountType' => $accountData['cashAccountType'] ?? null,
                         'bic' => $accountData['bic'] ?? null,
                         'name' => $accountData['name'] ?? null,
-                    ]
+                    ],
                 ]
             );
 
@@ -276,7 +279,7 @@ class Psd2GatewayClient
 
         Log::info('Synchronized bank accounts', [
             'connection_id' => $connection->id,
-            'synced_count' => $syncedCount
+            'synced_count' => $syncedCount,
         ]);
 
         return $syncedCount;
@@ -285,9 +288,9 @@ class Psd2GatewayClient
     /**
      * Sync transactions for a bank account
      *
-     * @param int $bankAccountId Local bank account ID
-     * @param \DateTime|string|null $dateFrom Start date (defaults to 30 days ago)
-     * @param \DateTime|string|null $dateTo End date (defaults to today)
+     * @param  int  $bankAccountId  Local bank account ID
+     * @param  \DateTime|string|null  $dateFrom  Start date (defaults to 30 days ago)
+     * @param  \DateTime|string|null  $dateTo  End date (defaults to today)
      * @return int Number of transactions synchronized
      */
     public function syncTransactions(
@@ -335,7 +338,7 @@ class Psd2GatewayClient
                     'counterparty_account' => $txnData['debtorAccount'] ?? $txnData['creditorAccount'] ?? null,
                     'description' => $txnData['remittanceInformationUnstructured'] ?? $txnData['additionalInformation'] ?? null,
                     'status' => 'booked',
-                    'metadata' => $txnData
+                    'metadata' => $txnData,
                 ]
             );
 
@@ -345,13 +348,13 @@ class Psd2GatewayClient
         // Update bank account balance if provided
         if (isset($transactions[0]['balanceAfterTransaction'])) {
             $bankAccount->update([
-                'current_balance' => $transactions[0]['balanceAfterTransaction']['amount']
+                'current_balance' => $transactions[0]['balanceAfterTransaction']['amount'],
             ]);
         }
 
         Log::info('Synchronized bank transactions', [
             'bank_account_id' => $bankAccount->id,
-            'synced_count' => $syncedCount
+            'synced_count' => $syncedCount,
         ]);
 
         return $syncedCount;
@@ -360,7 +363,7 @@ class Psd2GatewayClient
     /**
      * Revoke consent and disconnect bank connection
      *
-     * @param int $connectionId Bank connection ID
+     * @param  int  $connectionId  Bank connection ID
      * @return bool Success status
      */
     public function revokeConsent(int $connectionId): bool
@@ -376,7 +379,7 @@ class Psd2GatewayClient
 
             // Update connection status
             $connection->update([
-                'status' => BankConnection::STATUS_REVOKED
+                'status' => BankConnection::STATUS_REVOKED,
             ]);
 
             // Revoke all consents for this connection
@@ -385,19 +388,19 @@ class Psd2GatewayClient
 
             Log::info('Bank connection revoked', [
                 'connection_id' => $connection->id,
-                'bank' => $connection->bankProvider->key
+                'bank' => $connection->bankProvider->key,
             ]);
 
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to revoke consent', [
                 'connection_id' => $connection->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             // Still update local status even if revoke failed on bank side
             $connection->update([
-                'status' => BankConnection::STATUS_REVOKED
+                'status' => BankConnection::STATUS_REVOKED,
             ]);
 
             return false;
@@ -407,16 +410,17 @@ class Psd2GatewayClient
     /**
      * Get the appropriate gateway instance for a bank
      *
-     * @param string $bankKey Bank provider key
+     * @param  string  $bankKey  Bank provider key
      * @return Psd2Client|object Gateway instance
+     *
      * @throws \Exception If bank not supported
      */
     protected function getGateway(string $bankKey)
     {
         return match ($bankKey) {
-            'nlb' => new NlbGateway(),
-            'stopanska' => new StopanskaGateway(),
-            'komercijalna' => new KomerGateway(),
+            'nlb' => new NlbGateway,
+            'stopanska' => new StopanskaGateway,
+            'komercijalna' => new KomerGateway,
             default => throw new \Exception("Unsupported bank: {$bankKey}"),
         };
     }
@@ -424,13 +428,13 @@ class Psd2GatewayClient
     /**
      * Get redirect URI for OAuth callback
      *
-     * @param string $bankKey Bank provider key
+     * @param  string  $bankKey  Bank provider key
      * @return string Redirect URI
      */
     protected function getRedirectUri(string $bankKey): string
     {
         // Check if custom redirect URI is configured
-        $configKey = strtoupper($bankKey) . '_REDIRECT_URI';
+        $configKey = strtoupper($bankKey).'_REDIRECT_URI';
         $customUri = config("services.psd2.banks.{$bankKey}.redirect_uri");
 
         if ($customUri) {
@@ -444,14 +448,14 @@ class Psd2GatewayClient
     /**
      * Get currency ID by code
      *
-     * @param string $code Currency code (MKD, EUR, USD)
+     * @param  string  $code  Currency code (MKD, EUR, USD)
      * @return int|null Currency ID
      */
     protected function getCurrencyId(string $code): ?int
     {
         static $currencies = [];
 
-        if (!isset($currencies[$code])) {
+        if (! isset($currencies[$code])) {
             $currency = \App\Models\Currency::where('code', $code)->first();
             $currencies[$code] = $currency ? $currency->id : null;
         }
@@ -462,7 +466,7 @@ class Psd2GatewayClient
     /**
      * Determine transaction type from transaction data
      *
-     * @param array $txnData Transaction data
+     * @param  array  $txnData  Transaction data
      * @return string Transaction type (credit or debit)
      */
     protected function determineTransactionType(array $txnData): string

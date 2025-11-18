@@ -28,7 +28,7 @@ class Unit extends Model
         // Include both company-specific units AND global units (company_id = null)
         $query->where(function ($q) {
             $q->where('company_id', request()->header('company'))
-              ->orWhereNull('company_id');
+                ->orWhereNull('company_id');
         });
     }
 

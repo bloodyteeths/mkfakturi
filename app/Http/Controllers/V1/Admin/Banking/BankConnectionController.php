@@ -7,8 +7,8 @@ use App\Models\BankConnection;
 use App\Models\BankProvider;
 use App\Models\Company;
 use App\Services\Banking\Psd2GatewayClient;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,9 +30,6 @@ class BankConnectionController extends Controller
     /**
      * POST /api/v1/{company}/bank/oauth/start
      * Initiate OAuth flow for a bank provider
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function startOAuth(Request $request): JsonResponse
     {
@@ -43,7 +40,7 @@ class BankConnectionController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'error' => 'Validation failed',
-                'messages' => $validator->errors()
+                'messages' => $validator->errors(),
             ], 422);
         }
 
@@ -75,7 +72,7 @@ class BankConnectionController extends Controller
             Log::info('OAuth flow initiated', [
                 'company_id' => $company->id,
                 'bank_provider' => $bankProviderKey,
-                'connection_id' => $connection->id
+                'connection_id' => $connection->id,
             ]);
 
             return response()->json([
@@ -84,17 +81,17 @@ class BankConnectionController extends Controller
                     'authorization_url' => $authorizationUrl,
                     'connection_id' => $connection->id,
                     'bank_provider' => $bankProviderKey,
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to initiate OAuth flow', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to initiate OAuth flow',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -103,7 +100,6 @@ class BankConnectionController extends Controller
      * GET /api/v1/bank/oauth/callback
      * Handle OAuth callback from bank
      *
-     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function handleOAuthCallback(Request $request)
@@ -117,13 +113,13 @@ class BankConnectionController extends Controller
             if ($error) {
                 Log::warning('OAuth callback error', [
                     'error' => $error,
-                    'description' => $request->query('error_description')
+                    'description' => $request->query('error_description'),
                 ]);
 
-                return redirect('/admin/banking')->with('error', 'Bank authorization failed: ' . $error);
+                return redirect('/admin/banking')->with('error', 'Bank authorization failed: '.$error);
             }
 
-            if (!$code) {
+            if (! $code) {
                 return redirect('/admin/banking')->with('error', 'No authorization code received');
             }
 
@@ -146,26 +142,23 @@ class BankConnectionController extends Controller
             Log::info('OAuth callback processed successfully', [
                 'company_id' => $company->id,
                 'connection_id' => $connection->id,
-                'accounts_synced' => $accountsCount
+                'accounts_synced' => $accountsCount,
             ]);
 
             return redirect('/admin/banking')->with('success', "Bank connected successfully! {$accountsCount} accounts synchronized.");
         } catch (\Exception $e) {
             Log::error('OAuth callback failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect('/admin/banking')->with('error', 'Failed to complete bank connection: ' . $e->getMessage());
+            return redirect('/admin/banking')->with('error', 'Failed to complete bank connection: '.$e->getMessage());
         }
     }
 
     /**
      * GET /api/v1/{company}/bank/connections
      * List all bank connections for the company
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function listConnections(Request $request): JsonResponse
     {
@@ -196,16 +189,16 @@ class BankConnectionController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $connections
+                'data' => $connections,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to list bank connections', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to list connections',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -214,9 +207,7 @@ class BankConnectionController extends Controller
      * DELETE /api/v1/{company}/bank/connections/{id}
      * Revoke consent and disconnect bank connection
      *
-     * @param Request $request
-     * @param int $id Connection ID
-     * @return JsonResponse
+     * @param  int  $id  Connection ID
      */
     public function revokeConnection(Request $request, int $id): JsonResponse
     {
@@ -234,7 +225,7 @@ class BankConnectionController extends Controller
             Log::info('Bank connection revoked', [
                 'company_id' => $companyId,
                 'connection_id' => $connection->id,
-                'success' => $success
+                'success' => $success,
             ]);
 
             return response()->json([
@@ -242,18 +233,18 @@ class BankConnectionController extends Controller
                 'message' => 'Bank connection revoked successfully',
                 'data' => [
                     'connection_id' => $connection->id,
-                    'status' => BankConnection::STATUS_REVOKED
-                ]
+                    'status' => BankConnection::STATUS_REVOKED,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to revoke bank connection', [
                 'connection_id' => $id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to revoke connection',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -261,9 +252,6 @@ class BankConnectionController extends Controller
     /**
      * GET /api/v1/{company}/bank/accounts
      * List all bank accounts from all active connections
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function listAccounts(Request $request): JsonResponse
     {
@@ -302,23 +290,23 @@ class BankConnectionController extends Controller
                     Log::warning('Failed to fetch accounts for connection', [
                         'connection_id' => $connection->id,
                         'bank' => $connection->bankProvider->key,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
                 }
             }
 
             return response()->json([
                 'success' => true,
-                'data' => $allAccounts
+                'data' => $allAccounts,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to list bank accounts', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to list accounts',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -327,9 +315,7 @@ class BankConnectionController extends Controller
      * GET /api/v1/{company}/bank/accounts/{id}/transactions
      * Fetch transactions for a specific account
      *
-     * @param Request $request
-     * @param string $accountId External account ID
-     * @return JsonResponse
+     * @param  string  $accountId  External account ID
      */
     public function getAccountTransactions(Request $request, string $accountId): JsonResponse
     {
@@ -342,7 +328,7 @@ class BankConnectionController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'error' => 'Validation failed',
-                'messages' => $validator->errors()
+                'messages' => $validator->errors(),
             ], 422);
         }
 
@@ -375,18 +361,18 @@ class BankConnectionController extends Controller
                     'date_from' => $dateFrom,
                     'date_to' => $dateTo,
                     'transaction_count' => count($transactions),
-                    'transactions' => $transactions
-                ]
+                    'transactions' => $transactions,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to fetch account transactions', [
                 'account_id' => $accountId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to fetch transactions',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -395,9 +381,7 @@ class BankConnectionController extends Controller
      * POST /api/v1/{company}/bank/accounts/{id}/sync
      * Sync transactions for a specific bank account
      *
-     * @param Request $request
-     * @param int $bankAccountId Local bank account ID
-     * @return JsonResponse
+     * @param  int  $bankAccountId  Local bank account ID
      */
     public function syncBankAccount(Request $request, int $bankAccountId): JsonResponse
     {
@@ -409,7 +393,7 @@ class BankConnectionController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'error' => 'Validation failed',
-                'messages' => $validator->errors()
+                'messages' => $validator->errors(),
             ], 422);
         }
 
@@ -440,17 +424,17 @@ class BankConnectionController extends Controller
                     'synced_count' => $syncedCount,
                     'date_from' => $dateFrom ?? now()->subDays(30)->toDateString(),
                     'date_to' => $dateTo ?? now()->toDateString(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to sync bank account', [
                 'bank_account_id' => $bankAccountId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'error' => 'Failed to sync bank account',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

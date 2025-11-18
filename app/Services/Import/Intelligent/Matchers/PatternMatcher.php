@@ -20,10 +20,10 @@ class PatternMatcher implements MatcherInterface
      * 2. Check against built-in common patterns
      * 3. Return matches with confidence based on pattern strength
      *
-     * @param string $csvField CSV column name
-     * @param array $analysis Field analysis from FieldAnalyzer
-     * @param Collection $rules Available MappingRule records
-     * @param string $entityType Entity type being imported
+     * @param  string  $csvField  CSV column name
+     * @param  array  $analysis  Field analysis from FieldAnalyzer
+     * @param  Collection  $rules  Available MappingRule records
+     * @param  string  $entityType  Entity type being imported
      * @return array Array of candidates with confidence scores
      */
     public function match(
@@ -47,12 +47,12 @@ class PatternMatcher implements MatcherInterface
             }
 
             // Skip inactive rules
-            if (!$rule->is_active) {
+            if (! $rule->is_active) {
                 continue;
             }
 
             // Check against macedonian_patterns
-            if (!empty($rule->macedonian_patterns) && is_array($rule->macedonian_patterns)) {
+            if (! empty($rule->macedonian_patterns) && is_array($rule->macedonian_patterns)) {
                 foreach ($rule->macedonian_patterns as $pattern) {
                     if ($this->matchesPattern($csvField, $pattern)) {
                         $candidates[] = $this->buildCandidate(
@@ -67,10 +67,10 @@ class PatternMatcher implements MatcherInterface
             }
 
             // Check against format_patterns
-            if (!empty($rule->format_patterns) && is_array($rule->format_patterns)) {
+            if (! empty($rule->format_patterns) && is_array($rule->format_patterns)) {
                 $alreadyAdded = collect($candidates)->contains('rule_id', $rule->id);
 
-                if (!$alreadyAdded) {
+                if (! $alreadyAdded) {
                     foreach ($rule->format_patterns as $pattern) {
                         if ($this->matchesPattern($csvField, $pattern)) {
                             $candidates[] = $this->buildCandidate(
@@ -104,16 +104,16 @@ class PatternMatcher implements MatcherInterface
     /**
      * Check if field matches a regex pattern
      *
-     * @param string $field Field name
-     * @param string $pattern Regex pattern
+     * @param  string  $field  Field name
+     * @param  string  $pattern  Regex pattern
      * @return bool True if matches
      */
     private function matchesPattern(string $field, string $pattern): bool
     {
         try {
             // Ensure pattern has delimiters
-            if (!preg_match('/^\/.*\/[imsxu]*$/', $pattern)) {
-                $pattern = '/' . $pattern . '/i';
+            if (! preg_match('/^\/.*\/[imsxu]*$/', $pattern)) {
+                $pattern = '/'.$pattern.'/i';
             }
 
             return (bool) preg_match($pattern, $field);
@@ -126,9 +126,9 @@ class PatternMatcher implements MatcherInterface
     /**
      * Match against common built-in patterns
      *
-     * @param string $csvField CSV field name
-     * @param string $entityType Entity type
-     * @param Collection $rules Available mapping rules
+     * @param  string  $csvField  CSV field name
+     * @param  string  $entityType  Entity type
+     * @param  Collection  $rules  Available mapping rules
      * @return array Candidates from built-in patterns
      */
     private function matchBuiltInPatterns(string $csvField, string $entityType, Collection $rules): array
@@ -138,7 +138,7 @@ class PatternMatcher implements MatcherInterface
 
         foreach ($patterns as $targetField => $patternInfo) {
             // Check if this pattern is relevant for the entity type
-            if (!empty($patternInfo['entities']) && !in_array($entityType, $patternInfo['entities'])) {
+            if (! empty($patternInfo['entities']) && ! in_array($entityType, $patternInfo['entities'])) {
                 continue;
             }
 
@@ -328,7 +328,7 @@ class PatternMatcher implements MatcherInterface
     /**
      * Remove duplicate candidates, keeping highest confidence
      *
-     * @param array $candidates Candidate array
+     * @param  array  $candidates  Candidate array
      * @return array Deduplicated candidates
      */
     private function deduplicateCandidates(array $candidates): array
@@ -339,7 +339,7 @@ class PatternMatcher implements MatcherInterface
         foreach ($candidates as $candidate) {
             $key = $candidate['rule_id'];
 
-            if (!isset($seen[$key]) || $candidate['confidence'] > $seen[$key]['confidence']) {
+            if (! isset($seen[$key]) || $candidate['confidence'] > $seen[$key]['confidence']) {
                 $seen[$key] = $candidate;
             }
         }
@@ -350,7 +350,7 @@ class PatternMatcher implements MatcherInterface
     /**
      * Normalize a field name for comparison
      *
-     * @param string $field Field name to normalize
+     * @param  string  $field  Field name to normalize
      * @return string Normalized field name
      */
     private function normalize(string $field): string
@@ -367,10 +367,10 @@ class PatternMatcher implements MatcherInterface
     /**
      * Build a candidate result array
      *
-     * @param string $targetField Target field name
-     * @param string $source Pattern that matched
-     * @param int $ruleId MappingRule ID
-     * @param float $confidence Confidence score (0.70-0.85)
+     * @param  string  $targetField  Target field name
+     * @param  string  $source  Pattern that matched
+     * @param  int  $ruleId  MappingRule ID
+     * @param  float  $confidence  Confidence score (0.70-0.85)
      * @return array Candidate array
      */
     private function buildCandidate(

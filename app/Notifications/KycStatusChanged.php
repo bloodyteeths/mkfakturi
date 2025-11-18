@@ -13,7 +13,9 @@ class KycStatusChanged extends Notification implements ShouldQueue
     use Queueable;
 
     protected Partner $partner;
+
     protected string $status;
+
     protected ?string $rejectionReason;
 
     /**
@@ -58,7 +60,7 @@ class KycStatusChanged extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('KYC Verification Approved - Facturino Partner')
-            ->greeting('Congratulations, ' . $this->partner->name . '!')
+            ->greeting('Congratulations, '.$this->partner->name.'!')
             ->line('Your KYC verification has been approved.')
             ->line('You are now eligible to receive payouts from your affiliate commissions.')
             ->line('**Next Steps:**')
@@ -77,7 +79,7 @@ class KycStatusChanged extends Notification implements ShouldQueue
     {
         $message = (new MailMessage)
             ->subject('KYC Verification Requires Attention - Facturino Partner')
-            ->greeting('Hello ' . $this->partner->name . ',')
+            ->greeting('Hello '.$this->partner->name.',')
             ->line('Unfortunately, we were unable to approve your KYC verification at this time.');
 
         if ($this->rejectionReason) {
@@ -102,7 +104,7 @@ class KycStatusChanged extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('KYC Documents Received - Facturino Partner')
-            ->greeting('Hello ' . $this->partner->name . ',')
+            ->greeting('Hello '.$this->partner->name.',')
             ->line('We have received your KYC documents.')
             ->line('Our team will review them within 24-48 business hours.')
             ->line('You will receive another email once your verification is complete.')

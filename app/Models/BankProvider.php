@@ -32,11 +32,14 @@ class BankProvider extends Model
 
     // Bank provider constants
     public const NLB = 'nlb';
+
     public const STOPANSKA = 'stopanska';
+
     public const KOMERCIJALNA = 'komercijalna';
 
     // Environment constants
     public const SANDBOX = 'sandbox';
+
     public const PRODUCTION = 'production';
 
     protected $fillable = [

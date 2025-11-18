@@ -51,7 +51,7 @@ class MigrationException extends Exception
         ?Throwable $previous = null
     ) {
         parent::__construct($message, 0, $previous);
-        
+
         $this->step = $step;
         $this->importJobId = $importJobId;
         $this->recoverySuggestions = $recoverySuggestions;
@@ -121,7 +121,7 @@ class MigrationException extends Exception
                 'Check that the file is not corrupted',
                 'Ensure the file size is under the maximum limit',
                 'Verify the file format is supported (CSV, Excel, XML)',
-                'Try uploading the file again'
+                'Try uploading the file again',
             ],
             errorCode: 'FILE_UPLOAD_ERROR'
         );
@@ -136,7 +136,7 @@ class MigrationException extends Exception
             'Check that the file format matches the detected type',
             'Ensure the file is not password protected',
             'Verify the file encoding is UTF-8 or compatible',
-            'Try exporting the data in a different format'
+            'Try exporting the data in a different format',
         ], $additionalSuggestions);
 
         return new self(
@@ -156,12 +156,12 @@ class MigrationException extends Exception
         $suggestions = [
             'Review the field mapping suggestions',
             'Manually map any unrecognized fields',
-            'Check if field names in your file match expected formats'
+            'Check if field names in your file match expected formats',
         ];
 
-        if (!empty($unmappedFields)) {
+        if (! empty($unmappedFields)) {
             $fieldList = implode(', ', array_slice($unmappedFields, 0, 5));
-            $suggestions[] = "Unmapped fields: {$fieldList}" . (count($unmappedFields) > 5 ? ' and ' . (count($unmappedFields) - 5) . ' more' : '');
+            $suggestions[] = "Unmapped fields: {$fieldList}".(count($unmappedFields) > 5 ? ' and '.(count($unmappedFields) - 5).' more' : '');
         }
 
         return new self(
@@ -182,11 +182,11 @@ class MigrationException extends Exception
             'Review the validation errors and fix data issues',
             'Ensure required fields are not empty',
             'Check date formats match expected patterns',
-            'Verify numeric values are properly formatted'
+            'Verify numeric values are properly formatted',
         ];
 
-        if (!empty($validationErrors)) {
-            $suggestions[] = 'First few errors: ' . implode('; ', array_slice($validationErrors, 0, 3));
+        if (! empty($validationErrors)) {
+            $suggestions[] = 'First few errors: '.implode('; ', array_slice($validationErrors, 0, 3));
         }
 
         return new self(
@@ -201,12 +201,12 @@ class MigrationException extends Exception
     /**
      * Create a data transformation error
      */
-    public static function dataTransformationError(string $reason, string $importJobId, string $fieldName = null): self
+    public static function dataTransformationError(string $reason, string $importJobId, ?string $fieldName = null): self
     {
         $suggestions = [
             'Check the data format in the source file',
             'Ensure data types match expected formats',
-            'Verify that special characters are properly encoded'
+            'Verify that special characters are properly encoded',
         ];
 
         if ($fieldName) {
@@ -230,10 +230,10 @@ class MigrationException extends Exception
         $suggestions = [
             'Try the import process again',
             'Check for duplicate data that might cause conflicts',
-            'Ensure database connection is stable'
+            'Ensure database connection is stable',
         ];
 
-        if (!$rollbackSuccessful) {
+        if (! $rollbackSuccessful) {
             $suggestions[] = 'CRITICAL: Data rollback failed - contact support immediately';
         } else {
             $suggestions[] = 'No data was imported due to the error';
@@ -244,7 +244,7 @@ class MigrationException extends Exception
             step: 'commit',
             importJobId: $importJobId,
             recoverySuggestions: $suggestions,
-            critical: !$rollbackSuccessful,
+            critical: ! $rollbackSuccessful,
             errorCode: 'COMMIT_ERROR',
             statusCode: $rollbackSuccessful ? 422 : 500
         );
@@ -253,21 +253,21 @@ class MigrationException extends Exception
     /**
      * Create a memory limit error
      */
-    public static function memoryLimitError(string $importJobId, int $fileSize = null): self
+    public static function memoryLimitError(string $importJobId, ?int $fileSize = null): self
     {
         $suggestions = [
             'Try importing a smaller file',
             'Split your data into multiple smaller files',
             'Remove any unnecessary columns from your file',
-            'Contact support for large file import assistance'
+            'Contact support for large file import assistance',
         ];
 
         if ($fileSize) {
-            $suggestions[] = "File size: " . number_format($fileSize / 1024 / 1024, 2) . " MB";
+            $suggestions[] = 'File size: '.number_format($fileSize / 1024 / 1024, 2).' MB';
         }
 
         return new self(
-            message: "Import failed due to memory limitations",
+            message: 'Import failed due to memory limitations',
             step: 'processing',
             importJobId: $importJobId,
             recoverySuggestions: $suggestions,
@@ -289,7 +289,7 @@ class MigrationException extends Exception
                 'Try importing a smaller file',
                 'Split your data into multiple smaller files',
                 'Retry the import process',
-                'Contact support if the problem persists'
+                'Contact support if the problem persists',
             ],
             errorCode: 'TIMEOUT_ERROR',
             statusCode: 408
@@ -309,7 +309,7 @@ class MigrationException extends Exception
                 'Supported formats: CSV, Excel (.xlsx, .xls), XML',
                 'Convert your file to one of the supported formats',
                 'Check that the file extension matches the actual format',
-                'Ensure the file is not corrupted'
+                'Ensure the file is not corrupted',
             ],
             errorCode: 'UNSUPPORTED_FORMAT_ERROR',
             statusCode: 415
@@ -329,7 +329,7 @@ class MigrationException extends Exception
                 'Check your login credentials for the competitor system',
                 'Ensure the competitor system is accessible',
                 'Try exporting data manually and uploading the file',
-                'Contact support for assistance with competitor integration'
+                'Contact support for assistance with competitor integration',
             ],
             errorCode: 'COMPETITOR_INTEGRATION_ERROR'
         );
@@ -349,7 +349,7 @@ class MigrationException extends Exception
                 "Trying to import: {$current}",
                 'Consider upgrading your plan for higher limits',
                 'Remove some existing data before importing',
-                'Split the import into multiple smaller batches'
+                'Split the import into multiple smaller batches',
             ],
             errorCode: 'QUOTA_EXCEEDED_ERROR',
             statusCode: 429

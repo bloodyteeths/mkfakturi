@@ -17,8 +17,7 @@ class GenerateInvoicePdfJob implements ShouldQueue
     public function __construct(
         public int $invoiceId,
         public bool $deleteExistingFile = false
-    ) {
-    }
+    ) {}
 
     /**
      * Create a new job instance.

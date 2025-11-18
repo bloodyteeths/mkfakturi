@@ -2,13 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -16,7 +15,7 @@ use Tests\TestCase;
 
 /**
  * AUTH-05: Logout and Session Cleanup Audit Feature Test
- * 
+ *
  * This test validates session cleanup and logout functionality:
  * - Complete session invalidation on logout
  * - Token cleanup and revocation
@@ -24,7 +23,7 @@ use Tests\TestCase;
  * - Memory cleanup verification
  * - Database session cleanup
  * - No data leaks after logout
- * 
+ *
  * Target: All sessions invalidated with no data persistence
  */
 class SessionCleanupTest extends TestCase
@@ -32,37 +31,43 @@ class SessionCleanupTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $partnerUser;
+
     protected $company;
+
     protected $partnerCompany;
+
     protected $performanceMetrics = [];
+
     protected $memoryBefore = [];
+
     protected $memoryAfter = [];
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test companies
         $this->company = Company::factory()->create(['name' => 'Main Test Company']);
         $this->partnerCompany = Company::factory()->create(['name' => 'Partner Test Company']);
-        
+
         // Create admin user
         $this->user = User::factory()->create([
             'email' => 'admin.cleanup@invoiceshelf.com',
             'password' => Hash::make('CleanupTest123!'),
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
         $this->user->companies()->attach($this->company->id);
-        
+
         // Create partner user
         $this->partnerUser = User::factory()->create([
             'email' => 'partner.cleanup@invoiceshelf.com',
             'password' => Hash::make('PartnerTest123!'),
-            'role' => 'partner'
+            'role' => 'partner',
         ]);
         $this->partnerUser->companies()->attach([$this->company->id, $this->partnerCompany->id]);
-        
+
         // Create some test data
         $this->createTestData();
     }
@@ -72,13 +77,13 @@ class SessionCleanupTest extends TestCase
         // Create customers and invoices for session testing
         Customer::factory()->count(3)->create([
             'company_id' => $this->company->id,
-            'creator_id' => $this->user->id
+            'creator_id' => $this->user->id,
         ]);
-        
+
         Invoice::factory()->count(2)->create([
             'company_id' => $this->company->id,
             'creator_id' => $this->user->id,
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
     }
 
@@ -92,7 +97,7 @@ class SessionCleanupTest extends TestCase
         $loginResponse = $this->postJson('/api/v1/auth/login', [
             'username' => $this->user->email,
             'password' => 'CleanupTest123!',
-            'device_name' => 'cleanup-test-device'
+            'device_name' => 'cleanup-test-device',
         ]);
 
         $this->assertEquals(200, $loginResponse->status(), 'Login should succeed');
@@ -104,7 +109,7 @@ class SessionCleanupTest extends TestCase
         // Verify authenticated access works
         $authResponse = $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/auth/check');
 
         $this->assertTrue(
@@ -114,7 +119,7 @@ class SessionCleanupTest extends TestCase
 
         // Perform logout
         $logoutResponse = $this->withHeaders([
-            'Authorization' => $token
+            'Authorization' => $token,
         ])->postJson('/api/v1/auth/logout');
 
         $this->assertTrue(
@@ -127,7 +132,7 @@ class SessionCleanupTest extends TestCase
         // Verify token is invalidated
         $invalidResponse = $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/auth/check');
 
         $this->assertEquals(401, $invalidResponse->status(),
@@ -156,11 +161,11 @@ class SessionCleanupTest extends TestCase
             "user_permissions_{$this->user->id}",
             "user_roles_{$this->user->id}",
             "user_settings_{$this->user->id}",
-            "company_data_{$this->company->id}_{$this->user->id}"
+            "company_data_{$this->company->id}_{$this->user->id}",
         ];
 
         foreach ($cacheKeys as $key) {
-            Cache::put($key, 'test_data_' . $key, 3600);
+            Cache::put($key, 'test_data_'.$key, 3600);
         }
 
         // Verify cache data exists
@@ -176,7 +181,7 @@ class SessionCleanupTest extends TestCase
         // Note: This depends on implementation - some systems clear cache on logout
         $cacheCleared = 0;
         foreach ($cacheKeys as $key) {
-            if (!Cache::has($key)) {
+            if (! Cache::has($key)) {
                 $cacheCleared++;
             }
         }
@@ -200,7 +205,7 @@ class SessionCleanupTest extends TestCase
             $loginResponse = $this->postJson('/api/v1/auth/login', [
                 'username' => $this->user->email,
                 'password' => 'CleanupTest123!',
-                'device_name' => "device-{$i}"
+                'device_name' => "device-{$i}",
             ]);
 
             if ($loginResponse->status() === 200) {
@@ -214,7 +219,7 @@ class SessionCleanupTest extends TestCase
         foreach ($tokens as $token) {
             $response = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             $this->assertTrue(
@@ -230,7 +235,7 @@ class SessionCleanupTest extends TestCase
         // First token should be invalid
         $response = $this->withHeaders([
             'Authorization' => $tokens[0],
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/auth/check');
 
         $this->assertEquals(401, $response->status(),
@@ -240,7 +245,7 @@ class SessionCleanupTest extends TestCase
         for ($i = 1; $i < count($tokens); $i++) {
             $response = $this->withHeaders([
                 'Authorization' => $tokens[$i],
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             $this->assertTrue(
@@ -263,7 +268,7 @@ class SessionCleanupTest extends TestCase
         // Simulate company context switching
         $switchResponse = $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->partnerCompany->id
+            'company' => $this->partnerCompany->id,
         ])->getJson('/api/v1/customers');
 
         // Partner should be able to access data in partner company context
@@ -284,7 +289,7 @@ class SessionCleanupTest extends TestCase
         // Verify all company contexts are cleared
         $contextResponse = $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->partnerCompany->id
+            'company' => $this->partnerCompany->id,
         ])->getJson('/api/v1/customers');
 
         $this->assertEquals(401, $contextResponse->status(),
@@ -304,12 +309,12 @@ class SessionCleanupTest extends TestCase
         // Access user data
         $customerResponse = $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/customers');
 
         $invoiceResponse = $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/invoices');
 
         // Logout
@@ -321,13 +326,13 @@ class SessionCleanupTest extends TestCase
             '/api/v1/customers',
             '/api/v1/invoices',
             '/api/v1/users',
-            '/api/v1/dashboard'
+            '/api/v1/dashboard',
         ];
 
         foreach ($leakTestEndpoints as $endpoint) {
             $response = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson($endpoint);
 
             $this->assertEquals(401, $response->status(),
@@ -385,12 +390,12 @@ class SessionCleanupTest extends TestCase
         // Simulate data loading
         $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/customers');
 
         $this->withHeaders([
             'Authorization' => $token,
-            'company' => $this->company->id
+            'company' => $this->company->id,
         ])->getJson('/api/v1/invoices');
 
         $this->recordMemoryUsage('after_data_load');
@@ -419,7 +424,7 @@ class SessionCleanupTest extends TestCase
 
         // Test logout with invalid token
         $invalidResponse = $this->withHeaders([
-            'Authorization' => 'Bearer invalid-token-12345'
+            'Authorization' => 'Bearer invalid-token-12345',
         ])->postJson('/api/v1/auth/logout');
 
         $this->assertTrue(
@@ -436,10 +441,10 @@ class SessionCleanupTest extends TestCase
 
         // Test double logout
         $token = $this->loginUser($this->user);
-        
+
         $firstLogout = $this->withHeaders(['Authorization' => $token])
             ->postJson('/api/v1/auth/logout');
-        
+
         $secondLogout = $this->withHeaders(['Authorization' => $token])
             ->postJson('/api/v1/auth/logout');
 
@@ -473,13 +478,13 @@ class SessionCleanupTest extends TestCase
             // Simulate expired token (set created_at to past)
             $tokenModel->update([
                 'created_at' => now()->subHours(25), // Assuming 24h expiry
-                'updated_at' => now()->subHours(25)
+                'updated_at' => now()->subHours(25),
             ]);
 
             // Try to use expired token
             $expiredResponse = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             // Should be rejected (implementation dependent)
@@ -497,10 +502,11 @@ class SessionCleanupTest extends TestCase
         $response = $this->postJson('/api/v1/auth/login', [
             'username' => $user->email,
             'password' => $user->email === $this->user->email ? 'CleanupTest123!' : 'PartnerTest123!',
-            'device_name' => 'test-device'
+            'device_name' => 'test-device',
         ]);
 
         $this->assertEquals(200, $response->status(), 'Login should succeed');
+
         return $response->json('token');
     }
 
@@ -517,15 +523,15 @@ class SessionCleanupTest extends TestCase
     protected function tearDown(): void
     {
         // Log performance metrics
-        if (!empty($this->performanceMetrics)) {
+        if (! empty($this->performanceMetrics)) {
             $avgTime = array_sum($this->performanceMetrics) / count($this->performanceMetrics);
-            
+
             echo "\n📊 AUTH-05 Performance Metrics:\n";
             foreach ($this->performanceMetrics as $test => $time) {
                 echo sprintf("   %s: %.2fms\n", ucfirst(str_replace('_', ' ', $test)), $time);
             }
             echo sprintf("   Average: %.2fms\n", $avgTime);
-            
+
             if ($avgTime < 500) {
                 echo "🎯 TARGET MET: Session cleanup <500ms average\n";
             } elseif ($avgTime < 1000) {
@@ -536,7 +542,7 @@ class SessionCleanupTest extends TestCase
         }
 
         // Log memory usage
-        if (!empty($this->memoryBefore) && !empty($this->memoryAfter)) {
+        if (! empty($this->memoryBefore) && ! empty($this->memoryAfter)) {
             echo "\n💾 Memory Usage Analysis:\n";
             foreach ($this->memoryBefore as $point => $memory) {
                 echo sprintf("   %s: %.2fMB\n", ucfirst(str_replace('_', ' ', $point)), $memory / 1024 / 1024);

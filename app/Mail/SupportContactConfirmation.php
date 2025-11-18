@@ -20,8 +20,7 @@ class SupportContactConfirmation extends Mailable
         public SupportContact $contact,
         public int $responseTime = 48,
         public ?string $supportUrl = null
-    ) {
-    }
+    ) {}
 
     /**
      * Get the message envelope.
@@ -29,7 +28,7 @@ class SupportContactConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Thank you for contacting Facturino Support - ' . $this->contact->reference_number,
+            subject: 'Thank you for contacting Facturino Support - '.$this->contact->reference_number,
         );
     }
 

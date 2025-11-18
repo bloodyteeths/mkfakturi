@@ -23,4 +23,3 @@ class ImportBillsRequest extends FormRequest
         ];
     }
 }
-

@@ -14,24 +14,17 @@ use Illuminate\Support\Str;
  * Captures before/after values, user context, and request metadata.
  *
  * This observer is registered by the HasAuditing trait.
- *
- * @package App\Observers
  */
 class AuditObserver
 {
     /**
      * Batch ID for grouping related operations.
-     *
-     * @var string|null
      */
     protected static ?string $batchId = null;
 
     /**
      * Handle the Model "creating" event.
      * Sets created_by and updated_by before the model is saved.
-     *
-     * @param Model $model
-     * @return void
      */
     public function creating(Model $model): void
     {
@@ -43,9 +36,6 @@ class AuditObserver
 
     /**
      * Handle the Model "created" event.
-     *
-     * @param Model $model
-     * @return void
      */
     public function created(Model $model): void
     {
@@ -55,9 +45,6 @@ class AuditObserver
     /**
      * Handle the Model "updating" event.
      * Sets updated_by before the model is saved.
-     *
-     * @param Model $model
-     * @return void
      */
     public function updating(Model $model): void
     {
@@ -69,9 +56,6 @@ class AuditObserver
 
     /**
      * Handle the Model "updated" event.
-     *
-     * @param Model $model
-     * @return void
      */
     public function updated(Model $model): void
     {
@@ -83,9 +67,6 @@ class AuditObserver
 
     /**
      * Handle the Model "deleted" event.
-     *
-     * @param Model $model
-     * @return void
      */
     public function deleted(Model $model): void
     {
@@ -94,9 +75,6 @@ class AuditObserver
 
     /**
      * Handle the Model "restored" event.
-     *
-     * @param Model $model
-     * @return void
      */
     public function restored(Model $model): void
     {
@@ -105,9 +83,6 @@ class AuditObserver
 
     /**
      * Handle the Model "forceDeleted" event.
-     *
-     * @param Model $model
-     * @return void
      */
     public function forceDeleted(Model $model): void
     {
@@ -116,10 +91,6 @@ class AuditObserver
 
     /**
      * Log the model change to the audit_logs table.
-     *
-     * @param Model $model
-     * @param string $event
-     * @return void
      */
     protected function logChange(Model $model, string $event): void
     {
@@ -186,9 +157,6 @@ class AuditObserver
 
     /**
      * Get company_id from model or request.
-     *
-     * @param Model $model
-     * @return int|null
      */
     protected function getCompanyId(Model $model): ?int
     {
@@ -205,10 +173,6 @@ class AuditObserver
 
     /**
      * Get old values before change.
-     *
-     * @param Model $model
-     * @param string $event
-     * @return array
      */
     protected function getOldValues(Model $model, string $event): array
     {
@@ -233,10 +197,6 @@ class AuditObserver
 
     /**
      * Get new values after change.
-     *
-     * @param Model $model
-     * @param string $event
-     * @return array
      */
     protected function getNewValues(Model $model, string $event): array
     {
@@ -253,10 +213,6 @@ class AuditObserver
 
     /**
      * Filter out excluded fields from values.
-     *
-     * @param array $values
-     * @param array $excludedFields
-     * @return array
      */
     protected function filterExcludedFields(array $values, array $excludedFields): array
     {
@@ -269,10 +225,6 @@ class AuditObserver
 
     /**
      * Get list of changed field names.
-     *
-     * @param array $oldValues
-     * @param array $newValues
-     * @return array
      */
     protected function getChangedFields(array $oldValues, array $newValues): array
     {
@@ -293,10 +245,6 @@ class AuditObserver
 
     /**
      * Build human-readable description of the change.
-     *
-     * @param Model $model
-     * @param string $event
-     * @return string
      */
     protected function buildDescription(Model $model, string $event): string
     {
@@ -316,9 +264,6 @@ class AuditObserver
 
     /**
      * Get a human-readable identifier for the model.
-     *
-     * @param Model $model
-     * @return string
      */
     protected function getModelIdentifier(Model $model): string
     {
@@ -336,8 +281,6 @@ class AuditObserver
 
     /**
      * Get or generate batch ID for grouping operations.
-     *
-     * @return string|null
      */
     protected function getBatchId(): ?string
     {
@@ -354,8 +297,6 @@ class AuditObserver
     /**
      * Start a batch operation.
      * All changes will be grouped under the same batch_id.
-     *
-     * @return string
      */
     public static function startBatch(): string
     {
@@ -366,8 +307,6 @@ class AuditObserver
 
     /**
      * End a batch operation.
-     *
-     * @return void
      */
     public static function endBatch(): void
     {
@@ -376,10 +315,6 @@ class AuditObserver
 
     /**
      * Get tags for the audit log entry.
-     *
-     * @param Model $model
-     * @param string $event
-     * @return array
      */
     protected function getTags(Model $model, string $event): array
     {

@@ -174,7 +174,7 @@ class AuditLog extends Model
             return '****';
         }
 
-        return substr($value, 0, 2) . str_repeat('*', strlen($value) - 4) . substr($value, -2);
+        return substr($value, 0, 2).str_repeat('*', strlen($value) - 4).substr($value, -2);
     }
 
     /**

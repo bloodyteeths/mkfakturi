@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CacheableTrait;
 use App\Traits\GeneratesPdfTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use App\Traits\RequiresApproval;
 use Carbon\Carbon;
@@ -13,33 +14,39 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasAuditing;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Bill extends Model implements HasMedia
 {
-    use HasAuditing;
     use CacheableTrait;
     use GeneratesPdfTrait;
+    use GeneratesPdfTrait;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use InteractsWithMedia;
     use RequiresApproval;
     use SoftDeletes;
-    use GeneratesPdfTrait;
 
     // Status constants
     public const STATUS_DRAFT = 'DRAFT';
+
     public const STATUS_SENT = 'SENT';
+
     public const STATUS_VIEWED = 'VIEWED';
+
     public const STATUS_OVERDUE = 'OVERDUE';
+
     public const STATUS_PAID = 'PAID';
+
     public const STATUS_COMPLETED = 'COMPLETED';
 
     // Paid status constants
     public const PAID_STATUS_UNPAID = 'UNPAID';
+
     public const PAID_STATUS_PAID = 'PAID';
+
     public const PAID_STATUS_PARTIALLY_PAID = 'PARTIALLY_PAID';
 
     protected $guarded = [
@@ -68,7 +75,7 @@ class Bill extends Model implements HasMedia
     protected $with = [
         'supplier:id,name,email',
         'currency:id,name,code,symbol',
-        'company:id,name'
+        'company:id,name',
     ];
 
     protected function casts(): array
@@ -91,6 +98,7 @@ class Bill extends Model implements HasMedia
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
@@ -100,6 +108,7 @@ class Bill extends Model implements HasMedia
     public function getFormattedBillDateAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->bill_date)->translatedFormat($dateFormat);
     }
 
@@ -108,10 +117,11 @@ class Bill extends Model implements HasMedia
      */
     public function getFormattedDueDateAttribute()
     {
-        if (!$this->due_date) {
+        if (! $this->due_date) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
     }
 
@@ -121,6 +131,7 @@ class Bill extends Model implements HasMedia
     public function getDueAmountAttribute()
     {
         $paidAmount = $this->payments()->sum('amount');
+
         return $this->total - $paidAmount;
     }
 
@@ -406,7 +417,7 @@ class Bill extends Model implements HasMedia
      */
     public function isInLockedPeriod(): bool
     {
-        if (!$this->taxReportPeriod) {
+        if (! $this->taxReportPeriod) {
             return false;
         }
 
@@ -443,7 +454,7 @@ class Bill extends Model implements HasMedia
      * Create bill items with base_* fields and taxes
      *
      * @param  self  $bill
-     * @param  array $billItems
+     * @param  array  $billItems
      * @return void
      */
     public static function createItems($bill, $billItems)
@@ -483,7 +494,7 @@ class Bill extends Model implements HasMedia
      * Create bill-level taxes with base_* fields
      *
      * @param  self  $bill
-     * @param  array $taxes
+     * @param  array  $taxes
      * @return void
      */
     public static function createTaxes($bill, $taxes)
@@ -530,7 +541,7 @@ class Bill extends Model implements HasMedia
 
         // Build a lightweight "invoice-like" DTO so we can reuse
         // the existing invoice items/table partial for bill PDFs.
-        $invoiceDto = new \stdClass();
+        $invoiceDto = new \stdClass;
         $invoiceDto->items = $this->items;
         $invoiceDto->discount_per_item = $this->discount_per_item ?? 'NO';
         $invoiceDto->tax_per_item = $this->tax_per_item ?? 'NO';
@@ -545,7 +556,7 @@ class Bill extends Model implements HasMedia
 
         // Minimal customer wrapper so the invoice partial can
         // access $invoice->customer->currency
-        $invoiceCustomer = new \stdClass();
+        $invoiceCustomer = new \stdClass;
         $invoiceCustomer->currency = $this->currency;
         $invoiceDto->customer = $invoiceCustomer;
 
@@ -591,8 +602,8 @@ class Bill extends Model implements HasMedia
      */
     public function getFieldsArray()
     {
-        $supplier = $this->supplier ?? new Supplier();
-        $companyAddress = $this->company->address ?? new Address();
+        $supplier = $this->supplier ?? new Supplier;
+        $companyAddress = $this->company->address ?? new Address;
 
         $fields = [
             '{SHIPPING_ADDRESS_NAME}' => '',
@@ -654,14 +665,14 @@ class Bill extends Model implements HasMedia
      */
     public function getCompanyAddress()
     {
-        if ($this->company && (!$this->company->address()->exists())) {
+        if ($this->company && (! $this->company->address()->exists())) {
             return false;
         }
 
         $format = CompanySetting::getSetting('bill_company_address_format', $this->company_id);
 
         // Fallback to invoice format if bill format not set
-        if (!$format) {
+        if (! $format) {
             $format = CompanySetting::getSetting('invoice_company_address_format', $this->company_id);
         }
 
@@ -675,7 +686,7 @@ class Bill extends Model implements HasMedia
      */
     public function getSupplierAddress()
     {
-        if (!$this->supplier) {
+        if (! $this->supplier) {
             return false;
         }
 

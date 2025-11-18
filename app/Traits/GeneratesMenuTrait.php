@@ -7,7 +7,7 @@ trait GeneratesMenuTrait
     public function generateMenu($key, $user)
     {
         // Cache menu generation per user and company to avoid repeated processing
-        $cacheKey = "menu:{$key}:user:{$user->id}:company:" . request()->header('company', 'default');
+        $cacheKey = "menu:{$key}:user:{$user->id}:company:".request()->header('company', 'default');
 
         return \Cache::remember($cacheKey, \App\Providers\CacheServiceProvider::CACHE_TTLS['MEDIUM'], function () use ($key, $user) {
             $new_items = [];

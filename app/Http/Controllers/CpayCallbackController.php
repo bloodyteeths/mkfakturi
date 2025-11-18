@@ -13,6 +13,7 @@ use Modules\Mk\Services\CpayDriver;
  * processes the payment, and redirects the user to the invoice view.
  *
  * @version 1.0.0
+ *
  * @author Claude Code - CPAY Integration Agent
  */
 class CpayCallbackController extends Controller
@@ -23,7 +24,6 @@ class CpayCallbackController extends Controller
      * This method is called by CPAY after a payment is completed.
      * It validates the callback, processes the payment, and redirects the user.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function handle(Request $request)

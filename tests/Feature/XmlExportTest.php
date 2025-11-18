@@ -2,27 +2,26 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\Invoice;
-use App\Models\Company;
-use App\Models\Customer;
-use App\Models\Currency;
-use App\Models\InvoiceItem;
-use App\Models\TaxType;
-use App\Models\Tax;
 use App\Models\Address;
 use App\Models\BankAccount;
+use App\Models\Company;
+use App\Models\Currency;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\Tax;
+use App\Models\TaxType;
 use App\Models\User;
-use Modules\Mk\Services\MkUblMapper;
-use Modules\Mk\Services\MkXmlSigner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\MkUblMapper;
+use Modules\Mk\Services\MkXmlSigner;
+use Tests\TestCase;
 
 /**
  * OPS-04: XML Export with UBL Digital Signatures
- * 
+ *
  * Tests the complete UBL → Sign → Download flow with Macedonia-specific requirements:
  * - Valid UBL XML generation with Macedonia business data
  * - Digital signature validation with QES certificates
@@ -36,18 +35,25 @@ class XmlExportTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $company;
+
     protected $customer;
+
     protected $currency;
+
     protected $invoice;
+
     protected $ublMapper;
+
     protected $xmlSigner;
+
     protected $certificateDir;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->setupTestEnvironment();
         $this->createTestData();
         $this->setupServices();
@@ -57,13 +63,13 @@ class XmlExportTest extends TestCase
     {
         // Create certificate directory for testing
         $this->certificateDir = storage_path('testing/certificates');
-        if (!is_dir($this->certificateDir)) {
+        if (! is_dir($this->certificateDir)) {
             mkdir($this->certificateDir, 0755, true);
         }
 
         // Configure XML signing for testing
-        Config::set('mk.xml_signing.private_key_path', $this->certificateDir . '/private.key');
-        Config::set('mk.xml_signing.certificate_path', $this->certificateDir . '/certificate.pem');
+        Config::set('mk.xml_signing.private_key_path', $this->certificateDir.'/private.key');
+        Config::set('mk.xml_signing.certificate_path', $this->certificateDir.'/certificate.pem');
         Config::set('mk.xml_signing.passphrase', 'test_passphrase');
     }
 
@@ -73,13 +79,13 @@ class XmlExportTest extends TestCase
         $this->currency = Currency::factory()->create([
             'name' => 'Macedonian Denar',
             'code' => 'MKD',
-            'symbol' => 'ден'
+            'symbol' => 'ден',
         ]);
 
         // Create company with full address and bank account info
         $this->company = Company::factory()->create([
             'name' => 'Тест Компанија ДОО',
-            'vat_number' => 'MK4030009501234'
+            'vat_number' => 'MK4030009501234',
         ]);
 
         // Create company address (country_id nullable to avoid FK reliance on seeded countries)
@@ -90,7 +96,7 @@ class XmlExportTest extends TestCase
             'city' => 'Скопје',
             'zip' => '1000',
             'country_id' => null,
-            'type' => 'billing'
+            'type' => 'billing',
         ]);
 
         // Create bank account for the company
@@ -100,7 +106,7 @@ class XmlExportTest extends TestCase
             'account_number' => '1234567890123456',
             'iban' => 'MK07200000000012345678',
             'swift_code' => 'STBKMK22',
-            'is_primary' => true
+            'is_primary' => true,
         ]);
 
         // Create customer with address
@@ -109,7 +115,7 @@ class XmlExportTest extends TestCase
             'email' => 'klient@test.mk',
             'phone' => '+389 2 123 456',
             'tax_id' => 'MK4030009501235',
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         // Create customer address
@@ -120,7 +126,7 @@ class XmlExportTest extends TestCase
             'city' => 'Скопје',
             'zip' => '1000',
             'country_id' => null,
-            'type' => 'billing'
+            'type' => 'billing',
         ]);
 
         // Create tax types (Macedonian VAT rates)
@@ -128,20 +134,20 @@ class XmlExportTest extends TestCase
             'name' => 'ДДВ 18%',
             'percent' => 18,
             'compound_tax' => false,
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         $reducedVat = TaxType::factory()->create([
             'name' => 'ДДВ 5%',
             'percent' => 5,
             'compound_tax' => false,
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         // Create user for authentication
         $this->user = User::factory()->create([
             'company_id' => $this->company->id,
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
 
         // Create invoice with Macedonian business data
@@ -156,7 +162,7 @@ class XmlExportTest extends TestCase
             'tax_total' => 1800,   // 18.00 MKD
             'total' => 11800,      // 118.00 MKD
             'status' => 'SENT',
-            'notes' => 'Тест фактура за UBL експорт и дигитално потпишување'
+            'notes' => 'Тест фактура за UBL експорт и дигитално потпишување',
         ]);
 
         // Create invoice items
@@ -166,7 +172,7 @@ class XmlExportTest extends TestCase
             'description' => 'Деловен лаптоп за канцелариска употреба',
             'quantity' => 1,
             'price' => 5000, // 50.00 MKD
-            'total' => 5000
+            'total' => 5000,
         ]);
 
         $item2 = InvoiceItem::factory()->create([
@@ -175,7 +181,7 @@ class XmlExportTest extends TestCase
             'description' => 'Консултантски услуги за системска интеграција',
             'quantity' => 2,
             'price' => 2500, // 25.00 MKD
-            'total' => 5000
+            'total' => 5000,
         ]);
 
         // Create taxes for items
@@ -185,7 +191,7 @@ class XmlExportTest extends TestCase
             'tax_type_id' => $standardVat->id,
             'name' => 'ДДВ 18%',
             'amount' => 900, // 18% of 50.00
-            'percent' => 18
+            'percent' => 18,
         ]);
 
         Tax::factory()->create([
@@ -194,7 +200,7 @@ class XmlExportTest extends TestCase
             'tax_type_id' => $standardVat->id,
             'name' => 'ДДВ 18%',
             'amount' => 900, // 18% of 50.00
-            'percent' => 18
+            'percent' => 18,
         ]);
 
         // Refresh invoice to load relationships
@@ -204,8 +210,8 @@ class XmlExportTest extends TestCase
 
     protected function setupServices(): void
     {
-        $this->ublMapper = new MkUblMapper();
-        $this->xmlSigner = new MkXmlSigner();
+        $this->ublMapper = new MkUblMapper;
+        $this->xmlSigner = new MkXmlSigner;
     }
 
     /** @test */
@@ -218,7 +224,7 @@ class XmlExportTest extends TestCase
         $this->assertNotEmpty($xml, 'UBL XML should not be empty');
 
         // Verify XML is well-formed
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $this->assertTrue($dom->loadXML($xml), 'Generated UBL XML should be well-formed');
 
         // Verify contains invoice number
@@ -296,7 +302,7 @@ class XmlExportTest extends TestCase
         );
 
         // Verify signed XML is still well-formed
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $this->assertTrue($dom->loadXML($signedXml), 'Signed XML should be well-formed');
 
         // Verify original content is preserved
@@ -334,12 +340,12 @@ class XmlExportTest extends TestCase
 
         // Test XML structure validation without XSD schema
         // (Since we may not have the actual UBL schema file in testing)
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $this->assertTrue($dom->loadXML($xml));
 
         // Check for required UBL elements using XPath
         $xpath = new \DOMXPath($dom);
-        
+
         // Register UBL namespace (note: actual namespace may vary)
         $namespaces = $xpath->query('//namespace::*');
         $ublNamespace = null;
@@ -352,7 +358,7 @@ class XmlExportTest extends TestCase
 
         if ($ublNamespace) {
             $xpath->registerNamespace('ubl', $ublNamespace);
-            
+
             // Check for required UBL elements
             $this->assertGreaterThan(0, $xpath->query('//ubl:Invoice')->length);
         }
@@ -376,7 +382,7 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl',
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(200);
@@ -402,7 +408,7 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl_signed',
             'include_signature' => true,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(200);
@@ -429,12 +435,12 @@ class XmlExportTest extends TestCase
         // Mock the UBL mapper to return invalid XML
         $mockMapper = \Mockery::mock(MkUblMapper::class);
         $mockMapper->shouldReceive('mapInvoiceToUbl')
-                   ->andReturn('invalid xml content');
+            ->andReturn('invalid xml content');
         $mockMapper->shouldReceive('validateUblXml')
-                   ->andReturn([
-                       'is_valid' => false,
-                       'errors' => ['XML validation error: Missing required element']
-                   ]);
+            ->andReturn([
+                'is_valid' => false,
+                'errors' => ['XML validation error: Missing required element'],
+            ]);
 
         $this->app->instance(MkUblMapper::class, $mockMapper);
 
@@ -442,13 +448,13 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl',
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(422);
         $response->assertJson([
             'message' => 'XML validation failed',
-            'errors' => ['XML validation error: Missing required element']
+            'errors' => ['XML validation error: Missing required element'],
         ]);
     }
 
@@ -468,12 +474,12 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl_signed',
             'include_signature' => true,
-            'validate' => false
+            'validate' => false,
         ]);
 
         $response->assertStatus(422);
         $response->assertJsonFragment([
-            'message' => 'XML signing configuration invalid'
+            'message' => 'XML signing configuration invalid',
         ]);
     }
 
@@ -481,7 +487,7 @@ class XmlExportTest extends TestCase
     public function it_handles_digital_signature_failures()
     {
         // Create invalid private key file
-        $invalidKeyPath = $this->certificateDir . '/invalid.key';
+        $invalidKeyPath = $this->certificateDir.'/invalid.key';
         file_put_contents($invalidKeyPath, 'invalid key content');
 
         // Create signer with invalid key
@@ -504,7 +510,7 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl',
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(401);
@@ -520,7 +526,7 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'invalid_format',
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(422);
@@ -529,7 +535,7 @@ class XmlExportTest extends TestCase
         // Test with missing required format
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(422);
@@ -543,10 +549,10 @@ class XmlExportTest extends TestCase
         $this->actingAs($this->user);
 
         // Test with nonexistent invoice ID
-        $response = $this->postJson("/admin/invoices/99999/export-xml", [
+        $response = $this->postJson('/admin/invoices/99999/export-xml', [
             'format' => 'ubl',
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(404);
@@ -559,7 +565,7 @@ class XmlExportTest extends TestCase
         $otherCompany = Company::factory()->create();
         $otherUser = User::factory()->create([
             'company_id' => $otherCompany->id,
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
 
         // Authenticate as user from different company
@@ -569,12 +575,12 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl',
             'include_signature' => false,
-            'validate' => true
+            'validate' => true,
         ]);
 
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Unauthorized to export this invoice'
+            'message' => 'Unauthorized to export this invoice',
         ]);
     }
 
@@ -591,7 +597,7 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl',
             'include_signature' => false,
-            'validate' => false
+            'validate' => false,
         ]);
 
         $response->assertStatus(200);
@@ -602,7 +608,7 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl_signed',
             'include_signature' => true,
-            'validate' => false
+            'validate' => false,
         ]);
 
         $response->assertStatus(200);
@@ -626,14 +632,14 @@ class XmlExportTest extends TestCase
         $response = $this->postJson("/admin/invoices/{$this->invoice->id}/export-xml", [
             'format' => 'ubl_signed',
             'include_signature' => true,
-            'validate' => false
+            'validate' => false,
         ]);
 
         $response->assertStatus(200);
 
         // Verify logging occurred
         Log::assertLogged('info', function ($message, $context) {
-            return $message === 'Invoice XML exported' && 
+            return $message === 'Invoice XML exported' &&
                    $context['invoice_id'] === $this->invoice->id &&
                    $context['format'] === 'ubl_signed' &&
                    $context['signed'] === true;
@@ -657,7 +663,7 @@ class XmlExportTest extends TestCase
         $this->assertStringContainsString('encoding="UTF-8"', $xml);
 
         // Verify DOM can properly load the XML with Macedonian characters
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $dom->loadXML($xml);
         $this->assertEquals('UTF-8', $dom->encoding);
     }
@@ -670,14 +676,14 @@ class XmlExportTest extends TestCase
             'name' => 'Ослободено од ДДВ',
             'percent' => 0,
             'compound_tax' => false,
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         $reducedVat = TaxType::factory()->create([
             'name' => 'ДДВ 5%',
             'percent' => 5,
             'compound_tax' => false,
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
 
         // Add items with different VAT rates
@@ -687,7 +693,7 @@ class XmlExportTest extends TestCase
             'description' => 'Ослободени од ДДВ според член 29',
             'quantity' => 1,
             'price' => 3000,
-            'total' => 3000
+            'total' => 3000,
         ]);
 
         $reducedItem = InvoiceItem::factory()->create([
@@ -696,7 +702,7 @@ class XmlExportTest extends TestCase
             'description' => 'Намалена стапка ДДВ 5%',
             'quantity' => 2,
             'price' => 1000,
-            'total' => 2000
+            'total' => 2000,
         ]);
 
         // Create corresponding taxes
@@ -706,7 +712,7 @@ class XmlExportTest extends TestCase
             'tax_type_id' => $exemptVat->id,
             'name' => 'Ослободено од ДДВ',
             'amount' => 0,
-            'percent' => 0
+            'percent' => 0,
         ]);
 
         Tax::factory()->create([
@@ -715,7 +721,7 @@ class XmlExportTest extends TestCase
             'tax_type_id' => $reducedVat->id,
             'name' => 'ДДВ 5%',
             'amount' => 100, // 5% of 2000
-            'percent' => 5
+            'percent' => 5,
         ]);
 
         $this->invoice->refresh();
@@ -730,7 +736,7 @@ class XmlExportTest extends TestCase
 
         // Verify VAT category codes (Macedonia specific)
         $this->assertStringContainsString('S', $xml); // Standard rate category
-        $this->assertStringContainsString('AA', $xml); // Reduced rate category  
+        $this->assertStringContainsString('AA', $xml); // Reduced rate category
         $this->assertStringContainsString('E', $xml); // Exempt category
 
         // Verify tax scheme identification for Macedonia
@@ -746,14 +752,14 @@ class XmlExportTest extends TestCase
 
         // Verify company registration information
         $this->assertStringContainsString($this->company->vat_number, $xml);
-        
+
         // Check for Macedonia-specific business identifiers
         $this->assertStringContainsString('MK40300095', $xml); // VAT prefix
-        
+
         // Verify legal entity information
         $this->assertStringContainsString('CompanyLegalEntity', $xml);
         $this->assertStringContainsString('RegistrationName', $xml);
-        
+
         // Check postal address for Macedonia
         $this->assertStringContainsString('Скопје', $xml);
         $this->assertStringContainsString('1000', $xml);
@@ -768,7 +774,7 @@ class XmlExportTest extends TestCase
             'organization' => $this->company->name,
             'country' => 'MK',
             'vat_number' => $this->company->vat_number,
-            'qualified' => true
+            'qualified' => true,
         ]);
 
         // Create signer with QES certificate
@@ -782,7 +788,7 @@ class XmlExportTest extends TestCase
         $signedXml = $signer->signUblInvoice($xml);
 
         // Verify QES signature elements
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $dom->loadXML($signedXml);
         $xpath = new \DOMXPath($dom);
 
@@ -807,10 +813,10 @@ class XmlExportTest extends TestCase
 
         for ($i = 0; $i < $iterations; $i++) {
             $startTime = microtime(true);
-            
+
             // Generate UBL XML
             $xml = $this->ublMapper->mapInvoiceToUbl($this->invoice);
-            
+
             $endTime = microtime(true);
             $times[] = ($endTime - $startTime) * 1000; // Convert to milliseconds
         }
@@ -827,9 +833,9 @@ class XmlExportTest extends TestCase
         $performanceData = [
             'average_time_ms' => round($averageTime, 2),
             'max_time_ms' => round($maxTime, 2),
-            'iterations' => $iterations
+            'iterations' => $iterations,
         ];
-        
+
         Log::info('XML Generation Performance Test', $performanceData);
     }
 
@@ -839,7 +845,7 @@ class XmlExportTest extends TestCase
         // Generate UBL XML
         $xml = $this->ublMapper->mapInvoiceToUbl($this->invoice);
 
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $dom->loadXML($xml);
         $xpath = new \DOMXPath($dom);
 
@@ -856,7 +862,7 @@ class XmlExportTest extends TestCase
             '//cac:AccountingSupplierParty', // Supplier
             '//cac:AccountingCustomerParty', // Customer
             '//cac:InvoiceLine', // Invoice lines
-            '//cac:LegalMonetaryTotal' // Totals
+            '//cac:LegalMonetaryTotal', // Totals
         ];
 
         foreach ($mandatoryElements as $element) {
@@ -885,7 +891,7 @@ class XmlExportTest extends TestCase
                 'description' => "Опис на артикал број {$i} со македонски карактери",
                 'quantity' => rand(1, 10),
                 'price' => rand(100, 5000),
-                'total' => rand(100, 50000)
+                'total' => rand(100, 50000),
             ]);
 
             // Add tax for each item
@@ -895,21 +901,21 @@ class XmlExportTest extends TestCase
                 'tax_type_id' => TaxType::factory()->create([
                     'name' => 'ДДВ 18%',
                     'percent' => 18,
-                    'company_id' => $this->company->id
+                    'company_id' => $this->company->id,
                 ])->id,
                 'name' => 'ДДВ 18%',
                 'amount' => $item->total * 0.18,
-                'percent' => 18
+                'percent' => 18,
             ]);
         }
 
         $this->invoice->refresh();
 
         $startTime = microtime(true);
-        
+
         // Generate UBL XML for large invoice
         $xml = $this->ublMapper->mapInvoiceToUbl($this->invoice);
-        
+
         $endTime = microtime(true);
         $generationTime = ($endTime - $startTime) * 1000;
 
@@ -928,7 +934,7 @@ class XmlExportTest extends TestCase
         Log::info('Large Invoice XML Generation Test', [
             'item_count' => 50,
             'generation_time_ms' => round($generationTime, 2),
-            'xml_size_bytes' => strlen($xml)
+            'xml_size_bytes' => strlen($xml),
         ]);
     }
 
@@ -955,23 +961,23 @@ class XmlExportTest extends TestCase
         // Generate UBL XML
         $xml = $this->ublMapper->mapInvoiceToUbl($this->invoice);
 
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $dom->loadXML($xml);
         $xpath = new \DOMXPath($dom);
 
         // Verify timestamps are in correct format
         $issueDateNodes = $xpath->query('//cbc:IssueDate');
         $this->assertGreaterThan(0, $issueDateNodes->length);
-        
+
         $issueDate = $issueDateNodes->item(0)->textContent;
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $issueDate);
 
         // Verify UBL version information
         $this->assertStringContainsString('UBL-2.1', $xml);
-        
+
         // Verify schema locations
         $this->assertStringContainsString('urn:oasis:names:specification:ubl:schema:xsd:Invoice-2', $xml);
-        
+
         // Verify Macedonia-specific customization
         $customizationNodes = $xpath->query('//cbc:CustomizationID');
         if ($customizationNodes->length > 0) {
@@ -983,7 +989,7 @@ class XmlExportTest extends TestCase
     {
         // Clean up certificate files
         if (is_dir($this->certificateDir)) {
-            $files = glob($this->certificateDir . '/*');
+            $files = glob($this->certificateDir.'/*');
             foreach ($files as $file) {
                 if (is_file($file)) {
                     unlink($file);

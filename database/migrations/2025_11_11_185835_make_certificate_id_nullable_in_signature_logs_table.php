@@ -24,9 +24,9 @@ return new class extends Migration
 
             // Re-add the foreign key with ON DELETE SET NULL
             $table->foreign('certificate_id')
-                  ->references('id')
-                  ->on('certificates')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('certificates')
+                ->onDelete('set null');
         });
     }
 
@@ -44,9 +44,9 @@ return new class extends Migration
 
             // Re-add the original foreign key with ON DELETE RESTRICT
             $table->foreign('certificate_id')
-                  ->references('id')
-                  ->on('certificates')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('certificates')
+                ->onDelete('restrict');
         });
     }
 };

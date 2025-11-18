@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Webhooks\CpayCallbackController;
-use App\Http\Controllers\Webhooks\PaddleWebhookController;
 use App\Http\Controllers\Webhooks\InboundMailController;
+use App\Http\Controllers\Webhooks\PaddleWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,13 +47,13 @@ Route::post('/webhooks/cpay/callback', CpayCallbackController::class)
 */
 Route::get('/cpay/success/{invoice}', function ($invoiceId) {
     // Redirect to invoice view with success message
-    return redirect('/admin/invoices/' . $invoiceId)
+    return redirect('/admin/invoices/'.$invoiceId)
         ->with('success', 'Payment completed successfully via CPAY');
 })->name('cpay.success');
 
 Route::get('/cpay/cancel/{invoice}', function ($invoiceId) {
     // Redirect to invoice view with cancellation message
-    return redirect('/admin/invoices/' . $invoiceId)
+    return redirect('/admin/invoices/'.$invoiceId)
         ->with('warning', 'Payment was cancelled');
 })->name('cpay.cancel');
 

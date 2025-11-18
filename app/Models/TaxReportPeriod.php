@@ -34,28 +34,31 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $reopen_reason Reason for reopening period
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @package App\Models
  */
 class TaxReportPeriod extends Model
 {
-    use HasFactory;
     use HasAuditing;
+    use HasFactory;
     use TenantScope;
 
     /**
      * Period status constants
      */
     public const STATUS_OPEN = 'OPEN';
+
     public const STATUS_CLOSED = 'CLOSED';
+
     public const STATUS_FILED = 'FILED';
+
     public const STATUS_AMENDED = 'AMENDED';
 
     /**
      * Period type constants
      */
     public const PERIOD_MONTHLY = 'MONTHLY';
+
     public const PERIOD_QUARTERLY = 'QUARTERLY';
+
     public const PERIOD_ANNUAL = 'ANNUAL';
 
     /**
@@ -108,8 +111,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Get the company that owns the tax report period.
-     *
-     * @return BelongsTo
      */
     public function company(): BelongsTo
     {
@@ -118,8 +119,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Get all tax returns for this period.
-     *
-     * @return HasMany
      */
     public function taxReturns(): HasMany
     {
@@ -128,8 +127,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Get the user who closed this period.
-     *
-     * @return BelongsTo
      */
     public function lockedBy(): BelongsTo
     {
@@ -138,8 +135,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Get the user who last reopened this period.
-     *
-     * @return BelongsTo
      */
     public function reopenedBy(): BelongsTo
     {
@@ -152,8 +147,8 @@ class TaxReportPeriod extends Model
      * Validates that all tax returns for this period have been filed,
      * then marks the period as closed and locks all related documents.
      *
-     * @param int $userId User ID of person closing the period
-     * @return bool
+     * @param  int  $userId  User ID of person closing the period
+     *
      * @throws \Exception If unfiled returns exist
      */
     public function close(int $userId): bool
@@ -178,13 +173,12 @@ class TaxReportPeriod extends Model
      * Allows reopening for amendments or corrections.
      * Requires a reason for audit trail purposes.
      *
-     * @param int $userId User ID of person reopening the period
-     * @param string $reason Reason for reopening
-     * @return bool
+     * @param  int  $userId  User ID of person reopening the period
+     * @param  string  $reason  Reason for reopening
      */
     public function reopen(int $userId, string $reason): bool
     {
-        if (!$this->isClosed()) {
+        if (! $this->isClosed()) {
             throw new \Exception('Can only reopen closed periods');
         }
 
@@ -200,8 +194,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Check if the period is closed.
-     *
-     * @return bool
      */
     public function isClosed(): bool
     {
@@ -216,8 +208,6 @@ class TaxReportPeriod extends Model
      * Check if the period is locked (prevents document edits).
      *
      * A period is locked when it's closed, filed, or amended.
-     *
-     * @return bool
      */
     public function isLocked(): bool
     {
@@ -226,8 +216,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Check if this period has any unfiled tax returns.
-     *
-     * @return bool
      */
     public function hasUnfiledReturns(): bool
     {
@@ -242,8 +230,7 @@ class TaxReportPeriod extends Model
      *
      * Uses request header if no company ID provided.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int|null $companyId
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWhereCompany($query, ?int $companyId = null)
@@ -256,7 +243,7 @@ class TaxReportPeriod extends Model
     /**
      * Scope: Filter open periods.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOpen($query)
@@ -267,7 +254,7 @@ class TaxReportPeriod extends Model
     /**
      * Scope: Filter closed periods.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeClosed($query)
@@ -282,7 +269,7 @@ class TaxReportPeriod extends Model
     /**
      * Scope: Filter filed periods.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFiled($query)
@@ -296,10 +283,9 @@ class TaxReportPeriod extends Model
     /**
      * Scope: Filter by specific period (year, month, quarter).
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $year
-     * @param int|null $month Month (1-12)
-     * @param int|null $quarter Quarter (1-4)
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  int|null  $month  Month (1-12)
+     * @param  int|null  $quarter  Quarter (1-4)
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeForPeriod($query, int $year, ?int $month = null, ?int $quarter = null)
@@ -320,8 +306,7 @@ class TaxReportPeriod extends Model
     /**
      * Scope: Order by period date.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $direction
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByPeriod($query, string $direction = 'desc')
@@ -334,8 +319,8 @@ class TaxReportPeriod extends Model
     /**
      * Scope: Paginate data.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int|string $limit
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  int|string  $limit
      * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function scopePaginateData($query, $limit)
@@ -349,8 +334,6 @@ class TaxReportPeriod extends Model
 
     /**
      * Get a human-readable period name.
-     *
-     * @return string
      */
     public function getPeriodNameAttribute(): string
     {

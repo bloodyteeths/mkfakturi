@@ -3,8 +3,6 @@
 namespace Tests\Feature\Webhooks;
 
 use App\Models\Company;
-use App\Models\GatewayWebhookEvent;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

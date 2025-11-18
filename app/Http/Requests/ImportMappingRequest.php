@@ -119,7 +119,7 @@ class ImportMappingRequest extends FormRequest
             // Check for duplicate source fields
             $mappings = $this->input('mappings', []);
             $sourceFields = collect($mappings)->pluck('source_field');
-            
+
             if ($sourceFields->count() !== $sourceFields->unique()->count()) {
                 $validator->errors()->add('mappings', 'Duplicate source fields are not allowed.');
             }
@@ -137,26 +137,26 @@ class ImportMappingRequest extends FormRequest
 
                 switch ($type) {
                     case 'date':
-                        if (!isset($config['format']) || empty($config['format'])) {
+                        if (! isset($config['format']) || empty($config['format'])) {
                             $validator->errors()->add(
                                 "mappings.{$index}.transformation_config.format",
                                 'Date format is required for date transformations.'
                             );
                         }
                         break;
-                        
+
                     case 'decimal':
-                        if (isset($config['decimal_places']) && 
-                            (!is_numeric($config['decimal_places']) || $config['decimal_places'] < 0)) {
+                        if (isset($config['decimal_places']) &&
+                            (! is_numeric($config['decimal_places']) || $config['decimal_places'] < 0)) {
                             $validator->errors()->add(
                                 "mappings.{$index}.transformation_config.decimal_places",
                                 'Decimal places must be a non-negative number.'
                             );
                         }
                         break;
-                        
+
                     case 'currency':
-                        if (!isset($config['from_currency']) || !isset($config['to_currency'])) {
+                        if (! isset($config['from_currency']) || ! isset($config['to_currency'])) {
                             $validator->errors()->add(
                                 "mappings.{$index}.transformation_config",
                                 'Both from_currency and to_currency are required for currency transformations.'

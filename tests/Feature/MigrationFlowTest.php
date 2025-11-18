@@ -2,41 +2,34 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-use App\Models\User;
+use App\Jobs\Migration\AutoMapFieldsJob;
+use App\Jobs\Migration\CommitImportJob;
+use App\Jobs\Migration\DetectFileTypeJob;
+use App\Jobs\Migration\ParseFileJob;
+use App\Jobs\Migration\ValidateDataJob;
 use App\Models\Company;
+use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
+use App\Models\ImportJob;
+use App\Models\ImportLog;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Payment;
-use App\Models\Expense;
-use App\Models\Currency;
 use App\Models\PaymentMethod;
-use App\Models\ExpenseCategory;
 use App\Models\TaxType;
-use App\Models\ImportJob;
-use App\Models\ImportLog;
-use App\Models\ImportTempCustomer;
-use App\Models\ImportTempInvoice;
-use App\Models\ImportTempItem;
-use App\Models\ImportTempPayment;
-use App\Models\ImportTempExpense;
-use App\Jobs\Migration\DetectFileTypeJob;
-use App\Jobs\Migration\ParseFileJob;
-use App\Jobs\Migration\AutoMapFieldsJob;
-use App\Jobs\Migration\ValidateDataJob;
-use App\Jobs\Migration\CommitImportJob;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 /**
- * 
  * This test validates the complete migration platform that enables businesses to
  * migrate from competitors like Onivo/Megasoft/Pantheon in minutes, not months.
- * 
+ *
  * Features tested:
  * - Complete business migration (customers, invoices, items, payments, expenses)
  * - Data integrity and relationship preservation
@@ -52,22 +45,27 @@ class MigrationFlowTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Company $company;
+
     protected Currency $mkdCurrency;
+
     protected PaymentMethod $defaultPaymentMethod;
+
     protected ExpenseCategory $defaultExpenseCategory;
+
     protected TaxType $defaultTaxType;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Setup test environment
         $this->setupTestData();
-        
+
         // Setup storage for test files
         Storage::fake('private');
-        
+
         // Use sync queue for testing
         Queue::fake();
     }
@@ -125,7 +123,7 @@ class MigrationFlowTest extends TestCase
     public function test_complete_sme_migration(): void
     {
         $this->actingAs($this->user);
-        
+
         // Create CSV file with complete business data
         $csvContent = $this->generateCompleteSMEData();
         $file = $this->createTestFile('complete_sme_business.csv', $csvContent);
@@ -163,7 +161,7 @@ class MigrationFlowTest extends TestCase
     public function test_large_business_migration(): void
     {
         $this->actingAs($this->user);
-        
+
         // Create Excel file with large business data
         $csvContent = $this->generateLargeBusinessData();
         $file = $this->createTestFile('large_business.xlsx', $csvContent, 'xlsx');
@@ -201,7 +199,7 @@ class MigrationFlowTest extends TestCase
         // Step 1: Import customers only
         $customersData = $this->generateCustomersData(50);
         $customersFile = $this->createTestFile('customers.csv', $customersData);
-        
+
         $customersResponse = $this->postJson('/api/v1/admin/imports', [
             'file' => $customersFile,
             'type' => ImportJob::TYPE_CUSTOMERS,
@@ -219,7 +217,7 @@ class MigrationFlowTest extends TestCase
         // Step 2: Import invoices with customer references
         $invoicesData = $this->generateInvoicesData(200, true); // with customer references
         $invoicesFile = $this->createTestFile('invoices.csv', $invoicesData);
-        
+
         $invoicesResponse = $this->postJson('/api/v1/admin/imports', [
             'file' => $invoicesFile,
             'type' => ImportJob::TYPE_INVOICES,
@@ -238,7 +236,7 @@ class MigrationFlowTest extends TestCase
         // Step 3: Import payments with invoice references
         $paymentsData = $this->generatePaymentsData(150, true); // with invoice references
         $paymentsFile = $this->createTestFile('payments.csv', $paymentsData);
-        
+
         $paymentsResponse = $this->postJson('/api/v1/admin/imports', [
             'file' => $paymentsFile,
             'type' => ImportJob::TYPE_PAYMENTS,
@@ -325,7 +323,7 @@ class MigrationFlowTest extends TestCase
         // Performance assertions
         $this->assertLessThan(600, $totalTime, 'Large dataset should process within 10 minutes');
         $this->assertEquals(ImportJob::STATUS_COMPLETED, $importJob->fresh()->status);
-        
+
         // Verify memory usage remained reasonable
         $this->assertLessThan(256 * 1024 * 1024, memory_get_peak_usage(true), 'Memory usage should stay under 256MB');
     }
@@ -358,7 +356,7 @@ class MigrationFlowTest extends TestCase
         // Verify Macedonian fields were correctly mapped
         $mappingConfig = $importJob->fresh()->mapping_config;
         $this->assertNotNull($mappingConfig);
-        
+
         // Check specific Macedonian field mappings
         $this->assertArrayHasKey('име', $mappingConfig); // Name
         $this->assertEquals('name', $mappingConfig['име']);
@@ -437,7 +435,7 @@ class MigrationFlowTest extends TestCase
         $this->actingAs($this->user);
 
         $jobs = [];
-        
+
         // Start 3 concurrent import jobs
         for ($i = 1; $i <= 3; $i++) {
             $csvData = $this->generateTestData($i * 10, $i * 20, $i * 15, $i * 25, $i * 5);
@@ -467,7 +465,7 @@ class MigrationFlowTest extends TestCase
         // Verify total record counts
         $expectedCustomers = (1 * 10) + (2 * 10) + (3 * 10); // 60
         $expectedInvoices = (1 * 20) + (2 * 20) + (3 * 20); // 120
-        
+
         $this->assertEquals($expectedCustomers, Customer::where('company_id', $this->company->id)->count());
         $this->assertEquals($expectedInvoices, Invoice::where('company_id', $this->company->id)->count());
     }
@@ -496,7 +494,7 @@ class MigrationFlowTest extends TestCase
 
         // Verify comprehensive audit trail
         $logs = ImportLog::where('import_job_id', $importJob->id)->get();
-        
+
         // Check required log types exist
         $logTypes = $logs->pluck('log_type')->unique()->toArray();
         $requiredLogTypes = [
@@ -567,7 +565,7 @@ class MigrationFlowTest extends TestCase
 
         foreach ($stages as $jobClass) {
             $jobClass::dispatchSync($importJob);
-            
+
             // Check progress after each stage
             $progress = $this->getJson("/api/v1/admin/imports/{$importJob->id}/progress", [
                 'company' => $this->company->id,
@@ -579,7 +577,7 @@ class MigrationFlowTest extends TestCase
     /**
      * Test rollback capability
      */
-    protected function testRollbackCapability(ImportJob $importJob): void
+    protected function test_rollback_capability(ImportJob $importJob): void
     {
         // Record initial state
         $initialCustomerCount = Customer::where('company_id', $this->company->id)->count();
@@ -599,7 +597,7 @@ class MigrationFlowTest extends TestCase
         // Verify rollback occurred
         $this->assertEquals($initialCustomerCount, Customer::where('company_id', $this->company->id)->count());
         $this->assertEquals($initialInvoiceCount, Invoice::where('company_id', $this->company->id)->count());
-        
+
         // Verify rollback was logged
         $rollbackLog = ImportLog::where('import_job_id', $importJob->id)
             ->where('log_type', ImportLog::LOG_ROLLBACK_EXECUTED)
@@ -617,7 +615,7 @@ class MigrationFlowTest extends TestCase
         $this->assertEquals(200, Invoice::where('company_id', $this->company->id)->count());
         $this->assertEquals(100, Item::where('company_id', $this->company->id)->count());
         $this->assertEquals(150, Payment::where('company_id', $this->company->id)->count());
-        
+
         // Verify sample data integrity
         $customer = Customer::where('company_id', $this->company->id)->first();
         $this->assertNotNull($customer->name);
@@ -646,7 +644,7 @@ class MigrationFlowTest extends TestCase
             ->count();
         $this->assertGreaterThan(0, $customersWithInvoices);
 
-        // Test invoice-payment relationships  
+        // Test invoice-payment relationships
         $invoicesWithPayments = Invoice::where('company_id', $this->company->id)
             ->whereHas('payments')
             ->count();
@@ -725,7 +723,7 @@ class MigrationFlowTest extends TestCase
                 '',
                 '',
                 '',
-                'активен'
+                'активен',
             ];
         }
 
@@ -740,7 +738,7 @@ class MigrationFlowTest extends TestCase
                 rand(100, 10000),
                 '',
                 '',
-                'активен'
+                'активен',
             ];
         }
 
@@ -754,9 +752,9 @@ class MigrationFlowTest extends TestCase
                 '',
                 "Фактура {$i}",
                 '',
-                '2024-' . rand(1, 12) . '-' . rand(1, 28),
+                '2024-'.rand(1, 12).'-'.rand(1, 28),
                 rand(1000, 50000),
-                'издадена'
+                'издадена',
             ];
         }
 
@@ -769,9 +767,9 @@ class MigrationFlowTest extends TestCase
                 '',
                 "Плаќање {$i}",
                 '',
-                '2024-' . rand(1, 12) . '-' . rand(1, 28),
+                '2024-'.rand(1, 12).'-'.rand(1, 28),
                 rand(500, 25000),
-                'потврдено'
+                'потврдено',
             ];
         }
 
@@ -784,9 +782,9 @@ class MigrationFlowTest extends TestCase
                 '',
                 "Трошок {$i}",
                 '',
-                '2024-' . rand(1, 12) . '-' . rand(1, 28),
+                '2024-'.rand(1, 12).'-'.rand(1, 28),
                 rand(100, 5000),
-                'одобрен'
+                'одобрен',
             ];
         }
 
@@ -806,7 +804,7 @@ class MigrationFlowTest extends TestCase
                 "Клиент {$i}",
                 "client{$i}@example.mk",
                 "070{$i}123",
-                "Адреса {$i}, Скопје"
+                "Адреса {$i}, Скопје",
             ];
         }
 
@@ -822,13 +820,13 @@ class MigrationFlowTest extends TestCase
         $csv[] = ['број_фактура', 'клиент', 'датум', 'износ', 'ддв'];
 
         for ($i = 1; $i <= $count; $i++) {
-            $customerRef = $withCustomerRefs ? "Клиент " . rand(1, 50) : '';
+            $customerRef = $withCustomerRefs ? 'Клиент '.rand(1, 50) : '';
             $csv[] = [
                 "INV-{$i}",
                 $customerRef,
-                '2024-' . rand(1, 12) . '-' . rand(1, 28),
+                '2024-'.rand(1, 12).'-'.rand(1, 28),
                 rand(1000, 50000),
-                rand(100, 5000)
+                rand(100, 5000),
             ];
         }
 
@@ -844,13 +842,13 @@ class MigrationFlowTest extends TestCase
         $csv[] = ['број_плаќање', 'фактура', 'датум', 'износ', 'начин'];
 
         for ($i = 1; $i <= $count; $i++) {
-            $invoiceRef = $withInvoiceRefs ? "INV-" . rand(1, 200) : '';
+            $invoiceRef = $withInvoiceRefs ? 'INV-'.rand(1, 200) : '';
             $csv[] = [
                 "PAY-{$i}",
                 $invoiceRef,
-                '2024-' . rand(1, 12) . '-' . rand(1, 28),
+                '2024-'.rand(1, 12).'-'.rand(1, 28),
                 rand(500, 25000),
-                'готовина'
+                'готовина',
             ];
         }
 
@@ -864,16 +862,16 @@ class MigrationFlowTest extends TestCase
     {
         $csv = [];
         $csv[] = ['type', 'име', 'емаил', 'телефон', 'датум', 'износ'];
-        
+
         // Invalid email format
         $csv[] = ['customer', 'Клиент 1', 'invalid-email', '070123456', '', ''];
-        
+
         // Missing required field
         $csv[] = ['customer', '', 'client2@example.mk', '070234567', '', ''];
-        
+
         // Invalid date format
         $csv[] = ['invoice', 'Клиент 1', '', '', 'invalid-date', '1000'];
-        
+
         // Negative amount
         $csv[] = ['payment', '', '', '', '2024-01-15', '-500'];
 
@@ -902,7 +900,7 @@ class MigrationFlowTest extends TestCase
                 "client{$i}@example.mk",
                 "070{$i}123",
                 "Адреса {$i}",
-                "400{$i}567"
+                "400{$i}567",
             ];
         }
 
@@ -946,15 +944,15 @@ class MigrationFlowTest extends TestCase
     protected function createTestFile(string $filename, string $content, string $extension = 'csv'): UploadedFile
     {
         $path = storage_path("app/temp/{$filename}");
-        
+
         // Ensure directory exists
         $directory = dirname($path);
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
-        
+
         file_put_contents($path, $content);
-        
+
         return new UploadedFile($path, $filename, "text/{$extension}", null, true);
     }
 
@@ -964,15 +962,15 @@ class MigrationFlowTest extends TestCase
     protected function arrayToCsv(array $data): string
     {
         $output = fopen('php://temp', 'r+');
-        
+
         foreach ($data as $row) {
             fputcsv($output, $row);
         }
-        
+
         rewind($output);
         $csv = stream_get_contents($output);
         fclose($output);
-        
+
         return $csv;
     }
 }

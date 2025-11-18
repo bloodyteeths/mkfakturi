@@ -28,7 +28,7 @@ class ProcessInboundBillEmail implements ShouldQueue
     public array $attachments;
 
     /**
-     * @param array<int, array<string, string>> $attachments
+     * @param  array<int, array<string, string>>  $attachments
      */
     public function __construct(int $companyId, string $from, ?string $subject, array $attachments)
     {
@@ -56,4 +56,3 @@ class ProcessInboundBillEmail implements ShouldQueue
         ]);
     }
 }
-

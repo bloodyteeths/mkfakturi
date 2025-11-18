@@ -2,18 +2,16 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Company;
-use App\Models\User;
 use App\Models\Customer;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Expense;
+use App\Models\User;
 use App\Services\McpDataProvider;
-use App\Services\AiInsightsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
+use Tests\TestCase;
 
 /**
  * AI Data Mapping Validation Tests
@@ -33,7 +31,9 @@ class AiDataMappingTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $company;
+
     protected $dataProvider;
 
     protected function setUp(): void
@@ -63,7 +63,7 @@ class AiDataMappingTest extends TestCase
             'name' => 'Cash',
         ]);
 
-        $this->dataProvider = new McpDataProvider();
+        $this->dataProvider = new McpDataProvider;
 
         // Set AI provider to null to avoid actual API calls
         Config::set('ai.default_provider', 'null');
@@ -425,7 +425,7 @@ class AiDataMappingTest extends TestCase
         $requiredStatsFields = [
             'revenue', 'expenses', 'outstanding', 'customers',
             'invoices_count', 'pending_invoices', 'overdue_invoices',
-            'draft_invoices', 'payments_received', 'payment_variance'
+            'draft_invoices', 'payments_received', 'payment_variance',
         ];
 
         foreach ($requiredStatsFields as $field) {
@@ -483,7 +483,7 @@ class AiDataMappingTest extends TestCase
     public function test_error_fallback_returns_correct_structure()
     {
         // Create a company with invalid ID to trigger error path
-        $invalidCompany = new Company();
+        $invalidCompany = new Company;
         $invalidCompany->id = 99999;
         $invalidCompany->name = 'Invalid Company';
 

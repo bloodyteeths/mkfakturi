@@ -24,21 +24,22 @@ class Mt940Parser
     /**
      * Parse MT940 file and create bank transactions
      *
-     * @param string $filePath Path to MT940 file
-     * @param BankAccount $account Bank account to associate transactions with
+     * @param  string  $filePath  Path to MT940 file
+     * @param  BankAccount  $account  Bank account to associate transactions with
      * @return int Number of transactions imported
+     *
      * @throws \Exception If parsing fails
      */
     public function parseFile(string $filePath, BankAccount $account): int
     {
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             throw new \Exception("File not found: {$filePath}");
         }
 
         try {
             $contents = file_get_contents($filePath);
 
-            $reader = new Reader();
+            $reader = new Reader;
             $statements = $reader->getStatements($contents);
 
             return $this->importStatementsFromReader($statements, $account, basename($filePath));
@@ -64,7 +65,7 @@ class Mt940Parser
     /**
      * Import MT940 statements returned by the library reader.
      *
-     * @param iterable<\Jejik\MT940\StatementInterface> $statements
+     * @param  iterable<\Jejik\MT940\StatementInterface>  $statements
      */
     protected function importStatementsFromReader(iterable $statements, BankAccount $account, string $fileName): int
     {
@@ -127,6 +128,7 @@ class Mt940Parser
                 $payload = substr($line, 4);
 
                 $transactions[$currentIndex] = $this->parseFallbackTransactionLine($payload);
+
                 continue;
             }
 
@@ -149,6 +151,7 @@ class Mt940Parser
 
                 if ($exists) {
                     $duplicates++;
+
                     continue;
                 }
             }
@@ -214,7 +217,7 @@ class Mt940Parser
             if ($valueDate) {
                 try {
                     $yearPrefix = (int) substr($valueDate, 0, 2) > 70 ? '19' : '20';
-                    $result['value_date'] = \Carbon\Carbon::createFromFormat('Ymd', $yearPrefix . $valueDate);
+                    $result['value_date'] = \Carbon\Carbon::createFromFormat('Ymd', $yearPrefix.$valueDate);
                 } catch (\Exception $e) {
                     $result['value_date'] = now();
                 }
@@ -225,7 +228,7 @@ class Mt940Parser
                     $yearPrefix = isset($result['value_date'])
                         ? $result['value_date']->format('Y')
                         : date('Y');
-                    $result['book_date'] = \Carbon\Carbon::createFromFormat('Ymd', $yearPrefix . $entryDate);
+                    $result['book_date'] = \Carbon\Carbon::createFromFormat('Ymd', $yearPrefix.$entryDate);
                 } catch (\Exception $e) {
                     $result['book_date'] = $result['value_date'] ?? now();
                 }
@@ -247,8 +250,8 @@ class Mt940Parser
     /**
      * Create a bank transaction from MT940 transaction object
      *
-     * @param \Jejik\MT940\Transaction $mt940Transaction MT940 transaction
-     * @param BankAccount $account Bank account
+     * @param  \Jejik\MT940\Transaction  $mt940Transaction  MT940 transaction
+     * @param  BankAccount  $account  Bank account
      * @return string Result: 'created', 'duplicate', or 'failed'
      */
     protected function createTransaction($mt940Transaction, BankAccount $account): string
@@ -282,9 +285,9 @@ class Mt940Parser
                 'description' => $mt940Transaction->getDescription(),
                 'remittance_info' => $mt940Transaction->getDescription(),
                 'debtor_name' => $isCredit ? $this->extractCounterpartyName($mt940Transaction) : null,
-                'creditor_name' => !$isCredit ? $this->extractCounterpartyName($mt940Transaction) : null,
+                'creditor_name' => ! $isCredit ? $this->extractCounterpartyName($mt940Transaction) : null,
                 'debtor_account' => $isCredit ? $this->extractCounterpartyAccount($mt940Transaction) : null,
-                'creditor_account' => !$isCredit ? $this->extractCounterpartyAccount($mt940Transaction) : null,
+                'creditor_account' => ! $isCredit ? $this->extractCounterpartyAccount($mt940Transaction) : null,
                 'processing_status' => BankTransaction::STATUS_UNPROCESSED,
                 'source' => BankTransaction::SOURCE_CSV_IMPORT,
                 'raw_data' => [
@@ -309,7 +312,7 @@ class Mt940Parser
     /**
      * Extract counterparty name from MT940 transaction
      *
-     * @param \Jejik\MT940\Transaction $transaction
+     * @param  \Jejik\MT940\Transaction  $transaction
      * @return string|null Counterparty name
      */
     protected function extractCounterpartyName($transaction): ?string
@@ -333,7 +336,7 @@ class Mt940Parser
     /**
      * Extract counterparty account from MT940 transaction
      *
-     * @param \Jejik\MT940\Transaction $transaction
+     * @param  \Jejik\MT940\Transaction  $transaction
      * @return string|null Counterparty account number
      */
     protected function extractCounterpartyAccount($transaction): ?string
@@ -359,15 +362,16 @@ class Mt940Parser
      * Parse CSV file and create bank transactions
      * Alternative to MT940 for banks that don't support MT940 format
      *
-     * @param string $filePath Path to CSV file
-     * @param BankAccount $account Bank account
-     * @param array $columnMapping Column name mapping
+     * @param  string  $filePath  Path to CSV file
+     * @param  BankAccount  $account  Bank account
+     * @param  array  $columnMapping  Column name mapping
      * @return int Number of transactions imported
+     *
      * @throws \Exception If parsing fails
      */
     public function parseCsv(string $filePath, BankAccount $account, array $columnMapping = []): int
     {
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             throw new \Exception("File not found: {$filePath}");
         }
 
@@ -430,9 +434,9 @@ class Mt940Parser
     /**
      * Create a bank transaction from CSV row
      *
-     * @param array $data CSV row data
-     * @param BankAccount $account Bank account
-     * @param array $mapping Column mapping
+     * @param  array  $data  CSV row data
+     * @param  BankAccount  $account  Bank account
+     * @param  array  $mapping  Column mapping
      * @return string Result: 'created', 'duplicate', or 'failed'
      */
     protected function createTransactionFromCsv(array $data, BankAccount $account, array $mapping): string
@@ -464,9 +468,9 @@ class Mt940Parser
                 'value_date' => $this->parseDate($data[$mapping['date']] ?? now()),
                 'description' => $data[$mapping['description']] ?? '',
                 'debtor_name' => $isCredit ? ($data[$mapping['counterparty']] ?? null) : null,
-                'creditor_name' => !$isCredit ? ($data[$mapping['counterparty']] ?? null) : null,
+                'creditor_name' => ! $isCredit ? ($data[$mapping['counterparty']] ?? null) : null,
                 'debtor_account' => $isCredit ? ($data[$mapping['counterparty_account']] ?? null) : null,
-                'creditor_account' => !$isCredit ? ($data[$mapping['counterparty_account']] ?? null) : null,
+                'creditor_account' => ! $isCredit ? ($data[$mapping['counterparty_account']] ?? null) : null,
                 'processing_status' => BankTransaction::STATUS_UNPROCESSED,
                 'source' => BankTransaction::SOURCE_CSV_IMPORT,
                 'raw_data' => $data,
@@ -486,8 +490,7 @@ class Mt940Parser
     /**
      * Parse date string to Carbon instance
      *
-     * @param string $dateString Date string
-     * @return \Carbon\Carbon
+     * @param  string  $dateString  Date string
      */
     protected function parseDate(string $dateString): \Carbon\Carbon
     {

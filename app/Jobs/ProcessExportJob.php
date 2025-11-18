@@ -2,12 +2,13 @@
 
 namespace App\Jobs;
 
-use App\Models\ExportJob;
-use App\Models\Invoice;
 use App\Models\Bill;
 use App\Models\Customer;
 use App\Models\Expense;
+use App\Models\ExportJob;
+use App\Models\Invoice;
 use App\Models\Payment;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,13 +17,13 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProcessExportJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
     public $timeout = 600; // 10 minutes for large exports
 
     /**
@@ -30,8 +31,7 @@ class ProcessExportJob implements ShouldQueue
      */
     public function __construct(
         public ExportJob $exportJob
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -153,7 +153,7 @@ class ProcessExportJob implements ShouldQueue
         $path = "exports/{$this->exportJob->company_id}/{$filename}";
 
         // Create PDF
-        $pdf = Pdf::loadView('exports.' . $this->exportJob->type, [
+        $pdf = Pdf::loadView('exports.'.$this->exportJob->type, [
             'data' => $data,
             'company' => $this->exportJob->company,
             'params' => $this->exportJob->params,
@@ -171,6 +171,7 @@ class ProcessExportJob implements ShouldQueue
     protected function getFilename(string $extension): string
     {
         $timestamp = now()->format('Y-m-d_His');
+
         return "{$this->exportJob->type}_{$timestamp}.{$extension}";
     }
 }
@@ -183,8 +184,7 @@ class ExportCollection implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwe
     public function __construct(
         protected array $data,
         protected string $type
-    ) {
-    }
+    ) {}
 
     public function array(): array
     {

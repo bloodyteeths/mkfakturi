@@ -28,7 +28,7 @@ class ViewServiceProvider extends ServiceProvider
         }
 
         // Skip view sharing if database not created
-        if (!InstallUtils::isDbCreated()) {
+        if (! InstallUtils::isDbCreated()) {
             return;
         }
 
@@ -42,12 +42,10 @@ class ViewServiceProvider extends ServiceProvider
 
     /**
      * Check if current request is a health check endpoint
-     *
-     * @return bool
      */
     protected function isHealthCheckRequest(): bool
     {
-        if (!$this->app->bound('request')) {
+        if (! $this->app->bound('request')) {
             return false;
         }
 

@@ -16,13 +16,13 @@ return new class extends Migration
     {
         Schema::table('paddle_subscriptions', function (Blueprint $table) {
             $table->string('provider')->default('paddle')->after('type')
-                  ->comment('Payment provider: paddle or cpay');
+                ->comment('Payment provider: paddle or cpay');
             $table->string('tier')->nullable()->after('provider')
-                  ->comment('Subscription tier: free, starter, standard, business, max, partner_plus');
+                ->comment('Subscription tier: free, starter, standard, business, max, partner_plus');
             $table->decimal('monthly_price', 10, 2)->nullable()->after('tier')
-                  ->comment('Monthly subscription price in EUR');
+                ->comment('Monthly subscription price in EUR');
             $table->json('metadata')->nullable()->after('monthly_price')
-                  ->comment('Additional subscription metadata');
+                ->comment('Additional subscription metadata');
         });
     }
 

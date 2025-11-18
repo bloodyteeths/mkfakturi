@@ -39,7 +39,7 @@ class BusinessLogicException extends Exception
         ?Throwable $previous = null
     ) {
         parent::__construct($message, 0, $previous);
-        
+
         $this->errorCode = $errorCode;
         $this->statusCode = $statusCode;
         $this->context = $context;
@@ -128,7 +128,7 @@ class BusinessLogicException extends Exception
             errorCode: 'CURRENCY_CONVERSION_ERROR',
             context: array_merge($context, [
                 'from_currency' => $fromCurrency,
-                'to_currency' => $toCurrency
+                'to_currency' => $toCurrency,
             ]),
             userMessage: 'Unable to convert currency. Please check exchange rates and try again.'
         );
@@ -160,7 +160,7 @@ class BusinessLogicException extends Exception
             context: array_merge($context, [
                 'resource_type' => $resourceType,
                 'limit' => $limit,
-                'current' => $current
+                'current' => $current,
             ]),
             userMessage: "You have reached the limit for {$resourceType}. Please upgrade your plan or remove some items."
         );
@@ -177,7 +177,7 @@ class BusinessLogicException extends Exception
             statusCode: 409,
             context: array_merge($context, [
                 'resource_type' => $resourceType,
-                'identifier' => $identifier
+                'identifier' => $identifier,
             ]),
             userMessage: "A {$resourceType} with this information already exists."
         );
@@ -194,7 +194,7 @@ class BusinessLogicException extends Exception
             context: array_merge($context, [
                 'resource_type' => $resourceType,
                 'current_state' => $currentState,
-                'target_state' => $targetState
+                'target_state' => $targetState,
             ]),
             userMessage: "Cannot change {$resourceType} from {$currentState} to {$targetState}."
         );
@@ -278,7 +278,7 @@ class BusinessLogicException extends Exception
             errorCode: 'FILE_OPERATION_ERROR',
             context: array_merge($context, [
                 'operation' => $operation,
-                'filename' => $filename
+                'filename' => $filename,
             ]),
             userMessage: 'File operation failed. Please try again or contact support if the problem persists.'
         );

@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Expense;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Models\Expense;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Log;
  *
  * Automatically posts expense transactions to the IFRS ledger
  * when FEATURE_ACCOUNTING_BACKBONE is enabled.
- *
- * @package App\Observers
  */
 class ExpenseObserver
 {
@@ -27,9 +25,6 @@ class ExpenseObserver
      * Handle the Expense "created" event.
      *
      * Post to ledger when expense is created.
-     *
-     * @param Expense $expense
-     * @return void
      */
     public function created(Expense $expense): void
     {
@@ -51,14 +46,11 @@ class ExpenseObserver
      * Handle the Expense "updated" event.
      *
      * Re-post to ledger if not already posted (idempotent).
-     *
-     * @param Expense $expense
-     * @return void
      */
     public function updated(Expense $expense): void
     {
         // Only post if not already posted and feature is enabled
-        if ($this->isFeatureEnabled() && !$expense->ifrs_transaction_id) {
+        if ($this->isFeatureEnabled() && ! $expense->ifrs_transaction_id) {
             try {
                 $this->ifrsAdapter->postExpense($expense);
             } catch (\Exception $e) {
@@ -72,8 +64,6 @@ class ExpenseObserver
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {

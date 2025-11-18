@@ -131,7 +131,7 @@ class AffiliateEvent extends Model
     /**
      * Mark event as clawed back
      */
-    public function clawback(string $reason = null): void
+    public function clawback(?string $reason = null): void
     {
         $metadata = $this->metadata ?? [];
         $metadata['clawback_reason'] = $reason;

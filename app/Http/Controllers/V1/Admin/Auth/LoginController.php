@@ -43,7 +43,6 @@ class LoginController extends Controller
     /**
      * Handle a login request to the application.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      *
      * @throws \Illuminate\Validation\ValidationException
@@ -80,6 +79,7 @@ class LoginController extends Controller
 
         if ($this->attemptLogin($request)) {
             Log::info('Login successful', ['email' => $request->input('email')]);
+
             return $this->sendLoginResponse($request);
         }
 
@@ -100,7 +100,6 @@ class LoginController extends Controller
      * Send the response after the user was authenticated.
      * Returns user data including role for frontend routing.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     protected function sendLoginResponse(Request $request)

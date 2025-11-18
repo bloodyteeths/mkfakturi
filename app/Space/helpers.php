@@ -200,7 +200,7 @@ function format_money_pdf($money, $currency = null)
         $companyId = request()->header('company', 1);
         $currencyId = CompanySetting::getSetting('currency', $companyId);
 
-        if (!$currencyId) {
+        if (! $currencyId) {
             // Fallback: try to get first available currency
             $currency = Currency::first();
         } else {
@@ -208,8 +208,8 @@ function format_money_pdf($money, $currency = null)
         }
 
         // If still no currency found, throw a more helpful error
-        if (!$currency) {
-            throw new \Exception('No currency configured for company ID: ' . $companyId . '. Please configure a default currency in company settings.');
+        if (! $currency) {
+            throw new \Exception('No currency configured for company ID: '.$companyId.'. Please configure a default currency in company settings.');
         }
     }
 

@@ -2,26 +2,24 @@
 
 namespace Modules\Mk\Jobs;
 
+use App\Models\Currency;
+use App\Models\Customer;
+use App\Models\Expense;
+use App\Models\Invoice;
+use App\Models\Item;
+use App\Models\TaxType;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use App\Models\Customer;
-use App\Models\Item;
-use App\Models\Invoice;
-use App\Models\Expense;
-use App\Models\Currency;
-use App\Models\TaxType;
-use Carbon\Carbon;
 
 /**
  * CSV Import Job for processing CSV file imports
- * 
+ *
  * Handles importing various data types from CSV files:
  * - Customers
  * - Items
@@ -33,10 +31,15 @@ class ImportCsvJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $filePath;
+
     protected array $options;
+
     protected string $importType;
+
     protected array $columnMapping;
+
     protected array $config;
+
     protected int $companyId;
 
     /**
@@ -79,17 +82,17 @@ class ImportCsvJob implements ShouldQueue
                 'import_type' => $this->importType,
                 'company_id' => $this->companyId,
                 'options' => $this->options,
-                'config' => $this->config
+                'config' => $this->config,
             ]);
 
             // Validate file exists
-            if (!Storage::exists($this->filePath)) {
+            if (! Storage::exists($this->filePath)) {
                 throw new \Exception("CSV file not found: {$this->filePath}");
             }
 
             // Read and parse CSV
             $csvData = $this->parseCSV();
-            
+
             if (empty($csvData)) {
                 throw new \Exception('No data found in CSV file');
             }
@@ -109,7 +112,7 @@ class ImportCsvJob implements ShouldQueue
             Log::info('CSV import job completed successfully', [
                 'import_type' => $this->importType,
                 'company_id' => $this->companyId,
-                'results' => $results
+                'results' => $results,
             ]);
 
         } catch (\Exception $e) {
@@ -118,7 +121,7 @@ class ImportCsvJob implements ShouldQueue
                 'import_type' => $this->importType,
                 'company_id' => $this->companyId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Clean up temporary file on error
@@ -147,20 +150,21 @@ class ImportCsvJob implements ShouldQueue
 
         // Parse CSV lines
         $lines = explode("\n", $csvContent);
-        $lines = array_filter($lines, fn($line) => trim($line) !== '');
+        $lines = array_filter($lines, fn ($line) => trim($line) !== '');
 
         $data = [];
         $isFirstRow = true;
 
         foreach ($lines as $line) {
             $row = str_getcsv($line, $delimiter);
-            
+
             // Skip header row if configured
             if ($hasHeader && $isFirstRow) {
                 $isFirstRow = false;
+
                 continue;
             }
-            
+
             $data[] = $row;
             $isFirstRow = false;
         }
@@ -179,10 +183,10 @@ class ImportCsvJob implements ShouldQueue
         $errors = [];
 
         // Get default currency
-        $defaultCurrency = Currency::where('code', 'MKD')->first() 
+        $defaultCurrency = Currency::where('code', 'MKD')->first()
             ?? Currency::first();
 
-        if (!$defaultCurrency) {
+        if (! $defaultCurrency) {
             throw new \Exception('No currency found. Please create at least one currency.');
         }
 
@@ -196,24 +200,25 @@ class ImportCsvJob implements ShouldQueue
                     'city' => 'nullable|string|max:100',
                     'country' => 'nullable|string|max:100',
                     'tax_number' => 'nullable|string|max:50',
-                    'website' => 'nullable|url'
+                    'website' => 'nullable|url',
                 ]);
 
                 if (empty($customerData['name'])) {
                     $errors[] = "Row {$rowIndex}: Customer name is required";
                     $skipped++;
+
                     continue;
                 }
 
                 // Check for duplicates
                 $existingCustomer = null;
-                if (!empty($customerData['email'])) {
+                if (! empty($customerData['email'])) {
                     $existingCustomer = Customer::where('company_id', $this->companyId)
                         ->where('email', $customerData['email'])
                         ->first();
                 }
 
-                if (!$existingCustomer && !empty($customerData['name'])) {
+                if (! $existingCustomer && ! empty($customerData['name'])) {
                     $existingCustomer = Customer::where('company_id', $this->companyId)
                         ->where('name', $customerData['name'])
                         ->first();
@@ -222,6 +227,7 @@ class ImportCsvJob implements ShouldQueue
                 if ($existingCustomer) {
                     if ($this->config['skipDuplicates']) {
                         $skipped++;
+
                         continue;
                     } elseif ($this->config['updateExisting']) {
                         $existingCustomer->update($customerData);
@@ -231,7 +237,7 @@ class ImportCsvJob implements ShouldQueue
                     }
                 } else {
                     // Create new customer
-                    if (!$this->config['dryRun']) {
+                    if (! $this->config['dryRun']) {
                         Customer::create(array_merge($customerData, [
                             'company_id' => $this->companyId,
                             'currency_id' => $defaultCurrency->id,
@@ -242,7 +248,7 @@ class ImportCsvJob implements ShouldQueue
                 }
 
             } catch (\Exception $e) {
-                $errors[] = "Row {$rowIndex}: " . $e->getMessage();
+                $errors[] = "Row {$rowIndex}: ".$e->getMessage();
                 $skipped++;
             }
         }
@@ -253,7 +259,7 @@ class ImportCsvJob implements ShouldQueue
             'updated' => $updated,
             'skipped' => $skipped,
             'errors' => $errors,
-            'total_processed' => count($csvData)
+            'total_processed' => count($csvData),
         ];
     }
 
@@ -274,12 +280,13 @@ class ImportCsvJob implements ShouldQueue
                     'description' => 'nullable|string',
                     'price' => 'required|numeric|min:0',
                     'unit' => 'nullable|string|max:20',
-                    'tax_rate' => 'nullable|numeric|min:0|max:100'
+                    'tax_rate' => 'nullable|numeric|min:0|max:100',
                 ]);
 
-                if (empty($itemData['name']) || !isset($itemData['price'])) {
+                if (empty($itemData['name']) || ! isset($itemData['price'])) {
                     $errors[] = "Row {$rowIndex}: Item name and price are required";
                     $skipped++;
+
                     continue;
                 }
 
@@ -293,7 +300,7 @@ class ImportCsvJob implements ShouldQueue
                         $taxType = TaxType::where('company_id', $this->companyId)
                             ->where('percent', $taxRate)
                             ->first();
-                        
+
                         if ($taxType) {
                             $itemData['tax_type_id'] = $taxType->id;
                         }
@@ -309,6 +316,7 @@ class ImportCsvJob implements ShouldQueue
                 if ($existingItem) {
                     if ($this->config['skipDuplicates']) {
                         $skipped++;
+
                         continue;
                     } elseif ($this->config['updateExisting']) {
                         $existingItem->update($itemData);
@@ -318,7 +326,7 @@ class ImportCsvJob implements ShouldQueue
                     }
                 } else {
                     // Create new item
-                    if (!$this->config['dryRun']) {
+                    if (! $this->config['dryRun']) {
                         Item::create(array_merge($itemData, [
                             'company_id' => $this->companyId,
                             'creator_id' => auth()->id() ?? 1,
@@ -328,7 +336,7 @@ class ImportCsvJob implements ShouldQueue
                 }
 
             } catch (\Exception $e) {
-                $errors[] = "Row {$rowIndex}: " . $e->getMessage();
+                $errors[] = "Row {$rowIndex}: ".$e->getMessage();
                 $skipped++;
             }
         }
@@ -339,7 +347,7 @@ class ImportCsvJob implements ShouldQueue
             'updated' => $updated,
             'skipped' => $skipped,
             'errors' => $errors,
-            'total_processed' => count($csvData)
+            'total_processed' => count($csvData),
         ];
     }
 
@@ -351,7 +359,7 @@ class ImportCsvJob implements ShouldQueue
         // Note: Invoice import is complex and would typically require
         // separate line items, tax calculations, etc.
         // This is a basic implementation for demonstration
-        
+
         $created = 0;
         $errors = [];
 
@@ -365,7 +373,7 @@ class ImportCsvJob implements ShouldQueue
             'updated' => 0,
             'skipped' => count($csvData),
             'errors' => $errors,
-            'total_processed' => count($csvData)
+            'total_processed' => count($csvData),
         ];
     }
 
@@ -385,12 +393,13 @@ class ImportCsvJob implements ShouldQueue
                     'expense_date' => 'required|date',
                     'amount' => 'required|numeric|min:0',
                     'notes' => 'nullable|string',
-                    'category' => 'nullable|string|max:100'
+                    'category' => 'nullable|string|max:100',
                 ]);
 
-                if (!isset($expenseData['amount']) || !isset($expenseData['expense_date'])) {
+                if (! isset($expenseData['amount']) || ! isset($expenseData['expense_date'])) {
                     $errors[] = "Row {$rowIndex}: Amount and date are required";
                     $skipped++;
+
                     continue;
                 }
 
@@ -400,7 +409,7 @@ class ImportCsvJob implements ShouldQueue
                 // Parse date
                 $expenseData['expense_date'] = Carbon::parse($expenseData['expense_date'])->format('Y-m-d');
 
-                if (!$this->config['dryRun']) {
+                if (! $this->config['dryRun']) {
                     Expense::create(array_merge($expenseData, [
                         'company_id' => $this->companyId,
                         'creator_id' => auth()->id() ?? 1,
@@ -410,7 +419,7 @@ class ImportCsvJob implements ShouldQueue
                 $created++;
 
             } catch (\Exception $e) {
-                $errors[] = "Row {$rowIndex}: " . $e->getMessage();
+                $errors[] = "Row {$rowIndex}: ".$e->getMessage();
                 $skipped++;
             }
         }
@@ -421,7 +430,7 @@ class ImportCsvJob implements ShouldQueue
             'updated' => $updated,
             'skipped' => $skipped,
             'errors' => $errors,
-            'total_processed' => count($csvData)
+            'total_processed' => count($csvData),
         ];
     }
 
@@ -431,14 +440,14 @@ class ImportCsvJob implements ShouldQueue
     protected function mapRowData(array $row, array $rules): array
     {
         $data = [];
-        
+
         foreach ($this->columnMapping as $columnIndex => $fieldName) {
-            if (empty($fieldName) || !isset($row[$columnIndex])) {
+            if (empty($fieldName) || ! isset($row[$columnIndex])) {
                 continue;
             }
 
             $value = trim($row[$columnIndex]);
-            
+
             // Skip empty values
             if ($value === '') {
                 continue;
@@ -447,7 +456,7 @@ class ImportCsvJob implements ShouldQueue
             // Basic data type conversion
             if (isset($rules[$fieldName])) {
                 $rule = $rules[$fieldName];
-                
+
                 if (str_contains($rule, 'numeric')) {
                     $value = is_numeric($value) ? $value : 0;
                 } elseif (str_contains($rule, 'date')) {
@@ -481,7 +490,7 @@ class ImportCsvJob implements ShouldQueue
             'import_type' => $this->importType,
             'company_id' => $this->companyId,
             'exception' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString()
+            'trace' => $exception->getTraceAsString(),
         ]);
 
         // Clean up temporary file

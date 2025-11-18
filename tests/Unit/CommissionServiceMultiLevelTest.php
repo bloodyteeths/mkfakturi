@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Models\AffiliateEvent;
 use App\Models\Company;
 use App\Models\Partner;
 use App\Models\User;
-use App\Models\AffiliateEvent;
 use App\Services\CommissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;

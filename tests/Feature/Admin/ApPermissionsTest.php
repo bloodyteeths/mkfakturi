@@ -1,13 +1,10 @@
 <?php
 
-use App\Models\Bill;
-use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
 
 beforeEach(function () {
     Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
@@ -41,4 +38,3 @@ test('non-privileged user without supplier/bill abilities is forbidden', functio
     expect(in_array($responseSuppliers->status(), [401, 403, 404]))->toBeTrue();
     expect(in_array($responseBills->status(), [401, 403, 404]))->toBeTrue();
 });
-

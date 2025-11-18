@@ -12,6 +12,7 @@ class TrialExpiring extends Notification
     use Queueable;
 
     protected CompanySubscription $subscription;
+
     protected int $daysRemaining;
 
     /**
@@ -43,7 +44,7 @@ class TrialExpiring extends Notification
         $paddleCheckoutUrl = config('services.paddle.checkout_url');
 
         $message = (new MailMessage)
-            ->subject("Your {$planName} trial ends in {$this->daysRemaining} " . ($this->daysRemaining == 1 ? 'day' : 'days'));
+            ->subject("Your {$planName} trial ends in {$this->daysRemaining} ".($this->daysRemaining == 1 ? 'day' : 'days'));
 
         if ($this->daysRemaining === 0) {
             $message->line("Your {$planName} trial for {$companyName} ends **today**!")
@@ -55,7 +56,7 @@ class TrialExpiring extends Notification
                 ->action('Upgrade to Standard - €29/month', $paddleCheckoutUrl)
                 ->line('All your data will remain safe and accessible.');
         } else {
-            $message->line("Your {$planName} trial for {$companyName} will expire in **{$this->daysRemaining} " . ($this->daysRemaining == 1 ? 'day' : 'days') . "**.")
+            $message->line("Your {$planName} trial for {$companyName} will expire in **{$this->daysRemaining} ".($this->daysRemaining == 1 ? 'day' : 'days').'**.')
                 ->line('Upgrade now to continue enjoying:')
                 ->line('- E-Faktura sending with QES signatures')
                 ->line('- Up to 3 users')

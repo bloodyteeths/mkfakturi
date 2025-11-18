@@ -12,8 +12,6 @@ use Illuminate\Queue\InteractsWithQueue;
  * Generate Proforma Invoice PDF Job
  *
  * Background job to generate PDF for proforma invoices
- *
- * @package App\Jobs
  */
 class GenerateProformaInvoicePdfJob implements ShouldQueue
 {
@@ -23,23 +21,17 @@ class GenerateProformaInvoicePdfJob implements ShouldQueue
 
     /**
      * The proforma invoice ID
-     *
-     * @var int
      */
     public int $proformaInvoiceId;
 
     /**
      * Whether to delete existing file
-     *
-     * @var bool
      */
     public bool $deleteExistingFile;
 
     /**
      * Create a new job instance.
      *
-     * @param  int  $proformaInvoiceId
-     * @param  bool  $deleteExistingFile
      * @return void
      */
     public function __construct(int $proformaInvoiceId, bool $deleteExistingFile = false)
@@ -50,14 +42,12 @@ class GenerateProformaInvoicePdfJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return int
      */
     public function handle(): int
     {
         $proformaInvoice = ProformaInvoice::find($this->proformaInvoiceId);
 
-        if (!$proformaInvoice) {
+        if (! $proformaInvoice) {
             return 0;
         }
 

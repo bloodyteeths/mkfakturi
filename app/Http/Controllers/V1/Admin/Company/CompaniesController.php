@@ -8,10 +8,10 @@ use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use App\Models\CompanySubscription;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
-use Carbon\Carbon;
 
 class CompaniesController extends Controller
 {

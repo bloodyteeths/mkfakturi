@@ -28,7 +28,9 @@ class ClearPerformanceCache extends Command
     protected $description = 'Clear performance-related cache entries';
 
     protected PerformanceMonitorService $performanceMonitor;
+
     protected QueryCacheService $queryCacheService;
+
     protected CurrencyExchangeService $currencyExchangeService;
 
     public function __construct(
@@ -73,6 +75,7 @@ class ClearPerformanceCache extends Command
         }
 
         $this->info('Performance cache cleared successfully!');
+
         return 0;
     }
 
@@ -96,11 +99,11 @@ class ClearPerformanceCache extends Command
     protected function clearPerformanceMetrics(): void
     {
         $this->performanceMonitor->clearOldMetrics();
-        
+
         // Also clear current hour metrics
-        $currentHourKey = 'performance_metrics:' . date('Y-m-d-H');
+        $currentHourKey = 'performance_metrics:'.date('Y-m-d-H');
         Cache::forget($currentHourKey);
-        
+
         $this->line('Cleared performance metrics');
     }
 
@@ -118,9 +121,9 @@ class ClearPerformanceCache extends Command
                 $redis = Cache::getStore()->connection();
                 $pattern = 'mkaccounting_cache:*:exchange_rate:*';
                 $keys = $redis->keys($pattern);
-                if (!empty($keys)) {
+                if (! empty($keys)) {
                     $redis->del($keys);
-                    $this->line('Cleared exchange rate cache for all companies (' . count($keys) . ' keys)');
+                    $this->line('Cleared exchange rate cache for all companies ('.count($keys).' keys)');
                 } else {
                     $this->line('No exchange rate cache found to clear');
                 }
@@ -133,8 +136,9 @@ class ClearPerformanceCache extends Command
      */
     protected function clearCompanyCache(?string $companyId): void
     {
-        if (!$companyId) {
+        if (! $companyId) {
             $this->error('Company ID is required for company cache clearing');
+
             return;
         }
 
@@ -149,7 +153,7 @@ class ClearPerformanceCache extends Command
     {
         $this->clearQueryCache($companyId, null);
         $this->clearPerformanceMetrics();
-        
+
         if ($companyId) {
             $this->clearExchangeRateCache($companyId);
             $this->clearCompanyCache($companyId);
@@ -169,7 +173,7 @@ class ClearPerformanceCache extends Command
     {
         if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             $redis = Cache::getStore()->connection();
-            
+
             $patterns = [
                 'mkaccounting_cache:*:dashboard:*',
                 'mkaccounting_cache:*:aggregation:*',
@@ -177,17 +181,17 @@ class ClearPerformanceCache extends Command
                 'mkaccounting_cache:*:list:*',
                 'mkaccounting_cache:*:company_stats:*',
             ];
-            
+
             $totalKeysCleared = 0;
-            
+
             foreach ($patterns as $pattern) {
                 $keys = $redis->keys($pattern);
-                if (!empty($keys)) {
+                if (! empty($keys)) {
                     $redis->del($keys);
                     $totalKeysCleared += count($keys);
                 }
             }
-            
+
             if ($totalKeysCleared > 0) {
                 $this->line("Cleared {$totalKeysCleared} additional cache keys");
             }
@@ -202,7 +206,7 @@ class ClearPerformanceCache extends Command
         if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             $redis = Cache::getStore()->connection();
             $info = $redis->info();
-            
+
             $this->table(
                 ['Metric', 'Value'],
                 [
@@ -210,7 +214,7 @@ class ClearPerformanceCache extends Command
                     ['Total Keys', $redis->dbsize()],
                     ['Keyspace Hits', $info['keyspace_hits'] ?? 0],
                     ['Keyspace Misses', $info['keyspace_misses'] ?? 0],
-                    ['Hit Rate', $this->calculateHitRate($info) . '%'],
+                    ['Hit Rate', $this->calculateHitRate($info).'%'],
                 ]
             );
         }
@@ -224,7 +228,7 @@ class ClearPerformanceCache extends Command
         $hits = $info['keyspace_hits'] ?? 0;
         $misses = $info['keyspace_misses'] ?? 0;
         $total = $hits + $misses;
-        
+
         return $total > 0 ? round(($hits / $total) * 100, 2) : 0.0;
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Crypt;
 
 /**
@@ -35,13 +35,18 @@ class BankConsent extends Model
 
     // Status constants
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_REVOKED = 'revoked';
 
     // Scope constants - PSD2 service types
     public const SCOPE_ACCOUNTS = 'accounts';
+
     public const SCOPE_BALANCES = 'balances';
+
     public const SCOPE_TRANSACTIONS = 'transactions';
 
     protected $fillable = [
@@ -173,12 +178,12 @@ class BankConsent extends Model
     /**
      * Check if consent is expiring soon
      *
-     * @param int $hoursBuffer Hours before expiration to consider consent as expiring
+     * @param  int  $hoursBuffer  Hours before expiration to consider consent as expiring
      * @return bool True if consent expires within the buffer period
      */
     public function isExpiringSoon(int $hoursBuffer = 24): bool
     {
-        if (!$this->expires_at) {
+        if (! $this->expires_at) {
             return false;
         }
 
@@ -192,11 +197,12 @@ class BankConsent extends Model
      */
     public function getHoursUntilExpiration(): ?int
     {
-        if (!$this->expires_at) {
+        if (! $this->expires_at) {
             return null;
         }
 
         $hours = now()->diffInHours($this->expires_at, false);
+
         return $hours > 0 ? $hours : 0;
     }
 

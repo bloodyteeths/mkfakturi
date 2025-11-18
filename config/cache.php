@@ -108,37 +108,37 @@ return [
     'performance' => [
         // Enable/disable cache compression
         'compression' => env('CACHE_COMPRESSION', true),
-        
+
         // Cache serialization method
         'serialization' => env('CACHE_SERIALIZATION', 'php'),
-        
+
         // Maximum cache entry size (in bytes)
         'max_entry_size' => env('CACHE_MAX_ENTRY_SIZE', 1048576), // 1MB
-        
+
         // Cache tags support (Redis only)
         'tags_enabled' => env('CACHE_TAGS_ENABLED', true),
-        
+
         // Cache statistics collection
         'stats_enabled' => env('CACHE_STATS_ENABLED', true),
-        
+
         // Automatic cache warming
         'auto_warm' => env('CACHE_AUTO_WARM', true),
-        
+
         // Performance monitoring
         'monitor_slow_queries' => env('CACHE_MONITOR_SLOW_QUERIES', true),
         'slow_query_threshold_ms' => env('CACHE_SLOW_QUERY_THRESHOLD', 100),
-        
+
         // Exchange rate caching
         'exchange_rate_ttl' => env('EXCHANGE_RATE_CACHE_TTL', 3600), // 1 hour
         'exchange_rate_api_timeout' => env('EXCHANGE_RATE_API_TIMEOUT', 10), // seconds
-        
+
         // Query result caching
         'query_cache_enabled' => env('QUERY_CACHE_ENABLED', true),
         'query_cache_default_ttl' => env('QUERY_CACHE_TTL', 900), // 15 minutes
-        
+
         // Dashboard caching
         'dashboard_cache_ttl' => env('DASHBOARD_CACHE_TTL', 600), // 10 minutes
-        
+
         // Company settings cache
         'company_settings_ttl' => env('COMPANY_SETTINGS_CACHE_TTL', 86400), // 24 hours
     ],
@@ -155,7 +155,7 @@ return [
     'invalidation' => [
         // Automatic invalidation on model updates
         'auto_invalidate_models' => env('CACHE_AUTO_INVALIDATE_MODELS', true),
-        
+
         // Model-specific invalidation patterns
         'model_patterns' => [
             'Customer' => ['customers', 'dashboard', 'stats'],
@@ -164,7 +164,7 @@ return [
             'Item' => ['items', 'dashboard'],
             'CompanySetting' => ['settings', 'company'],
         ],
-        
+
         // Time-based invalidation
         'time_based_patterns' => [
             'dashboard:*' => 600, // 10 minutes

@@ -38,15 +38,22 @@ class Payment extends Model implements HasMedia
 
     // Gateway constants for CPAY integration
     public const GATEWAY_CPAY = 'cpay';
+
     public const GATEWAY_PADDLE = 'paddle';
+
     public const GATEWAY_BANK_TRANSFER = 'bank_transfer';
+
     public const GATEWAY_MANUAL = 'manual';
-    
+
     // Gateway status constants
     public const GATEWAY_STATUS_PENDING = 'PENDING';
+
     public const GATEWAY_STATUS_PROCESSING = 'PROCESSING';
+
     public const GATEWAY_STATUS_COMPLETED = 'COMPLETED';
+
     public const GATEWAY_STATUS_FAILED = 'FAILED';
+
     public const GATEWAY_STATUS_CANCELLED = 'CANCELLED';
 
     protected $dates = ['created_at', 'updated_at', 'payment_date'];
@@ -65,7 +72,7 @@ class Payment extends Model implements HasMedia
     protected $with = [
         'customer:id,name,email',
         'paymentMethod:id,name',
-        'currency:id,name,code,symbol'
+        'currency:id,name,code,symbol',
     ];
 
     protected function casts(): array

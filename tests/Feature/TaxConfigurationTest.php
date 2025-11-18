@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
-use App\Models\TaxType;
-use App\Models\Tax;
-use App\Models\Invoice;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Item;
+use App\Models\Tax;
+use App\Models\TaxType;
 use App\Models\User;
 use App\Services\VatXmlService;
 use Carbon\Carbon;
@@ -24,12 +24,13 @@ class TaxConfigurationTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected $company;
+
     protected $user;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test company and user
         $this->company = Company::factory()->create([
             'name' => 'Македонска Трговска ООД',
@@ -63,7 +64,7 @@ class TaxConfigurationTest extends TestCase
         $this->assertEquals(18.00, $vatType->percent);
         $this->assertEquals(TaxType::TYPE_GENERAL, $vatType->type);
         $this->assertFalse($vatType->compound_tax);
-        
+
         // Verify database persistence
         $this->assertDatabaseHas('tax_types', [
             'name' => 'ДДВ 18%',
@@ -89,7 +90,7 @@ class TaxConfigurationTest extends TestCase
         $this->assertInstanceOf(TaxType::class, $vatType);
         $this->assertEquals('ДДВ 5%', $vatType->name);
         $this->assertEquals(5.00, $vatType->percent);
-        
+
         // Verify database persistence
         $this->assertDatabaseHas('tax_types', [
             'name' => 'ДДВ 5%',
@@ -147,7 +148,7 @@ class TaxConfigurationTest extends TestCase
         $this->assertEquals(18.00, $tax->percent);
         $this->assertEquals(1800, $tax->amount); // 18.00 MKD in cents
         $this->assertEquals(11800, $invoice->total); // Total with VAT
-        
+
         // Verify relationships
         $this->assertEquals($vatType->id, $tax->tax_type_id);
         $this->assertEquals($invoice->id, $tax->invoice_id);
@@ -237,8 +238,8 @@ class TaxConfigurationTest extends TestCase
         ]);
 
         // Test ДДВ-04 XML generation service
-        $vatXmlService = new VatXmlService();
-        
+        $vatXmlService = new VatXmlService;
+
         $periodStart = Carbon::now()->startOfMonth();
         $periodEnd = Carbon::now()->endOfMonth();
 
@@ -254,10 +255,10 @@ class TaxConfigurationTest extends TestCase
             $this->assertStringContainsString('<?xml version="1.0" encoding="UTF-8"?>', $xml);
             $this->assertStringContainsString('DDV04', $xml);
             $this->assertStringContainsString('xmlns', $xml);
-            
+
             // Verify company information in XML
             $this->assertStringContainsString($this->company->vat_id, $xml);
-            
+
         } catch (\Exception $e) {
             // If XSD schema is not available, test basic XML generation logic
             $this->assertInstanceOf(VatXmlService::class, $vatXmlService);
@@ -267,8 +268,8 @@ class TaxConfigurationTest extends TestCase
     /** @test */
     public function it_validates_ddv04_xml_format()
     {
-        $vatXmlService = new VatXmlService();
-        
+        $vatXmlService = new VatXmlService;
+
         // Test XML validation (if schema is available)
         $testXml = '<?xml version="1.0" encoding="UTF-8"?>
         <DDV04 xmlns="http://www.ujp.gov.mk/ddv04" version="1.0">
@@ -277,8 +278,8 @@ class TaxConfigurationTest extends TestCase
                 <SubmissionDate>2025-01-31</SubmissionDate>
             </Header>
             <TaxPayer>
-                <VATNumber>' . $this->company->vat_id . '</VATNumber>
-                <Name>' . $this->company->name . '</Name>
+                <VATNumber>'.$this->company->vat_id.'</VATNumber>
+                <Name>'.$this->company->name.'</Name>
             </TaxPayer>
         </DDV04>';
 
@@ -348,7 +349,7 @@ class TaxConfigurationTest extends TestCase
         // Verify tax type properties
         $this->assertTrue($compoundTax->compound_tax);
         $this->assertFalse($compoundTax->collective_tax);
-        
+
         $this->assertFalse($collectiveTax->compound_tax);
         $this->assertTrue($collectiveTax->collective_tax);
     }
@@ -379,8 +380,8 @@ class TaxConfigurationTest extends TestCase
                         'name',
                         'percent',
                         'type',
-                    ]
-                ]
+                    ],
+                ],
             ]);
         } else {
             // Endpoint might not exist or require authentication
@@ -422,17 +423,17 @@ class TaxConfigurationTest extends TestCase
     public function it_validates_tax_compliance_requirements()
     {
         // Test Macedonia-specific tax compliance requirements
-        
+
         // 1. VAT registration threshold (placeholder - actual threshold depends on regulations)
         $annualRevenue = 2000000; // 20,000.00 MKD (example)
         $vatRegistrationRequired = $annualRevenue > 2000000;
         $this->assertFalse($vatRegistrationRequired); // Below threshold
-        
+
         // 2. VAT return submission periods
         $validPeriods = ['MONTHLY', 'QUARTERLY'];
         $this->assertContains('MONTHLY', $validPeriods);
         $this->assertContains('QUARTERLY', $validPeriods);
-        
+
         // 3. ДДВ-04 form requirements
         $requiredFields = [
             'company_vat_id',
@@ -441,15 +442,14 @@ class TaxConfigurationTest extends TestCase
             'input_vat',
             'output_vat',
         ];
-        
+
         foreach ($requiredFields as $field) {
             $this->assertIsString($field);
             $this->assertNotEmpty($field);
         }
-        
+
         // 4. Currency requirement (MKD for domestic transactions)
         $domesticCurrency = 'MKD';
         $this->assertEquals('MKD', $domesticCurrency);
     }
 }
-

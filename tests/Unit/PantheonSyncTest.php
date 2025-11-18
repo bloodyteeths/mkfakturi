@@ -2,27 +2,27 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use Modules\Mk\Services\PantheonSyncService;
-use App\Models\Invoice;
-use App\Models\Payment;
 use App\Models\Company;
-use App\Models\Customer;
 use App\Models\Currency;
+use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\Payment;
 use App\Models\PaymentMethod;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\PantheonSyncService;
+use Tests\TestCase;
 
 /**
  * Test PantheonSyncService for PANTHEON web-services integration
- * 
+ *
  * Tests API integration methods with mocked HTTP responses
  * Success criteria: API HTTP 200 response handling
  * Covers error scenarios and retry logic
@@ -32,27 +32,30 @@ class PantheonSyncTest extends TestCase
     use RefreshDatabase;
 
     protected PantheonSyncService $service;
+
     protected MockHandler $mockHandler;
+
     protected Invoice $testInvoice;
+
     protected Payment $testPayment;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create mock handler for HTTP client
-        $this->mockHandler = new MockHandler();
+        $this->mockHandler = new MockHandler;
         $handlerStack = HandlerStack::create($this->mockHandler);
-        
+
         // Create service instance and inject mock client
-        $this->service = new PantheonSyncService();
-        
+        $this->service = new PantheonSyncService;
+
         // Use reflection to inject mock client
         $reflection = new \ReflectionClass($this->service);
         $clientProperty = $reflection->getProperty('client');
         $clientProperty->setAccessible(true);
         $clientProperty->setValue($this->service, new Client(['handler' => $handlerStack]));
-        
+
         // Create test data
         $this->createTestData();
     }
@@ -66,8 +69,8 @@ class PantheonSyncTest extends TestCase
             'message' => 'Invoice pushed successfully',
             'data' => [
                 'pantheon_id' => 'PAN-INV-12345',
-                'status' => 'created'
-            ]
+                'status' => 'created',
+            ],
         ])));
 
         $result = $this->service->pushInvoice($this->testInvoice);
@@ -86,8 +89,8 @@ class PantheonSyncTest extends TestCase
             'message' => 'Payment pushed successfully',
             'data' => [
                 'pantheon_id' => 'PAN-PAY-67890',
-                'status' => 'processed'
-            ]
+                'status' => 'processed',
+            ],
         ])));
 
         $result = $this->service->pushPayment($this->testPayment);
@@ -104,7 +107,7 @@ class PantheonSyncTest extends TestCase
         $this->mockHandler->append(new Response(200, [], json_encode([
             'status' => 'online',
             'api_version' => '2.0',
-            'response_time_ms' => 150
+            'response_time_ms' => 150,
         ])));
 
         $result = $this->service->getStatus();
@@ -122,7 +125,7 @@ class PantheonSyncTest extends TestCase
         $this->mockHandler->append(new Response(400, [], json_encode([
             'success' => false,
             'message' => 'Invalid invoice data',
-            'errors' => ['invoice_number' => 'Already exists']
+            'errors' => ['invoice_number' => 'Already exists'],
         ])));
 
         $this->expectException(\Exception::class);
@@ -138,7 +141,7 @@ class PantheonSyncTest extends TestCase
         $this->mockHandler->append(new Response(422, [], json_encode([
             'success' => false,
             'message' => 'Payment validation failed',
-            'errors' => ['amount' => 'Must be greater than zero']
+            'errors' => ['amount' => 'Must be greater than zero'],
         ])));
 
         $this->expectException(\Exception::class);
@@ -168,11 +171,11 @@ class PantheonSyncTest extends TestCase
         // Mock 401 Unauthorized response
         $this->mockHandler->append(new Response(401, [], json_encode([
             'success' => false,
-            'message' => 'Invalid API key'
+            'message' => 'Invalid API key',
         ])));
 
         $this->expectException(\Exception::class);
-        
+
         Log::shouldReceive('error')->once();
         Log::shouldReceive('warning')->once()->with('PANTHEON API authentication failed - check API key and company code');
 
@@ -185,11 +188,11 @@ class PantheonSyncTest extends TestCase
         // Mock 429 Rate Limited response
         $this->mockHandler->append(new Response(429, [], json_encode([
             'success' => false,
-            'message' => 'Rate limit exceeded'
+            'message' => 'Rate limit exceeded',
         ])));
 
         $this->expectException(\Exception::class);
-        
+
         Log::shouldReceive('error')->once();
         Log::shouldReceive('warning')->once()->with('PANTHEON API rate limit exceeded - implement retry logic');
 
@@ -202,11 +205,11 @@ class PantheonSyncTest extends TestCase
         // Mock 500 Server Error response
         $this->mockHandler->append(new Response(500, [], json_encode([
             'success' => false,
-            'message' => 'Internal server error'
+            'message' => 'Internal server error',
         ])));
 
         $this->expectException(\Exception::class);
-        
+
         Log::shouldReceive('error')->once();
         Log::shouldReceive('warning')->once()->with('PANTHEON API server error - consider retry with backoff');
 
@@ -237,7 +240,7 @@ class PantheonSyncTest extends TestCase
         // Mock successful status response for connection test
         $this->mockHandler->append(new Response(200, [], json_encode([
             'status' => 'online',
-            'api_version' => '2.0'
+            'api_version' => '2.0',
         ])));
 
         $result = $this->service->testConnection();
@@ -286,17 +289,17 @@ class PantheonSyncTest extends TestCase
         // Mock successful response to capture the formatted data
         $this->mockHandler->append(new Response(200, [], json_encode([
             'success' => true,
-            'data' => ['pantheon_id' => 'test']
+            'data' => ['pantheon_id' => 'test'],
         ])));
 
         // Capture the last request to verify the data format
         $container = [];
         $history = \GuzzleHttp\Middleware::history($container);
-        
+
         // Add history middleware to handler stack
         $handlerStack = HandlerStack::create($this->mockHandler);
         $handlerStack->push($history);
-        
+
         // Recreate client with history middleware
         $reflection = new \ReflectionClass($this->service);
         $clientProperty = $reflection->getProperty('client');
@@ -326,7 +329,7 @@ class PantheonSyncTest extends TestCase
         // Mock successful response
         $this->mockHandler->append(new Response(200, [], json_encode([
             'success' => true,
-            'data' => ['pantheon_id' => 'test']
+            'data' => ['pantheon_id' => 'test'],
         ])));
 
         // Capture the request data
@@ -334,7 +337,7 @@ class PantheonSyncTest extends TestCase
         $history = \GuzzleHttp\Middleware::history($container);
         $handlerStack = HandlerStack::create($this->mockHandler);
         $handlerStack->push($history);
-        
+
         $reflection = new \ReflectionClass($this->service);
         $clientProperty = $reflection->getProperty('client');
         $clientProperty->setAccessible(true);
@@ -364,13 +367,13 @@ class PantheonSyncTest extends TestCase
         $currency = Currency::factory()->create([
             'name' => 'Macedonian Denar',
             'code' => 'MKD',
-            'symbol' => 'ден'
+            'symbol' => 'ден',
         ]);
 
         // Create company
         $company = Company::factory()->create([
             'name' => 'Тест Компанија ПАНТЕОН',
-            'vat_number' => 'MK4030009501234'
+            'vat_number' => 'MK4030009501234',
         ]);
 
         // Create customer
@@ -378,13 +381,13 @@ class PantheonSyncTest extends TestCase
             'name' => 'ПАНТЕОН Тест Клиент',
             'email' => 'test@pantheon.mk',
             'phone' => '+389 2 123 456',
-            'company_id' => $company->id
+            'company_id' => $company->id,
         ]);
 
         // Create payment method
         $paymentMethod = PaymentMethod::factory()->create([
             'name' => 'Банкарски трансфер',
-            'company_id' => $company->id
+            'company_id' => $company->id,
         ]);
 
         // Create test invoice
@@ -399,7 +402,7 @@ class PantheonSyncTest extends TestCase
             'tax_total' => 1800,   // 18.00 MKD
             'total' => 11800,      // 118.00 MKD
             'status' => 'SENT',
-            'notes' => 'ПАНТЕОН тест фактура'
+            'notes' => 'ПАНТЕОН тест фактура',
         ]);
 
         // Create invoice item
@@ -409,7 +412,7 @@ class PantheonSyncTest extends TestCase
             'description' => 'Веб сервиси синхронизација',
             'quantity' => 1,
             'price' => 10000,
-            'total' => 10000
+            'total' => 10000,
         ]);
 
         // Create test payment
@@ -423,7 +426,7 @@ class PantheonSyncTest extends TestCase
             'currency_id' => $currency->id,
             'payment_method_id' => $paymentMethod->id,
             'payment_mode' => 'BANK_TRANSFER',
-            'notes' => 'ПАНТЕОН тест плаќање'
+            'notes' => 'ПАНТЕОН тест плаќање',
         ]);
 
         // Load relationships

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class PartnerCompany extends Pivot
 {
@@ -85,4 +85,3 @@ class PartnerCompany extends Pivot
         return $this->override_commission_rate ?? $this->partner->commission_rate;
     }
 }
-

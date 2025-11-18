@@ -2,18 +2,19 @@
 
 namespace Tests\Feature\Banking;
 
-use Tests\TestCase;
 use App\Models\BankToken;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
 class Psd2OAuthTest extends TestCase
 {
     use RefreshDatabase;
 
     protected User $user;
+
     protected Company $company;
 
     protected function setUp(): void

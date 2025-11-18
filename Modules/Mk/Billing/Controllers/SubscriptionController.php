@@ -4,8 +4,8 @@ namespace Modules\Mk\Billing\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Paddle\Checkout;
@@ -31,9 +31,6 @@ class SubscriptionController extends Controller
 
     /**
      * Show plan selection for company
-     *
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function index(int $companyId): JsonResponse
     {
@@ -65,10 +62,6 @@ class SubscriptionController extends Controller
 
     /**
      * Create Paddle checkout session for company subscription
-     *
-     * @param Request $request
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function checkout(Request $request, int $companyId): JsonResponse
     {
@@ -84,15 +77,15 @@ class SubscriptionController extends Controller
         $tier = $request->input('tier');
         $priceId = config("services.paddle.prices.{$tier}");
 
-        if (!$priceId) {
+        if (! $priceId) {
             return response()->json([
-                'error' => 'Invalid tier or price not configured'
+                'error' => 'Invalid tier or price not configured',
             ], 400);
         }
 
         try {
             // Create or retrieve Paddle customer
-            if (!$company->paddle_id) {
+            if (! $company->paddle_id) {
                 $company->createAsCustomer([
                     'name' => $company->name,
                     'email' => $company->owner->email ?? Auth::user()->email,
@@ -120,16 +113,13 @@ class SubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to create checkout session'
+                'error' => 'Failed to create checkout session',
             ], 500);
         }
     }
 
     /**
      * Post-subscription success page
-     *
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function success(int $companyId): JsonResponse
     {
@@ -150,9 +140,6 @@ class SubscriptionController extends Controller
 
     /**
      * Subscription management dashboard
-     *
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function manage(int $companyId): JsonResponse
     {
@@ -163,9 +150,9 @@ class SubscriptionController extends Controller
 
         $subscription = $company->subscription('default');
 
-        if (!$subscription) {
+        if (! $subscription) {
             return response()->json([
-                'error' => 'No active subscription found'
+                'error' => 'No active subscription found',
             ], 404);
         }
 
@@ -186,10 +173,6 @@ class SubscriptionController extends Controller
 
     /**
      * Change subscription plan (upgrade/downgrade)
-     *
-     * @param Request $request
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function swap(Request $request, int $companyId): JsonResponse
     {
@@ -204,18 +187,18 @@ class SubscriptionController extends Controller
 
         $subscription = $company->subscription('default');
 
-        if (!$subscription || !$subscription->valid()) {
+        if (! $subscription || ! $subscription->valid()) {
             return response()->json([
-                'error' => 'No active subscription to modify'
+                'error' => 'No active subscription to modify',
             ], 400);
         }
 
         $newTier = $request->input('tier');
         $newPriceId = config("services.paddle.prices.{$newTier}");
 
-        if (!$newPriceId) {
+        if (! $newPriceId) {
             return response()->json([
-                'error' => 'Invalid tier or price not configured'
+                'error' => 'Invalid tier or price not configured',
             ], 400);
         }
 
@@ -246,17 +229,13 @@ class SubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to update subscription plan'
+                'error' => 'Failed to update subscription plan',
             ], 500);
         }
     }
 
     /**
      * Cancel subscription
-     *
-     * @param Request $request
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function cancel(Request $request, int $companyId): JsonResponse
     {
@@ -267,9 +246,9 @@ class SubscriptionController extends Controller
 
         $subscription = $company->subscription('default');
 
-        if (!$subscription || !$subscription->valid()) {
+        if (! $subscription || ! $subscription->valid()) {
             return response()->json([
-                'error' => 'No active subscription to cancel'
+                'error' => 'No active subscription to cancel',
             ], 400);
         }
 
@@ -293,16 +272,13 @@ class SubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to cancel subscription'
+                'error' => 'Failed to cancel subscription',
             ], 500);
         }
     }
 
     /**
      * Resume a cancelled subscription
-     *
-     * @param int $companyId
-     * @return JsonResponse
      */
     public function resume(int $companyId): JsonResponse
     {
@@ -313,9 +289,9 @@ class SubscriptionController extends Controller
 
         $subscription = $company->subscription('default');
 
-        if (!$subscription || !$subscription->onGracePeriod()) {
+        if (! $subscription || ! $subscription->onGracePeriod()) {
             return response()->json([
-                'error' => 'No subscription to resume'
+                'error' => 'No subscription to resume',
             ], 400);
         }
 
@@ -337,7 +313,7 @@ class SubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to resume subscription'
+                'error' => 'Failed to resume subscription',
             ], 500);
         }
     }

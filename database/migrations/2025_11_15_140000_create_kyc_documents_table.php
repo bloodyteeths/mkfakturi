@@ -24,7 +24,7 @@ return new class extends Migration
                 'proof_of_address',
                 'bank_statement',
                 'tax_certificate',
-                'other'
+                'other',
             ]);
             $table->string('original_filename');
             $table->string('file_path'); // Encrypted file path

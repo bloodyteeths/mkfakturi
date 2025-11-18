@@ -6,7 +6,6 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -21,6 +20,7 @@ use Illuminate\Support\Facades\Log;
  * - Subscription management (recurring payments)
  *
  * @version 1.1.0
+ *
  * @author Claude Code - CPAY Integration Agent
  */
 class CpayDriver
@@ -28,16 +28,15 @@ class CpayDriver
     /**
      * Create recurring payment agreement for subscription
      *
-     * @param \App\Models\Company $company
-     * @param string $tier
-     * @param float $monthlyPrice
+     * @param  \App\Models\Company  $company
      * @return array Contains 'checkout_url' and 'params'
+     *
      * @throws \Exception
      */
     public function createSubscription($company, string $tier, float $monthlyPrice): array
     {
         // Check feature flag
-        if (!config('mk.features.advanced_payments', false)) {
+        if (! config('mk.features.advanced_payments', false)) {
             throw new \Exception('Advanced payments feature is disabled');
         }
 
@@ -45,12 +44,12 @@ class CpayDriver
         $merchantId = config('mk.payment_gateways.cpay.merchant_id');
         $paymentUrl = config('mk.payment_gateways.cpay.subscription_url', config('mk.payment_gateways.cpay.payment_url'));
 
-        if (!$merchantId || !$paymentUrl) {
+        if (! $merchantId || ! $paymentUrl) {
             throw new \Exception('CPAY configuration is missing');
         }
 
         // Generate unique subscription reference
-        $subscriptionRef = 'SUB-' . $company->id . '-' . time();
+        $subscriptionRef = 'SUB-'.$company->id.'-'.time();
 
         // Build subscription parameters
         $params = [
@@ -68,7 +67,7 @@ class CpayDriver
         $params['signature'] = $this->generateSignature($params);
 
         // Build checkout URL
-        $checkoutUrl = $paymentUrl . '?' . http_build_query($params);
+        $checkoutUrl = $paymentUrl.'?'.http_build_query($params);
 
         Log::info('CPAY subscription checkout URL generated', [
             'company_id' => $company->id,
@@ -87,14 +86,15 @@ class CpayDriver
     /**
      * Cancel CPAY recurring payment agreement
      *
-     * @param string $subscriptionRef CPAY subscription reference
+     * @param  string  $subscriptionRef  CPAY subscription reference
      * @return bool Success status
+     *
      * @throws \Exception
      */
     public function cancelSubscription(string $subscriptionRef): bool
     {
         // Check feature flag
-        if (!config('mk.features.advanced_payments', false)) {
+        if (! config('mk.features.advanced_payments', false)) {
             throw new \Exception('Advanced payments feature is disabled');
         }
 
@@ -102,7 +102,7 @@ class CpayDriver
         $merchantId = config('mk.payment_gateways.cpay.merchant_id');
         $apiUrl = config('mk.payment_gateways.cpay.api_url');
 
-        if (!$merchantId || !$apiUrl) {
+        if (! $merchantId || ! $apiUrl) {
             throw new \Exception('CPAY API configuration is missing');
         }
 
@@ -118,7 +118,7 @@ class CpayDriver
 
         try {
             // Send cancellation request to CPAY API
-            $response = \Illuminate\Support\Facades\Http::post($apiUrl . '/subscription/cancel', $params);
+            $response = \Illuminate\Support\Facades\Http::post($apiUrl.'/subscription/cancel', $params);
 
             if ($response->successful()) {
                 Log::info('CPAY subscription cancelled', [
@@ -145,21 +145,21 @@ class CpayDriver
         }
     } // CLAUDE-CHECKPOINT: Added subscription management methods
 
-
     /**
      * Create checkout URL for invoice payment
      *
      * Generates a payment URL with all required parameters and signature.
      * The signature is calculated using SHA256 hash of pipe-delimited values.
      *
-     * @param Invoice $invoice The invoice to create payment for
+     * @param  Invoice  $invoice  The invoice to create payment for
      * @return array Contains 'checkout_url' and 'params' keys
+     *
      * @throws \Exception If feature is disabled or configuration is missing
      */
     public function createCheckout(Invoice $invoice): array
     {
         // Check feature flag
-        if (!config('mk.features.advanced_payments', false)) {
+        if (! config('mk.features.advanced_payments', false)) {
             throw new \Exception('Advanced payments feature is disabled');
         }
 
@@ -167,7 +167,7 @@ class CpayDriver
         $merchantId = config('mk.payment_gateways.cpay.merchant_id');
         $paymentUrl = config('mk.payment_gateways.cpay.payment_url');
 
-        if (!$merchantId || !$paymentUrl) {
+        if (! $merchantId || ! $paymentUrl) {
             throw new \Exception('CPAY configuration is missing');
         }
 
@@ -186,7 +186,7 @@ class CpayDriver
         $params['signature'] = $this->generateSignature($params);
 
         // Build checkout URL with query parameters
-        $checkoutUrl = $paymentUrl . '?' . http_build_query($params);
+        $checkoutUrl = $paymentUrl.'?'.http_build_query($params);
 
         Log::info('CPAY checkout URL generated', [
             'invoice_id' => $invoice->id,
@@ -206,19 +206,19 @@ class CpayDriver
      * Processes the payment callback, verifies signature, checks idempotency,
      * creates payment record, and updates invoice status.
      *
-     * @param Request $request The callback request from CPAY
-     * @return void
+     * @param  Request  $request  The callback request from CPAY
+     *
      * @throws \Exception If signature is invalid, feature is disabled, or invoice not found
      */
     public function handleCallback(Request $request): void
     {
         // Check feature flag
-        if (!config('mk.features.advanced_payments', false)) {
+        if (! config('mk.features.advanced_payments', false)) {
             throw new \Exception('Advanced payments feature is disabled');
         }
 
         // Verify signature
-        if (!$this->verifySignature($request->all())) {
+        if (! $this->verifySignature($request->all())) {
             Log::error('CPAY callback signature verification failed', [
                 'data' => $request->all(),
             ]);
@@ -234,6 +234,7 @@ class CpayDriver
             Log::info('CPAY callback already processed (idempotent)', [
                 'transaction_id' => $transactionId,
             ]);
+
             return;
         }
 
@@ -256,7 +257,7 @@ class CpayDriver
             'currency_id' => $invoice->currency_id,
             'amount' => $amount,
             'payment_date' => now(),
-            'payment_number' => 'CPAY-' . $transactionId,
+            'payment_number' => 'CPAY-'.$transactionId,
             'gateway' => Payment::GATEWAY_CPAY,
             'gateway_transaction_id' => $transactionId,
             'gateway_status' => Payment::GATEWAY_STATUS_COMPLETED,
@@ -296,14 +297,14 @@ class CpayDriver
      *
      * Note: 'signature' and 'timestamp' fields are excluded from signature calculation
      *
-     * @param array $params Payment parameters
+     * @param  array  $params  Payment parameters
      * @return string SHA256 hash signature
      */
     public function generateSignature(array $params): string
     {
         $secretKey = config('mk.payment_gateways.cpay.secret_key');
 
-        if (!$secretKey) {
+        if (! $secretKey) {
             throw new \Exception('CPAY secret key is not configured');
         }
 
@@ -316,7 +317,7 @@ class CpayDriver
         ksort($signatureData);
 
         // Build signature string with pipe delimiter
-        $signatureString = implode('|', $signatureData) . '|' . $secretKey;
+        $signatureString = implode('|', $signatureData).'|'.$secretKey;
 
         // Generate SHA256 hash
         return hash('sha256', $signatureString);
@@ -328,7 +329,7 @@ class CpayDriver
      * Compares the received signature with the expected signature
      * using timing-safe comparison to prevent timing attacks.
      *
-     * @param array $data Callback data including signature
+     * @param  array  $data  Callback data including signature
      * @return bool True if signature is valid, false otherwise
      */
     public function verifySignature(array $data): bool

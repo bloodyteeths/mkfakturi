@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Log;
 class McpClient
 {
     private string $mcpServerUrl;
+
     private string $bearerToken;
+
     private int $timeout;
 
     /**
@@ -35,9 +37,10 @@ class McpClient
     /**
      * Call an MCP tool and retrieve data
      *
-     * @param string $tool The tool name to call
-     * @param array<string, mixed> $params Parameters to pass to the tool
+     * @param  string  $tool  The tool name to call
+     * @param  array<string, mixed>  $params  Parameters to pass to the tool
      * @return array<string, mixed> The tool's response data
+     *
      * @throws McpException If the MCP call fails
      */
     public function call(string $tool, array $params): array
@@ -58,7 +61,7 @@ class McpClient
         try {
             $response = Http::withToken($this->bearerToken)
                 ->timeout($this->timeout)
-                ->post($this->mcpServerUrl . $endpoint, $params);
+                ->post($this->mcpServerUrl.$endpoint, $params);
 
             $duration = microtime(true) - $startTime;
 
@@ -96,12 +99,12 @@ class McpClient
     /**
      * Get the endpoint path for a given tool name
      *
-     * @param string $tool The tool name
+     * @param  string  $tool  The tool name
      * @return string|null The endpoint path or null if tool is unknown
      */
     private function getEndpointForTool(string $tool): ?string
     {
-        return match($tool) {
+        return match ($tool) {
             'get_trial_balance' => '/internal/mcp/trial-balance',
             'get_company_stats' => '/internal/mcp/company-stats',
             'search_customers' => '/internal/mcp/search-customers',
@@ -119,12 +122,12 @@ class McpClient
     /**
      * Log MCP call for monitoring and debugging
      *
-     * @param string $tool The tool name
-     * @param array<string, mixed> $params The parameters
-     * @param array<string, mixed>|null $response The response data
-     * @param int $statusCode HTTP status code
-     * @param float $duration Duration in seconds
-     * @param string|null $error Error message if any
+     * @param  string  $tool  The tool name
+     * @param  array<string, mixed>  $params  The parameters
+     * @param  array<string, mixed>|null  $response  The response data
+     * @param  int  $statusCode  HTTP status code
+     * @param  float  $duration  Duration in seconds
+     * @param  string|null  $error  Error message if any
      */
     private function logMcpCall(
         string $tool,
@@ -163,11 +166,12 @@ class McpClient
         try {
             $response = Http::withToken($this->bearerToken)
                 ->timeout(5)
-                ->get($this->mcpServerUrl . '/health');
+                ->get($this->mcpServerUrl.'/health');
 
             return $response->successful();
         } catch (\Exception $e) {
             Log::error('MCP health check failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -178,6 +182,4 @@ class McpClient
  *
  * Custom exception for MCP-related errors
  */
-class McpException extends \Exception
-{
-}
+class McpException extends \Exception {}

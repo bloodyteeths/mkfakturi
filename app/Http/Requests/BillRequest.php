@@ -82,4 +82,3 @@ class BillRequest extends FormRequest
             ->toArray();
     }
 }
-

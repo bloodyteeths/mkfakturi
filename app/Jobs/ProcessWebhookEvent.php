@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\BankTransaction;
 use App\Models\GatewayWebhookEvent;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\BankTransaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,6 +18,7 @@ class ProcessWebhookEvent implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
     public $timeout = 120;
 
     /**
@@ -25,8 +26,7 @@ class ProcessWebhookEvent implements ShouldQueue
      */
     public function __construct(
         public GatewayWebhookEvent $event
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -36,6 +36,7 @@ class ProcessWebhookEvent implements ShouldQueue
         // Check if already processed (idempotency)
         if ($this->event->status === 'processed') {
             Log::info("Webhook event {$this->event->id} already processed, skipping");
+
             return;
         }
 
@@ -101,12 +102,12 @@ class ProcessWebhookEvent implements ShouldQueue
     {
         $invoiceId = $payload['data']['custom_data']['invoice_id'] ?? null;
 
-        if (!$invoiceId) {
+        if (! $invoiceId) {
             throw new \Exception('Missing invoice_id in Paddle webhook');
         }
 
         $invoice = Invoice::find($invoiceId);
-        if (!$invoice) {
+        if (! $invoice) {
             throw new \Exception("Invoice {$invoiceId} not found");
         }
 
@@ -121,7 +122,7 @@ class ProcessWebhookEvent implements ShouldQueue
             'company_id' => $invoice->company_id,
             'amount' => $net,
             'payment_date' => now(),
-            'payment_number' => 'PADDLE-' . ($payload['data']['id'] ?? uniqid()),
+            'payment_number' => 'PADDLE-'.($payload['data']['id'] ?? uniqid()),
             'payment_method' => 'CREDIT_CARD',
             'notes' => "Paddle payment. Fee: {$fee} MKD",
         ]);
@@ -180,7 +181,7 @@ class ProcessWebhookEvent implements ShouldQueue
     {
         $orderReference = $payload['order_id'] ?? null;
 
-        if (!$orderReference) {
+        if (! $orderReference) {
             throw new \Exception('Missing order_id in CPAY webhook');
         }
 
@@ -189,7 +190,7 @@ class ProcessWebhookEvent implements ShouldQueue
             ->where('company_id', $this->event->company_id)
             ->first();
 
-        if (!$invoice) {
+        if (! $invoice) {
             throw new \Exception("Invoice with number {$orderReference} not found");
         }
 
@@ -199,7 +200,7 @@ class ProcessWebhookEvent implements ShouldQueue
             'company_id' => $invoice->company_id,
             'amount' => $payload['amount'] ?? 0,
             'payment_date' => now(),
-            'payment_number' => 'CPAY-' . ($payload['transaction_id'] ?? uniqid()),
+            'payment_number' => 'CPAY-'.($payload['transaction_id'] ?? uniqid()),
             'payment_method' => 'CREDIT_CARD',
             'transaction_reference' => $payload['transaction_id'] ?? null,
         ]);

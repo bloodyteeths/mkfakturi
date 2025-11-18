@@ -26,7 +26,7 @@ class DatabaseConfigurationController extends Controller
         \Log::info('DatabaseConfigurationController: Starting database configuration', [
             'connection' => $request->get('database_connection'),
             'database_name' => $request->get('database_name'),
-            'overwrite' => $request->get('database_overwrite')
+            'overwrite' => $request->get('database_overwrite'),
         ]);
 
         Artisan::call('config:clear');

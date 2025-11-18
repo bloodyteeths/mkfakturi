@@ -13,8 +13,6 @@ use Illuminate\Validation\Rule;
  *
  * Validates credit note creation and updates.
  * Prevents modifications if ifrs_transaction_id is set.
- *
- * @package App\Http\Requests
  */
 class CreditNoteRequest extends FormRequest
 {
@@ -219,8 +217,6 @@ class CreditNoteRequest extends FormRequest
      * Prepare credit note payload for model creation/update.
      *
      * Mirrors InvoicesRequest::getInvoicePayload() pattern.
-     *
-     * @return array
      */
     public function getCreditNotePayload(): array
     {

@@ -13,8 +13,6 @@ use DomainException;
  *
  * Usage:
  *   EntityGuard::ensureEntityExists($company);
- *
- * @package App\Domain\Guards
  */
 class EntityGuard
 {
@@ -22,23 +20,21 @@ class EntityGuard
      * Ensure that a company has an IFRS entity.
      * Throws DomainException if entity is missing.
      *
-     * @param Company $company
-     * @return void
      * @throws DomainException
      */
     public static function ensureEntityExists(Company $company): void
     {
         if (! $company->ifrs_entity_id) {
             throw new DomainException(
-                "Company '{$company->name}' (ID: {$company->id}) has no IFRS entity. " .
-                "Run MkIfrsSeeder or enable accounting features to create the entity."
+                "Company '{$company->name}' (ID: {$company->id}) has no IFRS entity. ".
+                'Run MkIfrsSeeder or enable accounting features to create the entity.'
             );
         }
 
         // Verify the entity actually exists in the database
         if (! $company->ifrsEntity()->exists()) {
             throw new DomainException(
-                "Company '{$company->name}' (ID: {$company->id}) references a non-existent IFRS entity " .
+                "Company '{$company->name}' (ID: {$company->id}) references a non-existent IFRS entity ".
                 "(Entity ID: {$company->ifrs_entity_id}). Run MkIfrsSeeder to fix."
             );
         }
@@ -46,9 +42,6 @@ class EntityGuard
 
     /**
      * Check if a company has an IFRS entity without throwing.
-     *
-     * @param Company $company
-     * @return bool
      */
     public static function hasEntity(Company $company): bool
     {
@@ -59,7 +52,6 @@ class EntityGuard
      * Ensure entity exists or return a friendly error message.
      * Use this for API responses where throwing exceptions is not desired.
      *
-     * @param Company $company
      * @return array|null Returns error array if entity missing, null if valid
      */
     public static function validateEntity(Company $company): ?array
@@ -67,8 +59,8 @@ class EntityGuard
         if (! $company->ifrs_entity_id) {
             return [
                 'error' => 'IFRS entity not configured',
-                'message' => "Company '{$company->name}' does not have an IFRS entity configured. " .
-                            "Please run the accounting setup to enable financial reporting.",
+                'message' => "Company '{$company->name}' does not have an IFRS entity configured. ".
+                            'Please run the accounting setup to enable financial reporting.',
                 'company_id' => $company->id,
                 'company_name' => $company->name,
             ];
@@ -77,8 +69,8 @@ class EntityGuard
         if (! $company->ifrsEntity()->exists()) {
             return [
                 'error' => 'IFRS entity reference invalid',
-                'message' => "Company '{$company->name}' has an invalid IFRS entity reference. " .
-                            "Please contact support or run the accounting setup.",
+                'message' => "Company '{$company->name}' has an invalid IFRS entity reference. ".
+                            'Please contact support or run the accounting setup.',
                 'company_id' => $company->id,
                 'company_name' => $company->name,
                 'entity_id' => $company->ifrs_entity_id,

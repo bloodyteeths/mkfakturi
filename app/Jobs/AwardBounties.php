@@ -2,17 +2,17 @@
 
 namespace App\Jobs;
 
-use App\Models\Partner;
-use App\Models\Company;
 use App\Models\AffiliateEvent;
+use App\Models\Company;
+use App\Models\Partner;
 use App\Services\CommissionService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AwardBounties implements ShouldQueue
 {
@@ -65,7 +65,6 @@ class AwardBounties implements ShouldQueue
     /**
      * Award accountant activation bounties
      *
-     * @param CommissionService $commissionService
      * @return int Number of bounties awarded
      */
     protected function awardAccountantBounties(CommissionService $commissionService): int
@@ -123,7 +122,6 @@ class AwardBounties implements ShouldQueue
     /**
      * Award company signup bounties
      *
-     * @param CommissionService $commissionService
      * @return int Number of bounties awarded
      */
     protected function awardCompanyBounties(CommissionService $commissionService): int
@@ -176,9 +174,6 @@ class AwardBounties implements ShouldQueue
 
     /**
      * Get count of active paying companies for a partner
-     *
-     * @param Partner $partner
-     * @return int
      */
     protected function getActivePayingCompaniesCount(Partner $partner): int
     {
@@ -195,9 +190,6 @@ class AwardBounties implements ShouldQueue
 
     /**
      * Get the first paying company brought by this partner
-     *
-     * @param Partner $partner
-     * @return Company|null
      */
     protected function getFirstPayingCompany(Partner $partner): ?Company
     {
@@ -211,7 +203,7 @@ class AwardBounties implements ShouldQueue
             ->orderBy('company_subscriptions.created_at', 'asc')
             ->value('companies.id');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return null;
         }
 

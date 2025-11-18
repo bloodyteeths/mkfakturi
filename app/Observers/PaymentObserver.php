@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Payment;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Log;
  *
  * Automatically posts payment transactions to the IFRS ledger
  * when FEATURE_ACCOUNTING_BACKBONE is enabled.
- *
- * @package App\Observers
  */
 class PaymentObserver
 {
@@ -27,9 +25,6 @@ class PaymentObserver
      * Handle the Payment "created" event.
      *
      * Post to ledger only when payment is marked as COMPLETED
-     *
-     * @param Payment $payment
-     * @return void
      */
     public function created(Payment $payment): void
     {
@@ -56,9 +51,6 @@ class PaymentObserver
      * Handle the Payment "updating" event.
      *
      * Prevent updates if the payment falls within a locked tax period.
-     *
-     * @param Payment $payment
-     * @return bool|null
      */
     public function updating(Payment $payment): ?bool
     {
@@ -74,9 +66,6 @@ class PaymentObserver
      * Handle the Payment "updated" event.
      *
      * If status changes to COMPLETED, post to ledger (idempotent).
-     *
-     * @param Payment $payment
-     * @return void
      */
     public function updated(Payment $payment): void
     {
@@ -84,7 +73,7 @@ class PaymentObserver
         if ($payment->wasChanged('gateway_status') &&
             $payment->gateway_status === Payment::GATEWAY_STATUS_COMPLETED &&
             $this->shouldPostToLedger($payment) &&
-            !$payment->ifrs_transaction_id) {
+            ! $payment->ifrs_transaction_id) {
 
             try {
                 $this->ifrsAdapter->postPayment($payment);
@@ -107,9 +96,6 @@ class PaymentObserver
      * Handle the Payment "deleting" event.
      *
      * Prevent deletion if the payment falls within a locked tax period.
-     *
-     * @param Payment $payment
-     * @return bool|null
      */
     public function deleting(Payment $payment): ?bool
     {
@@ -123,14 +109,11 @@ class PaymentObserver
 
     /**
      * Determine if payment should be posted to ledger
-     *
-     * @param Payment $payment
-     * @return bool
      */
     protected function shouldPostToLedger(Payment $payment): bool
     {
         // Check if feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return false;
         }
 
@@ -141,9 +124,6 @@ class PaymentObserver
 
     /**
      * Check if payment has a gateway fee
-     *
-     * @param Payment $payment
-     * @return bool
      */
     protected function hasGatewayFee(Payment $payment): bool
     {
@@ -162,7 +142,6 @@ class PaymentObserver
     /**
      * Calculate gateway fee from payment data
      *
-     * @param Payment $payment
      * @return float Fee amount in cents
      */
     protected function calculateGatewayFee(Payment $payment): float
@@ -188,8 +167,6 @@ class PaymentObserver
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {
@@ -204,14 +181,11 @@ class PaymentObserver
 
     /**
      * Check if payment falls within a locked tax period.
-     *
-     * @param Payment $payment
-     * @return bool
      */
     protected function isInLockedPeriod(Payment $payment): bool
     {
         // Check if tax period locking is enabled
-        if (!config('tax.period_locking_enabled', true)) {
+        if (! config('tax.period_locking_enabled', true)) {
             return false;
         }
 

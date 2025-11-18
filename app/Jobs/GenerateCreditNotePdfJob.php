@@ -13,8 +13,6 @@ use Illuminate\Queue\InteractsWithQueue;
  *
  * Background job to generate PDF for credit notes.
  * Mirrors GenerateInvoicePdfJob pattern.
- *
- * @package App\Jobs
  */
 class GenerateCreditNotePdfJob implements ShouldQueue
 {
@@ -25,13 +23,10 @@ class GenerateCreditNotePdfJob implements ShouldQueue
     public function __construct(
         public int $creditNoteId,
         public bool $deleteExistingFile = false
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
-     *
-     * @return int
      */
     public function handle(): int
     {

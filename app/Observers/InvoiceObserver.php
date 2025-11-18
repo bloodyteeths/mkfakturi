@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Invoice;
 use App\Domain\Accounting\IfrsAdapter;
+use App\Models\Invoice;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Log;
  *
  * Automatically posts invoice transactions to the IFRS ledger
  * when FEATURE_ACCOUNTING_BACKBONE is enabled.
- *
- * @package App\Observers
  */
 class InvoiceObserver
 {
@@ -28,9 +26,6 @@ class InvoiceObserver
      *
      * Post to ledger only when invoice is marked as SENT, VIEWED, or COMPLETED
      * (not for DRAFT status)
-     *
-     * @param Invoice $invoice
-     * @return void
      */
     public function created(Invoice $invoice): void
     {
@@ -52,9 +47,6 @@ class InvoiceObserver
      * Handle the Invoice "updating" event.
      *
      * Prevent updates if the invoice falls within a locked tax period.
-     *
-     * @param Invoice $invoice
-     * @return bool|null
      */
     public function updating(Invoice $invoice): ?bool
     {
@@ -71,9 +63,6 @@ class InvoiceObserver
      *
      * If status changes from DRAFT to SENT/VIEWED/COMPLETED, post to ledger.
      * We don't re-post if already posted (idempotent).
-     *
-     * @param Invoice $invoice
-     * @return void
      */
     public function updated(Invoice $invoice): void
     {
@@ -81,7 +70,7 @@ class InvoiceObserver
         if ($invoice->wasChanged('status') &&
             $invoice->getOriginal('status') === Invoice::STATUS_DRAFT &&
             $this->shouldPostToLedger($invoice) &&
-            !$invoice->ifrs_transaction_id) {
+            ! $invoice->ifrs_transaction_id) {
 
             try {
                 $this->ifrsAdapter->postInvoice($invoice);
@@ -98,9 +87,6 @@ class InvoiceObserver
      * Handle the Invoice "deleting" event.
      *
      * Prevent deletion if the invoice falls within a locked tax period.
-     *
-     * @param Invoice $invoice
-     * @return bool|null
      */
     public function deleting(Invoice $invoice): ?bool
     {
@@ -114,14 +100,11 @@ class InvoiceObserver
 
     /**
      * Determine if invoice should be posted to ledger
-     *
-     * @param Invoice $invoice
-     * @return bool
      */
     protected function shouldPostToLedger(Invoice $invoice): bool
     {
         // Check if feature is enabled
-        if (!$this->isFeatureEnabled()) {
+        if (! $this->isFeatureEnabled()) {
             return false;
         }
 
@@ -140,8 +123,6 @@ class InvoiceObserver
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isFeatureEnabled(): bool
     {
@@ -156,14 +137,11 @@ class InvoiceObserver
 
     /**
      * Check if invoice falls within a locked tax period.
-     *
-     * @param Invoice $invoice
-     * @return bool
      */
     protected function isInLockedPeriod(Invoice $invoice): bool
     {
         // Check if tax period locking is enabled
-        if (!config('tax.period_locking_enabled', true)) {
+        if (! config('tax.period_locking_enabled', true)) {
             return false;
         }
 

@@ -106,4 +106,3 @@ class ParseInvoicePdfJob implements ShouldQueue
         ]);
     }
 }
-

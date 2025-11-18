@@ -10,16 +10,11 @@ use Illuminate\Http\Request;
  * NotificationsController
  *
  * Handles user notification operations including fetching, marking as read, and clearing notifications.
- *
- * @package App\Http\Controllers\V1\Admin
  */
 class NotificationsController extends Controller
 {
     /**
      * Get all notifications for the authenticated user
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -46,10 +41,6 @@ class NotificationsController extends Controller
 
     /**
      * Mark a specific notification as read
-     *
-     * @param Request $request
-     * @param string $id
-     * @return JsonResponse
      */
     public function markAsRead(Request $request, string $id): JsonResponse
     {
@@ -57,7 +48,7 @@ class NotificationsController extends Controller
 
         $notification = $user->notifications()->find($id);
 
-        if (!$notification) {
+        if (! $notification) {
             return response()->json([
                 'error' => 'Notification not found',
             ], 404);
@@ -73,9 +64,6 @@ class NotificationsController extends Controller
 
     /**
      * Mark all notifications as read for the authenticated user
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function markAllAsRead(Request $request): JsonResponse
     {
@@ -91,10 +79,6 @@ class NotificationsController extends Controller
 
     /**
      * Delete a specific notification
-     *
-     * @param Request $request
-     * @param string $id
-     * @return JsonResponse
      */
     public function destroy(Request $request, string $id): JsonResponse
     {
@@ -102,7 +86,7 @@ class NotificationsController extends Controller
 
         $notification = $user->notifications()->find($id);
 
-        if (!$notification) {
+        if (! $notification) {
             return response()->json([
                 'error' => 'Notification not found',
             ], 404);
@@ -118,9 +102,6 @@ class NotificationsController extends Controller
 
     /**
      * Clear all notifications for the authenticated user
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function clear(Request $request): JsonResponse
     {
@@ -136,9 +117,6 @@ class NotificationsController extends Controller
 
     /**
      * Get unread notification count
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function unreadCount(Request $request): JsonResponse
     {
@@ -153,9 +131,6 @@ class NotificationsController extends Controller
 
     /**
      * Extract notification type from full class name
-     *
-     * @param string $fullType
-     * @return string
      */
     private function extractNotificationType(string $fullType): string
     {

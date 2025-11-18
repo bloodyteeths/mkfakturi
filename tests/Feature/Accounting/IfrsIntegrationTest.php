@@ -3,9 +3,9 @@
 namespace Tests\Feature\Accounting;
 
 use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Customer;
 use App\Models\User;
 use IFRS\Models\Currency;
 use IFRS\Models\Entity;
@@ -26,9 +26,13 @@ class IfrsIntegrationTest extends TestCase
     use RefreshDatabase;
 
     protected Company $company;
+
     protected User $user;
+
     protected Customer $customer;
+
     protected Currency $currency;
+
     protected Entity $entity;
 
     protected function setUp(): void

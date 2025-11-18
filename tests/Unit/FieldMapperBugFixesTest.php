@@ -18,8 +18,6 @@ use Tests\TestCase;
  * - Competitor context validation
  *
  * CLAUDE-CHECKPOINT: Comprehensive bug fix validation tests
- *
- * @package Tests\Unit
  */
 class FieldMapperBugFixesTest extends TestCase
 {
@@ -28,7 +26,7 @@ class FieldMapperBugFixesTest extends TestCase
     protected function setUp(): void
     {
         // Skip parent setup to avoid configuration issues during testing
-        $this->fieldMapper = new FieldMapperService();
+        $this->fieldMapper = new FieldMapperService;
     }
 
     /**
@@ -195,7 +193,7 @@ class FieldMapperBugFixesTest extends TestCase
             $this->assertCount(4, $mappings);
             $this->assertTrue(true); // Cache handling worked
         } catch (\Exception $e) {
-            $this->fail('Should not throw exception when cache is unavailable: ' . $e->getMessage());
+            $this->fail('Should not throw exception when cache is unavailable: '.$e->getMessage());
         }
     }
 
@@ -438,18 +436,18 @@ class FieldMapperBugFixesTest extends TestCase
         $cyrillicSamples = ['назив', 'клиент', 'купувач', 'фактура', 'количина'];
         foreach ($cyrillicSamples as $sample) {
             for ($i = 0; $i < 10; $i++) {
-                $testFields[] = $sample . '_' . $i;
+                $testFields[] = $sample.'_'.$i;
             }
         }
 
         // Add short fields
         for ($i = 0; $i < 10; $i++) {
-            $testFields[] = 'ab' . $i;
+            $testFields[] = 'ab'.$i;
         }
 
         // Add UTF-8 special char fields
         for ($i = 0; $i < 10; $i++) {
-            $testFields[] = 'field–' . $i;
+            $testFields[] = 'field–'.$i;
         }
 
         $startTime = microtime(true);

@@ -3,10 +3,10 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Partner;
 use App\Models\Company;
-use Illuminate\Http\Request;
+use App\Models\Partner;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AccountantConsoleController extends Controller
@@ -20,7 +20,7 @@ class AccountantConsoleController extends Controller
         return response()->json([
             'message' => 'Accountant Console Controller initialized',
             'user' => Auth::user()?->name,
-            'timestamp' => now()
+            'timestamp' => now(),
         ]);
     }
 
@@ -31,13 +31,13 @@ class AccountantConsoleController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Not registered as partner'], 403);
         }
 
@@ -94,18 +94,18 @@ class AccountantConsoleController extends Controller
     public function companies(): JsonResponse
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Find the partner record for this user
         $partner = Partner::where('user_id', $user->id)->first();
-        
-        if (!$partner) {
+
+        if (! $partner) {
             return response()->json([
                 'message' => 'User is not registered as a partner',
-                'companies' => []
+                'companies' => [],
             ]);
         }
 
@@ -142,7 +142,7 @@ class AccountantConsoleController extends Controller
                 'email' => $partner->email,
             ],
             'companies' => $companies,
-            'total_companies' => $companies->count()
+            'total_companies' => $companies->count(),
         ]);
     }
 
@@ -152,22 +152,22 @@ class AccountantConsoleController extends Controller
     public function switchCompany(Request $request): JsonResponse
     {
         $request->validate([
-            'company_id' => 'required|integer|exists:companies,id'
+            'company_id' => 'required|integer|exists:companies,id',
         ]);
 
         $user = Auth::user();
         $companyId = $request->input('company_id');
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Find the partner record for this user
         $partner = Partner::where('user_id', $user->id)->first();
-        
-        if (!$partner) {
+
+        if (! $partner) {
             return response()->json([
-                'error' => 'User is not registered as a partner'
+                'error' => 'User is not registered as a partner',
             ], 403);
         }
 
@@ -176,9 +176,9 @@ class AccountantConsoleController extends Controller
             ->where('companies.id', $companyId)
             ->first();
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
-                'error' => 'Partner does not have access to this company'
+                'error' => 'Partner does not have access to this company',
             ], 403);
         }
 
@@ -194,8 +194,8 @@ class AccountantConsoleController extends Controller
                 'company_id' => $companyId,
                 'permissions' => $company->pivot->permissions ?? [],
                 'commission_rate' => $effectiveRate,
-                'switched_at' => now()
-            ]
+                'switched_at' => now(),
+            ],
         ]);
 
         return response()->json([
@@ -211,8 +211,7 @@ class AccountantConsoleController extends Controller
                 'company_id' => $companyId,
                 'permissions' => $company->pivot->permissions ?? [],
                 'commission_rate' => $effectiveRate,
-            ]
+            ],
         ]);
     }
 }
-

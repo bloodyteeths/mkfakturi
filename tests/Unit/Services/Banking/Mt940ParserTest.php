@@ -2,27 +2,29 @@
 
 namespace Tests\Unit\Services\Banking;
 
-use Tests\TestCase;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Company;
 use App\Models\Currency;
 use App\Services\Banking\Mt940Parser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class Mt940ParserTest extends TestCase
 {
     use RefreshDatabase;
 
     protected Mt940Parser $parser;
+
     protected BankAccount $account;
+
     protected Company $company;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->parser = new Mt940Parser();
+        $this->parser = new Mt940Parser;
 
         $this->company = Company::factory()->create();
 
@@ -175,17 +177,15 @@ class Mt940ParserTest extends TestCase
 
     /**
      * Get sample MT940 content for testing
-     *
-     * @return string
      */
     protected function getSampleMt940(): string
     {
-        return ":20:TEST123\n" .
-            ":25:MK07290000000000001\n" .
-            ":28C:1/1\n" .
-            ":60F:C251101MKD10000,00\n" .
-            ":61:2511011101DR500,00NTRFNONREF//TEST001\n" .
-            ":86:Test Transaction\n" .
+        return ":20:TEST123\n".
+            ":25:MK07290000000000001\n".
+            ":28C:1/1\n".
+            ":60F:C251101MKD10000,00\n".
+            ":61:2511011101DR500,00NTRFNONREF//TEST001\n".
+            ":86:Test Transaction\n".
             ":62F:C251101MKD9500,00\n";
     }
 }

@@ -26,18 +26,19 @@ use Silber\Bouncer\Database\HasRolesAndAbilities;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-CHECKPOINT: Added CanUseTickets interface
+class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-CHECKPOINT: Added CanUseTickets interface
 {
-    use HasApiTokens;
+    use Billable;
     use CacheableTrait;
+    use HasApiTokens;
     use HasCustomFieldsTrait;
     use HasFactory;
     use HasRolesAndAbilities;
     use HasTickets; // CLAUDE-CHECKPOINT: Added HasTickets trait for support ticketing
-    use IFRSUser; // CLAUDE-CHECKPOINT: Added IFRSUser trait for IFRS entity relationship
+    use IFRSUser;
+    // CLAUDE-CHECKPOINT: Added IFRSUser trait for IFRS entity relationship
     use InteractsWithMedia;
-    use Notifiable;
-    use Billable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait for Partner Plus subscriptions
+    use Notifiable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait for Partner Plus subscriptions
 
     /**
      * The attributes that are mass assignable.
@@ -129,7 +130,7 @@ class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-
         // Try to get company-specific date format
         $company_id = request()->header('company');
 
-        if (!$company_id) {
+        if (! $company_id) {
             $firstCompany = $this->companies()->first();
             $company_id = $firstCompany ? $firstCompany->id : null;
         }
@@ -356,7 +357,7 @@ class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-
         if ($this->relationLoaded('companies')) {
             return $this->companies->contains('id', $company_id);
         }
-        
+
         // Fallback to query if not loaded
         return $this->companies()->where('companies.id', $company_id)->exists();
     }
@@ -391,7 +392,7 @@ class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-
         // Cache the result to avoid repeated queries
         return $this->cacheComputed('is_owner', function () {
             $companyId = request()->header('company');
-            
+
             if (Schema::hasColumn('companies', 'owner_id') && $companyId) {
                 // Try to use already loaded companies first
                 if ($this->relationLoaded('companies')) {
@@ -407,7 +408,7 @@ class User extends Authenticatable implements HasMedia, CanUseTickets // CLAUDE-
                     }
                 }
             }
-            
+
             // Fallback to role check
             return $this->role == 'super admin' || $this->role == 'admin';
         }, CacheServiceProvider::CACHE_TTLS['SHORT']);

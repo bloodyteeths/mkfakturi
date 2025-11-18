@@ -14,7 +14,6 @@ class TicketPolicy
      * Determine whether the user can view any tickets.
      * CRITICAL: Tenant isolation enforced at controller level via company_id filtering
      *
-     * @param User $user
      * @return mixed
      */
     public function viewAny(User $user): bool
@@ -27,8 +26,6 @@ class TicketPolicy
      * Determine whether the user can view the ticket.
      * CRITICAL: This is the PRIMARY tenant isolation check
      *
-     * @param User $user
-     * @param Ticket $ticket
      * @return mixed
      */
     public function view(User $user, Ticket $ticket): bool
@@ -36,12 +33,12 @@ class TicketPolicy
         // CRITICAL: Verify ticket belongs to user's current company
         $companyId = request()->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return false;
         }
 
         // User must belong to this company
-        if (!$user->hasCompany($companyId)) {
+        if (! $user->hasCompany($companyId)) {
             return false;
         }
 
@@ -56,7 +53,6 @@ class TicketPolicy
     /**
      * Determine whether the user can create tickets.
      *
-     * @param User $user
      * @return mixed
      */
     public function create(User $user): bool
@@ -64,7 +60,7 @@ class TicketPolicy
         // All authenticated users can create tickets for their company
         $companyId = request()->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return false;
         }
 
@@ -75,20 +71,18 @@ class TicketPolicy
     /**
      * Determine whether the user can update the ticket.
      *
-     * @param User $user
-     * @param Ticket $ticket
      * @return mixed
      */
     public function update(User $user, Ticket $ticket): bool
     {
         $companyId = request()->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return false;
         }
 
         // User must belong to this company
-        if (!$user->hasCompany($companyId)) {
+        if (! $user->hasCompany($companyId)) {
             return false;
         }
 
@@ -108,20 +102,18 @@ class TicketPolicy
     /**
      * Determine whether the user can delete the ticket.
      *
-     * @param User $user
-     * @param Ticket $ticket
      * @return mixed
      */
     public function delete(User $user, Ticket $ticket): bool
     {
         $companyId = request()->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return false;
         }
 
         // User must belong to this company
-        if (!$user->hasCompany($companyId)) {
+        if (! $user->hasCompany($companyId)) {
             return false;
         }
 
@@ -137,20 +129,18 @@ class TicketPolicy
     /**
      * Determine whether the user can reply to the ticket.
      *
-     * @param User $user
-     * @param Ticket $ticket
      * @return mixed
      */
     public function reply(User $user, Ticket $ticket): bool
     {
         $companyId = request()->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return false;
         }
 
         // User must belong to this company
-        if (!$user->hasCompany($companyId)) {
+        if (! $user->hasCompany($companyId)) {
             return false;
         }
 

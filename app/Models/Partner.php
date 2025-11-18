@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Partner extends Model
 {
-    use HasFactory;
     use \App\Traits\CachesPermissions;
+    use HasFactory;
 
     protected $fillable = [
         'name',
@@ -26,12 +26,12 @@ class Partner extends Model
         'is_active',
         'kyc_status',
         'user_id',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'commission_rate' => 'decimal:2'
+        'commission_rate' => 'decimal:2',
     ];
 
     /**
@@ -56,15 +56,15 @@ class Partner extends Model
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'partner_company_links')
-                    ->using(PartnerCompany::class)
-                    ->withPivot([
-                        'id',
-                        'is_primary',
-                        'override_commission_rate',
-                        'permissions',
-                        'is_active'
-                    ])
-                    ->withTimestamps();
+            ->using(PartnerCompany::class)
+            ->withPivot([
+                'id',
+                'is_primary',
+                'override_commission_rate',
+                'permissions',
+                'is_active',
+            ])
+            ->withTimestamps();
     }
 
     /**
@@ -188,10 +188,6 @@ class Partner extends Model
 
     /**
      * Check if partner has specific permission for a company (AC-13)
-     *
-     * @param int $companyId
-     * @param \App\Enums\PartnerPermission $permission
-     * @return bool
      */
     public function hasPermission(int $companyId, \App\Enums\PartnerPermission $permission): bool
     {
@@ -212,9 +208,7 @@ class Partner extends Model
     /**
      * Check if partner has any of the specified permissions for a company
      *
-     * @param int $companyId
-     * @param array<\App\Enums\PartnerPermission> $permissions
-     * @return bool
+     * @param  array<\App\Enums\PartnerPermission>  $permissions
      */
     public function hasAnyPermission(int $companyId, array $permissions): bool
     {
@@ -230,14 +224,12 @@ class Partner extends Model
     /**
      * Check if partner has all of the specified permissions for a company
      *
-     * @param int $companyId
-     * @param array<\App\Enums\PartnerPermission> $permissions
-     * @return bool
+     * @param  array<\App\Enums\PartnerPermission>  $permissions
      */
     public function hasAllPermissions(int $companyId, array $permissions): bool
     {
         foreach ($permissions as $permission) {
-            if (!$this->hasPermission($companyId, $permission)) {
+            if (! $this->hasPermission($companyId, $permission)) {
                 return false;
             }
         }

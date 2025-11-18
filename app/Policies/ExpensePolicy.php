@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Expense;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class ExpensePolicy
 {
@@ -21,7 +20,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-expense', Expense::class)) {
             return true;
         }
@@ -39,7 +38,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
@@ -57,7 +56,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-expense', Expense::class)) {
             return true;
         }
@@ -75,7 +74,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
@@ -93,7 +92,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
@@ -111,7 +110,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
@@ -129,7 +128,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
@@ -147,7 +146,7 @@ class ExpensePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-expense', Expense::class)) {
             return true;
         }

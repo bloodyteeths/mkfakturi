@@ -27,7 +27,7 @@ class Item extends Model
      */
     protected $with = [
         'unit:id,name',
-        'currency:id,name,code,symbol'
+        'currency:id,name,code,symbol',
     ];
 
     protected function casts(): array

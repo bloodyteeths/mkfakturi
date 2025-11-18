@@ -42,22 +42,16 @@ class BackfillTaxReturnsJob implements ShouldQueue
 
     /**
      * The company ID to backfill (null = all companies)
-     *
-     * @var int|null
      */
     protected ?int $companyId;
 
     /**
      * Dry run mode (log only, don't create records)
-     *
-     * @var bool
      */
     protected bool $dryRun;
 
     /**
      * Storage paths to scan for DDV XML files
-     *
-     * @var array
      */
     protected array $scanPaths = [
         'tax/ddv',
@@ -75,8 +69,8 @@ class BackfillTaxReturnsJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param int|null $companyId Company to backfill (null = all companies)
-     * @param bool $dryRun If true, only log what would be done
+     * @param  int|null  $companyId  Company to backfill (null = all companies)
+     * @param  bool  $dryRun  If true, only log what would be done
      */
     public function __construct(?int $companyId = null, bool $dryRun = false)
     {
@@ -86,8 +80,6 @@ class BackfillTaxReturnsJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -114,7 +106,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
                 $totalReturns += $result['returns'];
                 $totalSkipped += $result['skipped'];
 
-                if (!empty($result['errors'])) {
+                if (! empty($result['errors'])) {
                     $errors = array_merge($errors, $result['errors']);
                 }
             } catch (\Exception $e) {
@@ -142,7 +134,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
                     $totalReturns += $result['returns'];
                     $totalSkipped += $result['skipped'];
 
-                    if (!empty($result['errors'])) {
+                    if (! empty($result['errors'])) {
                         $errors = array_merge($errors, $result['errors']);
                     }
                 }
@@ -167,7 +159,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
     /**
      * Scan a storage path for DDV XML files
      *
-     * @param string $path Storage path to scan
+     * @param  string  $path  Storage path to scan
      * @return array Result statistics
      */
     protected function scanPath(string $path): array
@@ -183,7 +175,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
         $errors = [];
 
         // Check if path exists
-        if (!Storage::exists($path)) {
+        if (! Storage::exists($path)) {
             Log::info("$mode Path does not exist, skipping", ['path' => $path]);
 
             return [
@@ -244,7 +236,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
     /**
      * Process a single DDV XML file
      *
-     * @param string $filePath Storage file path
+     * @param  string  $filePath  Storage file path
      * @return array Result with 'created' and 'period_created' flags
      */
     protected function processXmlFile(string $filePath): array
@@ -364,8 +356,8 @@ class BackfillTaxReturnsJob implements ShouldQueue
     /**
      * Parse DDV XML file to extract period and submission data
      *
-     * @param string $xmlContent XML file content
-     * @param string $filePath File path for logging
+     * @param  string  $xmlContent  XML file content
+     * @param  string  $filePath  File path for logging
      * @return array|null Parsed data or null if failed
      */
     protected function parseXml(string $xmlContent, string $filePath): ?array
@@ -445,7 +437,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
 
             // Fallback: try to extract from filename
             // Pattern: ddv_2024_03.xml or vat_2024_q1.xml
-            if (!$year || (!$month && !$quarter)) {
+            if (! $year || (! $month && ! $quarter)) {
                 if (preg_match('/(\d{4})[_-](\d{1,2})/', basename($filePath), $matches)) {
                     $year = $year ?? (int) $matches[1];
                     $month = $month ?? (int) $matches[2];
@@ -456,7 +448,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
             }
 
             // Validation: we need at least year and (month or quarter) and company_id
-            if (!$year || (!$month && !$quarter) || !$companyId) {
+            if (! $year || (! $month && ! $quarter) || ! $companyId) {
                 Log::warning('XML missing required period information', [
                     'file' => $filePath,
                     'year' => $year,
@@ -524,8 +516,7 @@ class BackfillTaxReturnsJob implements ShouldQueue
     /**
      * Get or create tax report period
      *
-     * @param array $data Period data from parsed XML
-     * @return TaxReportPeriod
+     * @param  array  $data  Period data from parsed XML
      */
     protected function getOrCreatePeriod(array $data): TaxReportPeriod
     {
@@ -575,9 +566,6 @@ class BackfillTaxReturnsJob implements ShouldQueue
 
     /**
      * Handle job failure
-     *
-     * @param \Throwable $exception
-     * @return void
      */
     public function failed(\Throwable $exception): void
     {

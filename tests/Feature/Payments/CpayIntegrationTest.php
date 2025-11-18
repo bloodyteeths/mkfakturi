@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\PaymentMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -31,8 +30,11 @@ class CpayIntegrationTest extends TestCase
     use RefreshDatabase;
 
     protected Company $company;
+
     protected Customer $customer;
+
     protected Invoice $invoice;
+
     protected CpayDriver $cpayDriver;
 
     /**
@@ -78,7 +80,7 @@ class CpayIntegrationTest extends TestCase
         ]);
 
         // Initialize CPAY driver
-        $this->cpayDriver = new CpayDriver();
+        $this->cpayDriver = new CpayDriver;
     }
 
     /**
@@ -361,9 +363,6 @@ class CpayIntegrationTest extends TestCase
      *
      * This replicates the signature generation logic from CpayDriver
      * Note: Excludes 'timestamp' field as per existing driver logic
-     *
-     * @param array $data
-     * @return string
      */
     protected function generateTestSignature(array $data): string
     {
@@ -375,7 +374,7 @@ class CpayIntegrationTest extends TestCase
         ksort($signatureData);
 
         // Build signature string with pipe delimiter (as per existing driver)
-        $signatureString = implode('|', $signatureData) . '|' . 'test_secret_key_456';
+        $signatureString = implode('|', $signatureData).'|'.'test_secret_key_456';
 
         // Generate SHA256 hash
         return hash('sha256', $signatureString);

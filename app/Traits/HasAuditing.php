@@ -14,16 +14,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  *
  * Usage: Add to any model that needs audit logging:
  *   use HasAuditing;
- *
- * @package App\Traits
  */
 trait HasAuditing
 {
     /**
      * Boot the HasAuditing trait.
      * Registers the AuditObserver to listen for model events.
-     *
-     * @return void
      */
     protected static function bootHasAuditing(): void
     {
@@ -32,8 +28,6 @@ trait HasAuditing
 
     /**
      * Get all audit logs for this model.
-     *
-     * @return MorphMany
      */
     public function auditLogs(): MorphMany
     {
@@ -74,8 +68,6 @@ trait HasAuditing
     /**
      * Automatically set created_by and updated_by when saving.
      * This method is called by model events in AuditObserver.
-     *
-     * @return void
      */
     public function setAuditUser(): void
     {
@@ -99,8 +91,6 @@ trait HasAuditing
     /**
      * Get fields that should be excluded from audit logging.
      * Override this method in your model to customize.
-     *
-     * @return array
      */
     public function getAuditExclude(): array
     {
@@ -110,9 +100,6 @@ trait HasAuditing
     /**
      * Determine if a field should be encrypted in audit logs.
      * Override this method in your model to customize.
-     *
-     * @param string $field
-     * @return bool
      */
     public function shouldEncryptAuditField(string $field): bool
     {

@@ -1,62 +1,156 @@
-[2025-11-13 17:27:07] production.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'where clause' (Connection: mysql, SQL: update `users` set `company_id` = 1 where `role` = super admin and `company_id` is null) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'where clause' (Connection: mysql, SQL: update `users` set `company_id` = 1 where `role` = super admin and `company_id` is null) at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#26 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#28 /var/www/html/vendor/spatie/laravel-backup/src/Commands/BaseCommand.php(29): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/html/vendor/symfony/console/Application.php(1094): Spatie\\Backup\\Commands\\BaseCommand->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Spatie\\Backup\\Commands\\MonitorCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#34 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#35 {main}
+"} 
+[2025-11-18 07:00:18] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 07:00:18] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 08:00:18] production.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'expires_at' in 'where clause' (Connection: mysql, SQL: select * from `certificates` where `expires_at` <= 2025-12-18 08:00:18 and `expires_at` > 2025-11-18 08:00:18) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'expires_at' in 'where clause' (Connection: mysql, SQL: select * from `certificates` where `expires_at` <= 2025-12-18 08:00:18 and `expires_at` > 2025-11-18 08:00:18) at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
 [stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('update `users` ...', Array, Object(Closure))
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(581): Illuminate\\Database\\Connection->run('update `users` ...', Array, Object(Closure))
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(533): Illuminate\\Database\\Connection->affectingStatement('update `users` ...', Array)
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3843): Illuminate\\Database\\Connection->update('update `users` ...', Array)
-#4 /var/www/html/database/migrations/2025_11_13_000000_assign_super_admin_to_company.php(20): Illuminate\\Database\\Query\\Builder->update(Object(Illuminate\\Support\\Collection))
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
-#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_11_13_0000...', Object(Closure))
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_11_13_0000...', Object(Closure))
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 25, false)
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
-#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
-#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
-#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
-#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
-#24 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#26 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#27 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#28 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#31 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#32 {main}
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(395): Illuminate\\Database\\Connection->run('select * from `...', Array, Object(Closure))
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3117): Illuminate\\Database\\Connection->select('select * from `...', Array, true)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3102): Illuminate\\Database\\Query\\Builder->runSelect()
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3689): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3101): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#6 /var/www/html/app/Console/Commands/CheckCertificateExpiry.php(50): Illuminate\\Database\\Query\\Builder->get()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): App\\Console\\Commands\\CheckCertificateExpiry->handle()
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#13 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#15 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#16 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(App\\Console\\Commands\\CheckCertificateExpiry), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#17 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#20 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#21 {main}
 
-[previous exception] [object] (PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'company_id' in 'where clause' at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:589)
+[previous exception] [object] (PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'expires_at' in 'where clause' at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:404)
 [stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(589): PDO->prepare('update `users` ...')
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('update `users` ...', Array)
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('update `users` ...', Array, Object(Closure))
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(581): Illuminate\\Database\\Connection->run('update `users` ...', Array, Object(Closure))
-#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(533): Illuminate\\Database\\Connection->affectingStatement('update `users` ...', Array)
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3843): Illuminate\\Database\\Connection->update('update `users` ...', Array)
-#6 /var/www/html/database/migrations/2025_11_13_000000_assign_super_admin_to_company.php(20): Illuminate\\Database\\Query\\Builder->update(Object(Illuminate\\Support\\Collection))
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_11_13_0000...', Object(Closure))
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_11_13_0000...', Object(Closure))
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 25, false)
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
-#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(404): PDO->prepare('select * from `...')
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('select * from `...', Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(395): Illuminate\\Database\\Connection->run('select * from `...', Array, Object(Closure))
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3117): Illuminate\\Database\\Connection->select('select * from `...', Array, true)
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3102): Illuminate\\Database\\Query\\Builder->runSelect()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3689): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3101): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#8 /var/www/html/app/Console/Commands/CheckCertificateExpiry.php(50): Illuminate\\Database\\Query\\Builder->get()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): App\\Console\\Commands\\CheckCertificateExpiry->handle()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#15 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#17 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(App\\Console\\Commands\\CheckCertificateExpiry), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#19 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#22 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#23 {main}
+"} 
+[2025-11-18 08:00:18] production.ERROR: Symfony\Component\Mailer\Transport\Dsn::__construct(): Argument #5 ($port) must be of type ?int, string given, called in /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php on line 199 {"exception":"[object] (TypeError(code: 0): Symfony\\Component\\Mailer\\Transport\\Dsn::__construct(): Argument #5 ($port) must be of type ?int, string given, called in /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php on line 199 at /var/www/html/vendor/symfony/mailer/Transport/Dsn.php:21)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(199): Symfony\\Component\\Mailer\\Transport\\Dsn->__construct('smtp', '', '', Object(SensitiveParameterValue), '', Array)
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(180): Illuminate\\Mail\\MailManager->createSmtpTransport(Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(145): Illuminate\\Mail\\MailManager->createSymfonyTransport(Array)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(122): Illuminate\\Mail\\MailManager->build(Array)
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(100): Illuminate\\Mail\\MailManager->resolve('smtp')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(78): Illuminate\\Mail\\MailManager->get('smtp')
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailServiceProvider.php(33): Illuminate\\Mail\\MailManager->mailer()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(1010): Illuminate\\Mail\\MailServiceProvider->Illuminate\\Mail\\{closure}(Object(Illuminate\\Foundation\\Application), Array)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(890): Illuminate\\Container\\Container->build(Object(Closure))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1077): Illuminate\\Container\\Container->resolve('mailer', Array, true)
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(821): Illuminate\\Foundation\\Application->resolve('mailer', Array)
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1057): Illuminate\\Container\\Container->make('mailer', Array)
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(191): Illuminate\\Foundation\\Application->make('mailer')
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(127): Illuminate\\Container\\BoundMethod::addDependencyForCallParameter(Object(Illuminate\\Foundation\\Application), Object(ReflectionParameter), Array, Array)
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Container\\BoundMethod::getMethodDependencies(Object(Illuminate\\Foundation\\Application), Object(Closure), Array)
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(84): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Object(Closure), Object(Closure))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Object(Closure), Array, NULL)
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/Event.php(713): Illuminate\\Container\\Container->call(Object(Closure))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Console\\Scheduling\\Event->Illuminate\\Console\\Scheduling\\{closure}(Object(Illuminate\\Foundation\\Application))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(84): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Object(Closure), Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Object(Closure), Array, NULL)
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/Event.php(249): Illuminate\\Container\\Container->call(Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/Event.php(221): Illuminate\\Console\\Scheduling\\Event->callAfterCallbacks(Object(Illuminate\\Foundation\\Application))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/Event.php(136): Illuminate\\Console\\Scheduling\\Event->finish(Object(Illuminate\\Foundation\\Application), 1)
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/ScheduleRunCommand.php(192): Illuminate\\Console\\Scheduling\\Event->run(Object(Illuminate\\Foundation\\Application))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Console\\Scheduling\\ScheduleRunCommand->Illuminate\\Console\\Scheduling\\{closure}()
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Factory.php(59): Illuminate\\Console\\View\\Components\\Task->render('<fg=gray>2025-1...', Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/ScheduleRunCommand.php(186): Illuminate\\Console\\View\\Components\\Factory->__call('task', Array)
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Scheduling/ScheduleRunCommand.php(131): Illuminate\\Console\\Scheduling\\ScheduleRunCommand->runEvent(Object(Illuminate\\Console\\Scheduling\\Event))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Console\\Scheduling\\ScheduleRunCommand->handle(Object(Illuminate\\Console\\Scheduling\\Schedule), Object(Illuminate\\Events\\Dispatcher), Object(Illuminate\\Cache\\Repository), Object(Illuminate\\Foundation\\Exceptions\\Handler))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#39 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#41 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#42 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Console\\Scheduling\\ScheduleRunCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#43 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#46 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#47 {main}
+"} 
+[2025-11-18 08:00:19] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 08:00:19] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 09:00:18] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 09:00:18] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 10:00:19] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 10:00:19] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 11:00:19] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 11:00:19] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 12:00:19] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 12:00:19] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 12:00:19] production.ERROR: Symfony\Component\Mailer\Transport\Dsn::__construct(): Argument #5 ($port) must be of type ?int, string given, called in /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php on line 199 {"exception":"[object] (TypeError(code: 0): Symfony\\Component\\Mailer\\Transport\\Dsn::__construct(): Argument #5 ($port) must be of type ?int, string given, called in /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php on line 199 at /var/www/html/vendor/symfony/mailer/Transport/Dsn.php:21)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(199): Symfony\\Component\\Mailer\\Transport\\Dsn->__construct('smtp', '', '', Object(SensitiveParameterValue), '', Array)
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(180): Illuminate\\Mail\\MailManager->createSmtpTransport(Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(145): Illuminate\\Mail\\MailManager->createSymfonyTransport(Array)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(122): Illuminate\\Mail\\MailManager->build(Array)
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(100): Illuminate\\Mail\\MailManager->resolve('smtp')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/MailManager.php(78): Illuminate\\Mail\\MailManager->get('smtp')
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/Channels/MailChannel.php(66): Illuminate\\Mail\\MailManager->mailer('smtp')
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/NotificationSender.php(159): Illuminate\\Notifications\\Channels\\MailChannel->send(Object(Spatie\\Backup\\Notifications\\Notifiable), Object(Spatie\\Backup\\Notifications\\Notifications\\UnhealthyBackupWasFoundNotification))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/NotificationSender.php(116): Illuminate\\Notifications\\NotificationSender->sendToNotifiable(Object(Spatie\\Backup\\Notifications\\Notifiable), '89fd48c5-bce1-4...', Object(Spatie\\Backup\\Notifications\\Notifications\\UnhealthyBackupWasFoundNotification), 'mail')
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Traits/Localizable.php(19): Illuminate\\Notifications\\NotificationSender->Illuminate\\Notifications\\{closure}()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/NotificationSender.php(111): Illuminate\\Notifications\\NotificationSender->withLocale(NULL, Object(Closure))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/NotificationSender.php(89): Illuminate\\Notifications\\NotificationSender->sendNow(Array, Object(Spatie\\Backup\\Notifications\\Notifications\\UnhealthyBackupWasFoundNotification))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/ChannelManager.php(39): Illuminate\\Notifications\\NotificationSender->send(Array, Object(Spatie\\Backup\\Notifications\\Notifications\\UnhealthyBackupWasFoundNotification))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Notifications/RoutesNotifications.php(18): Illuminate\\Notifications\\ChannelManager->send(Object(Spatie\\Backup\\Notifications\\Notifiable), Object(Spatie\\Backup\\Notifications\\Notifications\\UnhealthyBackupWasFoundNotification))
+#14 /var/www/html/vendor/spatie/laravel-backup/src/Notifications/EventHandler.php(29): Spatie\\Backup\\Notifications\\Notifiable->notify(Object(Spatie\\Backup\\Notifications\\Notifications\\UnhealthyBackupWasFoundNotification))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Events/Dispatcher.php(459): Spatie\\Backup\\Notifications\\EventHandler->Spatie\\Backup\\Notifications\\{closure}(Object(Spatie\\Backup\\Events\\UnhealthyBackupWasFound))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Events/Dispatcher.php(286): Illuminate\\Events\\Dispatcher->Illuminate\\Events\\{closure}('Spatie\\\\Backup\\\\E...', Array)
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Events/Dispatcher.php(266): Illuminate\\Events\\Dispatcher->invokeListeners('Spatie\\\\Backup\\\\E...', Array, false)
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(476): Illuminate\\Events\\Dispatcher->dispatch('Spatie\\\\Backup\\\\E...')
+#19 /var/www/html/vendor/spatie/laravel-backup/src/Commands/MonitorCommand.php(40): event(Object(Spatie\\Backup\\Events\\UnhealthyBackupWasFound))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Spatie\\Backup\\Commands\\MonitorCommand->handle()
 #21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
 #22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
 #23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
@@ -64,25 +158,43 @@
 #25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
 #26 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
 #27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
-#28 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#29 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#30 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#33 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#34 {main}
+#28 /var/www/html/vendor/spatie/laravel-backup/src/Commands/BaseCommand.php(29): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/html/vendor/symfony/console/Application.php(1094): Spatie\\Backup\\Commands\\BaseCommand->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Spatie\\Backup\\Commands\\MonitorCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#34 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#35 {main}
 "} 
-[2025-11-13 17:28:41] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 17:28:41] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 17:28:41] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-13 17:28:41] production.WARNING: Slow operation detected {"operation":"req_69161548a70f7","execution_time_ms":635.49,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
-[2025-11-13 17:28:41] production.WARNING: Slow request detected {"operation":"req_69161548a70f7","execution_time_ms":635.49,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://www.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-13 17:28:49] production.INFO: [ImportController] Upload started {"has_file":true,"type":"invoices","user_id":2} 
-[2025-11-13 17:28:49] production.INFO: [ImportController] User and company loaded {"user_id":2,"company_id":"2"} 
-[2025-11-13 17:28:49] production.INFO: [ImportController] Storing file {"filename":"a1b23ee4-fc64-47db-ab50-245395b2e363.csv","original_name":"07_happy_path_invoices.csv","size":789} 
-[2025-11-13 17:28:49] production.INFO: [ImportController] File stored successfully {"path":"imports/2/a1b23ee4-fc64-47db-ab50-245395b2e363.csv"} 
-[2025-11-13 17:28:49] production.INFO: [ImportController] ImportJob created {"id":20} 
-[2025-11-13 17:28:49] production.INFO: [ImportController] Upload completed successfully {"import_id":20,"response_data":{"id":20,"name":"Import from 07_happy_path_invoices.csv","type":"invoices","status":"pending","source_system":null,"file_type":"csv","file_info":{"size":789,"mime_type":"text/csv","original_name":"07_happy_path_invoices.csv"},"file_path":"imports/2/a1b23ee4-fc64-47db-ab50-245395b2e363.csv","mapping_config":null,"validation_rules":null,"total_records":0,"processed_records":0,"successful_records":0,"failed_records":0,"started_at":null,"completed_at":null,"error_message":null,"error_details":null,"summary":null,"company_id":2,"creator_id":2,"created_at":"2025-11-13T17:28:49.000000Z","updated_at":"2025-11-13T17:28:49.000000Z","formattedCreatedAt":"13.11.2025","formattedStartedAt":null,"formattedCompletedAt":null,"progressPercentage":0,"duration":null,"isInProgress":false,"canRetry":false}} 
-[2025-11-13 17:28:58] production.INFO: [ImportController] show() - detecting fields {"import_id":"20","file_path":"imports/2/a1b23ee4-fc64-47db-ab50-245395b2e363.csv"} 
-[2025-11-13 17:28:58] production.INFO: [ImportController] File path constructed {"file_path":"/var/www/html/storage/app/imports/2/a1b23ee4-fc64-47db-ab50-245395b2e363.csv","exists":true} 
-[2025-11-13 17:28:58] production.INFO: [ImportController] Fields detected successfully {"count":10,"field_names":["invoice_number","customer_name","invoice_date","due_date","total","subtotal","tax","status","currency","notes"],"suggestions":{"invoice_number":"invoice_number","customer_name":"customer_name","invoice_date":"invoice_date","due_date":"due_date","total":"total","subtotal":"subtotal","tax":"tax","status":"status","currency":"currency","notes":"notes"},"confidence":1.0} 
+[2025-11-18 13:00:19] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-18 13:00:19] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-18 13:22:28] production.INFO: Login attempt {"email":"partner@demo.mk","has_password":true,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-18 13:22:29] production.INFO: Login successful {"email":"partner@demo.mk"} 
+[2025-11-18 13:22:29] production.WARNING: Slow operation detected {"operation":"req_691c7314ab0bb","execution_time_ms":332.35,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-11-18 13:22:29] production.WARNING: Slow request detected {"operation":"req_691c7314ab0bb","execution_time_ms":332.35,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"POST","url":"https://app.facturino.mk/api/v1/auth/login","route":null,"user_id":4,"company_id":null,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":302} 
+[2025-11-18 13:22:29] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"YA6ux2atgccWz0rExgj4izeNdoBzDh9BYoL5iJq1","has_session_cookie":true} 
+[2025-11-18 13:22:29] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"YA6ux2atgccWz0rExgj4izeNdoBzDh9BYoL5iJq1","has_company_header":false,"company_header":null} 
+[2025-11-18 13:22:29] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:22:29] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"YA6ux2atgccWz0rExgj4izeNdoBzDh9BYoL5iJq1","has_session_cookie":true} 
+[2025-11-18 13:22:29] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:22:38] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"YA6ux2atgccWz0rExgj4izeNdoBzDh9BYoL5iJq1","has_session_cookie":true} 
+[2025-11-18 13:22:38] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"YA6ux2atgccWz0rExgj4izeNdoBzDh9BYoL5iJq1","has_company_header":false,"company_header":null} 
+[2025-11-18 13:22:38] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:22:38] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"YA6ux2atgccWz0rExgj4izeNdoBzDh9BYoL5iJq1","has_session_cookie":true} 
+[2025-11-18 13:22:38] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:27:51] production.INFO: Login attempt {"email":"partner@demo.mk","has_password":true,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-18 13:27:51] production.INFO: Login successful {"email":"partner@demo.mk"} 
+[2025-11-18 13:27:52] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_session_cookie":true} 
+[2025-11-18 13:27:52] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_company_header":false,"company_header":null} 
+[2025-11-18 13:27:52] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:27:52] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_session_cookie":true} 
+[2025-11-18 13:27:52] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:27:58] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_session_cookie":true} 
+[2025-11-18 13:27:58] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_company_header":false,"company_header":null} 
+[2025-11-18 13:27:58] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:27:58] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_session_cookie":true} 
+[2025-11-18 13:27:58] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-18 13:27:58] production.WARNING: Slow operation detected {"operation":"req_691c745e88f14","execution_time_ms":323.57,"memory_used_bytes":12582912,"memory_used_mb":12.0} 
+[2025-11-18 13:27:58] production.WARNING: Slow request detected {"operation":"req_691c745e88f14","execution_time_ms":323.57,"memory_used_bytes":12582912,"memory_used_mb":12.0,"method":"GET","url":"https://app.facturino.mk/api/v1/console/companies","route":null,"user_id":4,"company_id":null,"ip":"77.28.26.107","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-18 13:28:58] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":4,"session_id":"Hc7zM8zu0XdTTIPwcuIBr3spELXYNCN9cqXKolLk","has_session_cookie":true} 

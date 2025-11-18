@@ -33,9 +33,13 @@ class BankConnection extends Model
 
     // Status constants
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_REVOKED = 'revoked';
+
     public const STATUS_ERROR = 'error';
 
     protected $fillable = [
@@ -136,7 +140,7 @@ class BankConnection extends Model
      */
     public function isExpired(): bool
     {
-        if (!$this->expires_at) {
+        if (! $this->expires_at) {
             return false;
         }
 
@@ -148,7 +152,7 @@ class BankConnection extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === self::STATUS_ACTIVE && !$this->isExpired();
+        return $this->status === self::STATUS_ACTIVE && ! $this->isExpired();
     }
 
     /**

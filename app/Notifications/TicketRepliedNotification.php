@@ -14,7 +14,9 @@ class TicketRepliedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected Ticket $ticket;
+
     protected Message $message;
+
     protected bool $isAgentReply;
 
     /**

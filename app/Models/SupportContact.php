@@ -108,7 +108,7 @@ class SupportContact extends Model
      */
     public function getReferenceNumberAttribute(): string
     {
-        return 'SUP-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        return 'SUP-'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 
     /**

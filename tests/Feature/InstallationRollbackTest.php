@@ -2,17 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\Company;
 use App\Models\Setting;
 use App\Models\User;
-use App\Models\Company;
 use App\Space\InstallUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -27,7 +25,7 @@ class InstallationRollbackTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Ensure clean state for rollback testing
         $this->clearInstallationMarkers();
     }
@@ -66,10 +64,10 @@ class InstallationRollbackTest extends TestCase
 
         // Should return error response
         $this->assertNotEquals(200, $response->status(), 'Invalid database config should fail');
-        
+
         // Verify no installation marker was created
         $this->assertFalse(InstallUtils::dbMarkerExists(), 'DB marker should not exist after failed connection');
-        
+
         // Verify installation is still incomplete
         $this->assertEquals(0, Setting::getSetting('profile_complete', 0), 'Installation should remain incomplete');
     }
@@ -81,21 +79,21 @@ class InstallationRollbackTest extends TestCase
     {
         // Create a temporary migration that will fail
         $this->createFailingMigration();
-        
+
         try {
             // Attempt to run migrations (this should fail)
             Artisan::call('migrate', ['--force' => true]);
-            
+
             // If we get here, the migration didn't fail as expected
             $this->markTestSkipped('Test migration did not fail as expected');
         } catch (\Exception $e) {
             // Expected behavior - migration failed
             $this->assertStringContains('syntax error', strtolower($e->getMessage()), 'Should fail with syntax error');
         }
-        
+
         // Verify rollback occurred
         $this->assertFalse(InstallUtils::dbMarkerExists(), 'DB marker should not exist after failed migration');
-        
+
         // Clean up the failing migration
         $this->removeFailingMigration();
     }
@@ -107,36 +105,36 @@ class InstallationRollbackTest extends TestCase
     {
         // Temporarily make storage directory read-only (if possible)
         $testDir = storage_path('app/test_readonly');
-        
-        if (!file_exists($testDir)) {
+
+        if (! file_exists($testDir)) {
             mkdir($testDir, 0755, true);
         }
-        
+
         // Try to make it read-only
         chmod($testDir, 0444);
-        
+
         // Test file permission check
         $response = $this->getJson('/api/v1/installation/permissions');
-        
+
         // Should detect permission issues
         $this->assertEquals(200, $response->status(), 'Permissions endpoint should respond');
-        
+
         $permissions = $response->json();
         $hasPermissionIssues = false;
-        
+
         if (isset($permissions['permissions'])) {
             foreach ($permissions['permissions'] as $permission) {
-                if (!$permission['isWritable']) {
+                if (! $permission['isWritable']) {
                     $hasPermissionIssues = true;
                     break;
                 }
             }
         }
-        
+
         // Clean up
         chmod($testDir, 0755);
         rmdir($testDir);
-        
+
         // Verify installation would be blocked by permission issues
         if ($hasPermissionIssues) {
             $this->assertTrue(true, 'Permission issues detected correctly');
@@ -152,14 +150,14 @@ class InstallationRollbackTest extends TestCase
     {
         // Create partial installation state
         $this->createPartialInstallationState();
-        
+
         // Verify partial state exists
         $this->assertTrue(Setting::getSetting('profile_complete') !== 'COMPLETED', 'Installation should be incomplete');
         $this->assertDatabaseHas('settings', ['option' => 'profile_language']);
-        
+
         // Simulate installation reset/cleanup
         $this->performInstallationCleanup();
-        
+
         // Verify cleanup was successful
         $this->assertFalse(InstallUtils::dbMarkerExists(), 'DB marker should be removed');
         $this->assertEquals(0, Setting::getSetting('profile_complete', 0), 'Profile should be reset');
@@ -180,10 +178,10 @@ class InstallationRollbackTest extends TestCase
 
         // Should fail validation
         $this->assertEquals(422, $response->status(), 'User creation should fail validation');
-        
+
         // Verify no user was created
         $this->assertEquals(0, User::count(), 'No users should be created after failed validation');
-        
+
         // Verify installation remains incomplete
         $this->assertFalse(InstallUtils::dbMarkerExists(), 'Installation should remain incomplete');
     }
@@ -198,9 +196,9 @@ class InstallationRollbackTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-        
+
         $this->actingAs($user, 'sanctum');
-        
+
         // Attempt to create company with invalid data
         $response = $this->postJson('/api/v1/companies', [
             'name' => '', // Empty name should fail
@@ -210,7 +208,7 @@ class InstallationRollbackTest extends TestCase
 
         // Should fail validation
         $this->assertNotEquals(200, $response->status(), 'Company creation should fail validation');
-        
+
         // Verify no company was created
         $this->assertEquals(0, Company::count(), 'No companies should be created after failed validation');
     }
@@ -226,19 +224,19 @@ class InstallationRollbackTest extends TestCase
             'installation_test_2.txt',
             'installation_backup.sql',
         ];
-        
+
         foreach ($testFiles as $file) {
             Storage::disk('local')->put($file, 'test content for rollback');
         }
-        
+
         // Verify files exist
         foreach ($testFiles as $file) {
             $this->assertTrue(Storage::disk('local')->exists($file), "Test file {$file} should exist");
         }
-        
+
         // Simulate installation failure and cleanup
         $this->performStorageCleanup($testFiles);
-        
+
         // Verify files were cleaned up
         foreach ($testFiles as $file) {
             $this->assertFalse(Storage::disk('local')->exists($file), "Test file {$file} should be cleaned up");
@@ -257,19 +255,19 @@ class InstallationRollbackTest extends TestCase
             'profile_language' => 'en',
             'profile_complete' => 'STEP_3',
         ];
-        
+
         foreach ($testSettings as $key => $value) {
             Setting::setSetting($key, $value);
         }
-        
+
         // Verify settings exist
         foreach ($testSettings as $key => $value) {
             $this->assertEquals($value, Setting::getSetting($key), "Setting {$key} should exist");
         }
-        
+
         // Perform rollback
         $this->performSettingsCleanup();
-        
+
         // Verify test settings were cleaned up
         $this->assertNull(Setting::getSetting('test_setting_1'), 'Test setting 1 should be cleaned up');
         $this->assertNull(Setting::getSetting('test_setting_2'), 'Test setting 2 should be cleaned up');
@@ -282,27 +280,26 @@ class InstallationRollbackTest extends TestCase
     public function test_database_transaction_rollback()
     {
         DB::beginTransaction();
-        
+
         try {
             // Create some test data
             $user = User::factory()->create(['name' => 'Test User']);
             $company = Company::factory()->create(['name' => 'Test Company']);
-            
+
             // Verify data exists in transaction
             $this->assertDatabaseHas('users', ['name' => 'Test User']);
             $this->assertDatabaseHas('companies', ['name' => 'Test Company']);
-            
+
             // Simulate an error that should trigger rollback
             throw new \Exception('Simulated installation error');
-            
         } catch (\Exception $e) {
             // Rollback transaction
             DB::rollBack();
-            
+
             // Verify rollback occurred
             $this->assertDatabaseMissing('users', ['name' => 'Test User']);
             $this->assertDatabaseMissing('companies', ['name' => 'Test Company']);
-            
+
             $this->assertEquals('Simulated installation error', $e->getMessage());
         }
     }
@@ -318,19 +315,19 @@ class InstallationRollbackTest extends TestCase
             'installation_progress',
             'user_preferences',
         ];
-        
+
         foreach ($testCacheKeys as $key) {
-            cache([$key => 'test_value_' . $key], 60);
+            cache([$key => 'test_value_'.$key], 60);
         }
-        
+
         // Verify cache values exist
         foreach ($testCacheKeys as $key) {
-            $this->assertEquals('test_value_' . $key, cache($key), "Cache key {$key} should exist");
+            $this->assertEquals('test_value_'.$key, cache($key), "Cache key {$key} should exist");
         }
-        
+
         // Perform cache cleanup
         $this->performCacheCleanup($testCacheKeys);
-        
+
         // Verify cache was cleaned up
         foreach ($testCacheKeys as $key) {
             $this->assertNull(cache($key), "Cache key {$key} should be cleaned up");
@@ -348,19 +345,19 @@ class InstallationRollbackTest extends TestCase
             'installation_data',
             'temporary_user_data',
         ];
-        
+
         foreach ($testSessionKeys as $key) {
-            session([$key => 'test_session_value_' . $key]);
+            session([$key => 'test_session_value_'.$key]);
         }
-        
+
         // Verify session values exist
         foreach ($testSessionKeys as $key) {
-            $this->assertEquals('test_session_value_' . $key, session($key), "Session key {$key} should exist");
+            $this->assertEquals('test_session_value_'.$key, session($key), "Session key {$key} should exist");
         }
-        
+
         // Perform session cleanup
         $this->performSessionCleanup();
-        
+
         // Verify session was cleaned up
         foreach ($testSessionKeys as $key) {
             $this->assertNull(session($key), "Session key {$key} should be cleaned up");
@@ -375,23 +372,23 @@ class InstallationRollbackTest extends TestCase
         // Scenario 1: Database failure
         $this->createPartialInstallationState();
         $this->performInstallationCleanup();
-        
+
         // Verify clean state
         $this->assertFalse(InstallUtils::dbMarkerExists());
         $this->assertEquals(0, Setting::getSetting('profile_complete', 0));
-        
+
         // Scenario 2: File permission failure
         $this->createPartialInstallationState();
         $this->performInstallationCleanup();
-        
+
         // Verify clean state again
         $this->assertFalse(InstallUtils::dbMarkerExists());
         $this->assertEquals(0, Setting::getSetting('profile_complete', 0));
-        
+
         // Scenario 3: User creation failure
         $this->createPartialInstallationState();
         $this->performInstallationCleanup();
-        
+
         // Final verification
         $this->assertFalse(InstallUtils::dbMarkerExists());
         $this->assertEquals(0, Setting::getSetting('profile_complete', 0));
@@ -406,24 +403,24 @@ class InstallationRollbackTest extends TestCase
     {
         // Create failed installation state
         $this->createPartialInstallationState();
-        
+
         // Perform rollback
         $this->performInstallationCleanup();
-        
+
         // Test that installation can be started fresh
         $response = $this->getJson('/api/v1/installation/wizard-step');
         $this->assertEquals(200, $response->status(), 'Installation wizard should be accessible after rollback');
-        
+
         $data = $response->json();
         $this->assertEquals(0, $data['profile_complete'], 'Profile should be reset to initial state');
-        
+
         // Verify all installation endpoints are accessible
         $endpoints = [
             '/api/v1/installation/requirements',
             '/api/v1/installation/permissions',
             '/api/v1/installation/languages',
         ];
-        
+
         foreach ($endpoints as $endpoint) {
             $response = $this->getJson($endpoint);
             $this->assertEquals(200, $response->status(), "Endpoint {$endpoint} should be accessible after rollback");
@@ -449,7 +446,7 @@ class InstallationRollbackTest extends TestCase
     {
         // Simulate cleanup process
         InstallUtils::deleteDbMarker();
-        
+
         // Clean up installation-related settings
         $installationSettings = [
             'profile_complete',
@@ -458,7 +455,7 @@ class InstallationRollbackTest extends TestCase
             'database_version',
             'installation_timestamp',
         ];
-        
+
         \DB::table('settings')->whereIn('option', $installationSettings)->delete();
     }
 
@@ -518,7 +515,7 @@ return new class extends Migration
     }
 };
 EOT;
-        
+
         file_put_contents($migrationPath, $migrationContent);
     }
 
@@ -530,4 +527,3 @@ EOT;
         }
     }
 }
-

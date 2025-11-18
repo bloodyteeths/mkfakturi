@@ -32,7 +32,7 @@ return new class extends Migration
             $table->index(['user_id', 'status']);
             $table->index(['created_at', 'status']);
             $table->index('status');
-        }) ;
+        });
     }
 
     /**

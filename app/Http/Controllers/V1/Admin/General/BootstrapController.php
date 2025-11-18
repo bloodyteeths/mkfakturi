@@ -5,16 +5,15 @@ namespace App\Http\Controllers\V1\Admin\General;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CompanyResource;
 use App\Http\Resources\UserResource;
-use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Currency;
 use App\Models\Module;
 use App\Models\Setting;
+use App\Providers\CacheServiceProvider;
 use App\Traits\GeneratesMenuTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Silber\Bouncer\BouncerFacade;
-use App\Providers\CacheServiceProvider;
 
 class BootstrapController extends Controller
 {
@@ -102,7 +101,7 @@ class BootstrapController extends Controller
             }
 
             // Handle case where user has no companies at all
-            if (!$current_company) {
+            if (! $current_company) {
                 abort(403, 'No company access. Please contact your administrator.');
             }
 

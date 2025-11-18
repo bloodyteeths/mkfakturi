@@ -34,7 +34,7 @@ class CompanyMiddleware
 
             // Only proceed if user has companies
             $firstCompany = $user->companies()->first();
-            if (!$firstCompany) {
+            if (! $firstCompany) {
                 return $next($request);
             }
 

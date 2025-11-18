@@ -7,11 +7,11 @@ use Tests\TestCase;
 
 /**
  * FieldMapperTest - Comprehensive Field Mapper Accuracy Tests
- * 
+ *
  * This test suite validates the FieldMapperService accuracy for Macedonian
  * field mapping system. It ensures >95% accuracy for exact matches and
  * tests all major competitor system variations.
- * 
+ *
  * Test Coverage:
  * - Macedonian language corpus mapping accuracy
  * - Confidence scoring validation (>95% for exact matches)
@@ -19,15 +19,12 @@ use Tests\TestCase;
  * - Competitor system variations (Onivo, Megasoft, Pantheon)
  * - Edge cases (Cyrillic vs Latin, case sensitivity, special characters)
  * - Performance testing for large field sets
- * 
+ *
  * Success Criteria:
  * - >95% Macedonian mapping accuracy achieved
  * - All competitor field variations recognized
  * - Confidence scoring works correctly
  * - Performance within acceptable limits
- * 
- * 
- * @package Tests\Unit
  */
 class FieldMapperTest extends TestCase
 {
@@ -36,7 +33,7 @@ class FieldMapperTest extends TestCase
     protected function setUp(): void
     {
         // Skip parent setup to avoid configuration issues during testing
-        $this->fieldMapper = new FieldMapperService();
+        $this->fieldMapper = new FieldMapperService;
     }
 
     /** @test */
@@ -51,13 +48,13 @@ class FieldMapperTest extends TestCase
             'kupuvach' => ['customer_name', 1.0],
             'embs' => ['tax_id', 1.0],
             'edb' => ['tax_id', 1.0],
-            
+
             // Invoice fields
             'broj_faktura' => ['invoice_number', 1.0],
             'faktura_broj' => ['invoice_number', 1.0],
             'datum_faktura' => ['invoice_date', 1.0],
             'dospeanos' => ['due_date', 1.0],
-            
+
             // Item fields
             'stavka' => ['item_name', 1.0],
             'proizvod' => ['item_name', 1.0],
@@ -65,18 +62,18 @@ class FieldMapperTest extends TestCase
             'kolicina' => ['quantity', 1.0],
             'cena' => ['price', 1.0],
             'edinichna_cena' => ['unit_price', 1.0],
-            
+
             // Financial fields
             'iznos' => ['amount', 1.0],
             'suma' => ['amount', 1.0],
             'vkupen_iznos' => ['total', 1.0],
             'pdv_stapka' => ['vat_rate', 1.0],
             'ddv_iznos' => ['vat_amount', 1.0],
-            
+
             // Payment fields
             'datum_plakanje' => ['payment_date', 1.0],
             'platena_suma' => ['payment_amount', 1.0],
-            
+
             // Cyrillic variations
             'назив' => ['customer_name', 1.0],
             'клиент' => ['customer_name', 1.0],
@@ -84,7 +81,7 @@ class FieldMapperTest extends TestCase
             'фактура_број' => ['invoice_number', 1.0],
             'износ' => ['amount', 1.0],
             'количина' => ['quantity', 1.0],
-            'цена' => ['price', 1.0]
+            'цена' => ['price', 1.0],
         ];
 
         $successCount = 0;
@@ -92,17 +89,17 @@ class FieldMapperTest extends TestCase
 
         foreach ($exactMatchTests as $inputField => $expected) {
             [$expectedField, $expectedConfidence] = $expected;
-            
+
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
+
             // Validate exact match confidence
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Field '{$inputField}' should map to '{$expectedField}' but mapped to '{$mapping['mapped_field']}'");
-            
-            $this->assertGreaterThanOrEqual(0.95, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.95, $mapping['confidence'],
                 "Field '{$inputField}' should have >=95% confidence but got {$mapping['confidence']}");
-            
+
             if ($mapping['confidence'] >= $expectedConfidence) {
                 $successCount++;
             }
@@ -110,7 +107,7 @@ class FieldMapperTest extends TestCase
 
         // Validate >95% overall accuracy for exact matches
         $accuracy = ($successCount / $totalTests) * 100;
-        $this->assertGreaterThanOrEqual(95, $accuracy, 
+        $this->assertGreaterThanOrEqual(95, $accuracy,
             "Overall exact match accuracy should be >=95% but got {$accuracy}%");
     }
 
@@ -130,13 +127,13 @@ class FieldMapperTest extends TestCase
             'datum_plakanye' => 'payment_date',    // Phonetic variation
             'edinachna_cena' => 'unit_price',     // Typo
             'proizvodi' => 'item_name',           // Plural form
-            
+
             // Mixed language variations
             'customer_naziv' => 'customer_name',   // English + Macedonian
             'invoice_broj' => 'invoice_number',    // English + Macedonian
             'amount_iznos' => 'amount',           // Redundant bilingual
             'quantity_kol' => 'quantity',         // Abbreviated bilingual
-            
+
             // Case variations
             'NAZIV' => 'customer_name',           // All caps
             'IzNos' => 'amount',                  // Mixed case
@@ -146,14 +143,14 @@ class FieldMapperTest extends TestCase
         foreach ($fuzzyMatchTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Fuzzy field '{$inputField}' should map to '{$expectedField}' but mapped to '{$mapping['mapped_field']}'");
-            
-            $this->assertGreaterThanOrEqual(0.65, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.65, $mapping['confidence'],
                 "Fuzzy field '{$inputField}' should have >=65% confidence but got {$mapping['confidence']}");
-            
-            $this->assertContains($mapping['algorithm'], ['fuzzy_match', 'heuristic_pattern', 'exact_match'], 
+
+            $this->assertContains($mapping['algorithm'], ['fuzzy_match', 'heuristic_pattern', 'exact_match'],
                 "Field '{$inputField}' should use fuzzy_match, heuristic_pattern or exact_match algorithm");
         }
     }
@@ -171,7 +168,7 @@ class FieldMapperTest extends TestCase
             'customer_city' => 'city',
             'customer_email' => 'email',
             'customer_phone' => 'phone',
-            
+
             // Onivo invoice export format
             'invoice_id' => 'invoice_number',
             'invoice_date' => 'invoice_date',
@@ -180,7 +177,7 @@ class FieldMapperTest extends TestCase
             'invoice_total' => 'total',
             'invoice_currency' => 'currency',
             'invoice_status' => 'invoice_status',
-            
+
             // Onivo item format
             'item_id' => 'item_code',
             'item_name' => 'item_name',
@@ -190,7 +187,7 @@ class FieldMapperTest extends TestCase
             'item_total_price' => 'amount',
             'item_vat_rate' => 'vat_rate',
             'item_vat_amount' => 'vat_amount',
-            
+
             // Onivo payment format
             'payment_id' => 'payment_reference',
             'payment_date' => 'payment_date',
@@ -201,11 +198,11 @@ class FieldMapperTest extends TestCase
         foreach ($onivoFieldTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField], 'csv', ['software' => 'onivo']);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Onivo field '{$inputField}' should map to '{$expectedField}'");
-            
-            $this->assertGreaterThanOrEqual(0.8, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.8, $mapping['confidence'],
                 "Onivo field '{$inputField}' should have >=80% confidence");
         }
     }
@@ -234,7 +231,7 @@ class FieldMapperTest extends TestCase
             'način_plaćanja' => 'payment_method',
             'datum_plaćanja' => 'payment_date',
             'iznos_plaćanja' => 'payment_amount',
-            
+
             // Megasoft abbreviated formats
             'naz_kupca' => 'customer_name',
             'pib' => 'tax_id',
@@ -247,11 +244,11 @@ class FieldMapperTest extends TestCase
         foreach ($megasoftFieldTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField], 'csv', ['software' => 'megasoft']);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Megasoft field '{$inputField}' should map to '{$expectedField}'");
-            
-            $this->assertGreaterThanOrEqual(0.6, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.6, $mapping['confidence'],
                 "Megasoft field '{$inputField}' should have >=60% confidence");
         }
     }
@@ -269,13 +266,13 @@ class FieldMapperTest extends TestCase
             'partner_mesto' => 'city',
             'partner_telefon' => 'phone',
             'partner_email' => 'email',
-            
+
             'dokument_broj' => 'invoice_number',
             'dokument_datum' => 'invoice_date',
             'dokument_valuta' => 'due_date',
             'dokument_iznos' => 'total',
             'dokument_status' => 'invoice_status',
-            
+
             'stavka_sifra' => 'item_code',
             'stavka_naziv' => 'item_name',
             'stavka_opis' => 'description',
@@ -284,12 +281,12 @@ class FieldMapperTest extends TestCase
             'stavka_iznos' => 'amount',
             'stavka_pdv_stopa' => 'vat_rate',
             'stavka_pdv_iznos' => 'vat_amount',
-            
+
             'uplata_datum' => 'payment_date',
             'uplata_iznos' => 'payment_amount',
             'uplata_nacin' => 'payment_method',
             'uplata_referenca' => 'payment_reference',
-            
+
             // Pantheon with underscores
             'prt_naziv' => 'customer_name',
             'dok_broj' => 'invoice_number',
@@ -300,11 +297,11 @@ class FieldMapperTest extends TestCase
         foreach ($pantheonFieldTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField], 'csv', ['software' => 'pantheon']);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Pantheon field '{$inputField}' should map to '{$expectedField}'");
-            
-            $this->assertGreaterThanOrEqual(0.7, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.7, $mapping['confidence'],
                 "Pantheon field '{$inputField}' should have >=70% confidence");
         }
     }
@@ -318,22 +315,22 @@ class FieldMapperTest extends TestCase
             ['naziv', 'назив', 'customer_name'],
             ['klient', 'клиент', 'customer_name'],
             ['kupuvach', 'купувач', 'customer_name'],
-            
+
             // Invoice fields
             ['faktura', 'фактура', 'invoice_number'],
             ['datum', 'датум', 'date'],
-            
+
             // Item fields
             ['stavka', 'ставка', 'item_name'],
             ['proizvod', 'производ', 'item_name'],
             ['kolicina', 'количина', 'quantity'],
             ['cena', 'цена', 'price'],
-            
+
             // Financial fields
             ['iznos', 'износ', 'amount'],
             ['suma', 'сума', 'amount'],
             ['vkupno', 'вкупно', 'total'],
-            
+
             // Payment fields
             ['plakanje', 'плаќање', 'payment_date'],
             ['uplata', 'уплата', 'payment_amount'],
@@ -343,17 +340,17 @@ class FieldMapperTest extends TestCase
             // Test Latin script
             $latinMappings = $this->fieldMapper->mapFields([$latin]);
             $latinMapping = $latinMappings[0];
-            
-            $this->assertEquals($expectedField, $latinMapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $latinMapping['mapped_field'],
                 "Latin field '{$latin}' should map to '{$expectedField}'");
-            
+
             // Test Cyrillic script
             $cyrillicMappings = $this->fieldMapper->mapFields([$cyrillic]);
             $cyrillicMapping = $cyrillicMappings[0];
-            
-            $this->assertEquals($expectedField, $cyrillicMapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $cyrillicMapping['mapped_field'],
                 "Cyrillic field '{$cyrillic}' should map to '{$expectedField}'");
-            
+
             // Both should have high confidence
             $this->assertGreaterThanOrEqual(0.8, $latinMapping['confidence']);
             $this->assertGreaterThanOrEqual(0.8, $cyrillicMapping['confidence']);
@@ -370,38 +367,38 @@ class FieldMapperTest extends TestCase
             'naziv' => 'customer_name',
             'Naziv' => 'customer_name',
             'NaZiV' => 'customer_name',
-            
+
             // With underscores
             'customer_name' => 'customer_name',
             'Customer_Name' => 'customer_name',
             'CUSTOMER_NAME' => 'customer_name',
-            
+
             // With dashes
             'invoice-number' => 'invoice_number',
             'Invoice-Number' => 'invoice_number',
             'INVOICE-NUMBER' => 'invoice_number',
-            
+
             // With spaces
             'unit price' => 'unit_price',
             'Unit Price' => 'unit_price',
             'UNIT PRICE' => 'unit_price',
-            
+
             // With dots
             'payment.date' => 'payment_date',
             'Payment.Date' => 'payment_date',
             'PAYMENT.DATE' => 'payment_date',
-            
+
             // With brackets and quotes
             '[customer_name]' => 'customer_name',
             '(invoice_number)' => 'invoice_number',
             '"item_name"' => 'item_name',
             "'quantity'" => 'quantity',
-            
+
             // With numbers (common in duplicated columns)
             'naziv1' => 'customer_name',
             'cena_2' => 'price',
             'amount3' => 'amount',
-            
+
             // With prefixes
             'field_naziv' => 'customer_name',
             'col_iznos' => 'amount',
@@ -411,11 +408,11 @@ class FieldMapperTest extends TestCase
         foreach ($caseTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Field '{$inputField}' should map to '{$expectedField}' but mapped to '{$mapping['mapped_field']}'");
-            
-            $this->assertGreaterThanOrEqual(0.7, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.7, $mapping['confidence'],
                 "Field '{$inputField}' should have >=70% confidence but got {$mapping['confidence']}");
         }
     }
@@ -438,13 +435,13 @@ class FieldMapperTest extends TestCase
             'vkopen_iznos' => 'total',           // p instead of up
             'platanje' => 'payment_date',        // missing k
             'uplate' => 'payment_amount',        // plural form
-            
+
             // Mixed transcription
             'nazivot' => 'customer_name',         // with definite article
             'fakturata' => 'invoice_number',      // with definite article
             'cenite' => 'price',                  // plural
             'iznosite' => 'amount',               // plural with definite article
-            
+
             // Common abbreviations
             'naz' => 'customer_name',
             'fakt' => 'invoice_number',
@@ -452,7 +449,7 @@ class FieldMapperTest extends TestCase
             'izn' => 'amount',
             'ukup' => 'total',
             'plat' => 'payment_date',
-            
+
             // Technical variations
             'customer_naziv_field' => 'customer_name',
             'invoice_broj_column' => 'invoice_number',
@@ -463,11 +460,11 @@ class FieldMapperTest extends TestCase
         foreach ($typoTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Typo field '{$inputField}' should map to '{$expectedField}' but mapped to '{$mapping['mapped_field']}'");
-            
-            $this->assertGreaterThanOrEqual(0.6, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.6, $mapping['confidence'],
                 "Typo field '{$inputField}' should have >=60% confidence but got {$mapping['confidence']}");
         }
     }
@@ -486,7 +483,7 @@ class FieldMapperTest extends TestCase
             'amount_iznos' => 'amount',
             'price_cena' => 'price',
             'quantity_kolicina' => 'quantity',
-            
+
             // Serbian-Macedonian mix
             'naziv_kupca' => 'customer_name',
             'broj_računa' => 'invoice_number',
@@ -494,13 +491,13 @@ class FieldMapperTest extends TestCase
             'količina_stavke' => 'quantity',
             'iznos_ukupno' => 'total',
             'datum_plaćanja' => 'payment_date',
-            
+
             // All three languages
             'customer_naziv_kupca' => 'customer_name',
             'invoice_broj_računa' => 'invoice_number',
             'item_stavka_proizvod' => 'item_name',
             'payment_plakanje_datum' => 'payment_date',
-            
+
             // Technical English with local terms
             'field_naziv' => 'customer_name',
             'column_iznos' => 'amount',
@@ -512,11 +509,11 @@ class FieldMapperTest extends TestCase
         foreach ($mixedLanguageTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Mixed language field '{$inputField}' should map to '{$expectedField}'");
-            
-            $this->assertGreaterThanOrEqual(0.6, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.6, $mapping['confidence'],
                 "Mixed language field '{$inputField}' should have >=60% confidence");
         }
     }
@@ -526,7 +523,7 @@ class FieldMapperTest extends TestCase
     {
         // Create a large set of fields to test performance
         $largeFieldSet = [];
-        
+
         // Add 1000 variations of common fields
         for ($i = 1; $i <= 200; $i++) {
             $largeFieldSet[] = "naziv_{$i}";
@@ -538,35 +535,35 @@ class FieldMapperTest extends TestCase
 
         $startTime = microtime(true);
         $startMemory = memory_get_usage();
-        
+
         $mappings = $this->fieldMapper->mapFields($largeFieldSet);
-        
+
         $endTime = microtime(true);
         $endMemory = memory_get_usage();
-        
+
         $processingTime = $endTime - $startTime;
         $memoryUsed = $endMemory - $startMemory;
-        
+
         // Performance assertions
-        $this->assertLessThan(10.0, $processingTime, 
+        $this->assertLessThan(10.0, $processingTime,
             "Processing 1000 fields should take less than 10 seconds but took {$processingTime} seconds");
-        
-        $this->assertLessThan(50 * 1024 * 1024, $memoryUsed, 
-            "Processing should use less than 50MB memory but used " . ($memoryUsed / 1024 / 1024) . "MB");
-        
+
+        $this->assertLessThan(50 * 1024 * 1024, $memoryUsed,
+            'Processing should use less than 50MB memory but used '.($memoryUsed / 1024 / 1024).'MB');
+
         // Accuracy assertions
-        $this->assertCount(1000, $mappings, "Should return mappings for all 1000 fields");
-        
+        $this->assertCount(1000, $mappings, 'Should return mappings for all 1000 fields');
+
         $highConfidenceCount = 0;
         foreach ($mappings as $mapping) {
             if ($mapping['confidence'] >= 0.8) {
                 $highConfidenceCount++;
             }
         }
-        
+
         $highConfidencePercentage = ($highConfidenceCount / 1000) * 100;
-        $this->assertGreaterThanOrEqual(80, $highConfidencePercentage, 
-            "At least 80% of mappings should have high confidence (>=0.8)");
+        $this->assertGreaterThanOrEqual(80, $highConfidencePercentage,
+            'At least 80% of mappings should have high confidence (>=0.8)');
     }
 
     /** @test */
@@ -578,16 +575,16 @@ class FieldMapperTest extends TestCase
             ['naziv', 'customer_name', 1.0, 1.0],
             ['embs', 'tax_id', 1.0, 1.0],
             ['broj_faktura', 'invoice_number', 1.0, 1.0],
-            
+
             // Good fuzzy matches should be 0.8-0.95
             ['naziva', 'customer_name', 0.8, 0.95],
             ['klijent', 'customer_name', 0.8, 0.95],
             ['faktora', 'invoice_number', 0.7, 0.9],
-            
+
             // Moderate matches should be 0.6-0.8
             ['customer_naziv', 'customer_name', 0.6, 0.8],
             ['invoice_broj', 'invoice_number', 0.6, 0.8],
-            
+
             // Weak matches should be 0.3-0.6
             ['naziv_field_customer', 'customer_name', 0.3, 0.6],
             ['amount_total_sum', 'amount', 0.3, 0.6],
@@ -596,14 +593,14 @@ class FieldMapperTest extends TestCase
         foreach ($confidenceTests as [$inputField, $expectedField, $minConfidence, $maxConfidence]) {
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Field '{$inputField}' should map to '{$expectedField}'");
-            
-            $this->assertGreaterThanOrEqual($minConfidence, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual($minConfidence, $mapping['confidence'],
                 "Field '{$inputField}' should have confidence >= {$minConfidence} but got {$mapping['confidence']}");
-            
-            $this->assertLessThanOrEqual($maxConfidence, $mapping['confidence'], 
+
+            $this->assertLessThanOrEqual($maxConfidence, $mapping['confidence'],
                 "Field '{$inputField}' should have confidence <= {$maxConfidence} but got {$mapping['confidence']}");
         }
     }
@@ -629,16 +626,16 @@ class FieldMapperTest extends TestCase
         ];
 
         $autoMapped = $this->fieldMapper->autoMapFields($inputFields, 0.8);
-        
+
         // Should include high-confidence mappings
         $this->assertArrayHasKey('naziv', $autoMapped);
         $this->assertArrayHasKey('embs', $autoMapped);
         $this->assertArrayHasKey('broj_faktura', $autoMapped);
-        
+
         // Should NOT include low-confidence mappings
         $this->assertArrayNotHasKey('unknown_field_xyz', $autoMapped);
         $this->assertArrayNotHasKey('maybe_customer', $autoMapped);
-        
+
         // Validate mappings are correct
         $this->assertEquals('customer_name', $autoMapped['naziv']);
         $this->assertEquals('tax_id', $autoMapped['embs']);
@@ -654,23 +651,23 @@ class FieldMapperTest extends TestCase
             'broj_faktura',
             'maybe_amount',
             'cena_proizvoda',
-            'very_unclear_field_name'
+            'very_unclear_field_name',
         ];
 
         $suggestions = $this->fieldMapper->getSuggestions($inputFields, 5);
-        
+
         // Should return suggestions ordered by confidence
         $this->assertCount(5, $suggestions);
-        
+
         // Verify ordering by confidence (highest first)
         for ($i = 0; $i < count($suggestions) - 1; $i++) {
             $this->assertGreaterThanOrEqual(
-                $suggestions[$i + 1]['confidence'], 
+                $suggestions[$i + 1]['confidence'],
                 $suggestions[$i]['confidence'],
-                "Suggestions should be ordered by confidence (highest first)"
+                'Suggestions should be ordered by confidence (highest first)'
             );
         }
-        
+
         // Check suggestion structure
         foreach ($suggestions as $suggestion) {
             $this->assertArrayHasKey('input_field', $suggestion);
@@ -678,7 +675,7 @@ class FieldMapperTest extends TestCase
             $this->assertArrayHasKey('confidence', $suggestion);
             $this->assertArrayHasKey('reason', $suggestion);
             $this->assertArrayHasKey('alternatives', $suggestion);
-            
+
             $this->assertGreaterThan(0.3, $suggestion['confidence']);
             $this->assertIsString($suggestion['reason']);
             $this->assertIsArray($suggestion['alternatives']);
@@ -697,24 +694,24 @@ class FieldMapperTest extends TestCase
         ];
 
         $requiredFields = ['customer_name', 'tax_id', 'invoice_number', 'amount'];
-        
+
         $validation = $this->fieldMapper->validateMappings($mappings, $requiredFields);
-        
-        $this->assertTrue($validation['valid'], "Mappings should be valid");
-        $this->assertEmpty($validation['errors'], "Should have no validation errors");
-        $this->assertEquals(100, $validation['coverage'], "Should have 100% coverage of required fields");
-        
+
+        $this->assertTrue($validation['valid'], 'Mappings should be valid');
+        $this->assertEmpty($validation['errors'], 'Should have no validation errors');
+        $this->assertEquals(100, $validation['coverage'], 'Should have 100% coverage of required fields');
+
         // Test with missing required field
         $incompleteMappings = [
             'naziv' => 'customer_name',
             'embs' => 'tax_id',
         ];
-        
+
         $incompleteValidation = $this->fieldMapper->validateMappings($incompleteMappings, $requiredFields);
-        
-        $this->assertFalse($incompleteValidation['valid'], "Incomplete mappings should be invalid");
-        $this->assertNotEmpty($incompleteValidation['errors'], "Should have validation errors");
-        $this->assertLessThan(100, $incompleteValidation['coverage'], "Should have incomplete coverage");
+
+        $this->assertFalse($incompleteValidation['valid'], 'Incomplete mappings should be invalid');
+        $this->assertNotEmpty($incompleteValidation['errors'], 'Should have validation errors');
+        $this->assertLessThan(100, $incompleteValidation['coverage'], 'Should have incomplete coverage');
     }
 
     /** @test */
@@ -722,21 +719,21 @@ class FieldMapperTest extends TestCase
     {
         $inputFields = ['naziv', 'embs', 'broj_faktura', 'unknown_field'];
         $mappings = $this->fieldMapper->mapFields($inputFields);
-        
+
         // Test JSON export
         $jsonExport = $this->fieldMapper->exportMappings($mappings, 'json');
         $exportData = json_decode($jsonExport, true);
-        
+
         $this->assertArrayHasKey('version', $exportData);
         $this->assertArrayHasKey('created_at', $exportData);
         $this->assertArrayHasKey('mappings', $exportData);
         $this->assertArrayHasKey('statistics', $exportData);
-        
+
         // Test CSV export
         $csvExport = $this->fieldMapper->exportMappings($mappings, 'csv');
         $this->assertStringContainsString('Input Field,Mapped Field,Confidence', $csvExport);
         $this->assertStringContainsString('naziv', $csvExport);
-        
+
         // Test statistics
         $stats = $exportData['statistics'];
         $this->assertEquals(4, $stats['total_fields']);
@@ -748,7 +745,7 @@ class FieldMapperTest extends TestCase
     public function supported_fields_and_variations_coverage()
     {
         $supportedFields = $this->fieldMapper->getSupportedFields();
-        
+
         // Should include all major categories
         $expectedCategories = [
             'customer_name', 'customer_id', 'tax_id', 'company_id',
@@ -759,20 +756,20 @@ class FieldMapperTest extends TestCase
             'payment_date', 'payment_method', 'payment_amount', 'payment_reference',
             'bank_account', 'bank_name', 'address', 'city', 'postal_code', 'country',
             'warehouse', 'stock_quantity', 'expense_category', 'expense_date',
-            'date', 'status', 'notes', 'email', 'phone', 'contact_person'
+            'date', 'status', 'notes', 'email', 'phone', 'contact_person',
         ];
-        
+
         foreach ($expectedCategories as $category) {
-            $this->assertContains($category, $supportedFields, 
+            $this->assertContains($category, $supportedFields,
                 "Should support field category '{$category}'");
         }
-        
+
         // Test field variations retrieval
         $customerVariations = $this->fieldMapper->getFieldVariations('customer_name');
         $this->assertContains('naziv', $customerVariations);
         $this->assertContains('klient', $customerVariations);
         $this->assertContains('купувач', $customerVariations);
-        
+
         $emptyVariations = $this->fieldMapper->getFieldVariations('non_existent_field');
         $this->assertEmpty($emptyVariations);
     }
@@ -798,13 +795,13 @@ class FieldMapperTest extends TestCase
         foreach ($heuristicTests as $inputField => $expectedField) {
             $mappings = $this->fieldMapper->mapFields([$inputField]);
             $mapping = $mappings[0];
-            
-            $this->assertEquals($expectedField, $mapping['mapped_field'], 
+
+            $this->assertEquals($expectedField, $mapping['mapped_field'],
                 "Heuristic field '{$inputField}' should map to '{$expectedField}'");
-            
-            $this->assertGreaterThanOrEqual(0.7, $mapping['confidence'], 
+
+            $this->assertGreaterThanOrEqual(0.7, $mapping['confidence'],
                 "Heuristic field '{$inputField}' should have >=70% confidence");
-            
+
             // Some should specifically use heuristic algorithm
             if (in_array($mapping['algorithm'], ['heuristic_pattern', 'exact_match'])) {
                 $this->assertTrue(true); // Expected algorithms

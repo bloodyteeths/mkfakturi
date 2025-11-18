@@ -10,43 +10,52 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * PANTHEON Web Services Sync Service
- * 
+ *
  * Integrates with PANTHEON accounting system web services API
  * for pushing invoices and payments to external accounting platform
- * 
+ *
  * API Documentation: PANTHEON Web Services API v2.0
  * Base URL: https://api.pantheon.mk/ws/v2/
  * Rate Limit: 100 requests per minute
- * 
+ *
  * @version 1.0.0
+ *
  * @updated 2025-07-26 - Initial implementation for ROADMAP4.md AI-06
  */
 class PantheonSyncService
 {
     protected Client $client;
+
     protected string $baseUrl;
+
     protected string $apiKey;
+
     protected string $companyCode;
+
     protected bool $sandbox;
 
     // PANTHEON API endpoints
     protected const API_PUSH_INVOICE = 'invoices/push';
+
     protected const API_PUSH_PAYMENT = 'payments/push';
+
     protected const API_STATUS = 'status';
+
     protected const API_AUTH_TOKEN = 'auth/token';
 
     // Sandbox URLs for testing
     protected const SANDBOX_BASE_URL = 'https://sandbox-api.pantheon.mk/ws/v2/';
+
     protected const PRODUCTION_BASE_URL = 'https://api.pantheon.mk/ws/v2/';
 
     public function __construct()
     {
         $this->sandbox = config('app.env') !== 'production';
         $this->baseUrl = $this->sandbox ? self::SANDBOX_BASE_URL : self::PRODUCTION_BASE_URL;
-        
+
         $this->apiKey = config('services.pantheon.api_key', 'demo-key-12345');
         $this->companyCode = config('services.pantheon.company_code', 'DEMO001');
-        
+
         $this->client = new Client([
             'base_uri' => $this->baseUrl,
             'timeout' => 30,
@@ -60,25 +69,26 @@ class PantheonSyncService
 
     /**
      * Push invoice to PANTHEON system
-     * 
-     * @param Invoice $invoice The invoice to push
+     *
+     * @param  Invoice  $invoice  The invoice to push
      * @return array Response from PANTHEON API
+     *
      * @throws \Exception On API errors
      */
     public function pushInvoice(Invoice $invoice): array
     {
         try {
             $invoiceData = $this->formatInvoiceData($invoice);
-            
+
             $response = $this->client->post(self::API_PUSH_INVOICE, [
                 'headers' => $this->getAuthHeaders(),
                 'json' => $invoiceData,
             ]);
 
             $responseData = json_decode($response->getBody()->getContents(), true);
-            
+
             if ($response->getStatusCode() !== 200) {
-                throw new \Exception('PANTHEON API returned error: ' . $responseData['message'] ?? 'Unknown error');
+                throw new \Exception('PANTHEON API returned error: '.$responseData['message'] ?? 'Unknown error');
             }
 
             Log::info('Invoice pushed to PANTHEON successfully', [
@@ -100,31 +110,32 @@ class PantheonSyncService
             // For HTTP errors, wrap in a domain-specific exception with a friendly message
             $message = $this->extractApiErrorMessage($e);
 
-            throw new \Exception('PANTHEON API returned error: ' . $message, 0, $e);
+            throw new \Exception('PANTHEON API returned error: '.$message, 0, $e);
         }
     }
 
     /**
      * Push payment to PANTHEON system
-     * 
-     * @param Payment $payment The payment to push
+     *
+     * @param  Payment  $payment  The payment to push
      * @return array Response from PANTHEON API
+     *
      * @throws \Exception On API errors
      */
     public function pushPayment(Payment $payment): array
     {
         try {
             $paymentData = $this->formatPaymentData($payment);
-            
+
             $response = $this->client->post(self::API_PUSH_PAYMENT, [
                 'headers' => $this->getAuthHeaders(),
                 'json' => $paymentData,
             ]);
 
             $responseData = json_decode($response->getBody()->getContents(), true);
-            
+
             if ($response->getStatusCode() !== 200) {
-                throw new \Exception('PANTHEON API returned error: ' . $responseData['message'] ?? 'Unknown error');
+                throw new \Exception('PANTHEON API returned error: '.$responseData['message'] ?? 'Unknown error');
             }
 
             Log::info('Payment pushed to PANTHEON successfully', [
@@ -144,14 +155,15 @@ class PantheonSyncService
 
             $message = $this->extractApiErrorMessage($e);
 
-            throw new \Exception('PANTHEON API returned error: ' . $message, 0, $e);
+            throw new \Exception('PANTHEON API returned error: '.$message, 0, $e);
         }
     }
 
     /**
      * Get PANTHEON system status
-     * 
+     *
      * @return array Status information from PANTHEON API
+     *
      * @throws \Exception On API errors
      */
     public function getStatus(): array
@@ -162,9 +174,9 @@ class PantheonSyncService
             ]);
 
             $responseData = json_decode($response->getBody()->getContents(), true);
-            
+
             if ($response->getStatusCode() !== 200) {
-                throw new \Exception('PANTHEON API returned error: ' . $responseData['message'] ?? 'Unknown error');
+                throw new \Exception('PANTHEON API returned error: '.$responseData['message'] ?? 'Unknown error');
             }
 
             return [
@@ -183,7 +195,7 @@ class PantheonSyncService
 
             // For real server errors (5xx), surface an exception so callers can react
             if ($statusCode >= 500) {
-                throw new \Exception('PANTHEON API server error: ' . $e->getMessage(), 0, $e);
+                throw new \Exception('PANTHEON API server error: '.$e->getMessage(), 0, $e);
             }
 
             // For network errors / non-HTTP failures, report offline status
@@ -298,7 +310,7 @@ class PantheonSyncService
     protected function getAuthHeaders(): array
     {
         return [
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer '.$this->apiKey,
             'X-Company-Code' => $this->companyCode,
             'X-Request-ID' => $this->generateRequestId(),
         ];
@@ -309,7 +321,7 @@ class PantheonSyncService
      */
     protected function generateRequestId(): string
     {
-        return 'pantheon-' . uniqid() . '-' . time();
+        return 'pantheon-'.uniqid().'-'.time();
     }
 
     /**
@@ -319,7 +331,7 @@ class PantheonSyncService
     {
         $statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
         $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : '';
-        
+
         Log::error('PANTHEON API Error', [
             'operation' => $operation,
             'entity_id' => $entityId,
@@ -354,7 +366,7 @@ class PantheonSyncService
 
                 return [
                     'success' => false,
-                    'message' => 'PANTHEON API connection failed: ' . $error,
+                    'message' => 'PANTHEON API connection failed: '.$error,
                     'error' => $error,
                 ];
             }
@@ -367,7 +379,7 @@ class PantheonSyncService
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'PANTHEON API connection failed: ' . $e->getMessage(),
+                'message' => 'PANTHEON API connection failed: '.$e->getMessage(),
                 'error' => $e->getMessage(),
             ];
         }
@@ -382,11 +394,11 @@ class PantheonSyncService
             'base_url' => $this->baseUrl,
             'environment' => $this->sandbox ? 'sandbox' : 'production',
             'company_code' => $this->companyCode,
-            'api_key_set' => !empty($this->apiKey),
+            'api_key_set' => ! empty($this->apiKey),
             'endpoints' => [
-                'push_invoice' => $this->baseUrl . self::API_PUSH_INVOICE,
-                'push_payment' => $this->baseUrl . self::API_PUSH_PAYMENT,
-                'status' => $this->baseUrl . self::API_STATUS,
+                'push_invoice' => $this->baseUrl.self::API_PUSH_INVOICE,
+                'push_payment' => $this->baseUrl.self::API_PUSH_PAYMENT,
+                'status' => $this->baseUrl.self::API_STATUS,
             ],
         ];
     }

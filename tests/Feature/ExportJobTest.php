@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Jobs\ProcessExportJob;
 use App\Models\Company;
 use App\Models\ExportJob;
-use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;

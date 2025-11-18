@@ -5,7 +5,6 @@ namespace App\Http\Controllers\V1\Admin\Invoice;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Modules\Mk\Services\MkUblMapper;
 use Modules\Mk\Services\MkXmlSigner;
@@ -33,16 +32,16 @@ class ExportXmlController extends Controller
             $validateXml = $request->boolean('validate', true);
 
             // Generate UBL XML using MkUblMapper
-            $ublMapper = new MkUblMapper();
+            $ublMapper = new MkUblMapper;
             $xmlContent = $ublMapper->mapInvoiceToUbl($invoice);
 
             // Validate XML if requested
             if ($validateXml) {
                 $validation = $ublMapper->validateUblXml($xmlContent);
-                if (!$validation['is_valid']) {
+                if (! $validation['is_valid']) {
                     return response()->json([
                         'message' => 'XML validation failed',
-                        'errors' => $validation['errors']
+                        'errors' => $validation['errors'],
                     ], 422);
                 }
             }
@@ -50,27 +49,27 @@ class ExportXmlController extends Controller
             // Apply digital signature if requested
             if ($includeSignature || $format === 'ubl_signed') {
                 try {
-                    $xmlSigner = new MkXmlSigner();
-                    
+                    $xmlSigner = new MkXmlSigner;
+
                     // Validate signer configuration
                     $config = $xmlSigner->validateConfiguration();
-                    if (!$config['is_valid']) {
+                    if (! $config['is_valid']) {
                         return response()->json([
                             'message' => 'XML signing configuration invalid',
-                            'errors' => $config['errors']
+                            'errors' => $config['errors'],
                         ], 422);
                     }
 
                     $xmlContent = $xmlSigner->signUblInvoice($xmlContent);
-                    
+
                 } catch (\Exception $e) {
                     Log::error('XML signing failed', [
                         'invoice_id' => $invoice->id,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
-                    
+
                     return response()->json([
-                        'message' => 'XML signing failed: ' . $e->getMessage()
+                        'message' => 'XML signing failed: '.$e->getMessage(),
                     ], 500);
                 }
             }
@@ -81,7 +80,7 @@ class ExportXmlController extends Controller
                 'invoice_number' => $invoice->invoice_number,
                 'format' => $format,
                 'signed' => $includeSignature,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
             // Generate filename
@@ -98,23 +97,23 @@ class ExportXmlController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
-            
+
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             return response()->json([
-                'message' => 'Unauthorized to export this invoice'
+                'message' => 'Unauthorized to export this invoice',
             ], 403);
-            
+
         } catch (\Exception $e) {
             Log::error('Invoice XML export failed', [
                 'invoice_id' => $invoice->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json([
-                'message' => 'XML export failed: ' . $e->getMessage()
+                'message' => 'XML export failed: '.$e->getMessage(),
             ], 500);
         }
     }

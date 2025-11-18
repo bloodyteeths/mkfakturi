@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\RecurringInvoice;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class RecurringInvoicePolicy
 {
@@ -22,7 +21,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         // Use the user instance to check abilities (respects Bouncer scope)
         if ($user->can('view-recurring-invoice', RecurringInvoice::class)) {
             return true;
@@ -41,7 +40,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
@@ -59,7 +58,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('create-recurring-invoice', RecurringInvoice::class)) {
             return true;
         }
@@ -77,7 +76,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
@@ -95,7 +94,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
@@ -113,7 +112,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
@@ -131,7 +130,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
@@ -149,7 +148,7 @@ class RecurringInvoicePolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('delete-recurring-invoice', RecurringInvoice::class)) {
             return true;
         }

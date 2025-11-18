@@ -19,8 +19,6 @@ class GenerateEInvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -44,8 +42,9 @@ class GenerateEInvoiceRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $invoice = Invoice::find($value);
 
-                    if (!$invoice) {
+                    if (! $invoice) {
                         $fail('The selected invoice does not exist.');
+
                         return;
                     }
 
@@ -53,12 +52,13 @@ class GenerateEInvoiceRequest extends FormRequest
                     $companyId = request()->header('company');
                     if ($invoice->company_id != $companyId) {
                         $fail('The selected invoice does not belong to your company.');
+
                         return;
                     }
 
                     // Check invoice status
                     if ($invoice->status !== Invoice::STATUS_SENT) {
-                        $fail('Invoice must be in SENT status to generate e-invoice. Current status: ' . $invoice->status);
+                        $fail('Invoice must be in SENT status to generate e-invoice. Current status: '.$invoice->status);
                     }
                 },
             ],
@@ -67,8 +67,6 @@ class GenerateEInvoiceRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
-     *
-     * @return array
      */
     public function messages(): array
     {
@@ -81,8 +79,6 @@ class GenerateEInvoiceRequest extends FormRequest
 
     /**
      * Get validated invoice instance.
-     *
-     * @return Invoice
      */
     public function getInvoice(): Invoice
     {

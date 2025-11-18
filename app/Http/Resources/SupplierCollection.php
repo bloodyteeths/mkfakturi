@@ -11,4 +11,3 @@ class SupplierCollection extends ResourceCollection
         return parent::toArray($request);
     }
 }
-

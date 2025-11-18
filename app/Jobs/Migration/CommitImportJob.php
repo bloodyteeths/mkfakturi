@@ -2,34 +2,33 @@
 
 namespace App\Jobs\Migration;
 
+use App\Models\Currency;
+use App\Models\Customer;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\ImportJob;
 use App\Models\ImportLog;
 use App\Models\ImportTempCustomer;
+use App\Models\ImportTempExpense;
 use App\Models\ImportTempInvoice;
 use App\Models\ImportTempItem;
 use App\Models\ImportTempPayment;
-use App\Models\ImportTempExpense;
-use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Payment;
-use App\Models\Expense;
-use App\Models\Currency;
-use App\Models\TaxType;
 use App\Models\PaymentMethod;
-use App\Models\ExpenseCategory;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\QueueableActions\QueueableAction;
 
 /**
  * CommitImportJob - Commit validated data to production tables
- * 
+ *
  * This job commits validated temporary data to production tables:
  * - Creates records in production tables from validated temp data
  * - Handles duplicate resolution strategies
@@ -40,10 +39,10 @@ use Spatie\QueueableActions\QueueableAction;
  */
 class CommitImportJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, QueueableAction;
+    use Dispatchable, InteractsWithQueue, Queueable, QueueableAction, SerializesModels;
 
     public ImportJob $importJob;
-    
+
     /**
      * Job timeout in seconds (45 minutes for large imports)
      */
@@ -168,23 +167,23 @@ class CommitImportJob implements ShouldQueue
             case ImportJob::TYPE_CUSTOMERS:
                 $this->commitCustomers();
                 break;
-                
+
             case ImportJob::TYPE_INVOICES:
                 $this->commitInvoices();
                 break;
-                
+
             case ImportJob::TYPE_ITEMS:
                 $this->commitItems();
                 break;
-                
+
             case ImportJob::TYPE_PAYMENTS:
                 $this->commitPayments();
                 break;
-                
+
             case ImportJob::TYPE_EXPENSES:
                 $this->commitExpenses();
                 break;
-                
+
             case ImportJob::TYPE_COMPLETE:
                 // For complete business import, commit in order of dependencies
                 $this->commitCustomers();
@@ -193,7 +192,7 @@ class CommitImportJob implements ShouldQueue
                 $this->commitPayments();
                 $this->commitExpenses();
                 break;
-                
+
             default:
                 throw new \Exception("Unknown import type: {$this->importJob->type}");
         }
@@ -283,7 +282,7 @@ class CommitImportJob implements ShouldQueue
         $customerData['currency_id'] = $defaultCurrency->id;
 
         $customer = Customer::create($customerData);
-        
+
         $this->commitStats['successfully_committed']++;
         $this->commitStats['records_created']['customers'][] = $customer->id;
 
@@ -361,7 +360,7 @@ class CommitImportJob implements ShouldQueue
         $invoiceData['currency_id'] = $defaultCurrency->id;
 
         $invoice = Invoice::create($invoiceData);
-        
+
         $this->commitStats['successfully_committed']++;
         $this->commitStats['records_created']['invoices'][] = $invoice->id;
 
@@ -398,7 +397,7 @@ class CommitImportJob implements ShouldQueue
                 break;
             default:
                 // Create with modified invoice number
-                $data['invoice_number'] = $data['invoice_number'] . '_' . uniqid();
+                $data['invoice_number'] = $data['invoice_number'].'_'.uniqid();
                 $this->createInvoice($tempRecord, $data, $this->getDefaultCurrency());
                 break;
         }
@@ -484,7 +483,7 @@ class CommitImportJob implements ShouldQueue
         $itemData['currency_id'] = $defaultCurrency->id;
 
         $item = Item::create($itemData);
-        
+
         $this->commitStats['successfully_committed']++;
         $this->commitStats['records_created']['items'][] = $item->id;
 
@@ -583,7 +582,7 @@ class CommitImportJob implements ShouldQueue
         $paymentData['currency_id'] = $defaultCurrency->id;
 
         $payment = Payment::create($paymentData);
-        
+
         $this->commitStats['successfully_committed']++;
         $this->commitStats['records_created']['payments'][] = $payment->id;
 
@@ -606,7 +605,7 @@ class CommitImportJob implements ShouldQueue
     protected function preparePaymentData(array $data, $defaultPaymentMethod): array
     {
         return [
-            'payment_number' => 'PAY-' . uniqid(),
+            'payment_number' => 'PAY-'.uniqid(),
             'payment_date' => $data['payment_date'] ?? now()->format('Y-m-d'),
             'amount' => isset($data['amount']) ? (int) round(floatval($data['amount']) * 100) : 0,
             'payment_method_id' => $defaultPaymentMethod->id,
@@ -655,7 +654,7 @@ class CommitImportJob implements ShouldQueue
         $expenseData['currency_id'] = $defaultCurrency->id;
 
         $expense = Expense::create($expenseData);
-        
+
         $this->commitStats['successfully_committed']++;
         $this->commitStats['records_created']['expenses'][] = $expense->id;
 
@@ -678,7 +677,7 @@ class CommitImportJob implements ShouldQueue
     protected function prepareExpenseData(array $data, $defaultCategory): array
     {
         return [
-            'expense_number' => 'EXP-' . uniqid(),
+            'expense_number' => 'EXP-'.uniqid(),
             'expense_date' => $data['expense_date'] ?? now()->format('Y-m-d'),
             'amount' => isset($data['amount']) ? (int) round(floatval($data['amount']) * 100) : 0,
             'expense_category_id' => $defaultCategory->id,
@@ -777,7 +776,7 @@ class CommitImportJob implements ShouldQueue
             'log_type' => ImportLog::LOG_JOB_COMPLETED,
             'severity' => ImportLog::SEVERITY_INFO,
             'message' => "Import completed: {$this->commitStats['successfully_committed']} records committed",
-            'detailed_message' => "Import completed in " . round($processingTime, 2) . " seconds. {$this->commitStats['failed_commits']} failed, {$this->commitStats['duplicates_skipped']} duplicates skipped, {$this->commitStats['duplicates_updated']} duplicates updated.",
+            'detailed_message' => 'Import completed in '.round($processingTime, 2)." seconds. {$this->commitStats['failed_commits']} failed, {$this->commitStats['duplicates_skipped']} duplicates skipped, {$this->commitStats['duplicates_updated']} duplicates updated.",
             'process_stage' => 'committing',
             'processing_time' => $processingTime,
             'records_processed' => $this->commitStats['total_processed'],
@@ -835,7 +834,7 @@ class CommitImportJob implements ShouldQueue
 
         // Mark import job as failed
         $this->importJob->markAsFailed(
-            'Import commit failed: ' . $exception->getMessage(),
+            'Import commit failed: '.$exception->getMessage(),
             [
                 'error' => $exception->getMessage(),
                 'file' => $exception->getFile(),

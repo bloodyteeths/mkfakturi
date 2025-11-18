@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\V1\Admin\AccountsPayable\BillsImportController;
 use App\Http\Requests\ImportBillsRequest;
-use App\Imports\BillImport;
 use App\Jobs\ProcessImportJob;
 use App\Models\Bill;
 use App\Models\Company;
@@ -99,7 +98,7 @@ test('bill import creates supplier and bill for correct company', function () {
     ]);
 
     $job = new ProcessImportJob($importJob, false);
-    $job->handle(new \App\Services\Migration\ImportPresetService());
+    $job->handle(new \App\Services\Migration\ImportPresetService);
 
     $bill = Bill::where('company_id', $company->id)
         ->where('bill_number', 'BILL-CSV-1')
@@ -146,7 +145,7 @@ test('bill import respects tenant isolation', function () {
     ]);
 
     $job = new ProcessImportJob($importJob, false);
-    $job->handle(new \App\Services\Migration\ImportPresetService());
+    $job->handle(new \App\Services\Migration\ImportPresetService);
 
     $billA = Bill::where('company_id', $companyA->id)
         ->where('bill_number', 'BILL-ISO-1')
@@ -158,4 +157,3 @@ test('bill import respects tenant isolation', function () {
     expect($billA)->not()->toBeNull();
     expect($billB)->toBeNull();
 });
-

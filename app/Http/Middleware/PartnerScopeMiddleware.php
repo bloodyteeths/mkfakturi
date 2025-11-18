@@ -2,11 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Company;
+use App\Models\Partner;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Partner;
-use App\Models\Company;
 use Symfony\Component\HttpFoundation\Response;
 
 class PartnerScopeMiddleware
@@ -14,46 +14,44 @@ class PartnerScopeMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Check if user is a partner
         $partner = Partner::where('user_id', $user->id)->first();
-        
-        if (!$partner) {
+
+        if (! $partner) {
             return response()->json([
-                'error' => 'User is not registered as a partner'
+                'error' => 'User is not registered as a partner',
             ], 403);
         }
 
         // Check if partner is active
-        if (!$partner->is_active) {
+        if (! $partner->is_active) {
             return response()->json([
-                'error' => 'Partner account is inactive'
+                'error' => 'Partner account is inactive',
             ], 403);
         }
 
         // Get the current company context from session or request
         $companyId = $this->getCurrentCompanyId($request);
-        
+
         if ($companyId) {
             // Verify partner has access to this company
             $hasAccess = $partner->activeCompanies()
                 ->where('companies.id', $companyId)
                 ->exists();
-                
-            if (!$hasAccess) {
+
+            if (! $hasAccess) {
                 return response()->json([
-                    'error' => 'Partner does not have access to this company'
+                    'error' => 'Partner does not have access to this company',
                 ], 403);
             }
 
@@ -63,7 +61,7 @@ class PartnerScopeMiddleware
                     'partner_id' => $partner->id,
                     'company_id' => $companyId,
                     'partner' => $partner,
-                ]
+                ],
             ]);
         }
 
@@ -100,4 +98,3 @@ class PartnerScopeMiddleware
         return null;
     }
 }
-

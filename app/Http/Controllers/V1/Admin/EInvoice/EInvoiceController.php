@@ -39,9 +39,6 @@ class EInvoiceController extends Controller
 
     /**
      * Display a listing of e-invoices with filters.
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -87,9 +84,6 @@ class EInvoiceController extends Controller
 
     /**
      * Display the specified e-invoice with submissions.
-     *
-     * @param  int  $id
-     * @return JsonResponse
      */
     public function show(int $id): JsonResponse
     {
@@ -131,9 +125,6 @@ class EInvoiceController extends Controller
 
     /**
      * Display e-invoice by invoice ID with submissions.
-     *
-     * @param  int  $invoiceId
-     * @return JsonResponse
      */
     public function showByInvoice(int $invoiceId): JsonResponse
     {
@@ -167,7 +158,7 @@ class EInvoiceController extends Controller
             ])
             ->first();
 
-        if (!$eInvoice) {
+        if (! $eInvoice) {
             return response()->json([
                 'data' => null,
                 'submissions' => [],
@@ -183,9 +174,6 @@ class EInvoiceController extends Controller
 
     /**
      * Generate UBL XML for an invoice (preview mode, doesn't save).
-     *
-     * @param  int  $invoiceId
-     * @return JsonResponse
      */
     public function generate(int $invoiceId): JsonResponse
     {
@@ -232,13 +220,13 @@ class EInvoiceController extends Controller
             }
 
             // Generate UBL XML
-            $ublMapper = new MkUblMapper();
+            $ublMapper = new MkUblMapper;
             $ublXml = $ublMapper->mapInvoiceToUbl($invoice);
 
             // Get or create e-invoice record
             $eInvoice = EInvoice::whereInvoice($invoiceId)->first();
 
-            if (!$eInvoice) {
+            if (! $eInvoice) {
                 $eInvoice = EInvoice::create([
                     'invoice_id' => $invoice->id,
                     'company_id' => $invoice->company_id,
@@ -283,10 +271,6 @@ class EInvoiceController extends Controller
 
     /**
      * Sign an e-invoice with the company's active certificate.
-     *
-     * @param  int  $id
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function sign(int $id, Request $request): JsonResponse
     {
@@ -306,7 +290,7 @@ class EInvoiceController extends Controller
             // Get active certificate for company
             $certificate = Certificate::getActiveCertificate($eInvoice->company_id);
 
-            if (!$certificate) {
+            if (! $certificate) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No active certificate found for this company. Please upload a valid certificate.',
@@ -314,7 +298,7 @@ class EInvoiceController extends Controller
             }
 
             // Validate certificate is not expired
-            if (!$certificate->isValid()) {
+            if (! $certificate->isValid()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Certificate is expired or invalid. Please upload a new certificate.',
@@ -403,9 +387,6 @@ class EInvoiceController extends Controller
 
     /**
      * Queue e-invoice for submission to tax authority.
-     *
-     * @param  int  $id
-     * @return JsonResponse
      */
     public function submit(int $id): JsonResponse
     {
@@ -416,7 +397,7 @@ class EInvoiceController extends Controller
             $this->authorize('update', $eInvoice);
 
             // Validate e-invoice is signed
-            if (!$eInvoice->isSigned()) {
+            if (! $eInvoice->isSigned()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'E-invoice must be signed before submission.',
@@ -490,9 +471,6 @@ class EInvoiceController extends Controller
     /**
      * Simulate/validate XML without submitting to portal.
      * Useful for testing XML validity before actual submission.
-     *
-     * @param  int  $id
-     * @return JsonResponse
      */
     public function simulate(int $id): JsonResponse
     {
@@ -510,11 +488,11 @@ class EInvoiceController extends Controller
             }
 
             // Validate XML structure
-            $doc = new \DOMDocument();
+            $doc = new \DOMDocument;
             $doc->preserveWhiteSpace = false;
             $doc->formatOutput = true;
 
-            if (!$doc->loadXML($eInvoice->ubl_xml_signed)) {
+            if (! $doc->loadXML($eInvoice->ubl_xml_signed)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid XML structure.',
@@ -522,7 +500,7 @@ class EInvoiceController extends Controller
             }
 
             // Verify signature
-            $signer = new MkXmlSigner();
+            $signer = new MkXmlSigner;
             $isValidSignature = $signer->verifySignature($eInvoice->ubl_xml_signed);
 
             // Validate UBL schema (basic checks)
@@ -554,7 +532,6 @@ class EInvoiceController extends Controller
     /**
      * Download signed XML file.
      *
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function downloadXml(int $id)
@@ -580,9 +557,6 @@ class EInvoiceController extends Controller
 
     /**
      * Retry a failed submission.
-     *
-     * @param  int  $submissionId
-     * @return JsonResponse
      */
     public function resubmit(int $submissionId): JsonResponse
     {
@@ -594,7 +568,7 @@ class EInvoiceController extends Controller
                 ->findOrFail($submissionId);
 
             // Check if can retry
-            if (!$submission->canRetry()) {
+            if (! $submission->canRetry()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Maximum retry attempts exceeded or submission is not in retryable state.',
@@ -639,8 +613,6 @@ class EInvoiceController extends Controller
     /**
      * Check portal health status.
      * Pings the e-UJP portal to verify availability.
-     *
-     * @return JsonResponse
      */
     public function checkPortalStatus(): JsonResponse
     {
@@ -681,9 +653,6 @@ class EInvoiceController extends Controller
 
     /**
      * Get submission queue (pending and failed submissions).
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function getSubmissionQueue(Request $request): JsonResponse
     {
@@ -728,14 +697,15 @@ class EInvoiceController extends Controller
      * Extract private key from certificate.
      * Handles decryption and temporary file creation using CertificateExtractionService.
      *
-     * @param  Certificate  $certificate
-     * @param  string|null  $passphrase Optional PFX passphrase
+     * @param  string|null  $passphrase  Optional PFX passphrase
      * @return string Path to private key file
+     *
      * @throws Exception
      */
     protected function extractPrivateKey(Certificate $certificate, ?string $passphrase = null): string
     {
         $extractionService = app(CertificateExtractionService::class);
+
         return $extractionService->getTempPrivateKeyPath($certificate, $passphrase);
     }
 
@@ -743,26 +713,26 @@ class EInvoiceController extends Controller
      * Extract certificate from Certificate model.
      * Handles decryption and temporary file creation using CertificateExtractionService.
      *
-     * @param  Certificate  $certificate
-     * @param  string|null  $passphrase Optional PFX passphrase
+     * @param  string|null  $passphrase  Optional PFX passphrase
      * @return string Path to certificate file
+     *
      * @throws Exception
      */
     protected function extractCertificate(Certificate $certificate, ?string $passphrase = null): string
     {
         $extractionService = app(CertificateExtractionService::class);
+
         return $extractionService->getTempCertificatePath($certificate, $passphrase);
     }
 
     /**
      * Format XML for preview display.
      *
-     * @param  string  $xml
      * @return array Formatted preview data
      */
     protected function formatXmlPreview(string $xml): array
     {
-        $doc = new \DOMDocument();
+        $doc = new \DOMDocument;
         $doc->preserveWhiteSpace = false;
         $doc->formatOutput = true;
         $doc->loadXML($xml);
@@ -781,10 +751,6 @@ class EInvoiceController extends Controller
 
     /**
      * Get XML element value by tag name.
-     *
-     * @param  \DOMDocument  $doc
-     * @param  string  $tagPath
-     * @return string|null
      */
     protected function getXmlValue(\DOMDocument $doc, string $tagPath): ?string
     {
@@ -801,7 +767,6 @@ class EInvoiceController extends Controller
     /**
      * Validate UBL XML structure.
      *
-     * @param  \DOMDocument  $doc
      * @return array Validation errors
      */
     protected function validateUblStructure(\DOMDocument $doc): array

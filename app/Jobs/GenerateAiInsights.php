@@ -48,7 +48,7 @@ class GenerateAiInsights implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param Company $company The company to analyze
+     * @param  Company  $company  The company to analyze
      */
     public function __construct(
         public Company $company
@@ -56,9 +56,6 @@ class GenerateAiInsights implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @param AiInsightsService $aiService
-     * @return void
      */
     public function handle(AiInsightsService $aiService): void
     {
@@ -103,9 +100,6 @@ class GenerateAiInsights implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @param \Throwable $exception
-     * @return void
      */
     public function failed(\Throwable $exception): void
     {
@@ -129,7 +123,7 @@ class GenerateAiInsights implements ShouldQueue
     {
         return [
             'ai-insights',
-            'company:' . $this->company->id,
+            'company:'.$this->company->id,
         ];
     }
 }

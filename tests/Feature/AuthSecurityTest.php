@@ -2,26 +2,24 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
  * AUTH-04: Session Security and CSRF Validation Feature Test
- * 
+ *
  * This test validates authentication security measures including:
  * - CSRF protection on authentication endpoints
- * - Rate limiting on login attempts  
+ * - Rate limiting on login attempts
  * - Session security headers
  * - Authentication middleware protection
  * - Token-based authentication security
- * 
+ *
  * Target: All security controls validated with proper error handling
  */
 class AuthSecurityTest extends TestCase
@@ -29,19 +27,21 @@ class AuthSecurityTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $company;
+
     protected $performanceMetrics = [];
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test user and company
         $this->company = Company::factory()->create();
         $this->user = User::factory()->create([
             'email' => 'security.test@invoiceshelf.com',
             'password' => Hash::make('SecurePassword123!'),
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
         $this->user->companies()->attach($this->company->id);
     }
@@ -50,12 +50,12 @@ class AuthSecurityTest extends TestCase
     public function it_enforces_csrf_protection_on_login_endpoint()
     {
         $startTime = microtime(true);
-        
+
         // Attempt login without CSRF token
         $response = $this->postJson('/api/v1/auth/login', [
             'username' => $this->user->email,
             'password' => 'SecurePassword123!',
-            'device_name' => 'test-device'
+            'device_name' => 'test-device',
         ]);
 
         // Should be protected by CSRF (419 status code)
@@ -82,7 +82,7 @@ class AuthSecurityTest extends TestCase
             $response = $this->postJson('/api/v1/auth/login', [
                 'username' => $email,
                 'password' => 'wrong-password',
-                'device_name' => 'test-device'
+                'device_name' => 'test-device',
             ]);
 
             $attempts++;
@@ -121,19 +121,19 @@ class AuthSecurityTest extends TestCase
             '/api/v1/users',
             '/api/v1/customers',
             '/api/v1/invoices',
-            '/api/v1/payments'
+            '/api/v1/payments',
         ];
 
         foreach ($protectedEndpoints as $endpoint) {
             $response = $this->getJson($endpoint);
-            
+
             // Should require authentication (401)
-            $this->assertEquals(401, $response->status(), 
+            $this->assertEquals(401, $response->status(),
                 "Endpoint {$endpoint} should require authentication");
         }
 
         $this->performanceMetrics['middleware_check'] = (microtime(true) - $startTime) * 1000;
-        $this->assertLessThan(500, $this->performanceMetrics['middleware_check'], 
+        $this->assertLessThan(500, $this->performanceMetrics['middleware_check'],
             'Middleware checks should be efficient');
     }
 
@@ -150,9 +150,9 @@ class AuthSecurityTest extends TestCase
         // Check for security headers (may vary based on configuration)
         $securityHeaders = [
             'X-Frame-Options',
-            'X-Content-Type-Options', 
+            'X-Content-Type-Options',
             'X-XSS-Protection',
-            'Referrer-Policy'
+            'Referrer-Policy',
         ];
 
         $foundHeaders = 0;
@@ -163,7 +163,7 @@ class AuthSecurityTest extends TestCase
         }
 
         // Should have at least some security headers
-        $this->assertGreaterThan(0, $foundHeaders, 
+        $this->assertGreaterThan(0, $foundHeaders,
             'Should have security headers present');
 
         $this->performanceMetrics['security_headers'] = (microtime(true) - $startTime) * 1000;
@@ -178,7 +178,7 @@ class AuthSecurityTest extends TestCase
         $loginResponse = $this->postJson('/api/v1/auth/login', [
             'username' => $this->user->email,
             'password' => 'SecurePassword123!',
-            'device_name' => 'test-device'
+            'device_name' => 'test-device',
         ]);
 
         if ($loginResponse->status() === 200) {
@@ -191,7 +191,7 @@ class AuthSecurityTest extends TestCase
             // Test authenticated request with token
             $authenticatedResponse = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             $this->assertTrue(
@@ -201,7 +201,7 @@ class AuthSecurityTest extends TestCase
         }
 
         $this->performanceMetrics['token_auth'] = (microtime(true) - $startTime) * 1000;
-        $this->assertLessThan(2000, $this->performanceMetrics['token_auth'], 
+        $this->assertLessThan(2000, $this->performanceMetrics['token_auth'],
             'Token authentication should be efficient');
     }
 
@@ -238,12 +238,12 @@ class AuthSecurityTest extends TestCase
         $response = $this->post('/admin/login', [
             'email' => $this->user->email,
             'password' => 'SecurePassword123!',
-            '_token' => csrf_token()
+            '_token' => csrf_token(),
         ]);
 
         // Session ID should change after authentication (session fixation protection)
         $newSessionId = session()->getId();
-        
+
         // This test may not apply to API authentication, but good to verify
         if ($initialSessionId && $newSessionId) {
             $this->assertNotEquals($initialSessionId, $newSessionId,
@@ -265,7 +265,7 @@ class AuthSecurityTest extends TestCase
             $response = $this->postJson('/api/v1/auth/login', [
                 'username' => $this->user->email,
                 'password' => 'SecurePassword123!',
-                'device_name' => "device-{$i}"
+                'device_name' => "device-{$i}",
             ]);
 
             if ($response->status() === 200) {
@@ -281,7 +281,7 @@ class AuthSecurityTest extends TestCase
         foreach ($tokens as $token) {
             $response = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             $this->assertTrue(
@@ -302,7 +302,7 @@ class AuthSecurityTest extends TestCase
         $loginResponse = $this->postJson('/api/v1/auth/login', [
             'username' => $this->user->email,
             'password' => 'SecurePassword123!',
-            'device_name' => 'test-device'
+            'device_name' => 'test-device',
         ]);
 
         if ($loginResponse->status() === 200) {
@@ -311,12 +311,12 @@ class AuthSecurityTest extends TestCase
             // Verify token works
             $checkResponse = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             // Logout
             $logoutResponse = $this->withHeaders([
-                'Authorization' => $token
+                'Authorization' => $token,
             ])->postJson('/api/v1/auth/logout');
 
             $this->assertTrue(
@@ -327,7 +327,7 @@ class AuthSecurityTest extends TestCase
             // Try to use token after logout
             $invalidTokenResponse = $this->withHeaders([
                 'Authorization' => $token,
-                'company' => $this->company->id
+                'company' => $this->company->id,
             ])->getJson('/api/v1/auth/check');
 
             $this->assertEquals(401, $invalidTokenResponse->status(),
@@ -352,7 +352,7 @@ class AuthSecurityTest extends TestCase
 
         foreach ($maliciousInputs as $input) {
             $response = $this->postJson('/api/v1/auth/login', array_merge($input, [
-                'device_name' => 'test-device'
+                'device_name' => 'test-device',
             ]));
 
             // Should handle malicious input gracefully (not crash)
@@ -383,7 +383,7 @@ class AuthSecurityTest extends TestCase
             $response = $this->postJson('/api/v1/auth/login', [
                 'username' => $email,
                 'password' => 'definitely-wrong-password',
-                'device_name' => 'test-device'
+                'device_name' => 'test-device',
             ]);
 
             if ($response->status() === 401 || $response->status() === 422) {
@@ -408,15 +408,15 @@ class AuthSecurityTest extends TestCase
     protected function tearDown(): void
     {
         // Log performance metrics
-        if (!empty($this->performanceMetrics)) {
+        if (! empty($this->performanceMetrics)) {
             $avgTime = array_sum($this->performanceMetrics) / count($this->performanceMetrics);
-            
+
             echo "\n📊 AUTH-04 Performance Metrics:\n";
             foreach ($this->performanceMetrics as $test => $time) {
                 echo sprintf("   %s: %.2fms\n", ucfirst(str_replace('_', ' ', $test)), $time);
             }
             echo sprintf("   Average: %.2fms\n", $avgTime);
-            
+
             if ($avgTime < 200) {
                 echo "🎯 TARGET MET: Security checks <200ms average\n";
             } elseif ($avgTime < 500) {

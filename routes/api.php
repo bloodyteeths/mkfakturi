@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\CertUploadController;
+use App\Http\Controllers\V1\Admin\Accounting\AccountingReportsController;
+use App\Http\Controllers\V1\Admin\AccountsPayable\CloneBillController;
 use App\Http\Controllers\V1\Admin\Auth\ForgotPasswordController;
+use App\Http\Controllers\V1\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\V1\Admin\Auth\ResetPasswordController;
 use App\Http\Controllers\V1\Admin\Backup\BackupsController;
 use App\Http\Controllers\V1\Admin\Backup\DownloadBackupController;
@@ -44,7 +47,6 @@ use App\Http\Controllers\V1\Admin\General\SearchController;
 use App\Http\Controllers\V1\Admin\General\SearchUsersController;
 use App\Http\Controllers\V1\Admin\General\TimeFormatsController;
 use App\Http\Controllers\V1\Admin\General\TimezonesController;
-use App\Http\Controllers\V1\Admin\AccountsPayable\CloneBillController;
 use App\Http\Controllers\V1\Admin\Invoice\ChangeInvoiceStatusController;
 use App\Http\Controllers\V1\Admin\Invoice\CloneInvoiceController;
 use App\Http\Controllers\V1\Admin\Invoice\InvoicesController;
@@ -53,8 +55,8 @@ use App\Http\Controllers\V1\Admin\Invoice\SendInvoiceController;
 use App\Http\Controllers\V1\Admin\Invoice\SendInvoicePreviewController;
 use App\Http\Controllers\V1\Admin\Item\ItemsController;
 use App\Http\Controllers\V1\Admin\Item\UnitsController;
+use App\Http\Controllers\V1\Admin\MigrationController;
 use App\Http\Controllers\V1\Admin\Mobile\AuthController as MobileAuthController;
-use App\Http\Controllers\V1\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\V1\Admin\Modules\ApiTokenController;
 use App\Http\Controllers\V1\Admin\Modules\CompleteModuleInstallationController;
 use App\Http\Controllers\V1\Admin\Modules\CopyModuleController;
@@ -95,8 +97,6 @@ use App\Http\Controllers\V1\Admin\Update\FinishUpdateController;
 use App\Http\Controllers\V1\Admin\Update\MigrateUpdateController;
 use App\Http\Controllers\V1\Admin\Update\UnzipUpdateController;
 use App\Http\Controllers\V1\Admin\Users\UsersController;
-use App\Http\Controllers\V1\Admin\MigrationController;
-use App\Http\Controllers\V1\Admin\Accounting\AccountingReportsController;
 use App\Http\Controllers\V1\Customer\Auth\ForgotPasswordController as AuthForgotPasswordController;
 use App\Http\Controllers\V1\Customer\Auth\ResetPasswordController as AuthResetPasswordController;
 use App\Http\Controllers\V1\Customer\Estimate\AcceptEstimateController as CustomerAcceptEstimateController;
@@ -211,7 +211,7 @@ Route::prefix('/v1')->group(function () {
         // This endpoint bypasses bouncer since users need abilities to access anything
         // TODO: Remove after all tenants have abilities synced
         Route::get('/sync-abilities', function () {
-            if (!auth()->user()->isOwner()) {
+            if (! auth()->user()->isOwner()) {
                 abort(403, 'Only owners can sync abilities');
             }
 
@@ -222,7 +222,7 @@ Route::prefix('/v1')->group(function () {
                 'success' => true,
                 'message' => 'Abilities synced successfully for all companies!',
                 'output' => $output,
-                'note' => 'This route can be removed after confirming all tenants have abilities'
+                'note' => 'This route can be removed after confirming all tenants have abilities',
             ]);
         });
 
@@ -541,7 +541,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('vat-return/periods/{periodId}/close', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'closePeriod']);
                 Route::post('vat-return/periods/{periodId}/reopen', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'reopenPeriod']);
                 Route::get('vat-return/{id}/download-xml', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'downloadXml']);
-            Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
+                Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
             });
 
             // Suppliers, Bills, Bill Payments (Accounts Payable)
@@ -569,7 +569,6 @@ Route::prefix('/v1')->group(function () {
 
             // Receipt Scanner (Fiscal QR → Expense/Bill)
             Route::post('/receipts/scan', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'scan']);
-
 
             // Proforma Invoices
             // ----------------------------------
@@ -765,9 +764,9 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/monthly-trends', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'monthlyTrends']);
 
                 // Debug endpoint to see raw data
-                Route::get('/debug/data', function(\Illuminate\Http\Request $request) {
+                Route::get('/debug/data', function (\Illuminate\Http\Request $request) {
                     $company = \App\Models\Company::find($request->header('company'));
-                    if (!$company) {
+                    if (! $company) {
                         return response()->json(['error' => 'Company not found'], 404);
                     }
 
@@ -776,7 +775,7 @@ Route::prefix('/v1')->group(function () {
                     // Get all invoices with details
                     $allInvoices = \App\Models\Invoice::where('company_id', $company->id)
                         ->get()
-                        ->map(function($inv) {
+                        ->map(function ($inv) {
                             return [
                                 'id' => $inv->id,
                                 'number' => $inv->invoice_number,
@@ -803,7 +802,7 @@ Route::prefix('/v1')->group(function () {
             });
         });
 
-// CLAUDE-CHECKPOINT
+        // CLAUDE-CHECKPOINT
 
         // Self Update
         // ----------------------------------

@@ -15,8 +15,6 @@ class MkUnitsSeeder extends Seeder
      *
      * Source: UN/ECE Recommendation No. 20 - Codes for units of measure
      * Used in: UBL 2.1, Peppol BIS Billing 3.0, North Macedonia e-Faktura
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -81,6 +79,6 @@ class MkUnitsSeeder extends Seeder
             );
         }
 
-        $this->command->info('✅ Seeded ' . count($units) . ' UN/ECE Recommendation 20 units');
+        $this->command->info('✅ Seeded '.count($units).' UN/ECE Recommendation 20 units');
     }
 }

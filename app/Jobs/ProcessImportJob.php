@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Imports\BillImport;
 use App\Imports\CustomerImport;
 use App\Imports\InvoiceImport;
-use App\Imports\BillImport;
 use App\Imports\ItemImport;
 use App\Models\ImportJob;
 use App\Services\Migration\ImportPresetService;
@@ -15,7 +15,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use League\Csv\Reader;
 use League\Csv\Writer;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -27,8 +26,6 @@ use Maatwebsite\Excel\Facades\Excel;
  * - Supports dry-run mode (validation only)
  * - Generates error CSV for failed rows
  * - Updates ImportJob status in real-time
- *
- * @package App\Jobs
  */
 class ProcessImportJob implements ShouldQueue
 {
@@ -49,13 +46,11 @@ class ProcessImportJob implements ShouldQueue
     public $tries = 3;
 
     private ImportJob $importJob;
+
     private bool $isDryRun;
 
     /**
      * Create a new job instance.
-     *
-     * @param ImportJob $importJob
-     * @param bool $isDryRun
      */
     public function __construct(ImportJob $importJob, bool $isDryRun = false)
     {
@@ -79,7 +74,7 @@ class ProcessImportJob implements ShouldQueue
             $fileInfo = $this->importJob->file_info;
             $filePath = $fileInfo['path'] ?? null;
 
-            if (!$filePath || !Storage::exists($filePath)) {
+            if (! $filePath || ! Storage::exists($filePath)) {
                 throw new \Exception('Import file not found');
             }
 
@@ -159,8 +154,8 @@ class ProcessImportJob implements ShouldQueue
     /**
      * Create importer instance based on job type
      *
-     * @param array $mapping
      * @return CustomerImport|InvoiceImport|ItemImport|BillImport
+     *
      * @throws \Exception
      */
     private function createImporter(array $mapping)
@@ -195,15 +190,12 @@ class ProcessImportJob implements ShouldQueue
                 $mapping,
                 $this->isDryRun
             ),
-            default => throw new \Exception('Unsupported import type: ' . $this->importJob->type),
+            default => throw new \Exception('Unsupported import type: '.$this->importJob->type),
         };
     }
 
     /**
      * Generate error CSV file for failed rows
-     *
-     * @param array $failures
-     * @return void
      */
     private function generateErrorCsv(array $failures): void
     {
@@ -226,7 +218,7 @@ class ProcessImportJob implements ShouldQueue
             }
 
             // Save error CSV
-            $errorPath = 'imports/errors/import_' . $this->importJob->id . '_errors.csv';
+            $errorPath = 'imports/errors/import_'.$this->importJob->id.'_errors.csv';
             Storage::put($errorPath, $csv->toString());
 
             // Update import job with error file path
@@ -248,7 +240,6 @@ class ProcessImportJob implements ShouldQueue
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
      * @return void
      */
     public function failed(\Throwable $exception)

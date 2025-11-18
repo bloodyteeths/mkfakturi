@@ -2,21 +2,20 @@
 
 namespace App\Domain\Accounting;
 
-use App\Models\Invoice;
-use App\Models\Payment;
 use App\Models\Company;
 use App\Models\CompanySetting;
+use App\Models\Invoice;
+use App\Models\Payment;
+use Carbon\Carbon;
 use IFRS\Models\Account;
-use IFRS\Models\Transaction;
-use IFRS\Models\LineItem;
-use IFRS\Models\ReportingPeriod;
 use IFRS\Models\Entity;
-use IFRS\Reports\TrialBalance;
+use IFRS\Models\LineItem;
+use IFRS\Models\Transaction;
 use IFRS\Reports\BalanceSheet;
 use IFRS\Reports\IncomeStatement;
+use IFRS\Reports\TrialBalance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 /**
  * IFRS Adapter for Eloquent-IFRS Integration
@@ -24,8 +23,6 @@ use Carbon\Carbon;
  * Provides double-entry accounting integration via eloquent-ifrs package.
  * Posts Invoice and Payment transactions to the general ledger when
  * FEATURE_ACCOUNTING_BACKBONE flag is enabled.
- *
- * @package App\Domain\Accounting
  */
 class IfrsAdapter
 {
@@ -33,14 +30,12 @@ class IfrsAdapter
      * Post an Invoice to the general ledger
      * Creates: DR Accounts Receivable, CR Revenue
      *
-     * @param Invoice $invoice
-     * @return void
      * @throws \Exception
      */
     public function postInvoice(Invoice $invoice): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
@@ -49,8 +44,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($invoice->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // Get or create accounts
@@ -105,14 +100,14 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Invoice posted to ledger", [
+            Log::info('Invoice posted to ledger', [
                 'invoice_id' => $invoice->id,
                 'invoice_number' => $invoice->invoice_number,
                 'ifrs_transaction_id' => $transaction->id,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post invoice to ledger", [
+            Log::error('Failed to post invoice to ledger', [
                 'invoice_id' => $invoice->id,
                 'error' => $e->getMessage(),
             ]);
@@ -124,14 +119,12 @@ class IfrsAdapter
      * Post a Payment to the general ledger
      * Creates: DR Cash, CR Accounts Receivable
      *
-     * @param Payment $payment
-     * @return void
      * @throws \Exception
      */
     public function postPayment(Payment $payment): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
@@ -140,8 +133,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($payment->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // Get accounts
@@ -184,14 +177,14 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Payment posted to ledger", [
+            Log::info('Payment posted to ledger', [
                 'payment_id' => $payment->id,
                 'payment_number' => $payment->payment_number,
                 'ifrs_transaction_id' => $transaction->id,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post payment to ledger", [
+            Log::error('Failed to post payment to ledger', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
             ]);
@@ -203,15 +196,14 @@ class IfrsAdapter
      * Post a payment processing fee to the general ledger
      * Creates: DR Fee Expense, CR Cash
      *
-     * @param Payment $payment
-     * @param float $fee Amount in cents
-     * @return void
+     * @param  float  $fee  Amount in cents
+     *
      * @throws \Exception
      */
     public function postFee(Payment $payment, float $fee): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
@@ -220,8 +212,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($payment->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // Get accounts
@@ -261,14 +253,14 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Payment fee posted to ledger", [
+            Log::info('Payment fee posted to ledger', [
                 'payment_id' => $payment->id,
                 'fee' => $fee,
                 'ifrs_transaction_id' => $transaction->id,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post payment fee to ledger", [
+            Log::error('Failed to post payment fee to ledger', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
             ]);
@@ -283,23 +275,24 @@ class IfrsAdapter
      * - DR 4000 Sales Revenue (reduce)
      * - DR 2100 Tax Payable (reduce)
      *
-     * @param \App\Models\CreditNote $creditNote
-     * @return void
+     * @param  \App\Models\CreditNote  $creditNote
+     *
      * @throws \Exception
      */
     public function postCreditNote($creditNote): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
         // Idempotency check: don't re-post if already posted
         if ($creditNote->ifrs_transaction_id) {
-            Log::info("Credit note already posted to ledger, skipping", [
+            Log::info('Credit note already posted to ledger, skipping', [
                 'credit_note_id' => $creditNote->id,
                 'ifrs_transaction_id' => $creditNote->ifrs_transaction_id,
             ]);
+
             return;
         }
 
@@ -308,8 +301,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($creditNote->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // Get or create accounts
@@ -373,7 +366,7 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Credit note posted to ledger", [
+            Log::info('Credit note posted to ledger', [
                 'credit_note_id' => $creditNote->id,
                 'credit_note_number' => $creditNote->credit_note_number,
                 'ifrs_transaction_id' => $transaction->id,
@@ -382,7 +375,7 @@ class IfrsAdapter
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post credit note to ledger", [
+            Log::error('Failed to post credit note to ledger', [
                 'credit_note_id' => $creditNote->id,
                 'error' => $e->getMessage(),
             ]);
@@ -393,13 +386,11 @@ class IfrsAdapter
     /**
      * Get Trial Balance for a company as of a specific date
      *
-     * @param Company $company
-     * @param string|null $asOfDate Date in Y-m-d format
-     * @return array
+     * @param  string|null  $asOfDate  Date in Y-m-d format
      */
     public function getTrialBalance(Company $company, ?string $asOfDate = null): array
     {
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return ['error' => 'Accounting backbone feature is disabled'];
         }
 
@@ -408,7 +399,7 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($company);
-            if (!$entity) {
+            if (! $entity) {
                 return [
                     'error' => 'IFRS Entity not available',
                     'message' => 'Failed to get or create IFRS Entity for this company.',
@@ -427,7 +418,7 @@ class IfrsAdapter
             }
 
             // TrialBalance expects year string and entity
-            $trialBalance = new TrialBalance((string)$date->year, $entity);
+            $trialBalance = new TrialBalance((string) $date->year, $entity);
             $sections = $trialBalance->getSections();
 
             // TrialBalance accumulates debits/credits in $balances property, not via methods
@@ -445,7 +436,7 @@ class IfrsAdapter
                 'is_balanced' => $totalDebits === $totalCredits,
             ];
         } catch (\Exception $e) {
-            Log::error("Failed to generate trial balance", [
+            Log::error('Failed to generate trial balance', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -469,13 +460,11 @@ class IfrsAdapter
     /**
      * Get Balance Sheet for a company as of a specific date
      *
-     * @param Company $company
-     * @param string|null $asOfDate Date in Y-m-d format
-     * @return array
+     * @param  string|null  $asOfDate  Date in Y-m-d format
      */
     public function getBalanceSheet(Company $company, ?string $asOfDate = null): array
     {
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return ['error' => 'Accounting backbone feature is disabled'];
         }
 
@@ -484,7 +473,7 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($company);
-            if (!$entity) {
+            if (! $entity) {
                 return [
                     'error' => 'IFRS Entity not available',
                     'message' => 'Failed to get or create IFRS Entity for this company.',
@@ -516,7 +505,7 @@ class IfrsAdapter
                 'results' => $sections['results'] ?? [],
             ];
         } catch (\Exception $e) {
-            Log::error("Failed to generate balance sheet", [
+            Log::error('Failed to generate balance sheet', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -538,14 +527,12 @@ class IfrsAdapter
     /**
      * Get Income Statement for a company for a date range
      *
-     * @param Company $company
-     * @param string $startDate Date in Y-m-d format
-     * @param string $endDate Date in Y-m-d format
-     * @return array
+     * @param  string  $startDate  Date in Y-m-d format
+     * @param  string  $endDate  Date in Y-m-d format
      */
     public function getIncomeStatement(Company $company, string $startDate, string $endDate): array
     {
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return ['error' => 'Accounting backbone feature is disabled'];
         }
 
@@ -555,7 +542,7 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($company);
-            if (!$entity) {
+            if (! $entity) {
                 return [
                     'error' => 'IFRS Entity not available',
                     'message' => 'Failed to get or create IFRS Entity for this company.',
@@ -593,7 +580,7 @@ class IfrsAdapter
                 'totals' => $sections['totals'] ?? [],
             ];
         } catch (\Exception $e) {
-            Log::error("Failed to generate income statement", [
+            Log::error('Failed to generate income statement', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -614,8 +601,6 @@ class IfrsAdapter
 
     /**
      * Check if accounting backbone feature is enabled
-     *
-     * @return bool
      */
     protected function isEnabled(): bool
     {
@@ -625,9 +610,6 @@ class IfrsAdapter
 
     /**
      * Get or create IFRS Entity for a company
-     *
-     * @param Company $company
-     * @return Entity|null
      */
     protected function getOrCreateEntityForCompany(Company $company): ?Entity
     {
@@ -651,27 +633,24 @@ class IfrsAdapter
             // Link entity to company
             $company->update(['ifrs_entity_id' => $entity->id]);
 
-            Log::info("Created IFRS Entity for company", [
+            Log::info('Created IFRS Entity for company', [
                 'company_id' => $company->id,
                 'entity_id' => $entity->id,
             ]);
 
             return $entity;
         } catch (\Exception $e) {
-            Log::error("Failed to create IFRS Entity for company", [
+            Log::error('Failed to create IFRS Entity for company', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
 
     /**
      * Get or create Accounts Receivable account
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getAccountsReceivableAccount(int $companyId, int $entityId): Account
     {
@@ -691,10 +670,6 @@ class IfrsAdapter
 
     /**
      * Get or create Revenue account
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getRevenueAccount(int $companyId, int $entityId): Account
     {
@@ -714,10 +689,6 @@ class IfrsAdapter
 
     /**
      * Get or create Cash account
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getCashAccount(int $companyId, int $entityId): Account
     {
@@ -737,10 +708,6 @@ class IfrsAdapter
 
     /**
      * Get or create Tax Payable account
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getTaxPayableAccount(int $companyId, int $entityId): Account
     {
@@ -760,10 +727,6 @@ class IfrsAdapter
 
     /**
      * Get or create Fee Expense account
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getFeeExpenseAccount(int $companyId, int $entityId): Account
     {
@@ -785,23 +748,24 @@ class IfrsAdapter
      * Post an Expense to the general ledger
      * Creates: DR Expense Account (5XXX based on category), CR Cash/Bank
      *
-     * @param \App\Models\Expense $expense
-     * @return void
+     * @param  \App\Models\Expense  $expense
+     *
      * @throws \Exception
      */
     public function postExpense($expense): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
         // Idempotency check: don't re-post if already posted
         if ($expense->ifrs_transaction_id) {
-            Log::info("Expense already posted to ledger, skipping", [
+            Log::info('Expense already posted to ledger, skipping', [
                 'expense_id' => $expense->id,
                 'ifrs_transaction_id' => $expense->ifrs_transaction_id,
             ]);
+
             return;
         }
 
@@ -810,8 +774,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($expense->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // EntityGuard check
@@ -825,7 +789,7 @@ class IfrsAdapter
             $categoryName = $expense->category ? $expense->category->name : 'General Expense';
             $narration = "Expense: {$categoryName}";
             if ($expense->notes) {
-                $narration .= " - " . substr($expense->notes, 0, 100);
+                $narration .= ' - '.substr($expense->notes, 0, 100);
             }
 
             // Create IFRS Transaction (Cash Purchase)
@@ -865,14 +829,14 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Expense posted to ledger", [
+            Log::info('Expense posted to ledger', [
                 'expense_id' => $expense->id,
                 'category' => $categoryName,
                 'ifrs_transaction_id' => $transaction->id,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post expense to ledger", [
+            Log::error('Failed to post expense to ledger', [
                 'expense_id' => $expense->id,
                 'error' => $e->getMessage(),
             ]);
@@ -882,32 +846,29 @@ class IfrsAdapter
 
     /**
      * Get currency ID for company (defaults to first currency)
-     *
-     * @param int $companyId
-     * @return int
      */
     protected function getCurrencyId(int $companyId): int
     {
         // Try 1: Get the company's currency from settings
         $appCurrencyId = CompanySetting::getSetting('currency', $companyId);
 
-        Log::info("getCurrencyId: Step 1 - CompanySetting lookup", [
+        Log::info('getCurrencyId: Step 1 - CompanySetting lookup', [
             'company_id' => $companyId,
             'app_currency_id' => $appCurrencyId,
         ]);
 
         // Try 2: If not in settings, check the company's invoices (migrated companies)
-        if (!$appCurrencyId) {
+        if (! $appCurrencyId) {
             $invoice = Invoice::where('company_id', $companyId)->whereNotNull('currency_id')->first();
             if ($invoice) {
                 $appCurrencyId = $invoice->currency_id;
-                Log::info("getCurrencyId: Step 2 - Found currency from invoice", [
+                Log::info('getCurrencyId: Step 2 - Found currency from invoice', [
                     'company_id' => $companyId,
                     'invoice_id' => $invoice->id,
                     'app_currency_id' => $appCurrencyId,
                 ]);
             } else {
-                Log::warning("getCurrencyId: Step 2 - No invoices with currency found", [
+                Log::warning('getCurrencyId: Step 2 - No invoices with currency found', [
                     'company_id' => $companyId,
                 ]);
             }
@@ -921,42 +882,43 @@ class IfrsAdapter
                 // Find or create corresponding IFRS currency
                 $ifrsCurrency = \IFRS\Models\Currency::where('currency_code', $appCurrency->code)->first();
 
-                if (!$ifrsCurrency) {
+                if (! $ifrsCurrency) {
                     $ifrsCurrency = \IFRS\Models\Currency::create([
                         'name' => $appCurrency->name,
                         'currency_code' => $appCurrency->code,
                     ]);
-                    Log::info("getCurrencyId: Created new IFRS currency", [
+                    Log::info('getCurrencyId: Created new IFRS currency', [
                         'ifrs_currency_id' => $ifrsCurrency->id,
                         'code' => $appCurrency->code,
                     ]);
                 }
 
-                Log::info("getCurrencyId: Returning IFRS currency", [
+                Log::info('getCurrencyId: Returning IFRS currency', [
                     'ifrs_currency_id' => $ifrsCurrency->id,
                     'code' => $appCurrency->code,
                 ]);
+
                 return $ifrsCurrency->id;
             } else {
-                Log::error("getCurrencyId: App currency not found", [
+                Log::error('getCurrencyId: App currency not found', [
                     'app_currency_id' => $appCurrencyId,
                 ]);
             }
         }
 
         // Fallback: Return first IFRS currency or create default MKD
-        Log::warning("getCurrencyId: Using fallback - first IFRS currency or MKD", [
+        Log::warning('getCurrencyId: Using fallback - first IFRS currency or MKD', [
             'company_id' => $companyId,
         ]);
 
         $currency = \IFRS\Models\Currency::first();
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = \IFRS\Models\Currency::create([
                 'name' => 'Macedonian Denar',
                 'currency_code' => 'MKD',
             ]);
-            Log::info("getCurrencyId: Created fallback MKD currency", [
+            Log::info('getCurrencyId: Created fallback MKD currency', [
                 'ifrs_currency_id' => $currency->id,
             ]);
         }
@@ -967,10 +929,7 @@ class IfrsAdapter
     /**
      * Get or create Expense account based on category
      *
-     * @param int $companyId
-     * @param int $entityId
-     * @param \App\Models\ExpenseCategory|null $category
-     * @return Account
+     * @param  \App\Models\ExpenseCategory|null  $category
      */
     protected function getExpenseAccount(int $companyId, int $entityId, $category = null): Account
     {
@@ -997,9 +956,6 @@ class IfrsAdapter
 
     /**
      * Map expense category to appropriate chart of accounts code
-     *
-     * @param string $categoryName
-     * @return string
      */
     protected function mapCategoryToAccountCode(string $categoryName): string
     {
@@ -1046,23 +1002,24 @@ class IfrsAdapter
      * Post a Bill to the general ledger
      * Creates: DR Expense Account (5XXX based on bill items), CR Accounts Payable, DR VAT Receivable
      *
-     * @param \App\Models\Bill $bill
-     * @return void
+     * @param  \App\Models\Bill  $bill
+     *
      * @throws \Exception
      */
     public function postBill($bill): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
         // Idempotency check: don't re-post if already posted
         if ($bill->ifrs_transaction_id) {
-            Log::info("Bill already posted to ledger, skipping", [
+            Log::info('Bill already posted to ledger, skipping', [
                 'bill_id' => $bill->id,
                 'ifrs_transaction_id' => $bill->ifrs_transaction_id,
             ]);
+
             return;
         }
 
@@ -1071,8 +1028,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($bill->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // Get or create accounts
@@ -1130,14 +1087,14 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Bill posted to ledger", [
+            Log::info('Bill posted to ledger', [
                 'bill_id' => $bill->id,
                 'bill_number' => $bill->bill_number,
                 'ifrs_transaction_id' => $transaction->id,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post bill to ledger", [
+            Log::error('Failed to post bill to ledger', [
                 'bill_id' => $bill->id,
                 'error' => $e->getMessage(),
             ]);
@@ -1149,23 +1106,24 @@ class IfrsAdapter
      * Post a BillPayment to the general ledger
      * Creates: DR Accounts Payable, CR Cash and Bank
      *
-     * @param \App\Models\BillPayment $billPayment
-     * @return void
+     * @param  \App\Models\BillPayment  $billPayment
+     *
      * @throws \Exception
      */
     public function postBillPayment($billPayment): void
     {
         // Skip if feature is disabled
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return;
         }
 
         // Idempotency check: don't re-post if already posted
         if ($billPayment->ifrs_transaction_id) {
-            Log::info("Bill payment already posted to ledger, skipping", [
+            Log::info('Bill payment already posted to ledger, skipping', [
                 'bill_payment_id' => $billPayment->id,
                 'ifrs_transaction_id' => $billPayment->ifrs_transaction_id,
             ]);
+
             return;
         }
 
@@ -1174,8 +1132,8 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($billPayment->company);
-            if (!$entity) {
-                throw new \Exception("Failed to get or create IFRS Entity for company");
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
             // Get accounts
@@ -1224,14 +1182,14 @@ class IfrsAdapter
 
             DB::commit();
 
-            Log::info("Bill payment posted to ledger", [
+            Log::info('Bill payment posted to ledger', [
                 'bill_payment_id' => $billPayment->id,
                 'payment_number' => $billPayment->payment_number,
                 'ifrs_transaction_id' => $transaction->id,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Failed to post bill payment to ledger", [
+            Log::error('Failed to post bill payment to ledger', [
                 'bill_payment_id' => $billPayment->id,
                 'error' => $e->getMessage(),
             ]);
@@ -1241,10 +1199,6 @@ class IfrsAdapter
 
     /**
      * Get or create Accounts Payable account
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getAccountsPayableAccount(int $companyId, int $entityId): Account
     {
@@ -1264,10 +1218,6 @@ class IfrsAdapter
 
     /**
      * Get or create VAT Receivable account (for input VAT on purchases)
-     *
-     * @param int $companyId
-     * @param int $entityId
-     * @return Account
      */
     protected function getVatReceivableAccount(int $companyId, int $entityId): Account
     {

@@ -19,4 +19,3 @@ class DeleteBillsRequest extends FormRequest
         ];
     }
 }
-

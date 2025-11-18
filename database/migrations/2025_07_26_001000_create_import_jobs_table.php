@@ -31,15 +31,15 @@ return new class extends Migration
             $table->text('error_message')->nullable();
             $table->json('error_details')->nullable(); // Detailed error information
             $table->json('summary')->nullable(); // Import summary and statistics
-            
+
             // Relationships
             $table->unsignedInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->unsignedInteger('creator_id');
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('cascade');
-            
+
             $table->timestamps();
-            
+
             // Indexes
             $table->index(['company_id', 'status']);
             $table->index(['creator_id', 'created_at']);

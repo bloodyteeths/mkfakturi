@@ -41,7 +41,8 @@ test('upload jpeg creates draft bill via parser', function () {
     $company = Company::firstOrFail();
 
     // Fake parser client returning a normalized invoice payload
-    $fakeParserClient = new class implements InvoiceParserClient {
+    $fakeParserClient = new class implements InvoiceParserClient
+    {
         public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
         {
             return [
@@ -77,7 +78,8 @@ test('upload jpeg creates draft bill via parser', function () {
     $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
     // Mapper stub that forwards parsed data into Bill components
-    $fakeMapper = new class extends ParsedInvoiceMapper {
+    $fakeMapper = new class extends ParsedInvoiceMapper
+    {
         public function mapToBillComponents(int $companyId, array $parsed): array
         {
             return [
@@ -120,7 +122,8 @@ test('upload jpeg creates draft bill via parser', function () {
     $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
 
     // Ensure QR path fails so we exercise parser fallback in controller
-    $failingQrService = new class extends FiscalReceiptQrService {
+    $failingQrService = new class extends FiscalReceiptQrService
+    {
         public function decodeAndNormalize(UploadedFile $file): array
         {
             throw new RuntimeException('QR not found in test image');
@@ -151,7 +154,8 @@ test('receipt scanner respects tenant isolation', function () {
     $companyA = Company::firstOrFail();
     $companyB = Company::factory()->create();
 
-    $fakeParserClient = new class implements InvoiceParserClient {
+    $fakeParserClient = new class implements InvoiceParserClient
+    {
         public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
         {
             return [
@@ -177,7 +181,8 @@ test('receipt scanner respects tenant isolation', function () {
     };
     $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    $fakeMapper = new class extends ParsedInvoiceMapper {
+    $fakeMapper = new class extends ParsedInvoiceMapper
+    {
         public function mapToBillComponents(int $companyId, array $parsed): array
         {
             return [
@@ -208,7 +213,8 @@ test('receipt scanner respects tenant isolation', function () {
     };
     $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
 
-    $failingQrService = new class extends FiscalReceiptQrService {
+    $failingQrService = new class extends FiscalReceiptQrService
+    {
         public function decodeAndNormalize(UploadedFile $file): array
         {
             throw new RuntimeException('QR not found in test image');
@@ -241,7 +247,8 @@ test('receipt scanner respects tenant isolation', function () {
 test('parser fallback generates bill_number when missing', function () {
     $company = Company::firstOrFail();
 
-    $fakeParserClient = new class implements InvoiceParserClient {
+    $fakeParserClient = new class implements InvoiceParserClient
+    {
         public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
         {
             return [
@@ -267,7 +274,8 @@ test('parser fallback generates bill_number when missing', function () {
     };
     $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    $fakeMapper = new class extends ParsedInvoiceMapper {
+    $fakeMapper = new class extends ParsedInvoiceMapper
+    {
         public function mapToBillComponents(int $companyId, array $parsed): array
         {
             return [
@@ -298,7 +306,8 @@ test('parser fallback generates bill_number when missing', function () {
     };
     $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
 
-    $failingQrService = new class extends FiscalReceiptQrService {
+    $failingQrService = new class extends FiscalReceiptQrService
+    {
         public function decodeAndNormalize(UploadedFile $file): array
         {
             throw new RuntimeException('QR not found in test image');

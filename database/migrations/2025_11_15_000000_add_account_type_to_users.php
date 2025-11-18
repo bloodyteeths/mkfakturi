@@ -29,7 +29,7 @@ return new class extends Migration
                 ->default('free')
                 ->after('kyc_status')
                 ->comment('For accountants only: free = affiliate, plus = paid accountant tier');
-        }) . ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
     }
 
     /**

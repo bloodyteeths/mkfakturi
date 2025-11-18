@@ -41,7 +41,7 @@ class CompanySetting extends Model
                 ]
             );
         }
-        
+
         // Clear company cache after updating settings
         Cache::flushCompanyCache($company_id);
     }
@@ -61,7 +61,8 @@ class CompanySetting extends Model
 
     public static function getSettings($settings, $company_id)
     {
-        $cacheKey = 'settings:' . md5(implode(',', $settings));
+        $cacheKey = 'settings:'.md5(implode(',', $settings));
+
         return Cache::companyRemember(
             $cacheKey,
             CacheServiceProvider::CACHE_TTLS['COMPANY_SETTINGS'],
@@ -81,6 +82,7 @@ class CompanySetting extends Model
             CacheServiceProvider::CACHE_TTLS['COMPANY_SETTINGS'],
             function () use ($key, $company_id) {
                 $setting = static::whereOption($key)->whereCompany($company_id)->first();
+
                 return $setting ? $setting->value : null;
             }
         );

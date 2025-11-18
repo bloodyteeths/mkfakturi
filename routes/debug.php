@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Models\BankToken;
 use App\Models\BankAccount;
+use App\Models\BankToken;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +16,7 @@ Route::middleware(['auth'])->prefix('debug')->group(function () {
     Route::get('/logs', function () {
         $logFile = storage_path('logs/laravel.log');
 
-        if (!file_exists($logFile)) {
+        if (! file_exists($logFile)) {
             return response()->json(['error' => 'Log file not found']);
         }
 
@@ -29,11 +29,11 @@ Route::middleware(['auth'])->prefix('debug')->group(function () {
         $start = max(0, $total - 200);
         $file->seek($start);
 
-        while (!$file->eof()) {
+        while (! $file->eof()) {
             $lines[] = $file->fgets();
         }
 
-        return response('<pre>' . htmlspecialchars(implode('', $lines)) . '</pre>');
+        return response('<pre>'.htmlspecialchars(implode('', $lines)).'</pre>');
     });
 
     // Show bank tokens
@@ -50,10 +50,10 @@ Route::middleware(['auth'])->prefix('debug')->group(function () {
                     'company_name' => $token->company->name ?? 'N/A',
                     'expires_at' => $token->expires_at,
                     'created_at' => $token->created_at,
-                    'has_access_token' => !empty($token->access_token),
-                    'has_refresh_token' => !empty($token->refresh_token),
+                    'has_access_token' => ! empty($token->access_token),
+                    'has_refresh_token' => ! empty($token->refresh_token),
                 ];
-            })
+            }),
         ], JSON_PRETTY_PRINT);
     });
 
@@ -76,7 +76,7 @@ Route::middleware(['auth'])->prefix('debug')->group(function () {
                     'is_active' => $account->is_active,
                     'created_at' => $account->created_at,
                 ];
-            })
+            }),
         ], JSON_PRETTY_PRINT);
     });
 });

@@ -4,12 +4,12 @@ namespace App\Jobs\Migration;
 
 use App\Models\ImportJob;
 use App\Models\ImportLog;
-use App\Models\MappingRule;
 use App\Models\ImportTempCustomer;
+use App\Models\ImportTempExpense;
 use App\Models\ImportTempInvoice;
 use App\Models\ImportTempItem;
 use App\Models\ImportTempPayment;
-use App\Models\ImportTempExpense;
+use App\Models\MappingRule;
 use App\Services\Migration\FieldMapperService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,12 +17,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Spatie\QueueableActions\QueueableAction;
 
 /**
  * AutoMapFieldsJob - Auto-map fields using FieldMapperService
- * 
+ *
  * This job automatically maps source fields to target fields using:
  * - Macedonian language corpus from FieldMapperService
  * - Heuristic matching algorithms
@@ -32,10 +31,10 @@ use Spatie\QueueableActions\QueueableAction;
  */
 class AutoMapFieldsJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, QueueableAction;
+    use Dispatchable, InteractsWithQueue, Queueable, QueueableAction, SerializesModels;
 
     public ImportJob $importJob;
-    
+
     /**
      * Job timeout in seconds (15 minutes)
      */
@@ -91,11 +90,11 @@ class AutoMapFieldsJob implements ShouldQueue
             ]);
 
             // Initialize field mapper service
-            $fieldMapper = new FieldMapperService();
+            $fieldMapper = new FieldMapperService;
 
             // Extract field headers from parsed data
             $sourceFields = $this->extractSourceFields();
-            
+
             if (empty($sourceFields)) {
                 throw new \Exception('No source fields found to map');
             }
@@ -121,8 +120,8 @@ class AutoMapFieldsJob implements ShouldQueue
             Log::info('Auto field mapping completed', [
                 'import_job_id' => $this->importJob->id,
                 'total_fields' => count($sourceFields),
-                'mapped_fields' => count(array_filter($mappingResults, fn($r) => $r['mapped'])),
-                'high_confidence_mappings' => count(array_filter($mappingResults, fn($r) => $r['confidence'] >= $this->highConfidenceThreshold)),
+                'mapped_fields' => count(array_filter($mappingResults, fn ($r) => $r['mapped'])),
+                'high_confidence_mappings' => count(array_filter($mappingResults, fn ($r) => $r['confidence'] >= $this->highConfidenceThreshold)),
             ]);
 
             // Chain to next job - ValidateDataJob
@@ -142,17 +141,17 @@ class AutoMapFieldsJob implements ShouldQueue
     protected function extractSourceFields(): array
     {
         $tempModel = $this->getTempModelClass();
-        
+
         // Get first record to extract field structure
         $firstRecord = $tempModel::where('import_job_id', $this->importJob->id)
             ->first();
 
-        if (!$firstRecord) {
+        if (! $firstRecord) {
             return [];
         }
 
         $rawData = json_decode($firstRecord->raw_data, true);
-        
+
         // Handle different data structures
         if (is_array($rawData)) {
             // For CSV with headers or XML with named elements
@@ -161,7 +160,7 @@ class AutoMapFieldsJob implements ShouldQueue
 
         // For indexed arrays (CSV without headers), create generic field names
         if (is_array($rawData)) {
-            return array_map(fn($i) => "column_$i", array_keys($rawData));
+            return array_map(fn ($i) => "column_$i", array_keys($rawData));
         }
 
         return [];
@@ -174,24 +173,24 @@ class AutoMapFieldsJob implements ShouldQueue
     {
         return match ($this->importJob->type) {
             ImportJob::TYPE_CUSTOMERS => [
-                'name', 'email', 'phone', 'address_1', 'address_2', 'city', 'state', 
-                'zip', 'country', 'tax_id', 'website', 'contact_name', 'currency_id'
+                'name', 'email', 'phone', 'address_1', 'address_2', 'city', 'state',
+                'zip', 'country', 'tax_id', 'website', 'contact_name', 'currency_id',
             ],
             ImportJob::TYPE_INVOICES => [
-                'invoice_number', 'customer_id', 'invoice_date', 'due_date', 
-                'subtotal', 'tax_amount', 'total', 'status', 'notes', 'currency_id'
+                'invoice_number', 'customer_id', 'invoice_date', 'due_date',
+                'subtotal', 'tax_amount', 'total', 'status', 'notes', 'currency_id',
             ],
             ImportJob::TYPE_ITEMS => [
-                'name', 'description', 'price', 'unit', 'tax_type_id', 
-                'sku', 'category', 'quantity'
+                'name', 'description', 'price', 'unit', 'tax_type_id',
+                'sku', 'category', 'quantity',
             ],
             ImportJob::TYPE_PAYMENTS => [
                 'payment_date', 'amount', 'payment_method', 'reference_number',
-                'customer_id', 'invoice_id', 'notes', 'currency_id'
+                'customer_id', 'invoice_id', 'notes', 'currency_id',
             ],
             ImportJob::TYPE_EXPENSES => [
                 'expense_date', 'amount', 'category', 'vendor', 'description',
-                'payment_method', 'tax_amount', 'receipt_path', 'currency_id'
+                'payment_method', 'tax_amount', 'receipt_path', 'currency_id',
             ],
             default => [],
         };
@@ -207,7 +206,7 @@ class AutoMapFieldsJob implements ShouldQueue
         foreach ($sourceFields as $sourceField) {
             // Try to map each source field to target schema
             $mappingResult = $fieldMapper->mapField(
-                $sourceField, 
+                $sourceField,
                 $this->importJob->type,
                 $targetSchema
             );
@@ -232,7 +231,7 @@ class AutoMapFieldsJob implements ShouldQueue
                 'import_job_id' => $this->importJob->id,
                 'log_type' => ImportLog::LOG_AUTO_MAPPING,
                 'severity' => $confidence >= $this->minConfidenceThreshold ? ImportLog::SEVERITY_INFO : ImportLog::SEVERITY_WARNING,
-                'message' => "Auto-mapping: {$sourceField} → " . ($suggestedTarget ?? 'unmapped'),
+                'message' => "Auto-mapping: {$sourceField} → ".($suggestedTarget ?? 'unmapped'),
                 'detailed_message' => "Field mapping attempted with {$confidence} confidence using {$mappingResult['reason']} method",
                 'field_name' => $sourceField,
                 'field_value' => $suggestedTarget,
@@ -254,8 +253,8 @@ class AutoMapFieldsJob implements ShouldQueue
             'auto_mapping_completed' => true,
             'auto_mapping_timestamp' => now()->toISOString(),
             'total_fields' => count($mappingResults),
-            'mapped_fields' => count(array_filter($mappingResults, fn($r) => $r['mapped'])),
-            'high_confidence_mappings' => count(array_filter($mappingResults, fn($r) => $r['confidence'] >= $this->highConfidenceThreshold)),
+            'mapped_fields' => count(array_filter($mappingResults, fn ($r) => $r['mapped'])),
+            'high_confidence_mappings' => count(array_filter($mappingResults, fn ($r) => $r['confidence'] >= $this->highConfidenceThreshold)),
             'mappings' => $mappingResults,
             'requires_manual_review' => $this->requiresManualReview($mappingResults),
         ];
@@ -268,12 +267,12 @@ class AutoMapFieldsJob implements ShouldQueue
      */
     protected function requiresManualReview(array $mappingResults): bool
     {
-        $mappedCount = count(array_filter($mappingResults, fn($r) => $r['mapped']));
+        $mappedCount = count(array_filter($mappingResults, fn ($r) => $r['mapped']));
         $totalCount = count($mappingResults);
-        
+
         // Require manual review if less than 70% of fields are mapped
         $mappingRate = $totalCount > 0 ? $mappedCount / $totalCount : 0;
-        
+
         return $mappingRate < 0.7;
     }
 
@@ -291,7 +290,7 @@ class AutoMapFieldsJob implements ShouldQueue
                     ->where('entity_type', $this->importJob->type)
                     ->first();
 
-                if (!$existingRule) {
+                if (! $existingRule) {
                     $mappingRule = MappingRule::create([
                         'company_id' => $this->importJob->company_id,
                         'name' => "Auto: {$mapping['source_field']} → {$mapping['target_field']}",
@@ -342,12 +341,13 @@ class AutoMapFieldsJob implements ShouldQueue
     protected function applyMappingsToTempData(array $mappingResults): void
     {
         $tempModel = $this->getTempModelClass();
-        $highConfidenceMappings = array_filter($mappingResults, fn($r) => $r['auto_applied']);
+        $highConfidenceMappings = array_filter($mappingResults, fn ($r) => $r['auto_applied']);
 
         if (empty($highConfidenceMappings)) {
             Log::info('No high-confidence mappings to apply automatically', [
                 'import_job_id' => $this->importJob->id,
             ]);
+
             return;
         }
 
@@ -391,9 +391,9 @@ class AutoMapFieldsJob implements ShouldQueue
     {
         $stats = [
             'total_fields' => count($mappingResults),
-            'mapped_fields' => count(array_filter($mappingResults, fn($r) => $r['mapped'])),
-            'high_confidence' => count(array_filter($mappingResults, fn($r) => $r['confidence'] >= $this->highConfidenceThreshold)),
-            'low_confidence' => count(array_filter($mappingResults, fn($r) => $r['confidence'] < $this->minConfidenceThreshold)),
+            'mapped_fields' => count(array_filter($mappingResults, fn ($r) => $r['mapped'])),
+            'high_confidence' => count(array_filter($mappingResults, fn ($r) => $r['confidence'] >= $this->highConfidenceThreshold)),
+            'low_confidence' => count(array_filter($mappingResults, fn ($r) => $r['confidence'] < $this->minConfidenceThreshold)),
             'avg_confidence' => count($mappingResults) > 0 ? array_sum(array_column($mappingResults, 'confidence')) / count($mappingResults) : 0,
         ];
 
@@ -402,7 +402,7 @@ class AutoMapFieldsJob implements ShouldQueue
             'log_type' => ImportLog::LOG_MAPPING_APPLIED,
             'severity' => ImportLog::SEVERITY_INFO,
             'message' => "Auto-mapping completed: {$stats['mapped_fields']}/{$stats['total_fields']} fields mapped",
-            'detailed_message' => "Field mapping completed in " . round($processingTime, 2) . " seconds. Average confidence: " . round($stats['avg_confidence'], 2),
+            'detailed_message' => 'Field mapping completed in '.round($processingTime, 2).' seconds. Average confidence: '.round($stats['avg_confidence'], 2),
             'process_stage' => 'mapping',
             'processing_time' => $processingTime,
             'records_processed' => $stats['total_fields'],
@@ -439,7 +439,7 @@ class AutoMapFieldsJob implements ShouldQueue
 
         // Mark import job as failed
         $this->importJob->markAsFailed(
-            'Auto field mapping failed: ' . $exception->getMessage(),
+            'Auto field mapping failed: '.$exception->getMessage(),
             [
                 'error' => $exception->getMessage(),
                 'file' => $exception->getFile(),

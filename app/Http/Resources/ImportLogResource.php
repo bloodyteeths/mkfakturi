@@ -29,7 +29,7 @@ class ImportLogResource extends JsonResource
             'row_number' => $this->row_number,
             'created_at' => $this->created_at,
             'formatted_created_at' => $this->created_at->diffForHumans(),
-            'formatted_execution_time' => $this->execution_time ? number_format($this->execution_time, 2) . 'ms' : null,
+            'formatted_execution_time' => $this->execution_time ? number_format($this->execution_time, 2).'ms' : null,
             'formatted_memory_usage' => $this->memory_usage ? $this->formatBytes($this->memory_usage) : null,
         ];
     }
@@ -40,11 +40,11 @@ class ImportLogResource extends JsonResource
     private function formatBytes($size, $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         for ($i = 0; $size > 1024 && $i < count($units) - 1; $i++) {
             $size /= 1024;
         }
-        
-        return round($size, $precision) . ' ' . $units[$i];
+
+        return round($size, $precision).' '.$units[$i];
     }
 }

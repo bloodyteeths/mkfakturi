@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Affiliate;
 
-use Tests\TestCase;
-use App\Models\Partner;
-use App\Models\Company;
-use App\Models\User;
-use App\Models\AffiliateEvent;
 use App\Jobs\AwardBounties;
+use App\Models\AffiliateEvent;
+use App\Models\Company;
+use App\Models\Partner;
+use App\Models\User;
 use App\Services\CommissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 class BountyAwardTest extends TestCase
 {
@@ -60,7 +60,7 @@ class BountyAwardTest extends TestCase
         }
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert bounty was awarded
@@ -86,7 +86,7 @@ class BountyAwardTest extends TestCase
         // No companies needed for this test
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert bounty was awarded
@@ -131,7 +131,7 @@ class BountyAwardTest extends TestCase
         }
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert bounty was NOT awarded
@@ -161,7 +161,7 @@ class BountyAwardTest extends TestCase
         ]);
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert only ONE bounty exists
@@ -201,7 +201,7 @@ class BountyAwardTest extends TestCase
         ]);
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert company bounty was awarded
@@ -243,7 +243,7 @@ class BountyAwardTest extends TestCase
         ]);
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert company bounty was NOT awarded
@@ -292,7 +292,7 @@ class BountyAwardTest extends TestCase
         ]);
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert only ONE company bounty exists for this partner
@@ -336,7 +336,7 @@ class BountyAwardTest extends TestCase
         }
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert only ONE company bounty was awarded (for first company)
@@ -388,7 +388,7 @@ class BountyAwardTest extends TestCase
         }
 
         // Run the job
-        $job = new AwardBounties();
+        $job = new AwardBounties;
         $job->handle(app(CommissionService::class));
 
         // Assert bounty was NOT awarded

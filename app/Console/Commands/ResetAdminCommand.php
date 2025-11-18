@@ -7,12 +7,12 @@ use App\Models\CompanySetting;
 use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 
 class ResetAdminCommand extends Command
 {
     protected $signature = 'admin:reset {--email=admin@facturino.mk} {--password=password}';
+
     protected $description = 'Reset or create admin user with specified credentials';
 
     public function handle()
@@ -26,7 +26,7 @@ class ResetAdminCommand extends Command
         $admin = User::where('email', $email)->first();
 
         if ($admin) {
-            $this->info("Found existing user. Resetting password and settings...");
+            $this->info('Found existing user. Resetting password and settings...');
             $admin->password = $password; // Let the model mutator handle hashing
             $admin->save();
 
@@ -50,7 +50,7 @@ class ResetAdminCommand extends Command
 
             $this->info("Password and settings updated for user: {$admin->email}");
         } else {
-            $this->info("No user found. Creating new admin user...");
+            $this->info('No user found. Creating new admin user...');
 
             // Create currency if needed
             $currency = Currency::firstOrCreate(
@@ -66,7 +66,7 @@ class ResetAdminCommand extends Command
 
             // Create company if needed
             $company = Company::first();
-            if (!$company) {
+            if (! $company) {
                 $company = Company::create([
                     'name' => 'Facturino',
                     'unique_hash' => str()->random(20),
@@ -102,15 +102,15 @@ class ResetAdminCommand extends Command
                 'currency' => $currency->id,
             ]);
 
-            $this->info("Admin user created successfully!");
+            $this->info('Admin user created successfully!');
         }
 
-        $this->info("");
-        $this->info("=================================");
-        $this->info("Admin credentials:");
+        $this->info('');
+        $this->info('=================================');
+        $this->info('Admin credentials:');
         $this->info("Email: {$email}");
         $this->info("Password: {$password}");
-        $this->info("=================================");
+        $this->info('=================================');
 
         return 0;
     }

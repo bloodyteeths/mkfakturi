@@ -11,8 +11,6 @@ use Illuminate\Validation\Rule;
  *
  * Validates bulk deletion of credit notes.
  * Ensures credit notes exist and are not posted to IFRS.
- *
- * @package App\Http\Requests
  */
 class DeleteCreditNoteRequest extends FormRequest
 {

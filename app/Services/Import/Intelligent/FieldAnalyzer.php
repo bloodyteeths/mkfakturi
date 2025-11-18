@@ -4,15 +4,12 @@ namespace App\Services\Import\Intelligent;
 
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
-use Illuminate\Support\Str;
 
 /**
  * Field Analyzer Service
  *
  * Analyzes CSV fields and sample data to detect data types,
  * statistical properties, and field characteristics.
- *
- * @package App\Services\Import\Intelligent
  */
 class FieldAnalyzer
 {
@@ -49,10 +46,10 @@ class FieldAnalyzer
     /**
      * Analyze a field and its sample data
      *
-     * @param string $fieldName The field name to analyze
-     * @param array $sampleData Sample values from the field
-     * @param int $position The position/index of the field
-     * @param array $allHeaders All field headers for context
+     * @param  string  $fieldName  The field name to analyze
+     * @param  array  $sampleData  Sample values from the field
+     * @param  int  $position  The position/index of the field
+     * @param  array  $allHeaders  All field headers for context
      * @return array Analysis results
      */
     public function analyze(
@@ -63,7 +60,7 @@ class FieldAnalyzer
     ): array {
         // Filter out empty values for analysis
         $nonEmptyValues = array_filter($sampleData, function ($value) {
-            return !is_null($value) && trim((string) $value) !== '';
+            return ! is_null($value) && trim((string) $value) !== '';
         });
 
         $normalizedName = $this->normalize($fieldName);
@@ -86,7 +83,7 @@ class FieldAnalyzer
     /**
      * Detect the data type from sample values
      *
-     * @param array $values Sample values to analyze
+     * @param  array  $values  Sample values to analyze
      * @return string Detected data type
      */
     public function detectDataType(array $values): string
@@ -159,7 +156,7 @@ class FieldAnalyzer
     /**
      * Calculate uniqueness ratio
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return float Uniqueness ratio (0.0 to 1.0)
      */
     private function calculateUniqueness(array $values): float
@@ -177,7 +174,7 @@ class FieldAnalyzer
     /**
      * Calculate completeness ratio
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return float Completeness ratio (0.0 to 1.0)
      */
     private function calculateCompleteness(array $values): float
@@ -188,7 +185,7 @@ class FieldAnalyzer
 
         $total = count($values);
         $nonEmpty = count(array_filter($values, function ($value) {
-            return !is_null($value) && trim((string) $value) !== '';
+            return ! is_null($value) && trim((string) $value) !== '';
         }));
 
         return round($nonEmpty / $total, 4);
@@ -197,7 +194,7 @@ class FieldAnalyzer
     /**
      * Detect patterns in the values
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return array Detected patterns
      */
     private function detectPatterns(array $values): array
@@ -309,7 +306,7 @@ class FieldAnalyzer
     /**
      * Calculate statistical properties
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return array Statistics
      */
     private function calculateStatistics(array $values): array
@@ -344,7 +341,7 @@ class FieldAnalyzer
     /**
      * Calculate ratio of numeric characters
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return float Numeric ratio
      */
     private function calculateNumericRatio(array $values): float
@@ -364,7 +361,7 @@ class FieldAnalyzer
     /**
      * Calculate ratio of alphabetic characters
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return float Alpha ratio
      */
     private function calculateAlphaRatio(array $values): float
@@ -384,7 +381,7 @@ class FieldAnalyzer
     /**
      * Calculate ratio of special characters
      *
-     * @param array $values Values to analyze
+     * @param  array  $values  Values to analyze
      * @return float Special character ratio
      */
     private function calculateSpecialCharRatio(array $values): float
@@ -404,7 +401,7 @@ class FieldAnalyzer
     /**
      * Get example values
      *
-     * @param array $values Values to sample from
+     * @param  array  $values  Values to sample from
      * @return array Example values
      */
     private function getExamples(array $values): array
@@ -423,7 +420,7 @@ class FieldAnalyzer
     /**
      * Normalize a field name
      *
-     * @param string $str String to normalize
+     * @param  string  $str  String to normalize
      * @return string Normalized string
      */
     public function normalize(string $str): string
@@ -449,7 +446,7 @@ class FieldAnalyzer
     /**
      * Check if a value is a date
      *
-     * @param string $value Value to check
+     * @param  string  $value  Value to check
      * @return bool True if date
      */
     private function isDate(string $value): bool
@@ -461,6 +458,7 @@ class FieldAnalyzer
         try {
             // Try to parse with Carbon
             Carbon::parse($value);
+
             return true;
         } catch (InvalidFormatException $e) {
             // Not a valid date
@@ -491,7 +489,7 @@ class FieldAnalyzer
     /**
      * Check if a value matches phone pattern
      *
-     * @param string $value Value to check
+     * @param  string  $value  Value to check
      * @return bool True if phone
      */
     private function isPhone(string $value): bool
@@ -528,7 +526,7 @@ class FieldAnalyzer
     /**
      * Check if a value looks like a currency amount
      *
-     * @param string $value Value to check
+     * @param  string  $value  Value to check
      * @return bool True if currency-like
      */
     private function isCurrency(string $value): bool

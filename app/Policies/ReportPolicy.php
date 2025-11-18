@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 class ReportPolicy
 {
@@ -16,7 +15,7 @@ class ReportPolicy
         if ($user->isOwner()) {
             return true;
         }
-        
+
         if ($user->can('view-financial-reports') && $user->hasCompany($company->id)) {
             return true;
         }

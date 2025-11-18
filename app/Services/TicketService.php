@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Ticket Service for External Support System Integration
- * 
+ *
  * This service demonstrates how Facturino would integrate with external
  * support systems like Zendesk, Freshdesk, or custom ticketing platforms.
- * 
+ *
  * Features:
  * - Create tickets in external systems
  * - Sync ticket status updates
@@ -37,15 +37,12 @@ class TicketService
             'base_url' => config('services.support.base_url', 'https://api.ticketing-system.com'),
             'api_key' => config('services.support.api_key', 'demo_api_key'),
             'organization' => config('services.support.organization', 'facturino'),
-            'webhook_secret' => config('services.support.webhook_secret', 'demo_webhook_secret')
+            'webhook_secret' => config('services.support.webhook_secret', 'demo_webhook_secret'),
         ];
     }
 
     /**
      * Create a new support ticket in external system
-     * 
-     * @param array $ticketData
-     * @return array
      */
     public function createTicket(array $ticketData): array
     {
@@ -58,23 +55,23 @@ class TicketService
 
             // Send to external system
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_key'],
+                'Authorization' => 'Bearer '.$this->config['api_key'],
                 'Content-Type' => 'application/json',
-                'X-Organization' => $this->config['organization']
+                'X-Organization' => $this->config['organization'],
             ])
-            ->timeout($this->timeout)
-            ->post($this->config['base_url'] . '/api/v1/tickets', $payload);
+                ->timeout($this->timeout)
+                ->post($this->config['base_url'].'/api/v1/tickets', $payload);
 
             if ($response->successful()) {
                 $externalTicket = $response->json();
-                
+
                 // Cache the ticket for quick access
                 $this->cacheTicket($externalTicket);
 
                 // Log successful creation
                 Log::info('External ticket created successfully', [
                     'external_ticket_id' => $externalTicket['id'],
-                    'internal_reference' => $ticketData['internal_reference'] ?? null
+                    'internal_reference' => $ticketData['internal_reference'] ?? null,
                 ]);
 
                 return [
@@ -82,14 +79,14 @@ class TicketService
                     'ticket_id' => $externalTicket['id'],
                     'ticket_url' => $externalTicket['url'] ?? null,
                     'status' => $externalTicket['status'],
-                    'created_at' => $externalTicket['created_at']
+                    'created_at' => $externalTicket['created_at'],
                 ];
             } else {
                 // Handle API errors
                 Log::error('External ticket creation failed', [
                     'status_code' => $response->status(),
                     'response_body' => $response->body(),
-                    'ticket_data' => $ticketData
+                    'ticket_data' => $ticketData,
                 ]);
 
                 return $this->createFallbackTicket($ticketData);
@@ -98,7 +95,7 @@ class TicketService
         } catch (\Exception $e) {
             Log::error('Exception during ticket creation', [
                 'error' => $e->getMessage(),
-                'ticket_data' => $ticketData
+                'ticket_data' => $ticketData,
             ]);
 
             return $this->createFallbackTicket($ticketData);
@@ -107,9 +104,6 @@ class TicketService
 
     /**
      * Get ticket status from external system
-     * 
-     * @param string $ticketId
-     * @return array|null
      */
     public function getTicketStatus(string $ticketId): ?array
     {
@@ -117,25 +111,25 @@ class TicketService
             // Check cache first
             $cacheKey = "ticket_status_{$ticketId}";
             $cachedStatus = Cache::get($cacheKey);
-            
+
             if ($cachedStatus) {
                 return $cachedStatus;
             }
 
             // Fetch from external system
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_key'],
-                'X-Organization' => $this->config['organization']
+                'Authorization' => 'Bearer '.$this->config['api_key'],
+                'X-Organization' => $this->config['organization'],
             ])
-            ->timeout($this->timeout)
-            ->get($this->config['base_url'] . "/api/v1/tickets/{$ticketId}");
+                ->timeout($this->timeout)
+                ->get($this->config['base_url']."/api/v1/tickets/{$ticketId}");
 
             if ($response->successful()) {
                 $ticket = $response->json();
-                
+
                 // Cache for 5 minutes
                 Cache::put($cacheKey, $ticket, 300);
-                
+
                 return $ticket;
             }
 
@@ -144,7 +138,7 @@ class TicketService
         } catch (\Exception $e) {
             Log::error('Error fetching ticket status', [
                 'ticket_id' => $ticketId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return null;
@@ -153,29 +147,25 @@ class TicketService
 
     /**
      * Update ticket in external system
-     * 
-     * @param string $ticketId
-     * @param array $updateData
-     * @return bool
      */
     public function updateTicket(string $ticketId, array $updateData): bool
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_key'],
+                'Authorization' => 'Bearer '.$this->config['api_key'],
                 'Content-Type' => 'application/json',
-                'X-Organization' => $this->config['organization']
+                'X-Organization' => $this->config['organization'],
             ])
-            ->timeout($this->timeout)
-            ->put($this->config['base_url'] . "/api/v1/tickets/{$ticketId}", $updateData);
+                ->timeout($this->timeout)
+                ->put($this->config['base_url']."/api/v1/tickets/{$ticketId}", $updateData);
 
             if ($response->successful()) {
                 // Clear cache
                 Cache::forget("ticket_status_{$ticketId}");
-                
+
                 Log::info('Ticket updated successfully', [
                     'ticket_id' => $ticketId,
-                    'update_data' => $updateData
+                    'update_data' => $updateData,
                 ]);
 
                 return true;
@@ -186,7 +176,7 @@ class TicketService
         } catch (\Exception $e) {
             Log::error('Error updating ticket', [
                 'ticket_id' => $ticketId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return false;
@@ -195,11 +185,6 @@ class TicketService
 
     /**
      * Add comment to ticket
-     * 
-     * @param string $ticketId
-     * @param string $comment
-     * @param bool $isInternal
-     * @return bool
      */
     public function addComment(string $ticketId, string $comment, bool $isInternal = false): bool
     {
@@ -207,23 +192,23 @@ class TicketService
             $payload = [
                 'body' => $comment,
                 'author_id' => 'system', // In production, use actual user ID
-                'public' => !$isInternal
+                'public' => ! $isInternal,
             ];
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_key'],
+                'Authorization' => 'Bearer '.$this->config['api_key'],
                 'Content-Type' => 'application/json',
-                'X-Organization' => $this->config['organization']
+                'X-Organization' => $this->config['organization'],
             ])
-            ->timeout($this->timeout)
-            ->post($this->config['base_url'] . "/api/v1/tickets/{$ticketId}/comments", $payload);
+                ->timeout($this->timeout)
+                ->post($this->config['base_url']."/api/v1/tickets/{$ticketId}/comments", $payload);
 
             return $response->successful();
 
         } catch (\Exception $e) {
             Log::error('Error adding comment to ticket', [
                 'ticket_id' => $ticketId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return false;
@@ -232,47 +217,46 @@ class TicketService
 
     /**
      * Handle webhook from external ticketing system
-     * 
-     * @param array $webhookData
-     * @return bool
      */
     public function handleWebhook(array $webhookData): bool
     {
         try {
             // Verify webhook signature
-            if (!$this->verifyWebhookSignature($webhookData)) {
+            if (! $this->verifyWebhookSignature($webhookData)) {
                 Log::warning('Invalid webhook signature', $webhookData);
+
                 return false;
             }
 
             // Process different event types
             $eventType = $webhookData['event_type'] ?? 'unknown';
-            
+
             switch ($eventType) {
                 case 'ticket.status_changed':
                     return $this->handleStatusChange($webhookData);
-                
+
                 case 'ticket.comment_added':
                     return $this->handleCommentAdded($webhookData);
-                
+
                 case 'ticket.assigned':
                     return $this->handleTicketAssigned($webhookData);
-                
+
                 case 'ticket.resolved':
                     return $this->handleTicketResolved($webhookData);
-                
+
                 default:
                     Log::info('Unhandled webhook event type', [
                         'event_type' => $eventType,
-                        'data' => $webhookData
+                        'data' => $webhookData,
                     ]);
+
                     return true;
             }
 
         } catch (\Exception $e) {
             Log::error('Error processing webhook', [
                 'error' => $e->getMessage(),
-                'webhook_data' => $webhookData
+                'webhook_data' => $webhookData,
             ]);
 
             return false;
@@ -281,8 +265,6 @@ class TicketService
 
     /**
      * Get support metrics and statistics
-     * 
-     * @return array
      */
     public function getSupportMetrics(): array
     {
@@ -290,13 +272,13 @@ class TicketService
             $cacheKey = 'support_metrics';
             $metrics = Cache::get($cacheKey);
 
-            if (!$metrics) {
+            if (! $metrics) {
                 $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $this->config['api_key'],
-                    'X-Organization' => $this->config['organization']
+                    'Authorization' => 'Bearer '.$this->config['api_key'],
+                    'X-Organization' => $this->config['organization'],
                 ])
-                ->timeout($this->timeout)
-                ->get($this->config['base_url'] . '/api/v1/reports/metrics');
+                    ->timeout($this->timeout)
+                    ->get($this->config['base_url'].'/api/v1/reports/metrics');
 
                 if ($response->successful()) {
                     $metrics = $response->json();
@@ -312,20 +294,20 @@ class TicketService
 
         } catch (\Exception $e) {
             Log::error('Error fetching support metrics', ['error' => $e->getMessage()]);
+
             return $this->getFallbackMetrics();
         }
     }
 
     /**
      * Validate ticket data before sending to external system
-     * 
-     * @param array $ticketData
+     *
      * @throws \InvalidArgumentException
      */
     private function validateTicketData(array $ticketData): void
     {
         $required = ['subject', 'description', 'priority', 'category', 'user_email'];
-        
+
         foreach ($required as $field) {
             if (empty($ticketData[$field])) {
                 throw new \InvalidArgumentException("Required field '{$field}' is missing");
@@ -335,9 +317,6 @@ class TicketService
 
     /**
      * Transform internal ticket data to external API format
-     * 
-     * @param array $ticketData
-     * @return array
      */
     private function transformTicketData(array $ticketData): array
     {
@@ -348,22 +327,19 @@ class TicketService
             'category' => $this->mapCategory($ticketData['category']),
             'requester' => [
                 'email' => $ticketData['user_email'],
-                'name' => $ticketData['user_name'] ?? null
+                'name' => $ticketData['user_name'] ?? null,
             ],
             'custom_fields' => [
                 'company_id' => $ticketData['company_id'] ?? null,
                 'platform' => 'Facturino Macedonia',
-                'source' => 'api'
+                'source' => 'api',
             ],
-            'tags' => $this->generateTags($ticketData)
+            'tags' => $this->generateTags($ticketData),
         ];
     }
 
     /**
      * Map internal priority to external system priority
-     * 
-     * @param string $priority
-     * @return string
      */
     private function mapPriority(string $priority): string
     {
@@ -371,7 +347,7 @@ class TicketService
             'low' => 'low',
             'medium' => 'normal',
             'high' => 'high',
-            'critical' => 'urgent'
+            'critical' => 'urgent',
         ];
 
         return $mapping[$priority] ?? 'normal';
@@ -379,9 +355,6 @@ class TicketService
 
     /**
      * Map internal category to external system category
-     * 
-     * @param string $category
-     * @return string
      */
     private function mapCategory(string $category): string
     {
@@ -391,7 +364,7 @@ class TicketService
             'migration' => 'Data Migration',
             'tax' => 'Tax Compliance',
             'banking' => 'Banking Integration',
-            'general' => 'General Inquiry'
+            'general' => 'General Inquiry',
         ];
 
         return $mapping[$category] ?? 'General Inquiry';
@@ -399,19 +372,16 @@ class TicketService
 
     /**
      * Generate tags for the ticket
-     * 
-     * @param array $ticketData
-     * @return array
      */
     private function generateTags(array $ticketData): array
     {
         $tags = ['facturino', 'macedonia'];
-        
-        if (!empty($ticketData['category'])) {
+
+        if (! empty($ticketData['category'])) {
             $tags[] = $ticketData['category'];
         }
-        
-        if (!empty($ticketData['priority'])) {
+
+        if (! empty($ticketData['priority'])) {
             $tags[] = $ticketData['priority'];
         }
 
@@ -420,8 +390,6 @@ class TicketService
 
     /**
      * Cache ticket data for quick access
-     * 
-     * @param array $ticket
      */
     private function cacheTicket(array $ticket): void
     {
@@ -431,17 +399,14 @@ class TicketService
 
     /**
      * Create a fallback ticket when external system is unavailable
-     * 
-     * @param array $ticketData
-     * @return array
      */
     private function createFallbackTicket(array $ticketData): array
     {
-        $fallbackId = 'FALLBACK-' . time() . '-' . rand(1000, 9999);
-        
+        $fallbackId = 'FALLBACK-'.time().'-'.rand(1000, 9999);
+
         Log::warning('Created fallback ticket due to external system unavailability', [
             'fallback_id' => $fallbackId,
-            'original_data' => $ticketData
+            'original_data' => $ticketData,
         ]);
 
         return [
@@ -449,28 +414,22 @@ class TicketService
             'ticket_id' => $fallbackId,
             'status' => 'pending_sync',
             'message' => 'Ticket created locally. Will sync with support system when available.',
-            'created_at' => now()->toISOString()
+            'created_at' => now()->toISOString(),
         ];
     }
 
     /**
      * Verify webhook signature for security
-     * 
-     * @param array $webhookData
-     * @return bool
      */
     private function verifyWebhookSignature(array $webhookData): bool
     {
         // In production, implement proper HMAC signature verification
         // This is a simplified demo implementation
-        return !empty($webhookData['signature']) || config('app.env') === 'local';
+        return ! empty($webhookData['signature']) || config('app.env') === 'local';
     }
 
     /**
      * Handle ticket status change webhook
-     * 
-     * @param array $data
-     * @return bool
      */
     private function handleStatusChange(array $data): bool
     {
@@ -480,11 +439,11 @@ class TicketService
         if ($ticketId && $newStatus) {
             // Clear cache
             Cache::forget("ticket_status_{$ticketId}");
-            
+
             // Update internal records if needed
             Log::info('Ticket status changed', [
                 'ticket_id' => $ticketId,
-                'new_status' => $newStatus
+                'new_status' => $newStatus,
             ]);
 
             return true;
@@ -495,9 +454,6 @@ class TicketService
 
     /**
      * Handle comment added webhook
-     * 
-     * @param array $data
-     * @return bool
      */
     private function handleCommentAdded(array $data): bool
     {
@@ -507,7 +463,7 @@ class TicketService
         if ($ticketId && $comment) {
             Log::info('Comment added to ticket', [
                 'ticket_id' => $ticketId,
-                'comment_id' => $comment['id'] ?? null
+                'comment_id' => $comment['id'] ?? null,
             ]);
 
             return true;
@@ -518,9 +474,6 @@ class TicketService
 
     /**
      * Handle ticket assigned webhook
-     * 
-     * @param array $data
-     * @return bool
      */
     private function handleTicketAssigned(array $data): bool
     {
@@ -530,7 +483,7 @@ class TicketService
         if ($ticketId && $assignee) {
             Log::info('Ticket assigned', [
                 'ticket_id' => $ticketId,
-                'assignee' => $assignee['name'] ?? $assignee['email'] ?? 'Unknown'
+                'assignee' => $assignee['name'] ?? $assignee['email'] ?? 'Unknown',
             ]);
 
             return true;
@@ -541,9 +494,6 @@ class TicketService
 
     /**
      * Handle ticket resolved webhook
-     * 
-     * @param array $data
-     * @return bool
      */
     private function handleTicketResolved(array $data): bool
     {
@@ -553,7 +503,7 @@ class TicketService
         if ($ticketId) {
             Log::info('Ticket resolved', [
                 'ticket_id' => $ticketId,
-                'resolution_time' => $data['ticket']['resolution_time'] ?? null
+                'resolution_time' => $data['ticket']['resolution_time'] ?? null,
             ]);
 
             return true;
@@ -564,8 +514,6 @@ class TicketService
 
     /**
      * Get fallback metrics when external system is unavailable
-     * 
-     * @return array
      */
     private function getFallbackMetrics(): array
     {
@@ -576,8 +524,7 @@ class TicketService
             'average_response_time' => '4 hours',
             'customer_satisfaction' => '95%',
             'first_contact_resolution' => '85%',
-            'status' => 'metrics_unavailable'
+            'status' => 'metrics_unavailable',
         ];
     }
 }
-

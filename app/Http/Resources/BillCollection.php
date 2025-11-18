@@ -11,4 +11,3 @@ class BillCollection extends ResourceCollection
         return parent::toArray($request);
     }
 }
-

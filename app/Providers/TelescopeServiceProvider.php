@@ -17,6 +17,7 @@ if (class_exists(\Laravel\Telescope\TelescopeApplicationServiceProvider::class))
     class TelescopeServiceProvider extends ServiceProvider
     {
         public function register(): void {}
+
         public function boot(): void {}
     }
 }
@@ -34,13 +35,13 @@ trait TelescopeServiceProviderTrait
         }
 
         // Don't enable Telescope during installation or if monitoring feature is disabled
-        if (!InstallUtils::isDbCreated()) {
+        if (! InstallUtils::isDbCreated()) {
             return;
         }
 
         // Check if monitoring feature is enabled
         $monitoringEnabled = config('features.monitoring.enabled', false);
-        if (!$monitoringEnabled) {
+        if (! $monitoringEnabled) {
             return;
         }
 
@@ -83,7 +84,7 @@ trait TelescopeServiceProviderTrait
      */
     protected function isHealthCheckRequest(): bool
     {
-        if (!$this->app->bound('request')) {
+        if (! $this->app->bound('request')) {
             return false;
         }
 
@@ -106,7 +107,7 @@ trait TelescopeServiceProviderTrait
             $monitoringEnabled = config('app.features.monitoring', false)
                 || env('FEATURE_MONITORING', false);
 
-            if (!$monitoringEnabled) {
+            if (! $monitoringEnabled) {
                 return false;
             }
 

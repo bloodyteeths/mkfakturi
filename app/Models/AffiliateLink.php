@@ -37,16 +37,12 @@ class AffiliateLink extends Model
 
     /**
      * Generate a unique referral code for a partner
-     *
-     * @param Partner $partner
-     * @param string|null $customCode
-     * @return string
      */
     public static function generateUniqueCode(Partner $partner, ?string $customCode = null): string
     {
         if ($customCode) {
             // Validate custom code is available
-            if (!self::where('code', $customCode)->exists()) {
+            if (! self::where('code', $customCode)->exists()) {
                 return $customCode;
             }
         }
@@ -58,7 +54,7 @@ class AffiliateLink extends Model
         // Ensure uniqueness
         $counter = 1;
         while (self::where('code', $code)->exists()) {
-            $code = strtoupper($baseName . '_' . $counter);
+            $code = strtoupper($baseName.'_'.$counter);
             $counter++;
         }
 
@@ -67,9 +63,6 @@ class AffiliateLink extends Model
 
     /**
      * Get the full referral URL for this affiliate link
-     *
-     * @param string|null $path
-     * @return string
      */
     public function getUrl(?string $path = null): string
     {
@@ -77,13 +70,11 @@ class AffiliateLink extends Model
         $path = $path ?? '/register';
         $refParam = config('affiliate.ref_param', 'ref');
 
-        return $baseUrl . $path . '?' . $refParam . '=' . $this->code;
+        return $baseUrl.$path.'?'.$refParam.'='.$this->code;
     }
 
     /**
      * Get conversion rate percentage
-     *
-     * @return float
      */
     public function getConversionRateAttribute(): float
     {

@@ -3,7 +3,7 @@
 use App\Services\FiscalReceiptQrService;
 
 it('parses Macedonian fiscal QR payload correctly', function () {
-    $service = new FiscalReceiptQrService();
+    $service = new FiscalReceiptQrService;
 
     $payload = 'MK|TIN=MK1234567;DATETIME=2025-11-16T10:30:00;TOTAL=1500;VAT=200;FID=FSC98765;TYPE=INVOICE';
 
@@ -28,10 +28,9 @@ it('parses Macedonian fiscal QR payload correctly', function () {
 });
 
 it('throws when required fiscal QR fields are missing', function () {
-    $service = new FiscalReceiptQrService();
+    $service = new FiscalReceiptQrService;
 
     $payload = 'MK|TIN=MK1234567;TOTAL=1500;VAT=200;FID=FSC98765;TYPE=INVOICE';
 
     $service->parsePayload($payload);
 })->throws(RuntimeException::class, 'Missing required fiscal QR fields');
-

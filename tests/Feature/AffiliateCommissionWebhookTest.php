@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\AffiliateEvent;
 use App\Models\Company;
 use App\Models\Currency;
 use App\Models\Partner;
 use App\Models\User;
-use App\Models\AffiliateEvent;
 use App\Services\CommissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
@@ -28,8 +28,11 @@ class AffiliateCommissionWebhookTest extends TestCase
     use RefreshDatabase;
 
     protected Company $company;
+
     protected Partner $partner;
+
     protected User $partnerUser;
+
     protected CommissionService $commissionService;
 
     protected function setUp(): void
@@ -343,8 +346,8 @@ class AffiliateCommissionWebhookTest extends TestCase
         foreach ($testCases as $index => $testCase) {
             $company = Company::factory()->create();
             $partner = Partner::create([
-                'name' => 'Partner ' . $index,
-                'email' => 'partner' . $index . '@test.com',
+                'name' => 'Partner '.$index,
+                'email' => 'partner'.$index.'@test.com',
                 'is_active' => true,
             ]);
 

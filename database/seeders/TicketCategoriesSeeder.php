@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Coderflex\LaravelTicket\Models\Category;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class TicketCategoriesSeeder extends Seeder
 {

@@ -18,27 +18,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * - ≥0.9: Auto-matched (automatically reconciled)
  * - 0.5-0.9: Suggested matches (require user approval)
  * - <0.5: Manual reconciliation needed
- *
- * @package App\Models
  */
 class Reconciliation extends Model
 {
-    use HasFactory;
     use HasAuditing;
+    use HasFactory;
     use TenantScope;
 
     /**
      * Status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_REJECTED = 'rejected';
+
     const STATUS_AUTO_MATCHED = 'auto_matched';
 
     /**
      * Confidence score thresholds
      */
     const THRESHOLD_AUTO_MATCH = 0.9; // ≥0.9: Auto-match
+
     const THRESHOLD_SUGGEST = 0.5; // 0.5-0.9: Suggest
     // <0.5: Manual reconciliation
 
@@ -66,7 +68,6 @@ class Reconciliation extends Model
     /**
      * Relationships
      */
-
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -90,10 +91,10 @@ class Reconciliation extends Model
     /**
      * Scopes
      */
-
     public function scopeWhereCompany($query, $companyId = null)
     {
         $companyId = $companyId ?? request()->header('company');
+
         return $query->where('company_id', $companyId);
     }
 
@@ -132,8 +133,6 @@ class Reconciliation extends Model
 
     /**
      * Check if this reconciliation is auto-matched
-     *
-     * @return bool
      */
     public function isAutoMatched(): bool
     {
@@ -143,8 +142,6 @@ class Reconciliation extends Model
 
     /**
      * Check if this reconciliation is a suggested match
-     *
-     * @return bool
      */
     public function isSuggested(): bool
     {
@@ -155,8 +152,6 @@ class Reconciliation extends Model
 
     /**
      * Check if this reconciliation needs manual review
-     *
-     * @return bool
      */
     public function needsManualReview(): bool
     {
@@ -167,9 +162,8 @@ class Reconciliation extends Model
     /**
      * Approve this reconciliation match
      *
-     * @param int|null $userId User who approved
-     * @param string|null $notes Optional approval notes
-     * @return bool
+     * @param  int|null  $userId  User who approved
+     * @param  string|null  $notes  Optional approval notes
      */
     public function approve(?int $userId = null, ?string $notes = null): bool
     {
@@ -184,9 +178,8 @@ class Reconciliation extends Model
     /**
      * Reject this reconciliation match
      *
-     * @param string $reason Rejection reason
-     * @param int|null $userId User who rejected
-     * @return bool
+     * @param  string  $reason  Rejection reason
+     * @param  int|null  $userId  User who rejected
      */
     public function reject(string $reason, ?int $userId = null): bool
     {
@@ -200,8 +193,6 @@ class Reconciliation extends Model
 
     /**
      * Get confidence percentage (0-100)
-     *
-     * @return float
      */
     public function getConfidencePercentageAttribute(): float
     {
@@ -210,8 +201,6 @@ class Reconciliation extends Model
 
     /**
      * Get confidence category
-     *
-     * @return string
      */
     public function getConfidenceCategoryAttribute(): string
     {

@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 /**
  * InvoiceCountService
@@ -18,15 +17,12 @@ class InvoiceCountService
 {
     /**
      * Get the invoice count for a company in the current month
-     *
-     * @param int $companyId
-     * @return int
      */
     public function getMonthlyCount(int $companyId): int
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (!$cacheEnabled) {
+        if (! $cacheEnabled) {
             return $this->queryMonthlyCount($companyId);
         }
 
@@ -40,9 +36,6 @@ class InvoiceCountService
 
     /**
      * Query the database for monthly invoice count
-     *
-     * @param int $companyId
-     * @return int
      */
     protected function queryMonthlyCount(int $companyId): int
     {
@@ -57,18 +50,17 @@ class InvoiceCountService
     /**
      * Get the invoice limit for a company's current plan
      *
-     * @param Company $company
      * @return int|null Null means unlimited
      */
     public function getInvoiceLimit(Company $company): ?int
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         // No subscription or inactive = default to free tier
-        if (!$company->subscription || !$company->subscription->isActive()) {
+        if (! $company->subscription || ! $company->subscription->isActive()) {
             return config('subscriptions.tiers.free.invoice_limit', 5);
         }
 
@@ -81,9 +73,6 @@ class InvoiceCountService
 
     /**
      * Check if company has reached their invoice limit
-     *
-     * @param Company $company
-     * @return bool
      */
     public function hasReachedLimit(Company $company): bool
     {
@@ -102,7 +91,6 @@ class InvoiceCountService
     /**
      * Get remaining invoices for the current month
      *
-     * @param Company $company
      * @return int|null Null means unlimited
      */
     public function getRemainingCount(Company $company): ?int
@@ -121,9 +109,6 @@ class InvoiceCountService
 
     /**
      * Get invoice usage statistics for a company
-     *
-     * @param Company $company
-     * @return array
      */
     public function getUsageStats(Company $company): array
     {
@@ -144,9 +129,6 @@ class InvoiceCountService
 
     /**
      * Clear the cache for a company's invoice count
-     *
-     * @param int $companyId
-     * @return void
      */
     public function clearCache(int $companyId): void
     {
@@ -156,15 +138,12 @@ class InvoiceCountService
 
     /**
      * Increment the cached count (called after invoice creation)
-     *
-     * @param int $companyId
-     * @return void
      */
     public function incrementCache(int $companyId): void
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (!$cacheEnabled) {
+        if (! $cacheEnabled) {
             return;
         }
 
@@ -190,7 +169,7 @@ class InvoiceCountService
     {
         // Clear all invoice count caches
         $prefix = config('subscriptions.cache.prefix', 'subscription:');
-        $pattern = $prefix . 'invoice_count:*';
+        $pattern = $prefix.'invoice_count:*';
 
         // Get all company IDs that have invoices
         $companyIds = Company::has('invoices')->pluck('id');
@@ -206,14 +185,11 @@ class InvoiceCountService
 
     /**
      * Get the upgrade message for a company that hit their limit
-     *
-     * @param Company $company
-     * @return string
      */
     public function getUpgradeMessage(Company $company): string
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
@@ -225,14 +201,11 @@ class InvoiceCountService
 
     /**
      * Get the Paddle price ID for the next tier upgrade
-     *
-     * @param Company $company
-     * @return string|null
      */
     public function getUpgradePriceId(Company $company): ?string
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
@@ -250,7 +223,7 @@ class InvoiceCountService
             }
         }
 
-        if (!$nextTier) {
+        if (! $nextTier) {
             return null; // Already on highest tier
         }
 
@@ -259,9 +232,6 @@ class InvoiceCountService
 
     /**
      * Get cache key for a company's invoice count
-     *
-     * @param int $companyId
-     * @return string
      */
     protected function getCacheKey(int $companyId): string
     {

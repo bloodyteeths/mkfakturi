@@ -42,7 +42,7 @@ class UpdateCompanySettingsController extends Controller
         $user = $request->user();
         if ($user) {
             $token = $user->createToken('settings-token')->plainTextToken;
-            $response['token'] = 'Bearer ' . $token;
+            $response['token'] = 'Bearer '.$token;
         }
 
         return response()->json($response);

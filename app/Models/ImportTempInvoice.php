@@ -14,9 +14,13 @@ class ImportTempInvoice extends Model
 
     // Processing statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_MAPPED = 'mapped';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_COMMITTED = 'committed';
 
     protected $guarded = ['id'];
@@ -84,30 +88,33 @@ class ImportTempInvoice extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
     public function getFormattedInvoiceDateAttribute()
     {
-        if (!$this->invoice_date) {
+        if (! $this->invoice_date) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->invoice_date)->translatedFormat($dateFormat);
     }
 
     public function getFormattedDueDateAttribute()
     {
-        if (!$this->due_date) {
+        if (! $this->due_date) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
     }
 
     public function getHasValidationErrorsAttribute()
     {
-        return !empty($this->validation_errors);
+        return ! empty($this->validation_errors);
     }
 
     public function getIsDuplicateAttribute()
@@ -122,21 +129,22 @@ class ImportTempInvoice extends Model
         }
 
         $scores = array_values($this->mapping_confidence);
+
         return count($scores) > 0 ? round(array_sum($scores) / count($scores), 2) : 0;
     }
 
     public function getFormattedTotalAttribute()
     {
-        if (!$this->total) {
+        if (! $this->total) {
             return null;
         }
-        
+
         return format_money_pdf($this->total, $this->getCurrency());
     }
 
     public function getHasLineItemsAttribute()
     {
-        return !empty($this->line_items) && is_array($this->line_items) && count($this->line_items) > 0;
+        return ! empty($this->line_items) && is_array($this->line_items) && count($this->line_items) > 0;
     }
 
     // Scopes
@@ -177,17 +185,17 @@ class ImportTempInvoice extends Model
 
     public function scopeWhereInvoiceNumber($query, $invoiceNumber)
     {
-        return $query->where('invoice_number', 'LIKE', '%' . $invoiceNumber . '%');
+        return $query->where('invoice_number', 'LIKE', '%'.$invoiceNumber.'%');
     }
 
     public function scopeWhereCustomerEmail($query, $email)
     {
-        return $query->where('customer_email', 'LIKE', '%' . $email . '%');
+        return $query->where('customer_email', 'LIKE', '%'.$email.'%');
     }
 
     public function scopeWhereCustomerName($query, $name)
     {
-        return $query->where('customer_name', 'LIKE', '%' . $name . '%');
+        return $query->where('customer_name', 'LIKE', '%'.$name.'%');
     }
 
     public function scopeInvoicesBetween($query, $start, $end)
@@ -261,13 +269,13 @@ class ImportTempInvoice extends Model
     public function addValidationError($field, $message)
     {
         $errors = $this->validation_errors ?: [];
-        
-        if (!isset($errors[$field])) {
+
+        if (! isset($errors[$field])) {
             $errors[$field] = [];
         }
-        
+
         $errors[$field][] = $message;
-        
+
         $this->update(['validation_errors' => $errors]);
     }
 
@@ -280,14 +288,14 @@ class ImportTempInvoice extends Model
     {
         $confidence = $this->mapping_confidence ?: [];
         $confidence[$field] = $score;
-        
+
         $this->update(['mapping_confidence' => $confidence]);
     }
 
     public function logTransformation($field, $originalValue, $transformedValue, $rule = null)
     {
         $log = $this->transformation_log ?: [];
-        
+
         $log[] = [
             'field' => $field,
             'original_value' => $originalValue,
@@ -295,7 +303,7 @@ class ImportTempInvoice extends Model
             'rule' => $rule,
             'timestamp' => now()->toISOString(),
         ];
-        
+
         $this->update(['transformation_log' => $log]);
     }
 
@@ -321,11 +329,11 @@ class ImportTempInvoice extends Model
     public function markAsFailed($errors = null)
     {
         $data = ['status' => self::STATUS_FAILED];
-        
+
         if ($errors) {
             $data['validation_errors'] = $errors;
         }
-        
+
         $this->update($data);
     }
 
@@ -336,7 +344,7 @@ class ImportTempInvoice extends Model
 
     public function shouldCreateNewInvoice()
     {
-        return !$this->is_duplicate && $this->status !== self::STATUS_FAILED;
+        return ! $this->is_duplicate && $this->status !== self::STATUS_FAILED;
     }
 
     public function shouldUpdateExistingInvoice()
@@ -375,15 +383,17 @@ class ImportTempInvoice extends Model
         if ($this->currency_code) {
             return Currency::where('code', $this->currency_code)->first();
         }
-        
+
         // Fallback to company default currency
         $companyCurrencyId = CompanySetting::getSetting('currency', $this->importJob->company_id);
+
         return Currency::find($companyCurrencyId);
     }
 
     public function getCurrencyId()
     {
         $currency = $this->getCurrency();
+
         return $currency ? $currency->id : null;
     }
 
@@ -442,7 +452,7 @@ class ImportTempInvoice extends Model
 
     public function parseLineItems()
     {
-        if (!$this->hasLineItems) {
+        if (! $this->hasLineItems) {
             return [];
         }
 

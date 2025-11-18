@@ -14,9 +14,13 @@ class ImportTempCustomer extends Model
 
     // Processing statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_MAPPED = 'mapped';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_COMMITTED = 'committed';
 
     protected $guarded = ['id'];
@@ -70,12 +74,13 @@ class ImportTempCustomer extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
     public function getHasValidationErrorsAttribute()
     {
-        return !empty($this->validation_errors);
+        return ! empty($this->validation_errors);
     }
 
     public function getIsDuplicateAttribute()
@@ -90,6 +95,7 @@ class ImportTempCustomer extends Model
         }
 
         $scores = array_values($this->mapping_confidence);
+
         return count($scores) > 0 ? round(array_sum($scores) / count($scores), 2) : 0;
     }
 
@@ -131,17 +137,17 @@ class ImportTempCustomer extends Model
 
     public function scopeWhereEmail($query, $email)
     {
-        return $query->where('email', 'LIKE', '%' . $email . '%');
+        return $query->where('email', 'LIKE', '%'.$email.'%');
     }
 
     public function scopeWhereName($query, $name)
     {
-        return $query->where('name', 'LIKE', '%' . $name . '%');
+        return $query->where('name', 'LIKE', '%'.$name.'%');
     }
 
     public function scopeWhereCompanyName($query, $companyName)
     {
-        return $query->where('company_name', 'LIKE', '%' . $companyName . '%');
+        return $query->where('company_name', 'LIKE', '%'.$companyName.'%');
     }
 
     public function scopeApplyFilters($query, array $filters)
@@ -204,13 +210,13 @@ class ImportTempCustomer extends Model
     public function addValidationError($field, $message)
     {
         $errors = $this->validation_errors ?: [];
-        
-        if (!isset($errors[$field])) {
+
+        if (! isset($errors[$field])) {
             $errors[$field] = [];
         }
-        
+
         $errors[$field][] = $message;
-        
+
         $this->update(['validation_errors' => $errors]);
     }
 
@@ -223,14 +229,14 @@ class ImportTempCustomer extends Model
     {
         $confidence = $this->mapping_confidence ?: [];
         $confidence[$field] = $score;
-        
+
         $this->update(['mapping_confidence' => $confidence]);
     }
 
     public function logTransformation($field, $originalValue, $transformedValue, $rule = null)
     {
         $log = $this->transformation_log ?: [];
-        
+
         $log[] = [
             'field' => $field,
             'original_value' => $originalValue,
@@ -238,7 +244,7 @@ class ImportTempCustomer extends Model
             'rule' => $rule,
             'timestamp' => now()->toISOString(),
         ];
-        
+
         $this->update(['transformation_log' => $log]);
     }
 
@@ -264,11 +270,11 @@ class ImportTempCustomer extends Model
     public function markAsFailed($errors = null)
     {
         $data = ['status' => self::STATUS_FAILED];
-        
+
         if ($errors) {
             $data['validation_errors'] = $errors;
         }
-        
+
         $this->update($data);
     }
 
@@ -297,7 +303,7 @@ class ImportTempCustomer extends Model
 
     public function shouldCreateNewCustomer()
     {
-        return !$this->is_duplicate && $this->status !== self::STATUS_FAILED;
+        return ! $this->is_duplicate && $this->status !== self::STATUS_FAILED;
     }
 
     public function shouldUpdateExistingCustomer()
@@ -322,7 +328,7 @@ class ImportTempCustomer extends Model
 
     public function getBillingAddressData()
     {
-        if (!$this->billing_address) {
+        if (! $this->billing_address) {
             return null;
         }
 
@@ -338,7 +344,7 @@ class ImportTempCustomer extends Model
 
     public function getShippingAddressData()
     {
-        if (!$this->shipping_address) {
+        if (! $this->shipping_address) {
             return null;
         }
 
@@ -354,11 +360,12 @@ class ImportTempCustomer extends Model
 
     private function getCountryId($countryName)
     {
-        if (!$countryName) {
+        if (! $countryName) {
             return null;
         }
 
-        $country = Country::where('name', 'LIKE', '%' . $countryName . '%')->first();
+        $country = Country::where('name', 'LIKE', '%'.$countryName.'%')->first();
+
         return $country ? $country->id : null;
     }
 

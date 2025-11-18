@@ -13,42 +13,73 @@ class ImportLog extends Model
 
     // Log types
     public const LOG_JOB_CREATED = 'job_created';
+
     public const LOG_JOB_STARTED = 'job_started';
+
     public const LOG_JOB_COMPLETED = 'job_completed';
+
     public const LOG_JOB_FAILED = 'job_failed';
+
     public const LOG_FILE_UPLOADED = 'file_uploaded';
+
     public const LOG_FILE_PARSED = 'file_parsed';
+
     public const LOG_PARSING_ERROR = 'parsing_error';
+
     public const LOG_MAPPING_APPLIED = 'mapping_applied';
+
     public const LOG_MAPPING_FAILED = 'mapping_failed';
+
     public const LOG_AUTO_MAPPING = 'auto_mapping';
+
     public const LOG_VALIDATION_STARTED = 'validation_started';
+
     public const LOG_VALIDATION_PASSED = 'validation_passed';
+
     public const LOG_VALIDATION_FAILED = 'validation_failed';
+
     public const LOG_TRANSFORMATION_APPLIED = 'transformation_applied';
+
     public const LOG_TRANSFORMATION_FAILED = 'transformation_failed';
+
     public const LOG_DUPLICATE_DETECTED = 'duplicate_detected';
+
     public const LOG_DUPLICATE_RESOLVED = 'duplicate_resolved';
+
     public const LOG_RECORD_COMMITTED = 'record_committed';
+
     public const LOG_RECORD_FAILED = 'record_failed';
+
     public const LOG_ROLLBACK_EXECUTED = 'rollback_executed';
+
     public const LOG_CUSTOM_RULE_APPLIED = 'custom_rule_applied';
+
     public const LOG_BUSINESS_RULE_VIOLATION = 'business_rule_violation';
+
     public const LOG_PERFORMANCE_WARNING = 'performance_warning';
+
     public const LOG_SYSTEM_ERROR = 'system_error';
 
     // Severity levels
     public const SEVERITY_DEBUG = 'debug';
+
     public const SEVERITY_INFO = 'info';
+
     public const SEVERITY_WARNING = 'warning';
+
     public const SEVERITY_ERROR = 'error';
+
     public const SEVERITY_CRITICAL = 'critical';
 
     // Entity types
     public const ENTITY_CUSTOMER = 'customer';
+
     public const ENTITY_INVOICE = 'invoice';
+
     public const ENTITY_ITEM = 'item';
+
     public const ENTITY_PAYMENT = 'payment';
+
     public const ENTITY_EXPENSE = 'expense';
 
     protected $guarded = ['id'];
@@ -102,20 +133,21 @@ class ImportLog extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id ?? null);
-        return Carbon::parse($this->created_at)->translatedFormat($dateFormat . ' H:i:s');
+
+        return Carbon::parse($this->created_at)->translatedFormat($dateFormat.' H:i:s');
     }
 
     public function getFormattedProcessingTimeAttribute()
     {
-        if (!$this->processing_time) {
+        if (! $this->processing_time) {
             return null;
         }
 
         if ($this->processing_time < 1) {
-            return round($this->processing_time * 1000, 2) . 'ms';
+            return round($this->processing_time * 1000, 2).'ms';
         }
 
-        return round($this->processing_time, 3) . 's';
+        return round($this->processing_time, 3).'s';
     }
 
     public function getIsErrorAttribute()
@@ -125,12 +157,12 @@ class ImportLog extends Model
 
     public function getHasSuggestedFixesAttribute()
     {
-        return !empty($this->suggested_fixes) && is_array($this->suggested_fixes) && count($this->suggested_fixes) > 0;
+        return ! empty($this->suggested_fixes) && is_array($this->suggested_fixes) && count($this->suggested_fixes) > 0;
     }
 
     public function getFormattedMemoryUsageAttribute()
     {
-        if (!$this->memory_usage) {
+        if (! $this->memory_usage) {
             return null;
         }
 
@@ -246,13 +278,13 @@ class ImportLog extends Model
         }
 
         if ($filters->get('rule_applied')) {
-            $query->where('rule_applied', 'LIKE', '%' . $filters->get('rule_applied') . '%');
+            $query->where('rule_applied', 'LIKE', '%'.$filters->get('rule_applied').'%');
         }
 
         if ($filters->get('message')) {
             $query->where(function ($q) use ($filters) {
-                $q->where('message', 'LIKE', '%' . $filters->get('message') . '%')
-                  ->orWhere('detailed_message', 'LIKE', '%' . $filters->get('message') . '%');
+                $q->where('message', 'LIKE', '%'.$filters->get('message').'%')
+                    ->orWhere('detailed_message', 'LIKE', '%'.$filters->get('message').'%');
             });
         }
 
@@ -371,7 +403,7 @@ class ImportLog extends Model
             'log_type' => self::LOG_VALIDATION_FAILED,
             'severity' => self::SEVERITY_WARNING,
             'message' => "Validation failed for {$fieldName} in row {$rowNumber}",
-            'detailed_message' => "Validation errors: " . implode(', ', $validationErrors),
+            'detailed_message' => 'Validation errors: '.implode(', ', $validationErrors),
             'entity_type' => $entityType,
             'entity_id' => $entityId,
             'row_number' => $rowNumber,
@@ -389,7 +421,7 @@ class ImportLog extends Model
             'log_type' => self::LOG_DUPLICATE_DETECTED,
             'severity' => self::SEVERITY_WARNING,
             'message' => "Duplicate {$entityType} detected in row {$rowNumber}",
-            'detailed_message' => "Duplicate detected based on {$matchField} field" . ($existingEntityId ? " (existing ID: {$existingEntityId})" : ''),
+            'detailed_message' => "Duplicate detected based on {$matchField} field".($existingEntityId ? " (existing ID: {$existingEntityId})" : ''),
             'entity_type' => $entityType,
             'entity_id' => $entityId,
             'row_number' => $rowNumber,
@@ -431,7 +463,7 @@ class ImportLog extends Model
             'log_type' => self::LOG_PERFORMANCE_WARNING,
             'severity' => self::SEVERITY_WARNING,
             'message' => $message,
-            'detailed_message' => "Performance threshold exceeded during import processing",
+            'detailed_message' => 'Performance threshold exceeded during import processing',
             'processing_time' => $processingTime,
             'memory_usage' => $memoryUsage,
             'records_processed' => $recordsProcessed,
@@ -477,7 +509,7 @@ class ImportLog extends Model
     public function addComplianceTag($tag)
     {
         $tags = $this->compliance_tags ?: [];
-        if (!in_array($tag, $tags)) {
+        if (! in_array($tag, $tags)) {
             $tags[] = $tag;
             $this->update(['compliance_tags' => $tags]);
         }
@@ -486,12 +518,12 @@ class ImportLog extends Model
     private function formatBytes($bytes, $precision = 2)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
-        
-        return round($bytes, $precision) . ' ' . $units[$i];
+
+        return round($bytes, $precision).' '.$units[$i];
     }
 
     public static function getLogTypeOptions()

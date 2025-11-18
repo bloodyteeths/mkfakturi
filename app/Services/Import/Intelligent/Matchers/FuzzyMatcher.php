@@ -32,10 +32,10 @@ class FuzzyMatcher implements MatcherInterface
      * 3. Only consider matches with similarity >= 0.65
      * 4. Return confidence based on similarity score
      *
-     * @param string $csvField CSV column name
-     * @param array $analysis Field analysis from FieldAnalyzer
-     * @param Collection $rules Available MappingRule records
-     * @param string $entityType Entity type being imported
+     * @param  string  $csvField  CSV column name
+     * @param  array  $analysis  Field analysis from FieldAnalyzer
+     * @param  Collection  $rules  Available MappingRule records
+     * @param  string  $entityType  Entity type being imported
      * @return array Array of candidates with confidence scores
      */
     public function match(
@@ -64,7 +64,7 @@ class FuzzyMatcher implements MatcherInterface
             }
 
             // Skip inactive rules
-            if (!$rule->is_active) {
+            if (! $rule->is_active) {
                 continue;
             }
 
@@ -78,11 +78,12 @@ class FuzzyMatcher implements MatcherInterface
                     $match['similarity'],
                     $match['distance']
                 );
+
                 continue; // Only add one candidate per rule
             }
 
             // Check against field_variations
-            if (!empty($rule->field_variations) && is_array($rule->field_variations)) {
+            if (! empty($rule->field_variations) && is_array($rule->field_variations)) {
                 foreach ($rule->field_variations as $variation) {
                     $match = $this->calculateSimilarity($normalizedCsvField, $this->normalize($variation));
                     if ($match['similarity'] >= self::MIN_SIMILARITY) {
@@ -113,8 +114,8 @@ class FuzzyMatcher implements MatcherInterface
      * Formula:
      * similarity = 1.0 - (distance / maxLength)
      *
-     * @param string $string1 First string (normalized)
-     * @param string $string2 Second string (normalized)
+     * @param  string  $string1  First string (normalized)
+     * @param  string  $string2  Second string (normalized)
      * @return array Array with 'similarity' and 'distance' keys
      */
     private function calculateSimilarity(string $string1, string $string2): array
@@ -166,8 +167,8 @@ class FuzzyMatcher implements MatcherInterface
      * PHP's built-in levenshtein() doesn't handle UTF-8 well,
      * so we use this custom implementation.
      *
-     * @param string $string1 First string
-     * @param string $string2 Second string
+     * @param  string  $string1  First string
+     * @param  string  $string2  Second string
      * @return int Levenshtein distance
      */
     private function levenshteinUtf8(string $string1, string $string2): int
@@ -194,6 +195,7 @@ class FuzzyMatcher implements MatcherInterface
             if (mb_check_encoding($string1, 'ASCII') && mb_check_encoding($string2, 'ASCII')) {
                 return levenshtein($string1, $string2);
             }
+
             // For very long UTF-8 strings, use a simplified calculation
             return (int) (max($length1, $length2) * 0.5); // Rough estimate
         }
@@ -227,7 +229,7 @@ class FuzzyMatcher implements MatcherInterface
      *
      * Removes special characters and converts to lowercase
      *
-     * @param string $field Field name to normalize
+     * @param  string  $field  Field name to normalize
      * @return string Normalized field name
      */
     private function normalize(string $field): string
@@ -256,11 +258,11 @@ class FuzzyMatcher implements MatcherInterface
      * - 0.75-0.85 similarity → 0.70-0.80 confidence (good match)
      * - 0.65-0.75 similarity → 0.65-0.70 confidence (weak match)
      *
-     * @param string $targetField Target field name
-     * @param string $source What matched
-     * @param int $ruleId MappingRule ID
-     * @param float $similarity Similarity score (0.0-1.0)
-     * @param int $distance Levenshtein distance
+     * @param  string  $targetField  Target field name
+     * @param  string  $source  What matched
+     * @param  int  $ruleId  MappingRule ID
+     * @param  float  $similarity  Similarity score (0.0-1.0)
+     * @param  int  $distance  Levenshtein distance
      * @return array Candidate array
      */
     private function buildCandidate(

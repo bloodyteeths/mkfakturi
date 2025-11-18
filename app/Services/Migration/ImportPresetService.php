@@ -14,16 +14,14 @@ namespace App\Services\Migration;
  * - Generic/Manual (Fallback for non-software CSVs)
  *
  * Maps column names from various sources to our internal field names.
- *
- * @package App\Services\Migration
  */
 class ImportPresetService
 {
     /**
      * Get preset mapping for a specific source and entity type
      *
-     * @param string $source Source system (onivo, megasoft, effectplus, eurofaktura, managerio, generic)
-     * @param string $entityType Entity type (customers, items, invoices, bills)
+     * @param  string  $source  Source system (onivo, megasoft, effectplus, eurofaktura, managerio, generic)
+     * @param  string  $entityType  Entity type (customers, items, invoices, bills)
      * @return array Column mapping
      */
     public function getPreset(string $source, string $entityType): array
@@ -41,8 +39,6 @@ class ImportPresetService
 
     /**
      * Get all available sources
-     *
-     * @return array
      */
     public function getAvailableSources(): array
     {
@@ -58,8 +54,6 @@ class ImportPresetService
 
     /**
      * Get all available entity types
-     *
-     * @return array
      */
     public function getAvailableEntityTypes(): array
     {
@@ -75,9 +69,6 @@ class ImportPresetService
      * Get Onivo preset mapping
      *
      * Onivo uses Macedonian/Cyrillic column names
-     *
-     * @param string $entityType
-     * @return array
      */
     private function getOnivoPreset(string $entityType): array
     {
@@ -117,9 +108,6 @@ class ImportPresetService
      * Get Megasoft preset mapping
      *
      * Megasoft uses mixed Latin/Cyrillic column names
-     *
-     * @param string $entityType
-     * @return array
      */
     private function getMegasoftPreset(string $entityType): array
     {
@@ -159,9 +147,6 @@ class ImportPresetService
      * Get Effect Plus preset mapping
      *
      * Effect Plus uses Latin-based Macedonian/Serbian column names
-     *
-     * @param string $entityType
-     * @return array
      */
     private function getEffectPlusPreset(string $entityType): array
     {
@@ -210,9 +195,6 @@ class ImportPresetService
      * Get Eurofaktura preset mapping
      *
      * Eurofaktura uses English-style column names
-     *
-     * @param string $entityType
-     * @return array
      */
     private function getEurofakturaPreset(string $entityType): array
     {
@@ -262,9 +244,6 @@ class ImportPresetService
      * Get Manager.io preset mapping
      *
      * Manager.io uses English column names with underscores
-     *
-     * @param string $entityType
-     * @return array
      */
     private function getManagerIoPreset(string $entityType): array
     {
@@ -311,9 +290,6 @@ class ImportPresetService
      * Get Generic/Manual preset mapping
      *
      * Generic preset with common English field names for manually created CSVs
-     *
-     * @param string $entityType
-     * @return array
      */
     private function getGenericPreset(string $entityType): array
     {
@@ -374,7 +350,6 @@ class ImportPresetService
     /**
      * Detect encoding of file content
      *
-     * @param string $content
      * @return string Detected encoding (UTF-8, Windows-1251, etc.)
      */
     public function detectEncoding(string $content): string
@@ -387,10 +362,6 @@ class ImportPresetService
 
     /**
      * Convert file content to UTF-8
-     *
-     * @param string $content
-     * @param string $fromEncoding
-     * @return string
      */
     public function convertToUtf8(string $content, string $fromEncoding): string
     {
@@ -404,7 +375,7 @@ class ImportPresetService
     /**
      * Detect CSV delimiter
      *
-     * @param string $content First few lines of CSV
+     * @param  string  $content  First few lines of CSV
      * @return string Detected delimiter
      */
     public function detectDelimiter(string $content): string
@@ -425,10 +396,6 @@ class ImportPresetService
 
     /**
      * Get preset structure for frontend
-     *
-     * @param string $source
-     * @param string $entityType
-     * @return array
      */
     public function getPresetStructure(string $source, string $entityType): array
     {

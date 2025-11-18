@@ -159,19 +159,19 @@ return [
     'performance' => [
         // Number of jobs to process per batch
         'batch_size' => env('QUEUE_BATCH_SIZE', 100),
-        
+
         // Maximum execution time per job (seconds)
         'max_execution_time' => env('QUEUE_MAX_EXECUTION_TIME', 300),
-        
+
         // Memory limit per worker (MB)
         'memory_limit' => env('QUEUE_MEMORY_LIMIT', 512),
-        
+
         // Sleep time when no jobs available (seconds)
         'sleep' => env('QUEUE_SLEEP', 3),
-        
+
         // Number of times to attempt a job before failing
         'max_tries' => env('QUEUE_MAX_TRIES', 3),
-        
+
         // Backoff delays between retries (seconds)
         'backoff' => [10, 30, 60],
     ],

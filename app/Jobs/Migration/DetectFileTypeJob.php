@@ -15,7 +15,7 @@ use Spatie\QueueableActions\QueueableAction;
 
 /**
  * DetectFileTypeJob - Detect file type and validate structure
- * 
+ *
  * This job analyzes uploaded files to:
  * - Detect file format (CSV, Excel, XML)
  * - Validate file structure and readability
@@ -25,10 +25,10 @@ use Spatie\QueueableActions\QueueableAction;
  */
 class DetectFileTypeJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, QueueableAction;
+    use Dispatchable, InteractsWithQueue, Queueable, QueueableAction, SerializesModels;
 
     public ImportJob $importJob;
-    
+
     /**
      * Job timeout in seconds (5 minutes)
      */
@@ -79,13 +79,13 @@ class DetectFileTypeJob implements ShouldQueue
             ]);
 
             // Validate file exists
-            if (!Storage::exists($this->importJob->file_path)) {
+            if (! Storage::exists($this->importJob->file_path)) {
                 throw new \Exception("File not found: {$this->importJob->file_path}");
             }
 
             // Get file info
             $fileInfo = $this->analyzeFile();
-            
+
             // Update import job with file information
             $this->importJob->update([
                 'file_info' => $fileInfo,
@@ -132,7 +132,7 @@ class DetectFileTypeJob implements ShouldQueue
         // Read first chunk of file for analysis
         $chunkSize = min($fileSize, 8192); // Read up to 8KB
         $fileContent = Storage::get($filePath, 0, $chunkSize);
-        
+
         $fileInfo = [
             'name' => $fileName,
             'size' => $fileSize,
@@ -157,17 +157,17 @@ class DetectFileTypeJob implements ShouldQueue
                 $csvInfo = $this->analyzeCsvStructure($fileContent);
                 $fileInfo = array_merge($fileInfo, $csvInfo);
                 break;
-                
+
             case 'excel':
                 $excelInfo = $this->analyzeExcelStructure($filePath);
                 $fileInfo = array_merge($fileInfo, $excelInfo);
                 break;
-                
+
             case 'xml':
                 $xmlInfo = $this->analyzeXmlStructure($fileContent);
                 $fileInfo = array_merge($fileInfo, $xmlInfo);
                 break;
-                
+
             default:
                 $fileInfo['validation_errors'][] = "Unsupported file type: {$fileInfo['type']}";
         }
@@ -219,8 +219,8 @@ class DetectFileTypeJob implements ShouldQueue
     protected function analyzeCsvStructure(string $content): array
     {
         $lines = explode("\n", $content);
-        $lines = array_filter($lines, fn($line) => trim($line) !== '');
-        
+        $lines = array_filter($lines, fn ($line) => trim($line) !== '');
+
         if (empty($lines)) {
             return [
                 'estimated_rows' => 0,
@@ -230,12 +230,12 @@ class DetectFileTypeJob implements ShouldQueue
 
         // Detect CSV delimiter
         $delimiter = $this->detectCsvDelimiter($lines[0]);
-        
+
         // Parse first few rows
         $headers = [];
         $sampleData = [];
         $maxSampleRows = min(5, count($lines));
-        
+
         for ($i = 0; $i < $maxSampleRows; $i++) {
             $row = str_getcsv($lines[$i], $delimiter);
             if ($i === 0) {
@@ -300,7 +300,7 @@ class DetectFileTypeJob implements ShouldQueue
             // Basic XML analysis
             $rootElement = $xml->getName();
             $children = $xml->children();
-            
+
             return [
                 'structure' => [
                     'root_element' => $rootElement,
@@ -365,7 +365,7 @@ class DetectFileTypeJob implements ShouldQueue
     protected function detectEncoding(string $content): string
     {
         $encodings = ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'UTF-16'];
-        
+
         foreach ($encodings as $encoding) {
             if (mb_check_encoding($content, $encoding)) {
                 return $encoding;
@@ -400,6 +400,7 @@ class DetectFileTypeJob implements ShouldQueue
         // Check for empty file
         if ($fileInfo['size'] === 0) {
             $fileInfo['validation_errors'][] = 'File is empty';
+
             return;
         }
 
@@ -420,7 +421,7 @@ class DetectFileTypeJob implements ShouldQueue
                     $fileInfo['validation_errors'][] = 'No CSV headers detected';
                 }
                 break;
-                
+
             case 'unknown':
                 $fileInfo['validation_errors'][] = 'Unknown or unsupported file format';
                 break;
@@ -433,12 +434,12 @@ class DetectFileTypeJob implements ShouldQueue
     protected function formatBytes(int $bytes, int $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
-        
-        return round($bytes, $precision) . ' ' . $units[$i];
+
+        return round($bytes, $precision).' '.$units[$i];
     }
 
     /**
@@ -454,7 +455,7 @@ class DetectFileTypeJob implements ShouldQueue
 
         // Mark import job as failed
         $this->importJob->markAsFailed(
-            'File type detection failed: ' . $exception->getMessage(),
+            'File type detection failed: '.$exception->getMessage(),
             [
                 'error' => $exception->getMessage(),
                 'file' => $exception->getFile(),

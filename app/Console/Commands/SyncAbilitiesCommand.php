@@ -36,6 +36,7 @@ class SyncAbilitiesCommand extends Command
             $companies = Company::where('id', $companyId)->get();
             if ($companies->isEmpty()) {
                 $this->error("❌ Company ID {$companyId} not found!");
+
                 return 1;
             }
         } else {
@@ -44,10 +45,11 @@ class SyncAbilitiesCommand extends Command
 
         if ($companies->isEmpty()) {
             $this->warn('⚠️  No companies found in database');
+
             return 0;
         }
 
-        $this->info("Found {$companies->count()} " . str('company')->plural($companies->count()));
+        $this->info("Found {$companies->count()} ".str('company')->plural($companies->count()));
         $this->newLine();
 
         $progressBar = $this->output->createProgressBar($companies->count());
@@ -78,7 +80,7 @@ class SyncAbilitiesCommand extends Command
             $company->setupRoles();
         } catch (\Exception $e) {
             $this->newLine();
-            $this->error("❌ Failed to sync abilities for company {$company->id} ({$company->name}): " . $e->getMessage());
+            $this->error("❌ Failed to sync abilities for company {$company->id} ({$company->name}): ".$e->getMessage());
             $this->newLine();
         }
     }

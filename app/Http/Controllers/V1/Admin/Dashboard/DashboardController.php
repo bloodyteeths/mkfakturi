@@ -12,9 +12,7 @@ use Silber\Bouncer\BouncerFacade;
 
 class DashboardController extends Controller
 {
-    public function __construct(private DashboardMetricsService $metrics)
-    {
-    }
+    public function __construct(private DashboardMetricsService $metrics) {}
 
     /**
      * Handle the incoming request.

@@ -72,7 +72,7 @@ if (InstallUtils::isDbCreated()) {
     // Checks for eligible partners (verified KYC + 3 companies OR 30 days)
     // Awards €300 accountant bounty and €50 company bounty (first paying company)
     // Note: job events cannot be marked runInBackground() in Laravel 12, so we keep it foreground here.
-    Schedule::job(new \App\Jobs\AwardBounties())
+    Schedule::job(new \App\Jobs\AwardBounties)
         ->dailyAt('02:00')
         ->withoutOverlapping()
         ->onSuccess(function () {
@@ -107,12 +107,12 @@ if (InstallUtils::isDbCreated()) {
             if ($response->status() !== 200) {
                 \Log::error('Health check self-test failed', [
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body' => $response->body(),
                 ]);
             }
         } catch (\Exception $e) {
             \Log::error('Health check self-test exception', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     })->hourly()

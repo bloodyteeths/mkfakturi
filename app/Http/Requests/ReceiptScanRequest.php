@@ -23,4 +23,3 @@ class ReceiptScanRequest extends FormRequest
         ];
     }
 }
-

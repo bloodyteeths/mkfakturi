@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 class NullAiProvider implements AiProviderInterface
 {
     private string $sourceProvider;
+
     private ?string $reason;
 
     public function __construct(string $sourceProvider = 'unknown', ?string $reason = null)

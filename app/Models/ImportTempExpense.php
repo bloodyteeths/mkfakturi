@@ -13,9 +13,13 @@ class ImportTempExpense extends Model
 
     // Processing statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_MAPPED = 'mapped';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_COMMITTED = 'committed';
 
     protected $guarded = ['id'];
@@ -73,21 +77,23 @@ class ImportTempExpense extends Model
     public function getFormattedCreatedAtAttribute()
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
     public function getFormattedExpenseDateAttribute()
     {
-        if (!$this->expense_date) {
+        if (! $this->expense_date) {
             return null;
         }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+
         return Carbon::parse($this->expense_date)->translatedFormat($dateFormat);
     }
 
     public function getHasValidationErrorsAttribute()
     {
-        return !empty($this->validation_errors);
+        return ! empty($this->validation_errors);
     }
 
     public function getIsDuplicateAttribute()
@@ -102,39 +108,40 @@ class ImportTempExpense extends Model
         }
 
         $scores = array_values($this->mapping_confidence);
+
         return count($scores) > 0 ? round(array_sum($scores) / count($scores), 2) : 0;
     }
 
     public function getFormattedAmountAttribute()
     {
-        if (!$this->amount) {
+        if (! $this->amount) {
             return null;
         }
-        
+
         return format_money_pdf($this->amount, $this->getCurrency());
     }
 
     public function getFormattedNetAmountAttribute()
     {
-        if (!$this->net_amount) {
+        if (! $this->net_amount) {
             return null;
         }
-        
+
         return format_money_pdf($this->net_amount, $this->getCurrency());
     }
 
     public function getFormattedTaxAmountAttribute()
     {
-        if (!$this->tax_amount) {
+        if (! $this->tax_amount) {
             return null;
         }
-        
+
         return format_money_pdf($this->tax_amount, $this->getCurrency());
     }
 
     public function getIsBillableAttribute()
     {
-        return $this->billable && !empty($this->customer_name);
+        return $this->billable && ! empty($this->customer_name);
     }
 
     // Scopes
@@ -175,22 +182,22 @@ class ImportTempExpense extends Model
 
     public function scopeWhereVendorName($query, $vendorName)
     {
-        return $query->where('vendor_name', 'LIKE', '%' . $vendorName . '%');
+        return $query->where('vendor_name', 'LIKE', '%'.$vendorName.'%');
     }
 
     public function scopeWhereCategoryName($query, $categoryName)
     {
-        return $query->where('category_name', 'LIKE', '%' . $categoryName . '%');
+        return $query->where('category_name', 'LIKE', '%'.$categoryName.'%');
     }
 
     public function scopeWhereReceiptNumber($query, $receiptNumber)
     {
-        return $query->where('receipt_number', 'LIKE', '%' . $receiptNumber . '%');
+        return $query->where('receipt_number', 'LIKE', '%'.$receiptNumber.'%');
     }
 
     public function scopeWhereCustomerName($query, $customerName)
     {
-        return $query->where('customer_name', 'LIKE', '%' . $customerName . '%');
+        return $query->where('customer_name', 'LIKE', '%'.$customerName.'%');
     }
 
     public function scopeBillable($query)
@@ -299,13 +306,13 @@ class ImportTempExpense extends Model
     public function addValidationError($field, $message)
     {
         $errors = $this->validation_errors ?: [];
-        
-        if (!isset($errors[$field])) {
+
+        if (! isset($errors[$field])) {
             $errors[$field] = [];
         }
-        
+
         $errors[$field][] = $message;
-        
+
         $this->update(['validation_errors' => $errors]);
     }
 
@@ -318,14 +325,14 @@ class ImportTempExpense extends Model
     {
         $confidence = $this->mapping_confidence ?: [];
         $confidence[$field] = $score;
-        
+
         $this->update(['mapping_confidence' => $confidence]);
     }
 
     public function logTransformation($field, $originalValue, $transformedValue, $rule = null)
     {
         $log = $this->transformation_log ?: [];
-        
+
         $log[] = [
             'field' => $field,
             'original_value' => $originalValue,
@@ -333,7 +340,7 @@ class ImportTempExpense extends Model
             'rule' => $rule,
             'timestamp' => now()->toISOString(),
         ];
-        
+
         $this->update(['transformation_log' => $log]);
     }
 
@@ -359,11 +366,11 @@ class ImportTempExpense extends Model
     public function markAsFailed($errors = null)
     {
         $data = ['status' => self::STATUS_FAILED];
-        
+
         if ($errors) {
             $data['validation_errors'] = $errors;
         }
-        
+
         $this->update($data);
     }
 
@@ -374,7 +381,7 @@ class ImportTempExpense extends Model
 
     public function shouldCreateNewExpense()
     {
-        return !$this->is_duplicate && $this->status !== self::STATUS_FAILED;
+        return ! $this->is_duplicate && $this->status !== self::STATUS_FAILED;
     }
 
     public function shouldUpdateExistingExpense()
@@ -407,29 +414,31 @@ class ImportTempExpense extends Model
         if ($this->currency_code) {
             return Currency::where('code', $this->currency_code)->first();
         }
-        
+
         // Fallback to company default currency
         $companyCurrencyId = CompanySetting::getSetting('currency', $this->importJob->company_id);
+
         return Currency::find($companyCurrencyId);
     }
 
     public function getCurrencyId()
     {
         $currency = $this->getCurrency();
+
         return $currency ? $currency->id : null;
     }
 
     public function getExpenseCategoryId()
     {
-        if (!$this->category_name) {
+        if (! $this->category_name) {
             return null;
         }
 
         $category = ExpenseCategory::where('company_id', $this->importJob->company_id)
-                                   ->where('name', 'LIKE', '%' . $this->category_name . '%')
-                                   ->first();
+            ->where('name', 'LIKE', '%'.$this->category_name.'%')
+            ->first();
 
-        if (!$category) {
+        if (! $category) {
             // Create a new expense category if it doesn't exist
             $category = ExpenseCategory::create([
                 'name' => $this->category_name,
@@ -442,15 +451,15 @@ class ImportTempExpense extends Model
 
     public function getPaymentMethodId()
     {
-        if (!$this->payment_method) {
+        if (! $this->payment_method) {
             return null;
         }
 
         $paymentMethod = PaymentMethod::where('company_id', $this->importJob->company_id)
-                                    ->where('name', 'LIKE', '%' . $this->payment_method . '%')
-                                    ->first();
+            ->where('name', 'LIKE', '%'.$this->payment_method.'%')
+            ->first();
 
-        if (!$paymentMethod) {
+        if (! $paymentMethod) {
             // Create a new payment method if it doesn't exist
             $paymentMethod = PaymentMethod::create([
                 'name' => $this->payment_method,
@@ -463,7 +472,7 @@ class ImportTempExpense extends Model
 
     public function getCustomerId()
     {
-        if (!$this->billable || !$this->customer_name) {
+        if (! $this->billable || ! $this->customer_name) {
             return null;
         }
 
@@ -474,8 +483,8 @@ class ImportTempExpense extends Model
 
         // Try to find existing customer by name
         $customer = Customer::where('company_id', $this->importJob->company_id)
-                           ->where('name', 'LIKE', '%' . $this->customer_name . '%')
-                           ->first();
+            ->where('name', 'LIKE', '%'.$this->customer_name.'%')
+            ->first();
 
         return $customer ? $customer->id : null;
     }
@@ -495,9 +504,9 @@ class ImportTempExpense extends Model
         // Try combination of vendor, amount, and date
         if ($this->vendor_name && $this->amount && $this->expense_date) {
             $expense = $query->where('vendor_name', $this->vendor_name)
-                           ->where('amount', $this->amount)
-                           ->where('expense_date', $this->expense_date)
-                           ->first();
+                ->where('amount', $this->amount)
+                ->where('expense_date', $this->expense_date)
+                ->first();
             if ($expense) {
                 return ['expense' => $expense, 'match_field' => 'vendor_amount_date'];
             }
@@ -540,12 +549,12 @@ class ImportTempExpense extends Model
 
     public function hasAttachment()
     {
-        return !empty($this->attachment_path);
+        return ! empty($this->attachment_path);
     }
 
     public function calculateTaxAmount()
     {
-        if (!$this->tax_rate || !$this->net_amount) {
+        if (! $this->tax_rate || ! $this->net_amount) {
             return 0;
         }
 
@@ -554,7 +563,7 @@ class ImportTempExpense extends Model
 
     public function calculateNetAmount()
     {
-        if (!$this->amount || !$this->tax_rate) {
+        if (! $this->amount || ! $this->tax_rate) {
             return $this->amount;
         }
 

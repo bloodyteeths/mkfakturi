@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\ImportJob;
 use App\Models\User;
-use App\Models\Company;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ImportJobFactory extends Factory
@@ -22,16 +22,16 @@ class ImportJobFactory extends Factory
                 ImportJob::TYPE_ITEMS,
                 ImportJob::TYPE_PAYMENTS,
                 ImportJob::TYPE_EXPENSES,
-                ImportJob::TYPE_COMPLETE
+                ImportJob::TYPE_COMPLETE,
             ]),
             'status' => ImportJob::STATUS_PENDING,
             'source_system' => $this->faker->randomElement([
-                'onivo', 'megasoft', 'pantheon', 'syntegra', 'excel', 'csv', 'xml', 'other'
+                'onivo', 'megasoft', 'pantheon', 'syntegra', 'excel', 'csv', 'xml', 'other',
             ]),
-            'file_path' => 'imports/' . $this->faker->uuid() . '/' . $this->faker->uuid() . '.csv',
+            'file_path' => 'imports/'.$this->faker->uuid().'/'.$this->faker->uuid().'.csv',
             'file_info' => [
-                'original_name' => $this->faker->word() . '.csv',
-                'filename' => $this->faker->uuid() . '.csv',
+                'original_name' => $this->faker->word().'.csv',
+                'filename' => $this->faker->uuid().'.csv',
                 'extension' => 'csv',
                 'size' => $this->faker->numberBetween(1024, 1048576), // 1KB to 1MB
                 'mime_type' => 'text/csv',
@@ -103,7 +103,7 @@ class ImportJobFactory extends Factory
             $total = $this->faker->numberBetween(100, 10000);
             $failed = $this->faker->numberBetween(0, $total * 0.05); // Max 5% failure rate
             $successful = $total - $failed;
-            
+
             return [
                 'status' => ImportJob::STATUS_COMPLETED,
                 'started_at' => now()->subHours($this->faker->numberBetween(1, 24)),
@@ -127,7 +127,7 @@ class ImportJobFactory extends Factory
             $processed = $this->faker->numberBetween(0, $total);
             $failed = $this->faker->numberBetween(1, $processed);
             $successful = $processed - $failed;
-            
+
             return [
                 'status' => ImportJob::STATUS_FAILED,
                 'started_at' => now()->subHours($this->faker->numberBetween(1, 48)),

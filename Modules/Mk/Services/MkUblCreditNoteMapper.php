@@ -2,27 +2,27 @@
 
 namespace Modules\Mk\Services;
 
-use App\Models\CreditNote;
 use App\Models\Company;
+use App\Models\CreditNote;
+use Carbon\Carbon;
+use NumNum\UBL\Address;
+use NumNum\UBL\BillingReference;
+use NumNum\UBL\Contact;
+use NumNum\UBL\Country;
 use NumNum\UBL\CreditNote as UBLCreditNote;
 use NumNum\UBL\CreditNoteLine;
-use NumNum\UBL\Party;
-use NumNum\UBL\Address;
-use NumNum\UBL\Country;
-use NumNum\UBL\Contact;
+use NumNum\UBL\Generator;
+use NumNum\UBL\InvoiceDocumentReference;
 use NumNum\UBL\Item;
-use NumNum\UBL\Price;
-use NumNum\UBL\TaxTotal;
-use NumNum\UBL\TaxSubTotal;
-use NumNum\UBL\TaxCategory;
-use NumNum\UBL\TaxScheme;
 use NumNum\UBL\LegalMonetaryTotal;
+use NumNum\UBL\Party;
 use NumNum\UBL\PaymentMeans;
 use NumNum\UBL\PaymentTerms;
-use NumNum\UBL\BillingReference;
-use NumNum\UBL\InvoiceDocumentReference;
-use NumNum\UBL\Generator;
-use Carbon\Carbon;
+use NumNum\UBL\Price;
+use NumNum\UBL\TaxCategory;
+use NumNum\UBL\TaxScheme;
+use NumNum\UBL\TaxSubTotal;
+use NumNum\UBL\TaxTotal;
 
 /**
  * Macedonian UBL CreditNote Mapper
@@ -34,6 +34,7 @@ use Carbon\Carbon;
 class MkUblCreditNoteMapper
 {
     protected $creditNote;
+
     protected $company;
 
     /**
@@ -45,7 +46,7 @@ class MkUblCreditNoteMapper
         $this->company = $creditNote->company;
 
         // Create UBL CreditNote document
-        $ublCreditNote = new UBLCreditNote();
+        $ublCreditNote = new UBLCreditNote;
 
         // Set basic credit note information
         $this->setBasicInformation($ublCreditNote);
@@ -72,7 +73,8 @@ class MkUblCreditNoteMapper
         $this->setLegalMonetaryTotal($ublCreditNote);
 
         // Generate XML
-        $generator = new Generator();
+        $generator = new Generator;
+
         return $generator->creditNote($ublCreditNote);
     }
 
@@ -103,14 +105,14 @@ class MkUblCreditNoteMapper
     {
         // If this credit note references an invoice, add the billing reference
         if ($this->creditNote->invoice) {
-            $invoiceDocRef = new InvoiceDocumentReference();
+            $invoiceDocRef = new InvoiceDocumentReference;
             $invoiceDocRef->setOriginalInvoiceId($this->creditNote->invoice->invoice_number);
 
             if ($this->creditNote->invoice->invoice_date) {
                 $invoiceDocRef->setIssueDate(Carbon::parse($this->creditNote->invoice->invoice_date));
             }
 
-            $billingReference = new BillingReference();
+            $billingReference = new BillingReference;
             $billingReference->setInvoiceDocumentReference($invoiceDocRef);
 
             $ublCreditNote->setBillingReferences([$billingReference]);
@@ -123,9 +125,9 @@ class MkUblCreditNoteMapper
     protected function setSupplierParty(UBLCreditNote $ublCreditNote): void
     {
         // Create address for supplier
-        $country = (new Country())->setIdentificationCode('MK'); // Macedonia
+        $country = (new Country)->setIdentificationCode('MK'); // Macedonia
 
-        $address = new Address();
+        $address = new Address;
         $address->setCountry($country);
 
         if ($this->company->address) {
@@ -136,7 +138,7 @@ class MkUblCreditNoteMapper
         }
 
         // Create supplier party
-        $supplierParty = new Party();
+        $supplierParty = new Party;
         $supplierParty->setName($this->company->name);
         $supplierParty->setPhysicalLocation($address);
         $supplierParty->setPostalAddress($address);
@@ -157,9 +159,9 @@ class MkUblCreditNoteMapper
         $customer = $this->creditNote->customer;
 
         // Create customer address
-        $country = (new Country())->setIdentificationCode('MK'); // Default to Macedonia
+        $country = (new Country)->setIdentificationCode('MK'); // Default to Macedonia
 
-        $address = new Address();
+        $address = new Address;
         $address->setCountry($country);
 
         if ($customer->addresses->count() > 0) {
@@ -175,7 +177,7 @@ class MkUblCreditNoteMapper
         }
 
         // Create customer contact
-        $contact = new Contact();
+        $contact = new Contact;
         $contact->setElectronicMail($customer->email ?? '');
 
         if ($customer->phone) {
@@ -183,7 +185,7 @@ class MkUblCreditNoteMapper
         }
 
         // Create customer party
-        $customerParty = new Party();
+        $customerParty = new Party;
         $customerParty->setName($customer->name);
         $customerParty->setPostalAddress($address);
         $customerParty->setContact($contact);
@@ -202,7 +204,7 @@ class MkUblCreditNoteMapper
     protected function setPaymentInformation(UBLCreditNote $ublCreditNote): void
     {
         // Payment means (bank transfer is most common in Macedonia)
-        $paymentMeans = new PaymentMeans();
+        $paymentMeans = new PaymentMeans;
         $paymentMeans->setPaymentMeansCode('30'); // Credit transfer
 
         // Add bank account information if available
@@ -218,8 +220,8 @@ class MkUblCreditNoteMapper
         $ublCreditNote->setPaymentMeans([$paymentMeans]);
 
         // Payment terms - credit notes typically reference the original invoice terms
-        $paymentTerms = new PaymentTerms();
-        $paymentTerms->setNote("Кредитно известување"); // Credit note in Macedonian
+        $paymentTerms = new PaymentTerms;
+        $paymentTerms->setNote('Кредитно известување'); // Credit note in Macedonian
         $ublCreditNote->setPaymentTerms([$paymentTerms]);
     }
 
@@ -231,19 +233,19 @@ class MkUblCreditNoteMapper
         $creditNoteLines = [];
 
         foreach ($this->creditNote->items as $index => $item) {
-            $creditNoteLine = new CreditNoteLine();
+            $creditNoteLine = new CreditNoteLine;
             $creditNoteLine->setId($index + 1);
             $creditNoteLine->setCreditedQuantity($item->quantity);
 
             // Create UBL Item
-            $ublItem = new Item();
+            $ublItem = new Item;
             $ublItem->setName($item->name);
             $ublItem->setDescription($item->description ?? '');
 
             $creditNoteLine->setItem($ublItem);
 
             // Set price
-            $price = new Price();
+            $price = new Price;
             $price->setPriceAmount($item->price);
             $creditNoteLine->setPrice($price);
 
@@ -270,15 +272,15 @@ class MkUblCreditNoteMapper
         $taxSubTotals = [];
 
         foreach ($item->taxes as $tax) {
-            $taxScheme = new TaxScheme();
+            $taxScheme = new TaxScheme;
             $taxScheme->setId('VAT'); // Standard VAT
 
-            $taxCategory = new TaxCategory();
+            $taxCategory = new TaxCategory;
             $taxCategory->setId('S'); // Standard rate
             $taxCategory->setPercent($tax->tax_type->percent);
             $taxCategory->setTaxScheme($taxScheme);
 
-            $taxSubTotal = new TaxSubTotal();
+            $taxSubTotal = new TaxSubTotal;
             $taxSubTotal->setTaxableAmount($item->quantity * $item->price);
             $taxSubTotal->setTaxAmount($tax->amount);
             $taxSubTotal->setTaxCategory($taxCategory);
@@ -286,8 +288,8 @@ class MkUblCreditNoteMapper
             $taxSubTotals[] = $taxSubTotal;
         }
 
-        if (!empty($taxSubTotals)) {
-            $taxTotal = new TaxTotal();
+        if (! empty($taxSubTotals)) {
+            $taxTotal = new TaxTotal;
             $taxTotal->setTaxSubtotals($taxSubTotals);
 
             // Calculate total tax amount for this line
@@ -318,16 +320,16 @@ class MkUblCreditNoteMapper
                 return $tax->tax_type->percent > 0 ? ($tax->amount / $tax->tax_type->percent * 100) : 0;
             });
 
-            $taxScheme = new TaxScheme();
+            $taxScheme = new TaxScheme;
             $taxScheme->setId('VAT');
             $taxScheme->setName('ДДВ'); // VAT in Macedonian
 
-            $taxCategory = new TaxCategory();
+            $taxCategory = new TaxCategory;
             $taxCategory->setId($this->getTaxCategoryId($taxType->percent));
             $taxCategory->setPercent($taxType->percent);
             $taxCategory->setTaxScheme($taxScheme);
 
-            $taxSubTotal = new TaxSubTotal();
+            $taxSubTotal = new TaxSubTotal;
             $taxSubTotal->setTaxableAmount($groupTaxableAmount);
             $taxSubTotal->setTaxAmount($groupTaxAmount);
             $taxSubTotal->setTaxCategory($taxCategory);
@@ -336,8 +338,8 @@ class MkUblCreditNoteMapper
             $totalTaxAmount += $groupTaxAmount;
         }
 
-        if (!empty($taxSubTotals)) {
-            $taxTotal = new TaxTotal();
+        if (! empty($taxSubTotals)) {
+            $taxTotal = new TaxTotal;
             $taxTotal->setTaxAmount($totalTaxAmount);
             $taxTotal->setTaxSubtotals($taxSubTotals);
 
@@ -350,7 +352,7 @@ class MkUblCreditNoteMapper
      */
     protected function setLegalMonetaryTotal(UBLCreditNote $ublCreditNote): void
     {
-        $legalMonetaryTotal = new LegalMonetaryTotal();
+        $legalMonetaryTotal = new LegalMonetaryTotal;
 
         // Line extension amount (subtotal without tax) - negative for credit
         $legalMonetaryTotal->setLineExtensionAmount($this->creditNote->sub_total);
@@ -399,19 +401,20 @@ class MkUblCreditNoteMapper
         libxml_clear_errors();
 
         // Create DOMDocument
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $dom->loadXML($xml);
 
         // Load UBL 2.1 CreditNote XSD schema
         $schemaPath = $this->getUblSchemaPath();
 
-        if (!file_exists($schemaPath)) {
+        if (! file_exists($schemaPath)) {
             $errors[] = "UBL Schema file not found: {$schemaPath}";
+
             return $errors;
         }
 
         // Validate against schema
-        if (!$dom->schemaValidate($schemaPath)) {
+        if (! $dom->schemaValidate($schemaPath)) {
             $xmlErrors = libxml_get_errors();
             foreach ($xmlErrors as $error) {
                 $errors[] = "Line {$error->line}: {$error->message}";
@@ -419,6 +422,7 @@ class MkUblCreditNoteMapper
         }
 
         libxml_clear_errors();
+
         return $errors;
     }
 

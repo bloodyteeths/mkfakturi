@@ -30,7 +30,7 @@ return new class extends Migration
         });
     }
 
-// CLAUDE-CHECKPOINT
+    // CLAUDE-CHECKPOINT
 
     /**
      * Reverse the migrations.

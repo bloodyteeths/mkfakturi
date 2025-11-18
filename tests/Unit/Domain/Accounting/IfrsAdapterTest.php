@@ -4,9 +4,9 @@ namespace Tests\Unit\Domain\Accounting;
 
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\Customer;
 use IFRS\Models\Account;
 use IFRS\Models\Currency;
 use IFRS\Models\Entity;
@@ -27,16 +27,20 @@ use Tests\TestCase;
 class IfrsAdapterTest extends TestCase
 {
     protected IfrsAdapter $adapter;
+
     protected Company $company;
+
     protected Customer $customer;
+
     protected Currency $currency;
+
     protected Entity $entity;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        if (!env('RUN_IFRS_TESTS', false)) {
+        if (! env('RUN_IFRS_TESTS', false)) {
             $this->markTestSkipped('IFRS integration tests are disabled by default (set RUN_IFRS_TESTS=true to enable).');
         }
 
@@ -49,11 +53,11 @@ class IfrsAdapterTest extends TestCase
             '--force' => true,
         ]);
 
-        if (!Schema::hasTable('ifrs_entities')) {
+        if (! Schema::hasTable('ifrs_entities')) {
             $this->markTestSkipped('IFRS tables are not available in this environment.');
         }
 
-        $this->adapter = new IfrsAdapter();
+        $this->adapter = new IfrsAdapter;
 
         // Create test entity
         $this->entity = Entity::create([
