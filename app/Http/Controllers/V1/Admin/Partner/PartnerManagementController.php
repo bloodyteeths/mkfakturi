@@ -281,10 +281,10 @@ class PartnerManagementController extends Controller
             })->count(),
             'pending_kyc' => Partner::where('kyc_status', 'pending')->count(),
             'total_commissions_paid' => DB::table('affiliate_events')
-                ->where('is_paid', true)
+                ->whereNotNull('paid_at')
                 ->sum('amount'),
             'total_commissions_unpaid' => DB::table('affiliate_events')
-                ->where('is_paid', false)
+                ->whereNull('paid_at')
                 ->sum('amount'),
         ];
 
