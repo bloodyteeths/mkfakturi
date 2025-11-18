@@ -36,9 +36,19 @@ class BootstrapController extends Controller
             'company_header' => $request->header('company'),
         ]);
 
+        $current_user = $request->user();
+
+        // Partner users should not use this endpoint - redirect to partner portal
+        if ($current_user->role === 'partner') {
+            return response()->json([
+                'redirect' => '/admin/console',
+                'message' => 'Partner users should use the partner console'
+            ], 302);
+        }
+
         // Eager load user relationships to avoid N+1 queries
         // FG-01-12: Include subscription for feature gating
-        $current_user = $request->user()->load([
+        $current_user->load([
             'currency',
             'settings',
             'companies.address',
@@ -79,6 +89,11 @@ class BootstrapController extends Controller
 
             if ($current_company && ! $current_company->relationLoaded('address')) {
                 $current_company->load('address');
+            }
+
+            // Handle case where user has no companies at all
+            if (!$current_company) {
+                abort(403, 'No company access. Please contact your administrator.');
             }
 
             $current_company_settings = CompanySetting::getAllSettings($current_company->id)->toArray();
