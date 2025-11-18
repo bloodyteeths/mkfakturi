@@ -26,6 +26,12 @@ class CompanyMiddleware
         if (Schema::hasTable('user_company')) {
             $user = $request->user();
 
+            // Skip company requirements for partner users entirely
+            // Partners manage multiple companies through partner_company_links
+            if ($user && $user->role === 'partner') {
+                return $next($request);
+            }
+
             // Only proceed if user has companies
             $firstCompany = $user->companies()->first();
             if (!$firstCompany) {
