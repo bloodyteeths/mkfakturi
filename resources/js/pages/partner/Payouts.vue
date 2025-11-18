@@ -285,7 +285,7 @@ export default {
   methods: {
     async fetchBankDetails() {
       try {
-        const response = await axios.get('/api/partner/bank-details')
+        const response = await axios.get('/partner/bank-details')
         this.bankDetails = response.data
       } catch (error) {
         console.error('Failed to fetch bank details:', error)
@@ -295,7 +295,7 @@ export default {
     async saveBankDetails() {
       this.savingBankDetails = true
       try {
-        const response = await axios.post('/api/partner/bank-details', this.bankDetailsForm)
+        const response = await axios.post('/partner/bank-details', this.bankDetailsForm)
         this.bankDetails = response.data
         this.editingBankDetails = false
       } catch (error) {
@@ -320,7 +320,7 @@ export default {
           status: this.statusFilter || undefined
         }
 
-        const response = await axios.get('/api/partner/payouts', { params })
+        const response = await axios.get('/partner/payouts', { params })
         this.payouts = response.data.data
         this.payoutSummary = response.data.summary
         this.pagination = {
@@ -346,7 +346,7 @@ export default {
 
     async downloadReceipt(payoutId) {
       try {
-        const response = await axios.get(`/api/partner/payouts/${payoutId}/receipt`, {
+        const response = await axios.get(`/partner/payouts/${payoutId}/receipt`, {
           responseType: 'blob'
         })
 

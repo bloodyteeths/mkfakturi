@@ -223,7 +223,7 @@ export default {
   methods: {
     async fetchReferralData() {
       try {
-        const response = await axios.get('/api/partner/referrals')
+        const response = await axios.get('/partner/referrals')
         this.activeLink = response.data.activeLink
         this.statistics = response.data.statistics
         this.hasActiveLink = !!this.activeLink
@@ -241,7 +241,7 @@ export default {
     async generateLink() {
       this.generating = true
       try {
-        const response = await axios.post('/api/partner/referrals', {
+        const response = await axios.post('/partner/referrals', {
           custom_code: this.customCode || null
         })
         this.activeLink = response.data.link
