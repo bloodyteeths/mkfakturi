@@ -261,10 +261,17 @@ const partnerColumns = ref([
 ])
 
 const showEmptyScreen = computed(() => {
-  return !totalPartners.value
+  // Only show empty screen if we've loaded data and have zero partners
+  // null means we haven't loaded yet, so don't show empty state
+  const isEmpty = totalPartners.value === 0
+  console.log('[Partners Index] showEmptyScreen computed:', {
+    totalPartners: totalPartners.value,
+    isEmpty,
+  })
+  return isEmpty
 })
 
-const totalPartners = ref(0)
+const totalPartners = ref(null)
 
 async function fetchData({ page, filter, sort }) {
   const params = {
@@ -277,8 +284,19 @@ async function fetchData({ page, filter, sort }) {
     sort_order: sort.order || 'desc',
   }
 
+  console.log('[Partners Index] Fetching data with params:', params)
   const response = await axios.get('/partners', { params })
+  console.log('[Partners Index] Response received:', {
+    total: response.data.total,
+    dataLength: response.data.data?.length,
+    currentPage: response.data.current_page,
+    lastPage: response.data.last_page,
+  })
+
   totalPartners.value = response.data.total
+  console.log('[Partners Index] totalPartners.value set to:', totalPartners.value)
+  console.log('[Partners Index] showEmptyScreen computed:', showEmptyScreen.value)
+
   return {
     data: response.data.data,
     pagination: {
@@ -333,6 +351,8 @@ async function deactivatePartner(id) {
 }
 
 onMounted(() => {
+  console.log('[Partners Index] Component mounted')
+  console.log('[Partners Index] totalPartners initial value:', totalPartners.value)
   fetchStats()
 })
 </script>
