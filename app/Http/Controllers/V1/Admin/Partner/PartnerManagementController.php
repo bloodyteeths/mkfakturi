@@ -437,6 +437,9 @@ class PartnerManagementController extends Controller
                 'permissions' => json_encode($validated['permissions']),
             ]);
 
+            // Clear permission cache
+            $partner->clearPermissionCache($companyId);
+
             DB::commit();
 
             return response()->json([
@@ -476,6 +479,9 @@ class PartnerManagementController extends Controller
 
             // Detach company
             $partner->companies()->detach($companyId);
+
+            // Clear permission cache
+            $partner->clearPermissionCache($companyId);
 
             DB::commit();
 

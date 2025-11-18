@@ -133,6 +133,9 @@ async function onSubmit() {
     }
   } catch (error) {
     isLoading.value = false
+    console.error('Login error:', error)
+    console.error('Login error response:', error.response)
+    console.error('Login error data:', error.response?.data)
   }
 }
 
