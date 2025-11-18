@@ -6,8 +6,16 @@ The partner user is **automatically created** on Railway deployment via the `Par
 
 ## Login Credentials
 
-**Email:** `partner@demo.mk`
-**Password:** `Partner2025!`
+| Account Type    | Email                  | Password                          | Company      | Role        |
+  |-----------------|------------------------|-----------------------------------|--------------|-------------|
+  | Partner 1       | partner@demo.mk        | testpass123                       | Teknomed DOO | partner     |
+  | Partner 2       | partner2@demo.mk       | testpass123                       | xyz          | partner     |
+  | Company Owner 1 | admin@invoiceshelf.com | newpassword123                    | xyz          | super admin |
+  | Company Owner 2 | your-email@example.com | (not shown - use reset if needed) | Teknomed DOO | super admin |
+
+  Email: company@demo.mk
+Password: testpass123
+Role: user (regular company account)
 
 ## How It Works
 

@@ -136,7 +136,7 @@
         <template #cell-total_earnings="{ row }">
           <BaseFormatMoney
             :amount="row.data.total_earnings || 0"
-            :currency="globalStore.companySettings.currency"
+            :currency="globalStore.companySettings?.currency || { name: 'US Dollar', code: 'USD', symbol: '$' }"
           />
         </template>
 
