@@ -62,49 +62,59 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
           </div>
         </div>
 
-        <div className="relative lg:h-[600px] w-full animate-[slideUp_1s_ease-out_0.2s_both]">
-          <div className="relative z-10 rounded-2xl bg-white/40 backdrop-blur-xl border border-white/50 shadow-2xl p-2 transform hover:scale-[1.02] transition-transform duration-500">
+        {/* Hero Visual */}
+        <div className="relative order-1 lg:order-2 animate-[slideUp_1s_ease-out_0.3s_both]">
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-3xl blur-3xl transform scale-95"></div>
+
+          {/* Image container */}
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 backdrop-blur-sm">
             <Image
-              src="/assets/images/hero_dashboard_1763567021038.png"
-              alt="Facturino AI Dashboard"
-              width={800}
-              height={600}
-              className="rounded-xl shadow-lg w-full h-auto"
+              src="/assets/images/hero_skopje.png"
+              alt="Facturino Dashboard"
+              width={700}
+              height={500}
               priority
+              className="w-full h-auto"
             />
+          </div>
 
-            {/* Floating Elements */}
-            <div className="absolute -left-8 top-20 bg-white/90 backdrop-blur p-4 rounded-xl shadow-xl border border-white/50 animate-[float_6s_ease-in-out_infinite]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500">Status</div>
-                  <div className="text-sm font-bold text-gray-900">AI Verified</div>
-                </div>
+          {/* Floating elements */}
+          <div className="absolute bottom-6 left-6 bg-white rounded-2xl shadow-xl p-4 max-w-xs animate-float">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-            </div>
-
-            <div className="absolute -right-8 bottom-20 bg-white/90 backdrop-blur p-4 rounded-xl shadow-xl border border-white/50 animate-[float_7s_ease-in-out_infinite_1s]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500">Efficiency</div>
-                  <div className="text-sm font-bold text-gray-900">+45% Boost</div>
-                </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Status</p>
+                <p className="text-sm font-bold text-gray-900">AI активно</p>
               </div>
             </div>
           </div>
 
-          {/* Decorative background blob behind image */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-indigo-500/20 to-cyan-500/20 rounded-full filter blur-3xl -z-10"></div>
+          <div className="absolute top-6 right-6 bg-white rounded-2xl shadow-xl p-4 animate-float animation-delay-2000">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">e-Faktura</p>
+                <p className="text-sm font-bold text-green-600">Готово</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Social Proof */}
+      <div className="mt-16 text-center animate-[fadeIn_1s_ease-out_0.6s_both]">
+        <p className="text-sm text-gray-500 mb-6">{t.socialProof.trustedBy}</p>
+        <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
+          {/* Bank logos will be handled by Partners component */}
         </div>
       </div>
     </section>

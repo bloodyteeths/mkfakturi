@@ -19,6 +19,8 @@ export type Dictionary = {
   hero: { h1: string; sub: string; primaryCta: string; secondaryCta: string; claim: string; onlyPlatform: string }
   // extra tagline line for hero
   heroTagline?: string
+  aiSection: { badge: string; title: string; subtitle: string; features: { title: string; desc: string }[] }
+  featureGrid: { title: string; subtitle: string; features: { title: string; desc: string }[] }
   socialProof: { trustedBy: string }
   whyDifferent: { title: string; cards: FeatureCard[] }
   benefits: { title: string; bullets: string[] }
@@ -83,6 +85,26 @@ const mk: Dictionary = {
       'Единствена локална платформа што комбинира AI, македонски сметководствени правила, подготвеност за е‑Фактура и PSD2 банкарски поврзувања – на едно место.'
   },
   heroTagline: 'Сметководствениот софтвер што го очекувавте – конечно е тука.',
+  aiSection: {
+    badge: 'Моќ на AI',
+    title: 'Сметководство на автопилот',
+    subtitle: 'Нашиот напреден AI се грижи за досадното внесување податоци додека вие се фокусирате на раст на вашиот бизнис.',
+    features: [
+      { title: 'Паметна категоризација', desc: 'AI автоматски препознава типови на трансакции и предлага соодветни ДДВ ставки и сметки.' },
+      { title: 'Препознавање образци', desc: 'Системот учи од вашите претходни внесувања и станува се попрецизен со текот на времето.' },
+      { title: 'Автоматизирани работни процеси', desc: 'Автоматско порамнување на фактури со банкарски изводи и интелигентни потсетници.' }
+    ]
+  },
+  featureGrid: {
+    title: 'Сè што ви треба за водење на вашиот бизнис',
+    subtitle: 'Моќни функции дизајнирани за современи македонски бизниси и сметководители.',
+    features: [
+      { title: 'Подготвено за е‑Фактура', desc: 'Целосно усогласено со новите владини прописи. Поврзете се веднаш кога ќе се отвори API.' },
+      { title: 'Банкарска интеграција', desc: 'Поврзете ги вашите локални банкарски сметки за ажурирања на трансакции во реално време.' },
+      { title: 'Безбедност на банкарско ниво', desc: 'Вашите податоци се енкриптирани и безбедно чувани во ЕУ дата центри.' },
+      { title: 'Мулти‑клиент', desc: 'Совршено за сметководители кои управуваат со повеќе клиентски компании од едно место.' }
+    ]
+  },
   socialProof: { trustedBy: 'Доверено од сметководители и мали бизниси' },
   whyDifferent: {
     title: 'Зошто Facturino е различен од било кој софтвер во Македонија',
@@ -250,6 +272,26 @@ const sq: Dictionary = {
       'E vetmja platformë lokale që kombinon AI, rregullat kontabël maqedonase, gatishmërinë për e‑Faturë dhe lidhjet bankare PSD2 – në një vend.'
   },
   heroTagline: 'Softueri i kontabilitetit që keni pritur – më në fund është këtu.',
+  aiSection: {
+    badge: 'Fuqia e AI',
+    title: 'Kontabilitet në autopilot',
+    subtitle: 'AI-ja jonë e avancuar merret me futjen e lodhshme të të dhënave ndërsa ju fokusoheni në rritjen e biznesit tuaj.',
+    features: [
+      { title: 'Kategorizim i mençur', desc: 'AI automatikisht njeh llojet e transaksioneve dhe propozon TVSH dhe llogari përkatëse.' },
+      { title: 'Njohja e modeleve', desc: 'Sistemi mëson nga hyrjet tuaja të mëparshme dhe bëhet gjithnjë e më i saktë me kalimin e kohës.' },
+      { title: 'Rrjedha pune të automatizuara', desc: 'Pajtim automatik i faturave me ekstrakte bankare dhe kujtues inteligjentë.' }
+    ]
+  },
+  featureGrid: {
+    title: 'Gjithçka që ju nevojitet për të drejtuar biznesin tuaj',
+    subtitle: 'Veçori të fuqishme të dizajnuara për bizneset dhe kontabilistët modernë maqedonas.',
+    features: [
+      { title: 'Gati për e‑Faturë', desc: 'Plotësisht në përputhje me rregulloret e reja qeveritare. Lidhuni menjëherë kur të hapet API.' },
+      { title: 'Integrim bankar', desc: 'Lidhni llogaritë tuaja bankare lokale për përditësime transaksionesh në kohë reale.' },
+      { title: 'Siguri në nivel bankar', desc: 'Të dhënat tuaja janë të enkriptuara dhe ruhen në mënyrë të sigurt në qendrat e të dhënave të BE-së.' },
+      { title: 'Multi-klient', desc: 'Perfekt për kontabilistët që menaxhojnë kompani të shumta klientësh nga një vend.' }
+    ]
+  },
   socialProof: { trustedBy: 'E besuar nga kontabilistët dhe bizneset e vogla' },
   whyDifferent: {
     title: 'Pse Facturino është ndryshe nga çdo softuer tjetër në Maqedoni',
@@ -416,7 +458,27 @@ const tr: Dictionary = {
     onlyPlatform:
       'Yapay zekâ, Makedonya muhasebe kuralları, e‑Fatura hazırlığı ve PSD2 banka bağlantılarını tek çatı altında birleştiren tek yerel platform.'
   },
-  heroTagline: 'Beklediğiniz muhasebe yazılımı sonunda geldi.',
+  heroTagline: 'Beklediğiniz muhasebe yazılımı – nihayet burada.',
+  aiSection: {
+    badge: 'AI Gücü',
+    title: 'Otopilotta muhasebe',
+    subtitle: 'Gelişmiş AI muhasebe görevi sıkıcı veri girişiyle ilgilenirken siz işinizi büyütmeye odaklanın.',
+    features: [
+      { title: 'Akıllı kategorizasyon', desc: 'AI otomatik olarak işlem türlerini tanır ve uygun KDV ve hesapları önerir.' },
+      { title: 'Desen tanıma', desc: 'Sistem önceki girişlerinizden öğrenir ve zaman içinde daha da doğru hale gelir.' },
+      { title: 'Otomatik iş akışları', desc: 'Faturaların banka ekstreleriyle otomatik eşleştirilmesi ve akıllı hatırlatmalar.' }
+    ]
+  },
+  featureGrid: {
+    title: 'İşinizi yürütmek için ihtiyacınız olan her şey',
+    subtitle: 'Modern Makedon işletmeleri ve muhasebeciler için tasarlanmış güçlü özellikler.',
+    features: [
+      { title: 'e-Fatura hazır', desc: 'Yeni hükümet düzenlemelerine tam uyumlu. API açıldığında anında bağlanın.' },
+      { title: 'Banka entegrasyonu', desc: 'Gerçek zamanlı işlem güncellemeleri için yerel banka hesaplarınızı bağlayın.' },
+      { title: 'Banka seviyesinde güvenlik', desc: 'Verileriniz şifrelenir ve AB merkezli veri merkezlerinde güvenle saklanır.' },
+      { title: 'Çoklu kiracı', desc: 'Birden fazla müşteri şirketini tek yerden yöneten muhasebeciler için mükemmel.' }
+    ]
+  },
   socialProof: { trustedBy: 'Muhasebeciler ve KOBİ’ler tarafından güveniliyor' },
   whyDifferent: {
     title: 'Facturino neden Makedonya’daki diğer yazılımlardan farklı',
