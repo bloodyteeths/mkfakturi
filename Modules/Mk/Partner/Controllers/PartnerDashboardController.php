@@ -18,10 +18,21 @@ class PartnerDashboardController extends Controller
      */
     public function index(Request $request)
     {
+        \Log::info('PartnerDashboardController::index called', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'user_id' => Auth::id(),
+        ]);
+
         $user = Auth::user();
 
         // Get partner record for the authenticated user
         $partner = Partner::where('user_id', $user->id)->firstOrFail();
+
+        \Log::info('Partner found', [
+            'partner_id' => $partner->id,
+            'user_id' => $user->id,
+        ]);
 
         // Calculate KPIs
         $totalEarnings = $partner->getLifetimeEarnings();
@@ -279,8 +290,19 @@ class PartnerDashboardController extends Controller
      */
     public function commissions(Request $request)
     {
+        \Log::info('PartnerDashboardController::commissions called', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'user_id' => Auth::id(),
+        ]);
+
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->firstOrFail();
+
+        \Log::info('Partner found for commissions', [
+            'partner_id' => $partner->id,
+            'user_id' => $user->id,
+        ]);
 
         // Get recent commissions (last 10)
         $recentCommissions = AffiliateEvent::with('company')

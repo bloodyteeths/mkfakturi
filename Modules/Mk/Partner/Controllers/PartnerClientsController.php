@@ -16,8 +16,19 @@ class PartnerClientsController extends Controller
      */
     public function index(Request $request)
     {
+        \Log::info('PartnerClientsController::index called', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'user_id' => Auth::id(),
+        ]);
+
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->firstOrFail();
+
+        \Log::info('Partner found for clients', [
+            'partner_id' => $partner->id,
+            'user_id' => $user->id,
+        ]);
 
         // Build query
         $query = $partner->companies()
