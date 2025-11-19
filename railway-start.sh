@@ -439,6 +439,10 @@ fi
 echo "Syncing abilities for all companies from config..."
 php artisan abilities:sync 2>/dev/null || echo "Abilities sync completed or skipped"
 
+# Setup admin roles for all companies (ensures partners can be assigned)
+echo "Setting up admin roles for all companies..."
+php artisan roles:setup-admin 2>/dev/null || echo "Admin roles setup completed or skipped"
+
 # Don't cache config in production - causes issues with environment variables
 echo "Skipping config cache to allow dynamic environment variables..."
 # php artisan config:cache
