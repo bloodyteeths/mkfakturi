@@ -54,12 +54,20 @@ class UsersController extends Controller
                 'email_trimmed' => trim($request->email),
             ]);
 
+            // Try direct DB query first to bypass any model scopes
+            $userExists = \DB::table('users')->where('email', $request->email)->first();
+            \Log::info('Direct DB query result', [
+                'found' => $userExists ? 'yes' : 'no',
+                'user_id' => $userExists->id ?? null,
+            ]);
+
             $user = User::where('email', $request->email)->first();
 
             if (!$user) {
                 \Log::warning('User not found', [
                     'searched_email' => $request->email,
-                    'all_emails' => User::pluck('email')->toArray(),
+                    'all_emails_eloquent' => User::pluck('email')->toArray(),
+                    'all_emails_db' => \DB::table('users')->pluck('email')->toArray(),
                 ]);
 
                 return response()->json([
