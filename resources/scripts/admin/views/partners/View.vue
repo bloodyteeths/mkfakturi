@@ -136,6 +136,14 @@
 
         <BaseTab :title="$t('partners.tabs.companies')" :count="partner.companies ? partner.companies.length : 0">
           <div class="bg-white rounded-lg shadow">
+            <div class="p-4 border-b border-gray-200">
+              <BaseButton @click="openAssignCompanyModal">
+                <template #left="slotProps">
+                  <BaseIcon name="PlusIcon" :class="slotProps.class" />
+                </template>
+                {{ $t('partners.assign_company') }}
+              </BaseButton>
+            </div>
 
             <div v-if="partner.companies && partner.companies.length > 0" class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
@@ -295,6 +303,14 @@
     <BaseLoader />
   </div>
 
+  <!-- Assign Company Modal (super admin can manually assign for support) -->
+  <AssignCompanyModal
+    :show="showAssignModal"
+    :partner-id="partner?.id"
+    :company="null"
+    @close="closeAssignModal"
+    @saved="onCompanyAssigned"
+  />
 </template>
 
 <script setup>
@@ -304,6 +320,7 @@ import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import AssignCompanyModal from './components/AssignCompanyModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -312,6 +329,7 @@ const notificationStore = useNotificationStore()
 const globalStore = useGlobalStore()
 
 const partner = ref(null)
+const showAssignModal = ref(false)
 
 // Add null-safe currency with fallback
 const currency = computed(() => {
@@ -350,6 +368,18 @@ function getPermissionsCount(permissions) {
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString()
+}
+
+function openAssignCompanyModal() {
+  showAssignModal.value = true
+}
+
+function closeAssignModal() {
+  showAssignModal.value = false
+}
+
+function onCompanyAssigned() {
+  fetchPartner()
 }
 
 async function unassignCompany(companyId) {
