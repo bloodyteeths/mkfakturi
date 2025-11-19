@@ -29,7 +29,7 @@ class UserRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                $isExistingUser ? 'exists:users,email' : Rule::unique('users'),
+                $isExistingUser ? '' : Rule::unique('users'),
             ],
             'phone' => [
                 'nullable',
