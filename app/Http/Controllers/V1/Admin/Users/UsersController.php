@@ -48,7 +48,15 @@ class UsersController extends Controller
         $this->authorize('create', User::class);
 
         if ($request->is_existing_user) {
-            $user = User::where('email', $request->email)->firstOrFail();
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'user_not_found',
+                    'message' => 'No user found with the provided email address.',
+                ], 422);
+            }
+
             $user->attachCompanies($request->companies);
         } else {
             $user = User::createFromRequest($request);
