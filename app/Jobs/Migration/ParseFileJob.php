@@ -39,7 +39,7 @@ class ParseFileJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, QueueableAction;
 
     public ImportJob $importJob;
-    
+
     /**
      * Job timeout in seconds (30 minutes for large files)
      */
@@ -161,17 +161,17 @@ class ParseFileJob implements ShouldQueue
     protected function parseFileByType(array $fileInfo): array
     {
         $filePath = $this->importJob->file_path;
-        
+
         switch ($fileInfo['type']) {
             case 'csv':
                 return $this->parseCsvFile($filePath, $fileInfo);
-                
+
             case 'excel':
                 return $this->parseExcelFile($filePath, $fileInfo);
-                
+
             case 'xml':
                 return $this->parseXmlFile($filePath, $fileInfo);
-                
+
             default:
                 throw new \Exception("Unsupported file type: {$fileInfo['type']}");
         }
@@ -183,7 +183,7 @@ class ParseFileJob implements ShouldQueue
     protected function parseCsvFile(string $filePath, array $fileInfo): array
     {
         $csvContent = Storage::get($filePath);
-        
+
         // Handle encoding conversion
         $encoding = $fileInfo['encoding'] ?? 'UTF-8';
         if ($encoding !== 'UTF-8') {
@@ -211,13 +211,13 @@ class ParseFileJob implements ShouldQueue
 
             // Apply basic data cleaning
             $cleanedRecord = array_map([$this, 'cleanCellValue'], $record);
-            
+
             $records[] = [
                 'row_number' => $rowNumber,
                 'raw_data' => $record,
                 'cleaned_data' => $cleanedRecord,
             ];
-            
+
             $rowNumber++;
 
             // Memory management for large files
@@ -235,7 +235,7 @@ class ParseFileJob implements ShouldQueue
     protected function parseExcelFile(string $filePath, array $fileInfo): array
     {
         $fullPath = Storage::path($filePath);
-        
+
         try {
             $spreadsheet = IOFactory::load($fullPath);
             $worksheet = $spreadsheet->getActiveSheet();
@@ -259,7 +259,8 @@ class ParseFileJob implements ShouldQueue
 
                 // Convert null values to empty strings and clean data
                 $cleanedRow = array_map(function ($cell) {
-                    if ($cell === null) return '';
+                    if ($cell === null)
+                        return '';
                     return $this->cleanCellValue($cell);
                 }, $row);
 
@@ -290,7 +291,7 @@ class ParseFileJob implements ShouldQueue
     protected function parseXmlFile(string $filePath, array $fileInfo): array
     {
         $xmlContent = Storage::get($filePath);
-        
+
         try {
             $xml = simplexml_load_string($xmlContent);
             if ($xml === false) {
@@ -304,12 +305,12 @@ class ParseFileJob implements ShouldQueue
             // This is a simplified implementation - real XML parsing would be more sophisticated
             foreach ($xml->children() as $element) {
                 $record = [];
-                
+
                 // Extract attributes
                 foreach ($element->attributes() as $key => $value) {
                     $record["@{$key}"] = (string) $value;
                 }
-                
+
                 // Extract child elements
                 foreach ($element->children() as $key => $value) {
                     $record[$key] = $this->cleanCellValue((string) $value);
@@ -342,19 +343,19 @@ class ParseFileJob implements ShouldQueue
 
         // Determine target temp table based on import type
         $tempModel = $this->getTempModelClass();
-        
+
         // Process data in batches for better performance
         $batches = array_chunk($parsedData, $this->batchSize);
         $totalBatches = count($batches);
 
         foreach ($batches as $batchIndex => $batch) {
             $this->processBatch($batch, $tempModel, $fileInfo);
-            
+
             // Update progress
             $processed = ($batchIndex + 1) * $this->batchSize;
             $this->importJob->updateProgress(min($processed, count($parsedData)));
-            
-            Log::debug("Processed batch {$batchIndex + 1}/{$totalBatches}", [
+
+            Log::debug("Processed batch " . ($batchIndex + 1) . "/{$totalBatches}", [
                 'import_job_id' => $this->importJob->id,
                 'records_in_batch' => count($batch),
             ]);
@@ -410,19 +411,19 @@ class ParseFileJob implements ShouldQueue
         }
 
         $value = (string) $value;
-        
+
         // Trim whitespace
         $value = trim($value);
-        
+
         // Remove BOM if present
         $value = str_replace("\xEF\xBB\xBF", '', $value);
-        
+
         // Normalize line endings
         $value = str_replace(["\r\n", "\r"], "\n", $value);
-        
+
         // Remove excessive whitespace
         $value = preg_replace('/\s+/', ' ', $value);
-        
+
         return $value;
     }
 

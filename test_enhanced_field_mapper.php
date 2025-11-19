@@ -113,9 +113,9 @@ class EnhancedFieldMapperTest
             $success = ($mapping['mapped_field'] === $expectedField && $mapping['confidence'] >= 0.8);
             if ($success) {
                 $correct++;
-                echo "  ✅ {$inputField} → {$mapping['mapped_field']} ({$mapping['confidence']:.2f})\n";
+                echo "  ✅ {$inputField} → {$mapping['mapped_field']} (" . number_format($mapping['confidence'], 2) . ")\n";
             } else {
-                echo "  ❌ {$inputField} → {$mapping['mapped_field']} ({$mapping['confidence']:.2f}) [Expected: {$expectedField}]\n";
+                echo "  ❌ {$inputField} → {$mapping['mapped_field']} (" . number_format($mapping['confidence'], 2) . ") [Expected: {$expectedField}]\n";
             }
         }
 

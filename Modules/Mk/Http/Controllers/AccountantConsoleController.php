@@ -31,13 +31,13 @@ class AccountantConsoleController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (! $partner) {
+        if (!$partner) {
             return response()->json(['error' => 'Not registered as partner'], 403);
         }
 
@@ -95,14 +95,14 @@ class AccountantConsoleController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Find the partner record for this user
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (! $partner) {
+        if (!$partner) {
             return response()->json([
                 'message' => 'User is not registered as a partner',
                 'companies' => [],
@@ -158,14 +158,14 @@ class AccountantConsoleController extends Controller
         $user = Auth::user();
         $companyId = $request->input('company_id');
 
-        if (! $user) {
+        if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Find the partner record for this user
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (! $partner) {
+        if (!$partner) {
             return response()->json([
                 'error' => 'User is not registered as a partner',
             ], 403);
@@ -176,7 +176,7 @@ class AccountantConsoleController extends Controller
             ->where('companies.id', $companyId)
             ->first();
 
-        if (! $company) {
+        if (!$company) {
             return response()->json([
                 'error' => 'Partner does not have access to this company',
             ], 403);
@@ -184,6 +184,15 @@ class AccountantConsoleController extends Controller
 
         // Calculate effective commission rate
         $effectiveRate = $company->pivot->override_commission_rate ?? $partner->commission_rate;
+
+        // Ensure partner has admin role in the company scope
+        // Partners need full access to manage the companies they're assigned to
+        \Bouncer::scope()->to($companyId);
+
+        // Check if user already has admin role, if not assign it
+        if (!$user->isAn('admin')) {
+            \Bouncer::assign('admin')->to($user);
+        }
 
         // Store the selected company in session for the partner
         session([
