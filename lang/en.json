@@ -1151,7 +1151,8 @@
       "exchange_rate": "Exchange Rate",
       "address_information": "Address Information",
       "pdf_generation": "PDF Generation",
-      "certificates": "Certificates"
+      "certificates": "Certificates",
+      "partner_settings": "Partner Management"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -1159,6 +1160,14 @@
     "title": "Settings",
     "setting": "Settings | Settings",
     "general": "General",
+    "invite_partner": "Invite Partner to Manage Your Books",
+    "invite_partner_description": "Invite an accountant or bookkeeper partner to help manage your company. You can specify exactly what permissions they'll have.",
+    "partner_email_placeholder": "partner@example.com",
+    "send_invitation": "Send Invitation",
+    "pending_invitations": "Pending Invitations",
+    "invited_at": "Invited at",
+    "invitation_sent_successfully": "Partner invitation sent successfully",
+    "invitation_failed": "Failed to send invitation",
     "language": "Language",
     "primary_currency": "Primary Currency",
     "timezone": "Time Zone",

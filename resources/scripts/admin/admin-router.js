@@ -64,6 +64,8 @@ const AiInsightsSetting = () =>
   import('@/scripts/admin/views/settings/AiInsightsSetting.vue')
 const FeatureFlagsSettings = () =>
   import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
+const PartnerSettings = () =>
+  import('@/scripts/admin/views/settings/InvitePartnerSection.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -471,6 +473,12 @@ export default [
             name: 'pdf.generation',
             meta: { isOwner: true },
             component: PDFGenerationSettings,
+          },
+          {
+            path: 'partner-settings',
+            name: 'partner.settings',
+            meta: { isOwner: true },
+            component: PartnerSettings,
           },
           {
             path: 'feature-flags',

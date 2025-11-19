@@ -189,6 +189,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'settings.menu_title.partner_settings',
+            'group' => '',
+            'name' => 'Partner Management',
+            'link' => '/admin/settings/partner-settings',
+            'icon' => 'UsersIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'settings.menu_title.exchange_rate',
             'group' => '',
             'name' => 'Exchange Rate Provider',
