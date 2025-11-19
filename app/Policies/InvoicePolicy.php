@@ -42,7 +42,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('view-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->can('view-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
             return true;
         }
 
@@ -78,7 +78,7 @@ class InvoicePolicy
             return $invoice->allow_edit;
         }
 
-        if ($user->can('edit-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->can('edit-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
             return $invoice->allow_edit;
         }
 
@@ -96,7 +96,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
             return true;
         }
 
@@ -114,7 +114,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
             return true;
         }
 
@@ -132,7 +132,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
             return true;
         }
 
@@ -151,7 +151,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('send-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->can('send-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
             return true;
         }
 

@@ -7,8 +7,9 @@ import '../globals.css'
 
 
 
-export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
-  const locale = isLocale(params.locale) ? params.locale : defaultLocale
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: localeParam } = await params
+  const locale = isLocale(localeParam) ? localeParam : defaultLocale
   const t = await getDictionary(locale)
   return {
     title: t.meta.title,
@@ -18,10 +19,15 @@ export async function generateMetadata({ params }: { params: { locale: string } 
 
 // Note: Next.js 16 types `params` as possibly a Promise.
 // Loosen the annotation to keep builds green across versions.
-export default async function LocaleLayout(props: any) {
-  const { children, params } = props
-  const resolvedParams = typeof params?.then === 'function' ? await params : params
-  const locale: Locale = isLocale(resolvedParams?.locale) ? (resolvedParams.locale as Locale) : defaultLocale
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
+}) {
+  const { locale: localeParam } = await params
+  const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = await getDictionary(locale)
   return (
     <>

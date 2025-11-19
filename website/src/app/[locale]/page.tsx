@@ -15,8 +15,9 @@ import Partners from '@/components/Partners'
 // Force dynamic rendering to ensure dictionary is fetched on each navigation
 export const dynamic = 'force-dynamic'
 
-export default async function Landing({ params }: { params: { locale: string } }) {
-  const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
+export default async function Landing({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: localeParam } = await params
+  const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = await getDictionary(locale)
 
   return (
