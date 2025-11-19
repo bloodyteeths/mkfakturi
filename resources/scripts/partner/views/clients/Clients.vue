@@ -236,53 +236,28 @@ const monthlyCommission = computed(() => {
 const loadClients = async () => {
   isLoading.value = true
   error.value = null
-  
+
   try {
-    // Simulate API call - replace with actual API endpoint
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Mock client data based on partner relationship structure
-    clients.value = [
-      {
-        id: 1,
-        name: 'Македонска Трговија ДООЕЛ',
-        is_active: true,
-        commission_rate: 15.0,
-        monthly_revenue: '125,000 МКД',
-        monthly_commission: 18750,
-        last_activity: '2024-01-15',
-        address: {
-          city: 'Скопје',
-          country: 'Македонија'
-        }
+    const { data } = await window.axios.get('/partner/clients')
+
+    // Transform API data to match component expectations
+    clients.value = data.data.map(client => ({
+      id: client.id,
+      name: client.name,
+      is_active: client.status === 'active',
+      commission_rate: client.commission,
+      monthly_revenue: new Intl.NumberFormat('mk-MK', {
+        style: 'currency',
+        currency: 'MKD'
+      }).format(client.mrr),
+      monthly_commission: client.commission,
+      last_activity: client.signup_date,
+      address: {
+        city: 'N/A',
+        country: 'Македонија'
       },
-      {
-        id: 2,
-        name: 'Охридски Туризам ДОО',
-        is_active: true,
-        commission_rate: 12.0,
-        monthly_revenue: '89,500 МКД',
-        monthly_commission: 10740,
-        last_activity: '2024-01-12',
-        address: {
-          city: 'Охрид',
-          country: 'Македонија'
-        }
-      },
-      {
-        id: 3,
-        name: 'Битолски Занаети ДООЕЛ',
-        is_active: false,
-        commission_rate: 15.0,
-        monthly_revenue: '45,200 МКД',
-        monthly_commission: 6780,
-        last_activity: '2023-12-20',
-        address: {
-          city: 'Битола',
-          country: 'Македонија'
-        }
-      }
-    ]
+      plan: client.plan
+    }))
   } catch (err) {
     error.value = 'Не можеше да се вчитаат клиентите. Обидете се повторно.'
     console.error('Error loading clients:', err)
