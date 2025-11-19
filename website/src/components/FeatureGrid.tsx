@@ -1,0 +1,57 @@
+import Image from 'next/image'
+import { Dictionary } from '@/i18n/dictionaries'
+
+export default function FeatureGrid({ t }: { t: Dictionary }) {
+    // Fallback content
+    const features = [
+        {
+            title: "E-Faktura Ready",
+            desc: "Fully compliant with new government regulations. Connect instantly when API opens.",
+            icon: "/assets/images/icon_e_faktura_1763567066316.png"
+        },
+        {
+            title: "Bank Integration",
+            desc: "Connect your local bank accounts for real-time transaction updates and reconciliation.",
+            icon: "/assets/images/icon_banking_1763567076635.png"
+        },
+        {
+            title: "Bank-Grade Security",
+            desc: "Your data is encrypted and stored securely in EU-based data centers.",
+            icon: "/assets/images/icon_security_1763567084197.png"
+        },
+        {
+            title: "Multi-Tenant",
+            desc: "Perfect for accountants managing multiple client companies from one dashboard.",
+            icon: "/assets/images/icon_ai_automation_1763567058570.png"
+        }
+    ]
+
+    return (
+        <section className="section bg-white">
+            <div className="container">
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                    <h2 className="text-3xl font-bold mb-4 text-gray-900">Everything you need to run your business</h2>
+                    <p className="text-lg text-gray-600">Powerful features designed for modern Macedonian businesses and accountants.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {features.map((f, i) => (
+                        <div key={i} className="group p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-14 h-14 mb-6 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Image
+                                    src={f.icon}
+                                    alt={f.title}
+                                    width={40}
+                                    height={40}
+                                    className="w-10 h-10"
+                                />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">{f.title}</h3>
+                            <p className="text-gray-600 leading-relaxed text-sm">{f.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )
+}

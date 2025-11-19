@@ -33,6 +33,23 @@ export type Dictionary = {
     heroTitle: string
     groups: { title: string; items: string[] }[]
   }
+  pricingPage?: {
+    h1: string
+    sub: string
+    sectionCompany: string
+    sectionPartner: string
+    popularBadge: string
+    recommendedBadge: string
+    companyPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
+    partnerPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
+    cta: string
+    ctaPartner: string
+    comparisonTable: {
+      title: string
+      plans: string[]
+      rows: { feature: string; values: (string | boolean)[] }[]
+    }
+  }
 }
 
 // Dictionaries per locale
@@ -165,6 +182,41 @@ const mk: Dictionary = {
         ]
       }
     ]
+  },
+  pricingPage: {
+    h1: 'Цени',
+    sub: '14‑дневен бесплатен пробен период. Без обврска.',
+    sectionCompany: 'За компании',
+    sectionPartner: 'За сметководители (партнери)',
+    popularBadge: 'Популарно',
+    recommendedBadge: 'Препорачано',
+    companyPlans: [
+      { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['5 фактури/месец', '1 корисник', 'PDF извоз', 'Основни шаблони'], popular: false },
+      { name: 'Starter', price: '€12', period: '/месец', bullets: ['50 фактури/месец', '1 корисник', 'Неограничено клиенти', 'Email фактури'], popular: false },
+      { name: 'Standard', price: '€29', period: '/месец', bullets: ['200 фактури/месец', '3 корисници', 'Е‑Фактура испраќање', 'QES потпис', 'AI увоз'], popular: true },
+      { name: 'Business', price: '€59', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', 'Авто-категоризација', 'Full AI увоз'], popular: false },
+      { name: 'Max', price: '€149', period: '/месец', bullets: ['Се неограничено', 'API пристап', 'Мулти-локации', 'IFRS извештаи', 'WhatsApp поддршка'], popular: false }
+    ],
+    partnerPlans: [
+      { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Партнер портал', '20% рекурентна провизија', 'Следење на заработка'], popular: true },
+      { name: 'Partner Plus', price: '€29', period: '/месec', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
+    ],
+    cta: 'Започни сега',
+    ctaPartner: 'Придружи се',
+    comparisonTable: {
+      title: 'Споредете ги пакетите',
+      plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
+      rows: [
+        { feature: 'Фактури месечно', values: ['5', '50', '200', '1000', 'Неограничено'] },
+        { feature: 'Корисници', values: ['1', '1', '3', '5', 'Неограничено'] },
+        { feature: 'Клиенти', values: ['Неограничено', 'Неограничено', 'Неограничено', 'Неограничено', 'Неограничено'] },
+        { feature: 'Е-Фактура (UJP)', values: [false, false, true, true, true] },
+        { feature: 'AI Предлози', values: [false, 'Basic', 'Standard', 'Advanced', 'Advanced'] },
+        { feature: 'Банкарски изводи (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'API Пристап', values: [false, false, false, true, true] },
+        { feature: 'Поддршка', values: ['Email', 'Email', 'Email/Chat', 'Prioritetna', 'WhatsApp'] }
+      ]
+    }
   }
 }
 
@@ -297,6 +349,41 @@ const sq: Dictionary = {
         ]
       }
     ]
+  },
+  pricingPage: {
+    h1: 'Çmimet',
+    sub: 'Provë falas 14 ditë. Pa detyrim.',
+    sectionCompany: 'Për kompani',
+    sectionPartner: 'Për kontabilistë (partnerë)',
+    popularBadge: 'Popullor',
+    recommendedBadge: 'I rekomanduar',
+    companyPlans: [
+      { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['5 fatura/muaj', '1 përdorues', 'Eksport PDF', 'Shabllone bazë'], popular: false },
+      { name: 'Starter', price: '€12', period: '/muaj', bullets: ['50 fatura/muaj', '1 përdorues', 'Klientë të pakufizuar', 'Email fatura'], popular: false },
+      { name: 'Standard', price: '€29', period: '/muaj', bullets: ['200 fatura/muaj', '3 përdorues', 'Dërgim e‑Faturë', 'Nënshkrim QES', 'Import AI'], popular: true },
+      { name: 'Business', price: '€59', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', 'Auto-kategorizim', 'Import AI i plotë'], popular: false },
+      { name: 'Max', price: '€149', period: '/muaj', bullets: ['Çdo gjë e pakufizuar', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS', 'Suport WhatsApp'], popular: false }
+    ],
+    partnerPlans: [
+      { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portal partneri', 'Komision 20% rekurent', 'Ndjekje fitimesh'], popular: true },
+      { name: 'Partner Plus', price: '€29', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
+    ],
+    cta: 'Fillo tani',
+    ctaPartner: 'Bashkohu',
+    comparisonTable: {
+      title: 'Krahasoni paketat',
+      plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
+      rows: [
+        { feature: 'Fatura në muaj', values: ['5', '50', '200', '1000', 'Pa limit'] },
+        { feature: 'Përdorues', values: ['1', '1', '3', '5', 'Pa limit'] },
+        { feature: 'Klientë', values: ['Pa limit', 'Pa limit', 'Pa limit', 'Pa limit', 'Pa limit'] },
+        { feature: 'e-Faturë (UJP)', values: [false, false, true, true, true] },
+        { feature: 'Sugjerime AI', values: [false, 'Bazike', 'Standard', 'E avancuar', 'E avancuar'] },
+        { feature: 'Ekstrakte bankare (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'Qasje API', values: [false, false, false, true, true] },
+        { feature: 'Mbështetje', values: ['Email', 'Email', 'Email/Chat', 'Prioritet', 'WhatsApp'] }
+      ]
+    }
   }
 }
 
@@ -429,6 +516,41 @@ const tr: Dictionary = {
         ]
       }
     ]
+  },
+  pricingPage: {
+    h1: 'Fiyatlar',
+    sub: '14 gün ücretsiz deneme. Taahhüt yok.',
+    sectionCompany: 'Şirketler için',
+    sectionPartner: 'Muhasebeciler için (iş ortakları)',
+    popularBadge: 'Popüler',
+    recommendedBadge: 'Önerilen',
+    companyPlans: [
+      { name: 'Free', price: '€0', period: '/süresiz', bullets: ['5 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', 'Temel şablonlar'], popular: false },
+      { name: 'Starter', price: '€12', period: '/ay', bullets: ['50 fatura/ay', '1 kullanıcı', 'Sınırsız müşteri', 'Email fatura'], popular: false },
+      { name: 'Standard', price: '€29', period: '/ay', bullets: ['200 fatura/ay', '3 kullanıcı', 'e‑Fatura gönderim', 'QES imza', 'AI içe aktarma'], popular: true },
+      { name: 'Business', price: '€59', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', 'Otomatik kategorizasyon', 'Tam AI içe aktarma'], popular: false },
+      { name: 'Max', price: '€149', period: '/ay', bullets: ['Her şey sınırsız', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları', 'WhatsApp destek'], popular: false }
+    ],
+    partnerPlans: [
+      { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Partner portalı', '%20 tekrarlayan komisyon', 'Kazanç takibi'], popular: true },
+      { name: 'Partner Plus', price: '€29', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
+    ],
+    cta: 'Şimdi başla',
+    ctaPartner: 'Katıl',
+    comparisonTable: {
+      title: 'Paketleri karşılaştırın',
+      plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
+      rows: [
+        { feature: 'Aylık Fatura', values: ['5', '50', '200', '1000', 'Sınırsız'] },
+        { feature: 'Kullanıcı', values: ['1', '1', '3', '5', 'Sınırsız'] },
+        { feature: 'Müşteri', values: ['Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
+        { feature: 'e-Fatura (UJP)', values: [false, false, true, true, true] },
+        { feature: 'AI Önerileri', values: [false, 'Temel', 'Standart', 'Gelişmiş', 'Gelişmiş'] },
+        { feature: 'Banka Ekstreleri (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'API Erişimi', values: [false, false, false, true, true] },
+        { feature: 'Destek', values: ['Email', 'Email', 'Email/Chat', 'Öncelikli', 'WhatsApp'] }
+      ]
+    }
   }
 }
 
