@@ -1034,7 +1034,8 @@
     "updated_message": "User updated successfully",
     "deleted_message": "User deleted successfully | Users deleted successfully",
     "select_company_role": "Select Role for {company}",
-    "companies": "Companies"
+    "companies": "Companies",
+    "add_existing_user": "Add Existing User"
   },
   "reports": {
     "title": "Report",

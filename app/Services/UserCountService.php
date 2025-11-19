@@ -22,7 +22,7 @@ class UserCountService
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (! $cacheEnabled) {
+        if (!$cacheEnabled) {
             return $this->queryUserCount($companyId);
         }
 
@@ -41,7 +41,7 @@ class UserCountService
     {
         // Count all users associated with this company
         // Including owner and invited users
-        return DB::table('company_user')
+        return DB::table('user_company')
             ->where('company_id', $companyId)
             ->count();
     }
@@ -54,12 +54,12 @@ class UserCountService
     public function getUserLimit(Company $company): ?int
     {
         // Load subscription if not already loaded
-        if (! $company->relationLoaded('subscription')) {
+        if (!$company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         // No subscription or inactive = default to free tier
-        if (! $company->subscription || ! $company->subscription->isActive()) {
+        if (!$company->subscription || !$company->subscription->isActive()) {
             return config('subscriptions.tiers.free.users', 1);
         }
 
@@ -141,7 +141,7 @@ class UserCountService
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (! $cacheEnabled) {
+        if (!$cacheEnabled) {
             return;
         }
 
@@ -164,7 +164,7 @@ class UserCountService
     {
         $cacheEnabled = config('subscriptions.cache.enabled', true);
 
-        if (! $cacheEnabled) {
+        if (!$cacheEnabled) {
             return;
         }
 
@@ -182,14 +182,16 @@ class UserCountService
     public function getUpgradeMessage(Company $company): string
     {
         // Load subscription if not already loaded
-        if (! $company->relationLoaded('subscription')) {
+        if (!$company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         $plan = $company->subscription?->plan ?? 'free';
 
-        return config("subscriptions.upgrade_messages.user_limit.{$plan}",
-            'You\'ve reached your user limit. Please upgrade to invite more users.');
+        return config(
+            "subscriptions.upgrade_messages.user_limit.{$plan}",
+            'You\'ve reached your user limit. Please upgrade to invite more users.'
+        );
     }
 
     /**
@@ -198,7 +200,7 @@ class UserCountService
     public function getUpgradePriceId(Company $company): ?string
     {
         // Load subscription if not already loaded
-        if (! $company->relationLoaded('subscription')) {
+        if (!$company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
@@ -216,7 +218,7 @@ class UserCountService
             }
         }
 
-        if (! $nextTier) {
+        if (!$nextTier) {
             return null; // Already on highest tier
         }
 
