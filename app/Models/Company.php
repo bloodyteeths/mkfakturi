@@ -399,7 +399,6 @@ class Company extends Model implements HasMedia
             'invoice_email_attachment' => 'NO',
             'estimate_email_attachment' => 'NO',
             'payment_email_attachment' => 'NO',
-            'save_pdf_to_disk' => 'NO',
             'retrospective_edits' => 'allow',
             'invoice_number_format' => '{{SERIES:INV}}{{DELIMITER:-}}{{SEQUENCE:6}}',
             'estimate_number_format' => '{{SERIES:EST}}{{DELIMITER:-}}{{SEQUENCE:6}}',
