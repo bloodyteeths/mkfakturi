@@ -211,7 +211,7 @@ Route::prefix('/v1')->group(function () {
         // This endpoint bypasses bouncer since users need abilities to access anything
         // TODO: Remove after all tenants have abilities synced
         Route::get('/sync-abilities', function () {
-            if (! auth()->user()->isOwner()) {
+            if (!auth()->user()->isOwner()) {
                 abort(403, 'Only owners can sync abilities');
             }
 
@@ -766,7 +766,7 @@ Route::prefix('/v1')->group(function () {
                 // Debug endpoint to see raw data
                 Route::get('/debug/data', function (\Illuminate\Http\Request $request) {
                     $company = \App\Models\Company::find($request->header('company'));
-                    if (! $company) {
+                    if (!$company) {
                         return response()->json(['error' => 'Company not found'], 404);
                     }
 
@@ -1041,7 +1041,7 @@ Route::prefix('webhooks')->group(function () {
 
 // Company Subscription Routes (B-31 series)
 // ----------------------------------
-Route::middleware(['auth:sanctum'])->prefix('companies/{company}/subscription')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('v1/companies/{company}/subscription')->group(function () {
     Route::get('/', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');
     Route::post('/checkout', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'checkout'])->name('subscription.checkout')->middleware('throttle:strict');
     Route::get('/success', [\Modules\Mk\Billing\Controllers\SubscriptionController::class, 'success'])->name('subscription.success');
@@ -1053,7 +1053,7 @@ Route::middleware(['auth:sanctum'])->prefix('companies/{company}/subscription')-
 
 // Partner Plus Subscription Routes (B-31-04)
 // ----------------------------------
-Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('v1/partner/subscription')->group(function () {
     Route::get('/', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'index'])->name('partner.subscription.index');
     Route::post('/checkout', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'checkout'])->name('partner.subscription.checkout')->middleware('throttle:strict');
     Route::get('/success', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'success'])->name('partner.subscription.success');
@@ -1064,7 +1064,7 @@ Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(funct
 
 // Partner Portal Routes
 // ----------------------------------
-Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('partner')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('v1/partner')->group(function () {
     Route::get('/dashboard', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'index']);
     Route::get('/commissions', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'commissions']);
     Route::get('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'index']);
@@ -1077,7 +1077,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('partner')->group(fu
 });
 
 // AI Financial Assistant Routes
-Route::middleware(['auth:sanctum'])->prefix('ai')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('v1/ai')->group(function () {
     Route::get('/summary', [App\Http\Controllers\AiSummaryController::class, 'getSummary']);
     Route::get('/risk', [App\Http\Controllers\AiSummaryController::class, 'getRisk']);
 });
