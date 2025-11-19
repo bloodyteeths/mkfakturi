@@ -30,22 +30,29 @@ class UsersController extends Controller
             ->paginate($limit);
 
         return UserResource::collection($users)
-            ->additional(['meta' => [
-                'user_total_count' => User::count(),
-            ]]);
+            ->additional([
+                'meta' => [
+                    'user_total_count' => User::count(),
+                ]
+            ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\UserRequest  $request
+     * @param  \App\Http\Requests\UserRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(UserRequest $request)
     {
         $this->authorize('create', User::class);
 
-        $user = User::createFromRequest($request);
+        if ($request->is_existing_user) {
+            $user = User::where('email', $request->email)->firstOrFail();
+            $user->attachCompanies($request->companies);
+        } else {
+            $user = User::createFromRequest($request);
+        }
 
         return new UserResource($user);
     }
@@ -65,7 +72,7 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\UserRequest  $request
+     * @param  \App\Http\Requests\UserRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UserRequest $request, User $user)

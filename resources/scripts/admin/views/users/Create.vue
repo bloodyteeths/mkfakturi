@@ -12,7 +12,15 @@
       <div class="grid grid-cols-12">
         <BaseCard class="mt-6 col-span-12 md:col-span-8">
           <BaseInputGrid layout="one-column">
+            <div class="mb-4 flex items-center justify-between">
+              <label class="text-sm font-medium text-gray-700">
+                {{ $t('users.add_existing_user') }}
+              </label>
+              <BaseSwitch v-model="isExistingUser" />
+            </div>
+
             <BaseInputGroup
+              v-if="!isExistingUser"
               :content-loading="isFetchingInitialData"
               :label="$t('users.name')"
               :error="
@@ -108,6 +116,7 @@
             </ValidateEach>
 
             <BaseInputGroup
+              v-if="!isExistingUser"
               :content-loading="isFetchingInitialData"
               :label="$t('users.password')"
               :error="
@@ -129,6 +138,7 @@
             </BaseInputGroup>
 
             <BaseInputGroup
+              v-if="!isExistingUser"
               :content-loading="isFetchingInitialData"
               :label="$t('users.phone')"
             >
@@ -177,6 +187,8 @@ import { ValidateEach } from '@vuelidate/components'
 import { useI18n } from 'vue-i18n'
 import { useUsersStore } from '@/scripts/admin/stores/users'
 
+import BaseSwitch from '@/scripts/components/base/BaseSwitch.vue'
+
 const userStore = useUsersStore()
 
 const { t } = useI18n()
@@ -188,6 +200,7 @@ let isSaving = ref(false)
 let isFetchingInitialData = ref(false)
 let selectedCompanies = ref([])
 let companies = ref([])
+let isExistingUser = ref(false)
 
 const isEdit = computed(() => route.name === 'users.edit')
 
@@ -199,7 +212,7 @@ const rules = computed(() => {
   return {
     userData: {
       name: {
-        required: helpers.withMessage(t('validation.required'), required),
+        required: helpers.withMessage(t('validation.required'), requiredIf(() => !isExistingUser.value)),
         minLength: helpers.withMessage(
           t('validation.name_min_length', { count: 3 }),
           minLength(3)
@@ -212,7 +225,7 @@ const rules = computed(() => {
       password: {
         required: requiredIf(function () {
           helpers.withMessage(t('validation.required'), required)
-          return !isEdit.value
+          return !isEdit.value && !isExistingUser.value
         }),
         minLength: helpers.withMessage(
           t('validation.password_min_length', { count: 8 }),
@@ -274,6 +287,7 @@ async function submitUser() {
     isSaving.value = true
     let data = {
       ...userStore.userData,
+      is_existing_user: isExistingUser.value,
       companies: userStore.userData.companies.map((c) => {
         return {
           role: c.role,
