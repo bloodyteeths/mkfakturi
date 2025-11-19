@@ -2860,5 +2860,130 @@
     "tabs": {
       "commissions": "Провизии"
     }
+  },
+  "landing": {
+    "hero": {
+      "badge": "New: AI-Powered Expense Tracking (MK)",
+      "title": "Accounting that thinks for you. (MK)",
+      "subtitle": "Facturino combines powerful invoicing with advanced AI to automate your bookkeeping, track expenses, and predict your financial future. (MK)",
+      "cta_primary": "Start Free Trial (MK)",
+      "cta_secondary": "See How It Works (MK)",
+      "dashboard_alt": "Facturino Dashboard (MK)"
+    },
+    "partners": {
+      "trusted_by": "Trusted by forward-thinking companies (MK)"
+    },
+    "features": {
+      "ai_insights": {
+        "title": "AI-Powered Financial Insights (MK)",
+        "description": "Get real-time suggestions on how to save money and optimize your cash flow. (MK)"
+      },
+      "invoicing": {
+        "title": "Beautiful Invoices (MK)",
+        "description": "Create professional invoices in seconds that get you paid faster. (MK)"
+      },
+      "expenses": {
+        "title": "Smart Expense Tracking (MK)",
+        "description": "Snap a photo of your receipt and let our AI extract the data automatically. (MK)"
+      },
+      "reporting": {
+        "title": "Comprehensive Reporting (MK)",
+        "description": "Visualize your financial health with interactive charts and reports. (MK)"
+      }
+    },
+    "how_it_works": {
+      "title": "How Facturino Works (MK)",
+      "subtitle": "Get started in minutes, not days. (MK)",
+      "step1": {
+        "title": "Create Account (MK)",
+        "description": "Sign up for free and set up your company profile. (MK)"
+      },
+      "step2": {
+        "title": "Connect Data (MK)",
+        "description": "Import your customers and connect your bank accounts. (MK)"
+      },
+      "step3": {
+        "title": "Get Paid (MK)",
+        "description": "Send invoices and track payments automatically. (MK)"
+      }
+    },
+    "testimonials": {
+      "title": "Loved by businesses like yours (MK)",
+      "review1": "Facturino has completely transformed how we manage our finances. The AI insights are a game changer. (MK)",
+      "author1": "Elena M. (MK)",
+      "role1": "CEO at TechStart (MK)",
+      "review2": "The best invoicing software I've used. Simple, fast, and beautiful. (MK)",
+      "author2": "Marko P. (MK)",
+      "role2": "Freelance Designer (MK)",
+      "review3": "I save hours every week on bookkeeping thanks to the automated expense tracking. (MK)",
+      "author3": "Sarah J. (MK)",
+      "role3": "Owner at Cafe Bliss (MK)"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions (MK)",
+      "q1": "Is there a free trial? (MK)",
+      "a1": "Yes, we offer a 14-day free trial on all paid plans. (MK)",
+      "q2": "Can I cancel anytime? (MK)",
+      "a2": "Absolutely. There are no long-term contracts and you can cancel whenever you like. (MK)",
+      "q3": "Is my data secure? (MK)",
+      "a3": "We use bank-level encryption to ensure your data is always safe and secure. (MK)",
+      "q4": "Do you support multiple currencies? (MK)",
+      "a4": "Yes, Facturino supports over 100 currencies with live exchange rates. (MK)"
+    },
+    "cta_footer": {
+      "title": "Ready to streamline your accounting? (MK)",
+      "subtitle": "Join thousands of businesses trusting Facturino. (MK)",
+      "button": "Get Started Now (MK)"
+    },
+    "footer": {
+      "product": "Product (MK)",
+      "features": "Features (MK)",
+      "pricing": "Pricing (MK)",
+      "company": "Company (MK)",
+      "about": "About Us (MK)",
+      "blog": "Blog (MK)",
+      "careers": "Careers (MK)",
+      "legal": "Legal (MK)",
+      "privacy": "Privacy Policy (MK)",
+      "terms": "Terms of Service (MK)",
+      "rights": "All rights reserved. (MK)"
+    }
+  },
+  "pricing_public": {
+    "title": "Simple, Transparent Pricing (MK)",
+    "subtitle": "Choose the plan that fits your business needs. (MK)",
+    "monthly": "Monthly (MK)",
+    "yearly": "Yearly (MK)",
+    "save_text": "Save 20% (MK)",
+    "most_popular": "Most Popular (MK)",
+    "per_month": "/mo (MK)",
+    "per_year": "/yr (MK)",
+    "start_trial": "Start Free Trial (MK)",
+    "get_started": "Get Started (MK)",
+    "contact_sales": "Contact Sales (MK)",
+    "features_label": "Everything in {prev} plus: (MK)",
+    "custom_solution": {
+      "title": "Need a custom solution? (MK)",
+      "description": "Contact us for enterprise pricing and custom integrations. (MK)",
+      "button": "Contact Sales (MK)"
+    },
+    "plans": {
+      "free": {
+        "name": "Free (MK)",
+        "description": "Perfect for freelancers just starting out. (MK)"
+      },
+      "starter": {
+        "name": "Starter (MK)",
+        "description": "Great for small businesses growing fast. (MK)"
+      },
+      "standard": {
+        "name": "Standard (MK)",
+        "description": "For established businesses with teams. (MK)"
+      },
+      "business": {
+        "name": "Business (MK)",
+        "description": "Advanced features for scaling companies. (MK)"
+      }
+    }
   }
 }

@@ -709,7 +709,130 @@
   },
   "expenses": {
     "new_expense": "Shpenzim i ri"
+  },
+  "landing": {
+    "hero": {
+      "badge": "New: AI-Powered Expense Tracking (SQ)",
+      "title": "Accounting that thinks for you. (SQ)",
+      "subtitle": "Facturino combines powerful invoicing with advanced AI to automate your bookkeeping, track expenses, and predict your financial future. (SQ)",
+      "cta_primary": "Start Free Trial (SQ)",
+      "cta_secondary": "See How It Works (SQ)",
+      "dashboard_alt": "Facturino Dashboard (SQ)"
+    },
+    "partners": {
+      "trusted_by": "Trusted by forward-thinking companies (SQ)"
+    },
+    "features": {
+      "ai_insights": {
+        "title": "AI-Powered Financial Insights (SQ)",
+        "description": "Get real-time suggestions on how to save money and optimize your cash flow. (SQ)"
+      },
+      "invoicing": {
+        "title": "Beautiful Invoices (SQ)",
+        "description": "Create professional invoices in seconds that get you paid faster. (SQ)"
+      },
+      "expenses": {
+        "title": "Smart Expense Tracking (SQ)",
+        "description": "Snap a photo of your receipt and let our AI extract the data automatically. (SQ)"
+      },
+      "reporting": {
+        "title": "Comprehensive Reporting (SQ)",
+        "description": "Visualize your financial health with interactive charts and reports. (SQ)"
+      }
+    },
+    "how_it_works": {
+      "title": "How Facturino Works (SQ)",
+      "subtitle": "Get started in minutes, not days. (SQ)",
+      "step1": {
+        "title": "Create Account (SQ)",
+        "description": "Sign up for free and set up your company profile. (SQ)"
+      },
+      "step2": {
+        "title": "Connect Data (SQ)",
+        "description": "Import your customers and connect your bank accounts. (SQ)"
+      },
+      "step3": {
+        "title": "Get Paid (SQ)",
+        "description": "Send invoices and track payments automatically. (SQ)"
+      }
+    },
+    "testimonials": {
+      "title": "Loved by businesses like yours (SQ)",
+      "review1": "Facturino has completely transformed how we manage our finances. The AI insights are a game changer. (SQ)",
+      "author1": "Elena M. (SQ)",
+      "role1": "CEO at TechStart (SQ)",
+      "review2": "The best invoicing software I've used. Simple, fast, and beautiful. (SQ)",
+      "author2": "Marko P. (SQ)",
+      "role2": "Freelance Designer (SQ)",
+      "review3": "I save hours every week on bookkeeping thanks to the automated expense tracking. (SQ)",
+      "author3": "Sarah J. (SQ)",
+      "role3": "Owner at Cafe Bliss (SQ)"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions (SQ)",
+      "q1": "Is there a free trial? (SQ)",
+      "a1": "Yes, we offer a 14-day free trial on all paid plans. (SQ)",
+      "q2": "Can I cancel anytime? (SQ)",
+      "a2": "Absolutely. There are no long-term contracts and you can cancel whenever you like. (SQ)",
+      "q3": "Is my data secure? (SQ)",
+      "a3": "We use bank-level encryption to ensure your data is always safe and secure. (SQ)",
+      "q4": "Do you support multiple currencies? (SQ)",
+      "a4": "Yes, Facturino supports over 100 currencies with live exchange rates. (SQ)"
+    },
+    "cta_footer": {
+      "title": "Ready to streamline your accounting? (SQ)",
+      "subtitle": "Join thousands of businesses trusting Facturino. (SQ)",
+      "button": "Get Started Now (SQ)"
+    },
+    "footer": {
+      "product": "Product (SQ)",
+      "features": "Features (SQ)",
+      "pricing": "Pricing (SQ)",
+      "company": "Company (SQ)",
+      "about": "About Us (SQ)",
+      "blog": "Blog (SQ)",
+      "careers": "Careers (SQ)",
+      "legal": "Legal (SQ)",
+      "privacy": "Privacy Policy (SQ)",
+      "terms": "Terms of Service (SQ)",
+      "rights": "All rights reserved. (SQ)"
+    }
+  },
+  "pricing_public": {
+    "title": "Simple, Transparent Pricing (SQ)",
+    "subtitle": "Choose the plan that fits your business needs. (SQ)",
+    "monthly": "Monthly (SQ)",
+    "yearly": "Yearly (SQ)",
+    "save_text": "Save 20% (SQ)",
+    "most_popular": "Most Popular (SQ)",
+    "per_month": "/mo (SQ)",
+    "per_year": "/yr (SQ)",
+    "start_trial": "Start Free Trial (SQ)",
+    "get_started": "Get Started (SQ)",
+    "contact_sales": "Contact Sales (SQ)",
+    "features_label": "Everything in {prev} plus: (SQ)",
+    "custom_solution": {
+      "title": "Need a custom solution? (SQ)",
+      "description": "Contact us for enterprise pricing and custom integrations. (SQ)",
+      "button": "Contact Sales (SQ)"
+    },
+    "plans": {
+      "free": {
+        "name": "Free (SQ)",
+        "description": "Perfect for freelancers just starting out. (SQ)"
+      },
+      "starter": {
+        "name": "Starter (SQ)",
+        "description": "Great for small businesses growing fast. (SQ)"
+      },
+      "standard": {
+        "name": "Standard (SQ)",
+        "description": "For established businesses with teams. (SQ)"
+      },
+      "business": {
+        "name": "Business (SQ)",
+        "description": "Advanced features for scaling companies. (SQ)"
+      }
+    }
   }
 }
-
-

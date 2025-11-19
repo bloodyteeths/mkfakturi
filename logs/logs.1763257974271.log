@@ -1,182 +1,60 @@
-Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
-content.js:4 content.js: v2.0.3
-main-DWoyZwk2.js:72 [intlify] Not found 'Support Tickets' key in 'mk' locale messages.
-Id @ main-DWoyZwk2.js:72
-lg @ main-DWoyZwk2.js:75
-Yz @ main-DWoyZwk2.js:75
-PK @ main-DWoyZwk2.js:75
-(anonymous) @ main-DWoyZwk2.js:105
-La @ main-DWoyZwk2.js:105
-Uo @ main-DWoyZwk2.js:105
-(anonymous) @ LayoutBasic-C7gm60EA.js:1
-n @ main-DWoyZwk2.js:20
-(anonymous) @ main-DWoyZwk2.js:38
-pf @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-fe @ main-DWoyZwk2.js:22
-Ce @ main-DWoyZwk2.js:22
-re @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-fe @ main-DWoyZwk2.js:22
-Ce @ main-DWoyZwk2.js:22
-re @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-runIfDirty @ main-DWoyZwk2.js:16
-uc @ main-DWoyZwk2.js:20
-JA @ main-DWoyZwk2.js:20
-main-DWoyZwk2.js:72 [intlify] Fall back to translate 'Support Tickets' key with 'en' locale.
-Id @ main-DWoyZwk2.js:72
-Yz @ main-DWoyZwk2.js:75
-PK @ main-DWoyZwk2.js:75
-(anonymous) @ main-DWoyZwk2.js:105
-La @ main-DWoyZwk2.js:105
-Uo @ main-DWoyZwk2.js:105
-(anonymous) @ LayoutBasic-C7gm60EA.js:1
-n @ main-DWoyZwk2.js:20
-(anonymous) @ main-DWoyZwk2.js:38
-pf @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-fe @ main-DWoyZwk2.js:22
-Ce @ main-DWoyZwk2.js:22
-re @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-fe @ main-DWoyZwk2.js:22
-Ce @ main-DWoyZwk2.js:22
-re @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-runIfDirty @ main-DWoyZwk2.js:16
-uc @ main-DWoyZwk2.js:20
-JA @ main-DWoyZwk2.js:20
-main-DWoyZwk2.js:72 [intlify] Not found 'Support Tickets' key in 'en' locale messages.
-Id @ main-DWoyZwk2.js:72
-lg @ main-DWoyZwk2.js:75
-Yz @ main-DWoyZwk2.js:75
-PK @ main-DWoyZwk2.js:75
-(anonymous) @ main-DWoyZwk2.js:105
-La @ main-DWoyZwk2.js:105
-Uo @ main-DWoyZwk2.js:105
-(anonymous) @ LayoutBasic-C7gm60EA.js:1
-n @ main-DWoyZwk2.js:20
-(anonymous) @ main-DWoyZwk2.js:38
-pf @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-fe @ main-DWoyZwk2.js:22
-Ce @ main-DWoyZwk2.js:22
-re @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-Y @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-fe @ main-DWoyZwk2.js:22
-Ce @ main-DWoyZwk2.js:22
-re @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-N @ main-DWoyZwk2.js:22
-T @ main-DWoyZwk2.js:22
-A @ main-DWoyZwk2.js:22
-v @ main-DWoyZwk2.js:22
-G @ main-DWoyZwk2.js:22
-run @ main-DWoyZwk2.js:16
-runIfDirty @ main-DWoyZwk2.js:16
-uc @ main-DWoyZwk2.js:20
-JA @ main-DWoyZwk2.js:20
-Dashboard-Co8Y6nyz.js:1 [AI Insights] Fetching insights...
-Dashboard-Co8Y6nyz.js:1 [AI Insights] Fetch response: Object
-main-DWoyZwk2.js:72 [intlify] Not found 'Support Tickets' key in 'mk' locale messages.
-Id @ main-DWoyZwk2.js:72
-main-DWoyZwk2.js:72 [intlify] Fall back to translate 'Support Tickets' key with 'en' locale.
-Id @ main-DWoyZwk2.js:72
-main-DWoyZwk2.js:72 [intlify] Not found 'Support Tickets' key in 'en' locale messages.
-Id @ main-DWoyZwk2.js:72
-/api/v1/auth/logout:1  Failed to load resource: the server responded with a status of 500 ()
-LayoutBasic-C7gm60EA.js:1 Uncaught (in promise) Tt
-utils.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
-heuristicsRedefinitions.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
-extensionState.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
-Unchecked runtime.lastError: The message port closed before a response was received.
-requests.js:1  GET https://app.facturino.mk/api/v1/api/v1/bootstrap 404 (Not Found)
-s.XMLHttpRequest.send @ requests.js:1
-(anonymous) @ traffic.js:1
-(anonymous) @ main-DWoyZwk2.js:4
-xhr @ main-DWoyZwk2.js:4
-yx @ main-DWoyZwk2.js:6
-Promise.then
-_request @ main-DWoyZwk2.js:7
-request @ main-DWoyZwk2.js:6
-Vl.<computed> @ main-DWoyZwk2.js:7
-(anonymous) @ main-DWoyZwk2.js:2
-D @ Login-DINWVlT-.js:1
-await in D
-(anonymous) @ main-DWoyZwk2.js:26
-uc @ main-DWoyZwk2.js:20
-Zi @ main-DWoyZwk2.js:20
-a @ main-DWoyZwk2.js:26
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:36] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 10:41:36] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 10:41:43] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-19 10:41:43] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-19 10:41:51] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-19 10:41:51] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-19 10:42:00] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:00] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_company_header":true,"company_header":"2"} 
+[2025-11-19 10:42:00] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":1,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-19 10:42:01] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-19 10:42:01] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-19 10:42:01] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":1,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-19 10:42:01] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-19 10:42:01] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:01] production.WARNING: Slow operation detected {"operation":"req_691d9ef87c320","execution_time_ms":871.93,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-11-19 10:42:01] production.WARNING: Slow request detected {"operation":"req_691d9ef87c320","execution_time_ms":871.93,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.5.111","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-19 10:42:01] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:01] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:01] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:01] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":1,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-19 10:42:01] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-19 10:42:01] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:25] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/users","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:25] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:37] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:37] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":2,"guard":"sanctum","session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_company_header":true,"company_header":"2"} 
+[2025-11-19 10:42:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":1,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-19 10:42:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":1,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-19 10:42:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-19 10:42:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:37] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-19 10:42:37] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:38] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/users","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:38] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/roles","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:38] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:38] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/users","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:38] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:38] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:42:49] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/users/delete","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 
+[2025-11-19 10:42:49] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":2} 
+[2025-11-19 10:43:01] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":2,"session_id":"rvFZri2pMz0v9DLRfE2WWCJNjake0mMrMMnInRvm","has_session_cookie":true} 

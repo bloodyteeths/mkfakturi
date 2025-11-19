@@ -41,8 +41,13 @@ class UserCountService
     {
         // Count all users associated with this company
         // Including owner and invited users
+        // Count all users associated with this company
+        // Including owner and invited users, but EXCLUDING partners
         return DB::table('user_company')
-            ->where('company_id', $companyId)
+            ->join('users', 'user_company.user_id', '=', 'users.id')
+            ->leftJoin('partners', 'users.id', '=', 'partners.user_id')
+            ->where('user_company.company_id', $companyId)
+            ->whereNull('partners.id') // Exclude partners
             ->count();
     }
 

@@ -1,103 +1,44 @@
-2025-11-14T17:02:34.709478580Z [inf]  
-2025-11-14T17:02:39.258988226Z [inf]  [35m[Region: europe-west4][0m
-2025-11-14T17:02:39.262534008Z [inf]  [35m==============
-2025-11-14T17:02:39.262563834Z [inf]  Using Nixpacks
-2025-11-14T17:02:39.262569407Z [inf]  ==============
-2025-11-14T17:02:39.262573562Z [inf]  [0m
-2025-11-14T17:02:39.262680118Z [inf]  context: pz9t-KVJA
-2025-11-14T17:02:39.366107384Z [inf]  ╔════════ Nixpacks v1.38.0 ═══════╗
-2025-11-14T17:02:39.366190699Z [inf]  ║ setup      │ nodejs_22, npm-9_x ║
-2025-11-14T17:02:39.366201499Z [inf]  ║─────────────────────────────────║
-2025-11-14T17:02:39.366208906Z [inf]  ║ install    │ npm i              ║
-2025-11-14T17:02:39.366217329Z [inf]  ║─────────────────────────────────║
-2025-11-14T17:02:39.366227446Z [inf]  ║ build      │ npm run build      ║
-2025-11-14T17:02:39.366234204Z [inf]  ║─────────────────────────────────║
-2025-11-14T17:02:39.366240687Z [inf]  ║ start      │ npm run start      ║
-2025-11-14T17:02:39.366249821Z [inf]  ╚═════════════════════════════════╝
-2025-11-14T17:02:39.601526782Z [inf]  [internal] load build definition from Dockerfile
-2025-11-14T17:02:39.601610729Z [inf]  [internal] load build definition from Dockerfile
-2025-11-14T17:02:39.601631171Z [inf]  [internal] load build definition from Dockerfile
-2025-11-14T17:02:39.613753639Z [inf]  [internal] load build definition from Dockerfile
-2025-11-14T17:02:39.616774892Z [inf]  [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-2025-11-14T17:02:39.762074625Z [inf]  [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-2025-11-14T17:02:39.762389800Z [inf]  [internal] load .dockerignore
-2025-11-14T17:02:39.762443132Z [inf]  [internal] load .dockerignore
-2025-11-14T17:02:39.762866206Z [inf]  [internal] load .dockerignore
-2025-11-14T17:02:39.773691703Z [inf]  [internal] load .dockerignore
-2025-11-14T17:02:39.781112020Z [inf]  [stage-0 10/10] COPY . /app
-2025-11-14T17:02:39.781156300Z [inf]  [stage-0  9/10] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
-2025-11-14T17:02:39.781180025Z [inf]  [stage-0  8/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
-2025-11-14T17:02:39.781195147Z [inf]  [stage-0  7/10] COPY . /app/.
-2025-11-14T17:02:39.781205332Z [inf]  [stage-0  6/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-/root/npm,target=/root/.npm npm i
-2025-11-14T17:02:39.781221290Z [inf]  [stage-0  5/10] COPY . /app/.
-2025-11-14T17:02:39.781236873Z [inf]  [stage-0  4/10] RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
-2025-11-14T17:02:39.781249825Z [inf]  [stage-0  3/10] COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
-2025-11-14T17:02:39.781284306Z [inf]  [internal] load build context
-2025-11-14T17:02:39.781576821Z [inf]  [internal] load build context
-2025-11-14T17:02:39.816748519Z [inf]  [internal] load build context
-2025-11-14T17:02:39.820349156Z [inf]  [stage-0  3/10] COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
-2025-11-14T17:02:39.820394694Z [inf]  [stage-0  4/10] RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
-2025-11-14T17:02:39.820420621Z [inf]  [stage-0  5/10] COPY . /app/.
-2025-11-14T17:02:40.128758687Z [inf]  [stage-0  5/10] COPY . /app/.
-2025-11-14T17:02:40.132225464Z [inf]  [stage-0  6/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-/root/npm,target=/root/.npm npm i
-2025-11-14T17:02:40.446722946Z [inf]  npm warn config production Use `--omit=dev` instead.
-
-2025-11-14T17:03:13.117102708Z [inf]  
-added 360 packages, and audited 361 packages in 33s
-
-2025-11-14T17:03:13.11713462Z [inf]  
-142 packages are looking for funding
-  run `npm fund` for details
-
-2025-11-14T17:03:13.118554865Z [inf]  
-found 0 vulnerabilities
-
-2025-11-14T17:03:13.973433246Z [inf]  [stage-0  6/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-/root/npm,target=/root/.npm npm i
-2025-11-14T17:03:13.975039676Z [inf]  [stage-0  7/10] COPY . /app/.
-2025-11-14T17:03:14.179183682Z [inf]  [stage-0  7/10] COPY . /app/.
-2025-11-14T17:03:14.182767564Z [inf]  [stage-0  8/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
-2025-11-14T17:03:14.394998209Z [inf]  npm warn config production Use `--omit=dev` instead.
-
-2025-11-14T17:03:14.414793181Z [inf]  
-> website@0.1.0 build
-> next build
-
-
-2025-11-14T17:03:15.415168925Z [inf]     ▲ Next.js 16.0.3 (Turbopack)
-
-2025-11-14T17:03:15.415443482Z [inf]  
-
-2025-11-14T17:03:15.489406025Z [inf]     Creating an optimized production build ...
-
-2025-11-14T17:03:18.349971181Z [inf]   ✓ Compiled successfully in 2.3s
-
-2025-11-14T17:03:18.357648068Z [inf]     Running TypeScript ...
-
-2025-11-14T17:03:21.711165285Z [inf]  Failed to compile.
-
-
-2025-11-14T17:03:21.711343732Z [inf]  ./src/app/[locale]/pricing/page.tsx:84:72
-Type error: Property 'popular' does not exist on type '{ readonly name: "Free"; readonly price: "€0"; readonly period: "/засекогаш"; readonly bullets: readonly ["5 фактури/месец", "1 корисник", "PDF извоз", "Основни шаблони"]; } | { readonly name: "Starter"; readonly price: "€12"; readonly period: "/месец"; readonly bullets: readonly [...]; } | ... 12 more ... | { ...; }'.
-  Property 'popular' does not exist on type '{ readonly name: "Free"; readonly price: "€0"; readonly period: "/засекогаш"; readonly bullets: readonly ["5 фактури/месец", "1 корисник", "PDF извоз", "Основни шаблони"]; }'.
-
-[0m [90m 82 |[39m           [33m<[39m[33mdiv[39m className[33m=[39m[32m"grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"[39m[33m>[39m
- [90m 83 |[39m             {t[33m.[39mcompanyPlans[33m.[39mmap((p[33m,[39m i) [33m=>[39m (
-[31m[1m>[22m[39m[90m 84 |[39m               [33m<[39m[33mdiv[39m key[33m=[39m{i} className[33m=[39m{[32m`card relative flex flex-col ${p.popular ? 'ring-2 ring-blue-500' : ''}`[39m}[33m>[39m
- [90m    |[39m                                                                        [31m[1m^[22m[39m
- [90m 85 |[39m                 {p[33m.[39mpopular [33m&&[39m (
- [90m 86 |[39m                   [33m<[39m[33mdiv[39m className[33m=[39m[32m"absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white whitespace-nowrap"[39m[33m>[39m
- [90m 87 |[39m                     {t[33m.[39mpopularBadge}[0m
-
-2025-11-14T17:03:21.773062106Z [inf]  Next.js build worker exited with code: 1 and signal: null
-
-2025-11-14T17:03:21.971932897Z [err]  [stage-0  8/10] RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
-2025-11-14T17:03:21.993932275Z [err]  Dockerfile:24
-2025-11-14T17:03:21.993996071Z [err]  -------------------
-2025-11-14T17:03:21.994003512Z [err]  22 |     # build phase
-2025-11-14T17:03:21.994009729Z [err]  23 |     COPY . /app/.
-2025-11-14T17:03:21.994018334Z [err]  24 | >>> RUN --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/1bb5ef8b-0ac2-40fb-bce5-a100f30c93b2-node_modules/cache,target=/app/node_modules/.cache npm run build
-2025-11-14T17:03:21.994025069Z [err]  25 |
-2025-11-14T17:03:21.994030579Z [err]  26 |
-2025-11-14T17:03:21.994036619Z [err]  -------------------
-2025-11-14T17:03:21.994043594Z [err]  ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
-2025-11-14T17:03:21.999447680Z [err]  Error: Docker build failed
+content.js:4 content.js: v2.0.3
+content_script.js:1 Uncaught TypeError: Cannot read properties of undefined (reading 'control')
+    at content_script.js:1:422999
+    at Array.some (<anonymous>)
+    at shouldOfferCompletionListForField (content_script.js:1:422984)
+    at elementWasFocused (content_script.js:1:423712)
+    at HTMLDocument.focusInEventHandler (content_script.js:1:423069)
+(anonymous) @ content_script.js:1
+shouldOfferCompletionListForField @ content_script.js:1
+elementWasFocused @ content_script.js:1
+focusInEventHandler @ content_script.js:1
+content_script.js:1 Uncaught TypeError: Cannot read properties of undefined (reading 'control')
+    at content_script.js:1:422999
+    at Array.some (<anonymous>)
+    at shouldOfferCompletionListForField (content_script.js:1:422984)
+    at elementWasFocused (content_script.js:1:423712)
+    at HTMLDocument.focusInEventHandler (content_script.js:1:423069)
+(anonymous) @ content_script.js:1
+shouldOfferCompletionListForField @ content_script.js:1
+elementWasFocused @ content_script.js:1
+focusInEventHandler @ content_script.js:1
+content_script.js:1 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'control')
+    at content_script.js:1:422999
+    at Array.some (<anonymous>)
+    at shouldOfferCompletionListForField (content_script.js:1:422984)
+    at processInputEvent (content_script.js:1:426332)
+(anonymous) @ content_script.js:1
+shouldOfferCompletionListForField @ content_script.js:1
+processInputEvent @ content_script.js:1
+content_script.js:1 Uncaught TypeError: Cannot read properties of undefined (reading 'control')
+    at content_script.js:1:422999
+    at Array.some (<anonymous>)
+    at shouldOfferCompletionListForField (content_script.js:1:422984)
+    at elementWasFocused (content_script.js:1:423712)
+    at HTMLDocument.focusInEventHandler (content_script.js:1:423069)
+(anonymous) @ content_script.js:1
+shouldOfferCompletionListForField @ content_script.js:1
+elementWasFocused @ content_script.js:1
+focusInEventHandler @ content_script.js:1
+/api/v1/users:1  Failed to load resource: the server responded with a status of 402 ()
+users-Bw58dFdI.js:1 Uncaught (in promise) TypeError: n.tc is not a function
+    at users-Bw58dFdI.js:1:1769
+users-Bw58dFdI.js:1 Uncaught (in promise) TypeError: n.tc is not a function
+    at users-Bw58dFdI.js:1:1769
