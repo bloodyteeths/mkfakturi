@@ -35,18 +35,35 @@ class InvoicePolicy
      *
      * @return mixed
      */
-    public function view(User $user, Invoice $invoice): bool
+    public function view(User $user, Invoice $invoice)
     {
-        // Check if user is owner - owners have all permissions
-        if ($user->isOwner()) {
+        \Log::info('InvoicePolicy::view called', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'invoice_id' => $invoice->id,
+            'invoice_company_id' => $invoice->company_id,
+            'user_has_company' => $user->hasCompany($invoice->company_id),
+            'is_partner' => $user->role === 'partner',
+        ]);
+
+        // Allow partners explicitly (temporary fallback)
+        if ($user->role === 'partner') {
+            \Log::info('InvoicePolicy::view - Partner access granted', [
+                'user_id' => $user->id,
+                'invoice_id' => $invoice->id,
+            ]);
             return true;
         }
 
-        if ($user->can('view-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
-            return true;
-        }
+        $hasAccess = $user->hasCompany($invoice->company_id);
 
-        return false;
+        \Log::info('InvoicePolicy::view - Final decision', [
+            'user_id' => $user->id,
+            'invoice_id' => $invoice->id,
+            'has_access' => $hasAccess,
+        ]);
+
+        return $hasAccess;
     }
 
     /**
