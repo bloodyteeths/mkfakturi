@@ -36,7 +36,7 @@
         <div class="text-2xl font-semibold">
           <BaseFormatMoney
             :amount="partner.total_earnings || 0"
-            :currency="globalStore.companySettings.currency"
+            :currency="currency"
           />
         </div>
       </div>
@@ -45,7 +45,7 @@
         <div class="text-2xl font-semibold text-orange-600">
           <BaseFormatMoney
             :amount="partner.pending_payout || 0"
-            :currency="globalStore.companySettings.currency"
+            :currency="currency"
           />
         </div>
       </div>
@@ -248,7 +248,7 @@
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
                         <BaseFormatMoney
                           :amount="commission.total"
-                          :currency="globalStore.companySettings.currency"
+                          :currency="currency"
                         />
                       </td>
                     </tr>
@@ -287,7 +287,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
                       <BaseFormatMoney
                         :amount="payout.amount"
-                        :currency="globalStore.companySettings.currency"
+                        :currency="currency"
                       />
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -322,7 +322,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
@@ -339,6 +339,18 @@ const globalStore = useGlobalStore()
 const partner = ref(null)
 const showAssignModal = ref(false)
 const editingCompany = ref(null)
+
+// Add null-safe currency with fallback
+const currency = computed(() => {
+  return globalStore.companySettings?.currency || {
+    code: 'MKD',
+    symbol: 'ден',
+    precision: 2,
+    thousand_separator: '.',
+    decimal_separator: ',',
+    swap_currency_symbol: false
+  }
+})
 
 async function fetchPartner() {
   try {
