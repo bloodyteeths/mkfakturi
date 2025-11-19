@@ -22,7 +22,8 @@ class PartnerSeeder extends Seeder
         $adminUsers = User::where(function ($query) {
             $query->where('role', 'super admin')
                 ->orWhere('role', 'admin')
-                ->orWhere('role', 'accountant');
+                ->orWhere('role', 'accountant')
+                ->orWhere('role', 'partner'); // Include partner role for console access
         })->get();
 
         // CLAUDE-CHECKPOINT: Retrieved users with admin/accountant roles from users table
@@ -74,7 +75,7 @@ class PartnerSeeder extends Seeder
         // CLAUDE-CHECKPOINT: Completed partner creation loop
 
         $this->command->info('Partner seeding completed!');
-        $this->command->info('Total users processed: '.$adminUsers->count());
+        $this->command->info('Total users processed: ' . $adminUsers->count());
         $this->command->info("Partners created: {$createdCount}");
         $this->command->info("Partners skipped (already exist): {$skippedCount}");
     }
