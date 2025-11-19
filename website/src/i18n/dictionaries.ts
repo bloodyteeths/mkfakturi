@@ -24,8 +24,8 @@ export type Dictionary = {
   featureGrid: { title: string; subtitle: string; features: { title: string; desc: string }[] }
   socialProof: { trustedBy: string }
   whyDifferent: { title: string; cards: FeatureCard[] }
-  benefits: { title: string; bullets: string[] }
-  how: { title: string; steps: { title: string; body: string }[] }
+  benefits: { title: string; cards: { title: string; body: string }[] }
+  how: { title: string; process: string; steps: { title: string; body: string }[] }
   cta: { title: string; sub?: string; button: string }
   footer: { rights: string }
   partners?: { title: string; logos: string[] }
@@ -43,6 +43,7 @@ export type Dictionary = {
     sectionPartner: string
     popularBadge: string
     recommendedBadge: string
+    includesPrevious: string
     companyPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
     partnerPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
     cta: string
@@ -121,14 +122,15 @@ const mk: Dictionary = {
   },
   benefits: {
     title: 'Бенефити',
-    bullets: [
-      'Завршете месечно затворање за часови, не за денови.',
-      'Вклучете нов клиент за едно попладне.',
-      'Подгответе е‑фактури од првиот ден.'
+    cards: [
+      { title: 'Заштедете време', body: 'Завршете месечно затворање за часови, не за денови.' },
+      { title: 'Работете побрзо', body: 'Вклучете нов клиент за едно попладне.' },
+      { title: 'Бидете подготвени', body: 'Подгответе е‑фактури од првиот ден.' }
     ]
   },
   how: {
     title: 'Како работи',
+    process: 'Процес',
     steps: [
       { title: '1. Поврзи компанија', body: 'Активирај е‑Фактура и подесувања за ДДВ/смeтки.' },
       { title: '2. Креирај фактура', body: 'AI предлага ДДВ и конта; вие потврдувате и испраќате.' },
@@ -214,6 +216,7 @@ const mk: Dictionary = {
     sectionPartner: 'За сметководители (партнери)',
     popularBadge: 'Популарно',
     recommendedBadge: 'Препорачано',
+    includesPrevious: 'Вклучува сè од {plan}',
     companyPlans: [
       { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['5 фактури/месец', '1 корисник', 'PDF извоз', 'Основни шаблони'], popular: false },
       { name: 'Starter', price: '€12', period: '/месец', bullets: ['50 фактури/месец', '1 корисник', 'Неограничено клиенти', 'Email фактури'], popular: false },
@@ -309,14 +312,15 @@ const sq: Dictionary = {
   },
   benefits: {
     title: 'Përfitime',
-    bullets: [
-      'Mbyllni fund‑muajin për orë, jo ditë.',
-      'Onboard‑oni një klient të ri në një pasdite.',
-      'Përgatisni fatura gati për e‑Faturë që nga dita e parë.'
+    cards: [
+      { title: 'Kurseni kohë', body: 'Mbyllni fund‑muajin për orë, jo ditë.' },
+      { title: 'Punoni më shpejt', body: 'Onboard‑oni një klient të ri në një pasdite.' },
+      { title: 'Bëhuni gati', body: 'Përgatisni fatura gati për e‑Faturë që nga dita e parë.' }
     ]
   },
   how: {
     title: 'Si funksionon',
+    process: 'Procesi',
     steps: [
       { title: '1. Lidh kompaninë', body: 'Aktivizo e‑Faturën dhe rregullimet e TVSH/llogarive.' },
       { title: '2. Krijo faturë', body: 'AI sugjeron TVSH dhe llogari; ju konfirmoni dhe dërgoni.' },
@@ -402,6 +406,7 @@ const sq: Dictionary = {
     sectionPartner: 'Për kontabilistë (partnerë)',
     popularBadge: 'Popullor',
     recommendedBadge: 'I rekomanduar',
+    includesPrevious: 'Përfshin gjithçka në {plan}',
     companyPlans: [
       { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['5 fatura/muaj', '1 përdorues', 'Eksport PDF', 'Shabllone bazë'], popular: false },
       { name: 'Starter', price: '€12', period: '/muaj', bullets: ['50 fatura/muaj', '1 përdorues', 'Klientë të pakufizuar', 'Email fatura'], popular: false },
@@ -497,14 +502,15 @@ const tr: Dictionary = {
   },
   benefits: {
     title: 'Faydalar',
-    bullets: [
-      'Aylık kapanışı günler değil saatlerde bitirin.',
-      'Yeni bir müşteriyi bir öğleden sonra devreye alın.',
-      'İlk günden e‑Fatura’ya hazır faturalar hazırlayın.'
+    cards: [
+      { title: 'Zaman Kazanın', body: 'Aylık kapanışı günler değil saatlerde bitirin.' },
+      { title: 'Daha Hızlı Çalışın', body: 'Yeni bir müşteriyi bir öğleden sonra devreye alın.' },
+      { title: 'Hazır Olun', body: 'İlk günden e‑Fatura’ya hazır faturalar hazırlayın.' }
     ]
   },
   how: {
     title: 'Nasıl çalışır',
+    process: 'Süreç',
     steps: [
       { title: '1. Şirketi bağlayın', body: 'e‑Fatura’yı ve KDV/hesap ayarlarını etkinleştirin.' },
       { title: '2. Fatura oluşturun', body: 'AI KDV ve hesap önerir; siz onaylayıp gönderirsiniz.' },
@@ -590,6 +596,7 @@ const tr: Dictionary = {
     sectionPartner: 'Muhasebeciler için (iş ortakları)',
     popularBadge: 'Popüler',
     recommendedBadge: 'Önerilen',
+    includesPrevious: '{plan} paketindeki her şey dahil',
     companyPlans: [
       { name: 'Free', price: '€0', period: '/süresiz', bullets: ['5 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', 'Temel şablonlar'], popular: false },
       { name: 'Starter', price: '€12', period: '/ay', bullets: ['50 fatura/ay', '1 kullanıcı', 'Sınırsız müşteri', 'Email fatura'], popular: false },

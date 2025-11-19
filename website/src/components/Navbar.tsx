@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSwitcher from './LanguageSwitcher'
+import MobileMenu from './MobileMenu'
 import { Dictionary } from '@/i18n/dictionaries'
 import { Locale } from '@/i18n/locales'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.facturino.mk'
@@ -41,13 +42,21 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          <LanguageSwitcher current={locale} />
-          <Link href={`${APP_URL}/admin`} className="text-sm text-gray-700 hover:underline">
-            {t.nav.login}
-          </Link>
-          <Link href={`/${locale}/pricing`} className="btn-accent text-sm">
-            {t.nav.start}
-          </Link>
+          <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher current={locale} />
+            <Link href={`${APP_URL}/admin`} className="text-sm text-gray-700 hover:underline">
+              {t.nav.login}
+            </Link>
+            <Link href={`/${locale}/pricing`} className="btn-accent text-sm">
+              {t.nav.start}
+            </Link>
+          </div>
+
+          {/* Mobile Actions */}
+          <div className="flex md:hidden items-center gap-2">
+            <LanguageSwitcher current={locale} />
+            <MobileMenu t={t} locale={locale} />
+          </div>
         </div>
       </div>
     </header>

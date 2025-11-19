@@ -49,7 +49,7 @@
   --color-primary: var(--color-primary);
   --color-accent: var(--color-accent);
   --font-sans: var(--font-inter);
-  --font-display: var(--font-space-grotesk);
+  --font-heading: var(--font-inter);
   --radius-lg: var(--radius);
 
   /* Animation Keyframes */
@@ -190,7 +190,7 @@ h6 {
 }
 
 .section {
-  padding: 6rem 0;
+  @apply py-12 md:py-20;
   position: relative;
   overflow: hidden;
 }

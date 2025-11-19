@@ -331,6 +331,18 @@ class Company extends Model implements HasMedia
         foreach (config('abilities.abilities') as $ability) {
             BouncerFacade::allow($super_admin)->to($ability['ability'], $ability['model']);
         }
+
+        // Create 'admin' role for partners/managers
+        $admin = BouncerFacade::role()->firstOrCreate([
+            'name' => 'admin',
+            'title' => 'Admin',
+            'scope' => $this->id,
+        ]);
+
+        // Grant same permissions to admin for now
+        foreach (config('abilities.abilities') as $ability) {
+            BouncerFacade::allow($admin)->to($ability['ability'], $ability['model']);
+        }
     }
 
     public function setupDefaultPaymentMethods()

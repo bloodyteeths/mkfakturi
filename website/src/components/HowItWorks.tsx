@@ -5,7 +5,7 @@ export default function HowItWorks({ t }: { t: Dictionary }) {
     <section className="section bg-white overflow-hidden">
       <div className="container">
         <div className="text-center max-w-3xl mx-auto mb-20">
-          <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm">Process</span>
+          <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm">{t.how.process}</span>
           <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900">
             {t.how.title}
           </h2>

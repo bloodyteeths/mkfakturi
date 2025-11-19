@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Silber\Bouncer\BouncerFacade;
 
 class PartnerManagementController extends Controller
 {
@@ -401,6 +402,11 @@ class PartnerManagementController extends Controller
                 'is_active' => true,
             ]);
 
+            // Automatically assign 'admin' role to the partner user in this company scope
+            // This ensures they have Bouncer permissions immediately
+            BouncerFacade::scope()->to($validated['company_id']);
+            BouncerFacade::assign('admin')->to($partner->user);
+
             // Clear permission cache
             $partner->clearPermissionCache($validated['company_id']);
 
@@ -443,7 +449,7 @@ class PartnerManagementController extends Controller
         try {
             // Check if company is assigned
             $link = $partner->companies()->where('companies.id', $companyId)->first();
-            if (! $link) {
+            if (!$link) {
                 return response()->json([
                     'message' => 'Company is not assigned to this partner',
                 ], 404);
@@ -499,7 +505,7 @@ class PartnerManagementController extends Controller
         try {
             // Check if company is assigned
             $link = $partner->companies()->where('companies.id', $companyId)->first();
-            if (! $link) {
+            if (!$link) {
                 return response()->json([
                     'message' => 'Company is not assigned to this partner',
                 ], 404);
@@ -545,7 +551,7 @@ class PartnerManagementController extends Controller
             ])
             ->first();
 
-        if (! $link) {
+        if (!$link) {
             return response()->json(['message' => 'No active partner found'], 404);
         }
 
@@ -570,7 +576,7 @@ class PartnerManagementController extends Controller
             ])
             ->first();
 
-        if (! $referral) {
+        if (!$referral) {
             return response()->json(['message' => 'No upline partner found'], 404);
         }
 

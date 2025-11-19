@@ -12,7 +12,7 @@ export default function Benefits({ t }: { t: Dictionary }) {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {t.benefits.bullets.map((b, i) => (
+          {t.benefits.cards.map((card, i) => (
             <div key={i} className="relative group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
@@ -33,10 +33,10 @@ export default function Benefits({ t }: { t: Dictionary }) {
               </div>
 
               <h3 className="text-xl font-bold text-gray-900 mb-3">
-                {i === 0 ? "Save Time" : i === 1 ? "Work Faster" : "Be Ready"}
+                {card.title}
               </h3>
               <p className="text-gray-600 font-medium leading-relaxed">
-                {b}
+                {card.body}
               </p>
             </div>
           ))}
