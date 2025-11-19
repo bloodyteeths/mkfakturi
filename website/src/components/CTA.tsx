@@ -32,13 +32,9 @@ export default function CTA({ t, locale }: { t: Dictionary; locale: Locale }) {
             href={`/${locale}/contact`}
             className="px-8 py-4 bg-indigo-700/50 text-white border border-white/20 rounded-xl font-bold text-lg hover:bg-indigo-700/70 transition-all duration-300 backdrop-blur-sm"
           >
-            Contact Sales
+            {t.nav.contactSales}
           </Link>
         </div>
-
-        <p className="mt-6 text-sm text-indigo-200 opacity-80">
-          No credit card required • 14-day free trial • Cancel anytime
-        </p>
       </div>
     </section>
   )

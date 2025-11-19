@@ -12,6 +12,7 @@ export type Dictionary = {
     pricing: string
     security: string
     contact: string
+    contactSales: string
     start: string
     login: string
     language: string
@@ -69,6 +70,7 @@ const mk: Dictionary = {
     pricing: 'Цени',
     security: 'Безбедност',
     contact: 'Контакт',
+    contactSales: 'Контакт со продажба',
     start: 'Започни бесплатно',
     login: 'Пријава',
     language: 'Јазик'
@@ -158,7 +160,7 @@ const mk: Dictionary = {
       { q: 'Поддржувате ли PSD2?', a: 'Да, вклучително увоз на изводи и полуавтоматско порамнување.' }
     ]
   },
-  cta: { title: 'Подготвени сте? Започнете бесплатно денес.', button: 'Започни бесплатно' },
+  cta: { title: 'Подготвени сте? Започнете бесплатно денес.', sub: 'Без кредитна картичка • 14-дневен бесплатен пробен период • Откажете во секое време', button: 'Започни бесплатно' },
   footer: { rights: '© Facturino. Сите права задржани.' },
   featuresPage: {
     heroTitle: 'Функции што не можете да ги промашите',
@@ -256,6 +258,7 @@ const sq: Dictionary = {
     pricing: 'Çmimet',
     security: 'Siguria',
     contact: 'Kontakti',
+    contactSales: 'Kontakto shitjet',
     start: 'Fillo falas',
     login: 'Hyr',
     language: 'Gjuha'
@@ -345,7 +348,7 @@ const sq: Dictionary = {
       { q: 'A mbështesni PSD2?', a: 'Po, import ekstraktesh dhe pajtim gjysmë‑automatik.' }
     ]
   },
-  cta: { title: 'Gati? Fillo falas sot.', button: 'Fillo falas' },
+  cta: { title: 'Gati? Fillo falas sot.', sub: 'Pa kartë krediti • Provë falas 14 ditë • Anulo në çdo kohë', button: 'Fillo falas' },
   footer: { rights: '© Facturino. Të gjitha të drejtat e rezervuara.' },
   featuresPage: {
     heroTitle: 'Veçori që nuk mund t’i anashkaloni',
@@ -443,6 +446,7 @@ const tr: Dictionary = {
     pricing: 'Fiyatlar',
     security: 'Güvenlik',
     contact: 'İletişim',
+    contactSales: 'Satışla İletişime Geçin',
     start: 'Ücretsiz başla',
     login: 'Giriş',
     language: 'Dil'
@@ -532,7 +536,7 @@ const tr: Dictionary = {
       { q: 'PSD2 destekliyor musunuz?', a: 'Evet, ekstre içe aktarma ve yarı otomatik mutabakat.' }
     ]
   },
-  cta: { title: 'Hazır mısınız? Bugün ücretsiz başlayın.', button: 'Ücretsiz başla' },
+  cta: { title: 'Hazır mısınız? Bugün ücretsiz başlayın.', sub: 'Kredi kartı gerekmez • 14 gün ücretsiz deneme • İstediğiniz zaman iptal edin', button: 'Ücretsiz başla' },
   footer: { rights: '© Facturino. Tüm hakları saklıdır.' },
   featuresPage: {
     heroTitle: 'Gözden kaçırılmayacak özellikler',
