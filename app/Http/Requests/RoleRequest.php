@@ -25,6 +25,7 @@ class RoleRequest extends FormRequest
                 'required',
                 'string',
                 Rule::unique('roles')->where('scope', $this->header('company')),
+                Rule::notIn(['partner', 'Partner', 'PARTNER']),
             ],
             'abilities' => [
                 'required',
@@ -41,6 +42,7 @@ class RoleRequest extends FormRequest
                 Rule::unique('roles')
                     ->ignore($this->route('role')->id, 'id')
                     ->where('scope', $this->header('company')),
+                Rule::notIn(['partner', 'Partner', 'PARTNER']),
             ];
         }
 
