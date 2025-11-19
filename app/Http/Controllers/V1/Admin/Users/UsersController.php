@@ -48,9 +48,20 @@ class UsersController extends Controller
         $this->authorize('create', User::class);
 
         if ($request->is_existing_user) {
+            \Log::info('Looking for existing user', [
+                'email' => $request->email,
+                'email_length' => strlen($request->email),
+                'email_trimmed' => trim($request->email),
+            ]);
+
             $user = User::where('email', $request->email)->first();
 
             if (!$user) {
+                \Log::warning('User not found', [
+                    'searched_email' => $request->email,
+                    'all_emails' => User::pluck('email')->toArray(),
+                ]);
+
                 return response()->json([
                     'error' => 'user_not_found',
                     'message' => 'No user found with the provided email address.',
