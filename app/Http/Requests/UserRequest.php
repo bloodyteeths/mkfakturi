@@ -20,20 +20,22 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isExistingUser = $this->input('is_existing_user', false);
+
         $rules = [
             'name' => [
-                'required',
+                $isExistingUser ? 'nullable' : 'required',
             ],
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users'),
+                $isExistingUser ? 'exists:users,email' : Rule::unique('users'),
             ],
             'phone' => [
                 'nullable',
             ],
             'password' => [
-                'required',
+                $isExistingUser ? 'nullable' : 'required',
                 'min:8',
             ],
             'companies' => [
@@ -44,6 +46,10 @@ class UserRequest extends FormRequest
             ],
             'companies.*.role' => [
                 'required',
+            ],
+            'is_existing_user' => [
+                'nullable',
+                'boolean',
             ],
         ];
 
