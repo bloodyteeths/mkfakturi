@@ -264,11 +264,17 @@ watch(
   { deep: true }
 )
 
-// Watch for external changes to modelValue
+// Watch for external changes to modelValue (only when different to avoid infinite loop)
 watch(
   () => props.modelValue,
   (newValue) => {
-    selectedPermissions.value = [...newValue]
+    // Only update if the value actually changed to prevent infinite loop
+    const currentValues = [...selectedPermissions.value].sort()
+    const newValues = [...newValue].sort()
+
+    if (JSON.stringify(currentValues) !== JSON.stringify(newValues)) {
+      selectedPermissions.value = [...newValue]
+    }
   },
   { deep: true }
 )
