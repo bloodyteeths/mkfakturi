@@ -29,7 +29,7 @@ class BootstrapController extends Controller
         \Log::info('Bootstrap controller reached', [
             'authenticated' => auth()->check(),
             'user_id' => auth()->id(),
-            'guard' => auth()->getDefaultDriver(),
+            'guard' => \Auth::getDefaultDriver(),
             'session_id' => session()->getId(),
             'has_company_header' => $request->hasHeader('company'),
             'company_header' => $request->header('company'),

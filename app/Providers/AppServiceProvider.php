@@ -77,10 +77,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(\App\Models\AuditLog::class, \App\Policies\AuditLogPolicy::class);
 
         // Phase 3-4 Policies
-        Gate::policy(\App\Models\BankConnection::class, \App\Policies\BankConnectionPolicy::class);
+        // Gate::policy(\App\Models\BankConnection::class, \App\Policies\BankConnectionPolicy::class);
         Gate::policy(\App\Models\ApprovalRequest::class, \App\Policies\ApprovalPolicy::class);
-        Gate::policy(\App\Models\ExportJob::class, \App\Policies\ExportJobPolicy::class);
-        Gate::policy(\App\Models\RecurringExpense::class, \App\Policies\RecurringExpensePolicy::class);
+        // Gate::policy(\App\Models\ExportJob::class, \App\Policies\ExportJobPolicy::class);
+        // Gate::policy(\App\Models\RecurringExpense::class, \App\Policies\RecurringExpensePolicy::class);
 
         // E-Invoice Policy
         Gate::policy(\App\Models\EInvoice::class, \App\Policies\EInvoicePolicy::class);

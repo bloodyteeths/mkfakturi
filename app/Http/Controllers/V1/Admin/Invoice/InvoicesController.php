@@ -44,29 +44,33 @@ class InvoicesController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
+        $this->authorize('viewAny', Invoice::class);
+
+        $limit = $request->has('limit') ? $request->limit : 10;
+
+        $user = $request->user();
+
+        // Log the request details for debugging
         \Log::info('InvoicesController::index called', [
             'user_id' => $user?->id,
             'user_role' => $user?->role,
             'company_header' => $request->header('company'),
         ]);
 
-        $this->authorize('viewAny', Invoice::class);
-
-        \Log::info('InvoicesController::index - Authorization passed', [
-            'user_id' => $user?->id,
-        ]);
-
-        $limit = $request->input('limit', 10);
-
-        $invoices = Invoice::whereCompany()
-            ->applyFilters($request->all())
-            ->with($this->invoiceResourceRelations())
-            ->latest()
+        $invoices = Invoice::with(['customer', 'items', 'payments'])
+            ->applyFilters($request->only([
+                'search',
+                'customer_id',
+                'status',
+                'date_range',
+                'orderByField',
+                'orderBy'
+            ]))
+            ->whereCompany()
             ->paginateData($limit);
 
         \Log::info('InvoicesController::index - Returning invoices', [
@@ -86,7 +90,7 @@ class InvoicesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\InvoiceResource
      */
     public function store(Requests\InvoicesRequest $request)
     {
@@ -96,7 +100,11 @@ class InvoicesController extends Controller
         $invoice->load($this->invoiceResourceRelations());
 
         if ($request->has('invoiceSend')) {
-            $invoice->send($request->subject, $request->body);
+            $invoice->send([
+                'subject' => $request->subject,
+                'body' => $request->body,
+                'to' => $invoice->customer->email // Assuming customer email is needed
+            ]);
         }
 
         GenerateInvoicePdfJob::dispatchAfterResponse($invoice->id);
@@ -107,7 +115,7 @@ class InvoicesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\InvoiceResource
      */
     public function show(Request $request, Invoice $invoice)
     {
@@ -122,7 +130,7 @@ class InvoicesController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\InvoiceResource|\Illuminate\Http\JsonResponse
      */
     public function update(Requests\InvoicesRequest $request, Invoice $invoice)
     {
