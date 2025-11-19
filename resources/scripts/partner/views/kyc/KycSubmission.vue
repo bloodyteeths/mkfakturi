@@ -283,7 +283,7 @@ const deleteDocument = async (documentId) => {
 
 const fetchKycStatus = async () => {
   try {
-    const response = await axios.get('/api/v1/partner/kyc/status')
+    const response = await axios.get('/partner/kyc/status')
     kycStatus.value = response.data
   } catch (error) {
     errorMessage.value = 'Failed to load KYC status'
