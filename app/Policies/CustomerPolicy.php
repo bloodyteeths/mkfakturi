@@ -23,7 +23,7 @@ class CustomerPolicy
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-customer', Customer::class)) {
+        if ($user->can('view-customer', Customer::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -41,7 +41,7 @@ class CustomerPolicy
             return true;
         }
 
-        if ($user->can('view-customer', $customer)) {
+        if ($user->can('view-customer', $customer) || $user->role === 'partner') {
             return true;
         }
 
