@@ -3,10 +3,6 @@ import abilities from '@/scripts/admin/stub/abilities'
 const LayoutInstallation = () =>
   import('@/scripts/admin/layouts/LayoutInstallation.vue')
 
-const LayoutPublic = () => import('@/scripts/admin/layouts/LayoutPublic.vue')
-const LandingPage = () => import('@/scripts/admin/views/public/LandingPage.vue')
-const PublicPricing = () => import('@/scripts/admin/views/public/PublicPricing.vue')
-
 const Login = () => import('@/scripts/admin/views/auth/Login.vue')
 const LayoutBasic = () => import('@/scripts/admin/layouts/LayoutBasic.vue')
 const LayoutLogin = () => import('@/scripts/admin/layouts/LayoutLogin.vue')
@@ -194,26 +190,13 @@ export default [
 
   {
     path: '/',
-    component: LayoutPublic,
-    meta: { requiresAuth: false },
-    children: [
-      {
-        path: '',
-        name: 'landing',
-        component: LandingPage,
-      },
-      {
-        path: 'pricing',
-        name: 'pricing.public',
-        component: PublicPricing,
-      },
-    ],
-  },
-  {
-    path: '/',
     component: LayoutLogin,
     meta: { requiresAuth: false, redirectIfAuthenticated: true },
     children: [
+      {
+        path: '',
+        component: Login,
+      },
       {
         path: 'login',
         name: 'login',
