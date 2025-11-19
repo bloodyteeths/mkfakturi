@@ -1649,126 +1649,126 @@
   "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:": "<b>{COMPANY_NAME}</b> firmasından yeni bir fatura aldınız.</br> Lütfen aşağıdaki butonu kullanarak indirin:",
   "landing": {
     "hero": {
-      "badge": "New: AI-Powered Expense Tracking (TR)",
-      "title": "Accounting that thinks for you. (TR)",
-      "subtitle": "Facturino combines powerful invoicing with advanced AI to automate your bookkeeping, track expenses, and predict your financial future. (TR)",
-      "cta_primary": "Start Free Trial (TR)",
-      "cta_secondary": "See How It Works (TR)",
-      "dashboard_alt": "Facturino Dashboard (TR)"
+      "badge": "Yeni: Yapay Zeka Destekli Gider Takibi",
+      "title": "Sizin için düşünen muhasebe.",
+      "subtitle": "Facturino, defter tutmanızı otomatikleştirmek, giderleri takip etmek ve finansal geleceğinizi tahmin etmek için gelişmiş yapay zeka ile güçlü faturalamayı birleştirir.",
+      "cta_primary": "Ücretsiz denemeye başlayın",
+      "cta_secondary": "Nasıl çalıştığını görün",
+      "dashboard_alt": "Facturino kontrol paneli"
     },
     "partners": {
-      "trusted_by": "Trusted by forward-thinking companies (TR)"
+      "trusted_by": "İleriye dönük düşünen şirketler tarafından güveniliyor"
     },
     "features": {
       "ai_insights": {
-        "title": "AI-Powered Financial Insights (TR)",
-        "description": "Get real-time suggestions on how to save money and optimize your cash flow. (TR)"
+        "title": "Yapay Zeka Destekli Finansal İçgörüler",
+        "description": "Nasıl para tasarrufu yapacağınız ve nakit akışınızı optimize edeceğiniz konusunda gerçek zamanlı öneriler alın."
       },
       "invoicing": {
-        "title": "Beautiful Invoices (TR)",
-        "description": "Create professional invoices in seconds that get you paid faster. (TR)"
+        "title": "Güzel faturalar",
+        "description": "Saniyeler içinde sizi daha hızlı ödeten profesyonel faturalar oluşturun."
       },
       "expenses": {
-        "title": "Smart Expense Tracking (TR)",
-        "description": "Snap a photo of your receipt and let our AI extract the data automatically. (TR)"
+        "title": "Akıllı gider takibi",
+        "description": "Fişinizin fotoğrafını çekin ve yapay zekamızın verileri otomatik olarak çıkarmasına izin verin."
       },
       "reporting": {
-        "title": "Comprehensive Reporting (TR)",
-        "description": "Visualize your financial health with interactive charts and reports. (TR)"
+        "title": "Kapsamlı raporlama",
+        "description": "Etkileşimli grafikler ve raporlarla finansal sağlığınızı görselleştirin."
       }
     },
     "how_it_works": {
-      "title": "How Facturino Works (TR)",
-      "subtitle": "Get started in minutes, not days. (TR)",
+      "title": "Facturino nasıl çalışır",
+      "subtitle": "Günler değil, dakikalar içinde başlayın.",
       "step1": {
-        "title": "Create Account (TR)",
-        "description": "Sign up for free and set up your company profile. (TR)"
+        "title": "Hesap oluşturun",
+        "description": "Ücretsiz kaydolun ve şirket profilinizi ayarlayın."
       },
       "step2": {
-        "title": "Connect Data (TR)",
-        "description": "Import your customers and connect your bank accounts. (TR)"
+        "title": "Verileri bağlayın",
+        "description": "Müşterilerinizi içe aktarın ve banka hesaplarınızı bağlayın."
       },
       "step3": {
-        "title": "Get Paid (TR)",
-        "description": "Send invoices and track payments automatically. (TR)"
+        "title": "Ödeme alın",
+        "description": "Fatura gönderin ve ödemeleri otomatik olarak takip edin."
       }
     },
     "testimonials": {
-      "title": "Loved by businesses like yours (TR)",
-      "review1": "Facturino has completely transformed how we manage our finances. The AI insights are a game changer. (TR)",
-      "author1": "Elena M. (TR)",
-      "role1": "CEO at TechStart (TR)",
-      "review2": "The best invoicing software I've used. Simple, fast, and beautiful. (TR)",
-      "author2": "Marko P. (TR)",
-      "role2": "Freelance Designer (TR)",
-      "review3": "I save hours every week on bookkeeping thanks to the automated expense tracking. (TR)",
-      "author3": "Sarah J. (TR)",
-      "role3": "Owner at Cafe Bliss (TR)"
+      "title": "Sizinki gibi işletmeler tarafından seviliyor",
+      "review1": "Facturino, finanslarımızı yönetme şeklimizi tamamen değiştirdi. Yapay zeka içgörüleri oyunun kurallarını değiştiriyor.",
+      "author1": "Elena M.",
+      "role1": "TechStart CEO'su",
+      "review2": "Kullandığım en iyi faturalama yazılımı. Basit, hızlı ve güzel.",
+      "author2": "Marko P.",
+      "role2": "Serbest tasarımcı",
+      "review3": "Otomatik gider takibi sayesinde her hafta defter tutmada saatler kazanıyorum.",
+      "author3": "Sarah J.",
+      "role3": "Cafe Bliss sahibi"
     },
     "faq": {
-      "title": "Frequently Asked Questions (TR)",
-      "q1": "Is there a free trial? (TR)",
-      "a1": "Yes, we offer a 14-day free trial on all paid plans. (TR)",
-      "q2": "Can I cancel anytime? (TR)",
-      "a2": "Absolutely. There are no long-term contracts and you can cancel whenever you like. (TR)",
-      "q3": "Is my data secure? (TR)",
-      "a3": "We use bank-level encryption to ensure your data is always safe and secure. (TR)",
-      "q4": "Do you support multiple currencies? (TR)",
-      "a4": "Yes, Facturino supports over 100 currencies with live exchange rates. (TR)"
+      "title": "Sıkça sorulan sorular",
+      "q1": "Ücretsiz deneme var mı?",
+      "a1": "Evet, tüm ücretli planlar için 14 günlük ücretsiz deneme sunuyoruz.",
+      "q2": "İstediğim zaman iptal edebilir miyim?",
+      "a2": "Kesinlikle. Uzun vadeli sözleşme yok ve istediğiniz zaman iptal edebilirsiniz.",
+      "q3": "Verilerim güvende mi?",
+      "a3": "Verilerinizin her zaman güvende olmasını sağlamak için banka düzeyinde şifreleme kullanıyoruz.",
+      "q4": "Birden fazla para birimini destekliyor musunuz?",
+      "a4": "Evet, Facturino canlı döviz kurlarıyla 100'den fazla para birimini destekler."
     },
     "cta_footer": {
-      "title": "Ready to streamline your accounting? (TR)",
-      "subtitle": "Join thousands of businesses trusting Facturino. (TR)",
-      "button": "Get Started Now (TR)"
+      "title": "Muhasebenizi kolaylaştırmaya hazır mısınız?",
+      "subtitle": "Facturino'ya güvenen binlerce işletmeye katılın.",
+      "button": "Şimdi başlayın"
     },
     "footer": {
-      "product": "Product (TR)",
-      "features": "Features (TR)",
-      "pricing": "Pricing (TR)",
-      "company": "Company (TR)",
-      "about": "About Us (TR)",
-      "blog": "Blog (TR)",
-      "careers": "Careers (TR)",
-      "legal": "Legal (TR)",
-      "privacy": "Privacy Policy (TR)",
-      "terms": "Terms of Service (TR)",
-      "rights": "All rights reserved. (TR)"
+      "product": "Ürün",
+      "features": "Özellikler",
+      "pricing": "Fiyatlandırma",
+      "company": "Şirket",
+      "about": "Hakkımızda",
+      "blog": "Blog",
+      "careers": "Kariyer",
+      "legal": "Yasal",
+      "privacy": "Gizlilik politikası",
+      "terms": "Hizmet şartları",
+      "rights": "Tüm hakları saklıdır."
     }
   },
   "pricing_public": {
-    "title": "Simple, Transparent Pricing (TR)",
-    "subtitle": "Choose the plan that fits your business needs. (TR)",
-    "monthly": "Monthly (TR)",
-    "yearly": "Yearly (TR)",
-    "save_text": "Save 20% (TR)",
-    "most_popular": "Most Popular (TR)",
-    "per_month": "/mo (TR)",
-    "per_year": "/yr (TR)",
-    "start_trial": "Start Free Trial (TR)",
-    "get_started": "Get Started (TR)",
-    "contact_sales": "Contact Sales (TR)",
-    "features_label": "Everything in {prev} plus: (TR)",
+    "title": "Basit, şeffaf fiyatlandırma",
+    "subtitle": "İşletmenizin ihtiyaçlarına uygun planı seçin.",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "save_text": "%20 tasarruf edin",
+    "most_popular": "En popüler",
+    "per_month": "/ay",
+    "per_year": "/yıl",
+    "start_trial": "Ücretsiz denemeye başlayın",
+    "get_started": "Başlayın",
+    "contact_sales": "Satışla iletişime geçin",
+    "features_label": "{prev} içindeki her şey artı:",
     "custom_solution": {
-      "title": "Need a custom solution? (TR)",
-      "description": "Contact us for enterprise pricing and custom integrations. (TR)",
-      "button": "Contact Sales (TR)"
+      "title": "Özel bir çözüme mi ihtiyacınız var?",
+      "description": "Kurumsal fiyatlandırma ve özel entegrasyonlar için bizimle iletişime geçin.",
+      "button": "Satışla iletişime geçin"
     },
     "plans": {
       "free": {
-        "name": "Free (TR)",
-        "description": "Perfect for freelancers just starting out. (TR)"
+        "name": "Ücretsiz",
+        "description": "Yeni başlayan serbest çalışanlar için mükemmel."
       },
       "starter": {
-        "name": "Starter (TR)",
-        "description": "Great for small businesses growing fast. (TR)"
+        "name": "Başlangıç",
+        "description": "Hızla büyüyen küçük işletmeler için harika."
       },
       "standard": {
-        "name": "Standard (TR)",
-        "description": "For established businesses with teams. (TR)"
+        "name": "Standart",
+        "description": "Ekipleri olan yerleşik işletmeler için."
       },
       "business": {
-        "name": "Business (TR)",
-        "description": "Advanced features for scaling companies. (TR)"
+        "name": "İşletme",
+        "description": "Ölçeklenen şirketler için gelişmiş özellikler."
       }
     }
   }

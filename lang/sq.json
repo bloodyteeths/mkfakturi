@@ -712,126 +712,126 @@
   },
   "landing": {
     "hero": {
-      "badge": "New: AI-Powered Expense Tracking (SQ)",
-      "title": "Accounting that thinks for you. (SQ)",
-      "subtitle": "Facturino combines powerful invoicing with advanced AI to automate your bookkeeping, track expenses, and predict your financial future. (SQ)",
-      "cta_primary": "Start Free Trial (SQ)",
-      "cta_secondary": "See How It Works (SQ)",
-      "dashboard_alt": "Facturino Dashboard (SQ)"
+      "badge": "E re: Gjurmimi i shpenzimeve të fuqizuara nga AI",
+      "title": "Kontabiliteti që mendon për ju.",
+      "subtitle": "Facturino kombinon faturimin e fuqishëm me AI të avancuar për të automatizuar kontabilitetin tuaj, gjurmuar shpenzimet dhe parashikuar të ardhmen tuaj financiare.",
+      "cta_primary": "Filloni provën falas",
+      "cta_secondary": "Shihni si funksionon",
+      "dashboard_alt": "Paneli i kontrollit Facturino"
     },
     "partners": {
-      "trusted_by": "Trusted by forward-thinking companies (SQ)"
+      "trusted_by": "Besuar nga kompani me mendim përpara"
     },
     "features": {
       "ai_insights": {
-        "title": "AI-Powered Financial Insights (SQ)",
-        "description": "Get real-time suggestions on how to save money and optimize your cash flow. (SQ)"
+        "title": "Njohuri financiare të fuqizuara nga AI",
+        "description": "Merrni sugjerime në kohë reale se si të kurseni para dhe të optimizoni rrjedhën tuaj të parasë."
       },
       "invoicing": {
-        "title": "Beautiful Invoices (SQ)",
-        "description": "Create professional invoices in seconds that get you paid faster. (SQ)"
+        "title": "Fatura të bukura",
+        "description": "Krijoni fatura profesionale në sekonda që ju paguajnë më shpejt."
       },
       "expenses": {
-        "title": "Smart Expense Tracking (SQ)",
-        "description": "Snap a photo of your receipt and let our AI extract the data automatically. (SQ)"
+        "title": "Gjurmimi i mençur i shpenzimeve",
+        "description": "Bëni një fotografi të faturës suaj dhe lini AI-në tonë të nxjerrë të dhënat automatikisht."
       },
       "reporting": {
-        "title": "Comprehensive Reporting (SQ)",
-        "description": "Visualize your financial health with interactive charts and reports. (SQ)"
+        "title": "Raportim gjithëpërfshirës",
+        "description": "Vizualizoni shëndetin tuaj financiar me grafikë dhe raporte interaktive."
       }
     },
     "how_it_works": {
-      "title": "How Facturino Works (SQ)",
-      "subtitle": "Get started in minutes, not days. (SQ)",
+      "title": "Si funksionon Facturino",
+      "subtitle": "Filloni për minuta, jo ditë.",
       "step1": {
-        "title": "Create Account (SQ)",
-        "description": "Sign up for free and set up your company profile. (SQ)"
+        "title": "Krijoni llogari",
+        "description": "Regjistrohuni falas dhe vendosni profilin e kompanisë suaj."
       },
       "step2": {
-        "title": "Connect Data (SQ)",
-        "description": "Import your customers and connect your bank accounts. (SQ)"
+        "title": "Lidhni të dhënat",
+        "description": "Importoni klientët tuaj dhe lidhni llogaritë tuaja bankare."
       },
       "step3": {
-        "title": "Get Paid (SQ)",
-        "description": "Send invoices and track payments automatically. (SQ)"
+        "title": "Merrni pagesën",
+        "description": "Dërgoni fatura dhe gjurmoni pagesat automatikisht."
       }
     },
     "testimonials": {
-      "title": "Loved by businesses like yours (SQ)",
-      "review1": "Facturino has completely transformed how we manage our finances. The AI insights are a game changer. (SQ)",
-      "author1": "Elena M. (SQ)",
-      "role1": "CEO at TechStart (SQ)",
-      "review2": "The best invoicing software I've used. Simple, fast, and beautiful. (SQ)",
-      "author2": "Marko P. (SQ)",
-      "role2": "Freelance Designer (SQ)",
-      "review3": "I save hours every week on bookkeeping thanks to the automated expense tracking. (SQ)",
-      "author3": "Sarah J. (SQ)",
-      "role3": "Owner at Cafe Bliss (SQ)"
+      "title": "E dashur nga biznese si juaja",
+      "review1": "Facturino ka transformuar plotësisht mënyrën se si menaxhojmë financat tona. Njohuritë e AI janë revolucionare.",
+      "author1": "Elena M.",
+      "role1": "CEO në TechStart",
+      "review2": "Softueri më i mirë i faturimit që kam përdorur. I thjeshtë, i shpejtë dhe i bukur.",
+      "author2": "Marko P.",
+      "role2": "Dizajner i lirë",
+      "review3": "Kursej orë çdo javë në kontabilitet falë gjurmimit automatik të shpenzimeve.",
+      "author3": "Sarah J.",
+      "role3": "Pronare në Cafe Bliss"
     },
     "faq": {
-      "title": "Frequently Asked Questions (SQ)",
-      "q1": "Is there a free trial? (SQ)",
-      "a1": "Yes, we offer a 14-day free trial on all paid plans. (SQ)",
-      "q2": "Can I cancel anytime? (SQ)",
-      "a2": "Absolutely. There are no long-term contracts and you can cancel whenever you like. (SQ)",
-      "q3": "Is my data secure? (SQ)",
-      "a3": "We use bank-level encryption to ensure your data is always safe and secure. (SQ)",
-      "q4": "Do you support multiple currencies? (SQ)",
-      "a4": "Yes, Facturino supports over 100 currencies with live exchange rates. (SQ)"
+      "title": "Pyetje të shpeshta",
+      "q1": "A ka provë falas?",
+      "a1": "Po, ofrojmë një provë falas 14-ditore për të gjitha planet e paguara.",
+      "q2": "A mund ta anuloj në çdo kohë?",
+      "a2": "Absolutisht. Nuk ka kontrata afatgjata dhe mund ta anuloni kur të dëshironi.",
+      "q3": "A janë të dhënat e mia të sigurta?",
+      "a3": "Përdorim enkriptim në nivel bankar për të siguruar që të dhënat tuaja janë gjithmonë të sigurta.",
+      "q4": "A mbështetni valuta të shumta?",
+      "a4": "Po, Facturino mbështet mbi 100 valuta me kurse këmbimi të drejtpërdrejta."
     },
     "cta_footer": {
-      "title": "Ready to streamline your accounting? (SQ)",
-      "subtitle": "Join thousands of businesses trusting Facturino. (SQ)",
-      "button": "Get Started Now (SQ)"
+      "title": "Gati për të thjeshtuar kontabilitetin tuaj?",
+      "subtitle": "Bashkohuni me mijëra biznese që i besojnë Facturino.",
+      "button": "Filloni tani"
     },
     "footer": {
-      "product": "Product (SQ)",
-      "features": "Features (SQ)",
-      "pricing": "Pricing (SQ)",
-      "company": "Company (SQ)",
-      "about": "About Us (SQ)",
-      "blog": "Blog (SQ)",
-      "careers": "Careers (SQ)",
-      "legal": "Legal (SQ)",
-      "privacy": "Privacy Policy (SQ)",
-      "terms": "Terms of Service (SQ)",
-      "rights": "All rights reserved. (SQ)"
+      "product": "Produkti",
+      "features": "Veçoritë",
+      "pricing": "Çmimet",
+      "company": "Kompania",
+      "about": "Rreth nesh",
+      "blog": "Blogu",
+      "careers": "Karriera",
+      "legal": "Ligjore",
+      "privacy": "Politika e privatësisë",
+      "terms": "Kushtet e shërbimit",
+      "rights": "Të gjitha të drejtat e rezervuara."
     }
   },
   "pricing_public": {
-    "title": "Simple, Transparent Pricing (SQ)",
-    "subtitle": "Choose the plan that fits your business needs. (SQ)",
-    "monthly": "Monthly (SQ)",
-    "yearly": "Yearly (SQ)",
-    "save_text": "Save 20% (SQ)",
-    "most_popular": "Most Popular (SQ)",
-    "per_month": "/mo (SQ)",
-    "per_year": "/yr (SQ)",
-    "start_trial": "Start Free Trial (SQ)",
-    "get_started": "Get Started (SQ)",
-    "contact_sales": "Contact Sales (SQ)",
-    "features_label": "Everything in {prev} plus: (SQ)",
+    "title": "Çmime të thjeshta dhe transparente",
+    "subtitle": "Zgjidhni planin që i përshtatet nevojave të biznesit tuaj.",
+    "monthly": "Mujore",
+    "yearly": "Vjetore",
+    "save_text": "Kurseni 20%",
+    "most_popular": "Më popullore",
+    "per_month": "/muaj",
+    "per_year": "/vit",
+    "start_trial": "Filloni provën falas",
+    "get_started": "Filloni",
+    "contact_sales": "Kontaktoni shitjet",
+    "features_label": "Gjithçka në {prev} plus:",
     "custom_solution": {
-      "title": "Need a custom solution? (SQ)",
-      "description": "Contact us for enterprise pricing and custom integrations. (SQ)",
-      "button": "Contact Sales (SQ)"
+      "title": "Keni nevojë për një zgjidhje të personalizuar?",
+      "description": "Na kontaktoni për çmime korporative dhe integrime të personalizuara.",
+      "button": "Kontaktoni shitjet"
     },
     "plans": {
       "free": {
-        "name": "Free (SQ)",
-        "description": "Perfect for freelancers just starting out. (SQ)"
+        "name": "Falas",
+        "description": "Perfekte për punëtorë të lirë që sapo fillojnë."
       },
       "starter": {
-        "name": "Starter (SQ)",
-        "description": "Great for small businesses growing fast. (SQ)"
+        "name": "Fillestar",
+        "description": "E shkëlqyer për biznese të vogla që rriten shpejt."
       },
       "standard": {
-        "name": "Standard (SQ)",
-        "description": "For established businesses with teams. (SQ)"
+        "name": "Standard",
+        "description": "Për biznese të vendosura me ekipe."
       },
       "business": {
-        "name": "Business (SQ)",
-        "description": "Advanced features for scaling companies. (SQ)"
+        "name": "Biznes",
+        "description": "Veçori të avancuara për kompani në rritje."
       }
     }
   }

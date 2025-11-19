@@ -2863,126 +2863,126 @@
   },
   "landing": {
     "hero": {
-      "badge": "New: AI-Powered Expense Tracking (MK)",
-      "title": "Accounting that thinks for you. (MK)",
-      "subtitle": "Facturino combines powerful invoicing with advanced AI to automate your bookkeeping, track expenses, and predict your financial future. (MK)",
-      "cta_primary": "Start Free Trial (MK)",
-      "cta_secondary": "See How It Works (MK)",
-      "dashboard_alt": "Facturino Dashboard (MK)"
+      "badge": "Ново: AI-засновано следење на трошоци",
+      "title": "Сметководство кое размислува за вас.",
+      "subtitle": "Факторино комбинира моќно фактурирање со напреден AI за да го автоматизира вашето книговодство, следи трошоци и предвидува ваша финансиска иднина.",
+      "cta_primary": "Започнете бесплатна проба",
+      "cta_secondary": "Видете како функционира",
+      "dashboard_alt": "Факторино контролна табла"
     },
     "partners": {
-      "trusted_by": "Trusted by forward-thinking companies (MK)"
+      "trusted_by": "Доверба од иновативни компании"
     },
     "features": {
       "ai_insights": {
-        "title": "AI-Powered Financial Insights (MK)",
-        "description": "Get real-time suggestions on how to save money and optimize your cash flow. (MK)"
+        "title": "AI-засновани финансиски анализи",
+        "description": "Добивајте предлози во реално време за тоа како да заштедите пари и да го оптимизирате вашиот готовински тек."
       },
       "invoicing": {
-        "title": "Beautiful Invoices (MK)",
-        "description": "Create professional invoices in seconds that get you paid faster. (MK)"
+        "title": "Убави фактури",
+        "description": "Креирајте професионални фактури за секунди кои ќе ве платат побрзо."
       },
       "expenses": {
-        "title": "Smart Expense Tracking (MK)",
-        "description": "Snap a photo of your receipt and let our AI extract the data automatically. (MK)"
+        "title": "Паметно следење на трошоци",
+        "description": "Сликајте ја вашата сметка и дозволете нашиот AI автоматски да ги извлече податоците."
       },
       "reporting": {
-        "title": "Comprehensive Reporting (MK)",
-        "description": "Visualize your financial health with interactive charts and reports. (MK)"
+        "title": "Сеопфатни извештаи",
+        "description": "Визуализирајте го вашето финансиско здравје со интерактивни графикони и извештаи."
       }
     },
     "how_it_works": {
-      "title": "How Facturino Works (MK)",
-      "subtitle": "Get started in minutes, not days. (MK)",
+      "title": "Како функционира Факторино",
+      "subtitle": "Започнете за минути, не денови.",
       "step1": {
-        "title": "Create Account (MK)",
-        "description": "Sign up for free and set up your company profile. (MK)"
+        "title": "Креирајте сметка",
+        "description": "Регистрирајте се бесплатно и поставете го профилот на вашата компанија."
       },
       "step2": {
-        "title": "Connect Data (MK)",
-        "description": "Import your customers and connect your bank accounts. (MK)"
+        "title": "Поврзете податоци",
+        "description": "Увезете ги вашите клиенти и поврзете ги вашите банкарски сметки."
       },
       "step3": {
-        "title": "Get Paid (MK)",
-        "description": "Send invoices and track payments automatically. (MK)"
+        "title": "Добијте плаќање",
+        "description": "Испраќајте фактури и следете плаќања автоматски."
       }
     },
     "testimonials": {
-      "title": "Loved by businesses like yours (MK)",
-      "review1": "Facturino has completely transformed how we manage our finances. The AI insights are a game changer. (MK)",
-      "author1": "Elena M. (MK)",
-      "role1": "CEO at TechStart (MK)",
-      "review2": "The best invoicing software I've used. Simple, fast, and beautiful. (MK)",
-      "author2": "Marko P. (MK)",
-      "role2": "Freelance Designer (MK)",
-      "review3": "I save hours every week on bookkeeping thanks to the automated expense tracking. (MK)",
-      "author3": "Sarah J. (MK)",
-      "role3": "Owner at Cafe Bliss (MK)"
+      "title": "Сакано од бизниси како вашиот",
+      "review1": "Факторино целосно го трансформираше начинот на кој ги управуваме нашите финансии. AI анализите се револуционерни.",
+      "author1": "Елена М.",
+      "role1": "Извршен директор во TechStart",
+      "review2": "Најдобриот софтвер за фактурирање што го користев. Едноставен, брз и убав.",
+      "author2": "Марко П.",
+      "role2": "Фриленс дизајнер",
+      "review3": "Заштедувам часови секоја недела на книговодство благодарение на автоматското следење на трошоци.",
+      "author3": "Сара Ј.",
+      "role3": "Сопственик на Cafe Bliss"
     },
     "faq": {
-      "title": "Frequently Asked Questions (MK)",
-      "q1": "Is there a free trial? (MK)",
-      "a1": "Yes, we offer a 14-day free trial on all paid plans. (MK)",
-      "q2": "Can I cancel anytime? (MK)",
-      "a2": "Absolutely. There are no long-term contracts and you can cancel whenever you like. (MK)",
-      "q3": "Is my data secure? (MK)",
-      "a3": "We use bank-level encryption to ensure your data is always safe and secure. (MK)",
-      "q4": "Do you support multiple currencies? (MK)",
-      "a4": "Yes, Facturino supports over 100 currencies with live exchange rates. (MK)"
+      "title": "Често поставувани прашања",
+      "q1": "Дали има бесплатна проба?",
+      "a1": "Да, нудиме 14-дневна бесплатна проба на сите платени планови.",
+      "q2": "Можам ли да откажам во секое време?",
+      "a2": "Апсолутно. Нема долгорочни договори и можете да откажете кога сакате.",
+      "q3": "Дали моите податоци се безбедни?",
+      "a3": "Користиме енкрипција на банкарско ниво за да обезбедиме дека вашите податоци се секогаш безбедни.",
+      "q4": "Дали поддржувате повеќе валути?",
+      "a4": "Да, Факторино поддржува преку 100 валути со живи курсеви."
     },
     "cta_footer": {
-      "title": "Ready to streamline your accounting? (MK)",
-      "subtitle": "Join thousands of businesses trusting Facturino. (MK)",
-      "button": "Get Started Now (MK)"
+      "title": "Подготвени да го поедноставите вашето сметководство?",
+      "subtitle": "Придружете се на илјадници бизниси кои му веруваат на Факторино.",
+      "button": "Започнете сега"
     },
     "footer": {
-      "product": "Product (MK)",
-      "features": "Features (MK)",
-      "pricing": "Pricing (MK)",
-      "company": "Company (MK)",
-      "about": "About Us (MK)",
-      "blog": "Blog (MK)",
-      "careers": "Careers (MK)",
-      "legal": "Legal (MK)",
-      "privacy": "Privacy Policy (MK)",
-      "terms": "Terms of Service (MK)",
-      "rights": "All rights reserved. (MK)"
+      "product": "Производ",
+      "features": "Функции",
+      "pricing": "Цени",
+      "company": "Компанија",
+      "about": "За нас",
+      "blog": "Блог",
+      "careers": "Кариери",
+      "legal": "Правно",
+      "privacy": "Политика за приватност",
+      "terms": "Услови за користење",
+      "rights": "Сите права задржани."
     }
   },
   "pricing_public": {
-    "title": "Simple, Transparent Pricing (MK)",
-    "subtitle": "Choose the plan that fits your business needs. (MK)",
-    "monthly": "Monthly (MK)",
-    "yearly": "Yearly (MK)",
-    "save_text": "Save 20% (MK)",
-    "most_popular": "Most Popular (MK)",
-    "per_month": "/mo (MK)",
-    "per_year": "/yr (MK)",
-    "start_trial": "Start Free Trial (MK)",
-    "get_started": "Get Started (MK)",
-    "contact_sales": "Contact Sales (MK)",
-    "features_label": "Everything in {prev} plus: (MK)",
+    "title": "Едноставни, транспарентни цени",
+    "subtitle": "Изберете го планот што одговара на потребите на вашиот бизнис.",
+    "monthly": "Месечно",
+    "yearly": "Годишно",
+    "save_text": "Заштедете 20%",
+    "most_popular": "Најпопуларно",
+    "per_month": "/месец",
+    "per_year": "/година",
+    "start_trial": "Започнете бесплатна проба",
+    "get_started": "Започнете",
+    "contact_sales": "Контактирајте продажба",
+    "features_label": "Сè од {prev} плус:",
     "custom_solution": {
-      "title": "Need a custom solution? (MK)",
-      "description": "Contact us for enterprise pricing and custom integrations. (MK)",
-      "button": "Contact Sales (MK)"
+      "title": "Потребно ви е приспособено решение?",
+      "description": "Контактирајте не за корпоративни цени и приспособени интеграции.",
+      "button": "Контактирајте продажба"
     },
     "plans": {
       "free": {
-        "name": "Free (MK)",
-        "description": "Perfect for freelancers just starting out. (MK)"
+        "name": "Бесплатно",
+        "description": "Совршено за фрилансери кои само започнуваат."
       },
       "starter": {
-        "name": "Starter (MK)",
-        "description": "Great for small businesses growing fast. (MK)"
+        "name": "Почетник",
+        "description": "Одлично за мали бизниси кои брзо растат."
       },
       "standard": {
-        "name": "Standard (MK)",
-        "description": "For established businesses with teams. (MK)"
+        "name": "Стандард",
+        "description": "За воспоставени бизниси со тимови."
       },
       "business": {
-        "name": "Business (MK)",
-        "description": "Advanced features for scaling companies. (MK)"
+        "name": "Бизнис",
+        "description": "Напредни функции за компании во раст."
       }
     }
   }
