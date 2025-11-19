@@ -21,7 +21,7 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('view-item', Item::class)) {
+        if ($user->can('view-item', Item::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -39,7 +39,7 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('view-item', $item) && $user->hasCompany($item->company_id)) {
+        if (($user->can('view-item', $item) && $user->hasCompany($item->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -57,7 +57,7 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('create-item', Item::class)) {
+        if ($user->can('create-item', Item::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -75,7 +75,7 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('edit-item', $item) && $user->hasCompany($item->company_id)) {
+        if (($user->can('edit-item', $item) && $user->hasCompany($item->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -93,7 +93,7 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if (($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -147,7 +147,7 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('delete-item', Item::class)) {
+        if ($user->can('delete-item', Item::class) || $user->role === 'partner') {
             return true;
         }
 

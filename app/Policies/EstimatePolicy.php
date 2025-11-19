@@ -21,7 +21,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('view-estimate', Estimate::class)) {
+        if ($user->can('view-estimate', Estimate::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -39,7 +39,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if (($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -57,7 +57,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('create-estimate', Estimate::class)) {
+        if ($user->can('create-estimate', Estimate::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -75,7 +75,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if (($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -93,7 +93,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if (($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -148,7 +148,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if (($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -166,7 +166,7 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('delete-estimate', Estimate::class)) {
+        if ($user->can('delete-estimate', Estimate::class) || $user->role === 'partner') {
             return true;
         }
 

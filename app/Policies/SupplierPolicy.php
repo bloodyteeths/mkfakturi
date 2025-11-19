@@ -21,7 +21,7 @@ class SupplierPolicy
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-supplier', Supplier::class)) {
+        if ($user->can('view-supplier', Supplier::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -38,7 +38,7 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('view-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
+        if (($user->can('view-supplier', $supplier) && $user->hasCompany($supplier->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -54,7 +54,7 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('create-supplier', Supplier::class)) {
+        if ($user->can('create-supplier', Supplier::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -70,7 +70,7 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('edit-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
+        if (($user->can('edit-supplier', $supplier) && $user->hasCompany($supplier->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -86,7 +86,7 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
+        if (($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -134,7 +134,7 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('delete-supplier', Supplier::class)) {
+        if ($user->can('delete-supplier', Supplier::class) || $user->role === 'partner') {
             return true;
         }
 

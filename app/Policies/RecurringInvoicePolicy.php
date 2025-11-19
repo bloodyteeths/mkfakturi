@@ -23,7 +23,7 @@ class RecurringInvoicePolicy
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->can('view-recurring-invoice', RecurringInvoice::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -41,7 +41,7 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if ($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if (($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -59,7 +59,7 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if ($user->can('create-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->can('create-recurring-invoice', RecurringInvoice::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -77,7 +77,7 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if ($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if (($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -95,7 +95,7 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if (($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -149,7 +149,7 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->can('delete-recurring-invoice', RecurringInvoice::class) || $user->role === 'partner') {
             return true;
         }
 

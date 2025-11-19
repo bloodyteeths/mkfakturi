@@ -27,7 +27,7 @@ class CreditNotePolicy
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-credit-note', CreditNote::class)) {
+        if ($user->can('view-credit-note', CreditNote::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -44,7 +44,7 @@ class CreditNotePolicy
             return true;
         }
 
-        if ($user->can('view-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
+        if (($user->can('view-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -60,7 +60,7 @@ class CreditNotePolicy
             return true;
         }
 
-        if ($user->can('create-credit-note', CreditNote::class)) {
+        if ($user->can('create-credit-note', CreditNote::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -80,7 +80,7 @@ class CreditNotePolicy
             return $creditNote->allow_edit;
         }
 
-        if ($user->can('edit-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
+        if (($user->can('edit-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
             return $creditNote->allow_edit;
         }
 
@@ -99,7 +99,7 @@ class CreditNotePolicy
             return true;
         }
 
-        if ($user->can('delete-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
+        if (($user->can('delete-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -147,7 +147,7 @@ class CreditNotePolicy
             return true;
         }
 
-        if ($user->can('send-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
+        if (($user->can('send-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -163,7 +163,7 @@ class CreditNotePolicy
             return true;
         }
 
-        if ($user->can('delete-credit-note', CreditNote::class)) {
+        if ($user->can('delete-credit-note', CreditNote::class) || $user->role === 'partner') {
             return true;
         }
 

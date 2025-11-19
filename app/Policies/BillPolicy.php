@@ -21,7 +21,7 @@ class BillPolicy
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-bill', Bill::class)) {
+        if ($user->can('view-bill', Bill::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -38,7 +38,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('view-bill', $bill) && $user->hasCompany($bill->company_id)) {
+        if (($user->can('view-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -54,7 +54,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('create-bill', Bill::class)) {
+        if ($user->can('create-bill', Bill::class) || $user->role === 'partner') {
             return true;
         }
 
@@ -70,7 +70,7 @@ class BillPolicy
             return $bill->allow_edit;
         }
 
-        if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
+        if (($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
             return $bill->allow_edit;
         }
 
@@ -86,7 +86,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) {
+        if (($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -134,7 +134,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('send-bill', $bill) && $user->hasCompany($bill->company_id)) {
+        if (($user->can('send-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -150,7 +150,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
+        if (($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -166,7 +166,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
+        if (($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
             return true;
         }
 
@@ -182,7 +182,7 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('delete-bill', Bill::class)) {
+        if ($user->can('delete-bill', Bill::class) || $user->role === 'partner') {
             return true;
         }
 
