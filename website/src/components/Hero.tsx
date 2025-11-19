@@ -50,16 +50,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             </Link>
           </div>
 
-          <div className="pt-6 border-t border-gray-100">
-            <p className="text-sm font-medium text-gray-500 mb-3">{t.socialProof.trustedBy}</p>
-            <div className="flex items-center justify-center lg:justify-start gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-              {/* Placeholder logos - in real app use SVGs */}
-              <div className="h-6 w-20 bg-gray-300 rounded animate-pulse"></div>
-              <div className="h-6 w-20 bg-gray-300 rounded animate-pulse delay-100"></div>
-              <div className="h-6 w-20 bg-gray-300 rounded animate-pulse delay-200"></div>
-              <div className="h-6 w-20 bg-gray-300 rounded animate-pulse delay-300"></div>
-            </div>
-          </div>
+
         </div>
 
         {/* Hero Visual */}
@@ -111,12 +102,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
       </div>
 
       {/* Social Proof */}
-      <div className="mt-16 text-center animate-[fadeIn_1s_ease-out_0.6s_both]">
-        <p className="text-sm text-gray-500 mb-6">{t.socialProof.trustedBy}</p>
-        <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
-          {/* Bank logos will be handled by Partners component */}
-        </div>
-      </div>
+
     </section>
   )
 }
