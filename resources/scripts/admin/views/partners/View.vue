@@ -136,14 +136,6 @@
 
         <BaseTab :title="$t('partners.tabs.companies')" :count="partner.companies ? partner.companies.length : 0">
           <div class="bg-white rounded-lg shadow">
-            <div class="p-4 border-b border-gray-200">
-              <BaseButton @click="openAssignCompanyModal">
-                <template #left="slotProps">
-                  <BaseIcon name="PlusIcon" :class="slotProps.class" />
-                </template>
-                {{ $t('partners.assign_company') }}
-              </BaseButton>
-            </div>
 
             <div v-if="partner.companies && partner.companies.length > 0" class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
@@ -198,14 +190,6 @@
                       </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <BaseButton
-                        variant="primary-outline"
-                        size="sm"
-                        @click="editPermissions(company)"
-                        class="mr-2"
-                      >
-                        {{ $t('partners.edit_permissions') }}
-                      </BaseButton>
                       <BaseButton
                         variant="danger-outline"
                         size="sm"
@@ -311,14 +295,6 @@
     <BaseLoader />
   </div>
 
-  <!-- Assign/Edit Company Modal (AC-13 integration) -->
-  <AssignCompanyModal
-    :show="showAssignModal"
-    :partner-id="partner?.id"
-    :company="editingCompany"
-    @close="closeAssignModal"
-    @saved="onCompanyAssigned"
-  />
 </template>
 
 <script setup>
@@ -328,7 +304,6 @@ import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
-import AssignCompanyModal from './components/AssignCompanyModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -337,8 +312,6 @@ const notificationStore = useNotificationStore()
 const globalStore = useGlobalStore()
 
 const partner = ref(null)
-const showAssignModal = ref(false)
-const editingCompany = ref(null)
 
 // Add null-safe currency with fallback
 const currency = computed(() => {
@@ -377,25 +350,6 @@ function getPermissionsCount(permissions) {
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString()
-}
-
-function openAssignCompanyModal() {
-  editingCompany.value = null
-  showAssignModal.value = true
-}
-
-function editPermissions(company) {
-  editingCompany.value = company
-  showAssignModal.value = true
-}
-
-function closeAssignModal() {
-  showAssignModal.value = false
-  editingCompany.value = null
-}
-
-function onCompanyAssigned() {
-  fetchPartner()
 }
 
 async function unassignCompany(companyId) {
