@@ -250,7 +250,7 @@ const submitDocuments = async () => {
       formData.append(`documents[${index}][file]`, item.file)
     })
 
-    const response = await axios.post('/partner/kyc/submit', formData, {
+    const response = await axios.post('/api/v1/partner/kyc/submit', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -283,7 +283,7 @@ const deleteDocument = async (documentId) => {
 
 const fetchKycStatus = async () => {
   try {
-    const response = await axios.get('/partner/kyc/status')
+    const response = await axios.get('/api/v1/partner/kyc/status')
     kycStatus.value = response.data
   } catch (error) {
     errorMessage.value = 'Failed to load KYC status'

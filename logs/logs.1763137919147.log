@@ -1,106 +1,38 @@
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:33] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 18:36:33] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 18:36:39] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-14 18:36:39] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-14 18:36:47] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-14 18:36:47] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-14 18:40:45] production.ERROR: SQLSTATE[HY000] [14] unable to open database file (Connection: sqlite, SQL: select exists (select 1 from "main".sqlite_master where name = 'recurring_invoices' and type = 'table') as "exists") {"exception":"[object] (Illuminate\\Database\\QueryException(code: 14): SQLSTATE[HY000] [14] unable to open database file (Connection: sqlite, SQL: select exists (select 1 from \"main\".sqlite_master where name = 'recurring_invoices' and type = 'table') as \"exists\") at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
-[stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('select exists (...', Array, Object(Closure))
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(395): Illuminate\\Database\\Connection->run('select exists (...', Array, Object(Closure))
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(341): Illuminate\\Database\\Connection->select('select exists (...', Array, true)
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(358): Illuminate\\Database\\Connection->selectOne('select exists (...', Array, true)
-#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(177): Illuminate\\Database\\Connection->scalar('select exists (...')
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\Schema\\Builder->hasTable('recurring_invoi...')
-#6 /var/www/html/routes/console.php(96): Illuminate\\Support\\Facades\\Facade::__callStatic('hasTable', Array)
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(502): require('/var/www/html/r...')
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#11 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#12 {main}
-
-[previous exception] [object] (PDOException(code: 14): SQLSTATE[HY000] [14] unable to open database file at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:66)
-[stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(66): PDO->__construct('sqlite:/var/www...', NULL, Object(SensitiveParameterValue), Array)
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(44): Illuminate\\Database\\Connectors\\Connector->createPdoConnection('sqlite:/var/www...', NULL, Object(SensitiveParameterValue), Array)
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php(21): Illuminate\\Database\\Connectors\\Connector->createConnection('sqlite:/var/www...', Array, Array)
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(223): Illuminate\\Database\\Connectors\\SQLiteConnector->connect(Array)
-#4 [internal function]: Illuminate\\Database\\Connectors\\ConnectionFactory->Illuminate\\Database\\Connectors\\{closure}()
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1228): call_user_func(Object(Closure))
-#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1264): Illuminate\\Database\\Connection->getPdo()
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(509): Illuminate\\Database\\Connection->getReadPdo()
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(404): Illuminate\\Database\\Connection->getPdoForSelect(true)
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('select exists (...', Array)
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('select exists (...', Array, Object(Closure))
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(395): Illuminate\\Database\\Connection->run('select exists (...', Array, Object(Closure))
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(341): Illuminate\\Database\\Connection->select('select exists (...', Array, true)
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(358): Illuminate\\Database\\Connection->selectOne('select exists (...', Array, true)
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(177): Illuminate\\Database\\Connection->scalar('select exists (...')
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\Schema\\Builder->hasTable('recurring_invoi...')
-#16 /var/www/html/routes/console.php(96): Illuminate\\Support\\Facades\\Facade::__callStatic('hasTable', Array)
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(502): require('/var/www/html/r...')
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#21 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#22 {main}
-"} 
-[2025-11-14 18:40:59] production.ERROR: SQLSTATE[HY000] [14] unable to open database file (Connection: sqlite, SQL: select exists (select 1 from "main".sqlite_master where name = 'recurring_invoices' and type = 'table') as "exists") {"exception":"[object] (Illuminate\\Database\\QueryException(code: 14): SQLSTATE[HY000] [14] unable to open database file (Connection: sqlite, SQL: select exists (select 1 from \"main\".sqlite_master where name = 'recurring_invoices' and type = 'table') as \"exists\") at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
-[stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('select exists (...', Array, Object(Closure))
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(395): Illuminate\\Database\\Connection->run('select exists (...', Array, Object(Closure))
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(341): Illuminate\\Database\\Connection->select('select exists (...', Array, true)
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(358): Illuminate\\Database\\Connection->selectOne('select exists (...', Array, true)
-#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(177): Illuminate\\Database\\Connection->scalar('select exists (...')
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\Schema\\Builder->hasTable('recurring_invoi...')
-#6 /var/www/html/routes/console.php(96): Illuminate\\Support\\Facades\\Facade::__callStatic('hasTable', Array)
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(502): require('/var/www/html/r...')
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#11 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#12 {main}
-
-[previous exception] [object] (PDOException(code: 14): SQLSTATE[HY000] [14] unable to open database file at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:66)
-[stacktrace]
-#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(66): PDO->__construct('sqlite:/var/www...', NULL, Object(SensitiveParameterValue), Array)
-#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(44): Illuminate\\Database\\Connectors\\Connector->createPdoConnection('sqlite:/var/www...', NULL, Object(SensitiveParameterValue), Array)
-#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php(21): Illuminate\\Database\\Connectors\\Connector->createConnection('sqlite:/var/www...', Array, Array)
-#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(223): Illuminate\\Database\\Connectors\\SQLiteConnector->connect(Array)
-#4 [internal function]: Illuminate\\Database\\Connectors\\ConnectionFactory->Illuminate\\Database\\Connectors\\{closure}()
-#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1228): call_user_func(Object(Closure))
-#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1264): Illuminate\\Database\\Connection->getPdo()
-#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(509): Illuminate\\Database\\Connection->getReadPdo()
-#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(404): Illuminate\\Database\\Connection->getPdoForSelect(true)
-#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('select exists (...', Array)
-#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('select exists (...', Array, Object(Closure))
-#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(395): Illuminate\\Database\\Connection->run('select exists (...', Array, Object(Closure))
-#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(341): Illuminate\\Database\\Connection->select('select exists (...', Array, true)
-#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(358): Illuminate\\Database\\Connection->selectOne('select exists (...', Array, true)
-#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(177): Illuminate\\Database\\Connection->scalar('select exists (...')
-#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\Schema\\Builder->hasTable('recurring_invoi...')
-#16 /var/www/html/routes/console.php(96): Illuminate\\Support\\Facades\\Facade::__callStatic('hasTable', Array)
-#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(502): require('/var/www/html/r...')
-#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
-#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
-#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
-#21 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
-#22 {main}
-"} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-19 02:18:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-19 02:18:22] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-19 02:18:22] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-19 02:18:29] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-19 02:18:29] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-19 02:20:21] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:21] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_company_header":true,"company_header":"1"} 
+[2025-11-19 02:20:21] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:21] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:22] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:22] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:22] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:23] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/switch","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:24] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:25] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/switch","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:25] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:25] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/switch","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:25] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:26] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/switch","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+[2025-11-19 02:20:26] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
+[2025-11-19 02:20:28] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
