@@ -77,16 +77,19 @@ class PartnerDashboardController extends Controller
             });
 
         return response()->json([
-            'totalEarnings' => $totalEarnings,
-            'monthlyEarnings' => $monthlyEarnings,
-            'pendingPayout' => $pendingPayout,
-            'activeClients' => $activeClients,
+            'data' => [
+                'active_clients' => $activeClients,
+                'monthly_commissions' => $monthlyEarnings,
+                'processed_invoices' => 0, // TODO: Calculate actual processed invoices if needed
+                'total_earnings' => $totalEarnings,
+                'pending_payout' => $pendingPayout,
+            ],
+            'earningsHistory' => $earningsHistory,
+            'recentCommissions' => $recentCommissions,
             'nextPayout' => $nextPayout ? [
                 'amount' => $nextPayout->amount,
                 'date' => $nextPayout->payout_date->toIso8601String(),
             ] : null,
-            'earningsHistory' => $earningsHistory,
-            'recentCommissions' => $recentCommissions,
         ]);
     }
 
@@ -265,6 +268,39 @@ class PartnerDashboardController extends Controller
                 'total' => $companies->total(),
                 'per_page' => $companies->perPage(),
             ],
+        ]);
+    }
+
+    /**
+     * Get commissions (recent commissions list)
+     * Partner portal commissions endpoint
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function commissions(Request $request)
+    {
+        $user = Auth::user();
+        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+
+        // Get recent commissions (last 10)
+        $recentCommissions = AffiliateEvent::with('company')
+            ->forPartner($partner->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'company_name' => $event->company->name ?? 'N/A',
+                    'event_type' => $event->event_type,
+                    'amount' => $event->amount,
+                    'created_at' => $event->created_at->toIso8601String(),
+                    'paid_at' => $event->paid_at ? $event->paid_at->toIso8601String() : null,
+                ];
+            });
+
+        return response()->json([
+            'data' => $recentCommissions,
         ]);
     }
 

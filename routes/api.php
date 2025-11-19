@@ -1066,6 +1066,7 @@ Route::middleware(['auth:sanctum'])->prefix('partner/subscription')->group(funct
 // ----------------------------------
 Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('partner')->group(function () {
     Route::get('/dashboard', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'index']);
+    Route::get('/commissions', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'commissions']);
     Route::get('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'index']);
     Route::post('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'store'])->middleware('throttle:strict');
     Route::get('/clients', [\Modules\Mk\Partner\Controllers\PartnerClientsController::class, 'index']);

@@ -37,10 +37,10 @@ router.beforeEach((to, from, next) => {
 
   // Check for redirectIfAuthenticated (login page when already logged in)
   if (to.meta.redirectIfAuthenticated && userStore.currentUser) {
-    // Redirect based on user role - partners go to console, others to dashboard
+    // Redirect based on user role - partners go to partner dashboard, others to admin dashboard
     const userRole = userStore.currentUser?.role
     if (userRole === 'partner') {
-      next('/admin/console')
+      next({ name: 'partner.dashboard' })
     } else {
       next({ name: 'dashboard' })
     }
