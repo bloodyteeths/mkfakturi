@@ -48,7 +48,18 @@ class InvoicesController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        \Log::info('InvoicesController::index called', [
+            'user_id' => $user?->id,
+            'user_role' => $user?->role,
+            'company_header' => $request->header('company'),
+        ]);
+
         $this->authorize('viewAny', Invoice::class);
+
+        \Log::info('InvoicesController::index - Authorization passed', [
+            'user_id' => $user?->id,
+        ]);
 
         $limit = $request->input('limit', 10);
 
@@ -58,10 +69,17 @@ class InvoicesController extends Controller
             ->latest()
             ->paginateData($limit);
 
+        \Log::info('InvoicesController::index - Returning invoices', [
+            'user_id' => $user?->id,
+            'invoice_count' => $invoices->count(),
+        ]);
+
         return InvoiceResource::collection($invoices)
-            ->additional(['meta' => [
-                'invoice_total_count' => Invoice::whereCompany()->count(),
-            ]]);
+            ->additional([
+                'meta' => [
+                    'invoice_total_count' => Invoice::whereCompany()->count(),
+                ]
+            ]);
     }
 
     /**
@@ -157,7 +175,7 @@ class InvoicesController extends Controller
         }
 
         // Check if advanced payments feature is enabled
-        if (! config('mk.features.advanced_payments', false)) {
+        if (!config('mk.features.advanced_payments', false)) {
             return response()->json([
                 'error' => 'Advanced payments feature is not enabled',
             ], 403);
