@@ -2832,6 +2832,32 @@
       "under_review": "Во проверка",
       "approved": "Одобрено",
       "rejected": "Одбиено"
+    },
+    "permissions": {
+      "full_access": "Целосен Пристап",
+      "full_access_description": "Дозволи целосен пристап до сите функции и податоци на компанијата",
+      "selected_permissions": "Избрани Дозволи"
+    },
+    "edit_permissions": "Уреди Дозволи",
+    "select_company": "Избери Компанија",
+    "search_company": "Пребарај компанија...",
+    "commission_rate_override": "Надгласување на Провизија",
+    "commission_rate_override_help": "Надгласи ја стандардната провизија за оваа компанија",
+    "use_default_rate": "Користи стандардна провизија",
+    "set_as_primary_company": "Постави како Примарна Компанија",
+    "edit_company_assignment": "Уреди Доделена Компанија",
+    "assign_company": "Додели Компанија",
+    "update_assignment": "Ажурирај Доделба",
+    "assignment_updated_successfully": "Доделбата на компанијата е успешно ажурирана",
+    "company_assigned_successfully": "Компанијата е успешно доделена",
+    "assignment_failed": "Неуспешно доделување на компанија",
+    "failed_to_load_companies": "Неуспешно вчитување на компании",
+    "unassign": "Отстрани Доделба",
+    "no_companies_assigned": "Нема доделени компании на овој партнер",
+    "pending_payout": "Исплата во тек",
+    "companies_managed": "Управувани Компании",
+    "tabs": {
+      "commissions": "Провизии"
     }
   }
 }

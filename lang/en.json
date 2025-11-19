@@ -2865,6 +2865,32 @@
       "under_review": "Under Review",
       "approved": "Approved",
       "rejected": "Rejected"
+    },
+    "permissions": {
+      "full_access": "Full Access",
+      "full_access_description": "Grant complete access to all company features and data",
+      "selected_permissions": "Selected Permissions"
+    },
+    "edit_permissions": "Edit Permissions",
+    "select_company": "Select Company",
+    "search_company": "Search for a company...",
+    "commission_rate_override": "Commission Rate Override",
+    "commission_rate_override_help": "Override the default commission rate for this company",
+    "use_default_rate": "Use default rate",
+    "set_as_primary_company": "Set as Primary Company",
+    "edit_company_assignment": "Edit Company Assignment",
+    "assign_company": "Assign Company",
+    "update_assignment": "Update Assignment",
+    "assignment_updated_successfully": "Company assignment updated successfully",
+    "company_assigned_successfully": "Company assigned successfully",
+    "assignment_failed": "Failed to assign company",
+    "failed_to_load_companies": "Failed to load companies",
+    "unassign": "Unassign",
+    "no_companies_assigned": "No companies assigned to this partner",
+    "pending_payout": "Pending Payout",
+    "companies_managed": "Companies Managed",
+    "tabs": {
+      "commissions": "Commissions"
     }
   }
 }
