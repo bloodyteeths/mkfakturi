@@ -70,7 +70,7 @@ class BootstrapController extends Controller
 
         $cacheKey = sprintf('bootstrap:%d:%s', $current_user->id, $companyId ?: 'primary');
 
-        $payload = Cache::remember($cacheKey, CacheServiceProvider::CACHE_TTLS['SHORT'], function () use ($current_user, $current_user_settings, $companyId) {
+        $bootstrapLogic = function () use ($current_user, $current_user_settings, $companyId) {
             // Refresh Bouncer cache first to ensure fresh abilities
             BouncerFacade::refreshFor($current_user);
             $current_user_abilities = $current_user->getCachedPermissions();
@@ -92,16 +92,16 @@ class BootstrapController extends Controller
                 $current_company = $companies->firstWhere('id', $companyId);
             }
 
-            if (! $current_company || ! $current_user->hasCompany($current_company->id)) {
+            if (!$current_company || !$current_user->hasCompany($current_company->id)) {
                 $current_company = $companies->first();
             }
 
-            if ($current_company && ! $current_company->relationLoaded('address')) {
+            if ($current_company && !$current_company->relationLoaded('address')) {
                 $current_company->load('address');
             }
 
             // Handle case where user has no companies at all
-            if (! $current_company) {
+            if (!$current_company) {
                 abort(403, 'No company access. Please contact your administrator.');
             }
 
@@ -152,7 +152,14 @@ class BootstrapController extends Controller
                 'setting_menu' => $setting_menu,
                 'modules' => Module::where('enabled', true)->pluck('name')->toArray(),
             ];
-        });
+        };
+
+        try {
+            $payload = Cache::remember($cacheKey, CacheServiceProvider::CACHE_TTLS['SHORT'], $bootstrapLogic);
+        } catch (\Exception $e) {
+            \Log::error('Bootstrap cache failed, falling back to direct execution', ['error' => $e->getMessage()]);
+            $payload = $bootstrapLogic();
+        }
 
         return response()->json($payload);
     }
