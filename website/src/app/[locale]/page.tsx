@@ -12,6 +12,9 @@ import FAQ from '@/components/FAQ'
 import CTA from '@/components/CTA'
 import Partners from '@/components/Partners'
 
+// Force dynamic rendering to ensure dictionary is fetched on each navigation
+export const dynamic = 'force-dynamic'
+
 export default async function Landing({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
   const t = await getDictionary(locale)

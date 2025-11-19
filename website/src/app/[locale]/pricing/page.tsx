@@ -4,6 +4,9 @@ import { isLocale, Locale, defaultLocale } from '@/i18n/locales'
 import FAQ from '@/components/FAQ'
 import ComparisonTable from '@/components/ComparisonTable'
 
+// Force dynamic rendering to ensure dictionary is fetched on each navigation
+export const dynamic = 'force-dynamic'
+
 export default async function PricingPage({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
   const t = await getDictionary(locale)
