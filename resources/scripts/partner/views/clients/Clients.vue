@@ -238,7 +238,7 @@ const loadClients = async () => {
   error.value = null
 
   try {
-    const { data } = await window.axios.get('/api/v1/partner/clients')
+    const { data } = await window.axios.get('/partner/clients')
 
     // Transform API data to match component expectations
     clients.value = data.data.map(client => ({

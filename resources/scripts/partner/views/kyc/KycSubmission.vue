@@ -250,7 +250,7 @@ const submitDocuments = async () => {
       formData.append(`documents[${index}][file]`, item.file)
     })
 
-    const response = await axios.post('/api/v1/partner/kyc/submit', formData, {
+    const response = await axios.post('/partner/kyc/submit', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

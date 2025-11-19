@@ -22,7 +22,11 @@ class PartnerPayoutsController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         // Build query
         $query = Payout::where('partner_id', $partner->id)
@@ -84,7 +88,11 @@ class PartnerPayoutsController extends Controller
     public function getBankDetails(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         return response()->json([
             'account_holder' => $partner->name,
@@ -116,7 +124,11 @@ class PartnerPayoutsController extends Controller
         }
 
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         // Update partner bank details
         $partner->update([
@@ -139,17 +151,25 @@ class PartnerPayoutsController extends Controller
      * Download payout receipt as PDF
      *
      * @param  int  $payoutId
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function downloadReceipt(Request $request, $payoutId)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $payout = Payout::where('id', $payoutId)
             ->where('partner_id', $partner->id)
             ->where('status', 'completed')
-            ->firstOrFail();
+            ->first();
+
+        if (!$payout) {
+            return response()->json(['error' => 'Payout not found or not completed'], 404);
+        }
 
         // Get events included in this payout
         $events = AffiliateEvent::with('company')

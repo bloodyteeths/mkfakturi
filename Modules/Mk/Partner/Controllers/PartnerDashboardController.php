@@ -27,7 +27,11 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
 
         // Get partner record for the authenticated user
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         \Log::info('Partner found', [
             'partner_id' => $partner->id,
@@ -113,7 +117,11 @@ class PartnerDashboardController extends Controller
     public function getPendingEarnings(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $currentMonth = Carbon::now()->format('Y-m');
         $pendingAmount = AffiliateEvent::forPartner($partner->id)
@@ -145,7 +153,11 @@ class PartnerDashboardController extends Controller
     public function getMonthlyEarnings(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $earningsHistory = [];
         for ($i = 11; $i >= 0; $i--) {
@@ -179,7 +191,11 @@ class PartnerDashboardController extends Controller
     public function getLifetimeEarnings(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $totalEarnings = $partner->getLifetimeEarnings();
         $totalPaid = AffiliateEvent::forPartner($partner->id)
@@ -204,7 +220,11 @@ class PartnerDashboardController extends Controller
     public function getActiveCompanies(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $activeCount = $partner->activeCompanies()->count();
         $totalCount = $partner->companies()->count();
@@ -226,7 +246,11 @@ class PartnerDashboardController extends Controller
     public function getNextPayoutEstimate(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $pendingAmount = $partner->getUnpaidCommissionsTotal();
         $minimumThreshold = 100.00;
@@ -253,7 +277,11 @@ class PartnerDashboardController extends Controller
     public function getReferrals(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $perPage = $request->get('per_page', 20);
 
@@ -297,7 +325,11 @@ class PartnerDashboardController extends Controller
         ]);
 
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         \Log::info('Partner found for commissions', [
             'partner_id' => $partner->id,
@@ -335,7 +367,11 @@ class PartnerDashboardController extends Controller
     public function getEarnings(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $perPage = $request->get('per_page', 20);
         $eventType = $request->get('event_type'); // Filter by type
@@ -383,7 +419,11 @@ class PartnerDashboardController extends Controller
     public function getPayouts(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         $perPage = $request->get('per_page', 20);
 
@@ -424,10 +464,14 @@ class PartnerDashboardController extends Controller
     public function generateReferralLink(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         // Ensure user has a ref_code
-        if (! $user->ref_code) {
+        if (!$user->ref_code) {
             $user->ref_code = \Str::upper(\Str::random(8));
             $user->save();
         }

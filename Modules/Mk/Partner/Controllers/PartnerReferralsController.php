@@ -19,7 +19,11 @@ class PartnerReferralsController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         // Get active affiliate link
         $activeLink = AffiliateLink::where('partner_id', $partner->id)
@@ -73,7 +77,11 @@ class PartnerReferralsController extends Controller
         }
 
         $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
         // Check if partner already has an active link
         $existingLink = AffiliateLink::where('partner_id', $partner->id)
