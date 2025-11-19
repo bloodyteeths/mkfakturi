@@ -1064,7 +1064,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1/partner/subscription')->group(fu
 
 // Partner Portal Routes
 // ----------------------------------
-Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('v1/partner')->group(function () {
+Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1/partner')->group(function () {
     Route::get('/dashboard', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'index']);
     Route::get('/commissions', [\Modules\Mk\Partner\Controllers\PartnerDashboardController::class, 'commissions']);
     Route::get('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'index']);
