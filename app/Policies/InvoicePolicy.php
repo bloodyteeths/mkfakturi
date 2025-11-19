@@ -17,15 +17,44 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
+        \Log::info('InvoicePolicy::viewAny called', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'is_owner' => $user->isOwner(),
+        ]);
+
         // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
+            \Log::info('InvoicePolicy::viewAny - Owner access granted', [
+                'user_id' => $user->id,
+            ]);
+            return true;
+        }
+
+        // Allow partners explicitly
+        if ($user->role === 'partner') {
+            \Log::info('InvoicePolicy::viewAny - Partner access granted', [
+                'user_id' => $user->id,
+            ]);
             return true;
         }
 
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-invoice', Invoice::class)) {
+        $canViewInvoice = $user->can('view-invoice', Invoice::class);
+
+        \Log::info('InvoicePolicy::viewAny - Final decision', [
+            'user_id' => $user->id,
+            'can_view_invoice' => $canViewInvoice,
+        ]);
+
+        if ($canViewInvoice) {
             return true;
         }
+
+        \Log::warning('InvoicePolicy::viewAny - Access DENIED', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+        ]);
 
         return false;
     }
