@@ -131,6 +131,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
+import { useRouter } from 'vue-router'
 import { BuildingOfficeIcon } from '@heroicons/vue/24/outline'
 import BasePage from '@/scripts/components/base/BasePage.vue'
 import BasePageHeader from '@/scripts/components/base/BasePageHeader.vue'
@@ -140,6 +141,7 @@ import BaseBadge from '@/scripts/components/base/BaseBadge.vue'
 import BaseSpinner from '@/scripts/components/base/BaseSpinner.vue'
 
 const consoleStore = useConsoleStore()
+const router = useRouter()
 const showCompanySwitcher = ref(false)
 
 onMounted(async () => {
@@ -149,8 +151,8 @@ onMounted(async () => {
 const switchToCompany = async (company) => {
   try {
     await consoleStore.switchCompany(company.id)
-    // Redirect to company-specific dashboard or stay on console
-    // This can be enhanced based on requirements
+    // Redirect to company-specific dashboard
+    router.push({ name: 'dashboard' })
   } catch (error) {
     console.error('Failed to switch company:', error)
   }

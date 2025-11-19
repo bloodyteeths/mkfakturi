@@ -50,10 +50,12 @@
 body {
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    overflow-y: auto;
 }
 
 html {
     height: -webkit-fill-available;
+    overflow-y: auto;
 }
 
 .h-screen-ios {
