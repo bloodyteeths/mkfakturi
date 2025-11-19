@@ -45,17 +45,16 @@ class Company extends Model implements HasMedia
 
     protected $appends = ['logo', 'logo_path'];
 
-    public function getRolesAttribute()
+    public function roles(): HasMany
     {
-        return Role::where('scope', $this->id)
-            ->get();
+        return $this->hasMany(Role::class, 'scope');
     }
 
     public function getLogoPathAttribute()
     {
         $logo = $this->getMedia('logo')->first();
 
-        if (! $logo || ! $this->logoFileExists($logo)) {
+        if (!$logo || !$this->logoFileExists($logo)) {
             return null;
         }
 
@@ -240,13 +239,13 @@ class Company extends Model implements HasMedia
      */
     public function isOnPlan(string $plan): bool
     {
-        if (! $this->relationLoaded('subscription')) {
+        if (!$this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
         return $this->subscription &&
-               $this->subscription->plan === $plan &&
-               in_array($this->subscription->status, ['trial', 'active']);
+            $this->subscription->plan === $plan &&
+            in_array($this->subscription->status, ['trial', 'active']);
     }
 
     /**
@@ -273,11 +272,11 @@ class Company extends Model implements HasMedia
 
         $requiredPlan = $featureRequirements[$feature] ?? 'free';
 
-        if (! $this->relationLoaded('subscription')) {
+        if (!$this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
-        if (! $this->subscription || ! in_array($this->subscription->status, ['trial', 'active'])) {
+        if (!$this->subscription || !in_array($this->subscription->status, ['trial', 'active'])) {
             return false;
         }
 
@@ -293,11 +292,11 @@ class Company extends Model implements HasMedia
     {
         $planHierarchy = ['free' => 0, 'starter' => 1, 'standard' => 2, 'business' => 3, 'max' => 4];
 
-        if (! $this->relationLoaded('subscription')) {
+        if (!$this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
-        if (! $this->subscription) {
+        if (!$this->subscription) {
             return true; // No subscription = upgrade required
         }
 
@@ -311,7 +310,7 @@ class Company extends Model implements HasMedia
      */
     public function getCurrentPlanAttribute(): string
     {
-        if (! $this->relationLoaded('subscription')) {
+        if (!$this->relationLoaded('subscription')) {
             $this->load('subscription');
         }
 
