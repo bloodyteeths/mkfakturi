@@ -61,7 +61,14 @@ class PartnerScopeMiddleware
             'url' => $request->url(),
         ]);
 
-        if ($companyId) {
+        // Skip company access check for routes that list all companies
+        $skipCompanyCheck = $request->is('api/*/console/companies') ||
+                           $request->is('api/*/console') ||
+                           $request->is('api/*/partner/dashboard') ||
+                           $request->is('api/*/partner/commissions') ||
+                           $request->is('api/*/partner/clients');
+
+        if ($companyId && !$skipCompanyCheck) {
             // Verify partner has access to this company
             $hasAccess = $partner->activeCompanies()
                 ->where('companies.id', $companyId)
@@ -82,7 +89,6 @@ class PartnerScopeMiddleware
                     'error' => 'Partner does not have access to this company',
                 ], 403);
             }
-
             // Add company context to request
             $request->merge([
                 'partner_context' => [
@@ -91,6 +97,8 @@ class PartnerScopeMiddleware
                     'partner' => $partner,
                 ],
             ]);
+        } elseif ($skipCompanyCheck) {
+            \Log::info('PartnerScopeMiddleware - Skipping company check for console/listing route');
         }
 
         // Add partner info to request for use in controllers
