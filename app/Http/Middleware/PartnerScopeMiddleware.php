@@ -18,9 +18,15 @@ class PartnerScopeMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        \Log::info('PartnerScopeMiddleware START', [
+            'url' => $request->url(),
+            'method' => $request->method(),
+        ]);
+
         $user = Auth::user();
 
         if (! $user) {
+            \Log::warning('PartnerScopeMiddleware - No authenticated user');
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -28,13 +34,20 @@ class PartnerScopeMiddleware
         $partner = Partner::where('user_id', $user->id)->first();
 
         if (! $partner) {
+            \Log::warning('PartnerScopeMiddleware - User is not a partner', ['user_id' => $user->id]);
             return response()->json([
                 'error' => 'User is not registered as a partner',
             ], 403);
         }
 
+        \Log::info('PartnerScopeMiddleware - Partner found', [
+            'partner_id' => $partner->id,
+            'is_active' => $partner->is_active,
+        ]);
+
         // Check if partner is active
         if (! $partner->is_active) {
+            \Log::warning('PartnerScopeMiddleware - Partner inactive', ['partner_id' => $partner->id]);
             return response()->json([
                 'error' => 'Partner account is inactive',
             ], 403);
@@ -43,13 +56,28 @@ class PartnerScopeMiddleware
         // Get the current company context from session or request
         $companyId = $this->getCurrentCompanyId($request);
 
+        \Log::info('PartnerScopeMiddleware - Company context', [
+            'company_id' => $companyId,
+            'url' => $request->url(),
+        ]);
+
         if ($companyId) {
             // Verify partner has access to this company
             $hasAccess = $partner->activeCompanies()
                 ->where('companies.id', $companyId)
                 ->exists();
 
+            \Log::info('PartnerScopeMiddleware - Access check', [
+                'company_id' => $companyId,
+                'has_access' => $hasAccess,
+            ]);
+
             if (! $hasAccess) {
+                \Log::warning('PartnerScopeMiddleware - BLOCKED: No access to company', [
+                    'partner_id' => $partner->id,
+                    'company_id' => $companyId,
+                    'url' => $request->url(),
+                ]);
                 return response()->json([
                     'error' => 'Partner does not have access to this company',
                 ], 403);
@@ -70,6 +98,8 @@ class PartnerScopeMiddleware
             'partner_id' => $partner->id,
             'partner' => $partner,
         ]);
+
+        \Log::info('PartnerScopeMiddleware - Passing to controller');
 
         return $next($request);
     }
