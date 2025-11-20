@@ -37,21 +37,120 @@ class BootstrapController extends Controller
 
         $current_user = $request->user();
 
-        // Partner users get minimal bootstrap data (they use partner console instead)
+        // Partner users: Check if they've switched to a company context
         if ($current_user->role === 'partner') {
+            $partnerContext = session('partner_context');
+            $partnerCompanyId = $partnerContext['company_id'] ?? null;
+
+            // If partner hasn't switched to a company yet, return minimal bootstrap
+            if (!$partnerCompanyId) {
+                return response()->json([
+                    'current_user' => new UserResource($current_user->load('currency', 'settings')),
+                    'current_user_settings' => $current_user->getAllSettings(),
+                    'current_user_abilities' => [],
+                    'companies' => [],
+                    'current_company' => null,
+                    'current_company_currency' => null,
+                    'current_company_settings' => [],
+                    'global_settings' => Setting::getSettings(['admin_portal_logo', 'copyright_text'])->toArray(),
+                    'main_menu' => [],
+                    'setting_menu' => [],
+                    'modules' => [],
+                    'is_partner' => true,
+                ]);
+            }
+
+            // Partner has switched to a company - provide full bootstrap for that company
+            // Load the partner's accessible companies
+            $partner = \App\Models\Partner::where('user_id', $current_user->id)->first();
+            if (!$partner) {
+                abort(403, 'Partner record not found');
+            }
+
+            $partnerCompanies = $partner->activeCompanies()
+                ->with(['address', 'subscription'])
+                ->get();
+
+            $current_company = $partnerCompanies->firstWhere('id', $partnerCompanyId);
+
+            if (!$current_company) {
+                // Partner lost access or company doesn't exist
+                session()->forget(['partner_context', 'partner_selected_company_id', 'partner_selected_company_slug']);
+                return response()->json([
+                    'current_user' => new UserResource($current_user->load('currency', 'settings')),
+                    'current_user_settings' => $current_user->getAllSettings(),
+                    'current_user_abilities' => [],
+                    'companies' => [],
+                    'current_company' => null,
+                    'current_company_currency' => null,
+                    'current_company_settings' => [],
+                    'global_settings' => Setting::getSettings(['admin_portal_logo', 'copyright_text'])->toArray(),
+                    'main_menu' => [],
+                    'setting_menu' => [],
+                    'modules' => [],
+                    'is_partner' => true,
+                    'error' => 'Company access revoked or not found',
+                ]);
+            }
+
+            // Generate full bootstrap data for the partner in this company context
+            BouncerFacade::scope()->to($partnerCompanyId);
+            BouncerFacade::refreshFor($current_user);
+
+            $current_user_abilities = $current_user->getCachedPermissions();
+            if ($current_user_abilities->isEmpty()) {
+                // Partners with full_access get all abilities
+                $permissions = $partnerContext['permissions'] ?? [];
+                if (in_array('full_access', $permissions)) {
+                    $current_user_abilities = collect([['name' => '*', 'title' => 'All Abilities']]);
+                }
+            }
+
+            $main_menu = $this->generateMenu('main_menu', $current_user);
+            $setting_menu = $this->generateMenu('setting_menu', $current_user);
+
+            $current_company_settings = CompanySetting::getAllSettings($current_company->id)->toArray();
+            $currencyId = $current_company_settings['currency'] ?? null;
+            $currencyModel = $currencyId ? Currency::find($currencyId) : Currency::first();
+            $current_company_currency = $currencyModel ? $currencyModel->toArray() : null;
+
+            $global_settings = Setting::getSettings([
+                'api_token',
+                'admin_portal_theme',
+                'admin_portal_logo',
+                'login_page_logo',
+                'login_page_heading',
+                'login_page_description',
+                'admin_page_title',
+                'copyright_text',
+            ])->toArray();
+
+            $global_settings['admin_portal_logo'] = logo_asset_url($global_settings['admin_portal_logo'] ?? null);
+            $global_settings['login_page_logo'] = logo_asset_url($global_settings['login_page_logo'] ?? null);
+
+            // Get feature flags from config
+            $feature_flags = [];
+            $features_config = config('features', []);
+            foreach ($features_config as $key => $feature) {
+                $feature_flags[$key] = $feature['enabled'] ?? false;
+            }
+
             return response()->json([
-                'current_user' => new UserResource($current_user->load('currency', 'settings')),
+                'current_user' => (new UserResource($current_user->load('currency', 'settings')))->toArray($request),
                 'current_user_settings' => $current_user->getAllSettings(),
-                'current_user_abilities' => [],
-                'companies' => [],
-                'current_company' => null,
-                'current_company_currency' => null,
-                'current_company_settings' => [],
-                'global_settings' => Setting::getSettings(['admin_portal_logo', 'copyright_text'])->toArray(),
-                'main_menu' => [],
-                'setting_menu' => [],
-                'modules' => [],
+                'current_user_abilities' => $current_user_abilities,
+                'companies' => CompanyResource::collection($partnerCompanies)->toArray($request),
+                'current_company' => (new CompanyResource($current_company))->toArray($request),
+                'current_company_settings' => $current_company_settings,
+                'current_company_currency' => $current_company_currency,
+                'config' => config('invoiceshelf'),
+                'global_settings' => $global_settings,
+                'feature_flags' => $feature_flags,
+                'main_menu' => $main_menu,
+                'setting_menu' => $setting_menu,
+                'modules' => Module::where('enabled', true)->pluck('name')->toArray(),
                 'is_partner' => true,
+                'partner_context' => $partnerContext,
             ]);
         }
 
