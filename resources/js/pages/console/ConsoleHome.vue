@@ -329,8 +329,9 @@ onMounted(async () => {
 const switchToCompany = async (company) => {
   try {
     await consoleStore.switchCompany(company.id)
-    // Redirect to company-specific dashboard
-    router.push({ name: 'dashboard' })
+    // Redirect to company-specific dashboard with full page reload
+    // This ensures all API calls use the new company context
+    window.location.href = '/admin/dashboard'
   } catch (error) {
     console.error('Failed to switch company:', error)
     notificationStore.showNotification({
