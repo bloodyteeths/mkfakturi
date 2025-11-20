@@ -86,7 +86,6 @@ class AccountantConsoleController extends Controller
         // 2. Get referred companies (from affiliate_events)
         $referredCompanies = \DB::table('affiliate_events')
             ->join('companies', 'companies.id', '=', 'affiliate_events.company_id')
-            ->leftJoin('users', 'users.company_id', '=', 'companies.id')
             ->where('affiliate_events.affiliate_partner_id', $partner->id)
             ->where('affiliate_events.is_clawed_back', false)
             ->select([
