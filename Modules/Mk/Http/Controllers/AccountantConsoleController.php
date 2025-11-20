@@ -153,7 +153,7 @@ class AccountantConsoleController extends Controller
                     'permissions' => $permissions,
                     'invited_at' => $invitation->invited_at,
                     'expires_at' => $expiresAt->toIso8601String(),
-                    'invited_by' => $invitation->invited_by,
+                    'inviter_name' => $invitation->invited_by, // Frontend expects 'inviter_name'
                     'override_commission_rate' => $invitation->override_commission_rate,
                 ];
             });
