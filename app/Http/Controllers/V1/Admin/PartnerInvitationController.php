@@ -29,13 +29,40 @@ class PartnerInvitationController extends Controller
             return response()->json(['message' => 'Partner not found'], 404);
         }
 
-        $exists = DB::table('partner_company_links')
+        // Check for existing link
+        $existingLink = DB::table('partner_company_links')
             ->where('partner_id', $partner->id)
             ->where('company_id', $validated['company_id'])
-            ->exists();
+            ->first();
 
-        if ($exists) {
-            return response()->json(['message' => 'Partner already linked'], 422);
+        // If already linked and accepted, update permissions instead of creating new link
+        if ($existingLink && $existingLink->invitation_status === 'accepted') {
+            DB::table('partner_company_links')
+                ->where('id', $existingLink->id)
+                ->update([
+                    'permissions' => json_encode($validated['permissions']),
+                    'updated_at' => now(),
+                ]);
+
+            return response()->json(['message' => 'Partner permissions updated']);
+        }
+
+        // If pending invitation exists, update it
+        if ($existingLink && $existingLink->invitation_status === 'pending') {
+            DB::table('partner_company_links')
+                ->where('id', $existingLink->id)
+                ->update([
+                    'permissions' => json_encode($validated['permissions']),
+                    'invited_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            return response()->json(['message' => 'Invitation updated']);
+        }
+
+        // If declined, delete old link and create new one
+        if ($existingLink && $existingLink->invitation_status === 'declined') {
+            DB::table('partner_company_links')->where('id', $existingLink->id)->delete();
         }
 
         DB::table('partner_company_links')->insert([
@@ -280,6 +307,35 @@ class PartnerInvitationController extends Controller
         // TODO: Implement actual email sending
         // For now, just return success
         return response()->json(['message' => 'Email invitation sent']);
+    }
+
+    /**
+     * Partner unlinks themselves from a company (removes access)
+     */
+    public function unlinkFromCompany(Request $request, $companyId)
+    {
+        $user = auth()->user();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (! $partner) {
+            return response()->json(['message' => 'Not a partner'], 403);
+        }
+
+        $link = DB::table('partner_company_links')
+            ->where('partner_id', $partner->id)
+            ->where('company_id', $companyId)
+            ->first();
+
+        if (! $link) {
+            return response()->json(['message' => 'Company link not found'], 404);
+        }
+
+        // Delete the link
+        DB::table('partner_company_links')
+            ->where('id', $link->id)
+            ->delete();
+
+        return response()->json(['message' => 'Successfully unlinked from company']);
     }
 }
 

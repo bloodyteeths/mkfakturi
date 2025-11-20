@@ -79,13 +79,22 @@
                 <span class="text-sm text-gray-500">
                   {{ getPermissionsCount(company.permissions) }} permissions
                 </span>
-                <BaseButton
-                  size="sm"
-                  variant="primary"
-                  @click.stop="switchToCompany(company)"
-                >
-                  Manage
-                </BaseButton>
+                <div class="flex gap-2">
+                  <BaseButton
+                    size="sm"
+                    variant="danger-outline"
+                    @click.stop="unlinkCompany(company)"
+                  >
+                    Delete
+                  </BaseButton>
+                  <BaseButton
+                    size="sm"
+                    variant="primary"
+                    @click.stop="switchToCompany(company)"
+                  >
+                    Manage
+                  </BaseButton>
+                </div>
               </div>
             </div>
           </BaseCard>
@@ -357,6 +366,28 @@ const respondToInvitation = async (invitationId, action) => {
     })
   } finally {
     respondingTo.value = null
+  }
+}
+
+const unlinkCompany = async (company) => {
+  if (!confirm(`Are you sure you want to remove access to "${company.name}"? The company can re-invite you later if needed.`)) {
+    return
+  }
+
+  try {
+    await axios.delete(`/invitations/companies/${company.id}/unlink`)
+    notificationStore.showNotification({
+      type: 'success',
+      message: 'Successfully removed access to company',
+    })
+    // Refresh the list
+    await consoleStore.fetchCompanies()
+  } catch (error) {
+    console.error('Failed to unlink company:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to remove company access',
+    })
   }
 }
 

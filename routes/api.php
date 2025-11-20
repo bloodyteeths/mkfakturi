@@ -913,6 +913,7 @@ Route::prefix('/v1')->group(function () {
         Route::get('/invitations/pending', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'getPending']);
         Route::get('/invitations/pending-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'getPendingCompany']);
         Route::post('/invitations/{linkId}/respond', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'respondToInvitation']);
+        Route::delete('/invitations/companies/{companyId}/unlink', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'unlinkFromCompany']);
         Route::post('/invitations/partner-to-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'partnerInvitesCompany']);
         Route::post('/invitations/company-to-company', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'companyInvitesCompany']);
         Route::post('/invitations/partner-to-partner', [\App\Http\Controllers\V1\Admin\PartnerInvitationController::class, 'partnerInvitesPartner']);
