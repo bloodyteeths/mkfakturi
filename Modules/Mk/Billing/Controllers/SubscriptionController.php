@@ -41,28 +41,35 @@ class SubscriptionController extends Controller
 
         $company = Company::findOrFail($companyId);
 
+        // Check if company has an active subscription
+        $hasSubscription = $company->subscribed('default');
+
         Log::info('SubscriptionController::index - Company found', [
             'company_id' => $company->id,
-            'has_subscription' => $company->subscribed('default'),
+            'has_subscription' => $hasSubscription,
         ]);
 
         // Check authorization - skip for now to allow viewing
         // $this->authorize('manage-billing', $company);
 
-        // Get current subscription
-        $subscription = $company->subscription('default');
-
         $currentPlan = null;
-        if ($subscription && $subscription->valid()) {
-            $currentPlan = [
-                'tier' => $company->subscription_tier,
-                'status' => $subscription->status,
-                'ends_at' => $subscription->ends_at,
-                'trial_ends_at' => $subscription->trial_ends_at,
-                'paused_at' => $subscription->paused_at,
-            ];
-        } else {
-            // Return default free tier if no subscription
+        if ($hasSubscription) {
+            // Get the subscription instance only if subscribed
+            $subscription = $company->subscription('default');
+
+            if ($subscription && method_exists($subscription, 'valid') && $subscription->valid()) {
+                $currentPlan = [
+                    'tier' => $company->subscription_tier,
+                    'status' => $subscription->status,
+                    'ends_at' => $subscription->ends_at,
+                    'trial_ends_at' => $subscription->trial_ends_at,
+                    'paused_at' => $subscription->paused_at,
+                ];
+            }
+        }
+
+        // If no valid subscription, return default free tier
+        if (!$currentPlan) {
             $currentPlan = [
                 'tier' => 'free',
                 'status' => 'active',
