@@ -47,12 +47,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
 import PermissionEditor from '@/scripts/admin/views/partners/components/PermissionEditor.vue'
 
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
-const globalStore = useGlobalStore()
+const companyStore = useCompanyStore()
 
 const sending = ref(false)
 const pendingInvitations = ref([])
@@ -70,7 +70,7 @@ async function sendInvitation() {
   sending.value = true
   try {
     await axios.post('/invitations/company-to-partner', {
-      company_id: globalStore.selectedCompany?.id,
+      company_id: companyStore.selectedCompany?.id,
       partner_email: form.value.partner_email,
       permissions: form.value.permissions,
     })
@@ -96,7 +96,7 @@ async function sendInvitation() {
 async function loadPendingInvitations() {
   try {
     const response = await axios.get('/invitations/pending', {
-      params: { company_id: globalStore.selectedCompany?.id },
+      params: { company_id: companyStore.selectedCompany?.id },
     })
     pendingInvitations.value = response.data
   } catch (error) {
