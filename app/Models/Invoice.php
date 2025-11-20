@@ -688,6 +688,19 @@ class Invoice extends Model implements HasMedia
         ]);
 
         $template = PdfTemplateUtils::findFormattedTemplate('invoice', $invoiceTemplate, '');
+
+        // Handle case where template is not found
+        if (!$template) {
+            \Log::warning('PDF template not found, falling back to default', [
+                'requested_template' => $invoiceTemplate,
+                'invoice_id' => $this->id,
+                'company_id' => $this->company_id,
+            ]);
+            // Fallback to invoice1 template (standard template)
+            $template = ['name' => 'invoice1', 'custom' => false];
+            $invoiceTemplate = 'invoice1';
+        }
+
         $templatePath = $template['custom'] ? sprintf('pdf_templates::invoice.%s', $invoiceTemplate) : sprintf('app.pdf.invoice.%s', $invoiceTemplate);
 
         if (request()->has('preview')) {

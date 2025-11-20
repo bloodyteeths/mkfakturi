@@ -61,7 +61,8 @@ class InvoicesController extends Controller
             'company_header' => $request->header('company'),
         ]);
 
-        $invoices = Invoice::with(['customer', 'items', 'payments'])
+        $invoices = Invoice::with($this->invoiceResourceRelations())
+            ->with('payments') // Add payments separately as it's not in invoiceResourceRelations
             ->applyFilters($request->only([
                 'search',
                 'customer_id',
