@@ -1063,6 +1063,30 @@ Route::middleware(['auth:sanctum'])->prefix('v1/partner/subscription')->group(fu
     Route::post('/resume', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'resume'])->name('partner.subscription.resume')->middleware('throttle:strict');
 });
 
+// Billing Route Aliases (for frontend convenience)
+// Automatically uses current company from user session
+// ----------------------------------
+Route::middleware(['auth:sanctum'])->prefix('billing')->group(function () {
+    Route::get('/subscription', function (\Illuminate\Http\Request $request) {
+        $user = $request->user();
+        $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+        return app(\Modules\Mk\Billing\Controllers\SubscriptionController::class)->index($companyId);
+    });
+
+    Route::get('/invoices', function (\Illuminate\Http\Request $request) {
+        $user = $request->user();
+        $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+
+        // Return billing invoices (from Paddle subscription)
+        $company = \App\Models\Company::find($companyId);
+        if (!$company || !$company->subscription) {
+            return response()->json(['data' => []]);
+        }
+
+        return response()->json(['data' => []]);  // TODO: Implement Paddle invoice fetching
+    });
+});
+
 // Partner Portal Routes
 // ----------------------------------
 Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1/partner')->group(function () {
