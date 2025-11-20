@@ -237,7 +237,7 @@ export const useConsoleStore = defineStore('console', {
      */
     async respondToInvitation(invitationId, action) {
       try {
-        const response = await axios.post(`/api/v1/invitations/${invitationId}/respond`, {
+        const response = await axios.post(`/invitations/${invitationId}/respond`, {
           action
         })
 
