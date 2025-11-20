@@ -876,7 +876,7 @@ Route::prefix('/v1')->group(function () {
         // ----------------------------------
         Route::prefix('/console')->middleware(['partner-scope'])->group(function () {
             Route::get('/', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'index']);
-            Route::get('/companies', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'companies']);
+            Route::get('/companies', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'index']); // Updated to use categorized index() method
             Route::post('/switch', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'switchCompany']);
             Route::get('/commissions', [\Modules\Mk\Http\Controllers\AccountantConsoleController::class, 'commissions']); // AC-10
         });
