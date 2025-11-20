@@ -187,6 +187,44 @@ class Partner extends Model
     }
 
     /**
+     * Get companies referred by this partner via affiliate links
+     */
+    public function referredCompanies(): HasMany
+    {
+        return $this->hasMany(AffiliateEvent::class, 'affiliate_partner_id')
+            ->with('company')
+            ->select([
+                'affiliate_events.*',
+                \DB::raw('SUM(affiliate_events.amount) as total_commissions')
+            ])
+            ->where('is_clawed_back', false)
+            ->groupBy('company_id');
+    }
+
+    /**
+     * Get permissions for a specific company
+     *
+     * @return array
+     */
+    public function getPermissionsForCompany(int $companyId): array
+    {
+        $link = \DB::table('partner_company_links')
+            ->where('partner_id', $this->id)
+            ->where('company_id', $companyId)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$link || !$link->permissions) {
+            return [];
+        }
+
+        // Decode JSON permissions
+        $permissions = json_decode($link->permissions, true);
+
+        return is_array($permissions) ? $permissions : [];
+    }
+
+    /**
      * Check if partner has specific permission for a company (AC-13)
      */
     public function hasPermission(int $companyId, \App\Enums\PartnerPermission $permission): bool

@@ -12,15 +12,168 @@ use Illuminate\Support\Facades\Auth;
 class AccountantConsoleController extends Controller
 {
     /**
-     * Display the accountant console dashboard
+     * Display the accountant console dashboard with categorized data
      */
     public function index(): JsonResponse
     {
-        // Basic endpoint to verify controller is working
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Find the partner record for this user
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (!$partner) {
+            return response()->json([
+                'error' => 'User is not registered as a partner',
+                'partner' => null,
+                'managed_companies' => [],
+                'referred_companies' => [],
+                'pending_invitations' => [],
+                'total_managed' => 0,
+                'total_referred' => 0,
+                'total_pending' => 0,
+            ], 403);
+        }
+
+        // 1. Get managed companies (active access with accepted invitation)
+        $managedCompanies = \DB::table('partner_company_links')
+            ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
+            ->leftJoin('addresses', function ($join) {
+                $join->on('addresses.company_id', '=', 'companies.id')
+                    ->where('addresses.type', '=', 'billing');
+            })
+            ->where('partner_company_links.partner_id', $partner->id)
+            ->where('partner_company_links.is_active', true)
+            ->where('partner_company_links.invitation_status', 'accepted')
+            ->select([
+                'companies.id',
+                'companies.name',
+                'companies.slug',
+                'companies.logo',
+                'partner_company_links.is_primary',
+                'partner_company_links.override_commission_rate',
+                'partner_company_links.permissions',
+                'addresses.name as address_name',
+                'addresses.address_street_1',
+                'addresses.city',
+                'addresses.state',
+            ])
+            ->get()
+            ->map(function ($company) use ($partner) {
+                $effectiveRate = $company->override_commission_rate ?? $partner->commission_rate;
+                $permissions = $company->permissions ? json_decode($company->permissions, true) : [];
+
+                return [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                    'slug' => $company->slug,
+                    'logo' => $company->logo,
+                    'is_primary' => (bool) $company->is_primary,
+                    'commission_rate' => (float) $effectiveRate,
+                    'permissions' => $permissions,
+                    'address' => $company->address_name ? [
+                        'name' => $company->address_name,
+                        'address_street_1' => $company->address_street_1,
+                        'city' => $company->city,
+                        'state' => $company->state,
+                    ] : null,
+                ];
+            });
+
+        // 2. Get referred companies (from affiliate_events)
+        $referredCompanies = \DB::table('affiliate_events')
+            ->join('companies', 'companies.id', '=', 'affiliate_events.company_id')
+            ->leftJoin('users', 'users.company_id', '=', 'companies.id')
+            ->where('affiliate_events.affiliate_partner_id', $partner->id)
+            ->where('affiliate_events.is_clawed_back', false)
+            ->select([
+                'companies.id',
+                'companies.name',
+                'companies.slug',
+                'companies.logo',
+                'companies.created_at as signup_date',
+                \DB::raw('SUM(affiliate_events.amount) as total_commissions'),
+                \DB::raw('MIN(affiliate_events.created_at) as first_commission_date'),
+            ])
+            ->groupBy([
+                'companies.id',
+                'companies.name',
+                'companies.slug',
+                'companies.logo',
+                'companies.created_at',
+            ])
+            ->orderBy('total_commissions', 'desc')
+            ->get()
+            ->map(function ($company) {
+                return [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                    'slug' => $company->slug,
+                    'logo' => $company->logo,
+                    'total_commissions' => (float) $company->total_commissions,
+                    'signup_date' => $company->signup_date,
+                    'first_commission_date' => $company->first_commission_date,
+                    'subscription_status' => 'active', // This could be enhanced with actual subscription data
+                ];
+            });
+
+        // 3. Get pending invitations
+        $pendingInvitations = \DB::table('partner_company_links')
+            ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
+            ->leftJoin('users', 'users.id', '=', 'partner_company_links.created_by')
+            ->where('partner_company_links.partner_id', $partner->id)
+            ->where('partner_company_links.invitation_status', 'pending')
+            ->select([
+                'partner_company_links.id',
+                'companies.id as company_id',
+                'companies.name as company_name',
+                'companies.slug',
+                'companies.logo',
+                'partner_company_links.permissions',
+                'partner_company_links.invited_at',
+                'partner_company_links.override_commission_rate',
+                'users.name as invited_by',
+            ])
+            ->get()
+            ->map(function ($invitation) {
+                $permissions = $invitation->permissions ? json_decode($invitation->permissions, true) : [];
+
+                // Calculate expiration (30 days from invited_at)
+                $invitedAt = \Carbon\Carbon::parse($invitation->invited_at);
+                $expiresAt = $invitedAt->copy()->addDays(30);
+
+                return [
+                    'id' => $invitation->id,
+                    'company_id' => $invitation->company_id,
+                    'company_name' => $invitation->company_name,
+                    'slug' => $invitation->slug,
+                    'logo' => $invitation->logo,
+                    'permissions' => $permissions,
+                    'invited_at' => $invitation->invited_at,
+                    'expires_at' => $expiresAt->toIso8601String(),
+                    'invited_by' => $invitation->invited_by,
+                    'override_commission_rate' => $invitation->override_commission_rate,
+                ];
+            });
+
         return response()->json([
-            'message' => 'Accountant Console Controller initialized',
-            'user' => Auth::user()?->name,
-            'timestamp' => now(),
+            'partner' => [
+                'id' => $partner->id,
+                'name' => $partner->name,
+                'email' => $partner->email,
+                'commission_rate' => (float) $partner->commission_rate,
+                'is_active' => $partner->is_active,
+                'kyc_status' => $partner->kyc_status,
+            ],
+            'managed_companies' => $managedCompanies,
+            'referred_companies' => $referredCompanies,
+            'pending_invitations' => $pendingInvitations,
+            'total_managed' => $managedCompanies->count(),
+            'total_referred' => $referredCompanies->count(),
+            'total_pending' => $pendingInvitations->count(),
         ]);
     }
 
@@ -224,3 +377,5 @@ class AccountantConsoleController extends Controller
         ]);
     }
 }
+
+// CLAUDE-CHECKPOINT

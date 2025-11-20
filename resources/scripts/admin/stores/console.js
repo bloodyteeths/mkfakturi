@@ -5,20 +5,30 @@ export const useConsoleStore = defineStore('console', {
   state: () => ({
     // Partner information
     partner: null,
-    
-    // Companies managed by this partner
+
+    // Companies managed by this partner (legacy - kept for backward compatibility)
     companies: [],
-    
+
+    // NEW: Categorized companies
+    managedCompanies: [],
+    referredCompanies: [],
+    pendingInvitations: [],
+
+    // Counts
+    totalManaged: 0,
+    totalReferred: 0,
+    totalPending: 0,
+
     // Currently selected company
     currentCompany: null,
-    
+
     // Loading states
     isLoading: false,
     isSwitching: false,
-    
+
     // Error handling
     error: null,
-    
+
     // UI state
     showCompanySwitcher: false,
   }),
@@ -28,34 +38,48 @@ export const useConsoleStore = defineStore('console', {
      * Get primary company for this partner
      */
     primaryCompany: (state) => {
-      return state.companies.find(company => company.is_primary) || null
+      return state.managedCompanies.find(company => company.is_primary) || null
     },
 
     /**
-     * Get total number of companies
+     * Get total number of managed companies
      */
     totalCompanies: (state) => {
-      return state.companies.length
+      return state.managedCompanies.length
     },
 
     /**
      * Check if partner has multiple companies
      */
     hasMultipleCompanies: (state) => {
-      return state.companies.length > 1
+      return state.managedCompanies.length > 1
     },
 
     /**
      * Get companies sorted by primary first, then by name
      */
     sortedCompanies: (state) => {
-      return [...state.companies].sort((a, b) => {
+      return [...state.managedCompanies].sort((a, b) => {
         // Primary company first
         if (a.is_primary && !b.is_primary) return -1
         if (!a.is_primary && b.is_primary) return 1
         // Then sort by name
         return a.name.localeCompare(b.name)
       })
+    },
+
+    /**
+     * Check if there are pending invitations
+     */
+    hasPendingInvitations: (state) => {
+      return state.pendingInvitations.length > 0
+    },
+
+    /**
+     * Check if there are referred companies
+     */
+    hasReferredCompanies: (state) => {
+      return state.referredCompanies.length > 0
     },
   },
 
@@ -71,11 +95,27 @@ export const useConsoleStore = defineStore('console', {
         const response = await axios.get('/console/companies')
 
         this.partner = response.data.partner
-        this.companies = response.data.companies
-        
+
+        // Handle new categorized response structure
+        if (response.data.managed_companies !== undefined) {
+          this.managedCompanies = response.data.managed_companies || []
+          this.referredCompanies = response.data.referred_companies || []
+          this.pendingInvitations = response.data.pending_invitations || []
+          this.totalManaged = response.data.total_managed || this.managedCompanies.length
+          this.totalReferred = response.data.total_referred || this.referredCompanies.length
+          this.totalPending = response.data.total_pending || this.pendingInvitations.length
+
+          // Legacy support: set companies to managedCompanies
+          this.companies = this.managedCompanies
+        } else {
+          // Fallback for old response format
+          this.companies = response.data.companies || []
+          this.managedCompanies = this.companies
+        }
+
         // Set current company to primary if exists, or first company
-        if (this.companies.length > 0) {
-          this.currentCompany = this.primaryCompany || this.companies[0]
+        if (this.managedCompanies.length > 0) {
+          this.currentCompany = this.primaryCompany || this.managedCompanies[0]
         }
 
         return response.data
@@ -191,6 +231,35 @@ export const useConsoleStore = defineStore('console', {
     getCompanyById(companyId) {
       return this.companies.find(company => company.id === companyId) || null
     },
+
+    /**
+     * Respond to a partner invitation
+     */
+    async respondToInvitation(invitationId, action) {
+      try {
+        const response = await axios.post(`/api/v1/invitations/${invitationId}/respond`, {
+          action
+        })
+
+        // Remove the invitation from pending list
+        this.pendingInvitations = this.pendingInvitations.filter(
+          inv => inv.id !== invitationId
+        )
+        this.totalPending = this.pendingInvitations.length
+
+        // If accepted, refresh companies to get the new managed company
+        if (action === 'accept') {
+          await this.fetchCompanies()
+        }
+
+        return response.data
+      } catch (error) {
+        console.error('Console store - respondToInvitation error:', error)
+        throw error
+      }
+    },
   },
 })
+
+// CLAUDE-CHECKPOINT
 
