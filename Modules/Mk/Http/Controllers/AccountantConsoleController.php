@@ -158,6 +158,13 @@ class AccountantConsoleController extends Controller
                 ];
             });
 
+        \Log::info('AccountantConsoleController::index response', [
+            'partner_id' => $partner->id,
+            'managed_count' => $managedCompanies->count(),
+            'referred_count' => $referredCompanies->count(),
+            'pending_count' => $pendingInvitations->count(),
+        ]);
+
         return response()->json([
             'partner' => [
                 'id' => $partner->id,
