@@ -1,59 +1,282 @@
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:41:45] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:41:45] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:45:02] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-14 00:45:02] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-14 00:45:02] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
-[2025-11-14 00:45:02] production.WARNING: Slow operation detected {"operation":"req_69167b8dcf76c","execution_time_ms":987.28,"memory_used_bytes":14680064,"memory_used_mb":14.0} 
-[2025-11-14 00:45:02] production.WARNING: Slow request detected {"operation":"req_69167b8dcf76c","execution_time_ms":987.28,"memory_used_bytes":14680064,"memory_used_mb":14.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.0.198","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
-[2025-11-14 00:46:54] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:46:54] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:46:54] production.INFO: [ImportController] Upload started {"has_file":true,"type":"invoices","user_id":2} 
-[2025-11-14 00:46:54] production.INFO: [ImportController] User and company loaded {"user_id":2,"company_id":"2"} 
-[2025-11-14 00:46:54] production.INFO: [ImportController] Storing file {"filename":"eb0ac2fc-8cf3-41e2-a96e-2a1a2fcf22e3.csv","original_name":"09_number_format_variations_invoices.csv","size":886} 
-[2025-11-14 00:46:54] production.INFO: [ImportController] File stored successfully {"path":"imports/2/eb0ac2fc-8cf3-41e2-a96e-2a1a2fcf22e3.csv"} 
-[2025-11-14 00:46:54] production.INFO: [ImportController] ImportJob created {"id":34} 
-[2025-11-14 00:46:54] production.INFO: [ImportController] Upload completed successfully {"import_id":34,"response_data":{"id":34,"name":"Import from 09_number_format_variations_invoices.csv","type":"invoices","status":"pending","source_system":null,"file_type":"csv","file_info":{"size":886,"mime_type":"text/plain","original_name":"09_number_format_variations_invoices.csv"},"file_path":"imports/2/eb0ac2fc-8cf3-41e2-a96e-2a1a2fcf22e3.csv","mapping_config":null,"validation_rules":null,"total_records":0,"processed_records":0,"successful_records":0,"failed_records":0,"started_at":null,"completed_at":null,"error_message":null,"error_details":null,"summary":null,"company_id":2,"creator_id":2,"created_at":"2025-11-14T00:46:54.000000Z","updated_at":"2025-11-14T00:46:54.000000Z","formattedCreatedAt":"14.11.2025","formattedStartedAt":null,"formattedCompletedAt":null,"progressPercentage":0,"duration":null,"isInProgress":false,"canRetry":false}} 
-[2025-11-14 00:46:58] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:46:58] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:46:58] production.INFO: [ImportController] show() - detecting fields {"import_id":"34","file_path":"imports/2/eb0ac2fc-8cf3-41e2-a96e-2a1a2fcf22e3.csv"} 
-[2025-11-14 00:46:58] production.INFO: [ImportController] File path constructed {"file_path":"/var/www/html/storage/app/imports/2/eb0ac2fc-8cf3-41e2-a96e-2a1a2fcf22e3.csv","exists":true} 
-[2025-11-14 00:46:58] production.INFO: [ImportController] Using intelligent mapping system {"import_id":"34","type":"invoices"} 
-[2025-11-14 00:46:58] production.INFO: Using intelligent field mapping system {"entity_type":"invoices","company_id":2,"fields_count":10,"sample_rows":3} 
-[2025-11-14 00:46:58] production.INFO: Starting intelligent field matching {"csv_fields":10,"sample_rows":3,"entity_type":"invoice","company_id":2} 
-[2025-11-14 00:46:58] production.DEBUG: Mapping rules loaded {"rule_count":11,"entity_type":"invoice","company_id":2} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"invoice_number","total_candidates":5,"candidates":["invoice_number","invoice_date","total","status","notes"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"customer_name","total_candidates":2,"candidates":["customer_name","notes"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"invoice_date","total_candidates":5,"candidates":["invoice_date","invoice_number","total","status","notes"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"due_date","total_candidates":2,"candidates":["due_date","invoice_date"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"total","total_candidates":5,"candidates":["total","invoice_number","subtotal","tax","discount"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"subtotal","total_candidates":5,"candidates":["subtotal","invoice_number","total","tax","discount"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"tax","total_candidates":4,"candidates":["tax","subtotal","notes","currency"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"status","total_candidates":1,"candidates":["status"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"currency","total_candidates":1,"candidates":["currency"]} 
-[2025-11-14 00:46:58] production.DEBUG: Candidates found {"csv_field":"notes","total_candidates":1,"candidates":["notes"]} 
-[2025-11-14 00:46:58] production.INFO: Field matching completed {"mapped_fields":10,"overall_confidence":1.0,"quality_score":70.0,"entity_type":"invoice"} 
-[2025-11-14 00:46:58] production.INFO: Intelligent field mapping completed {"mapped_fields":10,"overall_confidence":1.0,"quality_grade":"FAIR"} 
-[2025-11-14 00:46:58] production.INFO: [ImportController] Intelligent mapping completed {"mapped_fields":10,"confidence":1.0,"quality_grade":"FAIR"} 
-[2025-11-14 00:46:58] production.INFO: [ImportController] Fields detected successfully {"count":10,"field_names":["invoice_number","customer_name","invoice_date","due_date","total","subtotal","tax","status","currency","notes"],"suggestions_count":10,"confidence":1.0} 
-[2025-11-14 00:47:02] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:47:02] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:47:05] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-14 00:47:05] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-14 00:47:05] production.INFO: [ImportController] validateData() called {"import_id":"34","file_path":"imports/2/eb0ac2fc-8cf3-41e2-a96e-2a1a2fcf22e3.csv"} 
-[2025-11-14 00:47:05] production.INFO: [ImportController] Validation completed {"total_records":5,"valid_records":1,"invalid_records":4} 
+ TypeError: Cannot read properties of undefined (reading 'find')
+    at /build/assets/main-bAVUlrrx.js:68:21095
+    at u (/build/assets/main-bAVUlrrx.js:16:7984)
+    at Array.find (<anonymous>)
+    at zr (/build/assets/main-bAVUlrrx.js:16:8074)
+    at Proxy.find (/build/assets/main-bAVUlrrx.js:16:6623)
+    at Proxy.hasAbilities (/build/assets/main-bAVUlrrx.js:68:21037)
+    at Proxy.q (/build/assets/main-bAVUlrrx.js:42:2526)
+    at Dashboard-CmtdCLVb.js:1:27963
+    at n (/build/assets/main-bAVUlrrx.js:20:3963)
+    at rt (/build/assets/main-bAVUlrrx.js:22:9028)
+e9 @ /build/assets/main-bAVUlrrx.js:20
+Dashboard-CmtdCLVb.js:1 [AI Insights] Fetching insights...
+Dashboard-CmtdCLVb.js:1 [AI Insights] Fetch response: Object
+Index-CDBESSoN.js:1 Object
+Index-CDBESSoN.js:1 API response: Array(10)
+ TypeError: Cannot read properties of undefined (reading 'find')
+    at /build/assets/main-bAVUlrrx.js:68:21095
+    at u (/build/assets/main-bAVUlrrx.js:16:7984)
+    at Array.find (<anonymous>)
+    at zr (/build/assets/main-bAVUlrrx.js:16:8074)
+    at Proxy.find (/build/assets/main-bAVUlrrx.js:16:6623)
+    at Proxy.hasAbilities (/build/assets/main-bAVUlrrx.js:68:21037)
+    at Proxy.q (/build/assets/main-bAVUlrrx.js:42:2526)
+    at Dashboard-CmtdCLVb.js:1:27963
+    at n (/build/assets/main-bAVUlrrx.js:20:3963)
+    at rt (/build/assets/main-bAVUlrrx.js:22:9028)
+e9 @ /build/assets/main-bAVUlrrx.js:20
+Dashboard-CmtdCLVb.js:1 [AI Insights] Fetching insights...
+Dashboard-CmtdCLVb.js:1 [AI Insights] Fetch response: Object
+Index-CDBESSoN.js:1 Object
+Index-CDBESSoN.js:1 API response: Array(10)
+ [intlify] Not found 'subscriptions.features.efaktura_sending' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.efaktura_sending' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.qes_signing' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.qes_signing' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.multi_users' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.multi_users' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.200_invoices' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.200_invoices' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.upgrade_required' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.upgrade_required' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.efaktura_sending' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.efaktura_sending' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.qes_signing' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.qes_signing' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.multi_users' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.multi_users' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.features.200_invoices' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.features.200_invoices' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'subscriptions.upgrade_required' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'subscriptions.upgrade_required' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+/api/v1/e-invoices/by-invoice/35:1  Failed to load resource: the server responded with a status of 402 ()
+/invoices/pdf/jL532GVA6L3zRb4mz8O1:1  Failed to load resource: the server responded with a status of 500 ()
+Index-C-TzlzzF.js:1 Object
+Index-C-TzlzzF.js:1 API response: Array(10)
+ [intlify] Not found 'bills.details' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.details' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.details' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.payments' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.payments' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.payments' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.details' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.details' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.details' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.payments' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.payments' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.payments' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.bill_information' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.bill_information' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.bill_information' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.item' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.item' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.item' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.quantity' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.quantity' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.quantity' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.price' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.price' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.price' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.discount' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.discount' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.discount' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.totals' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.totals' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.totals' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.subtotal' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.subtotal' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.subtotal' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.details' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.details' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.details' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.payments' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.payments' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.payments' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.bill_information' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.bill_information' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.bill_information' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.item' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.item' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.item' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.quantity' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.quantity' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.quantity' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.price' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.price' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.price' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.discount' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.discount' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.discount' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.totals' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.totals' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.totals' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.subtotal' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'bills.subtotal' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'bills.subtotal' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+/api/billing/invoices:1  Failed to load resource: the server responded with a status of 404 ()
+/api/billing/subscription:1  Failed to load resource: the server responded with a status of 404 ()
+/api/billing/subscription:1  Failed to load resource: the server responded with a status of 404 ()
+/api/billing/invoices:1  Failed to load resource: the server responded with a status of 404 ()
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] Component mounted
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] importStore: Proxy(Object)
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] importStore.uploadedFile: null
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] importStore.supportedFormats: Proxy(Array)
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] hasSeenQuickStart: null
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] tourCompleted: null
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] Showing QuickStart panel
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] showQuickStart.value: true
+ImportWizard-CSPLX9wB.js:2 [Step1Upload] Component setup complete
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] Component mounted
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] importStore: Proxy(Object)
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] importStore.currentStep: 1
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] Store state reset
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] hasSeenHelp: null
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] Showing help guide
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] showHelpGuide.value: true
+ImportWizard-CSPLX9wB.js:2 [ImportWizard] Component setup complete
+ [intlify] Not found 'imports.faq' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'imports.faq' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'imports.faq' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'imports.contact_support' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'imports.contact_support' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'imports.contact_support' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ TypeError: Cannot read properties of undefined (reading 'find')
+    at /build/assets/main-bAVUlrrx.js:68:21095
+    at u (/build/assets/main-bAVUlrrx.js:16:7984)
+    at Array.find (<anonymous>)
+    at zr (/build/assets/main-bAVUlrrx.js:16:8074)
+    at Proxy.find (/build/assets/main-bAVUlrrx.js:16:6623)
+    at Proxy.hasAbilities (/build/assets/main-bAVUlrrx.js:68:21037)
+    at Proxy.q (/build/assets/main-bAVUlrrx.js:42:2526)
+    at Dashboard-CmtdCLVb.js:1:27963
+    at n (/build/assets/main-bAVUlrrx.js:20:3963)
+    at rt (/build/assets/main-bAVUlrrx.js:22:9028)
+e9 @ /build/assets/main-bAVUlrrx.js:20
+Dashboard-CmtdCLVb.js:1 [AI Insights] Fetching insights...
+Dashboard-CmtdCLVb.js:1 [AI Insights] Fetch response: Object
+ [intlify] Not found 'validation.sku_maxlength' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'validation.sku_maxlength' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'validation.sku_maxlength' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'validation.barcode_maxlength' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'validation.barcode_maxlength' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'validation.barcode_maxlength' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'items.barcode' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'items.barcode' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'items.barcode' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'items.barcode' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'items.barcode' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'items.barcode' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'items.barcode' key in 'mk' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Fall back to translate 'items.barcode' key with 'en' locale.
+Id @ /build/assets/main-bAVUlrrx.js:72
+ [intlify] Not found 'items.barcode' key in 'en' locale messages.
+Id @ /build/assets/main-bAVUlrrx.js:72
+Index-CDBESSoN.js:1 Object
+Index-CDBESSoN.js:1 API response: Array(10)
+/api/v1/e-invoices/by-invoice/35:1  Failed to load resource: the server responded with a status of 402 ()
+/invoices/pdf/jL532GVA6L3zRb4mz8O1:1  Failed to load resource: the server responded with a status of 500 ()
+/invoices/pdf/8N7Db9qj6qDP6O0GP5Y3:1  Failed to load resource: the server responded with a status of 500 ()
+/invoices/pdf/8N7Db9qj6qDP6O0GP5Y3:1  Failed to load resource: the server responded with a status of 500 ()
+/api/v1/e-invoices/by-invoice/34:1  Failed to load resource: the server responded with a status of 402 ()
+View-Bnqw7o61.js:1 Failed to load e-invoice: Tt
+F @ View-Bnqw7o61.js:1

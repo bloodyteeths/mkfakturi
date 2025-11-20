@@ -41,35 +41,50 @@ class SubscriptionController extends Controller
 
         $company = Company::findOrFail($companyId);
 
-        // Check if company has an active subscription
-        $hasSubscription = $company->subscribed('default');
-
         Log::info('SubscriptionController::index - Company found', [
             'company_id' => $company->id,
-            'has_subscription' => $hasSubscription,
+            'paddle_id' => $company->paddle_id,
         ]);
 
         // Check authorization - skip for now to allow viewing
         // $this->authorize('manage-billing', $company);
 
+        // Try to get subscription safely
         $currentPlan = null;
-        if ($hasSubscription) {
-            // Get the subscription instance only if subscribed
-            $subscription = $company->subscription('default');
+        try {
+            // Check directly in database to avoid calling Paddle methods
+            $subscription = \DB::table('subscriptions')
+                ->where('billable_id', $company->id)
+                ->where('billable_type', 'App\\Models\\Company')
+                ->where('name', 'default')
+                ->whereNull('ends_at')
+                ->orWhere('ends_at', '>', now())
+                ->first();
 
-            if ($subscription && method_exists($subscription, 'valid') && $subscription->valid()) {
-                $currentPlan = [
-                    'tier' => $company->subscription_tier,
+            if ($subscription) {
+                Log::info('SubscriptionController::index - Active subscription found', [
+                    'subscription_id' => $subscription->id,
                     'status' => $subscription->status,
+                ]);
+
+                $currentPlan = [
+                    'tier' => $company->subscription_tier ?? 'starter',
+                    'status' => $subscription->status ?? 'active',
                     'ends_at' => $subscription->ends_at,
                     'trial_ends_at' => $subscription->trial_ends_at,
-                    'paused_at' => $subscription->paused_at,
+                    'paused_at' => $subscription->paused_at ?? null,
                 ];
             }
+        } catch (\Exception $e) {
+            Log::warning('SubscriptionController::index - Error checking subscription', [
+                'error' => $e->getMessage(),
+                'company_id' => $company->id,
+            ]);
         }
 
         // If no valid subscription, return default free tier
         if (!$currentPlan) {
+            Log::info('SubscriptionController::index - No subscription, returning free tier');
             $currentPlan = [
                 'tier' => 'free',
                 'status' => 'active',

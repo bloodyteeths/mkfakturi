@@ -24,8 +24,8 @@ export type Dictionary = {
   featureGrid: { title: string; subtitle: string; features: { title: string; desc: string }[] }
   socialProof: { trustedBy: string }
   whyDifferent: { title: string; cards: FeatureCard[] }
-  benefits: { title: string; cards: { title: string; body: string }[] }
-  how: { title: string; process: string; steps: { title: string; body: string }[] }
+  benefits: { title: string; badge: string; cards: { title: string; body: string }[] }
+  how: { title: string; process: string; subtitle: string; steps: { title: string; body: string }[] }
   cta: { title: string; sub?: string; button: string }
   footer: { rights: string }
   partners?: { title: string; logos: string[] }
@@ -122,6 +122,7 @@ const mk: Dictionary = {
   },
   benefits: {
     title: 'Бенефити',
+    badge: 'Предности',
     cards: [
       { title: 'Заштедете време', body: 'Завршете месечно затворање за часови, не за денови.' },
       { title: 'Работете побрзо', body: 'Вклучете нов клиент за едно попладне.' },
@@ -131,6 +132,7 @@ const mk: Dictionary = {
   how: {
     title: 'Како работи',
     process: 'Процес',
+    subtitle: 'Почнете за минути, не за денови.',
     steps: [
       { title: '1. Поврзи компанија', body: 'Активирај е‑Фактура и подесувања за ДДВ/смeтки.' },
       { title: '2. Креирај фактура', body: 'AI предлага ДДВ и конта; вие потврдувате и испраќате.' },
@@ -315,6 +317,7 @@ const sq: Dictionary = {
   },
   benefits: {
     title: 'Përfitime',
+    badge: 'Avantazhet',
     cards: [
       { title: 'Kurseni kohë', body: 'Mbyllni fund‑muajin për orë, jo ditë.' },
       { title: 'Punoni më shpejt', body: 'Onboard‑oni një klient të ri në një pasdite.' },
@@ -324,6 +327,7 @@ const sq: Dictionary = {
   how: {
     title: 'Si funksionon',
     process: 'Procesi',
+    subtitle: 'Filloni për minuta, jo ditë.',
     steps: [
       { title: '1. Lidh kompaninë', body: 'Aktivizo e‑Faturën dhe rregullimet e TVSH/llogarive.' },
       { title: '2. Krijo faturë', body: 'AI sugjeron TVSH dhe llogari; ju konfirmoni dhe dërgoni.' },
@@ -508,6 +512,7 @@ const tr: Dictionary = {
   },
   benefits: {
     title: 'Faydalar',
+    badge: 'Avantajlar',
     cards: [
       { title: 'Zaman Kazanın', body: 'Aylık kapanışı günler değil saatlerde bitirin.' },
       { title: 'Daha Hızlı Çalışın', body: 'Yeni bir müşteriyi bir öğleden sonra devreye alın.' },
@@ -517,6 +522,7 @@ const tr: Dictionary = {
   how: {
     title: 'Nasıl çalışır',
     process: 'Süreç',
+    subtitle: 'Dakikalar içinde başlayın, günler değil.',
     steps: [
       { title: '1. Şirketi bağlayın', body: 'e‑Fatura’yı ve KDV/hesap ayarlarını etkinleştirin.' },
       { title: '2. Fatura oluşturun', body: 'AI KDV ve hesap önerir; siz onaylayıp gönderirsiniz.' },

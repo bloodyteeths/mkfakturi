@@ -1,781 +1,200 @@
-{
-    "data": {
-        "id": 3,
-        "invoice_id": 13,
-        "company_id": 2,
-        "status": "signed",
-        "certificate_id": 14,
-        "subject": {
-            "C": "MK",
-            "O": "Facturino",
-            "CN": "Facturino Test QES (DEV ONLY)"
-        },
-        "issuer": {
-            "C": "MK",
-            "O": "Facturino",
-            "CN": "Facturino Test QES (DEV ONLY)"
-        },
-        "signed_at": "2025-11-12T01:04:25.000000Z",
-        "submitted_at": null,
-        "accepted_at": null,
-        "rejected_at": null,
-        "rejection_reason": null,
-        "hash": null,
-        "xml_path": null,
-        "signed_xml_path": null,
-        "created_at": "2025-11-12T01:04:16.000000Z",
-        "updated_at": "2025-11-12T01:04:25.000000Z",
-        "invoice": {
-            "id": 13,
-            "ifrs_transaction_id": null,
-            "sequence_number": 12,
-            "customer_sequence_number": 2,
-            "invoice_date": "2025-11-12 00:00:00",
-            "due_date": "2025-11-13",
-            "invoice_number": "2025000012",
-            "reference_number": null,
-            "status": "SENT",
-            "paid_status": "UNPAID",
-            "tax_per_item": "YES",
-            "discount_per_item": "NO",
-            "notes": null,
-            "discount_type": "fixed",
-            "discount": 0,
-            "discount_val": 0,
-            "sub_total": 1200,
-            "total": 1416,
-            "tax": 216,
-            "due_amount": 1416,
-            "sent": 1,
-            "viewed": 0,
-            "unique_hash": "mjb49PL2Rm9eGVDNWz35",
-            "company_id": 2,
-            "created_at": "2025-11-12T01:04:04.000000Z",
-            "updated_at": "2025-11-12T01:04:11.000000Z",
-            "creator_id": 2,
-            "template_name": "invoice-mk",
-            "customer_id": 3,
-            "recurring_invoice_id": null,
-            "exchange_rate": 1,
-            "base_discount_val": 0,
-            "base_sub_total": 1200,
-            "base_total": 1416,
-            "base_tax": 216,
-            "base_due_amount": 1416,
-            "currency_id": 74,
-            "sales_tax_type": null,
-            "sales_tax_address_type": null,
-            "overdue": 0,
-            "formattedCreatedAt": "12.11.2025",
-            "formattedInvoiceDate": "12.11.2025",
-            "formattedDueDate": "13.11.2025",
-            "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf/mjb49PL2Rm9eGVDNWz35",
-            "customer": {
-                "id": 3,
-                "prefix": null,
-                "name": "test MK Doo",
-                "email": null,
-                "phone": null,
-                "facebook_id": null,
-                "google_id": null,
-                "github_id": null,
-                "tax_id": "MK12345678",
-                "contact_name": null,
-                "company_name": null,
-                "vat_number": null,
-                "website": null,
-                "enable_portal": false,
-                "currency_id": 74,
-                "company_id": 2,
-                "creator_id": 2,
-                "created_at": "2025-11-11T12:18:44.000000Z",
-                "updated_at": "2025-11-11T12:18:44.000000Z",
-                "formattedCreatedAt": "12.11.2025",
-                "avatar": 0,
-                "currency": {
-                    "id": 74,
-                    "name": "Macedonian Denar",
-                    "code": "MKD",
-                    "symbol": "ден",
-                    "precision": 0,
-                    "thousand_separator": ".",
-                    "decimal_separator": ",",
-                    "swap_currency_symbol": 1,
-                    "created_at": "2025-10-31T09:26:53.000000Z",
-                    "updated_at": "2025-10-31T09:26:53.000000Z"
-                },
-                "media": []
-            },
-            "currency": {
-                "id": 74,
-                "name": "Macedonian Denar",
-                "code": "MKD",
-                "symbol": "ден",
-                "precision": 0,
-                "thousand_separator": ".",
-                "decimal_separator": ",",
-                "swap_currency_symbol": 1,
-                "created_at": "2025-10-31T09:26:53.000000Z",
-                "updated_at": "2025-10-31T09:26:53.000000Z"
-            },
-            "company": {
-                "id": 2,
-                "name": "Teknomed DOO",
-                "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                "logo_path": "16/facturino_logo_clear.png",
-                "media": [
-                    {
-                        "id": 16,
-                        "model_type": "App\\Models\\Company",
-                        "model_id": 2,
-                        "collection_name": "logo",
-                        "name": "media-libraryvETS5P",
-                        "file_name": "facturino_logo_clear.png",
-                        "mime_type": "image/png",
-                        "disk": "s3compat",
-                        "size": 1308431,
-                        "manipulations": [],
-                        "custom_properties": [],
-                        "responsive_images": [],
-                        "order_column": 1,
-                        "created_at": "2025-11-06T22:20:25.000000Z",
-                        "updated_at": "2025-11-06T22:20:25.000000Z",
-                        "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                        "conversions_disk": "s3compat",
-                        "generated_conversions": [],
-                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                        "preview_url": ""
-                    }
-                ]
-            },
-            "items": [
-                {
-                    "id": 17,
-                    "name": "apple",
-                    "description": null,
-                    "discount_type": "fixed",
-                    "price": 1200,
-                    "quantity": 1,
-                    "unit_name": "Парче (Each)",
-                    "discount": 0,
-                    "discount_val": 0,
-                    "tax": 216,
-                    "total": 1200,
-                    "invoice_id": 13,
-                    "item_id": 4,
-                    "company_id": 2,
-                    "currency_id": null,
-                    "created_at": "2025-11-12T01:04:04.000000Z",
-                    "updated_at": "2025-11-12T01:04:04.000000Z",
-                    "recurring_invoice_id": null,
-                    "base_price": 1200,
-                    "exchange_rate": "1.000000",
-                    "base_discount_val": 0,
-                    "base_tax": 216,
-                    "base_total": 1200,
-                    "taxes": [
-                        {
-                            "id": 10,
-                            "tax_type_id": 2,
-                            "invoice_id": null,
-                            "estimate_id": null,
-                            "invoice_item_id": 17,
-                            "estimate_item_id": null,
-                            "item_id": null,
-                            "company_id": 2,
-                            "name": "18 ddv",
-                            "calculation_type": "percentage",
-                            "amount": 216,
-                            "percent": 18,
-                            "fixed_amount": null,
-                            "compound_tax": 0,
-                            "created_at": "2025-11-12T01:04:04.000000Z",
-                            "updated_at": "2025-11-12T01:04:04.000000Z",
-                            "exchange_rate": "1.000000",
-                            "base_amount": 216,
-                            "currency_id": 74,
-                            "recurring_invoice_id": null
-                        }
-                    ]
-                }
-            ]
-        },
-        "company": {
-            "id": 2,
-            "name": "Teknomed DOO",
-            "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-            "logo_path": "16/facturino_logo_clear.png",
-            "media": [
-                {
-                    "id": 16,
-                    "model_type": "App\\Models\\Company",
-                    "model_id": 2,
-                    "collection_name": "logo",
-                    "name": "media-libraryvETS5P",
-                    "file_name": "facturino_logo_clear.png",
-                    "mime_type": "image/png",
-                    "disk": "s3compat",
-                    "size": 1308431,
-                    "manipulations": [],
-                    "custom_properties": [],
-                    "responsive_images": [],
-                    "order_column": 1,
-                    "created_at": "2025-11-06T22:20:25.000000Z",
-                    "updated_at": "2025-11-06T22:20:25.000000Z",
-                    "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                    "conversions_disk": "s3compat",
-                    "generated_conversions": [],
-                    "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                    "preview_url": ""
-                }
-            ]
-        },
-        "certificate": {
-            "id": 14,
-            "company_id": 2,
-            "name": "Facturino Test QES (DEV ONLY)",
-            "subject": {
-                "C": "MK",
-                "O": "Facturino",
-                "CN": "Facturino Test QES (DEV ONLY)"
-            },
-            "issuer": {
-                "C": "MK",
-                "O": "Facturino",
-                "CN": "Facturino Test QES (DEV ONLY)"
-            },
-            "serial_number": "0x2FF740B059F3306B98F66A9A87D38F9D795908CC",
-            "fingerprint": "931f2fb58ea0200b52651eb04d52228d494085f1fe1b7796ea253b7c720d766d",
-            "valid_from": "2025-11-11T13:00:34.000000Z",
-            "valid_to": "2026-11-11T13:00:34.000000Z",
-            "certificate_path": "certificates/company_2/931f2fb58ea0200b_1762907468.pem",
-            "algorithm": "RSA-SHA256",
-            "key_size": 2048,
-            "is_active": true,
-            "is_expired": false,
-            "created_at": "2025-11-12T00:31:08.000000Z",
-            "updated_at": "2025-11-12T00:31:08.000000Z",
-            "last_used_at": null,
-            "is_valid": true,
-            "days_until_expiry": 364,
-            "company": {
-                "id": 2,
-                "name": "Teknomed DOO",
-                "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                "logo_path": "16/facturino_logo_clear.png",
-                "media": [
-                    {
-                        "id": 16,
-                        "model_type": "App\\Models\\Company",
-                        "model_id": 2,
-                        "collection_name": "logo",
-                        "name": "media-libraryvETS5P",
-                        "file_name": "facturino_logo_clear.png",
-                        "mime_type": "image/png",
-                        "disk": "s3compat",
-                        "size": 1308431,
-                        "manipulations": [],
-                        "custom_properties": [],
-                        "responsive_images": [],
-                        "order_column": 1,
-                        "created_at": "2025-11-06T22:20:25.000000Z",
-                        "updated_at": "2025-11-06T22:20:25.000000Z",
-                        "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                        "conversions_disk": "s3compat",
-                        "generated_conversions": [],
-                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                        "preview_url": ""
-                    }
-                ]
-            }
-        },
-        "submissions": [
-            {
-                "id": 2,
-                "e_invoice_id": 3,
-                "company_id": 2,
-                "submitted_at": "2025-11-12T01:48:27.000000Z",
-                "submitted_by": {
-                    "id": 2,
-                    "entity_id": null,
-                    "name": "Администратор",
-                    "email": "your-email@example.com",
-                    "phone": null,
-                    "role": "super admin",
-                    "facebook_id": null,
-                    "google_id": null,
-                    "github_id": null,
-                    "contact_name": null,
-                    "company_name": null,
-                    "website": null,
-                    "enable_portal": null,
-                    "currency_id": null,
-                    "created_at": "2025-10-31T09:35:04.000000Z",
-                    "updated_at": "2025-11-10T01:15:39.000000Z",
-                    "creator_id": null,
-                    "formattedCreatedAt": "31.10.2025",
-                    "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                    "currency": null,
-                    "media": [
-                        {
-                            "id": 15,
-                            "model_type": "App\\Models\\User",
-                            "model_id": 2,
-                            "collection_name": "admin_avatar",
-                            "name": "facturino_logo",
-                            "file_name": "facturino_logo.png",
-                            "mime_type": "image/png",
-                            "disk": "s3compat",
-                            "size": 1308431,
-                            "manipulations": [],
-                            "custom_properties": [],
-                            "responsive_images": [],
-                            "order_column": 1,
-                            "created_at": "2025-11-06T22:20:15.000000Z",
-                            "updated_at": "2025-11-06T22:20:15.000000Z",
-                            "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
-                            "conversions_disk": "s3compat",
-                            "generated_conversions": [],
-                            "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                            "preview_url": ""
-                        }
-                    ]
-                },
-                "portal_url": "https://e-ujp.ujp.gov.mk",
-                "upload_id": null,
-                "receipt_number": null,
-                "status": "pending",
-                "response_data": null,
-                "error_message": null,
-                "retry_count": 0,
-                "next_retry_at": null,
-                "idempotency_key": null,
-                "created_at": "2025-11-12T01:48:27.000000Z",
-                "updated_at": "2025-11-12T01:48:27.000000Z",
-                "e_invoice": {
-                    "id": 3,
-                    "invoice_id": 13,
-                    "status": "signed",
-                    "invoice": {
-                        "id": 13,
-                        "invoice_number": "2025000012",
-                        "invoice_date": "2025-11-12 00:00:00",
-                        "total": 1416,
-                        "company_id": 2,
-                        "customer_id": 3,
-                        "formattedCreatedAt": "12.11.2025",
-                        "formattedInvoiceDate": "12.11.2025",
-                        "formattedDueDate": "12.11.2025",
-                        "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
-                        "customer": {
-                            "id": 3,
-                            "name": "test MK Doo",
-                            "email": null,
-                            "formattedCreatedAt": "12.11.2025",
-                            "avatar": 0,
-                            "currency": null,
-                            "media": []
-                        },
-                        "currency": null,
-                        "company": {
-                            "id": 2,
-                            "name": "Teknomed DOO",
-                            "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                            "logo_path": "16/facturino_logo_clear.png",
-                            "media": [
-                                {
-                                    "id": 16,
-                                    "model_type": "App\\Models\\Company",
-                                    "model_id": 2,
-                                    "collection_name": "logo",
-                                    "name": "media-libraryvETS5P",
-                                    "file_name": "facturino_logo_clear.png",
-                                    "mime_type": "image/png",
-                                    "disk": "s3compat",
-                                    "size": 1308431,
-                                    "manipulations": [],
-                                    "custom_properties": [],
-                                    "responsive_images": [],
-                                    "order_column": 1,
-                                    "created_at": "2025-11-06T22:20:25.000000Z",
-                                    "updated_at": "2025-11-06T22:20:25.000000Z",
-                                    "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                                    "conversions_disk": "s3compat",
-                                    "generated_conversions": [],
-                                    "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                                    "preview_url": ""
-                                }
-                            ]
-                        }
-                    },
-                    "company": null
-                }
-            },
-            {
-                "id": 1,
-                "e_invoice_id": 3,
-                "company_id": 2,
-                "submitted_at": "2025-11-12T01:40:24.000000Z",
-                "submitted_by": {
-                    "id": 2,
-                    "entity_id": null,
-                    "name": "Администратор",
-                    "email": "your-email@example.com",
-                    "phone": null,
-                    "role": "super admin",
-                    "facebook_id": null,
-                    "google_id": null,
-                    "github_id": null,
-                    "contact_name": null,
-                    "company_name": null,
-                    "website": null,
-                    "enable_portal": null,
-                    "currency_id": null,
-                    "created_at": "2025-10-31T09:35:04.000000Z",
-                    "updated_at": "2025-11-10T01:15:39.000000Z",
-                    "creator_id": null,
-                    "formattedCreatedAt": "31.10.2025",
-                    "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                    "currency": null,
-                    "media": [
-                        {
-                            "id": 15,
-                            "model_type": "App\\Models\\User",
-                            "model_id": 2,
-                            "collection_name": "admin_avatar",
-                            "name": "facturino_logo",
-                            "file_name": "facturino_logo.png",
-                            "mime_type": "image/png",
-                            "disk": "s3compat",
-                            "size": 1308431,
-                            "manipulations": [],
-                            "custom_properties": [],
-                            "responsive_images": [],
-                            "order_column": 1,
-                            "created_at": "2025-11-06T22:20:15.000000Z",
-                            "updated_at": "2025-11-06T22:20:15.000000Z",
-                            "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
-                            "conversions_disk": "s3compat",
-                            "generated_conversions": [],
-                            "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                            "preview_url": ""
-                        }
-                    ]
-                },
-                "portal_url": "https://e-ujp.ujp.gov.mk",
-                "upload_id": null,
-                "receipt_number": null,
-                "status": "pending",
-                "response_data": null,
-                "error_message": null,
-                "retry_count": 0,
-                "next_retry_at": null,
-                "idempotency_key": null,
-                "created_at": "2025-11-12T01:40:24.000000Z",
-                "updated_at": "2025-11-12T01:40:24.000000Z",
-                "e_invoice": {
-                    "id": 3,
-                    "invoice_id": 13,
-                    "status": "signed",
-                    "invoice": {
-                        "id": 13,
-                        "invoice_number": "2025000012",
-                        "invoice_date": "2025-11-12 00:00:00",
-                        "total": 1416,
-                        "company_id": 2,
-                        "customer_id": 3,
-                        "formattedCreatedAt": "12.11.2025",
-                        "formattedInvoiceDate": "12.11.2025",
-                        "formattedDueDate": "12.11.2025",
-                        "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
-                        "customer": {
-                            "id": 3,
-                            "name": "test MK Doo",
-                            "email": null,
-                            "formattedCreatedAt": "12.11.2025",
-                            "avatar": 0,
-                            "currency": null,
-                            "media": []
-                        },
-                        "currency": null,
-                        "company": {
-                            "id": 2,
-                            "name": "Teknomed DOO",
-                            "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                            "logo_path": "16/facturino_logo_clear.png",
-                            "media": [
-                                {
-                                    "id": 16,
-                                    "model_type": "App\\Models\\Company",
-                                    "model_id": 2,
-                                    "collection_name": "logo",
-                                    "name": "media-libraryvETS5P",
-                                    "file_name": "facturino_logo_clear.png",
-                                    "mime_type": "image/png",
-                                    "disk": "s3compat",
-                                    "size": 1308431,
-                                    "manipulations": [],
-                                    "custom_properties": [],
-                                    "responsive_images": [],
-                                    "order_column": 1,
-                                    "created_at": "2025-11-06T22:20:25.000000Z",
-                                    "updated_at": "2025-11-06T22:20:25.000000Z",
-                                    "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                                    "conversions_disk": "s3compat",
-                                    "generated_conversions": [],
-                                    "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                                    "preview_url": ""
-                                }
-                            ]
-                        }
-                    },
-                    "company": null
-                }
-            }
-        ]
-    },
-    "submissions": [
-        {
-            "id": 2,
-            "e_invoice_id": 3,
-            "company_id": 2,
-            "submitted_at": "2025-11-12T01:48:27.000000Z",
-            "submitted_by": {
-                "id": 2,
-                "entity_id": null,
-                "name": "Администратор",
-                "email": "your-email@example.com",
-                "phone": null,
-                "role": "super admin",
-                "facebook_id": null,
-                "google_id": null,
-                "github_id": null,
-                "contact_name": null,
-                "company_name": null,
-                "website": null,
-                "enable_portal": null,
-                "currency_id": null,
-                "created_at": "2025-10-31T09:35:04.000000Z",
-                "updated_at": "2025-11-10T01:15:39.000000Z",
-                "creator_id": null,
-                "formattedCreatedAt": "31.10.2025",
-                "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                "currency": null,
-                "media": [
-                    {
-                        "id": 15,
-                        "model_type": "App\\Models\\User",
-                        "model_id": 2,
-                        "collection_name": "admin_avatar",
-                        "name": "facturino_logo",
-                        "file_name": "facturino_logo.png",
-                        "mime_type": "image/png",
-                        "disk": "s3compat",
-                        "size": 1308431,
-                        "manipulations": [],
-                        "custom_properties": [],
-                        "responsive_images": [],
-                        "order_column": 1,
-                        "created_at": "2025-11-06T22:20:15.000000Z",
-                        "updated_at": "2025-11-06T22:20:15.000000Z",
-                        "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
-                        "conversions_disk": "s3compat",
-                        "generated_conversions": [],
-                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                        "preview_url": ""
-                    }
-                ]
-            },
-            "portal_url": "https://e-ujp.ujp.gov.mk",
-            "upload_id": null,
-            "receipt_number": null,
-            "status": "pending",
-            "response_data": null,
-            "error_message": null,
-            "retry_count": 0,
-            "next_retry_at": null,
-            "idempotency_key": null,
-            "created_at": "2025-11-12T01:48:27.000000Z",
-            "updated_at": "2025-11-12T01:48:27.000000Z",
-            "e_invoice": {
-                "id": 3,
-                "invoice_id": 13,
-                "status": "signed",
-                "invoice": {
-                    "id": 13,
-                    "invoice_number": "2025000012",
-                    "invoice_date": "2025-11-12 00:00:00",
-                    "total": 1416,
-                    "company_id": 2,
-                    "customer_id": 3,
-                    "formattedCreatedAt": "12.11.2025",
-                    "formattedInvoiceDate": "12.11.2025",
-                    "formattedDueDate": "12.11.2025",
-                    "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
-                    "customer": {
-                        "id": 3,
-                        "name": "test MK Doo",
-                        "email": null,
-                        "formattedCreatedAt": "12.11.2025",
-                        "avatar": 0,
-                        "currency": null,
-                        "media": []
-                    },
-                    "currency": null,
-                    "company": {
-                        "id": 2,
-                        "name": "Teknomed DOO",
-                        "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                        "logo_path": "16/facturino_logo_clear.png",
-                        "media": [
-                            {
-                                "id": 16,
-                                "model_type": "App\\Models\\Company",
-                                "model_id": 2,
-                                "collection_name": "logo",
-                                "name": "media-libraryvETS5P",
-                                "file_name": "facturino_logo_clear.png",
-                                "mime_type": "image/png",
-                                "disk": "s3compat",
-                                "size": 1308431,
-                                "manipulations": [],
-                                "custom_properties": [],
-                                "responsive_images": [],
-                                "order_column": 1,
-                                "created_at": "2025-11-06T22:20:25.000000Z",
-                                "updated_at": "2025-11-06T22:20:25.000000Z",
-                                "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                                "conversions_disk": "s3compat",
-                                "generated_conversions": [],
-                                "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                                "preview_url": ""
-                            }
-                        ]
-                    }
-                },
-                "company": null
-            }
-        },
-        {
-            "id": 1,
-            "e_invoice_id": 3,
-            "company_id": 2,
-            "submitted_at": "2025-11-12T01:40:24.000000Z",
-            "submitted_by": {
-                "id": 2,
-                "entity_id": null,
-                "name": "Администратор",
-                "email": "your-email@example.com",
-                "phone": null,
-                "role": "super admin",
-                "facebook_id": null,
-                "google_id": null,
-                "github_id": null,
-                "contact_name": null,
-                "company_name": null,
-                "website": null,
-                "enable_portal": null,
-                "currency_id": null,
-                "created_at": "2025-10-31T09:35:04.000000Z",
-                "updated_at": "2025-11-10T01:15:39.000000Z",
-                "creator_id": null,
-                "formattedCreatedAt": "31.10.2025",
-                "avatar": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                "currency": null,
-                "media": [
-                    {
-                        "id": 15,
-                        "model_type": "App\\Models\\User",
-                        "model_id": 2,
-                        "collection_name": "admin_avatar",
-                        "name": "facturino_logo",
-                        "file_name": "facturino_logo.png",
-                        "mime_type": "image/png",
-                        "disk": "s3compat",
-                        "size": 1308431,
-                        "manipulations": [],
-                        "custom_properties": [],
-                        "responsive_images": [],
-                        "order_column": 1,
-                        "created_at": "2025-11-06T22:20:15.000000Z",
-                        "updated_at": "2025-11-06T22:20:15.000000Z",
-                        "uuid": "0b988d1d-cf79-479c-815b-d5baa855cb5d",
-                        "conversions_disk": "s3compat",
-                        "generated_conversions": [],
-                        "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/15/facturino_logo.png",
-                        "preview_url": ""
-                    }
-                ]
-            },
-            "portal_url": "https://e-ujp.ujp.gov.mk",
-            "upload_id": null,
-            "receipt_number": null,
-            "status": "pending",
-            "response_data": null,
-            "error_message": null,
-            "retry_count": 0,
-            "next_retry_at": null,
-            "idempotency_key": null,
-            "created_at": "2025-11-12T01:40:24.000000Z",
-            "updated_at": "2025-11-12T01:40:24.000000Z",
-            "e_invoice": {
-                "id": 3,
-                "invoice_id": 13,
-                "status": "signed",
-                "invoice": {
-                    "id": 13,
-                    "invoice_number": "2025000012",
-                    "invoice_date": "2025-11-12 00:00:00",
-                    "total": 1416,
-                    "company_id": 2,
-                    "customer_id": 3,
-                    "formattedCreatedAt": "12.11.2025",
-                    "formattedInvoiceDate": "12.11.2025",
-                    "formattedDueDate": "12.11.2025",
-                    "invoicePdfUrl": "https://www.facturino.mk/invoices/pdf",
-                    "customer": {
-                        "id": 3,
-                        "name": "test MK Doo",
-                        "email": null,
-                        "formattedCreatedAt": "12.11.2025",
-                        "avatar": 0,
-                        "currency": null,
-                        "media": []
-                    },
-                    "currency": null,
-                    "company": {
-                        "id": 2,
-                        "name": "Teknomed DOO",
-                        "logo": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                        "logo_path": "16/facturino_logo_clear.png",
-                        "media": [
-                            {
-                                "id": 16,
-                                "model_type": "App\\Models\\Company",
-                                "model_id": 2,
-                                "collection_name": "logo",
-                                "name": "media-libraryvETS5P",
-                                "file_name": "facturino_logo_clear.png",
-                                "mime_type": "image/png",
-                                "disk": "s3compat",
-                                "size": 1308431,
-                                "manipulations": [],
-                                "custom_properties": [],
-                                "responsive_images": [],
-                                "order_column": 1,
-                                "created_at": "2025-11-06T22:20:25.000000Z",
-                                "updated_at": "2025-11-06T22:20:25.000000Z",
-                                "uuid": "b7fa92ec-fa21-4573-9d99-0583400181a3",
-                                "conversions_disk": "s3compat",
-                                "generated_conversions": [],
-                                "original_url": "https://pub-a30d2455917c4cc280f4e89f131d7c33.r2.dev/16/facturino_logo_clear.png",
-                                "preview_url": ""
-                            }
-                        ]
-                    }
-                },
-                "company": null
-            }
-        }
-    ]
-}
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#69 {main}
+"} 
+[2025-11-20 13:50:09] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:10] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:10] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:10] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:10] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:10] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:10] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 13:50:10] production.WARNING: Slow operation detected {"operation":"req_691f1c912fcdd","execution_time_ms":1384.97,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-20 13:50:10] production.WARNING: Slow request detected {"operation":"req_691f1c912fcdd","execution_time_ms":1384.97,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":8,"company_id":"2","ip":"77.28.42.158","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-20 13:50:10] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 
+[2025-11-20 13:50:10] production.INFO: InvoicePolicy::viewAny called {"user_id":8,"user_role":"partner","is_owner":false} 
+[2025-11-20 13:50:10] production.INFO: InvoicePolicy::viewAny - Partner access granted {"user_id":8} 
+[2025-11-20 13:50:10] production.INFO: InvoicesController::index called {"user_id":8,"user_role":"partner","company_header":"2"} 
+[2025-11-20 13:50:10] production.INFO: InvoicesController::index - Returning invoices {"user_id":8,"invoice_count":10} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:11] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:12] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:12] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":null,"vat_number_raw":null,"vat_number_returned":null,"tax_id":null} 
+[2025-11-20 13:50:12] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 13:50:12] production.WARNING: Slow operation detected {"operation":"req_691f1c92b99f5","execution_time_ms":1405.85,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-20 13:50:12] production.WARNING: Slow request detected {"operation":"req_691f1c92b99f5","execution_time_ms":1405.85,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":8,"company_id":"2","ip":"77.28.42.158","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-20 13:50:15] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/invoices/34","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 
+[2025-11-20 13:50:15] production.INFO: InvoicePolicy::view called {"user_id":8,"user_role":"partner","invoice_id":34,"invoice_company_id":2,"user_has_company":true,"is_partner":true} 
+[2025-11-20 13:50:15] production.INFO: InvoicePolicy::view - Partner access granted {"user_id":8,"invoice_id":34} 
+[2025-11-20 13:50:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-20 13:50:15] production.INFO: CompanyResource::toArray - Returning to frontend {"company_id":2,"vat_id":"MK12345678901","vat_number_raw":"MK12345678901","vat_number_returned":"MK12345678901","tax_id":"MK12345678901"} 
+[2025-11-20 13:50:15] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 13:50:15] production.WARNING: Slow operation detected {"operation":"req_691f1c9722cf5","execution_time_ms":388.59,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-11-20 13:50:15] production.WARNING: Slow request detected {"operation":"req_691f1c9722cf5","execution_time_ms":388.59,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices/34","route":null,"user_id":8,"company_id":"2","ip":"77.28.42.158","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-11-20 13:50:15] production.ERROR: Trying to access array offset on value of type null {"userId":8,"exception":"[object] (ErrorException(code: 0): Trying to access array offset on value of type null at /var/www/html/app/Models/Invoice.php:691)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Trying to acces...', '/var/www/html/a...', 691)
+#1 /var/www/html/app/Models/Invoice.php(691): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'Trying to acces...', '/var/www/html/a...', 691)
+#2 /var/www/html/app/Traits/GeneratesPdfTrait.php(27): App\\Models\\Invoice->getPDFData()
+#3 /var/www/html/app/Http/Controllers/V1/PDF/InvoicePdfController.php(22): App\\Models\\Invoice->getGeneratedPDFOrStream('invoice')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\PDF\\InvoicePdfController->__invoke(Object(Illuminate\\Http\\Request), Object(App\\Models\\Invoice))
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('__invoke', Array)
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\PDF\\InvoicePdfController), '__invoke')
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#10 /var/www/html/app/Http/Middleware/PdfMiddleware.php(23): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PdfMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#12 /var/www/html/app/Http/Middleware/CompanyMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#14 /var/www/html/app/Http/Middleware/ResolvePdfCompanyMiddleware.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ResolvePdfCompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#16 /var/www/html/app/Http/Middleware/CaptureReferral.php(94): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CaptureReferral->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#38 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(40): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#42 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 /var/www/html/app/Http/Middleware/SecurityHeaders.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\SecurityHeaders->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#69 {main}
+"} 
+[2025-11-20 13:50:18] production.ERROR: Trying to access array offset on value of type null {"userId":8,"exception":"[object] (ErrorException(code: 0): Trying to access array offset on value of type null at /var/www/html/app/Models/Invoice.php:691)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Trying to acces...', '/var/www/html/a...', 691)
+#1 /var/www/html/app/Models/Invoice.php(691): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'Trying to acces...', '/var/www/html/a...', 691)
+#2 /var/www/html/app/Traits/GeneratesPdfTrait.php(27): App\\Models\\Invoice->getPDFData()
+#3 /var/www/html/app/Http/Controllers/V1/PDF/InvoicePdfController.php(22): App\\Models\\Invoice->getGeneratedPDFOrStream('invoice')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\PDF\\InvoicePdfController->__invoke(Object(Illuminate\\Http\\Request), Object(App\\Models\\Invoice))
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('__invoke', Array)
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\PDF\\InvoicePdfController), '__invoke')
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#10 /var/www/html/app/Http/Middleware/PdfMiddleware.php(23): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PdfMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#12 /var/www/html/app/Http/Middleware/CompanyMiddleware.php(32): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#14 /var/www/html/app/Http/Middleware/ResolvePdfCompanyMiddleware.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ResolvePdfCompanyMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#16 /var/www/html/app/Http/Middleware/CaptureReferral.php(94): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\CaptureReferral->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#38 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(40): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#42 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 /var/www/html/app/Http/Middleware/SecurityHeaders.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\SecurityHeaders->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#53 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#69 {main}
+"} 
+[2025-11-20 13:50:20] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/e-invoices/by-invoice/34","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 
+[2025-11-20 13:50:20] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 13:50:27] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 

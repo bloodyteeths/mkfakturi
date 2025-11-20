@@ -9,7 +9,7 @@ export default function HowItWorks({ t }: { t: Dictionary }) {
           <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900">
             {t.how.title}
           </h2>
-          <p className="text-lg text-gray-600">Get started in minutes, not days.</p>
+          <p className="text-lg text-gray-600">{t.how.subtitle}</p>
         </div>
 
         <div className="relative">

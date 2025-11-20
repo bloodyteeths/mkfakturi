@@ -5,7 +5,7 @@ export default function Benefits({ t }: { t: Dictionary }) {
     <section className="section bg-slate-50">
       <div className="container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm">Benefits</span>
+          <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm">{t.benefits.badge}</span>
           <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900">
             {t.benefits.title}
           </h2>
