@@ -395,6 +395,15 @@
     "action": "Action",
     "completed": "Completed",
     "date": "Date",
+    "details": "Details",
+    "payments": "Payments",
+    "bill_information": "Bill Information",
+    "item": "Item",
+    "quantity": "Quantity",
+    "price": "Price",
+    "discount": "Discount",
+    "totals": "Totals",
+    "subtotal": "Subtotal",
     "list_of_bills": "List of Bills",
     "number": "Number",
     "paid": "Paid",
@@ -444,7 +453,8 @@
     "created_message": "Item created successfully",
     "updated_message": "Item updated successfully",
     "deleted_message": "Item deleted successfully | Items deleted successfully",
-    "sku": "SKU"
+    "sku": "SKU",
+    "barcode": "Barcode"
   },
   "estimates": {
     "title": "Estimates",
@@ -1942,6 +1952,8 @@
     "address_maxlength": "Address should not be greater than 255 characters.",
     "ref_number_maxlength": "Ref Number should not be greater than 255 characters.",
     "prefix_maxlength": "Prefix should not be greater than 5 characters.",
+    "sku_maxlength": "SKU should not be greater than 100 characters.",
+    "barcode_maxlength": "Barcode should not be greater than 100 characters.",
     "something_went_wrong": "something went wrong",
     "number_length_minvalue": "Number length should be greater than 0",
     "at_least_one_ability": "Please select atleast one Permission.",
@@ -2785,7 +2797,9 @@
     "field_name": "Name",
     "field_phone": "Phone",
     "field_vat_number": "VAT Number",
-    "start_tour": "Start Tour"
+    "start_tour": "Start Tour",
+    "faq": "Frequently Asked Questions",
+    "contact_support": "Contact Support"
   },
   "tour": {
     "previous": "Previous",
