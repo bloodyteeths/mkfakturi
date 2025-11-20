@@ -30,7 +30,7 @@ export type Dictionary = {
   footer: { rights: string }
   partners?: { title: string; logos: string[] }
   pricingPreview?: { title: string; cta: string; plans: { name: string; bullets: string[] }[] }
-  testimonials?: { title: string; items: { quote: string; author: string }[] }
+  testimonials?: { title: string; subtitle: string; items: { quote: string; author: string }[] }
   faq?: { title: string; items: { q: string; a: string }[] }
   featuresPage?: {
     heroTitle: string
@@ -149,9 +149,12 @@ const mk: Dictionary = {
   },
   testimonials: {
     title: 'Обожуван од клиенти',
+    subtitle: 'Придружете се на стотици задоволни сметководители и сопственици на бизниси.',
     items: [
       { quote: 'Месечното затворање ни падна од 3 дена на неколку часа.', author: 'Ана, сметководител' },
-      { quote: 'Изводите влегуваат директно и порамнувањето е лесно.', author: 'Игор, сопственик на фирма' }
+      { quote: 'Изводите влегуваат директно и порамнувањето е лесно.', author: 'Игор, сопственик на фирма' },
+      { quote: 'е‑Фактура интеграцијата е совршена. Заштедивме многу време.', author: 'Марија, финансиски директор' },
+      { quote: 'AI предлозите се точни и ни помагаат да избегнеме грешки.', author: 'Петар, раководител на сметководство' }
     ]
   },
   faq: {
@@ -339,9 +342,12 @@ const sq: Dictionary = {
   },
   testimonials: {
     title: 'I dashur nga klientët',
+    subtitle: 'Bashkohuni me qindra kontabilistë dhe pronarë biznesesh të kënaqur.',
     items: [
-      { quote: 'Mbyllja mujore ra nga 3 ditë në disa orë.', author: 'Arta, kontabiliste' },
-      { quote: 'Ekstraktet hyjnë direkt dhe pajtimi është i lehtë.', author: 'Blerim, pronar biznesi' }
+      { quote: 'Mbyllja e fund‑muajit ra nga 3 ditë në disa orë.', author: 'Arta, kontabiliste' },
+      { quote: 'Ekstraktet hyjnë direkt dhe përputhja është e lehtë.', author: 'Blerim, pronar biznesi' },
+      { quote: 'Integrimi i e‑Faturës është i përkryer. Kemi kursyer shumë kohë.', author: 'Maria, drejtoreshë financiare' },
+      { quote: 'Sugjerimet e AI janë të sakta dhe na ndihmojnë të shmangim gabime.', author: 'Petrit, menaxher kontabiliteti' }
     ]
   },
   faq: {
@@ -528,10 +534,13 @@ const tr: Dictionary = {
     ]
   },
   testimonials: {
-    title: 'Müşterilerin sevdiği',
+    title: 'Müşteriler tarafından seviliyor',
+    subtitle: 'Yüzlerce memnun muhasebeci ve işletme sahibine katılın.',
     items: [
-      { quote: 'Aylık kapanışımız günlerden saatlere indi.', author: 'Selin, muhasebeci' },
-      { quote: 'Ekstreler doğrudan iniyor, mutabakat çok kolay.', author: 'Emir, işletme sahibi' }
+      { quote: 'Ay sonu kapanışı 3 günden birkaç saate düştü.', author: 'Selin, muhasebeci' },
+      { quote: 'Ekstreler doğrudan iniyor ve uzlaştırma kolay.', author: 'Emir, işletme sahibi' },
+      { quote: 'e‑Fatura entegrasyonu mükemmel. Çok zaman kazandık.', author: 'Maria, mali müdür' },
+      { quote: 'AI önerileri doğru ve hataları önlememize yardımcı oluyor.', author: 'Petrit, muhasebe müdürü' }
     ]
   },
   faq: {

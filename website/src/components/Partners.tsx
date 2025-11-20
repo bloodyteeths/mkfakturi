@@ -4,9 +4,9 @@ import { Dictionary } from '@/i18n/dictionaries'
 export default function Partners({ t }: { t: Dictionary }) {
   if (!t.partners) return null
   return (
-    <section className="py-12 bg-gray-50/50">
+    <section className="py-8 md:py-12 bg-gray-50/50">
       <div className="container">
-        <h3 className="mb-8 text-center text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="mb-6 md:mb-8 text-center text-sm font-semibold uppercase tracking-wide text-gray-500">
           {t.partners.title}
         </h3>
         <div className="flex items-center justify-center">

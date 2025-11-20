@@ -1,131 +1,63 @@
-2025-11-11T22:42:04.000000000Z [inf]  Starting Container
-2025-11-11T22:42:05.691193811Z [inf]  === Application Startup ===
-2025-11-11T22:42:05.691200031Z [inf]  Railway detected: Parsing MYSQL_URL...
-2025-11-11T22:42:05.691206332Z [inf]  DB configured from MYSQL_URL
-2025-11-11T22:42:05.691211741Z [inf]  Waiting for database at mysql-y5el.railway.internal:3306...
-2025-11-11T22:42:05.691217686Z [inf]  Waiting for database... (1/30)
-2025-11-11T22:42:06.593987016Z [inf]  Waiting for database... (2/30)
-2025-11-11T22:42:08.666620336Z [inf]  Waiting for database... (3/30)
-2025-11-11T22:42:10.831360719Z [inf]  Waiting for database... (4/30)
-2025-11-11T22:42:13.007287501Z [inf]  Waiting for database... (5/30)
-2025-11-11T22:42:15.622240143Z [inf]  Waiting for database... (6/30)
-2025-11-11T22:42:17.613107129Z [inf]  Waiting for database... (7/30)
-2025-11-11T22:42:19.557150159Z [inf]  Waiting for database... (8/30)
-2025-11-11T22:42:21.696706506Z [inf]  Waiting for database... (9/30)
-2025-11-11T22:42:23.845955177Z [inf]  Waiting for database... (10/30)
-2025-11-11T22:42:26.014596759Z [inf]  Waiting for database... (11/30)
-2025-11-11T22:42:28.778710188Z [inf]  Waiting for database... (12/30)
-2025-11-11T22:42:30.963471338Z [inf]  Waiting for database... (13/30)
-2025-11-11T22:42:32.698110325Z [inf]  Waiting for database... (14/30)
-2025-11-11T22:42:34.703404399Z [inf]  Waiting for database... (15/30)
-2025-11-11T22:42:36.876209419Z [inf]  Waiting for database... (16/30)
-2025-11-11T22:42:39.046387687Z [inf]  Waiting for database... (17/30)
-2025-11-11T22:42:41.727087355Z [inf]  Waiting for database... (18/30)
-2025-11-11T22:42:43.777914022Z [inf]  Waiting for database... (19/30)
-2025-11-11T22:42:45.791277501Z [inf]  Waiting for database... (20/30)
-2025-11-11T22:42:47.717113363Z [inf]  Waiting for database... (21/30)
-2025-11-11T22:42:49.891679288Z [inf]  Waiting for database... (22/30)
-2025-11-11T22:42:52.066577568Z [inf]  Waiting for database... (23/30)
-2025-11-11T22:42:54.902261713Z [inf]  Waiting for database... (24/30)
-2025-11-11T22:42:56.808697009Z [inf]  Waiting for database... (25/30)
-2025-11-11T22:42:59.127543526Z [inf]  Waiting for database... (26/30)
-2025-11-11T22:43:00.859408253Z [inf]  Waiting for database... (27/30)
-2025-11-11T22:43:03.109364543Z [inf]  Waiting for database... (28/30)
-2025-11-11T22:43:05.118620560Z [inf]  Waiting for database... (29/30)
-2025-11-11T22:43:08.000675486Z [inf]  Waiting for database... (30/30)
-2025-11-11T22:43:10.014664223Z [inf]  ✅ Permissions set for www user
-2025-11-11T22:43:10.014668603Z [inf]  Configuring nginx to listen on port 8080
-2025-11-11T22:43:10.014673895Z [inf]  Clearing caches...
-2025-11-11T22:43:10.014680152Z [inf]  
-2025-11-11T22:43:10.014685292Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-11-11T22:43:10.014694358Z [inf]  
-2025-11-11T22:43:10.188506245Z [inf]  
-2025-11-11T22:43:10.188514282Z [inf]     INFO  Application cache cleared successfully.  
-2025-11-11T22:43:10.188521023Z [inf]  
-2025-11-11T22:43:11.040833072Z [inf]  
-2025-11-11T22:43:11.040840837Z [inf]     INFO  Route cache cleared successfully.  
-2025-11-11T22:43:11.040847390Z [inf]  
-2025-11-11T22:43:11.040853891Z [inf]  
-2025-11-11T22:43:11.040860216Z [inf]     INFO  Compiled views cleared successfully.  
-2025-11-11T22:43:11.040866407Z [inf]  
-2025-11-11T22:43:11.040873932Z [inf]  Running migrations...
-2025-11-11T22:43:11.959629400Z [inf]  
-2025-11-11T22:43:11.959638536Z [inf]     INFO  Nothing to migrate.  
-2025-11-11T22:43:11.959644520Z [inf]  
-2025-11-11T22:43:11.959653222Z [inf]  Profile status: COMPLETED
-2025-11-11T22:43:12.926407323Z [inf]  ⚠️  Database marker missing, creating it now...
-2025-11-11T22:43:12.926449002Z [inf]  Database marker exists: NO
-2025-11-11T22:43:12.926457402Z [inf]  Already installed (profile_complete = COMPLETED)
-2025-11-11T22:43:13.207655179Z [inf]  ✅ Database marker created: YES
-2025-11-11T22:43:14.002696846Z [inf]  
-2025-11-11T22:43:14.002702118Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
-2025-11-11T22:43:14.002707419Z [inf]  
-2025-11-11T22:43:14.002712795Z [inf]  Verifying Laravel application...
-2025-11-11T22:43:14.105478752Z [inf]  Laravel Framework 12.12.0
-2025-11-11T22:43:14.128625317Z [inf]  Testing PHP bootstrap...
-2025-11-11T22:43:14.999517835Z [inf]    GET|HEAD        api/ai/risk .................... AiSummaryController@getRisk
-2025-11-11T22:43:14.999525414Z [inf]    GET|HEAD        api/ai/summary .............. AiSummaryController@getSummary
-2025-11-11T22:43:14.999532207Z [inf]  Testing database connection...
-2025-11-11T22:43:15.000105718Z [inf]  
-2025-11-11T22:43:15.000111818Z [inf]    GET|HEAD        / ..................................................... home
-2025-11-11T22:43:15.000131675Z [inf]    GET|HEAD        admin/{vue?} ............................... admin.dashboard
-2025-11-11T22:43:15.076217214Z [inf]  DB OK
-2025-11-11T22:43:15.082642189Z [inf]  Enabling verbose PHP errors for debugging...
-2025-11-11T22:43:15.082649910Z [inf]  Testing home route...
-2025-11-11T22:43:15.934539545Z [inf]  ✅ Final permissions set for www user
-2025-11-11T22:43:15.934547893Z [inf]  Home route test passed
-2025-11-11T22:43:15.934548118Z [inf]  Starting application services in background...
-2025-11-11T22:43:15.934556253Z [inf]  Validating nginx configuration...
-2025-11-11T22:43:15.934557286Z [inf]  Waiting for services to be ready...
-2025-11-11T22:43:15.934563161Z [inf]  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-2025-11-11T22:43:15.934569337Z [inf]  nginx: configuration file /etc/nginx/nginx.conf test is successful
-2025-11-11T22:43:15.934579158Z [inf]  Validating PHP-FPM configuration...
-2025-11-11T22:43:15.934584860Z [inf]  [11-Nov-2025 22:43:15] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
-2025-11-11T22:43:15.934592070Z [inf]  
-2025-11-11T22:43:15.934597913Z [inf]  [11-Nov-2025 22:43:15] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
-2025-11-11T22:43:15.934604689Z [inf]  
-2025-11-11T22:43:15.934611180Z [inf]  Setting final permissions before starting services...
-2025-11-11T22:43:15.940471922Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-2025-11-11T22:43:15.940477050Z [err]    import pkg_resources
-2025-11-11T22:43:15.987829369Z [inf]  2025-11-11 22:43:15,983 INFO Set uid to user 0 succeeded
-2025-11-11T22:43:15.987840545Z [inf]  2025-11-11 22:43:15,986 INFO supervisord started with pid 126
-2025-11-11T22:43:17.043043674Z [inf]  2025-11-11 22:43:16,990 INFO spawned: 'nginx' with pid 128
-2025-11-11T22:43:17.043050590Z [inf]  2025-11-11 22:43:16,992 INFO spawned: 'php-fpm' with pid 129
-2025-11-11T22:43:17.043057018Z [inf]  2025-11-11 22:43:16,995 INFO spawned: 'scheduler' with pid 130
-2025-11-11T22:43:17.046795577Z [err]  [11-Nov-2025 22:43:17] NOTICE: fpm is running, pid 129
-2025-11-11T22:43:17.051039200Z [err]  [11-Nov-2025 22:43:17] NOTICE: ready to handle connections
-2025-11-11T22:43:18.905285528Z [inf]  2025-11-11 22:43:18,544 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-11T22:43:18.905291716Z [inf]  2025-11-11 22:43:18,544 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-11T22:43:18.905300157Z [inf]  2025-11-11 22:43:18,545 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-11-11T22:43:21.008962581Z [inf]  tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      
-2025-11-11T22:43:21.008986876Z [inf]  Testing HTTP request through nginx/php-fpm...
-2025-11-11T22:43:21.009026095Z [inf]  Checking if PHP-FPM is listening on port 9000...
-2025-11-11T22:43:21.009033406Z [inf]  tcp        0      0 :::9000                 :::*                    LISTEN      
-2025-11-11T22:43:21.009042761Z [inf]  Checking if nginx is listening on port 8080...
-2025-11-11T22:43:22.020685199Z [err]  127.0.0.1 -  11/Nov/2025:22:43:20 +0000 "GET /index.php" 200
-2025-11-11T22:43:22.027428383Z [inf]  ✅ Health check passed (HTTP 200)
-2025-11-11T22:43:22.027439199Z [inf]  Testing home route through HTTP...
-2025-11-11T22:43:22.027444221Z [err]  127.0.0.1 -  11/Nov/2025:22:43:21 +0000 "GET /index.php" 200
-2025-11-11T22:43:22.027450497Z [inf]  ✅ Home route accessible (HTTP 200)
-2025-11-11T22:43:22.027456009Z [inf]  All startup checks complete. Supervisor running with PID 126
-2025-11-11T22:43:22.027461804Z [inf]  Application ready to serve requests.
-2025-11-11T22:43:27.086369200Z [err]  127.0.0.1 -  11/Nov/2025:22:43:26 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293144321Z [err]  127.0.0.1 -  11/Nov/2025:22:44:40 +0000 "GET /index.php" 302
-2025-11-11T22:44:46.293150495Z [err]  127.0.0.1 -  11/Nov/2025:22:44:40 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293158186Z [err]  127.0.0.1 -  11/Nov/2025:22:44:43 +0000 "GET /index.php" 204
-2025-11-11T22:44:46.293239311Z [err]  127.0.0.1 -  11/Nov/2025:22:44:43 +0000 "POST /index.php" 302
-2025-11-11T22:44:46.293245372Z [err]  127.0.0.1 -  11/Nov/2025:22:44:43 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293250903Z [err]  127.0.0.1 -  11/Nov/2025:22:44:44 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293256639Z [err]  127.0.0.1 -  11/Nov/2025:22:44:45 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293262159Z [err]  127.0.0.1 -  11/Nov/2025:22:44:45 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293268128Z [err]  127.0.0.1 -  11/Nov/2025:22:44:45 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293273889Z [err]  127.0.0.1 -  11/Nov/2025:22:44:45 +0000 "GET /index.php" 200
-2025-11-11T22:44:46.293279232Z [err]  127.0.0.1 -  11/Nov/2025:22:44:45 +0000 "GET /index.php" 200
-2025-11-11T22:44:48.145978778Z [err]  127.0.0.1 -  11/Nov/2025:22:44:47 +0000 "GET /index.php" 200
-2025-11-11T22:44:50.189381198Z [err]  127.0.0.1 -  11/Nov/2025:22:44:47 +0000 "GET /index.php" 200
-2025-11-11T22:44:54.365804017Z [err]  127.0.0.1 -  11/Nov/2025:22:44:53 +0000 "GET /index.php" 200
-2025-11-11T22:44:54.458502100Z [err]  127.0.0.1 -  11/Nov/2025:22:44:53 +0000 "GET /index.php" 200
-2025-11-11T22:44:56.222659903Z [err]  127.0.0.1 -  11/Nov/2025:22:44:55 +0000 "GET /index.php" 404
-2025-11-11T22:44:56.222673499Z [err]  127.0.0.1 -  11/Nov/2025:22:44:53 +0000 "GET /index.php" 200
-2025-11-11T22:44:58.497203886Z [err]  127.0.0.1 -  11/Nov/2025:22:44:58 +0000 "POST /index.php" 500
-2025-11-11T22:45:04.315388625Z [err]  127.0.0.1 -  11/Nov/2025:22:45:03 +0000 "GET /index.php" 200
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:15] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-11-20 11:31:15] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-11-20 11:31:21] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-20 11:31:21] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-20 11:31:30] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-11-20 11:31:30] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-11-20 11:32:51] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/certificates/current","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"khJ8K3LjqnbxMSv7qm13FUtt2wla2ByBheyzBN9v","has_session_cookie":true} 
+[2025-11-20 11:32:51] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 11:34:14] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/certificates/current","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"khJ8K3LjqnbxMSv7qm13FUtt2wla2ByBheyzBN9v","has_session_cookie":true} 
+[2025-11-20 11:34:14] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 11:34:56] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 
+[2025-11-20 11:34:56] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":8,"guard":"sanctum","session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_company_header":true,"company_header":"1"} 
+[2025-11-20 11:34:56] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 11:34:57] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware START {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET"} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Partner found {"partner_id":3,"is_active":true} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Company context {"company_id":2,"url":"https://app.facturino.mk/api/v1/console/companies"} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Skipping company check for console/listing route  
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index START {"user_id":8,"user_email":"partner@demo.mk"} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Partner found {"partner_id":3,"partner_email":"partner@demo.mk"} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Fetching managed companies  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Managed companies fetched {"count":0} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Fetching referred companies  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Referred companies fetched {"count":0} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Fetching pending invitations  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Pending invitations fetched {"count":1,"data":[{"id":3,"company_id":2,"company_name":"Teknomed DOO","slug":null,"logo":null,"permissions":["full_access"],"invited_at":"2025-11-20 10:36:00","expires_at":"2025-12-20T10:36:00+00:00","inviter_name":"Администратор","override_commission_rate":null}]} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index response {"partner_id":3,"managed_count":0,"referred_count":0,"pending_count":1} 
+[2025-11-20 11:34:57] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 11:34:57] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware START {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET"} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Partner found {"partner_id":3,"is_active":true} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Company context {"company_id":2,"url":"https://app.facturino.mk/api/v1/console/companies"} 
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Skipping company check for console/listing route  
+[2025-11-20 11:34:57] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index START {"user_id":8,"user_email":"partner@demo.mk"} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Partner found {"partner_id":3,"partner_email":"partner@demo.mk"} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Fetching managed companies  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Managed companies fetched {"count":0} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Fetching referred companies  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Referred companies fetched {"count":0} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Fetching pending invitations  
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index - Pending invitations fetched {"count":1,"data":[{"id":3,"company_id":2,"company_name":"Teknomed DOO","slug":null,"logo":null,"permissions":["full_access"],"invited_at":"2025-11-20 10:36:00","expires_at":"2025-12-20T10:36:00+00:00","inviter_name":"Администратор","override_commission_rate":null}]} 
+[2025-11-20 11:34:57] production.INFO: AccountantConsoleController::index response {"partner_id":3,"managed_count":0,"referred_count":0,"pending_count":1} 
+[2025-11-20 11:34:57] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":8} 
+[2025-11-20 11:35:07] production.WARNING: API 404 Not Found {"url":"https://app.facturino.mk/api/v1/api/v1/invitations/3/respond","method":"POST","ip":"77.28.42.158","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"} 
+[2025-11-20 11:35:12] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":8,"session_id":"Q8BNuwGEnC4dfG8VL8oJS9SoifgmUYyytewHUrjd","has_session_cookie":true} 

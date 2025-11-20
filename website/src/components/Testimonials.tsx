@@ -5,7 +5,9 @@ export default function Testimonials({ t }: { t: Dictionary }) {
   // Fallback avatars
   const avatars = [
     "/assets/images/avatar_woman_professional_1763567113575.png",
-    "/assets/images/avatar_man_business_1763567119792.png"
+    "/assets/images/avatar_man_business_1763567119792.png",
+    "/assets/images/avatar_woman_creative_1763567128140.png",
+    "/assets/images/avatar_man_tech_1763567135360.png"
   ]
 
   return (
@@ -21,10 +23,10 @@ export default function Testimonials({ t }: { t: Dictionary }) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {t.testimonials?.title || "Loved by businesses"}
           </h2>
-          <p className="text-indigo-200 text-lg">Join hundreds of satisfied accountants and business owners.</p>
+          <p className="text-indigo-200 text-lg">{t.testimonials?.subtitle || ''}</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
           {t.testimonials?.items.map((item, i) => (
             <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors">
               <div className="flex gap-1 text-yellow-400 mb-6">

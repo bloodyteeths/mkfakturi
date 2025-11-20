@@ -19,20 +19,24 @@ export default function FeatureGrid({ t }: { t: Dictionary }) {
                     <p className="text-lg text-gray-600">{fg.subtitle}</p>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {fg.features.map((f, i) => (
                         <div key={i} className="group p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="w-14 h-14 mb-6 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <Image
-                                    src={featureIcons[i]}
-                                    alt={f.title}
-                                    width={40}
-                                    height={40}
-                                    className="w-10 h-10"
-                                />
+                            <div className="flex md:flex-col gap-4 md:gap-0">
+                                <div className="w-14 h-14 md:mb-6 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                    <Image
+                                        src={featureIcons[i]}
+                                        alt={f.title}
+                                        width={40}
+                                        height={40}
+                                        className="w-10 h-10"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">{f.title}</h3>
+                                    <p className="text-gray-600 leading-relaxed text-sm">{f.desc}</p>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">{f.title}</h3>
-                            <p className="text-gray-600 leading-relaxed text-sm">{f.desc}</p>
                         </div>
                     ))}
                 </div>

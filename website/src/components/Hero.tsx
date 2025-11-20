@@ -71,7 +71,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
           </div>
 
           {/* Floating elements */}
-          <div className="absolute bottom-6 left-6 bg-white rounded-2xl shadow-xl p-4 max-w-xs animate-float">
+          <div className="absolute bottom-6 left-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-4 max-w-xs animate-float">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                 <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -85,7 +85,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             </div>
           </div>
 
-          <div className="absolute top-6 right-6 bg-white rounded-2xl shadow-xl p-4 animate-float animation-delay-2000">
+          <div className="absolute top-6 right-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-4 animate-float animation-delay-2000">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
                 <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
