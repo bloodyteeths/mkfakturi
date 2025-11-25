@@ -585,7 +585,7 @@ const v$ = useVuelidate(
 )
 
 const getCustomerPortalUrl = computed(() => {
-  return `${window.location.origin}/${companyStore.selectedCompany.slug}/customer/login`
+  return `${window.location.origin}/${companyStore.selectedCompany.unique_hash}/customer/login`
 })
 
 function copyAddress() {

@@ -178,7 +178,7 @@ export const useCustomerStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {
           axios
-            .post(`/customers/delete`, id)
+            .post(`/customers/delete`, { ids: [id] })
             .then((response) => {
               let index = this.customers.findIndex(
                 (customer) => customer.id === id

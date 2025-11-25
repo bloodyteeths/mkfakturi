@@ -20,6 +20,8 @@
 <script setup>
 import { ref } from 'vue'
 import SelectNotePopup from '../SelectNotePopup.vue'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   store: {
@@ -42,5 +44,13 @@ const props = defineProps({
 
 function onSelectNote(data) {
   props.store[props.storeProp].notes = '' + data.notes
+  
+  const notificationStore = useNotificationStore()
+  const { t } = useI18n()
+  
+  notificationStore.showNotification({
+    type: 'success',
+    message: t('general.note_added_successfully') ?? 'Note added successfully',
+  })
 }
 </script>

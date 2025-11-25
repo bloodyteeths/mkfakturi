@@ -15,6 +15,15 @@ class Item extends Model
     use CacheableTrait;
     use HasFactory;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($item) {
+            $item->taxes()->delete();
+        });
+    }
+
     protected $guarded = ['id'];
 
     protected $appends = [
@@ -72,10 +81,10 @@ class Item extends Model
     public function scopeWhereSearch($query, $search)
     {
         return $query->where(function ($query) use ($search) {
-            $query->where('items.name', 'LIKE', '%'.$search.'%')
-                ->orWhere('items.sku', 'LIKE', '%'.$search.'%')
-                ->orWhere('items.barcode', 'LIKE', '%'.$search.'%')
-                ->orWhere('items.description', 'LIKE', '%'.$search.'%');
+            $query->where('items.name', 'LIKE', '%' . $search . '%')
+                ->orWhere('items.sku', 'LIKE', '%' . $search . '%')
+                ->orWhere('items.barcode', 'LIKE', '%' . $search . '%')
+                ->orWhere('items.description', 'LIKE', '%' . $search . '%');
         });
     }
 
