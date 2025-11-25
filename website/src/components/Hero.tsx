@@ -14,7 +14,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
       </div>
 
       <div className="container relative z-10 grid items-center gap-12 lg:grid-cols-2">
-        <div className="space-y-8 text-center lg:text-left animate-[fadeIn_0.8s_ease-out] px-4 md:px-0">
+        <div className="space-y-8 text-center animate-[fadeIn_0.8s_ease-out] px-4 md:px-0">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-indigo-100 px-4 py-1.5 text-sm font-semibold text-indigo-600 shadow-sm hover:shadow-md transition-all cursor-default">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -33,12 +33,12 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             {t.heroTagline && (
               <p className="text-xl font-medium text-gray-900">{t.heroTagline}</p>
             )}
-            <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+            <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
               {t.hero.sub}
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link href={`/${locale}/pricing`} className="btn-primary w-full sm:w-auto group">
               {t.hero.primaryCta}
               <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
