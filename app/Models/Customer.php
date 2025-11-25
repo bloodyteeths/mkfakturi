@@ -143,18 +143,21 @@ class Customer extends Authenticatable implements HasMedia
     {
         foreach ($ids as $id) {
             try {
-                $customer = self::with([
+                $customer = self::find($id);
+
+                if (!$customer) {
+                    continue;
+                }
+
+                // Load all relationships at once
+                $customer->load([
                     'estimates',
                     'invoices.transactions',
                     'payments',
                     'addresses',
                     'expenses',
                     'recurringInvoices.items'
-                ])->find($id);
-
-                if (!$customer) {
-                    continue;
-                }
+                ]);
 
                 // Delete estimates
                 foreach ($customer->estimates as $estimate) {
