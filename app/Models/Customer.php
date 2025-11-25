@@ -143,45 +143,53 @@ class Customer extends Authenticatable implements HasMedia
     {
         foreach ($ids as $id) {
             try {
-                $customer = self::find($id);
+                $customer = self::with([
+                    'estimates',
+                    'invoices.transactions',
+                    'payments',
+                    'addresses',
+                    'expenses',
+                    'recurringInvoices.items'
+                ])->find($id);
 
                 if (!$customer) {
                     continue;
                 }
 
-                if ($customer->estimates()->exists()) {
-                    $customer->estimates()->delete();
+                // Delete estimates
+                foreach ($customer->estimates as $estimate) {
+                    $estimate->delete();
                 }
 
-                if ($customer->invoices()->exists()) {
-                    $customer->invoices->map(function ($invoice) {
-                        if ($invoice->transactions()->exists()) {
-                            $invoice->transactions()->delete();
-                        }
-                        $invoice->delete();
-                    });
-                }
-
-                if ($customer->payments()->exists()) {
-                    $customer->payments()->delete();
-                }
-
-                if ($customer->addresses()->exists()) {
-                    $customer->addresses()->delete();
-                }
-
-                if ($customer->expenses()->exists()) {
-                    $customer->expenses()->delete();
-                }
-
-                if ($customer->recurringInvoices()->exists()) {
-                    foreach ($customer->recurringInvoices as $recurringInvoice) {
-                        if ($recurringInvoice->items()->exists()) {
-                            $recurringInvoice->items()->delete();
-                        }
-
-                        $recurringInvoice->delete();
+                // Delete invoices and their transactions
+                foreach ($customer->invoices as $invoice) {
+                    foreach ($invoice->transactions as $transaction) {
+                        $transaction->delete();
                     }
+                    $invoice->delete();
+                }
+
+                // Delete payments
+                foreach ($customer->payments as $payment) {
+                    $payment->delete();
+                }
+
+                // Delete addresses
+                foreach ($customer->addresses as $address) {
+                    $address->delete();
+                }
+
+                // Delete expenses
+                foreach ($customer->expenses as $expense) {
+                    $expense->delete();
+                }
+
+                // Delete recurring invoices and their items
+                foreach ($customer->recurringInvoices as $recurringInvoice) {
+                    foreach ($recurringInvoice->items as $item) {
+                        $item->delete();
+                    }
+                    $recurringInvoice->delete();
                 }
 
                 $customer->delete();
