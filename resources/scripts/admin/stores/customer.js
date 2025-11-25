@@ -176,17 +176,20 @@ export const useCustomerStore = (useWindow = false) => {
 
       deleteCustomer(id) {
         const notificationStore = useNotificationStore()
-        alert('DELETE CUSTOMER FUNCTION CALLED - NEW CODE LOADED!')
         console.log('[DELETE CUSTOMER] Starting deletion for ID:', id)
         console.log('[DELETE CUSTOMER] Sending payload:', { ids: [id] })
 
         return new Promise((resolve, reject) => {
+          console.log('[DELETE CUSTOMER] About to make axios call')
+
           axios
             .post(`/customers/delete`, { ids: [id] })
             .then((response) => {
+              console.log('[DELETE CUSTOMER] THEN BLOCK EXECUTED - Success!')
               console.log('[DELETE CUSTOMER] Success response:', response)
               console.log('[DELETE CUSTOMER] Response data:', response.data)
               console.log('[DELETE CUSTOMER] Response status:', response.status)
+              console.log('[DELETE CUSTOMER] Response headers:', response.headers)
 
               let index = this.customers.findIndex(
                 (customer) => customer.id === id
@@ -199,11 +202,17 @@ export const useCustomerStore = (useWindow = false) => {
               resolve(response)
             })
             .catch((err) => {
+              console.error('[DELETE CUSTOMER] CATCH BLOCK EXECUTED - Error!')
               console.error('[DELETE CUSTOMER] Error caught:', err)
               console.error('[DELETE CUSTOMER] Error response:', err.response)
+              console.error('[DELETE CUSTOMER] Error request:', err.request)
               console.error('[DELETE CUSTOMER] Error message:', err.message)
+              console.error('[DELETE CUSTOMER] Error config:', err.config)
               handleError(err)
               reject(err)
+            })
+            .finally(() => {
+              console.log('[DELETE CUSTOMER] FINALLY BLOCK EXECUTED')
             })
         })
       },
