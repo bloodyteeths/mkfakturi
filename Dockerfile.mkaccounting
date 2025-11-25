@@ -57,8 +57,8 @@ RUN apk add --no-cache \
     && apk del $PHPIZE_DEPS \
     && rm -rf /var/cache/apk/* /tmp/*
 
-# Install Composer
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+# Install Composer directly (avoid Docker Hub rate limits)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version=2.7.9
 
 # Configure PHP
 RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini && \
