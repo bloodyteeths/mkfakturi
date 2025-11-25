@@ -101,7 +101,7 @@ function removeCustomer(id) {
     })
     .then((res) => {
       if (res) {
-        customerStore.deleteCustomer({ ids: [id] }).then((response) => {
+        customerStore.deleteCustomer(id).then((response) => {
           if (response.data.success) {
             props.loadData && props.loadData()
             return true
