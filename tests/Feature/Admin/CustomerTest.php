@@ -101,7 +101,7 @@ test('update customer', function () {
         ],
     ]);
 
-    $response = putJson('api/v1/customers/'.$customer->id, $customer1);
+    $response = putJson('api/v1/customers/' . $customer->id, $customer1);
 
     $customer1 = collect($customer1)
         ->only([
@@ -135,13 +135,17 @@ test('search customers', function () {
 
     $queryString = http_build_query($filters, '', '&');
 
-    $response = getJson('api/v1/customers?'.$queryString);
+    $response = getJson('api/v1/customers?' . $queryString);
 
     $response->assertOk();
 });
 
 test('delete multiple customer', function () {
     $customers = Customer::factory()->count(4)->create();
+    $user = User::find(1);
+    $companyId = $user->companies()->first()->id;
+    app(\Silber\Bouncer\Bouncer::class)->scope()->to($companyId);
+    $user->allow('delete multiple customers');
 
     $ids = $customers->pluck('id');
 
