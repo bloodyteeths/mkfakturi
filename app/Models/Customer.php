@@ -142,44 +142,52 @@ class Customer extends Authenticatable implements HasMedia
     public static function deleteCustomers($ids)
     {
         foreach ($ids as $id) {
-            $customer = self::find($id);
+            try {
+                $customer = self::find($id);
 
-            if ($customer->estimates()->exists()) {
-                $customer->estimates()->delete();
-            }
-
-            if ($customer->invoices()->exists()) {
-                $customer->invoices->map(function ($invoice) {
-                    if ($invoice->transactions()->exists()) {
-                        $invoice->transactions()->delete();
-                    }
-                    $invoice->delete();
-                });
-            }
-
-            if ($customer->payments()->exists()) {
-                $customer->payments()->delete();
-            }
-
-            if ($customer->addresses()->exists()) {
-                $customer->addresses()->delete();
-            }
-
-            if ($customer->expenses()->exists()) {
-                $customer->expenses()->delete();
-            }
-
-            if ($customer->recurringInvoices()->exists()) {
-                foreach ($customer->recurringInvoices as $recurringInvoice) {
-                    if ($recurringInvoice->items()->exists()) {
-                        $recurringInvoice->items()->delete();
-                    }
-
-                    $recurringInvoice->delete();
+                if (!$customer) {
+                    continue;
                 }
-            }
 
-            $customer->delete();
+                if ($customer->estimates()->exists()) {
+                    $customer->estimates()->delete();
+                }
+
+                if ($customer->invoices()->exists()) {
+                    $customer->invoices->map(function ($invoice) {
+                        if ($invoice->transactions()->exists()) {
+                            $invoice->transactions()->delete();
+                        }
+                        $invoice->delete();
+                    });
+                }
+
+                if ($customer->payments()->exists()) {
+                    $customer->payments()->delete();
+                }
+
+                if ($customer->addresses()->exists()) {
+                    $customer->addresses()->delete();
+                }
+
+                if ($customer->expenses()->exists()) {
+                    $customer->expenses()->delete();
+                }
+
+                if ($customer->recurringInvoices()->exists()) {
+                    foreach ($customer->recurringInvoices as $recurringInvoice) {
+                        if ($recurringInvoice->items()->exists()) {
+                            $recurringInvoice->items()->delete();
+                        }
+
+                        $recurringInvoice->delete();
+                    }
+                }
+
+                $customer->delete();
+            } catch (\Exception $e) {
+                \Log::error('Error deleting customer: ' . $e->getMessage());
+            }
         }
 
         return true;
@@ -263,12 +271,12 @@ class Customer extends Authenticatable implements HasMedia
 
     public function scopeWhereContactName($query, $contactName)
     {
-        return $query->where('contact_name', 'LIKE', '%'.$contactName.'%');
+        return $query->where('contact_name', 'LIKE', '%' . $contactName . '%');
     }
 
     public function scopeWhereDisplayName($query, $displayName)
     {
-        return $query->where('name', 'LIKE', '%'.$displayName.'%');
+        return $query->where('name', 'LIKE', '%' . $displayName . '%');
     }
 
     public function scopeWhereOrder($query, $orderByField, $orderBy)
@@ -280,16 +288,16 @@ class Customer extends Authenticatable implements HasMedia
     {
         foreach (explode(' ', $search) as $term) {
             $query->where(function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('email', 'LIKE', '%'.$term.'%')
-                    ->orWhere('phone', 'LIKE', '%'.$term.'%');
+                $query->where('name', 'LIKE', '%' . $term . '%')
+                    ->orWhere('email', 'LIKE', '%' . $term . '%')
+                    ->orWhere('phone', 'LIKE', '%' . $term . '%');
             });
         }
     }
 
     public function scopeWherePhone($query, $phone)
     {
-        return $query->where('phone', 'LIKE', '%'.$phone.'%');
+        return $query->where('phone', 'LIKE', '%' . $phone . '%');
     }
 
     public function scopeWhereCustomer($query, $customer_id)
