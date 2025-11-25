@@ -32,18 +32,24 @@ class CustomersController extends Controller
         ])
             ->whereCompany()
             ->applyFilters($request->all())
-            ->withSum(['invoices as base_due_amount' => function ($query) {
-                $query->whereCompany();
-            }], 'base_due_amount')
-            ->withSum(['invoices as due_amount' => function ($query) {
-                $query->whereCompany();
-            }], 'due_amount')
+            ->withSum([
+                'invoices as base_due_amount' => function ($query) {
+                    $query->whereCompany();
+                }
+            ], 'base_due_amount')
+            ->withSum([
+                'invoices as due_amount' => function ($query) {
+                    $query->whereCompany();
+                }
+            ], 'due_amount')
             ->paginateData($limit);
 
         return CustomerResource::collection($customers)
-            ->additional(['meta' => [
-                'customer_total_count' => Customer::whereCompany()->count(),
-            ]]);
+            ->additional([
+                'meta' => [
+                    'customer_total_count' => Customer::whereCompany()->count(),
+                ]
+            ]);
     }
 
     /**
@@ -102,10 +108,16 @@ class CustomersController extends Controller
     {
         $this->authorize('delete multiple customers');
 
+        \Log::info('Customer deletion request received', [
+            'ids' => $request->ids,
+            'ids_type' => gettype($request->ids),
+            'ids_count' => is_array($request->ids) ? count($request->ids) : 'not_array'
+        ]);
+
         Customer::deleteCustomers($request->ids);
 
         return response()->json([
             'success' => true,
-        ]);
+        ], 200);
     }
 }
