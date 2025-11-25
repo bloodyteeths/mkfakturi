@@ -176,10 +176,17 @@ export const useCustomerStore = (useWindow = false) => {
 
       deleteCustomer(id) {
         const notificationStore = useNotificationStore()
+        console.log('[DELETE CUSTOMER] Starting deletion for ID:', id)
+        console.log('[DELETE CUSTOMER] Sending payload:', { ids: [id] })
+
         return new Promise((resolve, reject) => {
           axios
             .post(`/customers/delete`, { ids: [id] })
             .then((response) => {
+              console.log('[DELETE CUSTOMER] Success response:', response)
+              console.log('[DELETE CUSTOMER] Response data:', response.data)
+              console.log('[DELETE CUSTOMER] Response status:', response.status)
+
               let index = this.customers.findIndex(
                 (customer) => customer.id === id
               )
@@ -191,6 +198,9 @@ export const useCustomerStore = (useWindow = false) => {
               resolve(response)
             })
             .catch((err) => {
+              console.error('[DELETE CUSTOMER] Error caught:', err)
+              console.error('[DELETE CUSTOMER] Error response:', err.response)
+              console.error('[DELETE CUSTOMER] Error message:', err.message)
               handleError(err)
               reject(err)
             })
