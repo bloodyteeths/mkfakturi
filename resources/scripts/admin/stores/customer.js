@@ -176,6 +176,7 @@ export const useCustomerStore = (useWindow = false) => {
 
       deleteCustomer(id) {
         const notificationStore = useNotificationStore()
+        alert('DELETE CUSTOMER FUNCTION CALLED - NEW CODE LOADED!')
         console.log('[DELETE CUSTOMER] Starting deletion for ID:', id)
         console.log('[DELETE CUSTOMER] Sending payload:', { ids: [id] })
 
