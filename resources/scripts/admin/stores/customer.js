@@ -2,6 +2,8 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 import { useRoute } from 'vue-router'
 import { handleError } from '@/scripts/helpers/error-handling'
+
+console.log('🔥🔥🔥 CUSTOMER STORE MODULE LOADED - VERSION 2025-11-26-03:11 🔥🔥🔥')
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
