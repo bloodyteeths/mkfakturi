@@ -199,7 +199,7 @@ export const useCustomerStore = (useWindow = false) => {
               this.customers.splice(index, 1)
               notificationStore.showNotification({
                 type: 'success',
-                message: window.i18n?.global?.tc('customers.deleted_message', 1) || 'Customer deleted successfully',
+                message: 'Customer deleted successfully',
               })
               resolve(response)
             })
