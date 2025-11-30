@@ -516,6 +516,13 @@ class Invoice extends Model implements HasMedia
 
         $this->update($data);
 
+        // Debug: Verify project_id after update
+        $this->refresh();
+        \Log::info('Invoice::updateInvoice AFTER save', [
+            'invoice_id' => $this->id,
+            'saved_project_id' => $this->project_id,
+        ]);
+
         $statusData = $this->getInvoiceStatusByAmount($data['due_amount']);
         if (! empty($statusData)) {
             $this->update($statusData);
