@@ -359,6 +359,16 @@ return [
             'ability' => 'manage-closings',
             'model' => '',
         ],
+        [
+            'title' => 'settings.menu_title.journal_export',
+            'group' => '',
+            'name' => 'Journal Export',
+            'link' => '/admin/settings/journal-export',
+            'icon' => 'ArrowDownTrayIcon',
+            'owner_only' => false,
+            'ability' => 'manage-closings',
+            'model' => '',
+        ],
     ],
 
     /*

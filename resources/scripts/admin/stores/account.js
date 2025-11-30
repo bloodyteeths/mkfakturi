@@ -264,6 +264,64 @@ export const useAccountStore = (useWindow = false) => {
             })
         })
       },
+
+      /**
+       * Get journal entries preview
+       */
+      getJournalPreview(params) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get('/accounting/journals', { params })
+            .then((response) => {
+              resolve(response.data)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      /**
+       * Export journals as CSV download
+       */
+      exportJournals(params) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get('/accounting/journals/export', {
+              params,
+              responseType: 'blob',
+            })
+            .then((response) => {
+              // Create download link
+              const url = window.URL.createObjectURL(new Blob([response.data]))
+              const link = document.createElement('a')
+              link.href = url
+
+              // Get filename from Content-Disposition header or generate one
+              const contentDisposition = response.headers['content-disposition']
+              let filename = `journals_${params.format}_${params.from}_${params.to}.csv`
+              if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
+                if (filenameMatch) {
+                  filename = filenameMatch[1]
+                }
+              }
+
+              link.setAttribute('download', filename)
+              document.body.appendChild(link)
+              link.click()
+              link.remove()
+              window.URL.revokeObjectURL(url)
+
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
     },
   })()
 }

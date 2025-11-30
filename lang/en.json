@@ -1310,7 +1310,8 @@
       "partner_settings": "Partner Management",
       "daily_closing": "Daily Closing",
       "period_lock": "Period Lock",
-      "chart_of_accounts": "Chart of Accounts"
+      "chart_of_accounts": "Chart of Accounts",
+      "journal_export": "Journal Export"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -1725,6 +1726,30 @@
       "cannot_delete": "This account cannot be deleted. It may have child accounts or be used in mappings.",
       "mapping_saved": "Account mapping saved successfully",
       "mapping_deleted": "Account mapping deleted successfully"
+    },
+    "journal_export": {
+      "title": "Journal Export",
+      "description": "Export journal entries to CSV for external accounting systems like Pantheon or Zonel.",
+      "from_date": "From Date",
+      "to_date": "To Date",
+      "format": "Export Format",
+      "preview": "Preview",
+      "export": "Export CSV",
+      "summary": "Export Summary",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "expenses": "Expenses",
+      "total_entries": "Total Entries",
+      "balanced": "Balanced",
+      "unbalanced": "Unbalanced",
+      "debit": "Debit",
+      "credit": "Credit",
+      "date": "Date",
+      "reference": "Reference",
+      "account": "Account",
+      "description_col": "Description",
+      "no_entries": "No Journal Entries Found",
+      "no_entries_description": "There are no transactions in the selected date range."
     },
     "exchange_rate": {
       "exchange_rate": "Exchange Rate",

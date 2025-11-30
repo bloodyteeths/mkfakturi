@@ -1336,7 +1336,8 @@
       "dashboard": "Dashboard",
       "daily_closing": "Дневно затворање",
       "period_lock": "Заклучување период",
-      "chart_of_accounts": "Сметковен план"
+      "chart_of_accounts": "Сметковен план",
+      "journal_export": "Извоз на налози"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -1715,6 +1716,30 @@
       "cannot_delete": "Оваа сметка не може да се избрише. Можеби има подсметки или се користи во мапирања.",
       "mapping_saved": "Мапирањето на сметката е успешно зачувано",
       "mapping_deleted": "Мапирањето на сметката е успешно избришано"
+    },
+    "journal_export": {
+      "title": "Извоз на налози",
+      "description": "Извезете дневнички записи во CSV за надворешни сметководствени системи како Пантеон или Зонел.",
+      "from_date": "Од датум",
+      "to_date": "До датум",
+      "format": "Формат за извоз",
+      "preview": "Преглед",
+      "export": "Извези CSV",
+      "summary": "Резиме на извоз",
+      "invoices": "Фактури",
+      "payments": "Плаќања",
+      "expenses": "Трошоци",
+      "total_entries": "Вкупно записи",
+      "balanced": "Балансирано",
+      "unbalanced": "Небалансирано",
+      "debit": "Должи",
+      "credit": "Побарува",
+      "date": "Датум",
+      "reference": "Референца",
+      "account": "Сметка",
+      "description_col": "Опис",
+      "no_entries": "Нема пронајдени дневнички записи",
+      "no_entries_description": "Нема трансакции во избраниот период."
     },
     "exchange_rate": {
       "exchange_rate": "Exchange Rate",

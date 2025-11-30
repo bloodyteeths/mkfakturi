@@ -72,6 +72,8 @@ const PeriodLockSetting = () =>
   import('@/scripts/admin/views/settings/PeriodLockSetting.vue')
 const ChartOfAccountsSetting = () =>
   import('@/scripts/admin/views/settings/ChartOfAccountsSetting.vue')
+const JournalExportSetting = () =>
+  import('@/scripts/admin/views/settings/JournalExportSetting.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -572,6 +574,12 @@ export default [
             name: 'settings.chart-of-accounts',
             meta: { ability: abilities.MANAGE_CLOSINGS },
             component: ChartOfAccountsSetting,
+          },
+          {
+            path: 'journal-export',
+            name: 'settings.journal-export',
+            meta: { ability: abilities.MANAGE_CLOSINGS },
+            component: JournalExportSetting,
           },
         ],
       },
