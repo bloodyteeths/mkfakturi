@@ -584,6 +584,15 @@ class Project extends Model
         $totalExpenses = $expenseQuery->sum('base_amount') ?? 0;
         $expenseCount = $expenseQuery->count();
 
+        // Debug: Log expense details
+        \Log::info('Project::getSummary expenses', [
+            'project_id' => $this->id,
+            'expense_count' => $expenseCount,
+            'total_expenses' => $totalExpenses,
+            'expense_ids' => (clone $this->expenses())->pluck('id')->toArray(),
+            'expense_amounts' => (clone $this->expenses())->pluck('base_amount', 'id')->toArray(),
+        ]);
+
         // Build payment query with optional date filter
         $paymentQuery = $this->payments();
         if ($fromDate && $toDate) {
