@@ -49,11 +49,11 @@ class ProjectResource extends JsonResource
             'formatted_start_date' => $this->formattedStartDate,
             'formatted_end_date' => $this->formattedEndDate,
 
-            // Calculated totals
-            'total_invoiced' => $this->totalInvoiced,
-            'total_expenses' => $this->totalExpenses,
-            'total_payments' => $this->totalPayments,
-            'net_result' => $this->netResult,
+            // Calculated totals (only when requested to avoid N+1 queries on list)
+            'total_invoiced' => $this->when($request->has('include_totals') || $request->routeIs('*.show'), fn() => $this->totalInvoiced),
+            'total_expenses' => $this->when($request->has('include_totals') || $request->routeIs('*.show'), fn() => $this->totalExpenses),
+            'total_payments' => $this->when($request->has('include_totals') || $request->routeIs('*.show'), fn() => $this->totalPayments),
+            'net_result' => $this->when($request->has('include_totals') || $request->routeIs('*.show'), fn() => $this->netResult),
 
             // Counts
             'invoice_count' => $this->whenCounted('invoices', $this->invoices_count ?? 0),
