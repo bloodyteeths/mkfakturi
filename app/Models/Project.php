@@ -560,35 +560,13 @@ class Project extends Model
      */
     public function getSummary(?string $fromDate = null, ?string $toDate = null): array
     {
-        // Debug: Log what we're querying
-        \Log::info('Project::getSummary', [
-            'project_id' => $this->id,
-            'project_name' => $this->name,
-        ]);
-
         // Build invoice query with optional date filter
         $invoiceQuery = $this->invoices();
         if ($fromDate && $toDate) {
             $invoiceQuery->whereBetween('invoice_date', [$fromDate, $toDate]);
         }
-
-        // Debug: Log the SQL and results
-        $invoiceIds = (clone $invoiceQuery)->pluck('id')->toArray();
-        \Log::info('Project::getSummary invoices', [
-            'project_id' => $this->id,
-            'invoice_ids' => $invoiceIds,
-            'sql' => (clone $invoiceQuery)->toSql(),
-        ]);
-
         $totalInvoiced = $invoiceQuery->sum('base_total') ?? 0;
         $invoiceCount = $invoiceQuery->count();
-
-        // Debug: Log the totals
-        \Log::info('Project::getSummary totals', [
-            'project_id' => $this->id,
-            'total_invoiced' => $totalInvoiced,
-            'invoice_count' => $invoiceCount,
-        ]);
 
         // Build expense query with optional date filter
         $expenseQuery = $this->expenses();

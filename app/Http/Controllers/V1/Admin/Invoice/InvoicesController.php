@@ -83,13 +83,6 @@ class InvoicesController extends Controller
     {
         $this->authorize('create', Invoice::class);
 
-        // Debug: Log project_id from request
-        if ($request->has('project_id')) {
-            \Log::info('InvoicesController::store project_id', [
-                'project_id' => $request->project_id,
-            ]);
-        }
-
         $invoice = Invoice::createInvoice($request);
         $invoice->load($this->invoiceResourceRelations());
 
@@ -129,13 +122,6 @@ class InvoicesController extends Controller
     public function update(Requests\InvoicesRequest $request, Invoice $invoice)
     {
         $this->authorize('update', $invoice);
-
-        // Debug: Log project_id from request (update)
-        \Log::info('InvoicesController::update project_id', [
-            'invoice_id' => $invoice->id,
-            'project_id' => $request->project_id,
-            'has_project_id' => $request->has('project_id'),
-        ]);
 
         $invoice = $invoice->updateInvoice($request);
 

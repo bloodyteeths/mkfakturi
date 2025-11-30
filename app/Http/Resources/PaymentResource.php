@@ -28,6 +28,7 @@ class PaymentResource extends JsonResource
             'exchange_rate' => $this->exchange_rate,
             'base_amount' => $this->base_amount,
             'currency_id' => $this->currency_id,
+            'project_id' => $this->project_id,
             'transaction_id' => $this->transaction_id,
             'sequence_number' => $this->sequence_number,
             'formatted_created_at' => $this->formattedCreatedAt,
