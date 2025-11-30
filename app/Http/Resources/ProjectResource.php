@@ -74,6 +74,10 @@ class ProjectResource extends JsonResource
                     'name' => $this->currency->name,
                     'code' => $this->currency->code,
                     'symbol' => $this->currency->symbol,
+                    'precision' => $this->currency->precision,
+                    'thousand_separator' => $this->currency->thousand_separator,
+                    'decimal_separator' => $this->currency->decimal_separator,
+                    'swap_currency_symbol' => $this->currency->swap_currency_symbol,
                 ];
             }),
             'company' => $this->whenLoaded('company', function () {
