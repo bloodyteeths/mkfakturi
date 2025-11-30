@@ -41,15 +41,6 @@ class CompanyResource extends JsonResource
             }),
         ];
 
-        // Log what we're returning to frontend
-        \Log::info('CompanyResource::toArray - Returning to frontend', [
-            'company_id' => $this->id,
-            'vat_id' => $this->vat_id,
-            'vat_number_raw' => $this->vat_number,
-            'vat_number_returned' => $data['vat_number'],
-            'tax_id' => $this->tax_id,
-        ]);
-
         return $data;
     }
 }

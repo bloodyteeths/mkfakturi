@@ -108,12 +108,6 @@ class CustomersController extends Controller
     {
         $this->authorize('delete multiple customers');
 
-        \Log::info('Customer deletion request received', [
-            'ids' => $request->ids,
-            'ids_type' => gettype($request->ids),
-            'ids_count' => is_array($request->ids) ? count($request->ids) : 'not_array'
-        ]);
-
         Customer::deleteCustomers($request->ids);
 
         return response()->json([

@@ -414,11 +414,27 @@ class Invoice extends Model implements HasMedia
     {
         $data = $request->getInvoicePayload();
 
+        // Debug: Log project_id flow
+        if ($request->project_id || ($data['project_id'] ?? null)) {
+            \Log::info('Invoice::createInvoice project_id', [
+                'request_project_id' => $request->project_id,
+                'payload_project_id' => $data['project_id'] ?? null,
+            ]);
+        }
+
         if ($request->has('invoiceSend')) {
             $data['status'] = Invoice::STATUS_SENT;
         }
 
         $invoice = Invoice::create($data);
+
+        // Debug: Verify project_id was saved
+        if ($data['project_id'] ?? null) {
+            \Log::info('Invoice::createInvoice saved', [
+                'invoice_id' => $invoice->id,
+                'saved_project_id' => $invoice->project_id,
+            ]);
+        }
 
         $serial = (new SerialNumberFormatter)
             ->setModel($invoice)

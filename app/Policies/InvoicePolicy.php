@@ -17,46 +17,15 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        \Log::info('InvoicePolicy::viewAny called', [
-            'user_id' => $user->id,
-            'user_role' => $user->role,
-            'is_owner' => $user->isOwner(),
-        ]);
-
-        // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
-            \Log::info('InvoicePolicy::viewAny - Owner access granted', [
-                'user_id' => $user->id,
-            ]);
             return true;
         }
 
-        // Allow partners explicitly
         if ($user->role === 'partner') {
-            \Log::info('InvoicePolicy::viewAny - Partner access granted', [
-                'user_id' => $user->id,
-            ]);
             return true;
         }
 
-        // Use the user instance to check abilities (respects Bouncer scope)
-        $canViewInvoice = $user->can('view-invoice', Invoice::class);
-
-        \Log::info('InvoicePolicy::viewAny - Final decision', [
-            'user_id' => $user->id,
-            'can_view_invoice' => $canViewInvoice,
-        ]);
-
-        if ($canViewInvoice) {
-            return true;
-        }
-
-        \Log::warning('InvoicePolicy::viewAny - Access DENIED', [
-            'user_id' => $user->id,
-            'user_role' => $user->role,
-        ]);
-
-        return false;
+        return $user->can('view-invoice', Invoice::class);
     }
 
     /**
@@ -66,33 +35,11 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice)
     {
-        \Log::info('InvoicePolicy::view called', [
-            'user_id' => $user->id,
-            'user_role' => $user->role,
-            'invoice_id' => $invoice->id,
-            'invoice_company_id' => $invoice->company_id,
-            'user_has_company' => $user->hasCompany($invoice->company_id),
-            'is_partner' => $user->role === 'partner',
-        ]);
-
-        // Allow partners explicitly (temporary fallback)
         if ($user->role === 'partner') {
-            \Log::info('InvoicePolicy::view - Partner access granted', [
-                'user_id' => $user->id,
-                'invoice_id' => $invoice->id,
-            ]);
             return true;
         }
 
-        $hasAccess = $user->hasCompany($invoice->company_id);
-
-        \Log::info('InvoicePolicy::view - Final decision', [
-            'user_id' => $user->id,
-            'invoice_id' => $invoice->id,
-            'has_access' => $hasAccess,
-        ]);
-
-        return $hasAccess;
+        return $user->hasCompany($invoice->company_id);
     }
 
     /**

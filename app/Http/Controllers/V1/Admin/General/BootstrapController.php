@@ -26,15 +26,6 @@ class BootstrapController extends Controller
      */
     public function __invoke(Request $request)
     {
-        \Log::info('Bootstrap controller reached', [
-            'authenticated' => auth()->check(),
-            'user_id' => auth()->id(),
-            'guard' => \Auth::getDefaultDriver(),
-            'session_id' => session()->getId(),
-            'has_company_header' => $request->hasHeader('company'),
-            'company_header' => $request->header('company'),
-        ]);
-
         $current_user = $request->user();
 
         // Partner users: Check if they've switched to a company context

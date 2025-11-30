@@ -52,17 +52,8 @@ class InvoicesController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $user = $request->user();
-
-        // Log the request details for debugging
-        \Log::info('InvoicesController::index called', [
-            'user_id' => $user?->id,
-            'user_role' => $user?->role,
-            'company_header' => $request->header('company'),
-        ]);
-
         $invoices = Invoice::with($this->invoiceResourceRelations())
-            ->with('payments') // Add payments separately as it's not in invoiceResourceRelations
+            ->with('payments')
             ->applyFilters($request->only([
                 'search',
                 'customer_id',
@@ -73,11 +64,6 @@ class InvoicesController extends Controller
             ]))
             ->whereCompany()
             ->paginateData($limit);
-
-        \Log::info('InvoicesController::index - Returning invoices', [
-            'user_id' => $user?->id,
-            'invoice_count' => $invoices->count(),
-        ]);
 
         return InvoiceResource::collection($invoices)
             ->additional([
@@ -96,6 +82,13 @@ class InvoicesController extends Controller
     public function store(Requests\InvoicesRequest $request)
     {
         $this->authorize('create', Invoice::class);
+
+        // Debug: Log project_id from request
+        if ($request->has('project_id')) {
+            \Log::info('InvoicesController::store project_id', [
+                'project_id' => $request->project_id,
+            ]);
+        }
 
         $invoice = Invoice::createInvoice($request);
         $invoice->load($this->invoiceResourceRelations());

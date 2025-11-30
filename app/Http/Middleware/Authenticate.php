@@ -16,24 +16,7 @@ class Authenticate extends Middleware
      */
     public function handle($request, $next, ...$guards)
     {
-        \Log::info('Authenticate middleware handling request', [
-            'url' => $request->url(),
-            'method' => $request->method(),
-            'guards' => $guards,
-            'authenticated_before' => auth()->check(),
-            'user_id_before' => auth()->id(),
-            'session_id' => session()->getId(),
-            'has_session_cookie' => $request->hasCookie(config('session.cookie')),
-        ]);
-
-        $result = parent::handle($request, $next, ...$guards);
-
-        \Log::info('Authenticate middleware completed', [
-            'authenticated_after' => auth()->check(),
-            'user_id_after' => auth()->id(),
-        ]);
-
-        return $result;
+        return parent::handle($request, $next, ...$guards);
     }
 
     /**
@@ -44,12 +27,6 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
-        \Log::warning('Authenticate middleware: User not authenticated, redirecting', [
-            'url' => $request->url(),
-            'expects_json' => $request->expectsJson(),
-            'session_id' => session()->getId(),
-        ]);
-
         if (! $request->expectsJson()) {
             return route('login');
         }
