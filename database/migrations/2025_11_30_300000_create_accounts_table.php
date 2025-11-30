@@ -17,9 +17,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('accounts')) {
+            return;
+        }
+
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id'); // companies.id is unsigned int
             $table->string('code', 20)->comment('Account code (e.g., 1100, 2100)');
             $table->string('name', 255)->comment('Account name');
             $table->unsignedBigInteger('parent_id')->nullable()->comment('Parent account for hierarchy');

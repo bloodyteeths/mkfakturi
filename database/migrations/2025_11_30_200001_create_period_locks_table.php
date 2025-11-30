@@ -17,12 +17,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('period_locks')) {
+            return;
+        }
+
         Schema::create('period_locks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id'); // companies.id is unsigned int
             $table->date('period_start')->comment('Start date of locked period');
             $table->date('period_end')->comment('End date of locked period (inclusive)');
-            $table->unsignedBigInteger('locked_by')->nullable()->comment('User who locked the period');
+            $table->unsignedInteger('locked_by')->nullable()->comment('User who locked the period');
             $table->timestamp('locked_at')->useCurrent()->comment('When the period was locked');
             $table->text('notes')->nullable()->comment('Optional notes (e.g., exported to Pantheon)');
             $table->timestamps();

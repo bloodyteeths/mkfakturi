@@ -17,12 +17,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('daily_closings')) {
+            return;
+        }
+
         Schema::create('daily_closings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id'); // companies.id is unsigned int, not bigint
             $table->date('date')->comment('The date being closed');
             $table->string('type', 50)->default('all')->comment('Type: all, cash, invoices, etc.');
-            $table->unsignedBigInteger('closed_by')->nullable()->comment('User who closed the day');
+            $table->unsignedInteger('closed_by')->nullable()->comment('User who closed the day');
             $table->timestamp('closed_at')->useCurrent()->comment('When the day was closed');
             $table->text('notes')->nullable()->comment('Optional notes about the closing');
             $table->timestamps();

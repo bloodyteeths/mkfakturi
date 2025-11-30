@@ -18,9 +18,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('account_mappings')) {
+            return;
+        }
+
         Schema::create('account_mappings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedInteger('company_id'); // companies.id is unsigned int
             $table->string('entity_type', 50)->comment('customer|supplier|expense_category|tax_type|payment_method');
             $table->unsignedBigInteger('entity_id')->nullable()->comment('ID of the mapped entity, null for default');
             $table->unsignedBigInteger('debit_account_id')->nullable()->comment('Account to debit');
