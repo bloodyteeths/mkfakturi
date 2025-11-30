@@ -581,17 +581,9 @@ class Project extends Model
         if ($fromDate && $toDate) {
             $expenseQuery->whereBetween('expense_date', [$fromDate, $toDate]);
         }
-        $totalExpenses = $expenseQuery->sum('base_amount') ?? 0;
+        // Use COALESCE to handle NULL base_amount - fall back to amount * exchange_rate
+        $totalExpenses = (clone $expenseQuery)->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')->value('total') ?? 0;
         $expenseCount = $expenseQuery->count();
-
-        // Debug: Log expense details
-        \Log::info('Project::getSummary expenses', [
-            'project_id' => $this->id,
-            'expense_count' => $expenseCount,
-            'total_expenses' => $totalExpenses,
-            'expense_ids' => (clone $this->expenses())->pluck('id')->toArray(),
-            'expense_amounts' => (clone $this->expenses())->pluck('base_amount', 'id')->toArray(),
-        ]);
 
         // Build payment query with optional date filter
         $paymentQuery = $this->payments();
