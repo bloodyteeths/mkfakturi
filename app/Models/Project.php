@@ -583,6 +583,13 @@ class Project extends Model
         $totalInvoiced = $invoiceQuery->sum('base_total') ?? 0;
         $invoiceCount = $invoiceQuery->count();
 
+        // Debug: Log the totals
+        \Log::info('Project::getSummary totals', [
+            'project_id' => $this->id,
+            'total_invoiced' => $totalInvoiced,
+            'invoice_count' => $invoiceCount,
+        ]);
+
         // Build expense query with optional date filter
         $expenseQuery = $this->expenses();
         if ($fromDate && $toDate) {
