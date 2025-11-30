@@ -46,6 +46,12 @@
         <TaxReport ref="report" />
       </BaseTab>
       <BaseTab
+        :title="$t('reports.projects.title')"
+        tab-panel-container="px-0 py-0"
+      >
+        <ProjectReport ref="report" />
+      </BaseTab>
+      <BaseTab
         v-if="accountingBackboneEnabled"
         :title="$t('reports.accounting.accounting')"
         tab-panel-container="px-0 py-0"
@@ -81,6 +87,7 @@ import SalesReport from '../SalesReports.vue'
 import ExpenseReport from '../ExpensesReport.vue'
 import ProfitLossReport from '../ProfitLossReport.vue'
 import TaxReport from '../TaxReport.vue'
+import ProjectReport from '../ProjectReport.vue'
 import TrialBalance from '../TrialBalance.vue'
 import BalanceSheet from '../BalanceSheet.vue'
 import IncomeStatement from '../IncomeStatement.vue'

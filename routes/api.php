@@ -117,7 +117,6 @@ use App\Http\Controllers\V1\Installation\LoginController;
 use App\Http\Controllers\V1\Installation\OnboardingWizardController;
 use App\Http\Controllers\V1\Installation\RequirementsController;
 use App\Http\Controllers\V1\Webhook\CronJobController;
-use Modules\Mk\Partner\Controllers\StripeConnectController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -686,6 +685,15 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
             });
 
+            // Project Reports
+            // Phase 1.1 - Project Dimension reporting
+            // ----------------------------------
+
+            Route::prefix('reports')->group(function () {
+                Route::get('/projects', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'index']);
+                Route::get('/projects/{id}', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'show']);
+            });
+
             // Migration Wizard (Laravel Excel)
             // Feature flag: FEATURE_MIGRATION_WIZARD
             // ----------------------------------
@@ -757,6 +765,14 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/journals', [\App\Http\Controllers\V1\Admin\Accounting\JournalExportController::class, 'index']);
                 Route::get('/journals/export', [\App\Http\Controllers\V1\Admin\Accounting\JournalExportController::class, 'export']);
                 Route::get('/journals/formats', [\App\Http\Controllers\V1\Admin\Accounting\JournalExportController::class, 'formats']);
+
+                // AI Account Suggestions (Phase 4.2)
+                Route::prefix('suggestions')->group(function () {
+                    Route::get('/{type}/{id}', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'suggest']);
+                    Route::post('/confirm', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'confirm']);
+                    Route::get('/pending', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'pending']);
+                    Route::post('/bulk-confirm', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'bulkConfirm']);
+                });
             });
             // CLAUDE-CHECKPOINT
 
@@ -871,6 +887,23 @@ Route::prefix('/v1')->group(function () {
                         ],
                     ]);
                 });
+            });
+
+            // Stock Management Module (Facturino)
+            // Feature flag: FACTURINO_STOCK_V1_ENABLED
+            // ----------------------------------
+
+            Route::prefix('stock')->middleware(['feature:stock'])->group(function () {
+                // Warehouses
+                Route::apiResource('warehouses', \App\Http\Controllers\V1\Admin\Stock\WarehouseController::class);
+                Route::post('/warehouses/{id}/set-default', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'setDefault']);
+
+                // Stock Reports
+                Route::get('/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'inventory']);
+                Route::get('/item-card/{item}', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'itemCard']);
+                Route::get('/warehouse/{warehouse}/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'warehouseInventory']);
+                Route::get('/valuation-report', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'valuationReport']);
+                Route::get('/low-stock', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'lowStock']);
             });
         });
 

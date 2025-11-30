@@ -148,7 +148,12 @@
     "paid": "Платено",
     "status": "Статус",
     "active": "Активен",
-    "inactive": "Неактивен"
+    "inactive": "Неактивен",
+    "filters": "Филтри",
+    "month": "Месец",
+    "loading": "Се вчитува...",
+    "export_to_csv": "Извези во CSV",
+    "select_customer": "Избери клиент"
   },
   "dashboard": {
     "select_year": "Избери година",
@@ -1311,6 +1316,23 @@
       "to_date": "To Date",
       "from_date": "From Date",
       "date_range": "Select Date Range"
+    },
+    "projects": {
+      "title": "Извештаи за проекти",
+      "description": "Финансиски преглед на вашите проекти",
+      "date_range": "Избери временски период",
+      "from_date": "Од датум",
+      "to_date": "До датум",
+      "total_invoiced": "Вкупно фактурирано",
+      "total_paid": "Вкупно платено",
+      "total_expenses": "Вкупно трошоци",
+      "net_profit": "Нето профит",
+      "no_projects": "Нема пронајдено проекти за избраниот период",
+      "error_loading": "Грешка при вчитување на извештаите за проекти",
+      "error_loading_detail": "Грешка при вчитување на детали за проектот",
+      "no_data_to_export": "Нема податоци за извоз",
+      "detail": "Детали за проект",
+      "monthly_breakdown": "Месечен преглед"
     }
   },
   "settings": {
@@ -1337,7 +1359,8 @@
       "daily_closing": "Дневно затворање",
       "period_lock": "Заклучување период",
       "chart_of_accounts": "Сметковен план",
-      "journal_export": "Извоз на налози"
+      "journal_export": "Извоз на налози",
+      "account_review": "Преглед на сметки"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -1689,7 +1712,7 @@
     },
     "accounts": {
       "title": "Сметковен план",
-      "description": "Управувајте со сметковниот план за дневнички записи и извоз во надворешни сметководствени системи.",
+      "description": "Опис",
       "add_account": "Додади сметка",
       "edit_account": "Уреди сметка",
       "code": "Шифра",
@@ -1704,7 +1727,6 @@
       "type_expense": "Расход",
       "parent_account": "Матична сметка",
       "no_parent": "Без матична (основна сметка)",
-      "description": "Опис",
       "description_placeholder": "Опционален опис на сметката",
       "status": "Статус",
       "is_active": "Активна",
@@ -1740,6 +1762,25 @@
       "description_col": "Опис",
       "no_entries": "Нема пронајдени дневнички записи",
       "no_entries_description": "Нема трансакции во избраниот период."
+    },
+    "account_review": {
+      "title": "Преглед на сметки",
+      "description": "Прегледајте и потврдете AI-предложени сметки за трансакции",
+      "pending_count": "{count} чекаат преглед",
+      "suggested_debit": "Предложено должи",
+      "suggested_credit": "Предложено побарува",
+      "confirm": "Потврди",
+      "confirm_all": "Потврди избрани",
+      "no_pending": "Нема трансакции за преглед",
+      "confirmed_successfully": "Назначувањето на сметка е потврдено",
+      "filter_type": "Тип на трансакција",
+      "all_types": "Сите типови",
+      "type_invoice": "Фактура",
+      "type_expense": "Трошок",
+      "type_payment": "Плаќање",
+      "select_account": "Избери сметка",
+      "confirm_bulk_title": "Потврди групно назначување",
+      "confirm_bulk_message": "Дали сте сигурни дека сакате да потврдите {count} трансакција(и)?"
     },
     "exchange_rate": {
       "exchange_rate": "Exchange Rate",

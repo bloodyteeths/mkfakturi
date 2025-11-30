@@ -142,7 +142,12 @@
     "paid": "Paid",
     "status": "Status",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "filters": "Filters",
+    "month": "Month",
+    "loading": "Loading...",
+    "export_to_csv": "Export to CSV",
+    "select_customer": "Select Customer"
   },
   "dashboard": {
     "select_year": "Select year",
@@ -1284,6 +1289,23 @@
       "to_date": "To Date",
       "from_date": "From Date",
       "date_range": "Select Date Range"
+    },
+    "projects": {
+      "title": "Project Reports",
+      "description": "Financial overview of your projects",
+      "date_range": "Select Date Range",
+      "from_date": "From Date",
+      "to_date": "To Date",
+      "total_invoiced": "Total Invoiced",
+      "total_paid": "Total Paid",
+      "total_expenses": "Total Expenses",
+      "net_profit": "Net Profit",
+      "no_projects": "No projects found for the selected period",
+      "error_loading": "Error loading project reports",
+      "error_loading_detail": "Error loading project details",
+      "no_data_to_export": "No data to export",
+      "detail": "Project Detail",
+      "monthly_breakdown": "Monthly Breakdown"
     }
   },
   "settings": {
@@ -1311,7 +1333,8 @@
       "daily_closing": "Daily Closing",
       "period_lock": "Period Lock",
       "chart_of_accounts": "Chart of Accounts",
-      "journal_export": "Journal Export"
+      "journal_export": "Journal Export",
+      "account_review": "Account Review"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -1699,7 +1722,7 @@
     },
     "accounts": {
       "title": "Chart of Accounts",
-      "description": "Manage your chart of accounts for journal entries and export to external accounting systems.",
+      "description": "Description",
       "add_account": "Add Account",
       "edit_account": "Edit Account",
       "code": "Code",
@@ -1714,7 +1737,6 @@
       "type_expense": "Expense",
       "parent_account": "Parent Account",
       "no_parent": "No parent (root account)",
-      "description": "Description",
       "description_placeholder": "Optional account description",
       "status": "Status",
       "is_active": "Active",
@@ -1750,6 +1772,25 @@
       "description_col": "Description",
       "no_entries": "No Journal Entries Found",
       "no_entries_description": "There are no transactions in the selected date range."
+    },
+    "account_review": {
+      "title": "Account Review",
+      "description": "Review and confirm AI-suggested account assignments for transactions",
+      "pending_count": "{count} pending review",
+      "suggested_debit": "Suggested Debit",
+      "suggested_credit": "Suggested Credit",
+      "confirm": "Confirm",
+      "confirm_all": "Confirm Selected",
+      "no_pending": "No transactions pending review",
+      "confirmed_successfully": "Account assignment confirmed successfully",
+      "filter_type": "Transaction Type",
+      "all_types": "All Types",
+      "type_invoice": "Invoice",
+      "type_expense": "Expense",
+      "type_payment": "Payment",
+      "select_account": "Select Account",
+      "confirm_bulk_title": "Confirm Bulk Assignment",
+      "confirm_bulk_message": "Are you sure you want to confirm {count} transaction(s)?"
     },
     "exchange_rate": {
       "exchange_rate": "Exchange Rate",

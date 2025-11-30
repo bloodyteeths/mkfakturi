@@ -322,6 +322,84 @@ export const useAccountStore = (useWindow = false) => {
             })
         })
       },
+
+      /**
+       * Get account suggestion for a transaction
+       */
+      getSuggestion(type, id) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get(`/accounting/suggestions/${type}/${id}`)
+            .then((response) => {
+              resolve(response.data)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      /**
+       * Confirm account assignment for a transaction
+       */
+      confirmSuggestion(data) {
+        const notificationStore = useNotificationStore()
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/accounting/suggestions/confirm', data)
+            .then((response) => {
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('settings.account_review.confirmed_successfully'),
+              })
+              resolve(response.data)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      /**
+       * Get pending transactions for review
+       */
+      getPendingReview(params = {}) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get('/accounting/suggestions/pending', { params })
+            .then((response) => {
+              resolve(response.data)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      /**
+       * Bulk confirm account assignments
+       */
+      bulkConfirm(items) {
+        const notificationStore = useNotificationStore()
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/accounting/suggestions/bulk-confirm', { items })
+            .then((response) => {
+              notificationStore.showNotification({
+                type: 'success',
+                message: response.data.message || global.t('settings.account_review.confirmed_successfully'),
+              })
+              resolve(response.data)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
     },
   })()
 }

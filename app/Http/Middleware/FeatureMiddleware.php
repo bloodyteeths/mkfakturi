@@ -18,12 +18,17 @@ class FeatureMiddleware
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  $feature  The feature name to check (e.g., 'partner_portal')
+     * @param  string  $feature  The feature name to check (e.g., 'partner_portal', 'stock')
      */
     public function handle(Request $request, Closure $next, string $feature): Response
     {
-        // Check if feature is enabled in config
+        // Check if feature is enabled in config/features.php
         $featureEnabled = config("features.{$feature}.enabled", false);
+
+        // Also check config/facturino.php for Facturino-specific features
+        if (! $featureEnabled) {
+            $featureEnabled = config("facturino.features.{$feature}", false);
+        }
 
         if (! $featureEnabled) {
             return response()->json([
