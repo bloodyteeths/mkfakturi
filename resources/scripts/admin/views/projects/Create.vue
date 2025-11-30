@@ -134,8 +134,10 @@ const form = reactive({
 
 const statusOptions = computed(() => [
   { value: 'open', label: t('projects.statuses.open') },
-  { value: 'closed', label: t('projects.statuses.closed') },
+  { value: 'in_progress', label: t('projects.statuses.in_progress') },
+  { value: 'completed', label: t('projects.statuses.completed') },
   { value: 'on_hold', label: t('projects.statuses.on_hold') },
+  { value: 'cancelled', label: t('projects.statuses.cancelled') },
 ])
 
 const isEdit = computed(() => !!route.params.id)

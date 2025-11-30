@@ -43,9 +43,13 @@ class Project extends Model
     // Status constants
     public const STATUS_OPEN = 'open';
 
-    public const STATUS_CLOSED = 'closed';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+
+    public const STATUS_COMPLETED = 'completed';
 
     public const STATUS_ON_HOLD = 'on_hold';
+
+    public const STATUS_CANCELLED = 'cancelled';
 
     /**
      * The attributes that are mass assignable.

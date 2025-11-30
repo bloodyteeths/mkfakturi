@@ -43,7 +43,7 @@ class ProjectRequest extends FormRequest
             ],
             'description' => ['nullable', 'string', 'max:2000'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
-            'status' => ['nullable', 'string', 'in:open,closed,on_hold'],
+            'status' => ['nullable', 'string', 'in:open,in_progress,completed,on_hold,cancelled'],
             'budget_amount' => ['nullable', 'integer', 'min:0'],
             'currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
             'start_date' => ['nullable', 'date'],
