@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import { handleError } from '@/scripts/admin/helpers/error-handling'
+import { handleError } from '@/scripts/helpers/error-handling'
 
 /**
  * Project stub for initializing new project forms
@@ -262,10 +262,13 @@ export const useProjectStore = (useWindow = false) => {
 
       /**
        * Fetch project summary (financial totals)
+       *
+       * @param {number} projectId
+       * @param {object} params - Optional params { from_date, to_date }
        */
-      async fetchProjectSummary(projectId) {
+      async fetchProjectSummary(projectId, params = {}) {
         try {
-          const response = await axios.get(`/api/v1/projects/${projectId}/summary`)
+          const response = await axios.get(`/api/v1/projects/${projectId}/summary`, { params })
 
           this.currentProjectSummary = response.data.data
 
