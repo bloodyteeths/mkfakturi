@@ -353,8 +353,9 @@ async function loadSummary(params = {}) {
   isLoadingSummary.value = true
   try {
     const summaryResponse = await projectStore.fetchProjectSummary(route.params.id, params)
-    if (summaryResponse?.data) {
-      summary.value = summaryResponse.data
+    // Response structure: { data: { success: true, data: {...summary} } }
+    if (summaryResponse?.data?.data) {
+      summary.value = summaryResponse.data.data
     }
   } catch (error) {
     console.error('Error fetching project summary:', error)
