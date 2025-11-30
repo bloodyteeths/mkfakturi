@@ -15,29 +15,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add warehouse_id to invoice_items
-        Schema::table('invoice_items', function (Blueprint $table) {
-            $table->unsignedBigInteger('warehouse_id')->nullable()->after('item_id');
+        // Add warehouse_id to invoice_items (if not already exists)
+        if (!Schema::hasColumn('invoice_items', 'warehouse_id')) {
+            Schema::table('invoice_items', function (Blueprint $table) {
+                $table->unsignedBigInteger('warehouse_id')->nullable()->after('item_id');
 
-            $table->foreign('warehouse_id')
-                ->references('id')
-                ->on('warehouses')
-                ->onDelete('set null');
+                $table->foreign('warehouse_id')
+                    ->references('id')
+                    ->on('warehouses')
+                    ->onDelete('set null');
 
-            $table->index('warehouse_id');
-        });
+                $table->index('warehouse_id');
+            });
+        }
 
-        // Add warehouse_id to bill_items
-        Schema::table('bill_items', function (Blueprint $table) {
-            $table->unsignedBigInteger('warehouse_id')->nullable()->after('item_id');
+        // Add warehouse_id to bill_items (if not already exists)
+        if (!Schema::hasColumn('bill_items', 'warehouse_id')) {
+            Schema::table('bill_items', function (Blueprint $table) {
+                $table->unsignedBigInteger('warehouse_id')->nullable()->after('item_id');
 
-            $table->foreign('warehouse_id')
-                ->references('id')
-                ->on('warehouses')
-                ->onDelete('set null');
+                $table->foreign('warehouse_id')
+                    ->references('id')
+                    ->on('warehouses')
+                    ->onDelete('set null');
 
-            $table->index('warehouse_id');
-        });
+                $table->index('warehouse_id');
+            });
+        }
     }
 
     /**
