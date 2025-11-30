@@ -151,11 +151,11 @@ const selectedCurrency = computed(() => {
   return globalStore.currencies.find(c => c.id === form.currency_id)
 })
 
-const rules = computed(() => ({
+const rules = {
   name: {
     required: helpers.withMessage(t('validation.required'), required),
   },
-}))
+}
 
 const v$ = useVuelidate(rules, form)
 
@@ -175,13 +175,16 @@ function hydrateForm(data) {
 
 async function handleSubmit() {
   console.log('handleSubmit called')
-  console.log('v$.value:', v$.value)
+  console.log('form.name:', form.name)
+  console.log('form values:', JSON.stringify(form))
+  console.log('v$.value.name.$model:', v$.value.name?.$model)
   console.log('v$.value.$invalid:', v$.value.$invalid)
 
   v$.value.$touch()
 
   if (v$.value.$invalid) {
     console.log('Form is invalid, errors:', v$.value.$errors)
+    console.log('name errors:', v$.value.name?.$errors)
     return
   }
 
