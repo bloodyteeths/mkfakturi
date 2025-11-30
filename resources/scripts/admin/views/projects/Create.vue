@@ -174,13 +174,21 @@ function hydrateForm(data) {
 }
 
 async function handleSubmit() {
+  console.log('handleSubmit called')
+  console.log('v$.value:', v$.value)
+  console.log('v$.value.$invalid:', v$.value.$invalid)
+
   v$.value.$touch()
+
   if (v$.value.$invalid) {
+    console.log('Form is invalid, errors:', v$.value.$errors)
     return
   }
 
+  console.log('Form is valid, proceeding with save')
   isLoading.value = true
   const payload = { ...form }
+  console.log('Payload:', payload)
 
   try {
     if (isEdit.value) {
@@ -216,4 +224,4 @@ onMounted(async () => {
   }
 })
 </script>
-// CLAUDE-CHECKPOINT
+<!-- CLAUDE-CHECKPOINT -->
