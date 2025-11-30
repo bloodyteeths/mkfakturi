@@ -10,6 +10,7 @@ use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Projects Controller
@@ -24,29 +25,40 @@ class ProjectsController extends Controller
      */
     public function index(Request $request): JsonResponse|AnonymousResourceCollection
     {
-        $this->authorize('viewAny', Project::class);
+        try {
+            $this->authorize('viewAny', Project::class);
 
-        $limit = $request->input('limit', 10);
+            $limit = $request->input('limit', 10);
 
-        $projects = Project::with([
-            'customer',
-            'currency',
-            'company',
-            'creator',
-        ])
-            ->withCount(['invoices', 'expenses', 'payments'])
-            ->whereCompany()
-            ->applyFilters($request->all())
-            ->paginateData($limit);
+            $projects = Project::with([
+                'customer',
+                'currency',
+                'company',
+                'creator',
+            ])
+                ->withCount(['invoices', 'expenses', 'payments'])
+                ->whereCompany()
+                ->applyFilters($request->all())
+                ->paginateData($limit);
 
-        return ProjectResource::collection($projects)
-            ->additional([
-                'meta' => [
-                    'project_total_count' => Project::whereCompany()->count(),
-                    'open_count' => Project::whereCompany()->open()->count(),
-                    'closed_count' => Project::whereCompany()->closed()->count(),
-                ],
+            return ProjectResource::collection($projects)
+                ->additional([
+                    'meta' => [
+                        'project_total_count' => Project::whereCompany()->count(),
+                        'open_count' => Project::whereCompany()->open()->count(),
+                        'in_progress_count' => Project::whereCompany()->inProgress()->count(),
+                        'completed_count' => Project::whereCompany()->completed()->count(),
+                        'on_hold_count' => Project::whereCompany()->onHold()->count(),
+                        'cancelled_count' => Project::whereCompany()->cancelled()->count(),
+                    ],
+                ]);
+        } catch (\Exception $e) {
+            Log::error('Project index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'company_id' => $request->header('company'),
             ]);
+            throw $e;
+        }
     }
 
     /**
@@ -54,14 +66,27 @@ class ProjectsController extends Controller
      */
     public function store(ProjectRequest $request): JsonResponse
     {
-        $this->authorize('create', Project::class);
+        try {
+            $this->authorize('create', Project::class);
 
-        $project = Project::createProject($request);
-        $project->load(['customer', 'currency', 'company', 'creator']);
+            Log::info('Creating project', ['data' => $request->validated()]);
 
-        return (new ProjectResource($project))
-            ->response()
-            ->setStatusCode(201);
+            $project = Project::createProject($request);
+            $project->load(['customer', 'currency', 'company', 'creator']);
+
+            Log::info('Project created successfully', ['id' => $project->id]);
+
+            return (new ProjectResource($project))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Exception $e) {
+            Log::error('Project store error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $request->all(),
+                'company_id' => $request->header('company'),
+            ]);
+            throw $e;
+        }
     }
 
     /**
