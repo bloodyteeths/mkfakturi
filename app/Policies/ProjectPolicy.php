@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
 
 /**
  * Project Policy
@@ -22,11 +21,18 @@ class ProjectPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-all-projects', Project::class)) {
+        // Check if user is owner - owners have all permissions
+        if ($user->isOwner()) {
             return true;
         }
 
-        return BouncerFacade::can('view-project', Project::class);
+        // Partners can view projects
+        if ($user->role === 'partner') {
+            return true;
+        }
+
+        // Use the user instance to check abilities (respects Bouncer scope)
+        return $user->can('view-project', Project::class);
     }
 
     /**
@@ -34,11 +40,15 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        if (BouncerFacade::can('view-all-projects', Project::class)) {
+        if ($user->isOwner()) {
             return true;
         }
 
-        return BouncerFacade::can('view-project', Project::class);
+        if ($user->role === 'partner') {
+            return true;
+        }
+
+        return $user->can('view-project', $project);
     }
 
     /**
@@ -46,7 +56,15 @@ class ProjectPolicy
      */
     public function create(User $user): bool
     {
-        return BouncerFacade::can('create-project', Project::class);
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        if ($user->role === 'partner') {
+            return true;
+        }
+
+        return $user->can('create-project', Project::class);
     }
 
     /**
@@ -54,7 +72,15 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project): bool
     {
-        return BouncerFacade::can('edit-project', Project::class);
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        if ($user->role === 'partner') {
+            return true;
+        }
+
+        return $user->can('edit-project', $project);
     }
 
     /**
@@ -62,7 +88,15 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project): bool
     {
-        return BouncerFacade::can('delete-project', Project::class);
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        if ($user->role === 'partner') {
+            return true;
+        }
+
+        return $user->can('delete-project', $project);
     }
 
     /**
@@ -70,7 +104,15 @@ class ProjectPolicy
      */
     public function deleteMultiple(User $user): bool
     {
-        return BouncerFacade::can('delete-project', Project::class);
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        if ($user->role === 'partner') {
+            return true;
+        }
+
+        return $user->can('delete-project', Project::class);
     }
 
     /**
@@ -78,7 +120,11 @@ class ProjectPolicy
      */
     public function restore(User $user, Project $project): bool
     {
-        return BouncerFacade::can('delete-project', Project::class);
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        return $user->can('delete-project', $project);
     }
 
     /**
@@ -86,7 +132,11 @@ class ProjectPolicy
      */
     public function forceDelete(User $user, Project $project): bool
     {
-        return BouncerFacade::can('delete-project', Project::class);
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        return $user->can('delete-project', $project);
     }
 }
 
