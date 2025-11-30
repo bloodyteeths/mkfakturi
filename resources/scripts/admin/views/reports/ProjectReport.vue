@@ -453,7 +453,7 @@ async function loadReports() {
       params.status = filters.status
     }
 
-    const response = await axios.get('/api/v1/reports/projects', { params })
+    const response = await axios.get('/reports/projects', { params })
     reportData.value = response.data
   } catch (error) {
     notificationStore.showNotification({
@@ -467,7 +467,7 @@ async function loadReports() {
 
 async function loadCustomers() {
   try {
-    const response = await axios.get('/api/v1/customers', {
+    const response = await axios.get('/customers', {
       params: { limit: 'all' },
     })
     customers.value = response.data.data || []
@@ -483,7 +483,7 @@ async function viewProjectDetail(projectId) {
       to_date: filters.to_date,
     }
 
-    const response = await axios.get(`/api/v1/reports/projects/${projectId}`, { params })
+    const response = await axios.get(`/reports/projects/${projectId}`, { params })
     projectDetail.value = response.data
     selectedProject.value = response.data.project
     showDetailModal.value = true

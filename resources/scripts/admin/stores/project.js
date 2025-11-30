@@ -119,7 +119,7 @@ export const useProjectStore = (useWindow = false) => {
        */
       async fetchProjects(params = {}) {
         try {
-          const response = await axios.get('/api/v1/projects', { params })
+          const response = await axios.get('/projects', { params })
 
           this.projects = response.data.data
           this.totalProjects = response.data.meta?.project_total_count || 0
@@ -138,7 +138,7 @@ export const useProjectStore = (useWindow = false) => {
        */
       async fetchProjectList(params = {}) {
         try {
-          const response = await axios.get('/api/v1/projects/list', { params })
+          const response = await axios.get('/projects/list', { params })
 
           this.projectList = response.data.data || []
 
@@ -154,7 +154,7 @@ export const useProjectStore = (useWindow = false) => {
        */
       async fetchProject(id) {
         try {
-          const response = await axios.get(`/api/v1/projects/${id}`)
+          const response = await axios.get(`/projects/${id}`)
 
           this.currentProject = response.data.data
 
@@ -172,7 +172,7 @@ export const useProjectStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
 
         try {
-          const response = await axios.post('/api/v1/projects', data)
+          const response = await axios.post('/projects', data)
 
           // Add to local state
           this.projects.unshift(response.data.data)
@@ -200,7 +200,7 @@ export const useProjectStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
 
         try {
-          const response = await axios.put(`/api/v1/projects/${data.id}`, data)
+          const response = await axios.put(`/projects/${data.id}`, data)
 
           // Update in local state
           const index = this.projects.findIndex((p) => p.id === data.id)
@@ -229,7 +229,7 @@ export const useProjectStore = (useWindow = false) => {
         const notificationStore = useNotificationStore()
 
         try {
-          const response = await axios.post('/api/v1/projects/delete', { ids })
+          const response = await axios.post('/projects/delete', { ids })
 
           // Remove from local state
           ids.forEach((id) => {
@@ -268,7 +268,7 @@ export const useProjectStore = (useWindow = false) => {
        */
       async fetchProjectSummary(projectId, params = {}) {
         try {
-          const response = await axios.get(`/api/v1/projects/${projectId}/summary`, { params })
+          const response = await axios.get(`/projects/${projectId}/summary`, { params })
 
           this.currentProjectSummary = response.data.data
 
@@ -284,7 +284,7 @@ export const useProjectStore = (useWindow = false) => {
        */
       async fetchProjectDocuments(projectId, type = 'all') {
         try {
-          const response = await axios.get(`/api/v1/projects/${projectId}/documents`, {
+          const response = await axios.get(`/projects/${projectId}/documents`, {
             params: { type },
           })
 

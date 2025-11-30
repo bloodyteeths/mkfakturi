@@ -107,7 +107,7 @@ export const useStockStore = (useWindow = false) => {
       async fetchWarehouses() {
         this.isLoadingWarehouses = true
         try {
-          const response = await axios.get('/api/v1/stock/warehouses')
+          const response = await axios.get('/stock/warehouses')
           this.warehouses = response.data.data || []
           return response
         } catch (err) {
@@ -127,7 +127,7 @@ export const useStockStore = (useWindow = false) => {
       async fetchItemCard(itemId, params = {}) {
         this.isLoadingItemCard = true
         try {
-          const response = await axios.get(`/api/v1/stock/items/${itemId}/card`, { params })
+          const response = await axios.get(`/stock/items/${itemId}/card`, { params })
           const data = response.data.data
 
           this.itemCard = {
@@ -157,7 +157,7 @@ export const useStockStore = (useWindow = false) => {
       async fetchWarehouseInventory(warehouseId, params = {}) {
         this.isLoadingInventory = true
         try {
-          const response = await axios.get(`/api/v1/stock/warehouses/${warehouseId}/inventory`, { params })
+          const response = await axios.get(`/stock/warehouses/${warehouseId}/inventory`, { params })
           const data = response.data.data
 
           this.warehouseInventory = {
@@ -184,7 +184,7 @@ export const useStockStore = (useWindow = false) => {
       async fetchInventoryValuation(params = {}) {
         this.isLoadingValuation = true
         try {
-          const response = await axios.get('/api/v1/stock/inventory-valuation', { params })
+          const response = await axios.get('/stock/inventory-valuation', { params })
           const data = response.data.data
 
           this.inventoryValuation = {
@@ -212,7 +212,7 @@ export const useStockStore = (useWindow = false) => {
       async fetchInventoryList(params = {}) {
         this.isLoadingList = true
         try {
-          const response = await axios.get('/api/v1/stock/inventory-list', { params })
+          const response = await axios.get('/stock/inventory-list', { params })
           const data = response.data.data
 
           this.inventoryList = {
