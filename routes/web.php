@@ -763,3 +763,4 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         return response('<pre>' . implode("\n", $output) . '</pre>');
     });
 }
+

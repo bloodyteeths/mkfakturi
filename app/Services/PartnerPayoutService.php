@@ -8,9 +8,20 @@ use App\Models\Payout;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Partner\Controllers\StripeConnectController;
+use Stripe\StripeClient;
 
 class PartnerPayoutService
 {
+    protected ?StripeClient $stripe = null;
+
+    public function __construct()
+    {
+        if (config('services.stripe.secret')) {
+            $this->stripe = new StripeClient(config('services.stripe.secret'));
+        }
+    }
+
     /**
      * Process payouts for all eligible partners
      * Run this as a scheduled job (5th of each month)
@@ -39,7 +50,7 @@ class PartnerPayoutService
 
     /**
      * Process payout for a single partner
-     * Creates a pending payout record that will be processed via Wise
+     * Creates a pending payout record - uses Stripe Connect if partner has connected account
      */
     public function processPartnerPayout(Partner $partner, Carbon $cutoffDate)
     {
@@ -61,15 +72,18 @@ class PartnerPayoutService
             $totalAmount = $events->sum('amount');
             $monthRef = Carbon::now()->subMonth()->format('Y-m');
 
-            // Create payout record (will be processed via Wise)
+            // Determine payout method based on partner setup
+            $payoutMethod = $partner->stripe_account_id ? 'stripe_connect' : 'bank_transfer';
+
+            // Create payout record
             $payout = Payout::create([
                 'partner_id' => $partner->id,
                 'amount' => $totalAmount,
-                'currency' => 'EUR', // Wise transfers in EUR
+                'currency' => 'EUR', // Cross-border payouts to MK in EUR
                 'status' => 'pending',
                 'payout_date' => Carbon::now()->addDays(5), // 5th of next month
-                'payout_method' => 'wise', // Using Wise for all partner payouts
-                'payment_method' => $partner->payment_method ?? 'wise',
+                'payout_method' => $payoutMethod,
+                'payment_method' => $partner->payment_method ?? $payoutMethod,
                 'payment_reference' => null,
                 'details' => [
                     'month_ref' => $monthRef,
@@ -90,7 +104,13 @@ class PartnerPayoutService
                 'partner_id' => $partner->id,
                 'amount' => $totalAmount,
                 'month_ref' => $monthRef,
+                'method' => $payoutMethod,
             ]);
+
+            // Auto-process via Stripe Connect if partner has connected account
+            if ($payoutMethod === 'stripe_connect' && $this->stripe) {
+                $this->processStripeConnectPayout($payout, $partner);
+            }
 
             return $payout;
 
@@ -105,42 +125,125 @@ class PartnerPayoutService
     }
 
     /**
-     * Get pending payouts ready for Wise batch transfer
+     * Process payout via Stripe Connect (cross-border to Macedonia)
+     */
+    public function processStripeConnectPayout(Payout $payout, Partner $partner)
+    {
+        if (!$this->stripe || !$partner->stripe_account_id) {
+            Log::warning('Cannot process Stripe Connect payout - missing credentials or account', [
+                'payout_id' => $payout->id,
+                'partner_id' => $partner->id,
+            ]);
+            return;
+        }
+
+        try {
+            // Convert EUR amount to cents
+            $amountCents = (int) round($payout->amount * 100);
+
+            // Create transfer to connected account
+            $transfer = $this->stripe->transfers->create([
+                'amount' => $amountCents,
+                'currency' => 'eur', // Cross-border payouts to MK in EUR
+                'destination' => $partner->stripe_account_id,
+                'description' => "Partner commission payout - {$payout->details['month_ref']}",
+                'metadata' => [
+                    'payout_id' => $payout->id,
+                    'partner_id' => $partner->id,
+                    'month_ref' => $payout->details['month_ref'] ?? null,
+                    'type' => 'commission_payout',
+                ],
+            ]);
+
+            // Update payout with Stripe transfer ID
+            $payout->update([
+                'status' => 'processing',
+                'stripe_transfer_id' => $transfer->id,
+                'payment_reference' => $transfer->id,
+            ]);
+
+            Log::info('Stripe Connect transfer created', [
+                'payout_id' => $payout->id,
+                'partner_id' => $partner->id,
+                'transfer_id' => $transfer->id,
+                'amount_cents' => $amountCents,
+            ]);
+
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            Log::error('Stripe Connect transfer failed', [
+                'payout_id' => $payout->id,
+                'partner_id' => $partner->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $payout->update([
+                'status' => 'failed',
+                'details' => array_merge($payout->details ?? [], [
+                    'stripe_error' => $e->getMessage(),
+                ]),
+            ]);
+        }
+    }
+
+    /**
+     * Get pending payouts ready for processing
      */
     public function getPendingPayouts()
     {
         return Payout::where('status', 'pending')
-            ->where('payout_method', 'wise')
             ->with('partner.user')
             ->get();
     }
 
     /**
-     * Mark payout as processing (when Wise transfer is initiated)
+     * Get pending payouts for Stripe Connect processing
      */
-    public function markAsProcessing(Payout $payout, string $wiseTransferId)
+    public function getPendingStripeConnectPayouts()
+    {
+        return Payout::where('status', 'pending')
+            ->where('payout_method', 'stripe_connect')
+            ->with('partner.user')
+            ->get();
+    }
+
+    /**
+     * Get pending payouts for manual bank transfer
+     */
+    public function getPendingBankTransferPayouts()
+    {
+        return Payout::where('status', 'pending')
+            ->where('payout_method', 'bank_transfer')
+            ->with('partner.user')
+            ->get();
+    }
+
+    /**
+     * Mark payout as processing
+     */
+    public function markAsProcessing(Payout $payout, string $reference)
     {
         $payout->update([
             'status' => 'processing',
-            'payment_reference' => $wiseTransferId,
+            'payment_reference' => $reference,
         ]);
     }
 
     /**
-     * Mark payout as completed (when Wise transfer is confirmed)
+     * Mark payout as completed (webhook callback from Stripe)
      */
-    public function markAsCompleted(Payout $payout, array $wiseMetadata = [])
+    public function markAsCompleted(Payout $payout, array $metadata = [])
     {
         $payout->update([
             'status' => 'completed',
             'processed_at' => now(),
-            'details' => array_merge($payout->details ?? [], ['wise' => $wiseMetadata]),
+            'details' => array_merge($payout->details ?? [], $metadata),
         ]);
 
-        Log::info('Partner payout completed via Wise', [
+        Log::info('Partner payout completed', [
             'payout_id' => $payout->id,
             'partner_id' => $payout->partner_id,
             'amount' => $payout->amount,
+            'method' => $payout->payout_method,
         ]);
     }
 
@@ -160,4 +263,42 @@ class PartnerPayoutService
             'reason' => $reason,
         ]);
     }
+
+    /**
+     * Handle Stripe transfer.paid webhook event
+     * Called when Stripe confirms transfer to connected account
+     */
+    public function handleStripeTransferPaid(string $transferId)
+    {
+        $payout = Payout::where('stripe_transfer_id', $transferId)->first();
+
+        if (!$payout) {
+            Log::warning('Received transfer.paid webhook for unknown transfer', [
+                'transfer_id' => $transferId,
+            ]);
+            return;
+        }
+
+        $this->markAsCompleted($payout, [
+            'stripe_confirmed_at' => now()->toISOString(),
+        ]);
+    }
+
+    /**
+     * Handle Stripe transfer.failed webhook event
+     */
+    public function handleStripeTransferFailed(string $transferId, string $reason)
+    {
+        $payout = Payout::where('stripe_transfer_id', $transferId)->first();
+
+        if (!$payout) {
+            Log::warning('Received transfer.failed webhook for unknown transfer', [
+                'transfer_id' => $transferId,
+            ]);
+            return;
+        }
+
+        $this->markAsFailed($payout, "Stripe transfer failed: {$reason}");
+    }
 }
+// CLAUDE-CHECKPOINT

@@ -1205,6 +1205,23 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     Route::get('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'getBankDetails']);
     Route::post('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'updateBankDetails'])->middleware('throttle:strict');
     Route::get('/payouts/{payout}/receipt', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'downloadReceipt']);
+
+    // Stripe Connect for partner payouts (Cross-border to Macedonia)
+    Route::prefix('/stripe-connect')->group(function () {
+        // Account management
+        Route::post('/account', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'createConnectedAccount'])->middleware('throttle:strict');
+        Route::get('/status', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'getAccountStatus']);
+        Route::delete('/account', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'deleteConnectedAccount'])->middleware('throttle:strict');
+
+        // Onboarding - generates Stripe-hosted Account Link
+        Route::post('/account-link', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'createAccountLink'])->middleware('throttle:strict');
+
+        // Express Dashboard - generates login link for partner
+        Route::post('/dashboard-link', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'createDashboardLink'])->middleware('throttle:strict');
+
+        // Bank account management
+        Route::put('/bank-account', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'updateBankAccount'])->middleware('throttle:strict');
+    });
 });
 
 // AI Financial Assistant Routes
