@@ -85,6 +85,11 @@ class InvoicesRequest extends FormRequest
                 'numeric',
                 'required',
             ],
+            'project_id' => [
+                'nullable',
+                'integer',
+                'exists:projects,id',
+            ],
         ];
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
@@ -136,6 +141,7 @@ class InvoicesRequest extends FormRequest
                 'base_tax' => $this->tax * $exchange_rate,
                 'base_due_amount' => $this->total * $exchange_rate,
                 'currency_id' => $currency,
+                'project_id' => $this->project_id,
             ])
             ->toArray();
     }

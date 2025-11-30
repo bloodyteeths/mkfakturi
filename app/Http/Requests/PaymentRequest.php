@@ -48,6 +48,11 @@ class PaymentRequest extends FormRequest
             'notes' => [
                 'nullable',
             ],
+            'project_id' => [
+                'nullable',
+                'integer',
+                'exists:projects,id',
+            ],
         ];
 
         if ($this->isMethod('PUT')) {
@@ -88,6 +93,7 @@ class PaymentRequest extends FormRequest
                 'exchange_rate' => $exchange_rate,
                 'base_amount' => $this->amount * $exchange_rate,
                 'currency_id' => $currency,
+                'project_id' => $this->project_id,
             ])
             ->toArray();
     }
