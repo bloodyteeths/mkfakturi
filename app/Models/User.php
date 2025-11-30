@@ -206,6 +206,14 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * Get the partner record associated with this user (for partner portal)
+     */
+    public function partner(): HasOne
+    {
+        return $this->hasOne(Partner::class);
+    }
+
     public function billingAddress(): HasOne
     {
         return $this->hasOne(Address::class)->where('type', Address::BILLING_TYPE);

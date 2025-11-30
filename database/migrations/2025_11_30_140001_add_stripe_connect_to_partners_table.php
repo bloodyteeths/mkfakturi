@@ -21,6 +21,9 @@ return new class extends Migration
 
             // When payouts were enabled
             $table->timestamp('stripe_payouts_enabled_at')->nullable()->after('stripe_account_status');
+
+            // Payment method preference: stripe_connect, bank_transfer, wise
+            $table->string('payment_method')->default('bank_transfer')->after('stripe_payouts_enabled_at');
         });
     }
 
@@ -34,6 +37,7 @@ return new class extends Migration
                 'stripe_account_id',
                 'stripe_account_status',
                 'stripe_payouts_enabled_at',
+                'payment_method',
             ]);
         });
     }

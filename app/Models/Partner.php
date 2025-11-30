@@ -27,6 +27,11 @@ class Partner extends Model
         'kyc_status',
         'user_id',
         'notes',
+        // Stripe Connect fields
+        'stripe_account_id',
+        'stripe_account_status',
+        'stripe_payouts_enabled_at',
+        'payment_method',
     ];
 
     protected $casts = [
