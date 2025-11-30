@@ -117,6 +117,7 @@ use App\Http\Controllers\V1\Installation\LoginController;
 use App\Http\Controllers\V1\Installation\OnboardingWizardController;
 use App\Http\Controllers\V1\Installation\RequirementsController;
 use App\Http\Controllers\V1\Webhook\CronJobController;
+use Modules\Mk\Partner\Controllers\StripeConnectController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -291,6 +292,7 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::post('/items/delete', [ItemsController::class, 'delete'])->middleware('throttle:strict');
+            Route::get('/items/lookup-barcode', [ItemsController::class, 'lookupByBarcode']);
 
             Route::resource('items', ItemsController::class);
 
@@ -700,6 +702,62 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/templates', [MigrationController::class, 'templates']);
                 Route::get('/templates/{type}', [MigrationController::class, 'downloadTemplate'])->name('migration.download-template');
             });
+
+            // Stock Management Reports
+            // Feature flag: FACTURINO_STOCK_V1_ENABLED
+            // ----------------------------------
+
+            Route::prefix('stock')->group(function () {
+                // Warehouse list for dropdowns
+                Route::get('/warehouses', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'warehouses']);
+
+                // Item Stock Card (movement history with running balance)
+                Route::get('/items/{item}/card', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'itemCard']);
+
+                // Warehouse Inventory (current stock by warehouse)
+                Route::get('/warehouses/{warehouse}/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'warehouseInventory']);
+
+                // Inventory Valuation (total stock value report)
+                Route::get('/inventory-valuation', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryValuation']);
+
+                // Inventory List (for physical counting)
+                Route::get('/inventory-list', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryList']);
+            });
+
+            // Daily Closing & Period Lock (Phase 3)
+            // ----------------------------------
+            Route::prefix('accounting')->group(function () {
+                // Daily Closings
+                Route::get('/daily-closings', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'indexDailyClosings']);
+                Route::post('/daily-closings', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'storeDailyClosing']);
+                Route::delete('/daily-closings/{id}', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'destroyDailyClosing']);
+
+                // Period Locks
+                Route::get('/period-locks', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'indexPeriodLocks']);
+                Route::post('/period-locks', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'storePeriodLock']);
+                Route::delete('/period-locks/{id}', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'destroyPeriodLock']);
+
+                // Check if date is locked
+                Route::get('/check-date', [\App\Http\Controllers\V1\Admin\Accounting\PeriodLockController::class, 'checkDate']);
+
+                // Chart of Accounts (Phase 4)
+                Route::get('/accounts', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'index']);
+                Route::get('/accounts/tree', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'tree']);
+                Route::get('/accounts/{id}', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'show']);
+                Route::post('/accounts', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'store']);
+                Route::put('/accounts/{id}', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'update']);
+                Route::delete('/accounts/{id}', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'destroy']);
+
+                // Account Mappings
+                Route::get('/account-mappings', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'indexMappings']);
+                Route::post('/account-mappings', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'upsertMapping']);
+                Route::delete('/account-mappings/{id}', [\App\Http\Controllers\V1\Admin\Accounting\AccountController::class, 'destroyMapping']);
+
+                // Journal Export (Phase 4)
+                Route::get('/journals', [\App\Http\Controllers\V1\Admin\Accounting\JournalExportController::class, 'index']);
+                Route::get('/journals/export', [\App\Http\Controllers\V1\Admin\Accounting\JournalExportController::class, 'export']);
+                Route::get('/journals/formats', [\App\Http\Controllers\V1\Admin\Accounting\JournalExportController::class, 'formats']);
+            });
             // CLAUDE-CHECKPOINT
 
             // PSD2 Banking Integration (OAuth + Transaction Management)
@@ -1048,6 +1106,7 @@ Route::prefix('webhooks')->group(function () {
     Route::post('cpay', [\App\Http\Controllers\Webhooks\WebhookController::class, 'cpay']);
     Route::post('bank/nlb', [\App\Http\Controllers\Webhooks\WebhookController::class, 'nlbBank']);
     Route::post('bank/stopanska', [\App\Http\Controllers\Webhooks\WebhookController::class, 'stopanskaBank']);
+    Route::post('stripe', [\App\Http\Controllers\Webhooks\WebhookController::class, 'stripe']);
 
     // Subscription webhooks
     Route::post('paddle/subscription', [\Modules\Mk\Billing\Controllers\PaddleWebhookController::class, 'handleWebhook']);

@@ -66,6 +66,12 @@ const FeatureFlagsSettings = () =>
   import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
 const PartnerSettings = () =>
   import('@/scripts/admin/views/settings/InvitePartnerSection.vue')
+const DailyClosingSetting = () =>
+  import('@/scripts/admin/views/settings/DailyClosingSetting.vue')
+const PeriodLockSetting = () =>
+  import('@/scripts/admin/views/settings/PeriodLockSetting.vue')
+const ChartOfAccountsSetting = () =>
+  import('@/scripts/admin/views/settings/ChartOfAccountsSetting.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -91,6 +97,16 @@ const SuppliersIndex = () =>
 const SupplierCreate = () =>
   import('@/scripts/admin/views/suppliers/Create.vue')
 const SupplierView = () => import('@/scripts/admin/views/suppliers/View.vue')
+
+// Projects
+const ProjectsIndex = () => import('@/scripts/admin/views/projects/Index.vue')
+const ProjectCreate = () => import('@/scripts/admin/views/projects/Create.vue')
+const ProjectView = () => import('@/scripts/admin/views/projects/View.vue')
+
+// Stock Reports (Phase 2: Stock Module)
+const StockItemCard = () => import('@/scripts/admin/views/stock/ItemCard.vue')
+const StockWarehouseInventory = () => import('@/scripts/admin/views/stock/WarehouseInventory.vue')
+const StockInventoryValuation = () => import('@/scripts/admin/views/stock/InventoryValuation.vue')
 
 // Bills (Accounts Payable)
 const BillsIndex = () => import('@/scripts/admin/views/bills/Index.vue')
@@ -277,6 +293,53 @@ export default [
         name: 'suppliers.view',
         meta: { ability: abilities.VIEW_SUPPLIER },
         component: SupplierView,
+      },
+
+      // Projects
+      {
+        path: 'projects',
+        name: 'projects.index',
+        meta: { ability: abilities.VIEW_PROJECT },
+        component: ProjectsIndex,
+      },
+      {
+        path: 'projects/create',
+        name: 'projects.create',
+        meta: { ability: abilities.CREATE_PROJECT },
+        component: ProjectCreate,
+      },
+      {
+        path: 'projects/:id/edit',
+        name: 'projects.edit',
+        meta: { ability: abilities.EDIT_PROJECT },
+        component: ProjectCreate,
+      },
+      {
+        path: 'projects/:id/view',
+        name: 'projects.view',
+        meta: { ability: abilities.VIEW_PROJECT },
+        component: ProjectView,
+      },
+
+      // Stock Reports (Phase 2: Stock Module)
+      // Note: These routes are only functional when FACTURINO_STOCK_V1_ENABLED=true
+      {
+        path: 'stock/item-card',
+        name: 'stock.item-card',
+        meta: { ability: abilities.VIEW_STOCK_REPORTS },
+        component: StockItemCard,
+      },
+      {
+        path: 'stock/warehouse-inventory',
+        name: 'stock.warehouse-inventory',
+        meta: { ability: abilities.VIEW_STOCK_REPORTS },
+        component: StockWarehouseInventory,
+      },
+      {
+        path: 'stock/inventory-valuation',
+        name: 'stock.inventory-valuation',
+        meta: { ability: abilities.VIEW_STOCK_REPORTS },
+        component: StockInventoryValuation,
       },
 
       // Payments
@@ -491,6 +554,24 @@ export default [
             name: 'settings.certificates',
             meta: { isOwner: true },
             component: () => import('@/js/pages/settings/CertUpload.vue'),
+          },
+          {
+            path: 'daily-closing',
+            name: 'settings.daily-closing',
+            meta: { ability: abilities.MANAGE_CLOSINGS },
+            component: DailyClosingSetting,
+          },
+          {
+            path: 'period-lock',
+            name: 'settings.period-lock',
+            meta: { ability: abilities.MANAGE_CLOSINGS },
+            component: PeriodLockSetting,
+          },
+          {
+            path: 'chart-of-accounts',
+            name: 'settings.chart-of-accounts',
+            meta: { ability: abilities.MANAGE_CLOSINGS },
+            component: ChartOfAccountsSetting,
           },
         ],
       },
