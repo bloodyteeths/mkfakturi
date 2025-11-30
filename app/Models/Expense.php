@@ -33,6 +33,9 @@ class Expense extends Model implements HasMedia
         'expense_category_id',
         'company_id',
         'customer_id',
+        'supplier_id',
+        'invoice_number',
+        'project_id',
         'payment_method_id',
         'currency_id',
         'creator_id',
@@ -82,6 +85,69 @@ class Expense extends Model implements HasMedia
     public function creator(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'creator_id');
+    }
+
+    /**
+     * Get the project this expense belongs to.
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * Get the supplier this expense is from.
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    /**
+     * Check for potential duplicate expenses.
+     * Duplicates are identified by: same company + same supplier + same invoice_number
+     *
+     * @param  int  $companyId
+     * @param  int|null  $supplierId
+     * @param  string|null  $invoiceNumber
+     * @param  int|null  $excludeId  Expense ID to exclude (for updates)
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function findPotentialDuplicates(
+        int $companyId,
+        ?int $supplierId,
+        ?string $invoiceNumber,
+        ?int $excludeId = null
+    ) {
+        // If no supplier or invoice number, no duplicate check needed
+        if (empty($supplierId) || empty($invoiceNumber)) {
+            return collect();
+        }
+
+        $query = self::where('company_id', $companyId)
+            ->where('supplier_id', $supplierId)
+            ->where('invoice_number', $invoiceNumber);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->with(['supplier', 'category'])->get();
+    }
+
+    /**
+     * Check if this expense would be a duplicate.
+     *
+     * @return bool
+     */
+    public function hasDuplicates(): bool
+    {
+        return self::findPotentialDuplicates(
+            $this->company_id,
+            $this->supplier_id,
+            $this->invoice_number,
+            $this->id
+        )->isNotEmpty();
     }
 
     public function getFormattedExpenseDateAttribute($value)

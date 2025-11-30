@@ -1,39 +1,117 @@
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:29] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
-[2025-11-19 02:28:29] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
-[2025-11-19 02:28:36] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-19 02:28:36] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-19 02:28:44] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
-[2025-11-19 02:28:44] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
-[2025-11-19 02:31:59] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:31:59] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_company_header":true,"company_header":"1"} 
-[2025-11-19 02:31:59] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:32:00] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:32:00] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:32:00] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:32:00] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:32:02] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/switch","method":"POST","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:32:02] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:32:20] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/bootstrap","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:32:20] production.INFO: Bootstrap controller reached {"authenticated":true,"user_id":4,"guard":"sanctum","session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_company_header":true,"company_header":"1"} 
-[2025-11-19 02:32:20] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:32:20] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:32:21] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:32:21] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET","guards":["sanctum"],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
-[2025-11-19 02:32:21] production.INFO: Authenticate middleware completed {"authenticated_after":true,"user_id_after":4} 
-[2025-11-19 02:33:53] production.INFO: Authenticate middleware handling request {"url":"https://app.facturino.mk/debug/logs","method":"GET","guards":[],"authenticated_before":true,"user_id_before":4,"session_id":"9cMcHd4R2GOzYGkSbtov4QXprye7DTEwJ83wX84r","has_session_cookie":true} 
+main-Bg-zeasb.js:142 🔥🔥🔥 CUSTOMER STORE MODULE LOADED - VERSION 2025-11-26-03:11 🔥🔥🔥
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Starting deletion for ID: 34
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Sending payload: {ids: Array(1)}
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] About to make axios call
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] THEN BLOCK EXECUTED - Success!
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Success response: {data: {…}, status: 200, statusText: '', headers: Si, config: {…}, …}
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Response data: {success: true}
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Response status: 200
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Response headers: Si {access-control-allow-origin: '*', cache-control: 'no-cache, private', content-security-policy: "default-src 'self'; script-src 'self' 'unsafe-inli…stors 'self'; base-uri 'self'; form-action 'self'", content-type: 'application/json', date: 'Wed, 26 Nov 2025 02:19:59 GMT', …}
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] CATCH BLOCK EXECUTED - Error!
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.catch
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error caught: TypeError: _.tc is not a function
+    at main-Bg-zeasb.js:142:12912
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.catch
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error response: undefined
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.catch
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error request: undefined
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.catch
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error message: _.tc is not a function
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.catch
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error config: undefined
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.catch
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26
+main-Bg-zeasb.js:142 [DELETE CUSTOMER] FINALLY BLOCK EXECUTED
+main-Bg-zeasb.js:142 Uncaught (in promise) TypeError: _.tc is not a function
+    at main-Bg-zeasb.js:142:12912
+(anonymous) @ main-Bg-zeasb.js:142
+Promise.then
+(anonymous) @ main-Bg-zeasb.js:142
+deleteCustomer @ main-Bg-zeasb.js:142
+U @ main-Bg-zeasb.js:42
+(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
+Promise.then
+I @ CustomerIndexDropdown-By_W2OgJ.js:1
+e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
+onClick @ main-Bg-zeasb.js:154
+onClick @ main-Bg-zeasb.js:154
+_c @ main-Bg-zeasb.js:20
+Zi @ main-Bg-zeasb.js:20
+a @ main-Bg-zeasb.js:26

@@ -75,7 +75,7 @@ class PartnerPayoutsController extends Controller
                 'pending' => $pending,
                 'thisMonth' => $thisMonth,
                 'nextPayout' => $nextPayout ? $nextPayout->amount : 0,
-                'nextPayoutDate' => $nextPayout ? $nextPayout->payout_date->toIso8601String() : null,
+                'nextPayoutDate' => $nextPayout ? $nextPayout->payout_date->toISOString() : null,
             ],
         ]);
     }

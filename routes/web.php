@@ -38,7 +38,7 @@ Route::get('/debug-auth', function () {
     return response()->json([
         'authenticated' => auth()->check(),
         'user_id' => auth()->id(),
-        'guard' => auth()->getDefaultDriver(),
+        'guard' => config('auth.defaults.guard'),
         'session_id' => session()->getId(),
         'session_driver' => config('session.driver'),
         'sanctum_stateful' => config('sanctum.stateful'),

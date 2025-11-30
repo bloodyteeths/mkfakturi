@@ -41,6 +41,25 @@ class ExpenseRequest extends FormRequest
             'customer_id' => [
                 'nullable',
             ],
+            'supplier_id' => [
+                'nullable',
+                'integer',
+                'exists:suppliers,id',
+            ],
+            'invoice_number' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+            'project_id' => [
+                'nullable',
+                'integer',
+                'exists:projects,id',
+            ],
+            'allow_duplicate' => [
+                'nullable',
+                'boolean',
+            ],
             'notes' => [
                 'nullable',
             ],
@@ -73,6 +92,7 @@ class ExpenseRequest extends FormRequest
         $exchange_rate = $company_currency != $current_currency ? $this->exchange_rate : 1;
 
         return collect($this->validated())
+            ->except(['allow_duplicate']) // Remove non-model field
             ->merge([
                 'creator_id' => $this->user()->id,
                 'company_id' => $this->header('company'),
@@ -81,5 +101,13 @@ class ExpenseRequest extends FormRequest
                 'currency_id' => $current_currency,
             ])
             ->toArray();
+    }
+
+    /**
+     * Check if user wants to allow duplicate
+     */
+    public function allowsDuplicate(): bool
+    {
+        return (bool) $this->input('allow_duplicate', false);
     }
 }

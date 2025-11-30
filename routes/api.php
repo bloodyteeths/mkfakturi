@@ -382,6 +382,20 @@ Route::prefix('/v1')->group(function () {
 
             Route::apiResource('categories', ExpenseCategoriesController::class);
 
+            // Projects
+            // ----------------------------------
+            // Phase 1.1 - Project Dimension feature for accountants
+
+            Route::get('/projects/list', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'list']);
+
+            Route::get('/projects/{project}/summary', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'summary']);
+
+            Route::get('/projects/{project}/documents', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'documents']);
+
+            Route::post('/projects/delete', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'delete'])->middleware('throttle:strict');
+
+            Route::apiResource('projects', \App\Http\Controllers\V1\Admin\Project\ProjectsController::class);
+
             // Recurring Expenses (Phase 4)
             // ----------------------------------
 

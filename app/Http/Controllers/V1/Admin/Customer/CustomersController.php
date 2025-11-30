@@ -14,7 +14,7 @@ class CustomersController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request)
     {
@@ -56,7 +56,7 @@ class CustomersController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\CustomerResource
      */
     public function store(Requests\CustomerRequest $request)
     {
@@ -70,7 +70,7 @@ class CustomersController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\CustomerResource
      */
     public function show(Customer $customer)
     {
@@ -83,7 +83,7 @@ class CustomersController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\CustomerResource
      */
     public function update(Requests\CustomerRequest $request, Customer $customer)
     {

@@ -20,7 +20,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Spatie\QueueableActions\QueueableAction;
 use League\Csv\Reader;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -36,7 +35,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
  */
 class ParseFileJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, QueueableAction;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public ImportJob $importJob;
 

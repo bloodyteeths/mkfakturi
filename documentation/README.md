@@ -1,193 +1,168 @@
-# MK Accounting - Documentation Index
+# Facturino Documentation
 
-Welcome to the centralized documentation hub for the MK Accounting (Facturino) project. All project documentation has been organized here for easy access.
+Welcome to the Facturino documentation hub. All project documentation is organized here by category.
 
-## 📁 Directory Structure
+## 📁 Documentation Structure
 
-```
-documentation/
-├── roadmaps/        # Product roadmaps and feature planning
-├── guides/          # User and developer guides
-├── reports/         # Audit reports and analysis
-├── summaries/       # Implementation and feature summaries
-├── deployment/      # Deployment and infrastructure docs
-└── testing/         # Testing documentation
-```
+### [01-deployment/](./01-deployment/)
+Production deployment guides, runbooks, and infrastructure setup.
+- **production/** - Production deployment procedures
+- **staging/** - Staging environment setup
+- **railway/** - Railway.app specific guides
+- **docker/** - Docker and containerization docs
 
----
-
-## 🗺️ Roadmaps
-
-Strategic planning and feature roadmaps for the project.
-
-| Document | Description |
-|----------|-------------|
-| [MASTER_ROADMAP.md](roadmaps/MASTER_ROADMAP.md) | Master project roadmap with all features |
-| [ROADMAP_DETAILED.md](roadmaps/ROADMAP_DETAILED.md) | Detailed implementation roadmap |
-| [ROADMAP_DEBUG_COMPREHENSIVE_SYSTEM_AUDIT.md](roadmaps/ROADMAP_DEBUG_COMPREHENSIVE_SYSTEM_AUDIT.md) | Debug and system audit roadmap |
-| [roadmap.md](roadmaps/roadmap.md) | Original project roadmap |
-| [roadmap_nov10.md](roadmaps/roadmap_nov10.md) | November 10 roadmap update |
-| [ROADMAP2.md](roadmaps/ROADMAP2.md) | Phase 2 roadmap |
-| [ROADMAP3.md](roadmaps/ROADMAP3.md) | Phase 3 roadmap |
-| [ROADMAP4.md](roadmaps/ROADMAP4.md) | Phase 4 roadmap |
-| [ROADMAP-5.md](roadmaps/ROADMAP-5.md) | Phase 5 roadmap |
-| [ROADMAP-DEBUG.md](roadmaps/ROADMAP-DEBUG.md) | Debug-focused roadmap |
-| [ROADMAP-FINAL.md](roadmaps/ROADMAP-FINAL.md) | Final release roadmap |
-| [ROADMAP-L10N.md](roadmaps/ROADMAP-L10N.md) | Localization roadmap |
-| [ROADMAP-UI.md](roadmaps/ROADMAP-UI.md) | UI/UX improvement roadmap |
-| [roadmap-livetest.md](roadmaps/roadmap-livetest.md) | Live testing roadmap |
-| [ROADMAP3_IMPLEMENTATION_SUMMARY.md](roadmaps/ROADMAP3_IMPLEMENTATION_SUMMARY.md) | Phase 3 implementation summary |
+**Key Files:**
+- Deployment runbooks and checklists
+- Rollback procedures
+- Environment configuration guides
 
 ---
 
-## 📖 Guides
+### [02-testing/](./02-testing/)
+Testing strategies, QA procedures, and test execution plans.
+- **qa/** - Quality assurance documentation
+- **e2e/** - End-to-end testing guides
+- **guides/** - Testing best practices
 
-Comprehensive guides for users and developers.
-
-| Document | Description |
-|----------|-------------|
-| [USER_GUIDE.md](guides/USER_GUIDE.md) | End-user guide for the application |
-| [PRODUCTION_TESTING_GUIDE.md](guides/PRODUCTION_TESTING_GUIDE.md) | Guide for testing in production |
-| [DOCKER_DEPLOYMENT_GUIDE.md](guides/DOCKER_DEPLOYMENT_GUIDE.md) | Docker deployment instructions |
-| [COMPETITOR_MIGRATION_GUIDE.md](guides/COMPETITOR_MIGRATION_GUIDE.md) | Migrating from competitor software |
-| [FIELD_MAPPER_EXPANSION_GUIDE.md](guides/FIELD_MAPPER_EXPANSION_GUIDE.md) | Expanding field mapper functionality |
-| [CSV_FORMAT_GUIDE.md](guides/CSV_FORMAT_GUIDE.md) | CSV import format specifications |
-| [ERROR_HANDLING_GUIDE.md](guides/ERROR_HANDLING_GUIDE.md) | Error handling best practices |
+**Key Files:**
+- Comprehensive test execution plans
+- Manual QA checklists
+- UI/E2E testing guides
+- Partner testing procedures
 
 ---
 
-## 📊 Reports
+### [03-development/](./03-development/)
+Developer guides, workflows, and coding standards.
+- **agent-workflows/** - AI agent collaboration guides
+- **roadmaps/** - Development roadmaps
+- **guides/** - Development best practices
 
-Audit reports, security scans, and analysis documents.
-
-| Document | Description |
-|----------|-------------|
-| [COMPREHENSIVE_AUDIT_REPORT.md](reports/COMPREHENSIVE_AUDIT_REPORT.md) | Complete system audit |
-| [SECURITY_SCAN_REPORT.md](reports/SECURITY_SCAN_REPORT.md) | Security vulnerability scan results |
-| [AUTHENTICATION_AUDIT_REPORT.md](reports/AUTHENTICATION_AUDIT_REPORT.md) | Authentication system audit |
-| [AGENT_1_AUTH_AUDIT_REPORT.md](reports/AGENT_1_AUTH_AUDIT_REPORT.md) | Agent 1: Auth audit findings |
-| [AGENT_2_AUDIT_REPORT.md](reports/AGENT_2_AUDIT_REPORT.md) | Agent 2: General audit findings |
-| [AGENT_3_AUDIT_REPORT.md](reports/AGENT_3_AUDIT_REPORT.md) | Agent 3: Feature audit findings |
-| [AGENT_3_LOCALE_AUDIT_REPORT.md](reports/AGENT_3_LOCALE_AUDIT_REPORT.md) | Agent 3: Localization audit |
-| [AGENT_4_FINAL_VALIDATION_REPORT.md](reports/AGENT_4_FINAL_VALIDATION_REPORT.md) | Agent 4: Final validation |
-| [MIGRATION_WIZARD_BUG_REPORT.md](reports/MIGRATION_WIZARD_BUG_REPORT.md) | Migration wizard bug tracking |
-| [RAILWAY_PRODUCTION_TEST_REPORT.md](reports/RAILWAY_PRODUCTION_TEST_REPORT.md) | Railway production test results |
+**Key Files:**
+- Agent prompt templates and workflows
+- Code of conduct
+- Quick fix guides
+- Upgrade procedures
 
 ---
 
-## 📝 Summaries
+### [04-features/](./04-features/)
+Feature-specific documentation and implementation guides.
+- **import-system/** - Intelligent import system docs
+- **partner-program/** - Partner/affiliate program
+- **mobile/** - Mobile app documentation
+- **ui/** - UI/UX feature docs
 
-Implementation summaries and feature documentation.
-
-| Document | Description |
-|----------|-------------|
-| [IMPLEMENTATION_SUMMARY.md](summaries/IMPLEMENTATION_SUMMARY.md) | Overall implementation summary |
-| [BUG_FIXES_SUMMARY.md](summaries/BUG_FIXES_SUMMARY.md) | Summary of bug fixes |
-| [TESTING_SUMMARY.md](summaries/TESTING_SUMMARY.md) | Testing implementation summary |
-| [AUDIT_IMPLEMENTATION_SUMMARY.md](summaries/AUDIT_IMPLEMENTATION_SUMMARY.md) | Audit trail implementation |
-| [CPAY_INTEGRATION_AUDIT_SUMMARY.md](summaries/CPAY_INTEGRATION_AUDIT_SUMMARY.md) | CPay payment integration |
-| [FIELD_MAPPER_SUMMARY.md](summaries/FIELD_MAPPER_SUMMARY.md) | Field mapper feature overview |
-| [FIELD_MAPPER_ENHANCEMENT_SUMMARY.md](summaries/FIELD_MAPPER_ENHANCEMENT_SUMMARY.md) | Field mapper improvements |
-| [FIELD_MAPPER_TEST_SUMMARY.md](summaries/FIELD_MAPPER_TEST_SUMMARY.md) | Field mapper test results |
-| [PERFORMANCE_OPTIMIZATION_SUMMARY.md](summaries/PERFORMANCE_OPTIMIZATION_SUMMARY.md) | Performance optimizations |
-| [QUEUE_SETUP_SUMMARY.md](summaries/QUEUE_SETUP_SUMMARY.md) | Queue system setup |
-| [SMK-01_IMPLEMENTATION_SUMMARY.md](summaries/SMK-01_IMPLEMENTATION_SUMMARY.md) | SMK-01 feature implementation |
-| [SOP_SALE_01_IMPLEMENTATION_SUMMARY.md](summaries/SOP_SALE_01_IMPLEMENTATION_SUMMARY.md) | Sales operation implementation |
-| [VIDEO_TUTORIAL_SUMMARY.md](summaries/VIDEO_TUTORIAL_SUMMARY.md) | Video tutorial summary |
+**Key Files:**
+- Feature implementation reports
+- User guides for specific features
+- Integration documentation
 
 ---
 
-## 🚀 Deployment
+### [05-infrastructure/](./05-infrastructure/)
+Infrastructure, monitoring, and performance documentation.
+- **backup/** - Backup and restore procedures
+- **monitoring/** - Monitoring setup and alerts
+- **performance/** - Performance optimization
 
-Infrastructure, deployment, and server configuration documentation.
-
-| Document | Description |
-|----------|-------------|
-| [RAILWAY_SETUP.md](deployment/RAILWAY_SETUP.md) | Railway.app deployment setup |
-| [RAILWAY_ENV_VARS.md](deployment/RAILWAY_ENV_VARS.md) | Railway environment variables |
-| [RAILWAY_QUEUE_DEPLOYMENT.md](deployment/RAILWAY_QUEUE_DEPLOYMENT.md) | Queue worker deployment on Railway |
-| [RAILWAY.md](deployment/RAILWAY.md) | Railway platform overview |
-| [DEPLOYMENT_PHASE1.md](deployment/DEPLOYMENT_PHASE1.md) | Phase 1 deployment |
-| [DEPLOYMENT_PHASE2.md](deployment/DEPLOYMENT_PHASE2.md) | Phase 2 deployment |
-| [DEPLOYMENT_PHASE3_4.md](deployment/DEPLOYMENT_PHASE3_4.md) | Phase 3-4 deployment |
-| [DOCKER_SMOKE_TEST_AUDIT.md](deployment/DOCKER_SMOKE_TEST_AUDIT.md) | Docker smoke test results |
-| [QUEUE_WORKER_SETUP.md](deployment/QUEUE_WORKER_SETUP.md) | Queue worker configuration |
-| [QUEUE_COMMANDS.md](deployment/QUEUE_COMMANDS.md) | Queue management commands |
-| [QUEUE_DATABASE_DRIVER.md](deployment/QUEUE_DATABASE_DRIVER.md) | Database queue driver setup |
-| [README_QUEUE_WORKER.md](deployment/README_QUEUE_WORKER.md) | Queue worker README |
-| [BANKING_OAUTH_SETUP.md](deployment/BANKING_OAUTH_SETUP.md) | Bank OAuth integration setup |
-| [BANK_CERTIFICATES.md](deployment/BANK_CERTIFICATES.md) | Bank certificate management |
-| [BANK_INTEGRATION_TESTING.md](deployment/BANK_INTEGRATION_TESTING.md) | Bank integration testing |
+**Key Files:**
+- Infrastructure reports
+- Monitoring dashboards
+- Performance benchmarks
+- Post-deployment monitoring
 
 ---
 
-## 🧪 Testing
+### [06-legal-compliance/](./06-legal-compliance/)
+Legal, security, and compliance documentation.
+- **fiscal/** - Fiscal receipt and tax compliance
+- **security/** - Security policies and audits
 
-Testing documentation and test results.
-
-| Document | Description |
-|----------|-------------|
-| [TST_COMPREHENSIVE_TEST_SUITE_IMPLEMENTATION.md](testing/TST_COMPREHENSIVE_TEST_SUITE_IMPLEMENTATION.md) | Comprehensive test suite |
-| [CPAY_COMPATIBILITY_TEST_RESULTS.md](testing/CPAY_COMPATIBILITY_TEST_RESULTS.md) | CPay compatibility tests |
-
----
-
-## 📚 Additional Resources
-
-Miscellaneous documentation in the root of `/documentation`:
-
-| Document | Description |
-|----------|-------------|
-| [QUICK_START.md](QUICK_START.md) | Quick start guide |
-| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Quick reference guide |
-| [MIGRATION_QUICK_REFERENCE.md](MIGRATION_QUICK_REFERENCE.md) | Migration quick reference |
-| [AI_DOCUMENT_ENDPOINTS.md](AI_DOCUMENT_ENDPOINTS.md) | AI document processing endpoints |
-| [MINIMAX_API_CLIENT_README.md](MINIMAX_API_CLIENT_README.md) | MiniMax API client documentation |
-| [INTEGRATIONS.md](INTEGRATIONS.md) | Third-party integrations |
-| [FIELD_MAPPER_CODE_SNIPPETS.md](FIELD_MAPPER_CODE_SNIPPETS.md) | Field mapper code examples |
-| [IMPORT_WIZARD_DEPENDENCIES.md](IMPORT_WIZARD_DEPENDENCIES.md) | Import wizard dependencies |
-| [VIDEO_TUTORIAL_SCRIPT.md](VIDEO_TUTORIAL_SCRIPT.md) | Video tutorial script |
-| [VIDEO_STORYBOARD.md](VIDEO_STORYBOARD.md) | Video tutorial storyboard |
-| [PASSWORD_DOUBLE_HASH_BUG_DIAGRAM.md](PASSWORD_DOUBLE_HASH_BUG_DIAGRAM.md) | Password hashing bug diagram |
-| [AGENTS_STATUS.md](AGENTS_STATUS.md) | Development agents status |
-| [SERVER_STATUS.md](SERVER_STATUS.md) | Server status documentation |
-| [LINKS.md](LINKS.md) | Important project links |
-| [STEP5_COMPLETED.md](STEP5_COMPLETED.md) | Step 5 completion notes |
-| [debuglive.md](debuglive.md) | Live debugging notes |
+**Key Files:**
+- Legal notes and compliance requirements
+- Security policies
+- PCI compliance audits
+- Fiscal regulations
 
 ---
 
-## 🔍 Quick Navigation
+### [07-project-management/](./07-project-management/)
+Project tracking, reports, and management documentation.
+- **reports/** - Phase completion and status reports
+- **checklists/** - Launch and deployment checklists
+- **summaries/** - Executive summaries
 
-### By Topic
-
-- **Getting Started**: [QUICK_START.md](QUICK_START.md), [USER_GUIDE.md](guides/USER_GUIDE.md)
-- **Development**: [MASTER_ROADMAP.md](roadmaps/MASTER_ROADMAP.md), [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
-- **Deployment**: [RAILWAY_SETUP.md](deployment/RAILWAY_SETUP.md), [DOCKER_DEPLOYMENT_GUIDE.md](guides/DOCKER_DEPLOYMENT_GUIDE.md)
-- **Testing**: [PRODUCTION_TESTING_GUIDE.md](guides/PRODUCTION_TESTING_GUIDE.md), [TST_COMPREHENSIVE_TEST_SUITE_IMPLEMENTATION.md](testing/TST_COMPREHENSIVE_TEST_SUITE_IMPLEMENTATION.md)
-- **Security**: [SECURITY_SCAN_REPORT.md](reports/SECURITY_SCAN_REPORT.md), [AUTHENTICATION_AUDIT_REPORT.md](reports/AUTHENTICATION_AUDIT_REPORT.md)
-- **Migrations**: [COMPETITOR_MIGRATION_GUIDE.md](guides/COMPETITOR_MIGRATION_GUIDE.md), [MIGRATION_QUICK_REFERENCE.md](MIGRATION_QUICK_REFERENCE.md)
-
----
-
-## 📧 Project Information
-
-- **Project Name**: MK Accounting (Facturino)
-- **Description**: Macedonian-localized fork of InvoiceShelf with advanced features
-- **Documentation Location**: `/documentation`
-- **Last Updated**: November 12, 2025
+**Key Files:**
+- Phase completion reports
+- Launch preparation checklists
+- Merge readiness reports
+- Changelog and version history
 
 ---
 
-## 🤝 Contributing
+### [08-archive/](./08-archive/)
+Historical documentation and completed investigations.
 
-When adding new documentation:
-
-1. Place files in the appropriate subdirectory
-2. Update this README with a link and description
-3. Follow the existing naming conventions
-4. Use clear, descriptive filenames
+**Contains:**
+- Old bug fix reports
+- Completed investigations
+- Migration documentation
+- Historical implementation summaries
 
 ---
 
-*This documentation index was auto-generated and organized for better project navigation.*
+## 🔍 Quick Links
+
+### For Developers
+- [Development Roadmap](./03-development/roadmaps/)
+- [Agent Workflows](./03-development/agent-workflows/)
+- [Quick Fix Guide](./03-development/guides/)
+
+### For DevOps
+- [Deployment Runbook](./01-deployment/)
+- [Railway Guide](./01-deployment/railway/)
+- [Monitoring Setup](./05-infrastructure/monitoring/)
+
+### For QA
+- [Test Execution Plan](./02-testing/qa/)
+- [UI Testing Guide](./02-testing/e2e/)
+- [Manual QA Checklist](./02-testing/qa/)
+
+### For Product/PM
+- [Feature Documentation](./04-features/)
+- [Project Reports](./07-project-management/reports/)
+- [Launch Checklists](./07-project-management/checklists/)
+
+---
+
+## 📝 Documentation Standards
+
+### File Naming
+- Use UPPERCASE for major documents (e.g., `DEPLOYMENT_RUNBOOK.md`)
+- Use descriptive names with category prefixes
+- Include version numbers where applicable
+
+### Structure
+- All markdown files should have clear headers
+- Include table of contents for long documents
+- Use relative links for cross-references
+- Add dates to time-sensitive documents
+
+### Maintenance
+- Archive outdated documentation to `08-archive/`
+- Update the changelog when making significant changes
+- Keep README files updated in each category
+
+---
+
+## 🆘 Need Help?
+
+- **Can't find a document?** Check the [archive](./08-archive/) or use global search
+- **Documentation outdated?** Create an issue or update it directly
+- **New feature needs docs?** Add to the appropriate category folder
+
+---
+
+**Last Updated:** 2025-11-30  
+**Maintained By:** Development Team

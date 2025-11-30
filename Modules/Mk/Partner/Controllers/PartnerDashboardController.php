@@ -86,8 +86,8 @@ class PartnerDashboardController extends Controller
                     'company_name' => $event->company->name ?? 'N/A',
                     'event_type' => $event->event_type,
                     'amount' => $event->amount,
-                    'created_at' => $event->created_at->toIso8601String(),
-                    'paid_at' => $event->paid_at ? $event->paid_at->toIso8601String() : null,
+                    'created_at' => $event->created_at->toISOString(),
+                    'paid_at' => $event->paid_at ? $event->paid_at->toISOString() : null,
                 ];
             });
 
@@ -103,7 +103,7 @@ class PartnerDashboardController extends Controller
             'recentCommissions' => $recentCommissions,
             'nextPayout' => $nextPayout ? [
                 'amount' => $nextPayout->amount,
-                'date' => $nextPayout->payout_date->toIso8601String(),
+                'date' => $nextPayout->payout_date->toISOString(),
             ] : null,
         ]);
     }
@@ -140,7 +140,7 @@ class PartnerDashboardController extends Controller
             'month' => $currentMonth,
             'pending_amount' => $pendingAmount,
             'event_count' => $eventCount,
-            'next_payout_date' => now()->startOfMonth()->addMonth()->addDays(4)->toIso8601String(), // 5th of next month
+            'next_payout_date' => now()->startOfMonth()->addMonth()->addDays(4)->toISOString(), // 5th of next month
         ]);
     }
 
@@ -263,7 +263,7 @@ class PartnerDashboardController extends Controller
             'pending_amount' => $pendingAmount,
             'minimum_threshold' => $minimumThreshold,
             'meets_threshold' => $meetsThreshold,
-            'estimated_payout_date' => $meetsThreshold ? $nextPayoutDate->toIso8601String() : null,
+            'estimated_payout_date' => $meetsThreshold ? $nextPayoutDate->toISOString() : null,
             'remaining_to_threshold' => max(0, $minimumThreshold - $pendingAmount),
         ]);
     }
@@ -297,7 +297,7 @@ class PartnerDashboardController extends Controller
                     'name' => $company->name,
                     'tier' => $company->subscription->tier ?? 'free',
                     'status' => $company->subscription->status ?? 'inactive',
-                    'joined_at' => $company->created_at->toIso8601String(),
+                    'joined_at' => $company->created_at->toISOString(),
                     'is_active' => $company->pivot->is_active ?? false,
                 ];
             }),
@@ -348,8 +348,8 @@ class PartnerDashboardController extends Controller
                     'company_name' => $event->company->name ?? 'N/A',
                     'event_type' => $event->event_type,
                     'amount' => $event->amount,
-                    'created_at' => $event->created_at->toIso8601String(),
-                    'paid_at' => $event->paid_at ? $event->paid_at->toIso8601String() : null,
+                    'created_at' => $event->created_at->toISOString(),
+                    'paid_at' => $event->paid_at ? $event->paid_at->toISOString() : null,
                 ];
             });
 
@@ -395,8 +395,8 @@ class PartnerDashboardController extends Controller
                     'event_type' => $event->event_type,
                     'amount' => $event->amount,
                     'month_ref' => $event->month_ref,
-                    'created_at' => $event->created_at->toIso8601String(),
-                    'paid_at' => $event->paid_at?->toIso8601String(),
+                    'created_at' => $event->created_at->toISOString(),
+                    'paid_at' => $event->paid_at?->toISOString(),
                     'payout_id' => $event->payout_id,
                     'is_clawed_back' => $event->is_clawed_back,
                 ];
@@ -438,10 +438,10 @@ class PartnerDashboardController extends Controller
                     'id' => $payout->id,
                     'amount' => $payout->amount,
                     'status' => $payout->status,
-                    'payout_date' => $payout->payout_date->toIso8601String(),
+                    'payout_date' => $payout->payout_date->toISOString(),
                     'payment_method' => $payout->payment_method,
                     'payment_reference' => $payout->payment_reference,
-                    'processed_at' => $payout->processed_at?->toIso8601String(),
+                    'processed_at' => $payout->processed_at?->toISOString(),
                     'event_count' => $payout->details['event_count'] ?? 0,
                     'month_ref' => $payout->details['month_ref'] ?? null,
                 ];

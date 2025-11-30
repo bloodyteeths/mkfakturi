@@ -136,6 +136,14 @@ class Invoice extends Model implements HasMedia
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Get the project this invoice belongs to.
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
     // CLAUDE-CHECKPOINT
     /**
      * Get the e-invoice associated with this invoice

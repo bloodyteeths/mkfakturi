@@ -45,6 +45,36 @@ class ExpensesController extends Controller
     {
         $this->authorize('create', Expense::class);
 
+        // Check for duplicates if supplier_id and invoice_number are provided
+        $supplierId = $request->input('supplier_id');
+        $invoiceNumber = $request->input('invoice_number');
+        $companyId = $request->header('company');
+
+        if ($supplierId && $invoiceNumber && ! $request->allowsDuplicate()) {
+            $duplicates = Expense::findPotentialDuplicates(
+                (int) $companyId,
+                (int) $supplierId,
+                $invoiceNumber
+            );
+
+            if ($duplicates->isNotEmpty()) {
+                // Return warning response with duplicate info
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('expenses.duplicate_warning'),
+                    'duplicates' => $duplicates->map(function ($expense) {
+                        return [
+                            'id' => $expense->id,
+                            'expense_date' => $expense->formattedExpenseDate,
+                            'amount' => $expense->amount,
+                            'category' => $expense->category?->name,
+                            'invoice_number' => $expense->invoice_number,
+                        ];
+                    }),
+                ], 200); // Use 200 so frontend can handle it gracefully
+            }
+        }
+
         $expense = Expense::createExpense($request);
 
         return new ExpenseResource($expense);
@@ -70,6 +100,37 @@ class ExpensesController extends Controller
     public function update(ExpenseRequest $request, Expense $expense)
     {
         $this->authorize('update', $expense);
+
+        // Check for duplicates if supplier_id and invoice_number are provided
+        $supplierId = $request->input('supplier_id');
+        $invoiceNumber = $request->input('invoice_number');
+        $companyId = $request->header('company');
+
+        if ($supplierId && $invoiceNumber && ! $request->allowsDuplicate()) {
+            $duplicates = Expense::findPotentialDuplicates(
+                (int) $companyId,
+                (int) $supplierId,
+                $invoiceNumber,
+                $expense->id // Exclude current expense
+            );
+
+            if ($duplicates->isNotEmpty()) {
+                // Return warning response with duplicate info
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('expenses.duplicate_warning'),
+                    'duplicates' => $duplicates->map(function ($exp) {
+                        return [
+                            'id' => $exp->id,
+                            'expense_date' => $exp->formattedExpenseDate,
+                            'amount' => $exp->amount,
+                            'category' => $exp->category?->name,
+                            'invoice_number' => $exp->invoice_number,
+                        ];
+                    }),
+                ], 200);
+            }
+        }
 
         $expense->updateExpense($request);
 

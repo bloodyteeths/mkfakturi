@@ -163,6 +163,14 @@ class Payment extends Model implements HasMedia
         return $this->belongsTo(PaymentMethod::class);
     }
 
+    /**
+     * Get the project this payment belongs to.
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
     public function sendPaymentData($data)
     {
         $data['payment'] = $this->toArray();
