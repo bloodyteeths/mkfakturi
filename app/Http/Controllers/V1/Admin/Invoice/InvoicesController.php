@@ -130,6 +130,13 @@ class InvoicesController extends Controller
     {
         $this->authorize('update', $invoice);
 
+        // Debug: Log project_id from request (update)
+        \Log::info('InvoicesController::update project_id', [
+            'invoice_id' => $invoice->id,
+            'project_id' => $request->project_id,
+            'has_project_id' => $request->has('project_id'),
+        ]);
+
         $invoice = $invoice->updateInvoice($request);
 
         if (is_string($invoice)) {

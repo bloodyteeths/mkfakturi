@@ -485,6 +485,13 @@ class Invoice extends Model implements HasMedia
             ->setNextNumbers();
 
         $data = $request->getInvoicePayload();
+
+        // Debug: Log project_id in update payload
+        \Log::info('Invoice::updateInvoice project_id', [
+            'invoice_id' => $this->id,
+            'request_project_id' => $request->project_id,
+            'payload_project_id' => $data['project_id'] ?? null,
+        ]);
         $oldTotal = $this->total;
 
         $total_paid_amount = $this->total - $this->due_amount;
