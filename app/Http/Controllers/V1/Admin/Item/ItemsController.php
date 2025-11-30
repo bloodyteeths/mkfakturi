@@ -110,4 +110,45 @@ class ItemsController extends Controller
             'success' => true,
         ]);
     }
+
+    /**
+     * Lookup item by barcode (exact match).
+     *
+     * Used for barcode scanner scenarios where we need fast exact lookup.
+     * Returns the item if found, 404 if not found.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function lookupByBarcode(Request $request)
+    {
+        $this->authorize('viewAny', Item::class);
+
+        $request->validate([
+            'barcode' => 'required|string|max:255',
+        ]);
+
+        $item = Item::whereCompany()
+            ->where('barcode', $request->barcode)
+            ->with([
+                'unit',
+                'taxes.taxType',
+                'taxes.currency',
+                'currency',
+            ])
+            ->first();
+
+        if (! $item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Item not found with barcode: '.$request->barcode,
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => new ItemResource($item),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT

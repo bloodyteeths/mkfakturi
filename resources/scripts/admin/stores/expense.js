@@ -93,13 +93,24 @@ export const useExpenseStore = (useWindow = false) => {
         })
       },
 
-      addExpense(data) {
+      addExpense(data, allowDuplicate = false) {
         const formData = utils.toFormData(data)
+        if (allowDuplicate) {
+          formData.append('allow_duplicate', '1')
+        }
 
         return new Promise((resolve, reject) => {
           axios
             .post('/expenses', formData)
             .then((response) => {
+              // Check if this is a duplicate warning response
+              if (response.data?.is_duplicate_warning) {
+                // Return the response without showing success notification
+                // The component will handle showing the duplicate warning modal
+                resolve(response)
+                return
+              }
+
               this.expenses.push(response.data)
 
               const notificationStore = useNotificationStore()
@@ -118,16 +129,27 @@ export const useExpenseStore = (useWindow = false) => {
         })
       },
 
-      updateExpense({ id, data, isAttachmentReceiptRemoved }) {
+      updateExpense({ id, data, isAttachmentReceiptRemoved, allowDuplicate = false }) {
         const notificationStore = useNotificationStore()
 
         const formData = utils.toFormData(data)
 
         formData.append('_method', 'PUT')
         formData.append('is_attachment_receipt_removed', isAttachmentReceiptRemoved)
+        if (allowDuplicate) {
+          formData.append('allow_duplicate', '1')
+        }
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           axios.post(`/expenses/${id}`, formData).then((response) => {
+            // Check if this is a duplicate warning response
+            if (response.data?.is_duplicate_warning) {
+              // Return the response without showing success notification
+              // The component will handle showing the duplicate warning modal
+              resolve(response)
+              return
+            }
+
             let pos = this.expenses.findIndex(
               (expense) => expense.id === response.data.id
             )
@@ -140,10 +162,10 @@ export const useExpenseStore = (useWindow = false) => {
             })
 
             resolve(response)
+          }).catch((err) => {
+            handleError(err)
+            reject(err)
           })
-        }).catch((err) => {
-          handleError(err)
-          reject(err)
         })
       },
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Services\InvoiceProfitService;
+use App\Services\StockService;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class InvoiceResource extends JsonResource
@@ -13,6 +15,16 @@ class InvoiceResource extends JsonResource
      */
     public function toArray($request): array
     {
+        // Include profit data if stock module is enabled and this is a detail view
+        $profit = $this->when(
+            $request->routeIs('invoices.show') && StockService::isEnabled(),
+            function () {
+                $profitService = app(InvoiceProfitService::class);
+
+                return $profitService->getInvoiceProfit($this->resource, true);
+            }
+        );
+
         return [
             'id' => $this->id,
             'invoice_date' => $this->invoice_date,
@@ -76,6 +88,8 @@ class InvoiceResource extends JsonResource
             'currency' => $this->whenLoaded('currency', function () {
                 return CurrencyResource::make($this->currency);
             }),
+            'profit' => $profit,
         ];
     }
 }
+// CLAUDE-CHECKPOINT

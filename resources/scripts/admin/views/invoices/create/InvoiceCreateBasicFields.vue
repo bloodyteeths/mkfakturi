@@ -58,6 +58,17 @@
         :is-edit="isEdit"
         :customer-currency="invoiceStore.newInvoice.currency_id"
       />
+
+      <BaseInputGroup
+        :label="$t('projects.project')"
+        :content-loading="isLoading"
+      >
+        <BaseProjectSelectInput
+          v-model="invoiceStore.newInvoice.project_id"
+          :content-loading="isLoading"
+          :show-action="false"
+        />
+      </BaseInputGroup>
     </BaseInputGrid>
   </div>
 </template>

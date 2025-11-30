@@ -277,16 +277,47 @@ For every phase completion:
 ## Remaining Frontend Work
 
 ### Phase 1.1 - Projects (Vue Pages Needed)
-- [ ] Projects list page (`resources/scripts/admin/views/projects/Index.vue`)
-- [ ] Project create/edit form (`resources/scripts/admin/views/projects/Create.vue`)
-- [ ] Project view page (`resources/scripts/admin/views/projects/View.vue`)
-- [ ] Add project dropdown to invoice/expense/payment forms
+- [x] Projects list page (`resources/scripts/admin/views/projects/Index.vue`) - DONE
+- [x] Project create/edit form (`resources/scripts/admin/views/projects/Create.vue`) - DONE
+- [x] Project view page (`resources/scripts/admin/views/projects/View.vue`) - DONE
+- [x] Add project dropdown to invoice/expense/payment forms - DONE
 - [ ] Project Overview report page
 
 ### Phase 1.3 - Duplicate Protection (Frontend Modal Needed)
-- [ ] Update expense store to handle duplicate warning response
-- [ ] Add duplicate warning modal component
-- [ ] Update expense form to show modal and allow override
+- [x] Update expense store to handle duplicate warning response - DONE
+- [x] Add duplicate warning modal component - DONE
+- [x] Update expense form to show modal and allow override - DONE
+
+---
+
+## Additional Files Created (Frontend - 2025-11-30)
+
+### Phase 1.1 - Projects (Vue Frontend)
+**Files Created:**
+- `resources/scripts/admin/views/projects/Index.vue` - Projects list page with filtering
+- `resources/scripts/admin/views/projects/Create.vue` - Project create/edit form
+- `resources/scripts/admin/views/projects/View.vue` - Project detail page with financial summary
+- `resources/scripts/admin/components/dropdowns/ProjectIndexDropdown.vue` - Actions dropdown
+- `resources/scripts/components/base/BaseProjectSelectInput.vue` - Reusable project select component
+
+**Files Modified:**
+- `resources/scripts/admin/stub/abilities.js` - Added PROJECT abilities
+- `resources/scripts/admin/admin-router.js` - Added project routes
+- `resources/scripts/admin/stub/invoice.js` - Added project_id field
+- `resources/scripts/admin/stub/expense.js` - Added project_id field
+- `resources/scripts/admin/stub/payment.js` - Added project_id field
+- `resources/scripts/admin/views/invoices/create/InvoiceCreateBasicFields.vue` - Added project dropdown
+- `resources/scripts/admin/views/expenses/Create.vue` - Added project dropdown + duplicate warning
+- `resources/scripts/admin/views/payments/Create.vue` - Added project dropdown
+- `config/invoiceshelf.php` - Added Projects navigation menu item
+
+### Phase 1.3 - Expense Duplicate Protection (Vue Frontend)
+**Files Created:**
+- `resources/scripts/admin/components/modal-components/ExpenseDuplicateWarningModal.vue` - Warning modal
+
+**Files Modified:**
+- `resources/scripts/admin/stores/expense.js` - Added duplicate handling in addExpense/updateExpense
+- `resources/scripts/admin/views/expenses/Create.vue` - Added duplicate warning modal integration
 
 ---
 

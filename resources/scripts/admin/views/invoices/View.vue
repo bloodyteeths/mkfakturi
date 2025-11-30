@@ -14,6 +14,7 @@ import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendIn
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 import EInvoiceTab from '@/scripts/admin/views/invoices/partials/EInvoiceTab.vue'
+import ProfitTab from '@/scripts/admin/views/invoices/partials/ProfitTab.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -561,6 +562,18 @@ onSearched = debounce(onSearched, 500)
           :title="$t('e_invoice.title')"
         >
           <EInvoiceTab :invoice="invoiceData" />
+        </BaseTab>
+
+        <!-- Profit Tab (only shown when stock is enabled) -->
+        <BaseTab
+          v-if="invoiceData.profit !== undefined"
+          tab-panel-container="py-4 mt-px"
+          :title="$t('profit.title')"
+        >
+          <ProfitTab
+            :profit="invoiceData.profit"
+            :currency="invoiceData.currency"
+          />
         </BaseTab>
       </BaseTabGroup>
     </BaseCard>

@@ -94,4 +94,18 @@ export default {
   EDIT_BILL: 'edit-bill',
   DELETE_BILL: 'delete-bill',
   SEND_BILL: 'send-bill',
+
+  // Projects
+  VIEW_PROJECT: 'view-project',
+  CREATE_PROJECT: 'create-project',
+  EDIT_PROJECT: 'edit-project',
+  DELETE_PROJECT: 'delete-project',
+
+  // Stock Reports (Phase 2: Stock Module)
+  VIEW_STOCK_REPORTS: 'view-item', // Uses existing item permission - stock reports are read-only
+
+  // Period Closings (Phase 3: Daily Closing & Period Lock)
+  VIEW_CLOSINGS: 'view-financial-reports', // View closings uses financial reports permission
+  MANAGE_CLOSINGS: 'manage-closings', // Create/delete daily closings and period locks
 }
+// CLAUDE-CHECKPOINT

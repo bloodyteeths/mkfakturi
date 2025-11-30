@@ -336,6 +336,31 @@ export const useItemStore = (useWindow = false) => {
             })
         })
       },
+
+      /**
+       * Lookup item by barcode (exact match).
+       * Used for barcode scanner scenarios.
+       *
+       * @param {string} barcode - The barcode to lookup
+       * @returns {Promise} Resolves with item data or rejects with 404
+       */
+      lookupByBarcode(barcode) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get('/items/lookup-barcode', { params: { barcode } })
+            .then((response) => {
+              resolve(response.data.data)
+            })
+            .catch((err) => {
+              // Don't show notification for 404 - let caller handle it
+              if (err.response?.status !== 404) {
+                handleError(err)
+              }
+              reject(err)
+            })
+        })
+      },
     },
   })()
 }
+// CLAUDE-CHECKPOINT

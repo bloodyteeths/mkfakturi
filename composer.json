@@ -41,6 +41,7 @@
         "spatie/flysystem-dropbox": "^3.0",
         "spatie/laravel-backup": "^9.2.9",
         "spatie/laravel-medialibrary": "^11.11",
+        "stripe/stripe-php": "^19.0",
         "symfony/http-client": "^7.2",
         "vinkla/hashids": "^13.0.0"
     },

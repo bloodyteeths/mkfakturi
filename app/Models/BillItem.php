@@ -76,6 +76,23 @@ class BillItem extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    /**
+     * Get the warehouse for this bill item (stock module).
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    /**
+     * Get stock movements related to this bill item.
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'source_id')
+            ->where('source_type', StockMovement::SOURCE_BILL_ITEM);
+    }
 }
 
 // CLAUDE-CHECKPOINT

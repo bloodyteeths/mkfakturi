@@ -135,6 +135,11 @@ class Item extends Model
             $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'asc';
             $query->whereOrder($field, $orderBy);
         }
+
+        // Filter by track_quantity (for stock-enabled items only)
+        if ($filters->has('track_quantity')) {
+            $query->where('track_quantity', (bool) $filters->get('track_quantity'));
+        }
     }
 
     public function scopePaginateData($query, $limit)
@@ -173,6 +178,22 @@ class Item extends Model
     public function estimateItems(): HasMany
     {
         return $this->hasMany(EstimateItem::class);
+    }
+
+    /**
+     * Get all stock movements for this item.
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * Check if this item has stock tracking enabled.
+     */
+    public function hasStockTracking(): bool
+    {
+        return (bool) $this->track_quantity;
     }
 
     public static function createItem($request)

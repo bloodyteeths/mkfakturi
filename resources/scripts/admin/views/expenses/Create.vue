@@ -1,5 +1,11 @@
 <template>
   <CategoryModal />
+  <ExpenseDuplicateWarningModal
+    :show="showDuplicateWarning"
+    :duplicates="duplicateExpenses"
+    @close="closeDuplicateWarning"
+    @confirm="saveWithDuplicate"
+  />
 
   <BasePage class="relative">
     <form action="" @submit.prevent="submitForm">
@@ -218,6 +224,17 @@
 
           <BaseInputGroup
             :content-loading="isFetchingInitialData"
+            :label="$t('projects.project')"
+          >
+            <BaseProjectSelectInput
+              v-model="expenseStore.currentExpense.project_id"
+              :content-loading="isFetchingInitialData"
+              :show-action="false"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
             :label="$t('expenses.note')"
             :error="
               v$.currentExpense.notes.$error &&
@@ -302,6 +319,7 @@ import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import { useModalStore } from '@/scripts/stores/modal'
 import ExpenseCustomFields from '@/scripts/admin/components/custom-fields/CreateCustomFields.vue'
 import CategoryModal from '@/scripts/admin/components/modal-components/CategoryModal.vue'
+import ExpenseDuplicateWarningModal from '@/scripts/admin/components/modal-components/ExpenseDuplicateWarningModal.vue'
 import ExchangeRateConverter from '@/scripts/admin/components/estimate-invoice-common/ExchangeRateConverter.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
@@ -320,6 +338,10 @@ let isSaving = ref(false)
 let isFetchingInitialData = ref(false)
 const expenseValidationScope = 'newExpense'
 const isAttachmentReceiptRemoved = ref(false)
+
+// Duplicate warning state
+const showDuplicateWarning = ref(false)
+const duplicateExpenses = ref([])
 
 const rules = computed(() => {
   return {
@@ -483,7 +505,7 @@ async function loadData() {
   isFetchingInitialData.value = false
 }
 
-async function submitForm() {
+async function submitForm(allowDuplicate = false) {
   v$.value.$touch()
 
   if (v$.value.$invalid) {
@@ -495,15 +517,26 @@ async function submitForm() {
   let formData = expenseStore.currentExpense
 
   try {
+    let response
     if (isEdit.value) {
-      await expenseStore.updateExpense({
+      response = await expenseStore.updateExpense({
         id: route.params.id,
         data: formData,
-        isAttachmentReceiptRemoved: isAttachmentReceiptRemoved.value
+        isAttachmentReceiptRemoved: isAttachmentReceiptRemoved.value,
+        allowDuplicate
       })
     } else {
-      await expenseStore.addExpense(formData)
+      response = await expenseStore.addExpense(formData, allowDuplicate)
     }
+
+    // Check for duplicate warning response
+    if (response?.data?.is_duplicate_warning) {
+      isSaving.value = false
+      duplicateExpenses.value = response.data.duplicates || []
+      showDuplicateWarning.value = true
+      return
+    }
+
     isSaving.value = false
     expenseStore.currentExpense.attachment_receipt = null
     isAttachmentReceiptRemoved.value = false
@@ -513,6 +546,16 @@ async function submitForm() {
     isSaving.value = false
     return
   }
+}
+
+function closeDuplicateWarning() {
+  showDuplicateWarning.value = false
+  duplicateExpenses.value = []
+}
+
+function saveWithDuplicate() {
+  closeDuplicateWarning()
+  submitForm(true)
 }
 
 onBeforeUnmount(() => {

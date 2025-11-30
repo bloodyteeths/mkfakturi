@@ -252,6 +252,13 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\RecurringExpense::observe(\App\Observers\AuditObserver::class);
         \App\Models\ExportJob::observe(\App\Observers\AuditObserver::class);
         \App\Models\GatewayWebhookEvent::observe(\App\Observers\AuditObserver::class);
+
+        // Stock module observers (behind FACTURINO_STOCK_V1_ENABLED feature flag)
+        // These observers automatically process stock movements when invoice/bill items are created
+        if (\App\Services\StockService::isEnabled()) {
+            \App\Models\InvoiceItem::observe(\App\Observers\StockInvoiceItemObserver::class);
+            \App\Models\BillItem::observe(\App\Observers\StockBillItemObserver::class);
+        }
     }
 
     /**

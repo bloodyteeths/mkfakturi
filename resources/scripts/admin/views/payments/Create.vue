@@ -187,6 +187,17 @@
             :is-edit="isEdit"
             :customer-currency="paymentStore.currentPayment.currency_id"
           />
+
+          <BaseInputGroup
+            :label="$t('projects.project')"
+            :content-loading="isLoadingContent"
+          >
+            <BaseProjectSelectInput
+              v-model="paymentStore.currentPayment.project_id"
+              :content-loading="isLoadingContent"
+              :show-action="false"
+            />
+          </BaseInputGroup>
         </BaseInputGrid>
 
         <!-- Payment Custom Fields -->

@@ -83,6 +83,8 @@ class Project extends Model
 
     /**
      * The attributes that should be appended to the model.
+     * Note: Financial totals (totalInvoiced, totalExpenses, etc.) are NOT auto-appended
+     * to avoid N+1 query issues. Use getSummary() for financial data.
      *
      * @var array<int, string>
      */
@@ -90,22 +92,15 @@ class Project extends Model
         'formattedCreatedAt',
         'formattedStartDate',
         'formattedEndDate',
-        'totalInvoiced',
-        'totalExpenses',
-        'totalPayments',
-        'netResult',
     ];
 
     /**
      * Default eager loaded relationships.
+     * Note: Relationships are loaded explicitly in controllers to avoid issues.
      *
      * @var array<int, string>
      */
-    protected $with = [
-        'customer:id,name,email',
-        'currency:id,name,code,symbol',
-        'company:id,name',
-    ];
+    protected $with = [];
 
     // ============================================
     // RELATIONSHIPS
@@ -417,22 +412,53 @@ class Project extends Model
 
     /**
      * Get project summary statistics.
+     *
+     * @param  string|null  $fromDate  Optional start date filter (Y-m-d)
+     * @param  string|null  $toDate  Optional end date filter (Y-m-d)
      */
-    public function getSummary(): array
+    public function getSummary(?string $fromDate = null, ?string $toDate = null): array
     {
+        // Build invoice query with optional date filter
+        $invoiceQuery = $this->invoices();
+        if ($fromDate && $toDate) {
+            $invoiceQuery->whereBetween('invoice_date', [$fromDate, $toDate]);
+        }
+        $totalInvoiced = $invoiceQuery->sum('base_total') ?? 0;
+        $invoiceCount = $invoiceQuery->count();
+
+        // Build expense query with optional date filter
+        $expenseQuery = $this->expenses();
+        if ($fromDate && $toDate) {
+            $expenseQuery->whereBetween('expense_date', [$fromDate, $toDate]);
+        }
+        $totalExpenses = $expenseQuery->sum('base_amount') ?? 0;
+        $expenseCount = $expenseQuery->count();
+
+        // Build payment query with optional date filter
+        $paymentQuery = $this->payments();
+        if ($fromDate && $toDate) {
+            $paymentQuery->whereBetween('payment_date', [$fromDate, $toDate]);
+        }
+        $totalPayments = $paymentQuery->sum('base_amount') ?? 0;
+        $paymentCount = $paymentQuery->count();
+
+        $netResult = $totalInvoiced - $totalExpenses;
+
         return [
-            'total_invoiced' => $this->totalInvoiced,
-            'total_expenses' => $this->totalExpenses,
-            'total_payments' => $this->totalPayments,
-            'net_result' => $this->netResult,
-            'invoice_count' => $this->invoices()->count(),
-            'expense_count' => $this->expenses()->count(),
-            'payment_count' => $this->payments()->count(),
+            'total_invoiced' => $totalInvoiced,
+            'total_expenses' => $totalExpenses,
+            'total_payments' => $totalPayments,
+            'net_result' => $netResult,
+            'invoice_count' => $invoiceCount,
+            'expense_count' => $expenseCount,
+            'payment_count' => $paymentCount,
             'budget_amount' => $this->budget_amount,
-            'budget_remaining' => $this->budget_amount ? $this->budget_amount - $this->totalExpenses : null,
+            'budget_remaining' => $this->budget_amount ? $this->budget_amount - $totalExpenses : null,
             'budget_used_percentage' => $this->budget_amount && $this->budget_amount > 0
-                ? round(($this->totalExpenses / $this->budget_amount) * 100, 2)
+                ? round(($totalExpenses / $this->budget_amount) * 100, 2)
                 : null,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
         ];
     }
 }

@@ -24,6 +24,28 @@ return [
             'secret' => env('STRIPE_WEBHOOK_SECRET'),
             'tolerance' => env('STRIPE_WEBHOOK_TOLERANCE', 300),
         ],
+
+        // Subscription price IDs (MKD) - Monthly and Yearly
+        'prices' => [
+            'starter' => [
+                'monthly' => env('STRIPE_PRICE_STARTER_MKD_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_STARTER_MKD_YEARLY'),
+            ],
+            'standard' => [
+                'monthly' => env('STRIPE_PRICE_STANDARD_MKD_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_STANDARD_MKD_YEARLY'),
+            ],
+            'business' => [
+                'monthly' => env('STRIPE_PRICE_BUSINESS_MKD_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_BUSINESS_MKD_YEARLY'),
+            ],
+            'max' => [
+                'monthly' => env('STRIPE_PRICE_MAX_MKD_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_MAX_MKD_YEARLY'),
+            ],
+        ],
+
+        'currency' => 'mkd',
     ],
 
     'facebook' => [

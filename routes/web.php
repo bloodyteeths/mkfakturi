@@ -47,6 +47,7 @@ Route::get('/debug-auth', function () {
     ]);
 })->middleware(['web']);
 
+
 // Admin Auth
 // ----------------------------------------------
 // NOTE: The /login route has been removed from web.php

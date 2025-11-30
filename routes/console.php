@@ -91,6 +91,13 @@ if (InstallUtils::isDbCreated()) {
         ->withoutOverlapping()
         ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
 
+    // Process partner Stripe Connect payouts - runs on 5th of each month at 2:00 AM
+    Schedule::command('partner:process-payouts')
+        ->monthlyOn(5, '02:00')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+
     // Process trial expirations - runs daily at 1:00 AM UTC (FG-01-41)
     // Sends trial expiry reminders (7 days, 1 day before)
     // Downgrades expired trials to Free tier

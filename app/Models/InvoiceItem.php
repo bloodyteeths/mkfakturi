@@ -51,6 +51,24 @@ class InvoiceItem extends Model
         return $this->belongsTo(RecurringInvoice::class);
     }
 
+    /**
+     * Get the warehouse for this invoice item (stock module).
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    /**
+     * Get stock movements related to this invoice item.
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'source_id')
+            ->where('source_type', StockMovement::SOURCE_INVOICE_ITEM);
+    }
+    // CLAUDE-CHECKPOINT
+
     public function scopeWhereCompany($query, $company_id)
     {
         $query->where('company_id', $company_id);

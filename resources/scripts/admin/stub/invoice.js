@@ -35,5 +35,6 @@ export default function () {
     fields: [],
     selectedNote: null,
     selectedCurrency: '',
+    project_id: null,
   }
 }

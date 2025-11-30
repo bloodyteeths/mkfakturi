@@ -109,12 +109,17 @@ class ProjectsController extends Controller
 
     /**
      * Get project summary with all financial totals.
+     *
+     * Supports optional date range filtering via from_date and to_date query params.
      */
-    public function summary(Project $project): JsonResponse
+    public function summary(Request $request, Project $project): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $summary = $project->getSummary();
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        $summary = $project->getSummary($fromDate, $toDate);
 
         return response()->json([
             'success' => true,
