@@ -263,6 +263,10 @@
               <span class="text-sm text-gray-600">{{ $t('projects.payments') }}</span>
               <span class="text-sm font-medium text-gray-900">{{ summary.payment_count || 0 }}</span>
             </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">{{ $t('projects.bills') }}</span>
+              <span class="text-sm font-medium text-gray-900">{{ summary.bill_count || 0 }}</span>
+            </div>
           </div>
         </BaseCard>
       </div>

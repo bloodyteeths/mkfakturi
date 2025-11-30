@@ -24,6 +24,7 @@ class BillResource extends JsonResource
             'company_id' => $this->company_id,
             'supplier_id' => $this->supplier_id,
             'currency_id' => $this->currency_id,
+            'project_id' => $this->project_id,
             'creator_id' => $this->creator_id,
             'formatted_created_at' => $this->formattedCreatedAt,
             'formatted_bill_date' => $this->formattedBillDate,

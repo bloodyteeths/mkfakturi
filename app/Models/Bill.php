@@ -232,6 +232,14 @@ class Bill extends Model implements HasMedia
     }
 
     /**
+     * Get the project this bill belongs to.
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    /**
      * Get the tax report period this bill belongs to based on bill_date
      */
     public function taxReportPeriod(): BelongsTo

@@ -60,6 +60,13 @@
               step="0.0001"
             />
           </BaseInputGroup>
+
+          <BaseInputGroup :label="$t('projects.project')">
+            <BaseProjectSelectInput
+              v-model="bill.project_id"
+              :show-action="false"
+            />
+          </BaseInputGroup>
         </div>
 
         <div class="mt-6">
@@ -207,6 +214,7 @@ const bill = reactive({
   exchange_rate: 1,
   discount: 0,
   scanned_receipt_path: null,
+  project_id: null,
 })
 
 const items = reactive([
@@ -238,6 +246,7 @@ function hydrateForm(data) {
   bill.exchange_rate = data.exchange_rate || 1
   bill.discount = data.discount || 0
   bill.scanned_receipt_path = data.scanned_receipt_path || null
+  bill.project_id = data.project_id || null
 
   if (data.items && data.items.length) {
     items.splice(0, items.length, ...data.items.map((i) => ({
@@ -311,6 +320,7 @@ function buildPayload() {
     currency_id: bill.currency_id,
     exchange_rate: bill.exchange_rate,
     discount: bill.discount || 0,
+    project_id: bill.project_id,
     discount_val: Math.round(discountVal),
     sub_total: Math.round(subTotal),
     tax: Math.round(taxAmount),

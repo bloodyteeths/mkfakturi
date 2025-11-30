@@ -37,6 +37,7 @@ class BillRequest extends FormRequest
             'items.*.quantity' => ['numeric', 'required'],
             'items.*.price' => ['numeric', 'required'],
             'currency_id' => ['required', 'integer'],
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
         ];
 
         if ($this->isMethod('PUT') && $this->route('bill')) {
@@ -78,6 +79,7 @@ class BillRequest extends FormRequest
                 'base_sub_total' => $this->sub_total * $exchangeRate,
                 'base_tax' => $this->tax * $exchangeRate,
                 'base_due_amount' => $this->total * $exchangeRate,
+                'project_id' => $this->project_id,
             ])
             ->toArray();
     }

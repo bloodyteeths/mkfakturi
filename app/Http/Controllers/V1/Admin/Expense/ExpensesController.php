@@ -89,6 +89,8 @@ class ExpensesController extends Controller
     {
         $this->authorize('view', $expense);
 
+        $expense->load(['currency', 'category', 'customer', 'company', 'creator', 'paymentMethod', 'fields.customField']);
+
         return new ExpenseResource($expense);
     }
 

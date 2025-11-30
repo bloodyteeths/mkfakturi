@@ -56,6 +56,8 @@ class PaymentsController extends Controller
     {
         $this->authorize('view', $payment);
 
+        $payment->load(['currency', 'customer', 'company', 'invoice', 'paymentMethod', 'fields.customField']);
+
         return new PaymentResource($payment);
     }
 

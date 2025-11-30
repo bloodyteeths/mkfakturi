@@ -167,6 +167,14 @@ class Project extends Model
     }
 
     /**
+     * Get all bills for the project.
+     */
+    public function bills(): HasMany
+    {
+        return $this->hasMany(Bill::class);
+    }
+
+    /**
      * Get all estimates for the project.
      */
     public function estimates(): HasMany
@@ -584,16 +592,27 @@ class Project extends Model
         $totalPayments = $paymentQuery->sum('base_amount') ?? 0;
         $paymentCount = $paymentQuery->count();
 
-        $netResult = $totalInvoiced - $totalExpenses;
+        // Build bill query with optional date filter
+        $billQuery = $this->bills();
+        if ($fromDate && $toDate) {
+            $billQuery->whereBetween('bill_date', [$fromDate, $toDate]);
+        }
+        $totalBills = $billQuery->sum('base_total') ?? 0;
+        $billCount = $billQuery->count();
+
+        // Net result: invoices received minus expenses and bills paid
+        $netResult = $totalInvoiced - $totalExpenses - $totalBills;
 
         return [
             'total_invoiced' => $totalInvoiced,
             'total_expenses' => $totalExpenses,
             'total_payments' => $totalPayments,
+            'total_bills' => $totalBills,
             'net_result' => $netResult,
             'invoice_count' => $invoiceCount,
             'expense_count' => $expenseCount,
             'payment_count' => $paymentCount,
+            'bill_count' => $billCount,
             'budget_amount' => $this->budget_amount,
             'budget_remaining' => $this->budget_amount ? $this->budget_amount - $totalExpenses : null,
             'budget_used_percentage' => $this->budget_amount && $this->budget_amount > 0
