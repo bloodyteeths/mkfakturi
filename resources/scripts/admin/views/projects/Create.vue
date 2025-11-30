@@ -17,13 +17,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <BaseInputGroup
             :label="$t('projects.name')"
-            :error="v$.form.name.$error && v$.form.name.$errors[0].$message"
+            :error="v$.name.$error && v$.name.$errors[0].$message"
             required
           >
             <BaseInput
               v-model="form.name"
-              :invalid="v$.form.name.$error"
-              @blur="v$.form.name.$touch()"
+              :invalid="v$.name.$error"
+              @blur="v$.name.$touch()"
             />
           </BaseInputGroup>
 
@@ -152,14 +152,12 @@ const selectedCurrency = computed(() => {
 })
 
 const rules = computed(() => ({
-  form: {
-    name: {
-      required: helpers.withMessage(t('validation.required'), required),
-    },
+  name: {
+    required: helpers.withMessage(t('validation.required'), required),
   },
 }))
 
-const v$ = useVuelidate(rules, { form })
+const v$ = useVuelidate(rules, form)
 
 function hydrateForm(data) {
   form.id = data.id
