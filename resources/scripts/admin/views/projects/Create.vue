@@ -17,13 +17,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <BaseInputGroup
             :label="$t('projects.name')"
-            :error="v$.name.$error && v$.name.$errors[0].$message"
+            :error="nameError"
             required
           >
             <BaseInput
               v-model="form.name"
-              :invalid="v$.name.$error"
-              @blur="v$.name.$touch()"
+              :invalid="!!nameError"
             />
           </BaseInputGroup>
 
@@ -110,9 +109,6 @@ import { useI18n } from 'vue-i18n'
 import { useProjectStore } from '@/scripts/admin/stores/project'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
-import useVuelidate from '@vuelidate/core'
-import { required, helpers } from '@vuelidate/validators'
-
 const { t } = useI18n()
 const projectStore = useProjectStore()
 const globalStore = useGlobalStore()
@@ -151,13 +147,16 @@ const selectedCurrency = computed(() => {
   return globalStore.currencies.find(c => c.id === form.currency_id)
 })
 
-const rules = {
-  name: {
-    required: helpers.withMessage(t('validation.required'), required),
-  },
-}
+const nameError = ref('')
 
-const v$ = useVuelidate(rules, form)
+function validateForm() {
+  nameError.value = ''
+  if (!form.name || form.name.trim() === '') {
+    nameError.value = t('validation.required')
+    return false
+  }
+  return true
+}
 
 function hydrateForm(data) {
   form.id = data.id
@@ -174,24 +173,12 @@ function hydrateForm(data) {
 }
 
 async function handleSubmit() {
-  console.log('handleSubmit called')
-  console.log('form.name:', form.name)
-  console.log('form values:', JSON.stringify(form))
-  console.log('v$.value.name.$model:', v$.value.name?.$model)
-  console.log('v$.value.$invalid:', v$.value.$invalid)
-
-  v$.value.$touch()
-
-  if (v$.value.$invalid) {
-    console.log('Form is invalid, errors:', v$.value.$errors)
-    console.log('name errors:', v$.value.name?.$errors)
+  if (!validateForm()) {
     return
   }
 
-  console.log('Form is valid, proceeding with save')
   isLoading.value = true
   const payload = { ...form }
-  console.log('Payload:', payload)
 
   try {
     if (isEdit.value) {
