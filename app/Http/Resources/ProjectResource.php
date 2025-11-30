@@ -28,6 +28,13 @@ class ProjectResource extends JsonResource
             'description' => $this->description,
             'customer_id' => $this->customer_id,
             'status' => $this->status,
+
+            // Status flags for UI
+            'allows_new_documents' => $this->allowsNewDocuments(),
+            'is_editable' => $this->isEditable(),
+            'can_be_completed' => $this->canBeCompleted(),
+            'can_be_cancelled' => $this->canBeCancelled(),
+            'can_be_reopened' => $this->canBeReopened(),
             'budget_amount' => $this->budget_amount,
             'currency_id' => $this->currency_id,
             'start_date' => $this->start_date?->format('Y-m-d'),

@@ -301,11 +301,149 @@ class Project extends Model
     }
 
     /**
-     * Scope for closed projects.
+     * Scope for in-progress projects.
      */
-    public function scopeClosed($query)
+    public function scopeInProgress($query)
     {
-        return $query->where('projects.status', self::STATUS_CLOSED);
+        return $query->where('projects.status', self::STATUS_IN_PROGRESS);
+    }
+
+    /**
+     * Scope for completed projects.
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('projects.status', self::STATUS_COMPLETED);
+    }
+
+    /**
+     * Scope for on-hold projects.
+     */
+    public function scopeOnHold($query)
+    {
+        return $query->where('projects.status', self::STATUS_ON_HOLD);
+    }
+
+    /**
+     * Scope for cancelled projects.
+     */
+    public function scopeCancelled($query)
+    {
+        return $query->where('projects.status', self::STATUS_CANCELLED);
+    }
+
+    /**
+     * Scope for active projects (not completed or cancelled).
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNotIn('projects.status', [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+    }
+
+    // ============================================
+    // STATUS LOGIC
+    // ============================================
+
+    /**
+     * Check if project allows adding new documents (invoices, expenses, payments).
+     * Only open and in_progress projects can receive new documents.
+     */
+    public function allowsNewDocuments(): bool
+    {
+        return in_array($this->status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS]);
+    }
+
+    /**
+     * Check if project is editable.
+     * Completed and cancelled projects cannot be edited.
+     */
+    public function isEditable(): bool
+    {
+        return !in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+    }
+
+    /**
+     * Check if project can be completed.
+     */
+    public function canBeCompleted(): bool
+    {
+        return in_array($this->status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_ON_HOLD]);
+    }
+
+    /**
+     * Check if project can be cancelled.
+     */
+    public function canBeCancelled(): bool
+    {
+        return $this->status !== self::STATUS_CANCELLED;
+    }
+
+    /**
+     * Check if project can be reopened.
+     */
+    public function canBeReopened(): bool
+    {
+        return in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_ON_HOLD, self::STATUS_CANCELLED]);
+    }
+
+    /**
+     * Mark project as completed.
+     */
+    public function markAsCompleted(): bool
+    {
+        if (!$this->canBeCompleted()) {
+            return false;
+        }
+        $this->status = self::STATUS_COMPLETED;
+        return $this->save();
+    }
+
+    /**
+     * Mark project as cancelled.
+     */
+    public function markAsCancelled(): bool
+    {
+        if (!$this->canBeCancelled()) {
+            return false;
+        }
+        $this->status = self::STATUS_CANCELLED;
+        return $this->save();
+    }
+
+    /**
+     * Reopen a completed/cancelled/on-hold project.
+     */
+    public function reopen(): bool
+    {
+        if (!$this->canBeReopened()) {
+            return false;
+        }
+        $this->status = self::STATUS_OPEN;
+        return $this->save();
+    }
+
+    /**
+     * Put project on hold.
+     */
+    public function putOnHold(): bool
+    {
+        if (in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_CANCELLED])) {
+            return false;
+        }
+        $this->status = self::STATUS_ON_HOLD;
+        return $this->save();
+    }
+
+    /**
+     * Start working on project (move to in_progress).
+     */
+    public function startProgress(): bool
+    {
+        if (!in_array($this->status, [self::STATUS_OPEN, self::STATUS_ON_HOLD])) {
+            return false;
+        }
+        $this->status = self::STATUS_IN_PROGRESS;
+        return $this->save();
     }
 
     /**
