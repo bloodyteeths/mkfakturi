@@ -219,9 +219,9 @@ For every phase completion:
 
 | Phase | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
-| Phase 1.1 - Projects | Backend Complete | 2025-11-30 | 2025-11-30 | Backend, API, translations done. Frontend pages needed. |
-| Phase 1.2 - Proforma | Complete | Prior | Prior | Already fully implemented in codebase |
-| Phase 1.3 - Duplicate Protection | Backend Complete | 2025-11-30 | 2025-11-30 | Backend logic done. Frontend modal needed. |
+| Phase 1.1 - Projects | Complete | 2025-11-30 | 2025-11-30 | Backend + Frontend complete |
+| Phase 1.2 - Proforma | Complete | Prior | 2025-12-01 | Backend existed, Frontend completed 2025-12-01 |
+| Phase 1.3 - Duplicate Protection | Complete | 2025-11-30 | 2025-11-30 | Backend + Frontend complete |
 | Phase 2.1 - Stock Foundation | Pending | | | |
 | Phase 2.2 - Valuation | Pending | | | |
 | Phase 2.3 - Stock Reports | Pending | | | |
@@ -319,6 +319,22 @@ For every phase completion:
 - `resources/scripts/admin/stores/expense.js` - Added duplicate handling in addExpense/updateExpense
 - `resources/scripts/admin/views/expenses/Create.vue` - Added duplicate warning modal integration
 
+### Phase 1.2 - Proforma Invoice (Vue Frontend - Completed 2025-12-01)
+**Files Created:**
+- `resources/scripts/admin/stub/proforma-invoice.js` - Default proforma invoice data structure
+- `resources/scripts/admin/stores/proforma-invoice.js` - Pinia store with CRUD actions + convert to invoice
+- `resources/scripts/admin/views/proforma-invoices/Index.vue` - List page with filtering
+- `resources/scripts/admin/views/proforma-invoices/View.vue` - Detail page with sidebar navigation
+- `resources/scripts/admin/views/proforma-invoices/create/ProformaInvoiceCreate.vue` - Create/edit form
+- `resources/scripts/admin/views/proforma-invoices/create/ProformaInvoiceCreateBasicFields.vue` - Form fields component
+- `resources/scripts/admin/components/dropdowns/ProformaInvoiceIndexDropdown.vue` - Actions dropdown
+
+**Files Modified:**
+- `resources/scripts/admin/admin-router.js` - Added proforma invoice routes
+- `config/invoiceshelf.php` - Added Proforma Invoices navigation menu item
+- `lang/en.json` - Added proforma_invoices translations (navigation + section)
+- `lang/mk.json` - Added Macedonian proforma_invoices translations
+
 ---
 
-_Last updated: 2025-11-30_
+_Last updated: 2025-12-01_

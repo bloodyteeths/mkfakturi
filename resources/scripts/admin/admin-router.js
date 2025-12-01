@@ -146,6 +146,14 @@ const RecurringInvoiceCreate = () =>
 const RecurringInvoiceView = () =>
   import('@/scripts/admin/views/recurring-invoices/View.vue')
 
+// Proforma Invoices
+const ProformaInvoiceIndex = () =>
+  import('@/scripts/admin/views/proforma-invoices/Index.vue')
+const ProformaInvoiceCreate = () =>
+  import('@/scripts/admin/views/proforma-invoices/create/ProformaInvoiceCreate.vue')
+const ProformaInvoiceView = () =>
+  import('@/scripts/admin/views/proforma-invoices/View.vue')
+
 // Reports
 const ReportsIndex = () =>
   import('@/scripts/admin/views/reports/layout/Index.vue')
@@ -726,6 +734,32 @@ export default [
         name: 'recurring-invoices.edit',
         meta: { ability: abilities.EDIT_RECURRING_INVOICE },
         component: RecurringInvoiceCreate,
+      },
+
+      // Proforma Invoices
+      {
+        path: 'proforma-invoices',
+        name: 'proforma-invoices.index',
+        meta: { ability: abilities.VIEW_ESTIMATE },
+        component: ProformaInvoiceIndex,
+      },
+      {
+        path: 'proforma-invoices/create',
+        name: 'proforma-invoices.create',
+        meta: { ability: abilities.CREATE_ESTIMATE },
+        component: ProformaInvoiceCreate,
+      },
+      {
+        path: 'proforma-invoices/:id/view',
+        name: 'proforma-invoices.view',
+        meta: { ability: abilities.VIEW_ESTIMATE },
+        component: ProformaInvoiceView,
+      },
+      {
+        path: 'proforma-invoices/:id/edit',
+        name: 'proforma-invoices.edit',
+        meta: { ability: abilities.EDIT_ESTIMATE },
+        component: ProformaInvoiceCreate,
       },
 
       // Modules

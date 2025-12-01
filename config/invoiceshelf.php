@@ -10,6 +10,7 @@ use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Note;
 use App\Models\Payment;
+use App\Models\ProformaInvoice;
 use App\Models\Project;
 use App\Models\RecurringInvoice;
 use App\Models\Supplier;
@@ -414,6 +415,16 @@ return [
             'owner_only' => false,
             'ability' => 'view-estimate',
             'model' => Estimate::class,
+        ],
+        [
+            'title' => 'navigation.proforma_invoices',
+            'group' => 2,
+            'link' => '/admin/proforma-invoices',
+            'icon' => 'DocumentDuplicateIcon',
+            'name' => 'Proforma Invoices',
+            'owner_only' => false,
+            'ability' => 'view-estimate',
+            'model' => ProformaInvoice::class,
         ],
         [
             'title' => 'navigation.invoices',
