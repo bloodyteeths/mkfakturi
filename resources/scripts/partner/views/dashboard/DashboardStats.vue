@@ -18,28 +18,35 @@ import { usePartnerStore } from '@/scripts/partner/stores/partner'
 
 const partnerStore = usePartnerStore()
 
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('mk-MK', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(amount || 0)
+}
+
 const stats = ref([
   {
-    title: 'Активни Кліенти',
+    title: 'Активни Клиенти',
     value: '0',
     icon: 'CustomerIcon',
     color: 'text-blue-500'
   },
   {
     title: 'Месечни Провизии',
-    value: '0 МКД',
-    icon: 'DollarIcon', 
+    value: '€0.00',
+    icon: 'DollarIcon',
     color: 'text-green-500'
   },
   {
-    title: 'Обработени Фактури',
-    value: '0',
+    title: 'Вкупно Заработено',
+    value: '€0.00',
     icon: 'InvoiceIcon',
     color: 'text-purple-500'
   },
   {
-    title: 'Тековни Проекти',
-    value: '0',
+    title: 'Чека Исплата',
+    value: '€0.00',
     icon: 'EstimateIcon',
     color: 'text-orange-500'
   }
@@ -48,30 +55,30 @@ const stats = ref([
 onMounted(async () => {
   // Load partner dashboard data
   await partnerStore.loadDashboardStats()
-  
+
   // Update stats with real data
   stats.value = [
     {
-      title: 'Активни Кліенти',
+      title: 'Активни Клиенти',
       value: partnerStore.dashboardStats.activeClients?.toString() || '0',
       icon: 'CustomerIcon',
       color: 'text-blue-500'
     },
     {
       title: 'Месечни Провизии',
-      value: `${partnerStore.dashboardStats.monthlyCommissions || 0} МКД`,
+      value: formatCurrency(partnerStore.dashboardStats.monthlyCommissions || 0),
       icon: 'DollarIcon',
       color: 'text-green-500'
     },
     {
-      title: 'Обработени Фактури',
-      value: partnerStore.dashboardStats.processedInvoices?.toString() || '0',
-      icon: 'InvoiceIcon', 
+      title: 'Вкупно Заработено',
+      value: formatCurrency(partnerStore.dashboardStats.totalEarned || 0),
+      icon: 'InvoiceIcon',
       color: 'text-purple-500'
     },
     {
-      title: 'Тековни Проекти',
-      value: partnerStore.dashboardStats.currentProjects?.toString() || '0',
+      title: 'Чека Исплата',
+      value: formatCurrency(partnerStore.dashboardStats.pendingPayout || 0),
       icon: 'EstimateIcon',
       color: 'text-orange-500'
     }

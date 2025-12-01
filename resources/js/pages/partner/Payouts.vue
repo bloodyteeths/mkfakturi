@@ -1,5 +1,5 @@
 <template>
-  <div class="payouts-page">
+  <div class="payouts-page min-h-screen overflow-auto pb-8">
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Управување со исплати</h1>
       <p class="text-gray-600">Поврзете се со Stripe за автоматски исплати на провизии</p>
@@ -240,101 +240,6 @@
       </div>
     </div>
 
-    <!-- Bank Account Settings -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900">Банкарски детали за исплата</h3>
-        <button
-          v-if="!editingBankDetails"
-          @click="editBankDetails"
-          class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-        >
-          Измени
-        </button>
-      </div>
-
-      <div v-if="!editingBankDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">Име на сопственик</label>
-          <p class="text-gray-900">{{ bankDetails.account_holder || 'Не е поставено' }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">Име на банка</label>
-          <p class="text-gray-900">{{ bankDetails.bank_name || 'Не е поставено' }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">IBAN</label>
-          <p class="text-gray-900 font-mono">{{ bankDetails.account_number || 'Не е поставено' }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">SWIFT/BIC код</label>
-          <p class="text-gray-900 font-mono">{{ bankDetails.bank_code || 'Не е поставено' }}</p>
-        </div>
-      </div>
-
-      <form v-else @submit.prevent="saveBankDetails" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Име на сопственик *</label>
-            <input
-              v-model="bankDetailsForm.account_holder"
-              type="text"
-              required
-              placeholder="Име Презиме или Име на фирма"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Име на банка *</label>
-            <input
-              v-model="bankDetailsForm.bank_name"
-              type="text"
-              required
-              placeholder="пр. Стопанска банка"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">IBAN *</label>
-            <input
-              v-model="bankDetailsForm.account_number"
-              type="text"
-              required
-              placeholder="MK07..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
-            />
-            <p class="text-xs text-gray-500 mt-1">Македонски IBAN започнува со MK</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">SWIFT/BIC код</label>
-            <input
-              v-model="bankDetailsForm.bank_code"
-              type="text"
-              placeholder="пр. STOBMK2X"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
-            />
-          </div>
-        </div>
-
-        <div class="flex gap-3">
-          <button
-            type="submit"
-            :disabled="savingBankDetails"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {{ savingBankDetails ? 'Се зачувува...' : 'Зачувај' }}
-          </button>
-          <button
-            type="button"
-            @click="cancelEditBankDetails"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-          >
-            Откажи
-          </button>
-        </div>
-      </form>
-    </div>
-
     <!-- Payout Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
@@ -390,7 +295,7 @@
                 Износ
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Метод
+                Stripe Transfer
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Статус
@@ -414,8 +319,8 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                 {{ formatCurrency(payout.amount) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                {{ formatPaymentMethod(payout.payment_method) }}
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                {{ payout.stripe_transfer_id || '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="getStatusBadgeClass(payout.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
@@ -496,20 +401,6 @@ export default {
 
   data() {
     return {
-      bankDetails: {
-        account_holder: '',
-        bank_name: '',
-        account_number: '',
-        bank_code: ''
-      },
-      bankDetailsForm: {
-        account_holder: '',
-        bank_name: '',
-        account_number: '',
-        bank_code: ''
-      },
-      editingBankDetails: false,
-      savingBankDetails: false,
       payoutSummary: {
         totalPaid: 0,
         pending: 0,
@@ -536,45 +427,11 @@ export default {
 
   mounted() {
     this.loadStripeStatus()
-    this.fetchBankDetails()
     this.fetchPayouts()
     this.handleStripeRedirect()
   },
 
   methods: {
-    editBankDetails() {
-      this.bankDetailsForm = { ...this.bankDetails }
-      this.editingBankDetails = true
-    },
-
-    async fetchBankDetails() {
-      try {
-        const response = await axios.get('/partner/bank-details')
-        this.bankDetails = response.data
-      } catch (error) {
-        console.error('Failed to fetch bank details:', error)
-      }
-    },
-
-    async saveBankDetails() {
-      this.savingBankDetails = true
-      try {
-        const response = await axios.post('/partner/bank-details', this.bankDetailsForm)
-        this.bankDetails = response.data
-        this.editingBankDetails = false
-      } catch (error) {
-        console.error('Failed to save bank details:', error)
-        alert('Неуспешно зачувување. Обидете се повторно.')
-      } finally {
-        this.savingBankDetails = false
-      }
-    },
-
-    cancelEditBankDetails() {
-      this.bankDetailsForm = { ...this.bankDetails }
-      this.editingBankDetails = false
-    },
-
     async fetchPayouts() {
       this.loading = true
       try {
@@ -641,15 +498,6 @@ export default {
         month: 'short',
         day: 'numeric'
       })
-    },
-
-    formatPaymentMethod(method) {
-      const methods = {
-        wise: 'Wise',
-        bank_transfer: 'Банкарски трансфер',
-        manual: 'Рачно'
-      }
-      return methods[method] || method || '-'
     },
 
     formatStatus(status) {

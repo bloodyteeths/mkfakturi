@@ -7,8 +7,8 @@ export const usePartnerStore = defineStore('partner', () => {
   const dashboardStats = ref({
     activeClients: 0,
     monthlyCommissions: 0,
-    processedInvoices: 0,
-    currentProjects: 0
+    totalEarned: 0,
+    pendingPayout: 0
   })
 
   const recentCommissions = ref([])
@@ -45,21 +45,17 @@ export const usePartnerStore = defineStore('partner', () => {
         console.warn('⚠️ Partner portal using mocked data')
         isMocked.value = true
         mockWarning.value = data.warning || 'Using mocked data for safety'
-        dashboardStats.value = {
-          activeClients: data.data.active_clients,
-          monthlyCommissions: data.data.monthly_commissions,
-          processedInvoices: data.data.processed_invoices,
-          currentProjects: 0  // Not provided by API
-        }
       } else {
         isMocked.value = false
         mockWarning.value = ''
-        dashboardStats.value = {
-          activeClients: data.data.active_clients,
-          monthlyCommissions: data.data.monthly_commissions,
-          processedInvoices: data.data.processed_invoices,
-          currentProjects: 0  // Not provided by API
-        }
+      }
+
+      // Update stats - API returns EUR amounts
+      dashboardStats.value = {
+        activeClients: data.data.active_clients || 0,
+        monthlyCommissions: data.data.monthly_commissions || 0,
+        totalEarned: data.data.total_earnings || 0,
+        pendingPayout: data.data.pending_payout || 0
       }
     } catch (error) {
       console.error('Error loading dashboard stats:', error)
@@ -67,8 +63,8 @@ export const usePartnerStore = defineStore('partner', () => {
       dashboardStats.value = {
         activeClients: 0,
         monthlyCommissions: 0,
-        processedInvoices: 0,
-        currentProjects: 0
+        totalEarned: 0,
+        pendingPayout: 0
       }
     } finally {
       isLoading.value = false

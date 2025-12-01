@@ -24,7 +24,7 @@
                 <span class="capitalize">{{ commission.type }}</span>
               </td>
               <td class="px-4 py-3 text-sm">
-                {{ formatMoney(commission.amount) }} МКД
+                {{ formatMoney(commission.amount) }}
               </td>
               <td class="px-4 py-3 text-sm">
                 <span 
@@ -83,7 +83,10 @@ const recentCommissions = ref([])
 const recentActivities = ref([])
 
 const formatMoney = (amount) => {
-  return new Intl.NumberFormat('mk-MK').format(amount)
+  return new Intl.NumberFormat('mk-MK', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(amount || 0)
 }
 
 const formatDate = (date) => {
