@@ -24,7 +24,7 @@ class WarehouseFactory extends Factory
 
         return [
             'company_id' => $company->id,
-            'name' => $this->faker->company() . ' Warehouse',
+            'name' => $this->faker->company().' Warehouse',
             'code' => strtoupper($this->faker->unique()->lexify('WH-???')),
             'address' => $this->faker->address(),
             'is_default' => false,

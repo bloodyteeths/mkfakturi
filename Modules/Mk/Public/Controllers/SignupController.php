@@ -18,15 +18,10 @@ use Modules\Mk\Public\Services\SignupService;
  */
 class SignupController extends Controller
 {
-    /**
-     * @var SignupService
-     */
     protected SignupService $signupService;
 
     /**
      * Constructor
-     *
-     * @param SignupService $signupService
      */
     public function __construct(SignupService $signupService)
     {
@@ -37,9 +32,6 @@ class SignupController extends Controller
      * Validate referral code and return partner information
      *
      * POST /api/v1/public/signup/validate-referral
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function validateReferral(Request $request): JsonResponse
     {
@@ -59,7 +51,7 @@ class SignupController extends Controller
         try {
             $referralData = $this->signupService->validateReferralCode($code);
 
-            if (!$referralData) {
+            if (! $referralData) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid or inactive referral code.',
@@ -92,9 +84,6 @@ class SignupController extends Controller
      * Get available subscription plans
      *
      * GET /api/v1/public/signup/plans
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function getPlans(Request $request): JsonResponse
     {
@@ -121,9 +110,6 @@ class SignupController extends Controller
      * Register new company with user and create Stripe Checkout session
      *
      * POST /api/v1/public/signup/register
-     *
-     * @param SignupRequest $request
-     * @return JsonResponse
      */
     public function register(SignupRequest $request): JsonResponse
     {
@@ -131,7 +117,7 @@ class SignupController extends Controller
             $data = $request->validated();
 
             // If referral code provided, validate it first
-            if (!empty($data['referral_code']) && empty($data['partner_id'])) {
+            if (! empty($data['referral_code']) && empty($data['partner_id'])) {
                 $referralData = $this->signupService->validateReferralCode($data['referral_code']);
 
                 if ($referralData) {

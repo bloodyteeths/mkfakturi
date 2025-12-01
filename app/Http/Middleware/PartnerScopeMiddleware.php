@@ -27,6 +27,7 @@ class PartnerScopeMiddleware
 
         if (! $user) {
             \Log::warning('PartnerScopeMiddleware - No authenticated user');
+
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -35,6 +36,7 @@ class PartnerScopeMiddleware
 
         if (! $partner) {
             \Log::warning('PartnerScopeMiddleware - User is not a partner', ['user_id' => $user->id]);
+
             return response()->json([
                 'error' => 'User is not registered as a partner',
             ], 403);
@@ -48,6 +50,7 @@ class PartnerScopeMiddleware
         // Check if partner is active
         if (! $partner->is_active) {
             \Log::warning('PartnerScopeMiddleware - Partner inactive', ['partner_id' => $partner->id]);
+
             return response()->json([
                 'error' => 'Partner account is inactive',
             ], 403);
@@ -68,7 +71,7 @@ class PartnerScopeMiddleware
                            $request->is('api/*/partner/commissions') ||
                            $request->is('api/*/partner/clients');
 
-        if ($companyId && !$skipCompanyCheck) {
+        if ($companyId && ! $skipCompanyCheck) {
             // Verify partner has access to this company
             $hasAccess = $partner->activeCompanies()
                 ->where('companies.id', $companyId)
@@ -85,6 +88,7 @@ class PartnerScopeMiddleware
                     'company_id' => $companyId,
                     'url' => $request->url(),
                 ]);
+
                 return response()->json([
                     'error' => 'Partner does not have access to this company',
                 ], 403);

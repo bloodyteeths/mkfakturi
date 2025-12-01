@@ -101,7 +101,7 @@ test('update customer', function () {
         ],
     ]);
 
-    $response = putJson('api/v1/customers/' . $customer->id, $customer1);
+    $response = putJson('api/v1/customers/'.$customer->id, $customer1);
 
     $customer1 = collect($customer1)
         ->only([
@@ -135,7 +135,7 @@ test('search customers', function () {
 
     $queryString = http_build_query($filters, '', '&');
 
-    $response = getJson('api/v1/customers?' . $queryString);
+    $response = getJson('api/v1/customers?'.$queryString);
 
     $response->assertOk();
 });

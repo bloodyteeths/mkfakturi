@@ -27,7 +27,6 @@ class AccountSuggestionService
      *
      * For invoices: Debit=Receivables, Credit=Revenue
      *
-     * @param  Invoice  $invoice
      * @return array ['debit_account_id' => X, 'credit_account_id' => Y, 'confidence' => 0.85]
      */
     public function suggestForInvoice(Invoice $invoice): array
@@ -107,7 +106,6 @@ class AccountSuggestionService
      *
      * For expenses: Debit=Expense category account, Credit=Payables/Cash
      *
-     * @param  Expense  $expense
      * @return array ['debit_account_id' => X, 'credit_account_id' => Y, 'confidence' => 0.85]
      */
     public function suggestForExpense(Expense $expense): array
@@ -242,7 +240,6 @@ class AccountSuggestionService
      *
      * For payments: Debit=Cash/Bank, Credit=Receivables
      *
-     * @param  Payment  $payment
      * @return array ['debit_account_id' => X, 'credit_account_id' => Y, 'confidence' => 0.85]
      */
     public function suggestForPayment(Payment $payment): array
@@ -325,10 +322,6 @@ class AccountSuggestionService
      * Confirm the account suggestion for a transaction.
      *
      * @param  Model  $model  Invoice, Expense, or Payment
-     * @param  int  $debitAccountId
-     * @param  int  $creditAccountId
-     * @param  User  $user
-     * @return void
      */
     public function confirmSuggestion(Model $model, int $debitAccountId, int $creditAccountId, User $user): void
     {
@@ -347,7 +340,6 @@ class AccountSuggestionService
      * Update mappings based on confirmed selections for better future suggestions.
      *
      * @param  Model  $model  Invoice, Expense, or Payment
-     * @return void
      */
     public function learnFromConfirmation(Model $model): void
     {
@@ -412,14 +404,6 @@ class AccountSuggestionService
 
     /**
      * Helper to upsert account mapping.
-     *
-     * @param  int  $companyId
-     * @param  string  $entityType
-     * @param  int|null  $entityId
-     * @param  string  $transactionType
-     * @param  int  $debitAccountId
-     * @param  int  $creditAccountId
-     * @return void
      */
     protected function upsertMapping(
         int $companyId,

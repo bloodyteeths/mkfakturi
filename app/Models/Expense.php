@@ -107,9 +107,6 @@ class Expense extends Model implements HasMedia
      * Check for potential duplicate expenses.
      * Duplicates are identified by: same company + same supplier + same invoice_number
      *
-     * @param  int  $companyId
-     * @param  int|null  $supplierId
-     * @param  string|null  $invoiceNumber
      * @param  int|null  $excludeId  Expense ID to exclude (for updates)
      * @return \Illuminate\Database\Eloquent\Collection
      */
@@ -137,8 +134,6 @@ class Expense extends Model implements HasMedia
 
     /**
      * Check if this expense would be a duplicate.
-     *
-     * @return bool
      */
     public function hasDuplicates(): bool
     {

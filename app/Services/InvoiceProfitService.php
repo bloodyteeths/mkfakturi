@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\StockMovement;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Invoice Profit Service
@@ -67,9 +66,7 @@ class InvoiceProfitService
      *
      * All monetary values are in cents (base currency).
      *
-     * @param Invoice $invoice
-     * @param bool $includeItemBreakdown Include per-item costs
-     * @return array
+     * @param  bool  $includeItemBreakdown  Include per-item costs
      */
     public function getInvoiceProfit(Invoice $invoice, bool $includeItemBreakdown = false): array
     {
@@ -160,7 +157,6 @@ class InvoiceProfitService
      * 2. Current WAC from stock service
      * 3. Fallback: no cost available
      *
-     * @param InvoiceItem $invoiceItem
      * @return array ['unit_cost' => int|null, 'cogs' => int, 'has_cost' => bool, 'cost_source' => string]
      */
     protected function calculateItemCost(InvoiceItem $invoiceItem): array
@@ -246,7 +242,7 @@ class InvoiceProfitService
      *
      * Useful for reports and dashboards.
      *
-     * @param \Illuminate\Database\Eloquent\Collection $invoices
+     * @param  \Illuminate\Database\Eloquent\Collection  $invoices
      * @return array ['total_revenue' => int, 'total_cogs' => int, 'total_profit' => int, 'avg_margin' => float]
      */
     public function getInvoicesProfitSummary($invoices): array

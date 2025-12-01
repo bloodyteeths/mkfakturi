@@ -25,7 +25,7 @@ class PartnerClientsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -90,7 +90,7 @@ class PartnerClientsController extends Controller
                 'id' => $company->id,
                 'name' => $company->name,
                 'email' => $company->owner ? $company->owner->email : null,
-                'logo' => $company->logo_path ? asset('storage/' . $company->logo_path) : null,
+                'logo' => $company->logo_path ? asset('storage/'.$company->logo_path) : null,
                 'plan' => $planTier,
                 'mrr' => $mrr,
                 'status' => $subscription->status ?? 'inactive',
@@ -114,7 +114,7 @@ class PartnerClientsController extends Controller
 
         $monthlyCommission = $allCompanies->reduce(function ($carry, $company) use ($partner) {
             $subscription = $company->subscription;
-            if (!$subscription || $subscription->status !== 'active') {
+            if (! $subscription || $subscription->status !== 'active') {
                 return $carry;
             }
 

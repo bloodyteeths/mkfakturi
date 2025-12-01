@@ -130,7 +130,7 @@ class InvoiceProfitTest extends TestCase
         ]);
 
         // Calculate profit
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice, true);
 
         $this->assertTrue($profit['available']);
@@ -154,7 +154,7 @@ class InvoiceProfitTest extends TestCase
             'company_id' => $this->company->id,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice);
 
         $this->assertFalse($profit['available']);
@@ -191,7 +191,7 @@ class InvoiceProfitTest extends TestCase
             'base_total' => 10000,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice);
 
         $this->assertFalse($profit['available']);
@@ -242,7 +242,7 @@ class InvoiceProfitTest extends TestCase
             'base_total' => 20000,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice, true);
 
         $this->assertTrue($profit['available']);
@@ -315,7 +315,7 @@ class InvoiceProfitTest extends TestCase
             'base_total' => 5000,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice, true);
 
         $this->assertTrue($profit['available']);
@@ -375,7 +375,7 @@ class InvoiceProfitTest extends TestCase
             'base_total' => 0,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice);
 
         $this->assertTrue($profit['available']);
@@ -422,7 +422,7 @@ class InvoiceProfitTest extends TestCase
             'base_total' => 5000,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $profit = $profitService->getInvoiceProfit($invoice);
 
         $this->assertTrue($profit['available']);
@@ -451,7 +451,7 @@ class InvoiceProfitTest extends TestCase
             'company_id' => $this->company->id,
         ]);
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $this->assertFalse($profitService->isProfitAvailable($invoice));
 
         // Now with tracked item - should be available
@@ -518,7 +518,7 @@ class InvoiceProfitTest extends TestCase
             $invoices->push($invoice);
         }
 
-        $profitService = new InvoiceProfitService(new StockService());
+        $profitService = new InvoiceProfitService(new StockService);
         $summary = $profitService->getInvoicesProfitSummary($invoices);
 
         $this->assertTrue($summary['available']);

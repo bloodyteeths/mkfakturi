@@ -41,7 +41,7 @@ class PeriodLockTest extends TestCase
         ]);
         $this->user->companies()->attach($this->company->id);
 
-        $this->lockService = new PeriodLockService();
+        $this->lockService = new PeriodLockService;
     }
 
     /** @test */

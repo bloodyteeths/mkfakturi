@@ -81,10 +81,10 @@ class Item extends Model
     public function scopeWhereSearch($query, $search)
     {
         return $query->where(function ($query) use ($search) {
-            $query->where('items.name', 'LIKE', '%' . $search . '%')
-                ->orWhere('items.sku', 'LIKE', '%' . $search . '%')
-                ->orWhere('items.barcode', 'LIKE', '%' . $search . '%')
-                ->orWhere('items.description', 'LIKE', '%' . $search . '%');
+            $query->where('items.name', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.sku', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.barcode', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.description', 'LIKE', '%'.$search.'%');
         });
     }
 

@@ -21,7 +21,7 @@ class SignupService
     /**
      * Validate referral code and return partner information
      *
-     * @param string $code Referral code from affiliate link
+     * @param  string  $code  Referral code from affiliate link
      * @return array|null Partner information or null if invalid
      */
     public function validateReferralCode(string $code): ?array
@@ -31,7 +31,7 @@ class SignupService
             ->with('partner')
             ->first();
 
-        if (!$affiliateLink || !$affiliateLink->partner || !$affiliateLink->partner->is_active) {
+        if (! $affiliateLink || ! $affiliateLink->partner || ! $affiliateLink->partner->is_active) {
             return null;
         }
 
@@ -122,8 +122,9 @@ class SignupService
     /**
      * Register new company with user and optional referral
      *
-     * @param array $data Registration data
+     * @param  array  $data  Registration data
      * @return array Company and checkout session information
+     *
      * @throws \Exception
      */
     public function register(array $data): array
@@ -138,7 +139,7 @@ class SignupService
             $user = $this->createAdminUser($data, $company);
 
             // Record referral conversion if applicable
-            if (!empty($data['affiliate_link_id'])) {
+            if (! empty($data['affiliate_link_id'])) {
                 $this->recordConversion($data['affiliate_link_id'], $company->id);
             }
 
@@ -172,8 +173,7 @@ class SignupService
     /**
      * Create company record
      *
-     * @param array $data Company data
-     * @return Company
+     * @param  array  $data  Company data
      */
     private function createCompany(array $data): Company
     {
@@ -195,7 +195,7 @@ class SignupService
         ]);
 
         // Link to partner if referred
-        if (!empty($data['partner_id'])) {
+        if (! empty($data['partner_id'])) {
             $company->partners()->attach($data['partner_id'], [
                 'is_primary' => true,
                 'is_active' => true,
@@ -212,9 +212,8 @@ class SignupService
     /**
      * Create admin user for company
      *
-     * @param array $data User data
-     * @param Company $company Company instance
-     * @return User
+     * @param  array  $data  User data
+     * @param  Company  $company  Company instance
      */
     private function createAdminUser(array $data, Company $company): User
     {
@@ -241,8 +240,8 @@ class SignupService
     /**
      * Record conversion for affiliate link
      *
-     * @param int $affiliateLinkId Affiliate link ID
-     * @param int $companyId Company ID
+     * @param  int  $affiliateLinkId  Affiliate link ID
+     * @param  int  $companyId  Company ID
      */
     private function recordConversion(int $affiliateLinkId, int $companyId): void
     {
@@ -263,9 +262,9 @@ class SignupService
     /**
      * Create Stripe Checkout session for subscription
      *
-     * @param Company $company Company instance
-     * @param array $data Checkout data
-     * @return \Stripe\Checkout\Session
+     * @param  Company  $company  Company instance
+     * @param  array  $data  Checkout data
+     *
      * @throws \Stripe\Exception\ApiErrorException
      */
     private function createStripeCheckoutSession(Company $company, array $data): \Stripe\Checkout\Session
@@ -278,7 +277,7 @@ class SignupService
         $prices = config('services.stripe.prices');
         $priceId = $prices[$plan][$billingPeriod] ?? null;
 
-        if (!$priceId) {
+        if (! $priceId) {
             throw new \Exception("Invalid plan or billing period: {$plan}/{$billingPeriod}");
         }
 
@@ -289,11 +288,11 @@ class SignupService
             'company_id' => $company->id,
         ];
 
-        if (!empty($data['partner_id'])) {
+        if (! empty($data['partner_id'])) {
             $metadata['partner_id'] = $data['partner_id'];
         }
 
-        if (!empty($data['affiliate_link_id'])) {
+        if (! empty($data['affiliate_link_id'])) {
             $metadata['affiliate_link_id'] = $data['affiliate_link_id'];
         }
 

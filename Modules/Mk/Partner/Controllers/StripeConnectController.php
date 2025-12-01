@@ -25,8 +25,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
 use Stripe\Exception\ApiErrorException;
+use Stripe\StripeClient;
 
 class StripeConnectController extends Controller
 {
@@ -37,7 +37,7 @@ class StripeConnectController extends Controller
         // PLACEHOLDER: Ensure STRIPE_SECRET is set in your .env file
         $secretKey = config('services.stripe.secret');
 
-        if (!empty($secretKey)) {
+        if (! empty($secretKey)) {
             $this->stripe = new StripeClient([
                 'api_key' => $secretKey,
                 'stripe_version' => '2025-11-17.clover', // Latest API version
@@ -53,12 +53,11 @@ class StripeConnectController extends Controller
      * - losses.payments = 'application' → Platform handles disputes
      * - stripe_dashboard.type = 'express' → Partner gets Express Dashboard
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function createConnectedAccount(Request $request)
     {
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             return response()->json([
                 'error' => 'Stripe is not configured. Please contact support.',
             ], 500);
@@ -66,7 +65,7 @@ class StripeConnectController extends Controller
 
         $partner = $request->user()->partner;
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 404);
         }
 
@@ -157,7 +156,7 @@ class StripeConnectController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to create Stripe account: ' . $e->getMessage(),
+                'error' => 'Failed to create Stripe account: '.$e->getMessage(),
             ], 422);
         }
     }
@@ -171,12 +170,11 @@ class StripeConnectController extends Controller
      * - Bank account setup
      * - Terms of Service acceptance
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function createAccountLink(Request $request)
     {
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             return response()->json([
                 'error' => 'Stripe is not configured',
             ], 500);
@@ -184,7 +182,7 @@ class StripeConnectController extends Controller
 
         $partner = $request->user()->partner;
 
-        if (!$partner || !$partner->stripe_account_id) {
+        if (! $partner || ! $partner->stripe_account_id) {
             return response()->json([
                 'error' => 'No connected account found. Please create one first.',
             ], 400);
@@ -232,7 +230,7 @@ class StripeConnectController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to create onboarding link: ' . $e->getMessage(),
+                'error' => 'Failed to create onboarding link: '.$e->getMessage(),
             ], 422);
         }
     }
@@ -242,21 +240,20 @@ class StripeConnectController extends Controller
      *
      * Always fetches fresh status from Stripe (no caching).
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getAccountStatus(Request $request)
     {
         $partner = $request->user()->partner;
 
-        if (!$partner || !$partner->stripe_account_id) {
+        if (! $partner || ! $partner->stripe_account_id) {
             return response()->json([
                 'connected' => false,
                 'status' => null,
             ]);
         }
 
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             return response()->json([
                 'connected' => true,
                 'account_id' => $partner->stripe_account_id,
@@ -319,8 +316,7 @@ class StripeConnectController extends Controller
     /**
      * Determine overall account status
      *
-     * @param \Stripe\Account $account
-     * @return string
+     * @param  \Stripe\Account  $account
      */
     protected function determineAccountStatus($account): string
     {
@@ -328,7 +324,7 @@ class StripeConnectController extends Controller
             return 'disabled';
         }
 
-        if (!empty($account->requirements->past_due)) {
+        if (! empty($account->requirements->past_due)) {
             return 'restricted';
         }
 
@@ -347,18 +343,17 @@ class StripeConnectController extends Controller
      * - Payout history
      * - Account details
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function createDashboardLink(Request $request)
     {
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             return response()->json(['error' => 'Stripe not configured'], 500);
         }
 
         $partner = $request->user()->partner;
 
-        if (!$partner || !$partner->stripe_account_id) {
+        if (! $partner || ! $partner->stripe_account_id) {
             return response()->json(['error' => 'No connected account'], 400);
         }
 
@@ -377,7 +372,7 @@ class StripeConnectController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to create dashboard link: ' . $e->getMessage(),
+                'error' => 'Failed to create dashboard link: '.$e->getMessage(),
             ], 422);
         }
     }
@@ -388,19 +383,18 @@ class StripeConnectController extends Controller
      * Called by PartnerPayoutService when processing monthly payouts.
      * Transfers EUR to the partner's connected account.
      *
-     * @param Partner $partner
-     * @param int $amountCents Amount in EUR cents
-     * @param string|null $description
+     * @param  int  $amountCents  Amount in EUR cents
      * @return \Stripe\Transfer
+     *
      * @throws \Exception
      */
     public function transferToPartner(Partner $partner, int $amountCents, ?string $description = null)
     {
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             throw new \Exception('Stripe is not configured');
         }
 
-        if (!$partner->stripe_account_id) {
+        if (! $partner->stripe_account_id) {
             throw new \Exception('Partner does not have a connected Stripe account');
         }
 
@@ -439,7 +433,6 @@ class StripeConnectController extends Controller
      *
      * Allows partner to update their bank account for payouts.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateBankAccount(Request $request)
@@ -449,13 +442,13 @@ class StripeConnectController extends Controller
             'account_holder_name' => 'required|string|max:255',
         ]);
 
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             return response()->json(['error' => 'Stripe not configured'], 500);
         }
 
         $partner = $request->user()->partner;
 
-        if (!$partner || !$partner->stripe_account_id) {
+        if (! $partner || ! $partner->stripe_account_id) {
             return response()->json(['error' => 'No connected Stripe account'], 404);
         }
 
@@ -499,7 +492,7 @@ class StripeConnectController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to update bank account: ' . $e->getMessage(),
+                'error' => 'Failed to update bank account: '.$e->getMessage(),
             ], 422);
         }
     }
@@ -507,18 +500,17 @@ class StripeConnectController extends Controller
     /**
      * Delete connected account (for partner offboarding)
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function deleteConnectedAccount(Request $request)
     {
-        if (!$this->stripe) {
+        if (! $this->stripe) {
             return response()->json(['error' => 'Stripe not configured'], 500);
         }
 
         $partner = $request->user()->partner;
 
-        if (!$partner || !$partner->stripe_account_id) {
+        if (! $partner || ! $partner->stripe_account_id) {
             return response()->json(['error' => 'No connected Stripe account'], 404);
         }
 
@@ -544,7 +536,7 @@ class StripeConnectController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Failed to delete Stripe account: ' . $e->getMessage(),
+                'error' => 'Failed to delete Stripe account: '.$e->getMessage(),
             ], 422);
         }
     }

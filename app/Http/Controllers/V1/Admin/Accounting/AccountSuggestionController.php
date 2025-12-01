@@ -30,10 +30,7 @@ class AccountSuggestionController extends Controller
     /**
      * Get account suggestion for a specific transaction.
      *
-     * @param  Request  $request
      * @param  string  $type  invoice|expense|payment
-     * @param  int  $id
-     * @return JsonResponse
      */
     public function suggest(Request $request, string $type, int $id): JsonResponse
     {
@@ -84,9 +81,6 @@ class AccountSuggestionController extends Controller
 
     /**
      * Confirm or update account assignment for a transaction.
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function confirm(Request $request): JsonResponse
     {
@@ -139,9 +133,6 @@ class AccountSuggestionController extends Controller
 
     /**
      * Get all pending (unconfirmed) transactions for review.
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function pending(Request $request): JsonResponse
     {
@@ -253,9 +244,6 @@ class AccountSuggestionController extends Controller
 
     /**
      * Confirm multiple transactions at once.
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function bulkConfirm(Request $request): JsonResponse
     {
@@ -291,6 +279,7 @@ class AccountSuggestionController extends Controller
                         'id' => $item['id'],
                         'error' => 'Transaction not found',
                     ];
+
                     continue;
                 }
 
@@ -301,6 +290,7 @@ class AccountSuggestionController extends Controller
                         'id' => $item['id'],
                         'error' => 'Unauthorized',
                     ];
+
                     continue;
                 }
 
@@ -339,10 +329,6 @@ class AccountSuggestionController extends Controller
 
     /**
      * Find model instance by type and ID.
-     *
-     * @param  string  $type
-     * @param  int  $id
-     * @return Model|null
      */
     protected function findModel(string $type, int $id): ?Model
     {

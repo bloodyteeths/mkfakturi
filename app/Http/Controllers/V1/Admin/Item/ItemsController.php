@@ -117,7 +117,6 @@ class ItemsController extends Controller
      * Used for barcode scanner scenarios where we need fast exact lookup.
      * Returns the item if found, 404 if not found.
      *
-     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function lookupByBarcode(Request $request)

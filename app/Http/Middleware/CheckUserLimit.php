@@ -44,7 +44,7 @@ class CheckUserLimit
         // Get company ID from header (set by CompanyMiddleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'company_header_missing',
                 'message' => 'Company header is required',
@@ -54,7 +54,7 @@ class CheckUserLimit
         // Load company with subscription
         $company = Company::with('subscription')->find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'company_not_found',
                 'message' => 'Company not found',
@@ -68,7 +68,7 @@ class CheckUserLimit
 
             // Build Paddle checkout URL
             $checkoutUrl = $paddlePriceId
-                ? config('services.paddle.checkout_url') . '?price_id=' . $paddlePriceId
+                ? config('services.paddle.checkout_url').'?price_id='.$paddlePriceId
                 : null;
 
             return response()->json([

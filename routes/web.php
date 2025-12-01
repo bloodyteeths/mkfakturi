@@ -47,7 +47,6 @@ Route::get('/debug-auth', function () {
     ]);
 })->middleware(['web']);
 
-
 // Admin Auth
 // ----------------------------------------------
 // NOTE: The /login route has been removed from web.php
@@ -162,27 +161,27 @@ Route::get('/metrics/debug', function () {
         $output = "# Debug info\n";
 
         // Test 1: Check if PrometheusExporter class exists
-        $output .= '# PrometheusExporter class exists: ' . (class_exists(\Arquivei\LaravelPrometheusExporter\PrometheusExporter::class) ? 'YES' : 'NO') . "\n";
+        $output .= '# PrometheusExporter class exists: '.(class_exists(\Arquivei\LaravelPrometheusExporter\PrometheusExporter::class) ? 'YES' : 'NO')."\n";
 
         // Test 2: Try to resolve from container
         try {
             $prometheus = app(\Arquivei\LaravelPrometheusExporter\PrometheusExporter::class);
             $output .= "# PrometheusExporter resolved: YES\n";
-            $output .= '# PrometheusExporter class: ' . get_class($prometheus) . "\n";
+            $output .= '# PrometheusExporter class: '.get_class($prometheus)."\n";
         } catch (\Exception $e) {
-            $output .= '# PrometheusExporter resolve FAILED: ' . $e->getMessage() . "\n";
-            $output .= '# Error class: ' . get_class($e) . "\n";
+            $output .= '# PrometheusExporter resolve FAILED: '.$e->getMessage()."\n";
+            $output .= '# Error class: '.get_class($e)."\n";
         }
 
         // Test 3: Check config
-        $output .= '# Config namespace: ' . config('prometheus-exporter.namespace', 'NOT SET') . "\n";
-        $output .= '# Config storage: ' . config('prometheus-exporter.storage_adapter', 'NOT SET') . "\n";
+        $output .= '# Config namespace: '.config('prometheus-exporter.namespace', 'NOT SET')."\n";
+        $output .= '# Config storage: '.config('prometheus-exporter.storage_adapter', 'NOT SET')."\n";
 
         return response($output, 200, [
             'Content-Type' => 'text/plain; charset=utf-8',
         ]);
     } catch (\Exception $e) {
-        return response('# Critical error: ' . $e->getMessage() . "\n# File: " . $e->getFile() . ':' . $e->getLine(), 500, [
+        return response('# Critical error: '.$e->getMessage()."\n# File: ".$e->getFile().':'.$e->getLine(), 500, [
             'Content-Type' => 'text/plain; charset=utf-8',
         ]);
     }
@@ -271,7 +270,7 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
             $logs = file_get_contents($logFile);
             $lastLines = implode("\n", array_slice(explode("\n", $logs), -200)); // Last 200 lines
 
-            return response('<pre>' . htmlspecialchars($lastLines) . '</pre>');
+            return response('<pre>'.htmlspecialchars($lastLines).'</pre>');
         }
 
         return response('No log file found');
@@ -285,7 +284,7 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         if (file_exists($phpFpmLog)) {
             $logs = file_get_contents($phpFpmLog);
             $lastLines = implode("\n", array_slice(explode("\n", $logs), -100));
-            $output .= "PHP-FPM Errors:\n" . $lastLines . "\n\n";
+            $output .= "PHP-FPM Errors:\n".$lastLines."\n\n";
         } else {
             $output .= "PHP-FPM error log not found at: $phpFpmLog\n\n";
         }
@@ -294,10 +293,10 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         if (file_exists($laravelLog)) {
             $logs = file_get_contents($laravelLog);
             $lastLines = implode("\n", array_slice(explode("\n", $logs), -100));
-            $output .= "=== Laravel Log (last 100 lines) ===\n" . $lastLines;
+            $output .= "=== Laravel Log (last 100 lines) ===\n".$lastLines;
         }
 
-        return response('<pre>' . htmlspecialchars($output) . '</pre>');
+        return response('<pre>'.htmlspecialchars($output).'</pre>');
     });
 
     // Debug route to check installation status
@@ -310,14 +309,14 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         // Check 1: isDbCreated()
         $output[] = '1. InstallUtils::isDbCreated() check:';
         $dbCreated = \App\Space\InstallUtils::isDbCreated();
-        $output[] = '   Result: ' . ($dbCreated ? '✅ TRUE' : '❌ FALSE');
+        $output[] = '   Result: '.($dbCreated ? '✅ TRUE' : '❌ FALSE');
 
         $markerFile = storage_path('app/database_created');
-        $output[] = '   Marker file: ' . $markerFile;
-        $output[] = '   File exists: ' . (file_exists($markerFile) ? '✅ YES' : '❌ NO');
+        $output[] = '   Marker file: '.$markerFile;
+        $output[] = '   File exists: '.(file_exists($markerFile) ? '✅ YES' : '❌ NO');
         if (file_exists($markerFile)) {
-            $output[] = '   File contents: ' . file_get_contents($markerFile);
-            $output[] = '   File permissions: ' . substr(sprintf('%o', fileperms($markerFile)), -4);
+            $output[] = '   File contents: '.file_get_contents($markerFile);
+            $output[] = '   File permissions: '.substr(sprintf('%o', fileperms($markerFile)), -4);
         }
         $output[] = '';
 
@@ -325,36 +324,36 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         $output[] = '2. Setting::getSetting(\'profile_complete\') check:';
         try {
             $profileComplete = \App\Models\Setting::getSetting('profile_complete');
-            $output[] = '   Result: ' . ($profileComplete ?? 'NULL');
+            $output[] = '   Result: '.($profileComplete ?? 'NULL');
             $output[] = '   Expected: COMPLETED';
-            $output[] = '   Match: ' . ($profileComplete === 'COMPLETED' ? '✅ YES' : '❌ NO');
+            $output[] = '   Match: '.($profileComplete === 'COMPLETED' ? '✅ YES' : '❌ NO');
 
             // Query database directly
             $setting = \App\Models\Setting::where('option', 'profile_complete')->first();
             if ($setting) {
-                $output[] = '   Database row: option=' . $setting->option . ', value=' . $setting->value;
+                $output[] = '   Database row: option='.$setting->option.', value='.$setting->value;
             } else {
                 $output[] = '   ❌ Row not found in settings table!';
             }
         } catch (\Exception $e) {
-            $output[] = '   ❌ ERROR: ' . $e->getMessage();
+            $output[] = '   ❌ ERROR: '.$e->getMessage();
         }
         $output[] = '';
 
         // Check 3: Middleware logic
         $output[] = '3. InstallationMiddleware logic:';
-        $shouldRedirect = (!$dbCreated || $profileComplete !== 'COMPLETED');
-        $output[] = '   Should redirect to /installation: ' . ($shouldRedirect ? '❌ YES' : '✅ NO');
+        $shouldRedirect = (! $dbCreated || $profileComplete !== 'COMPLETED');
+        $output[] = '   Should redirect to /installation: '.($shouldRedirect ? '❌ YES' : '✅ NO');
         $output[] = '';
 
         // Check 4: Environment variables
         $output[] = '4. Environment Variables:';
-        $output[] = '   APP_ENV: ' . env('APP_ENV');
-        $output[] = '   RAILWAY_ENVIRONMENT: ' . (env('RAILWAY_ENVIRONMENT') ?? 'NOT SET');
-        $output[] = '   RAILWAY_SKIP_INSTALL: ' . (env('RAILWAY_SKIP_INSTALL') ?? 'NOT SET');
+        $output[] = '   APP_ENV: '.env('APP_ENV');
+        $output[] = '   RAILWAY_ENVIRONMENT: '.(env('RAILWAY_ENVIRONMENT') ?? 'NOT SET');
+        $output[] = '   RAILWAY_SKIP_INSTALL: '.(env('RAILWAY_SKIP_INSTALL') ?? 'NOT SET');
         $output[] = '';
 
-        return response('<pre>' . implode("\n", $output) . '</pre>');
+        return response('<pre>'.implode("\n", $output).'</pre>');
     });
 
     // TEMPORARY: Show actual database data
@@ -366,7 +365,7 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
         try {
             $companies = \App\Models\Company::all();
-            $output[] = 'Total companies: ' . $companies->count();
+            $output[] = 'Total companies: '.$companies->count();
             foreach ($companies as $company) {
                 $output[] = "  - {$company->name} (ID: {$company->id}, slug: {$company->slug})";
             }
@@ -381,7 +380,7 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
                 // Invoices
                 $invoices = \App\Models\Invoice::where('company_id', $company->id)->get();
-                $output[] = 'INVOICES: ' . $invoices->count();
+                $output[] = 'INVOICES: '.$invoices->count();
                 foreach ($invoices as $inv) {
                     $output[] = sprintf(
                         '  - #%s: %s MKD (status=%s, paid_status=%s, customer=%s, date=%s)',
@@ -397,7 +396,7 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
                 // Expenses
                 $expenses = \App\Models\Expense::where('company_id', $company->id)->get();
-                $output[] = 'EXPENSES: ' . $expenses->count();
+                $output[] = 'EXPENSES: '.$expenses->count();
                 $totalExpenses = 0;
                 foreach ($expenses as $exp) {
                     $totalExpenses += $exp->amount;
@@ -408,18 +407,18 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
                         $exp->expense_date
                     );
                 }
-                $output[] = 'Total expenses: ' . number_format($totalExpenses, 2) . ' MKD';
+                $output[] = 'Total expenses: '.number_format($totalExpenses, 2).' MKD';
                 $output[] = '';
 
                 // MCP Stats
                 $dataProvider = app(\App\Services\McpDataProvider::class);
                 $stats = $dataProvider->getCompanyStats($company);
                 $output[] = 'MCP DATA PROVIDER STATS:';
-                $output[] = '  - Revenue: ' . number_format($stats['revenue'], 2) . ' MKD';
-                $output[] = '  - Expenses: ' . number_format($stats['expenses'], 2) . ' MKD';
-                $output[] = '  - Outstanding: ' . number_format($stats['outstanding'], 2) . ' MKD';
-                $output[] = '  - Invoices count: ' . $stats['invoices_count'];
-                $output[] = '  - Customers: ' . $stats['customers'];
+                $output[] = '  - Revenue: '.number_format($stats['revenue'], 2).' MKD';
+                $output[] = '  - Expenses: '.number_format($stats['expenses'], 2).' MKD';
+                $output[] = '  - Outstanding: '.number_format($stats['outstanding'], 2).' MKD';
+                $output[] = '  - Invoices count: '.$stats['invoices_count'];
+                $output[] = '  - Customers: '.$stats['customers'];
                 $output[] = '';
 
                 // IFRS data
@@ -432,11 +431,11 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
             }
 
         } catch (\Exception $e) {
-            $output[] = '❌ ERROR: ' . $e->getMessage();
+            $output[] = '❌ ERROR: '.$e->getMessage();
             $output[] = $e->getTraceAsString();
         }
 
-        return response('<pre>' . implode("\n", $output) . '</pre>');
+        return response('<pre>'.implode("\n", $output).'</pre>');
     });
 
     // TEMPORARY: Fix currency multiplier bug in existing data
@@ -449,10 +448,10 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
         try {
             $mkdCurrency = \App\Models\Currency::where('code', 'MKD')->first();
-            if (!$mkdCurrency) {
+            if (! $mkdCurrency) {
                 $output[] = '❌ MKD currency not found';
 
-                return response('<pre>' . implode("\n", $output) . '</pre>');
+                return response('<pre>'.implode("\n", $output).'</pre>');
             }
 
             $output[] = "MKD Currency ID: {$mkdCurrency->id}, Precision: {$mkdCurrency->precision}";
@@ -520,11 +519,11 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
             $output[] = 'Please refresh the AI insights to see accurate numbers.';
 
         } catch (\Exception $e) {
-            $output[] = '❌ ERROR: ' . $e->getMessage();
+            $output[] = '❌ ERROR: '.$e->getMessage();
             $output[] = $e->getTraceAsString();
         }
 
-        return response('<pre>' . implode("\n", $output) . '</pre>');
+        return response('<pre>'.implode("\n", $output).'</pre>');
     });
 
     // TEMPORARY: Clean demo data via web endpoint
@@ -572,13 +571,13 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
             $output[] = 'Your production data is now clean.';
 
         } catch (\Exception $e) {
-            $output[] = '❌ ERROR: ' . $e->getMessage();
+            $output[] = '❌ ERROR: '.$e->getMessage();
             $output[] = '';
             $output[] = 'Stack trace:';
             $output[] = $e->getTraceAsString();
         }
 
-        return response('<pre>' . implode("\n", $output) . '</pre>');
+        return response('<pre>'.implode("\n", $output).'</pre>');
     });
 
     // Debug invoice PDF issues (logo 404, PDF 404)
@@ -600,12 +599,12 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         foreach ($invoices as $invoice) {
             $output[] = "  Invoice #{$invoice->invoice_number}:";
             $output[] = "    - ID: {$invoice->id}";
-            $output[] = '    - unique_hash: ' . ($invoice->unique_hash ?? 'NULL - MISSING!');
+            $output[] = '    - unique_hash: '.($invoice->unique_hash ?? 'NULL - MISSING!');
             $output[] = "    - company_id: {$invoice->company_id}";
             $output[] = "    - status: {$invoice->status}";
 
             // Fix missing unique_hash
-            if (!$invoice->unique_hash) {
+            if (! $invoice->unique_hash) {
                 $invoice->unique_hash = \Illuminate\Support\Str::random(20);
                 $invoice->save();
                 $output[] = "    ✅ Generated new unique_hash: {$invoice->unique_hash}";
@@ -618,8 +617,8 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
         foreach ($companies as $company) {
             $output[] = "\nCompany: {$company->name} (ID: {$company->id})";
-            $output[] = '  logo_path: ' . ($company->logo_path ?? 'NULL');
-            $output[] = '  logo (URL): ' . ($company->logo ?? 'NULL');
+            $output[] = '  logo_path: '.($company->logo_path ?? 'NULL');
+            $output[] = '  logo (URL): '.($company->logo ?? 'NULL');
 
             // Check media
             $logoMedia = $company->getMedia('logo')->first();
@@ -632,13 +631,13 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
                 // Check if file actually exists
                 try {
                     $exists = \Storage::disk($logoMedia->disk)->exists($logoMedia->getPathRelativeToRoot());
-                    $output[] = '    - file_exists: ' . ($exists ? 'YES' : 'NO - MISSING!');
+                    $output[] = '    - file_exists: '.($exists ? 'YES' : 'NO - MISSING!');
 
-                    if (!$exists) {
+                    if (! $exists) {
                         $output[] = '    ⚠️  Logo file is missing from storage!';
                     }
                 } catch (\Exception $e) {
-                    $output[] = '    - Error checking file: ' . $e->getMessage();
+                    $output[] = '    - Error checking file: '.$e->getMessage();
                 }
             } else {
                 $output[] = '  No logo media record';
@@ -646,10 +645,10 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
             // Check for default logo
             $defaultLogo = base_path('logo/facturino_logo.png');
-            $output[] = '  Default logo exists: ' . (file_exists($defaultLogo) ? 'YES' : 'NO');
+            $output[] = '  Default logo exists: '.(file_exists($defaultLogo) ? 'YES' : 'NO');
         }
 
-        return response('<pre>' . implode("\n", $output) . '</pre>');
+        return response('<pre>'.implode("\n", $output).'</pre>');
     });
 
     // Debug storage configuration (Cloudflare R2, media uploads)
@@ -666,33 +665,33 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
 
         // Check filesystem configuration
         $output[] = "\n--- Filesystem Config ---";
-        $output[] = 'Default disk: ' . config('filesystems.default');
-        $output[] = 'Cloud disk: ' . config('filesystems.cloud');
-        $output[] = 'Media disk: ' . config('media-library.disk_name');
+        $output[] = 'Default disk: '.config('filesystems.default');
+        $output[] = 'Cloud disk: '.config('filesystems.cloud');
+        $output[] = 'Media disk: '.config('media-library.disk_name');
 
         // Check S3-compatible (R2) configuration
         $output[] = "\n--- S3-Compatible (Cloudflare R2) Config ---";
         $s3Config = config('filesystems.disks.s3compat');
         if ($s3Config) {
-            $output[] = 'Endpoint: ' . ($s3Config['endpoint'] ?? 'NOT SET');
-            $output[] = 'Bucket: ' . ($s3Config['bucket'] ?? 'NOT SET');
-            $output[] = 'Region: ' . ($s3Config['region'] ?? 'NOT SET');
-            $output[] = 'Access Key exists: ' . (!empty($s3Config['key']) ? 'YES' : 'NO');
-            $output[] = 'Secret Key exists: ' . (!empty($s3Config['secret']) ? 'YES' : 'NO');
+            $output[] = 'Endpoint: '.($s3Config['endpoint'] ?? 'NOT SET');
+            $output[] = 'Bucket: '.($s3Config['bucket'] ?? 'NOT SET');
+            $output[] = 'Region: '.($s3Config['region'] ?? 'NOT SET');
+            $output[] = 'Access Key exists: '.(! empty($s3Config['key']) ? 'YES' : 'NO');
+            $output[] = 'Secret Key exists: '.(! empty($s3Config['secret']) ? 'YES' : 'NO');
 
             // Test S3 connection
             try {
-                $testFile = 'test-' . time() . '.txt';
+                $testFile = 'test-'.time().'.txt';
                 \Storage::disk('s3compat')->put($testFile, 'Test connection from facturino.mk');
                 $exists = \Storage::disk('s3compat')->exists($testFile);
-                $output[] = '✅ Test file upload: ' . ($exists ? 'SUCCESS' : 'FAILED');
+                $output[] = '✅ Test file upload: '.($exists ? 'SUCCESS' : 'FAILED');
 
                 if ($exists) {
                     \Storage::disk('s3compat')->delete($testFile);
                     $output[] = '✅ Test file cleanup: SUCCESS';
                 }
             } catch (\Exception $e) {
-                $output[] = '❌ S3 Connection Error: ' . $e->getMessage();
+                $output[] = '❌ S3 Connection Error: '.$e->getMessage();
             }
         } else {
             $output[] = '❌ S3-compatible disk not configured!';
@@ -718,14 +717,14 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
                 // Check if file exists on its disk
                 try {
                     $exists = \Storage::disk($media->disk)->exists($media->getPathRelativeToRoot());
-                    $output[] = '  Exists on disk: ' . ($exists ? 'YES ✅' : 'NO ❌');
+                    $output[] = '  Exists on disk: '.($exists ? 'YES ✅' : 'NO ❌');
 
                     if ($exists && $media->disk === 's3compat') {
                         $url = \Storage::disk('s3compat')->url($media->getPathRelativeToRoot());
                         $output[] = "  R2 URL: {$url}";
                     }
                 } catch (\Exception $e) {
-                    $output[] = '  Error checking file: ' . $e->getMessage();
+                    $output[] = '  Error checking file: '.$e->getMessage();
                 }
             }
         }
@@ -741,9 +740,9 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
                 $output[] = "  Stored on disk: {$logoMedia->disk}";
                 try {
                     $exists = \Storage::disk($logoMedia->disk)->exists($logoMedia->getPathRelativeToRoot());
-                    $output[] = '  File exists: ' . ($exists ? 'YES ✅' : 'NO ❌');
+                    $output[] = '  File exists: '.($exists ? 'YES ✅' : 'NO ❌');
                 } catch (\Exception $e) {
-                    $output[] = '  Error: ' . $e->getMessage();
+                    $output[] = '  Error: '.$e->getMessage();
                 }
             } else {
                 $output[] = '  No logo uploaded';
@@ -760,14 +759,13 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         ];
         foreach ($envVars as $var) {
             $value = env($var);
-            $output[] = "{$var}: " . ($value ? $value : 'NOT SET ❌');
+            $output[] = "{$var}: ".($value ? $value : 'NOT SET ❌');
         }
-        $output[] = 'S3_COMPAT_KEY: ' . (env('S3_COMPAT_KEY') ? 'SET ✅' : 'NOT SET ❌');
-        $output[] = 'S3_COMPAT_SECRET: ' . (env('S3_COMPAT_SECRET') ? 'SET ✅' : 'NOT SET ❌');
+        $output[] = 'S3_COMPAT_KEY: '.(env('S3_COMPAT_KEY') ? 'SET ✅' : 'NOT SET ❌');
+        $output[] = 'S3_COMPAT_SECRET: '.(env('S3_COMPAT_SECRET') ? 'SET ✅' : 'NOT SET ❌');
 
-        return response('<pre>' . implode("\n", $output) . '</pre>');
+        return response('<pre>'.implode("\n", $output).'</pre>');
     });
 }
 
 // CLAUDE-CHECKPOINT
-

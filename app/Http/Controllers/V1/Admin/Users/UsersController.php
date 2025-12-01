@@ -33,14 +33,13 @@ class UsersController extends Controller
             ->additional([
                 'meta' => [
                     'user_total_count' => User::count(),
-                ]
+                ],
             ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\UserRequest  $request
      * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\UserResource
      */
     public function store(UserRequest $request)
@@ -63,7 +62,7 @@ class UsersController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
-            if (!$user) {
+            if (! $user) {
                 \Log::warning('User not found', [
                     'searched_email' => $request->email,
                     'all_emails_eloquent' => User::pluck('email')->toArray(),
@@ -99,7 +98,6 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UserRequest  $request
      * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\UserResource
      */
     public function update(UserRequest $request, User $user)

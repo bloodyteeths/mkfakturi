@@ -29,7 +29,7 @@ class PartnerDashboardController extends Controller
         // Get partner record for the authenticated user
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -119,7 +119,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -155,7 +155,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -193,7 +193,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -222,7 +222,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -248,7 +248,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -279,7 +279,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -327,7 +327,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -369,7 +369,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -421,7 +421,7 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -466,12 +466,12 @@ class PartnerDashboardController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
         // Ensure user has a ref_code
-        if (!$user->ref_code) {
+        if (! $user->ref_code) {
             $user->ref_code = \Str::upper(\Str::random(8));
             $user->save();
         }

@@ -146,14 +146,16 @@ class Customer extends Authenticatable implements HasMedia
                 // Use whereKey()->first() instead of find() to avoid collection issues with global scopes
                 $customer = self::whereKey($id)->first();
 
-                if (!$customer) {
-                    \Log::warning("Customer not found for deletion", ['customer_id' => $id]);
+                if (! $customer) {
+                    \Log::warning('Customer not found for deletion', ['customer_id' => $id]);
+
                     continue;
                 }
 
                 // Verify we have a model instance, not a collection
                 if ($customer instanceof \Illuminate\Database\Eloquent\Collection) {
-                    \Log::error("Got collection instead of model for customer deletion", ['customer_id' => $id]);
+                    \Log::error('Got collection instead of model for customer deletion', ['customer_id' => $id]);
+
                     continue;
                 }
 
@@ -164,7 +166,7 @@ class Customer extends Authenticatable implements HasMedia
                     'payments',
                     'addresses',
                     'expenses',
-                    'recurringInvoices.items'
+                    'recurringInvoices.items',
                 ]);
 
                 // Delete estimates
@@ -204,12 +206,12 @@ class Customer extends Authenticatable implements HasMedia
                 }
 
                 $customer->delete();
-                \Log::info("Successfully deleted customer", ['customer_id' => $id]);
+                \Log::info('Successfully deleted customer', ['customer_id' => $id]);
             } catch (\Exception $e) {
                 \Log::error('Error deleting customer', [
                     'customer_id' => $id,
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
             }
         }
@@ -295,12 +297,12 @@ class Customer extends Authenticatable implements HasMedia
 
     public function scopeWhereContactName($query, $contactName)
     {
-        return $query->where('contact_name', 'LIKE', '%' . $contactName . '%');
+        return $query->where('contact_name', 'LIKE', '%'.$contactName.'%');
     }
 
     public function scopeWhereDisplayName($query, $displayName)
     {
-        return $query->where('name', 'LIKE', '%' . $displayName . '%');
+        return $query->where('name', 'LIKE', '%'.$displayName.'%');
     }
 
     public function scopeWhereOrder($query, $orderByField, $orderBy)
@@ -312,16 +314,16 @@ class Customer extends Authenticatable implements HasMedia
     {
         foreach (explode(' ', $search) as $term) {
             $query->where(function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('email', 'LIKE', '%' . $term . '%')
-                    ->orWhere('phone', 'LIKE', '%' . $term . '%');
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('email', 'LIKE', '%'.$term.'%')
+                    ->orWhere('phone', 'LIKE', '%'.$term.'%');
             });
         }
     }
 
     public function scopeWherePhone($query, $phone)
     {
-        return $query->where('phone', 'LIKE', '%' . $phone . '%');
+        return $query->where('phone', 'LIKE', '%'.$phone.'%');
     }
 
     public function scopeWhereCustomer($query, $customer_id)

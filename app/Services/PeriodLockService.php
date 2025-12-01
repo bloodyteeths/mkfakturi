@@ -20,10 +20,8 @@ class PeriodLockService
     /**
      * Check if a date is locked (either by daily closing or period lock).
      *
-     * @param  int  $companyId
      * @param  string|\Carbon\Carbon  $date
      * @param  string  $type  Document type for daily closings
-     * @return bool
      */
     public function isDateLocked(int $companyId, $date, string $type = DailyClosing::TYPE_ALL): bool
     {
@@ -45,9 +43,7 @@ class PeriodLockService
     /**
      * Get the reason why a date is locked.
      *
-     * @param  int  $companyId
      * @param  string|\Carbon\Carbon  $date
-     * @param  string  $type
      * @return array|null ['type' => 'daily'|'period', 'lock' => Model, 'message' => string]
      */
     public function getLockReason(int $companyId, $date, string $type = DailyClosing::TYPE_ALL): ?array
@@ -92,9 +88,7 @@ class PeriodLockService
      * Enforce that a date is not locked.
      * Throws exception if date is locked.
      *
-     * @param  int  $companyId
      * @param  string|\Carbon\Carbon  $date
-     * @param  string  $type
      * @param  string  $action  Action being attempted (for error message)
      *
      * @throws PeriodLockedException
@@ -115,12 +109,7 @@ class PeriodLockService
     /**
      * Create a daily closing.
      *
-     * @param  int  $companyId
      * @param  string|\Carbon\Carbon  $date
-     * @param  string  $type
-     * @param  int|null  $userId
-     * @param  string|null  $notes
-     * @return DailyClosing
      */
     public function closeDay(int $companyId, $date, string $type = DailyClosing::TYPE_ALL, ?int $userId = null, ?string $notes = null): DailyClosing
     {
@@ -137,12 +126,8 @@ class PeriodLockService
     /**
      * Create a period lock.
      *
-     * @param  int  $companyId
      * @param  string|\Carbon\Carbon  $startDate
      * @param  string|\Carbon\Carbon  $endDate
-     * @param  int|null  $userId
-     * @param  string|null  $notes
-     * @return PeriodLock
      */
     public function lockPeriod(int $companyId, $startDate, $endDate, ?int $userId = null, ?string $notes = null): PeriodLock
     {
@@ -158,9 +143,6 @@ class PeriodLockService
 
     /**
      * Delete a daily closing (unlock a day).
-     *
-     * @param  int  $closingId
-     * @return bool
      */
     public function unlockDay(int $closingId): bool
     {
@@ -171,9 +153,6 @@ class PeriodLockService
 
     /**
      * Delete a period lock (unlock a period).
-     *
-     * @param  int  $lockId
-     * @return bool
      */
     public function unlockPeriod(int $lockId): bool
     {
@@ -185,9 +164,6 @@ class PeriodLockService
     /**
      * Get all closed days for a company.
      *
-     * @param  int  $companyId
-     * @param  string|null  $fromDate
-     * @param  string|null  $toDate
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getClosedDays(int $companyId, ?string $fromDate = null, ?string $toDate = null)
@@ -210,7 +186,6 @@ class PeriodLockService
     /**
      * Get all period locks for a company.
      *
-     * @param  int  $companyId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getPeriodLocks(int $companyId)

@@ -9,6 +9,7 @@ use Silber\Bouncer\BouncerFacade;
 class SetupAdminRoles extends Command
 {
     protected $signature = 'roles:setup-admin';
+
     protected $description = 'Create admin roles for all existing companies';
 
     public function handle()
@@ -26,7 +27,7 @@ class SetupAdminRoles extends Command
                 ->where('scope', $company->id)
                 ->first();
 
-            if (!$adminRole) {
+            if (! $adminRole) {
                 $this->info("Creating admin role for company: {$company->name} (ID: {$company->id})");
 
                 $admin = BouncerFacade::role()->firstOrCreate([

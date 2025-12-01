@@ -17,9 +17,6 @@ class WarehouseController extends Controller
 {
     /**
      * Display a listing of warehouses.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -54,8 +51,6 @@ class WarehouseController extends Controller
     /**
      * Store a newly created warehouse.
      *
-     * @param Request $request
-     * @return JsonResponse
      * @throws ValidationException
      */
     public function store(Request $request): JsonResponse
@@ -105,10 +100,6 @@ class WarehouseController extends Controller
 
     /**
      * Display the specified warehouse.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
     public function show(Request $request, int $id): JsonResponse
     {
@@ -126,9 +117,6 @@ class WarehouseController extends Controller
     /**
      * Update the specified warehouse.
      *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      * @throws ValidationException
      */
     public function update(Request $request, int $id): JsonResponse
@@ -176,10 +164,6 @@ class WarehouseController extends Controller
 
     /**
      * Remove the specified warehouse.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
@@ -222,10 +206,6 @@ class WarehouseController extends Controller
 
     /**
      * Set warehouse as default.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
     public function setDefault(Request $request, int $id): JsonResponse
     {

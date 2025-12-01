@@ -4,7 +4,6 @@ namespace App\Http\Controllers\V1\Admin\Stock;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
-use App\Models\StockMovement;
 use App\Models\Warehouse;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
@@ -30,9 +29,6 @@ class StockController extends Controller
 
     /**
      * Get current inventory levels for all items.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function inventory(Request $request): JsonResponse
     {
@@ -94,6 +90,7 @@ class StockController extends Controller
             if ($a['is_low_stock'] != $b['is_low_stock']) {
                 return $b['is_low_stock'] <=> $a['is_low_stock'];
             }
+
             return $a['item_name'] <=> $b['item_name'];
         });
 
@@ -102,17 +99,13 @@ class StockController extends Controller
             'summary' => [
                 'total_items' => count($inventory),
                 'total_value' => array_sum(array_column($inventory, 'total_value')),
-                'low_stock_items' => count(array_filter($inventory, fn($i) => $i['is_low_stock'])),
+                'low_stock_items' => count(array_filter($inventory, fn ($i) => $i['is_low_stock'])),
             ],
         ]);
     }
 
     /**
      * Get stock card (movement history) for a specific item.
-     *
-     * @param Request $request
-     * @param int $itemId
-     * @return JsonResponse
      */
     public function itemCard(Request $request, int $itemId): JsonResponse
     {
@@ -128,7 +121,7 @@ class StockController extends Controller
             ->with(['unit', 'currency'])
             ->firstOrFail();
 
-        if (!$item->track_quantity) {
+        if (! $item->track_quantity) {
             return response()->json([
                 'error' => 'Stock tracking is not enabled for this item',
             ], 400);
@@ -184,18 +177,14 @@ class StockController extends Controller
             'movements' => $formattedMovements,
             'summary' => [
                 'total_movements' => $movements->count(),
-                'stock_in_count' => $movements->filter(fn($m) => $m->isStockIn())->count(),
-                'stock_out_count' => $movements->filter(fn($m) => $m->isStockOut())->count(),
+                'stock_in_count' => $movements->filter(fn ($m) => $m->isStockIn())->count(),
+                'stock_out_count' => $movements->filter(fn ($m) => $m->isStockOut())->count(),
             ],
         ]);
     }
 
     /**
      * Get inventory for a specific warehouse.
-     *
-     * @param Request $request
-     * @param int $warehouseId
-     * @return JsonResponse
      */
     public function warehouseInventory(Request $request, int $warehouseId): JsonResponse
     {
@@ -249,16 +238,13 @@ class StockController extends Controller
             'summary' => [
                 'total_items' => count($inventory),
                 'total_value' => $totalValue,
-                'low_stock_items' => count(array_filter($inventory, fn($i) => $i['is_low_stock'])),
+                'low_stock_items' => count(array_filter($inventory, fn ($i) => $i['is_low_stock'])),
             ],
         ]);
     }
 
     /**
      * Get stock valuation report.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function valuationReport(Request $request): JsonResponse
     {
@@ -272,9 +258,6 @@ class StockController extends Controller
 
     /**
      * Get low stock items.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function lowStock(Request $request): JsonResponse
     {

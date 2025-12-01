@@ -36,7 +36,7 @@ class CheckSubscriptionTier
         // Get current company from request header (set by CompanyMiddleware)
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'No company context found',
                 'message' => 'You must select a company to access this feature',
@@ -46,7 +46,7 @@ class CheckSubscriptionTier
         // Load company with subscription
         $company = \App\Models\Company::with('subscription')->find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
                 'message' => 'The specified company does not exist',
@@ -54,14 +54,14 @@ class CheckSubscriptionTier
         }
 
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         // Determine if feature is a plan name or feature key
         $requiredPlan = $this->getRequiredPlan($feature);
 
-        if (!$requiredPlan) {
+        if (! $requiredPlan) {
             return response()->json([
                 'error' => 'Invalid feature configuration',
                 'message' => 'Feature or plan not recognized',
@@ -69,7 +69,7 @@ class CheckSubscriptionTier
         }
 
         // Check if company can access this feature
-        if (!$this->canAccessFeature($company, $requiredPlan)) {
+        if (! $this->canAccessFeature($company, $requiredPlan)) {
             $upgradeMessage = $this->getUpgradeMessage($feature, $requiredPlan);
             $upgradePriceId = $this->getUpgradePriceId($requiredPlan);
 
@@ -120,7 +120,7 @@ class CheckSubscriptionTier
         $currentPlan = $company->subscription?->plan ?? 'free';
 
         // Check if subscription is active
-        if ($company->subscription && !$company->subscription->isActive()) {
+        if ($company->subscription && ! $company->subscription->isActive()) {
             $currentPlan = 'free'; // Inactive subscription = free tier
         }
 
@@ -169,7 +169,7 @@ class CheckSubscriptionTier
      */
     protected function generateCheckoutUrl(?string $priceId, $company): ?string
     {
-        if (!$priceId) {
+        if (! $priceId) {
             return null;
         }
 

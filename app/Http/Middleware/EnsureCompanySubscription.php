@@ -37,7 +37,7 @@ class EnsureCompanySubscription
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'error' => 'Unauthenticated',
                 'message' => 'You must be logged in to access this resource.',
@@ -57,7 +57,7 @@ class EnsureCompanySubscription
         // Get company from request header or user context
         $companyId = $request->header('company');
 
-        if (!$companyId) {
+        if (! $companyId) {
             return response()->json([
                 'error' => 'Company required',
                 'message' => 'No company context found.',
@@ -66,7 +66,7 @@ class EnsureCompanySubscription
 
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json([
                 'error' => 'Company not found',
                 'message' => 'The specified company does not exist.',
@@ -74,7 +74,7 @@ class EnsureCompanySubscription
         }
 
         // Check if user has access to this company
-        if (!$user->hasCompany($companyId)) {
+        if (! $user->hasCompany($companyId)) {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'You do not have access to this company.',
@@ -82,7 +82,7 @@ class EnsureCompanySubscription
         }
 
         // Check subscription level
-        if (!$this->hasRequiredPlan($company, $minPlan)) {
+        if (! $this->hasRequiredPlan($company, $minPlan)) {
             return response()->json([
                 'error' => 'Upgrade required',
                 'message' => "This feature requires a '{$minPlan}' plan or higher.",
@@ -124,17 +124,17 @@ class EnsureCompanySubscription
     private function hasRequiredPlan(Company $company, string $minPlan): bool
     {
         // Load subscription if not already loaded
-        if (!$company->relationLoaded('subscription')) {
+        if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
 
         // No subscription = free plan
-        if (!$company->subscription) {
+        if (! $company->subscription) {
             return self::PLAN_HIERARCHY[$minPlan] <= 0; // Only 'free' level features allowed
         }
 
         // Subscription must be active or in trial
-        if (!in_array($company->subscription->status, ['trial', 'active'])) {
+        if (! in_array($company->subscription->status, ['trial', 'active'])) {
             return false;
         }
 

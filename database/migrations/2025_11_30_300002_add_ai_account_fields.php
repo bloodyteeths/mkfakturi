@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Add AI account suggestion fields to invoices table (if not already exists)
-        if (!Schema::hasColumn('invoices', 'suggested_debit_account_id')) {
+        if (! Schema::hasColumn('invoices', 'suggested_debit_account_id')) {
             Schema::table('invoices', function (Blueprint $table) {
                 $table->unsignedBigInteger('suggested_debit_account_id')->nullable()->after('id');
                 $table->unsignedBigInteger('suggested_credit_account_id')->nullable()->after('suggested_debit_account_id');
@@ -49,7 +49,7 @@ return new class extends Migration
         }
 
         // Add AI account suggestion fields to expenses table (if not already exists)
-        if (!Schema::hasColumn('expenses', 'suggested_debit_account_id')) {
+        if (! Schema::hasColumn('expenses', 'suggested_debit_account_id')) {
             Schema::table('expenses', function (Blueprint $table) {
                 $table->unsignedBigInteger('suggested_debit_account_id')->nullable()->after('id');
                 $table->unsignedBigInteger('suggested_credit_account_id')->nullable()->after('suggested_debit_account_id');
@@ -86,7 +86,7 @@ return new class extends Migration
         }
 
         // Add AI account suggestion fields to payments table (if not already exists)
-        if (!Schema::hasColumn('payments', 'suggested_debit_account_id')) {
+        if (! Schema::hasColumn('payments', 'suggested_debit_account_id')) {
             Schema::table('payments', function (Blueprint $table) {
                 $table->unsignedBigInteger('suggested_debit_account_id')->nullable()->after('id');
                 $table->unsignedBigInteger('suggested_credit_account_id')->nullable()->after('suggested_debit_account_id');

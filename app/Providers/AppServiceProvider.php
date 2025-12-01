@@ -60,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Ensure cache directory exists (fix for ephemeral environments)
-        if (!file_exists(storage_path('framework/cache/data'))) {
+        if (! file_exists(storage_path('framework/cache/data'))) {
             @mkdir(storage_path('framework/cache/data'), 0775, true);
         }
 
@@ -215,7 +215,7 @@ class AppServiceProvider extends ServiceProvider
         $isEnabled = config('ifrs.enabled', false) || env('FEATURE_ACCOUNTING_BACKBONE', false);
 
         // Check database feature flag if available (may not exist during tests/migrations)
-        if (!$isEnabled && function_exists('feature')) {
+        if (! $isEnabled && function_exists('feature')) {
             try {
                 $isEnabled = feature('accounting_backbone');
             } catch (\Exception $e) {
@@ -266,7 +266,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function isHealthCheckRequest(): bool
     {
-        if (!$this->app->bound('request')) {
+        if (! $this->app->bound('request')) {
             return false;
         }
 

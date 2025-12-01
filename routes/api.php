@@ -211,7 +211,7 @@ Route::prefix('/v1')->group(function () {
         // This endpoint bypasses bouncer since users need abilities to access anything
         // TODO: Remove after all tenants have abilities synced
         Route::get('/sync-abilities', function () {
-            if (!auth()->user()->isOwner()) {
+            if (! auth()->user()->isOwner()) {
                 abort(403, 'Only owners can sync abilities');
             }
 
@@ -854,7 +854,7 @@ Route::prefix('/v1')->group(function () {
                 // Debug endpoint to see raw data
                 Route::get('/debug/data', function (\Illuminate\Http\Request $request) {
                     $company = \App\Models\Company::find($request->header('company'));
-                    if (!$company) {
+                    if (! $company) {
                         return response()->json(['error' => 'Company not found'], 404);
                     }
 
@@ -1176,6 +1176,7 @@ Route::middleware(['auth:sanctum'])->prefix('billing')->group(function () {
     Route::get('/subscription', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
         $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+
         return app(\Modules\Mk\Billing\Controllers\SubscriptionController::class)->index($companyId);
     });
 
@@ -1185,7 +1186,7 @@ Route::middleware(['auth:sanctum'])->prefix('billing')->group(function () {
 
         // Return billing invoices (from Paddle subscription)
         $company = \App\Models\Company::find($companyId);
-        if (!$company || !$company->subscription) {
+        if (! $company || ! $company->subscription) {
             return response()->json(['data' => []]);
         }
 

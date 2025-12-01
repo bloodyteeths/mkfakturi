@@ -98,9 +98,6 @@ class Warehouse extends Model
 
     /**
      * Get or create default warehouse for a company.
-     *
-     * @param int $companyId
-     * @return Warehouse
      */
     public static function getOrCreateDefault(int $companyId): self
     {
@@ -136,9 +133,6 @@ class Warehouse extends Model
 
     /**
      * Get current stock quantity for an item in this warehouse.
-     *
-     * @param int $itemId
-     * @return float
      */
     public function getItemStock(int $itemId): float
     {
@@ -154,7 +148,6 @@ class Warehouse extends Model
     /**
      * Get current stock value for an item in this warehouse.
      *
-     * @param int $itemId
      * @return int Value in cents
      */
     public function getItemStockValue(int $itemId): int

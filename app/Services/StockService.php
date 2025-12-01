@@ -54,17 +54,8 @@ class StockService
     /**
      * Record stock IN movement (e.g., from purchase/bill).
      *
-     * @param  int  $companyId
-     * @param  int  $warehouseId
-     * @param  int  $itemId
      * @param  float  $quantity  Must be positive
      * @param  int  $unitCost  Cost per unit in cents
-     * @param  string  $sourceType
-     * @param  int|null  $sourceId
-     * @param  string|null  $movementDate
-     * @param  string|null  $notes
-     * @param  array|null  $meta
-     * @return StockMovement
      *
      * @throws Exception
      */
@@ -103,16 +94,7 @@ class StockService
     /**
      * Record stock OUT movement (e.g., from sale/invoice).
      *
-     * @param  int  $companyId
-     * @param  int  $warehouseId
-     * @param  int  $itemId
      * @param  float  $quantity  Will be stored as negative
-     * @param  string  $sourceType
-     * @param  int|null  $sourceId
-     * @param  string|null  $movementDate
-     * @param  string|null  $notes
-     * @param  array|null  $meta
-     * @return StockMovement
      *
      * @throws Exception
      */
@@ -155,14 +137,8 @@ class StockService
     /**
      * Record a stock adjustment (positive or negative).
      *
-     * @param  int  $companyId
-     * @param  int  $warehouseId
-     * @param  int  $itemId
      * @param  float  $quantity  Can be positive (increase) or negative (decrease)
      * @param  int|null  $unitCost  Required for positive adjustments
-     * @param  string|null  $notes
-     * @param  array|null  $meta
-     * @return StockMovement
      */
     public function recordAdjustment(
         int $companyId,
@@ -197,13 +173,7 @@ class StockService
     /**
      * Record initial stock for an item.
      *
-     * @param  int  $companyId
-     * @param  int  $warehouseId
-     * @param  int  $itemId
-     * @param  float  $quantity
      * @param  int  $unitCost  Cost per unit in cents
-     * @param  string|null  $notes
-     * @return StockMovement
      */
     public function recordInitialStock(
         int $companyId,
@@ -232,12 +202,6 @@ class StockService
     /**
      * Transfer stock between warehouses.
      *
-     * @param  int  $companyId
-     * @param  int  $fromWarehouseId
-     * @param  int  $toWarehouseId
-     * @param  int  $itemId
-     * @param  float  $quantity
-     * @param  string|null  $notes
      * @return array ['out' => StockMovement, 'in' => StockMovement]
      *
      * @throws Exception
@@ -421,8 +385,6 @@ class StockService
     /**
      * Get current stock for an item (optionally in specific warehouse).
      *
-     * @param  int  $companyId
-     * @param  int  $itemId
      * @param  int|null  $warehouseId  If null, returns total across all warehouses
      * @return array ['quantity' => float, 'total_value' => int, 'weighted_average_cost' => int]
      */
@@ -478,8 +440,6 @@ class StockService
     /**
      * Get stock breakdown by warehouse for an item.
      *
-     * @param  int  $companyId
-     * @param  int  $itemId
      * @return array<int, array> Keyed by warehouse_id
      */
     public function getItemStockByWarehouse(int $companyId, int $itemId): array
@@ -503,12 +463,6 @@ class StockService
     /**
      * Get stock movement history for an item.
      *
-     * @param  int  $companyId
-     * @param  int  $itemId
-     * @param  int|null  $warehouseId
-     * @param  string|null  $fromDate
-     * @param  string|null  $toDate
-     * @param  int  $limit
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getMovementHistory(
@@ -544,9 +498,6 @@ class StockService
 
     /**
      * Update the item's quantity field based on total stock.
-     *
-     * @param  int  $itemId
-     * @param  int|null  $warehouseId
      */
     protected function updateItemQuantity(int $itemId, ?int $warehouseId = null): void
     {
@@ -563,9 +514,7 @@ class StockService
     /**
      * Process stock movement from a bill item (purchase).
      *
-     * @param  BillItem  $billItem
      * @param  int|null  $warehouseId  Override warehouse from bill item
-     * @return StockMovement|null
      */
     public function processStockFromBillItem(BillItem $billItem, ?int $warehouseId = null): ?StockMovement
     {
@@ -614,9 +563,7 @@ class StockService
     /**
      * Process stock movement from an invoice item (sale).
      *
-     * @param  InvoiceItem  $invoiceItem
      * @param  int|null  $warehouseId  Override warehouse from invoice item
-     * @return StockMovement|null
      */
     public function processStockFromInvoiceItem(InvoiceItem $invoiceItem, ?int $warehouseId = null): ?StockMovement
     {
@@ -660,10 +607,6 @@ class StockService
 
     /**
      * Reverse a stock movement (e.g., when deleting an invoice/bill).
-     *
-     * @param  StockMovement  $movement
-     * @param  string|null  $reason
-     * @return StockMovement
      */
     public function reverseMovement(StockMovement $movement, ?string $reason = null): StockMovement
     {
@@ -703,7 +646,6 @@ class StockService
     /**
      * Get low stock items for a company.
      *
-     * @param  int  $companyId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getLowStockItems(int $companyId)
@@ -717,10 +659,6 @@ class StockService
 
     /**
      * Get stock valuation report for a company.
-     *
-     * @param  int  $companyId
-     * @param  int|null  $warehouseId
-     * @return array
      */
     public function getStockValuationReport(int $companyId, ?int $warehouseId = null): array
     {

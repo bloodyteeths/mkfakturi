@@ -24,7 +24,7 @@ class PartnerPayoutsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -90,7 +90,7 @@ class PartnerPayoutsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -126,7 +126,7 @@ class PartnerPayoutsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -158,7 +158,7 @@ class PartnerPayoutsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -167,7 +167,7 @@ class PartnerPayoutsController extends Controller
             ->where('status', 'completed')
             ->first();
 
-        if (!$payout) {
+        if (! $payout) {
             return response()->json(['error' => 'Payout not found or not completed'], 404);
         }
 

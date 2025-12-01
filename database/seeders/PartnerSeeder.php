@@ -75,7 +75,7 @@ class PartnerSeeder extends Seeder
         // CLAUDE-CHECKPOINT: Completed partner creation loop
 
         $this->command->info('Partner seeding completed!');
-        $this->command->info('Total users processed: ' . $adminUsers->count());
+        $this->command->info('Total users processed: '.$adminUsers->count());
         $this->command->info("Partners created: {$createdCount}");
         $this->command->info("Partners skipped (already exist): {$skippedCount}");
     }

@@ -35,12 +35,12 @@ class CustomersController extends Controller
             ->withSum([
                 'invoices as base_due_amount' => function ($query) {
                     $query->whereCompany();
-                }
+                },
             ], 'base_due_amount')
             ->withSum([
                 'invoices as due_amount' => function ($query) {
                     $query->whereCompany();
-                }
+                },
             ], 'due_amount')
             ->paginateData($limit);
 
@@ -48,7 +48,7 @@ class CustomersController extends Controller
             ->additional([
                 'meta' => [
                     'customer_total_count' => Customer::whereCompany()->count(),
-                ]
+                ],
             ]);
     }
 

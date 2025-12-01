@@ -21,18 +21,24 @@ class JournalExportService
      * Export formats supported
      */
     public const FORMAT_CSV = 'csv';
+
     public const FORMAT_PANTHEON = 'pantheon';
+
     public const FORMAT_ZONEL = 'zonel';
 
     /**
      * Transaction types for journal entries
      */
     public const TYPE_INVOICE = 'invoice';
+
     public const TYPE_PAYMENT = 'payment';
+
     public const TYPE_EXPENSE = 'expense';
 
     protected int $companyId;
+
     protected Carbon $fromDate;
+
     protected Carbon $toDate;
 
     public function __construct(int $companyId, string $from, string $to)
@@ -133,7 +139,7 @@ class JournalExportService
                 'type' => self::TYPE_INVOICE,
                 'account_code' => $taxAccount,
                 'account_name' => 'Tax Payable',
-                'description' => $description . ' - VAT',
+                'description' => $description.' - VAT',
                 'debit' => 0,
                 'credit' => $invoice->tax / 100,
                 'customer_name' => $invoice->customer->name ?? '',
@@ -194,7 +200,7 @@ class JournalExportService
     {
         $entries = [];
         $date = $expense->expense_date->format('Y-m-d');
-        $reference = $expense->invoice_number ?? 'EXP-' . $expense->id;
+        $reference = $expense->invoice_number ?? 'EXP-'.$expense->id;
         $categoryName = $expense->category->name ?? 'Expense';
         $description = "{$categoryName} - {$reference}";
 

@@ -200,7 +200,7 @@ class Partner extends Model
             ->with('company')
             ->select([
                 'affiliate_events.*',
-                \DB::raw('SUM(affiliate_events.amount) as total_commissions')
+                \DB::raw('SUM(affiliate_events.amount) as total_commissions'),
             ])
             ->where('is_clawed_back', false)
             ->groupBy('company_id');
@@ -208,8 +208,6 @@ class Partner extends Model
 
     /**
      * Get permissions for a specific company
-     *
-     * @return array
      */
     public function getPermissionsForCompany(int $companyId): array
     {
@@ -219,7 +217,7 @@ class Partner extends Model
             ->where('is_active', true)
             ->first();
 
-        if (!$link || !$link->permissions) {
+        if (! $link || ! $link->permissions) {
             return [];
         }
 

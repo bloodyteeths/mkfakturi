@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 class ProcessPartnerPayouts extends Command
 {
     protected $signature = 'partner:process-payouts';
+
     protected $description = 'Process monthly partner commission payouts';
 
     public function handle(PartnerPayoutService $payoutService)

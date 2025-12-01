@@ -7,7 +7,6 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Invoice;
-use App\Models\Payment;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

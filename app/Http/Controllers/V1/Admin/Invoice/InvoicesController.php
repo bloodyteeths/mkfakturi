@@ -60,7 +60,7 @@ class InvoicesController extends Controller
                 'status',
                 'date_range',
                 'orderByField',
-                'orderBy'
+                'orderBy',
             ]))
             ->whereCompany()
             ->paginateData($limit);
@@ -69,7 +69,7 @@ class InvoicesController extends Controller
             ->additional([
                 'meta' => [
                     'invoice_total_count' => Invoice::whereCompany()->count(),
-                ]
+                ],
             ]);
     }
 
@@ -90,7 +90,7 @@ class InvoicesController extends Controller
             $invoice->send([
                 'subject' => $request->subject,
                 'body' => $request->body,
-                'to' => $invoice->customer->email // Assuming customer email is needed
+                'to' => $invoice->customer->email, // Assuming customer email is needed
             ]);
         }
 
@@ -170,7 +170,7 @@ class InvoicesController extends Controller
         }
 
         // Check if advanced payments feature is enabled
-        if (!config('mk.features.advanced_payments', false)) {
+        if (! config('mk.features.advanced_payments', false)) {
             return response()->json([
                 'error' => 'Advanced payments feature is not enabled',
             ], 403);

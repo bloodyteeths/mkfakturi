@@ -5,27 +5,24 @@ namespace App\Jobs\Migration;
 use App\Models\ImportJob;
 use App\Models\ImportLog;
 use App\Models\ImportTempCustomer;
+use App\Models\ImportTempExpense;
 use App\Models\ImportTempInvoice;
 use App\Models\ImportTempItem;
 use App\Models\ImportTempPayment;
-use App\Models\ImportTempExpense;
-use App\Services\Migration\Transformers\DateTransformer;
-use App\Services\Migration\Transformers\DecimalTransformer;
-use App\Services\Migration\Transformers\CurrencyTransformer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 use League\Csv\Reader;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
  * ParseFileJob - Parse CSV/Excel/XML files into temp tables
- * 
+ *
  * This job parses uploaded files and loads raw data into temporary staging tables:
  * - Handles CSV, Excel, and XML formats
  * - Applies basic data cleaning and transformation
@@ -130,7 +127,7 @@ class ParseFileJob implements ShouldQueue
                 'log_type' => ImportLog::LOG_FILE_PARSED,
                 'severity' => ImportLog::SEVERITY_INFO,
                 'message' => 'File parsed successfully',
-                'detailed_message' => "Parsed {$this->importJob->processed_records} records in " . round($processingTime, 2) . " seconds",
+                'detailed_message' => "Parsed {$this->importJob->processed_records} records in ".round($processingTime, 2).' seconds',
                 'process_stage' => 'parsing',
                 'processing_time' => $processingTime,
                 'memory_usage' => $memoryUsed,
@@ -204,7 +201,7 @@ class ParseFileJob implements ShouldQueue
 
         foreach ($csv as $record) {
             // Skip empty rows
-            if (empty(array_filter($record, fn($cell) => trim($cell) !== ''))) {
+            if (empty(array_filter($record, fn ($cell) => trim($cell) !== ''))) {
                 continue;
             }
 
@@ -248,18 +245,21 @@ class ParseFileJob implements ShouldQueue
                 // Skip header row
                 if ($hasHeader && $rowNumber === 1) {
                     $rowNumber++;
+
                     continue;
                 }
 
                 // Skip empty rows
-                if (empty(array_filter($row, fn($cell) => $cell !== null && trim($cell) !== ''))) {
+                if (empty(array_filter($row, fn ($cell) => $cell !== null && trim($cell) !== ''))) {
                     continue;
                 }
 
                 // Convert null values to empty strings and clean data
                 $cleanedRow = array_map(function ($cell) {
-                    if ($cell === null)
+                    if ($cell === null) {
                         return '';
+                    }
+
                     return $this->cleanCellValue($cell);
                 }, $row);
 
@@ -354,7 +354,7 @@ class ParseFileJob implements ShouldQueue
             $processed = ($batchIndex + 1) * $this->batchSize;
             $this->importJob->updateProgress(min($processed, count($parsedData)));
 
-            Log::debug("Processed batch " . ($batchIndex + 1) . "/{$totalBatches}", [
+            Log::debug('Processed batch '.($batchIndex + 1)."/{$totalBatches}", [
                 'import_job_id' => $this->importJob->id,
                 'records_in_batch' => count($batch),
             ]);
@@ -459,7 +459,7 @@ class ParseFileJob implements ShouldQueue
 
         // Mark import job as failed
         $this->importJob->markAsFailed(
-            'File parsing failed: ' . $exception->getMessage(),
+            'File parsing failed: '.$exception->getMessage(),
             [
                 'error' => $exception->getMessage(),
                 'file' => $exception->getFile(),

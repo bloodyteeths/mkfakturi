@@ -12,10 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\InvoiceParsingServiceProvider::class,
     ])
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
-        channels: __DIR__ . '/../routes/channels.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         then: function () {
             // Webhook routes (without CSRF protection)
@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\RefreshTemplateCache::class,
     ])
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo(fn() => route('login'));
+        $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(AppServiceProvider::HOME);
 
         $middleware->validateCsrfTokens(except: [
@@ -102,7 +102,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
         ]);
         // CLAUDE-CHECKPOINT
-    
+
         $middleware->priority([
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,

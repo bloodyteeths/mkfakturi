@@ -36,6 +36,7 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
     use HasRolesAndAbilities;
     use HasTickets; // CLAUDE-CHECKPOINT: Added HasTickets trait for support ticketing
     use IFRSUser;
+
     // CLAUDE-CHECKPOINT: Added IFRSUser trait for IFRS entity relationship
     use InteractsWithMedia;
     use Notifiable; // CLAUDE-CHECKPOINT: Added Paddle Billable trait for Partner Plus subscriptions
@@ -130,7 +131,7 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         // Try to get company-specific date format
         $company_id = request()->header('company');
 
-        if (!$company_id) {
+        if (! $company_id) {
             $firstCompany = $this->companies()->first();
             $company_id = $firstCompany ? $firstCompany->id : null;
         }
@@ -241,31 +242,31 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
     {
         foreach (explode(' ', $search) as $term) {
             $query->where(function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('email', 'LIKE', '%' . $term . '%')
-                    ->orWhere('phone', 'LIKE', '%' . $term . '%');
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('email', 'LIKE', '%'.$term.'%')
+                    ->orWhere('phone', 'LIKE', '%'.$term.'%');
             });
         }
     }
 
     public function scopeWhereContactName($query, $contactName)
     {
-        return $query->where('contact_name', 'LIKE', '%' . $contactName . '%');
+        return $query->where('contact_name', 'LIKE', '%'.$contactName.'%');
     }
 
     public function scopeWhereDisplayName($query, $displayName)
     {
-        return $query->where('name', 'LIKE', '%' . $displayName . '%');
+        return $query->where('name', 'LIKE', '%'.$displayName.'%');
     }
 
     public function scopeWherePhone($query, $phone)
     {
-        return $query->where('phone', 'LIKE', '%' . $phone . '%');
+        return $query->where('phone', 'LIKE', '%'.$phone.'%');
     }
 
     public function scopeWhereEmail($query, $email)
     {
-        return $query->where('email', 'LIKE', '%' . $email . '%');
+        return $query->where('email', 'LIKE', '%'.$email.'%');
     }
 
     public function scopePaginateData($query, $limit)
@@ -462,15 +463,15 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
             return true;
         }
 
-        if ((!$data->data['owner_only']) && empty($data->data['ability'])) {
+        if ((! $data->data['owner_only']) && empty($data->data['ability'])) {
             return true;
         }
 
-        if ((!$data->data['owner_only']) && (!empty($data->data['ability'])) && (!empty($data->data['model'])) && $this->can($data->data['ability'], $data->data['model'])) {
+        if ((! $data->data['owner_only']) && (! empty($data->data['ability'])) && (! empty($data->data['model'])) && $this->can($data->data['ability'], $data->data['model'])) {
             return true;
         }
 
-        if ((!$data->data['owner_only']) && $this->can($data->data['ability'])) {
+        if ((! $data->data['owner_only']) && $this->can($data->data['ability'])) {
             return true;
         }
 

@@ -8,7 +8,6 @@ use App\Models\Payout;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Modules\Mk\Partner\Controllers\StripeConnectController;
 use Stripe\StripeClient;
 
 class PartnerPayoutService
@@ -66,6 +65,7 @@ class PartnerPayoutService
 
             if ($events->isEmpty()) {
                 DB::rollBack();
+
                 return null;
             }
 
@@ -129,11 +129,12 @@ class PartnerPayoutService
      */
     public function processStripeConnectPayout(Payout $payout, Partner $partner)
     {
-        if (!$this->stripe || !$partner->stripe_account_id) {
+        if (! $this->stripe || ! $partner->stripe_account_id) {
             Log::warning('Cannot process Stripe Connect payout - missing credentials or account', [
                 'payout_id' => $payout->id,
                 'partner_id' => $partner->id,
             ]);
+
             return;
         }
 
@@ -272,10 +273,11 @@ class PartnerPayoutService
     {
         $payout = Payout::where('stripe_transfer_id', $transferId)->first();
 
-        if (!$payout) {
+        if (! $payout) {
             Log::warning('Received transfer.paid webhook for unknown transfer', [
                 'transfer_id' => $transferId,
             ]);
+
             return;
         }
 
@@ -291,10 +293,11 @@ class PartnerPayoutService
     {
         $payout = Payout::where('stripe_transfer_id', $transferId)->first();
 
-        if (!$payout) {
+        if (! $payout) {
             Log::warning('Received transfer.failed webhook for unknown transfer', [
                 'transfer_id' => $transferId,
             ]);
+
             return;
         }
 

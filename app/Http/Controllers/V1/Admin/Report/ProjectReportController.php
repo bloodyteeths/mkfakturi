@@ -221,11 +221,6 @@ class ProjectReportController extends Controller
 
     /**
      * Generate monthly breakdown for project.
-     *
-     * @param  Project  $project
-     * @param  string|null  $fromDate
-     * @param  string|null  $toDate
-     * @return array
      */
     private function getMonthlyBreakdown(Project $project, ?string $fromDate = null, ?string $toDate = null): array
     {

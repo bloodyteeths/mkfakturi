@@ -58,7 +58,7 @@ class StockMovementFactory extends Factory
     /**
      * Create a stock IN movement (positive quantity).
      */
-    public function stockIn(float $quantity = null): Factory
+    public function stockIn(?float $quantity = null): Factory
     {
         return $this->state(function (array $attributes) use ($quantity) {
             $qty = $quantity ?? $this->faker->numberBetween(1, 100);
@@ -73,7 +73,7 @@ class StockMovementFactory extends Factory
     /**
      * Create a stock OUT movement (negative quantity).
      */
-    public function stockOut(float $quantity = null): Factory
+    public function stockOut(?float $quantity = null): Factory
     {
         return $this->state(function (array $attributes) use ($quantity) {
             $qty = $quantity ?? $this->faker->numberBetween(1, 50);
@@ -89,7 +89,7 @@ class StockMovementFactory extends Factory
     /**
      * Create an initial stock movement.
      */
-    public function initial(float $quantity = null, int $unitCost = null): Factory
+    public function initial(?float $quantity = null, ?int $unitCost = null): Factory
     {
         return $this->state(function (array $attributes) use ($quantity, $unitCost) {
             return [

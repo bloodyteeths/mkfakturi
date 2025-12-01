@@ -449,7 +449,7 @@ class PartnerManagementController extends Controller
         try {
             // Check if company is assigned
             $link = $partner->companies()->where('companies.id', $companyId)->first();
-            if (!$link) {
+            if (! $link) {
                 return response()->json([
                     'message' => 'Company is not assigned to this partner',
                 ], 404);
@@ -505,7 +505,7 @@ class PartnerManagementController extends Controller
         try {
             // Check if company is assigned
             $link = $partner->companies()->where('companies.id', $companyId)->first();
-            if (!$link) {
+            if (! $link) {
                 return response()->json([
                     'message' => 'Company is not assigned to this partner',
                 ], 404);
@@ -551,7 +551,7 @@ class PartnerManagementController extends Controller
             ])
             ->first();
 
-        if (!$link) {
+        if (! $link) {
             return response()->json(['message' => 'No active partner found'], 404);
         }
 
@@ -576,7 +576,7 @@ class PartnerManagementController extends Controller
             ])
             ->first();
 
-        if (!$referral) {
+        if (! $referral) {
             return response()->json(['message' => 'No upline partner found'], 404);
         }
 

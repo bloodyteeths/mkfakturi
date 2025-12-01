@@ -83,7 +83,7 @@ class SubscriptionController extends Controller
         }
 
         // If no valid subscription, return default free tier
-        if (!$currentPlan) {
+        if (! $currentPlan) {
             Log::info('SubscriptionController::index - No subscription, returning free tier');
             $currentPlan = [
                 'tier' => 'free',

@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('partners', 'payment_method')) {
+        if (! Schema::hasColumn('partners', 'payment_method')) {
             Schema::table('partners', function (Blueprint $table) {
                 $table->string('payment_method')->default('bank_transfer')->after('stripe_payouts_enabled_at');
             });

@@ -367,7 +367,7 @@ class Project extends Model
      */
     public function isEditable(): bool
     {
-        return !in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+        return ! in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
     }
 
     /**
@@ -399,10 +399,11 @@ class Project extends Model
      */
     public function markAsCompleted(): bool
     {
-        if (!$this->canBeCompleted()) {
+        if (! $this->canBeCompleted()) {
             return false;
         }
         $this->status = self::STATUS_COMPLETED;
+
         return $this->save();
     }
 
@@ -411,10 +412,11 @@ class Project extends Model
      */
     public function markAsCancelled(): bool
     {
-        if (!$this->canBeCancelled()) {
+        if (! $this->canBeCancelled()) {
             return false;
         }
         $this->status = self::STATUS_CANCELLED;
+
         return $this->save();
     }
 
@@ -423,10 +425,11 @@ class Project extends Model
      */
     public function reopen(): bool
     {
-        if (!$this->canBeReopened()) {
+        if (! $this->canBeReopened()) {
             return false;
         }
         $this->status = self::STATUS_OPEN;
+
         return $this->save();
     }
 
@@ -439,6 +442,7 @@ class Project extends Model
             return false;
         }
         $this->status = self::STATUS_ON_HOLD;
+
         return $this->save();
     }
 
@@ -447,10 +451,11 @@ class Project extends Model
      */
     public function startProgress(): bool
     {
-        if (!in_array($this->status, [self::STATUS_OPEN, self::STATUS_ON_HOLD])) {
+        if (! in_array($this->status, [self::STATUS_OPEN, self::STATUS_ON_HOLD])) {
             return false;
         }
         $this->status = self::STATUS_IN_PROGRESS;
+
         return $this->save();
     }
 

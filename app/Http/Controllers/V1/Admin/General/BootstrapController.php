@@ -34,7 +34,7 @@ class BootstrapController extends Controller
             $partnerCompanyId = $partnerContext['company_id'] ?? null;
 
             // If partner hasn't switched to a company yet, return minimal bootstrap
-            if (!$partnerCompanyId) {
+            if (! $partnerCompanyId) {
                 return response()->json([
                     'current_user' => new UserResource($current_user->load('currency', 'settings')),
                     'current_user_settings' => $current_user->getAllSettings(),
@@ -54,7 +54,7 @@ class BootstrapController extends Controller
             // Partner has switched to a company - provide full bootstrap for that company
             // Load the partner's accessible companies
             $partner = \App\Models\Partner::where('user_id', $current_user->id)->first();
-            if (!$partner) {
+            if (! $partner) {
                 abort(403, 'Partner record not found');
             }
 
@@ -64,9 +64,10 @@ class BootstrapController extends Controller
 
             $current_company = $partnerCompanies->firstWhere('id', $partnerCompanyId);
 
-            if (!$current_company) {
+            if (! $current_company) {
                 // Partner lost access or company doesn't exist
                 session()->forget(['partner_context', 'partner_selected_company_id', 'partner_selected_company_slug']);
+
                 return response()->json([
                     'current_user' => new UserResource($current_user->load('currency', 'settings')),
                     'current_user_settings' => $current_user->getAllSettings(),
@@ -182,16 +183,16 @@ class BootstrapController extends Controller
                 $current_company = $companies->firstWhere('id', $companyId);
             }
 
-            if (!$current_company || !$current_user->hasCompany($current_company->id)) {
+            if (! $current_company || ! $current_user->hasCompany($current_company->id)) {
                 $current_company = $companies->first();
             }
 
-            if ($current_company && !$current_company->relationLoaded('address')) {
+            if ($current_company && ! $current_company->relationLoaded('address')) {
                 $current_company->load('address');
             }
 
             // Handle case where user has no companies at all
-            if (!$current_company) {
+            if (! $current_company) {
                 abort(403, 'No company access. Please contact your administrator.');
             }
 

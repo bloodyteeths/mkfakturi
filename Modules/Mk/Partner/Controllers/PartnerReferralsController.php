@@ -21,7 +21,7 @@ class PartnerReferralsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
@@ -79,7 +79,7 @@ class PartnerReferralsController extends Controller
         $user = Auth::user();
         $partner = Partner::where('user_id', $user->id)->first();
 
-        if (!$partner) {
+        if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 

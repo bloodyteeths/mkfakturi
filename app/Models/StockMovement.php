@@ -47,10 +47,15 @@ class StockMovement extends Model
 
     // Source type constants
     public const SOURCE_INITIAL = 'initial';
+
     public const SOURCE_BILL_ITEM = 'bill_item';
+
     public const SOURCE_INVOICE_ITEM = 'invoice_item';
+
     public const SOURCE_ADJUSTMENT = 'adjustment';
+
     public const SOURCE_TRANSFER_IN = 'transfer_in';
+
     public const SOURCE_TRANSFER_OUT = 'transfer_out';
 
     protected function casts(): array

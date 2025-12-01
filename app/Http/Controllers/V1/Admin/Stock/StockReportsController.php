@@ -49,10 +49,6 @@ class StockReportsController extends Controller
      * Item Stock Card - Movement history with running balance.
      *
      * GET /api/v1/stock/items/{item}/card
-     *
-     * @param  Request  $request
-     * @param  Item  $item
-     * @return JsonResponse
      */
     public function itemCard(Request $request, Item $item): JsonResponse
     {
@@ -113,7 +109,7 @@ class StockReportsController extends Controller
         );
 
         // Format movements for response
-        $formattedMovements = $movements->map(function ($movement) use ($openingBalance) {
+        $formattedMovements = $movements->map(function ($movement) {
             return [
                 'id' => $movement->id,
                 'date' => $movement->movement_date->format('Y-m-d'),
@@ -165,10 +161,6 @@ class StockReportsController extends Controller
      * Warehouse Inventory - Current stock by warehouse.
      *
      * GET /api/v1/stock/warehouses/{warehouse}/inventory
-     *
-     * @param  Request  $request
-     * @param  Warehouse  $warehouse
-     * @return JsonResponse
      */
     public function warehouseInventory(Request $request, Warehouse $warehouse): JsonResponse
     {
@@ -254,9 +246,6 @@ class StockReportsController extends Controller
      * Inventory Valuation - Total stock value report.
      *
      * GET /api/v1/stock/inventory-valuation
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function inventoryValuation(Request $request): JsonResponse
     {
@@ -309,9 +298,6 @@ class StockReportsController extends Controller
      * Inventory List - Simple list for physical counting.
      *
      * GET /api/v1/stock/inventory-list
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function inventoryList(Request $request): JsonResponse
     {
@@ -391,9 +377,6 @@ class StockReportsController extends Controller
      * Get list of warehouses for dropdown.
      *
      * GET /api/v1/stock/warehouses
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function warehouses(Request $request): JsonResponse
     {

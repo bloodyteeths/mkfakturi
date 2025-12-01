@@ -16,7 +16,7 @@ return new class extends Migration
     public function up(): void
     {
         // Add warehouse_id to invoice_items (if not already exists)
-        if (!Schema::hasColumn('invoice_items', 'warehouse_id')) {
+        if (! Schema::hasColumn('invoice_items', 'warehouse_id')) {
             Schema::table('invoice_items', function (Blueprint $table) {
                 $table->unsignedBigInteger('warehouse_id')->nullable()->after('item_id');
 
@@ -30,7 +30,7 @@ return new class extends Migration
         }
 
         // Add warehouse_id to bill_items (if not already exists)
-        if (!Schema::hasColumn('bill_items', 'warehouse_id')) {
+        if (! Schema::hasColumn('bill_items', 'warehouse_id')) {
             Schema::table('bill_items', function (Blueprint $table) {
                 $table->unsignedBigInteger('warehouse_id')->nullable()->after('item_id');
 

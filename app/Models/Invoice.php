@@ -698,7 +698,7 @@ class Invoice extends Model implements HasMedia
         $template = PdfTemplateUtils::findFormattedTemplate('invoice', $invoiceTemplate, '');
 
         // Handle case where template is not found
-        if (!$template) {
+        if (! $template) {
             \Log::warning('PDF template not found, falling back to default', [
                 'requested_template' => $invoiceTemplate,
                 'invoice_id' => $this->id,
