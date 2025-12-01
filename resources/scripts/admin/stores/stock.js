@@ -22,6 +22,11 @@ export const useStockStore = (useWindow = false) => {
       valuationReport: null,
       lowStockItems: [],
       isLoading: false,
+      // Stock module enabled flag
+      stockEnabled: false,
+      // Warehouses for filter dropdowns (fetched from warehouse API)
+      warehouses: [],
+      isLoadingWarehouses: false,
     }),
 
     getters: {
@@ -199,6 +204,47 @@ export const useStockStore = (useWindow = false) => {
        */
       clearLowStock() {
         this.lowStockItems = []
+      },
+
+      /**
+       * Set stock module enabled flag
+       * @param {boolean} enabled - Whether stock module is enabled
+       */
+      setStockEnabled(enabled) {
+        this.stockEnabled = Boolean(enabled)
+      },
+
+      /**
+       * Fetch warehouses for filter dropdowns
+       * Uses the warehouse API endpoint
+       */
+      async fetchWarehouses() {
+        this.isLoadingWarehouses = true
+
+        try {
+          const response = await axios.get('/api/v1/stock/warehouses', {
+            params: { limit: 100 },
+          })
+
+          this.warehouses = response.data.data || []
+
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoadingWarehouses = false
+        }
+      },
+
+      /**
+       * Fetch inventory list with pagination and filters
+       * Alias for fetchInventory with pagination support
+       *
+       * @param {object} params - Filter and pagination params
+       */
+      async fetchInventoryList(params = {}) {
+        return this.fetchInventory(params)
       },
     },
   })()

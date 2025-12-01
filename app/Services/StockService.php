@@ -40,7 +40,7 @@ class StockService
      */
     public static function isEnabled(): bool
     {
-        return env('FACTURINO_STOCK_V1_ENABLED', false);
+        return config('facturino.features.stock', false);
     }
 
     /**

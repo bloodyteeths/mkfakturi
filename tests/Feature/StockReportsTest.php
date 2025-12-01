@@ -507,7 +507,7 @@ class StockReportsTest extends TestCase
     public function it_returns_403_when_stock_module_disabled()
     {
         // Disable stock module
-        putenv('FACTURINO_STOCK_V1_ENABLED=false');
+        config(['facturino.features.stock' => false]);
 
         $response = $this->actingAs($this->user)
             ->withHeader('company', $this->company->id)
@@ -523,7 +523,7 @@ class StockReportsTest extends TestCase
     /** @test */
     public function all_endpoints_require_stock_module_enabled()
     {
-        putenv('FACTURINO_STOCK_V1_ENABLED=false');
+        config(['facturino.features.stock' => false]);
 
         $endpoints = [
             "/api/v1/stock/items/{$this->item->id}/card",

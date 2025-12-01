@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1\Admin\Stock;
 
 use App\Http\Controllers\Controller;
 use App\Models\Warehouse;
+use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -12,14 +13,33 @@ use Illuminate\Validation\ValidationException;
  * Warehouse Controller
  *
  * Handles CRUD operations for warehouses.
+ * All endpoints require FACTURINO_STOCK_V1_ENABLED feature flag.
  */
 class WarehouseController extends Controller
 {
+    /**
+     * Check if stock module is enabled, return 403 if not.
+     */
+    protected function checkStockEnabled(): ?JsonResponse
+    {
+        if (! StockService::isEnabled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Stock module is not enabled.',
+            ], 403);
+        }
+
+        return null;
+    }
+
     /**
      * Display a listing of warehouses.
      */
     public function index(Request $request): JsonResponse
     {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
         $companyId = $request->header('company');
 
         $query = Warehouse::where('company_id', $companyId)
@@ -34,7 +54,8 @@ class WarehouseController extends Controller
         $warehouses = $query->get();
 
         return response()->json([
-            'warehouses' => $warehouses->map(function ($warehouse) {
+            'success' => true,
+            'data' => $warehouses->map(function ($warehouse) {
                 return [
                     'id' => $warehouse->id,
                     'name' => $warehouse->name,
@@ -55,6 +76,10 @@ class WarehouseController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50',
@@ -103,6 +128,10 @@ class WarehouseController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
+
         $companyId = $request->header('company');
 
         $warehouse = Warehouse::where('company_id', $companyId)
@@ -121,6 +150,10 @@ class WarehouseController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'code' => 'nullable|string|max:50',
@@ -167,6 +200,10 @@ class WarehouseController extends Controller
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
+
         $companyId = $request->header('company');
 
         $warehouse = Warehouse::where('company_id', $companyId)
@@ -209,6 +246,10 @@ class WarehouseController extends Controller
      */
     public function setDefault(Request $request, int $id): JsonResponse
     {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
+
         $companyId = $request->header('company');
 
         $warehouse = Warehouse::where('company_id', $companyId)

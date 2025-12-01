@@ -37,7 +37,7 @@ class InvoiceProfitTest extends TestCase
         parent::setUp();
 
         // Enable stock module
-        putenv('FACTURINO_STOCK_V1_ENABLED=true');
+        config(['facturino.features.stock' => true]);
 
         $this->currency = Currency::factory()->create([
             'code' => 'MKD',
@@ -63,7 +63,6 @@ class InvoiceProfitTest extends TestCase
 
     protected function tearDown(): void
     {
-        putenv('FACTURINO_STOCK_V1_ENABLED');
         parent::tearDown();
     }
 
@@ -148,7 +147,7 @@ class InvoiceProfitTest extends TestCase
     /** @test */
     public function it_returns_unavailable_when_stock_disabled()
     {
-        putenv('FACTURINO_STOCK_V1_ENABLED=false');
+        config(['facturino.features.stock' => false]);
 
         $invoice = Invoice::factory()->create([
             'company_id' => $this->company->id,
