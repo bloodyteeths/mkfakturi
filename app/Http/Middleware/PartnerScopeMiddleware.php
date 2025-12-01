@@ -69,7 +69,11 @@ class PartnerScopeMiddleware
                            $request->is('api/*/console') ||
                            $request->is('api/*/partner/dashboard') ||
                            $request->is('api/*/partner/commissions') ||
-                           $request->is('api/*/partner/clients');
+                           $request->is('api/*/partner/clients') ||
+                           $request->is('api/*/partner/referrals') ||
+                           $request->is('api/*/partner/payouts') ||
+                           $request->is('api/*/partner/stripe-connect/*') ||
+                           $request->is('api/*/partner/bank-details');
 
         if ($companyId && ! $skipCompanyCheck) {
             // Verify partner has access to this company

@@ -18,11 +18,17 @@ class PartnerReferralsController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        // Get partner from middleware (already validated)
+        $partner = $request->partner;
 
         if (! $partner) {
-            return response()->json(['error' => 'Partner account not found'], 403);
+            // Fallback to lookup if not set by middleware
+            $user = Auth::user();
+            $partner = Partner::where('user_id', $user->id)->first();
+
+            if (! $partner) {
+                return response()->json(['error' => 'Partner account not found'], 403);
+            }
         }
 
         // Get active affiliate link
@@ -76,11 +82,17 @@ class PartnerReferralsController extends Controller
             ], 422);
         }
 
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        // Get partner from middleware (already validated)
+        $partner = $request->partner;
 
         if (! $partner) {
-            return response()->json(['error' => 'Partner account not found'], 403);
+            // Fallback to lookup if not set by middleware
+            $user = Auth::user();
+            $partner = Partner::where('user_id', $user->id)->first();
+
+            if (! $partner) {
+                return response()->json(['error' => 'Partner account not found'], 403);
+            }
         }
 
         // Check if partner already has an active link
