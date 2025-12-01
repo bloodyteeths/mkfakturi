@@ -118,7 +118,8 @@ class WarehouseController extends Controller
         }
 
         return response()->json([
-            'warehouse' => $warehouse,
+            'success' => true,
+            'data' => $warehouse,
             'message' => 'Warehouse created successfully.',
         ], 201);
     }
@@ -139,7 +140,8 @@ class WarehouseController extends Controller
             ->firstOrFail();
 
         return response()->json([
-            'warehouse' => $warehouse,
+            'success' => true,
+            'data' => $warehouse,
         ]);
     }
 
@@ -190,7 +192,8 @@ class WarehouseController extends Controller
         }
 
         return response()->json([
-            'warehouse' => $warehouse->fresh(),
+            'success' => true,
+            'data' => $warehouse->fresh(),
             'message' => 'Warehouse updated successfully.',
         ]);
     }

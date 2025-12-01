@@ -156,6 +156,7 @@
     "month": "Месец",
     "loading": "Се вчитува...",
     "export_to_csv": "Извези во CSV",
+    "export": "Извези",
     "select_customer": "Избери клиент"
   },
   "dashboard": {

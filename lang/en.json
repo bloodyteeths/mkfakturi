@@ -150,6 +150,7 @@
     "month": "Month",
     "loading": "Loading...",
     "export_to_csv": "Export to CSV",
+    "export": "Export",
     "select_customer": "Select Customer"
   },
   "dashboard": {

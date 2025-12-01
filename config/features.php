@@ -56,6 +56,11 @@ return [
         'enabled' => env('FEATURE_MONITORING', false),
         'description' => 'Prometheus metrics + Telescope debugging interface',
     ],
+
+    'stock' => [
+        'enabled' => env('FACTURINO_STOCK_V1_ENABLED', false),
+        'description' => 'Inventory/stock tracking with warehouses, movements, and WAC valuation',
+    ],
 ];
 
 // CLAUDE-CHECKPOINT

@@ -266,13 +266,15 @@ debouncedWatch(
 )
 
 onMounted(async () => {
-  // Check if stock is enabled via bootstrap data
-  const bootstrap = globalStore.bootstrap
-  stockStore.setStockEnabled(bootstrap?.stock_enabled || false)
+  // Check if stock is enabled via feature flags from bootstrap
+  const featureFlags = globalStore.featureFlags || {}
+  const stockEnabled = featureFlags?.stock?.enabled || featureFlags?.stock || false
+  stockStore.setStockEnabled(stockEnabled)
 
-  // Load warehouses
+  // Load warehouses and initial inventory data
   if (stockStore.stockEnabled) {
     await stockStore.fetchWarehouses()
+    await refreshTable()
   }
 })
 

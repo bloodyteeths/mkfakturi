@@ -195,6 +195,7 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useStockStore } from '@/scripts/admin/stores/stock'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { debouncedWatch } from '@vueuse/core'
 
@@ -202,6 +203,7 @@ const { t } = useI18n()
 const router = useRouter()
 
 const stockStore = useStockStore()
+const globalStore = useGlobalStore()
 const notificationStore = useNotificationStore()
 
 // Create a pseudo-store for low stock items
@@ -275,9 +277,15 @@ debouncedWatch(
 )
 
 onMounted(async () => {
-  // Load warehouses
+  // Check if stock is enabled via feature flags from bootstrap
+  const featureFlags = globalStore.featureFlags || {}
+  const stockEnabled = featureFlags?.stock?.enabled || featureFlags?.stock || false
+  stockStore.setStockEnabled(stockEnabled)
+
+  // Load warehouses and initial data
   if (stockStore.stockEnabled) {
     await stockStore.fetchWarehouses()
+    await refreshTable()
   }
 })
 
