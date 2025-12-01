@@ -75,6 +75,7 @@ const showStripeConnectBanner = computed(() => {
   if (!partnerStore.stripeConnect.connected) return true
   if (partnerStore.stripeConnect.status === 'pending') return true
   if (partnerStore.stripeConnect.status === 'restricted') return true
+  if (partnerStore.stripeConnect.status === 'disabled') return true
   // Don't show banner if active - everything is fine
   return false
 })
@@ -86,7 +87,7 @@ const stripeConnectBannerClass = computed(() => {
   if (partnerStore.stripeConnect.status === 'pending') {
     return 'bg-yellow-50 border border-yellow-200'
   }
-  if (partnerStore.stripeConnect.status === 'restricted') {
+  if (partnerStore.stripeConnect.status === 'restricted' || partnerStore.stripeConnect.status === 'disabled') {
     return 'bg-red-50 border border-red-200'
   }
   return 'bg-green-50 border border-green-200'
@@ -99,7 +100,7 @@ const stripeConnectTextClass = computed(() => {
   if (partnerStore.stripeConnect.status === 'pending') {
     return 'text-yellow-800'
   }
-  if (partnerStore.stripeConnect.status === 'restricted') {
+  if (partnerStore.stripeConnect.status === 'restricted' || partnerStore.stripeConnect.status === 'disabled') {
     return 'text-red-800'
   }
   return 'text-green-800'
@@ -112,7 +113,7 @@ const stripeConnectButtonClass = computed(() => {
   if (partnerStore.stripeConnect.status === 'pending') {
     return 'bg-yellow-600 text-white hover:bg-yellow-700'
   }
-  if (partnerStore.stripeConnect.status === 'restricted') {
+  if (partnerStore.stripeConnect.status === 'restricted' || partnerStore.stripeConnect.status === 'disabled') {
     return 'bg-red-600 text-white hover:bg-red-700'
   }
   return 'bg-green-600 text-white hover:bg-green-700'
@@ -128,6 +129,9 @@ const stripeConnectMessage = computed(() => {
   if (partnerStore.stripeConnect.status === 'restricted') {
     return 'Вашата Stripe сметка има ограничувања - потребна е акција'
   }
+  if (partnerStore.stripeConnect.status === 'disabled') {
+    return 'Вашата Stripe сметка е деактивирана - потребна е акција'
+  }
   return 'Stripe е поврзан и исплатите се активни'
 })
 
@@ -138,8 +142,8 @@ const stripeConnectButtonText = computed(() => {
   if (partnerStore.stripeConnect.status === 'pending') {
     return 'Продолжи'
   }
-  if (partnerStore.stripeConnect.status === 'restricted') {
-    return 'Ажурирај'
+  if (partnerStore.stripeConnect.status === 'restricted' || partnerStore.stripeConnect.status === 'disabled') {
+    return 'Активирај'
   }
   return 'Прегледај'
 })
