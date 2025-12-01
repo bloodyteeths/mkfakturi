@@ -385,6 +385,7 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { useRecurringInvoiceStore } from '@/scripts/admin/stores/recurring-invoice'
+import { useProformaInvoiceStore } from '@/scripts/admin/stores/proforma-invoice'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
@@ -421,6 +422,7 @@ const customerStore = useCustomerStore()
 const globalStore = useGlobalStore()
 const invoiceStore = useInvoiceStore()
 const recurringInvoiceStore = useRecurringInvoiceStore()
+const proformaInvoiceStore = useProformaInvoiceStore()
 const userStore = useUserStore()
 const routes = useRoute()
 const { t } = useI18n()
@@ -435,6 +437,8 @@ const selectedCustomer = computed(() => {
       return invoiceStore.newInvoice.customer
     case 'recurring-invoice':
       return recurringInvoiceStore.newRecurringInvoice.customer
+    case 'proforma-invoice':
+      return proformaInvoiceStore.newProformaInvoice.customer
     default:
       return ''
   }
@@ -445,6 +449,8 @@ function resetSelectedCustomer() {
     estimateStore.resetSelectedCustomer()
   } else if (props.type === 'invoice') {
     invoiceStore.resetSelectedCustomer()
+  } else if (props.type === 'proforma-invoice') {
+    proformaInvoiceStore.resetSelectedCustomer()
   } else {
     recurringInvoiceStore.resetSelectedCustomer()
   }
@@ -454,6 +460,8 @@ if (props.customerId && props.type === 'estimate') {
   estimateStore.selectCustomer(props.customerId)
 } else if (props.customerId && props.type === 'invoice') {
   invoiceStore.selectCustomer(props.customerId)
+} else if (props.customerId && props.type === 'proforma-invoice') {
+  proformaInvoiceStore.selectCustomer(props.customerId)
 } else {
   if (props.customerId) recurringInvoiceStore.selectCustomer(props.customerId)
 }
@@ -520,6 +528,9 @@ function selectNewCustomer(id, close) {
   } else if (props.type === 'invoice') {
     invoiceStore.getNextNumber(params, true)
     invoiceStore.selectCustomer(id)
+  } else if (props.type === 'proforma-invoice') {
+    proformaInvoiceStore.getNextNumber(params, true)
+    proformaInvoiceStore.selectCustomer(id)
   } else {
     recurringInvoiceStore.selectCustomer(id)
   }

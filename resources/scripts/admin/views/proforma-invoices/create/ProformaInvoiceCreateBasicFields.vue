@@ -4,7 +4,7 @@
       v-model="proformaInvoiceStore.newProformaInvoice.customer"
       :valid="v.customer_id"
       :content-loading="isLoading"
-      type="estimate"
+      type="proforma-invoice"
       class="col-span-12 lg:col-span-5 pr-0"
     />
 
