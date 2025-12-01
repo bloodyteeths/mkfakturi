@@ -34,14 +34,21 @@ fi
 # Wait for database to be ready (Railway)
 if [ ! -z "$DB_HOST" ]; then
     echo "Waiting for database at $DB_HOST:$DB_PORT..."
-    for i in {1..30}; do
-        if mysqladmin ping -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" --silent 2>/dev/null; then
-            echo "Database is ready!"
+    for i in {1..60}; do
+        # Use PHP PDO to check database connection (more reliable than mysqladmin)
+        if php -r "try { new PDO('mysql:host='.\$_SERVER['DB_HOST'].';port='.\$_SERVER['DB_PORT'], \$_SERVER['DB_USERNAME'], \$_SERVER['DB_PASSWORD'], [PDO::ATTR_TIMEOUT => 5]); echo 'OK'; exit(0); } catch(Exception \$e) { exit(1); }" 2>/dev/null; then
+            echo "✅ Database is ready!"
             break
         fi
-        echo "Waiting for database... ($i/30)"
+        echo "Waiting for database... ($i/60)"
         sleep 2
     done
+
+    # Final check - if we couldn't connect after all attempts, show error
+    if [ $i -eq 60 ]; then
+        echo "⚠️ Warning: Database connection timeout after 60 attempts (2 minutes)"
+        echo "Proceeding anyway - migrations may fail"
+    fi
 fi
 
 # Ensure proper .env setup
