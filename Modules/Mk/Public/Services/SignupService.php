@@ -170,8 +170,26 @@ class SignupService
                 $this->recordConversion($data['affiliate_link_id'], $company->id);
             }
 
-            // Create Stripe Checkout session
-            $checkoutSession = $this->createStripeCheckoutSession($company, $data);
+            $plan = $data['plan'] ?? 'free';
+            $checkoutUrl = null;
+            $checkoutSessionId = null;
+
+            // Free plan - no checkout needed
+            if ($plan === 'free') {
+                // Set company subscription tier to free
+                $company->update([
+                    'subscription_tier' => 'free',
+                    'subscription_status' => 'active',
+                ]);
+
+                // Login URL for free plan
+                $checkoutUrl = config('app.url').'/login?registered=1&email='.urlencode($data['email']);
+            } else {
+                // Create Stripe Checkout session for paid plans
+                $checkoutSession = $this->createStripeCheckoutSession($company, $data);
+                $checkoutUrl = $checkoutSession->url;
+                $checkoutSessionId = $checkoutSession->id;
+            }
 
             DB::commit();
 
@@ -179,13 +197,14 @@ class SignupService
                 'company_id' => $company->id,
                 'user_id' => $user->id,
                 'partner_id' => $data['partner_id'] ?? null,
+                'plan' => $plan,
             ]);
 
             return [
                 'company' => $company,
                 'user' => $user,
-                'checkout_url' => $checkoutSession->url,
-                'checkout_session_id' => $checkoutSession->id,
+                'checkout_url' => $checkoutUrl,
+                'checkout_session_id' => $checkoutSessionId,
             ];
         } catch (\Exception $e) {
             DB::rollBack();

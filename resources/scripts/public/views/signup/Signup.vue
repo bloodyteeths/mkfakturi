@@ -219,6 +219,35 @@
         description="Одберете го планот што најмногу ви одговара"
       >
         <div class="mb-8">
+          <!-- Billing Period Toggle -->
+          <div class="flex justify-center mb-8">
+            <div class="inline-flex items-center bg-gray-100 rounded-full p-1">
+              <button
+                :class="[
+                  'px-6 py-2 rounded-full text-sm font-medium transition-all',
+                  billingPeriod === 'monthly'
+                    ? 'bg-white text-primary-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                ]"
+                @click="billingPeriod = 'monthly'"
+              >
+                Месечно
+              </button>
+              <button
+                :class="[
+                  'px-6 py-2 rounded-full text-sm font-medium transition-all',
+                  billingPeriod === 'yearly'
+                    ? 'bg-white text-primary-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                ]"
+                @click="billingPeriod = 'yearly'"
+              >
+                Годишно
+                <span class="ml-1 text-xs text-green-600 font-bold">-17%</span>
+              </button>
+            </div>
+          </div>
+
           <div v-if="loadingPlans" class="text-center py-12">
             <BaseSpinner class="w-12 h-12 mx-auto text-primary-500" />
             <p class="mt-4 text-gray-600">Се вчитуваат плановите...</p>
@@ -230,7 +259,7 @@
             <BaseButton class="mt-4" @click="loadPlans">Обиди се повторно</BaseButton>
           </div>
 
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div
               v-for="plan in plans"
               :key="plan.id"
@@ -263,10 +292,19 @@
                   {{ plan.name }}
                 </h3>
                 <div class="mb-4">
-                  <span v-if="plan.price === 0" class="text-3xl font-bold text-green-600">Бесплатно</span>
+                  <span v-if="plan.price === 0" class="text-2xl font-bold text-green-600">Бесплатно</span>
                   <template v-else>
-                    <span class="text-3xl font-bold text-gray-900">{{ plan.price }}</span>
-                    <span class="text-gray-600"> ден/месец</span>
+                    <div v-if="billingPeriod === 'monthly'">
+                      <span class="text-2xl font-bold text-gray-900">{{ plan.price }}</span>
+                      <span class="text-sm text-gray-600"> ден/месец</span>
+                    </div>
+                    <div v-else>
+                      <span class="text-2xl font-bold text-gray-900">{{ plan.price_yearly }}</span>
+                      <span class="text-sm text-gray-600"> ден/год</span>
+                      <div class="text-xs text-green-600 mt-1">
+                        ({{ Math.round(plan.price_yearly / 12) }} ден/месец)
+                      </div>
+                    </div>
                   </template>
                 </div>
                 <ul class="text-sm text-left space-y-2 mb-6">
@@ -416,6 +454,7 @@ const loadingPlans = ref(false)
 const plansError = ref('')
 const plans = ref([])
 const selectedPlan = ref(null)
+const billingPeriod = ref('monthly')
 const isProcessing = ref(false)
 const registrationError = ref('')
 
@@ -588,7 +627,7 @@ async function completeRegistration() {
       email: userForm.email,
       password: userForm.password,
       plan: selectedPlan.value.id,
-      billing_period: 'monthly',
+      billing_period: billingPeriod.value,
     }
 
     // Add referral data if available
