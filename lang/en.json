@@ -625,7 +625,9 @@
     "scan_barcode": "Scan Barcode",
     "barcode_placeholder": "Scan or type barcode...",
     "barcode_not_found": "Item not found with barcode: {barcode}",
-    "barcode_added": "Item added from barcode scan"
+    "barcode_added": "Item added from barcode scan",
+    "category": "Category",
+    "enter_category": "Enter category..."
   },
   "estimates": {
     "title": "Estimates",

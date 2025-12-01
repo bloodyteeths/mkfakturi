@@ -655,7 +655,9 @@
     "scan_barcode": "Скенирај баркод",
     "barcode_placeholder": "Скенирајте или внесете баркод...",
     "barcode_not_found": "Не е пронајден артикл со баркод: {barcode}",
-    "barcode_added": "Артиклот е додаден од скенирање на баркод"
+    "barcode_added": "Артиклот е додаден од скенирање на баркод",
+    "category": "Категорија",
+    "enter_category": "Внесете категорија..."
   },
   "estimates": {
     "title": "Estimates",

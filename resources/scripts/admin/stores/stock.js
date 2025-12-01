@@ -79,8 +79,9 @@ export const useStockStore = (useWindow = false) => {
         try {
           const response = await axios.get('/stock/inventory', { params })
 
-          this.inventory = response.data.data
-          this.totalInventory = response.data.meta?.total || response.data.data.length
+          // API returns {inventory: [...], summary: {...}}
+          this.inventory = response.data.inventory || response.data.data || []
+          this.totalInventory = response.data.summary?.total_items || this.inventory.length
 
           return response
         } catch (err) {
