@@ -50,6 +50,11 @@ class Tax extends Model
         return $this->belongsTo(Bill::class);
     }
 
+    public function proformaInvoice(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoice::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -68,6 +73,11 @@ class Tax extends Model
     public function billItem(): BelongsTo
     {
         return $this->belongsTo(BillItem::class);
+    }
+
+    public function proformaInvoiceItem(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoiceItem::class);
     }
 
     public function item(): BelongsTo

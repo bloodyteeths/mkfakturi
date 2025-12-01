@@ -6,6 +6,7 @@ use App\Traits\HasCustomFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ProformaInvoiceItem extends Model
@@ -63,9 +64,9 @@ class ProformaInvoiceItem extends Model
         return $this->belongsTo(Item::class);
     }
 
-    public function taxes(): MorphMany
+    public function taxes(): HasMany
     {
-        return $this->morphMany(Tax::class, 'taxable');
+        return $this->hasMany(Tax::class);
     }
 
     public function fields(): MorphMany

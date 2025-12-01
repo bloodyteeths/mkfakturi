@@ -125,9 +125,9 @@ class ProformaInvoice extends Model
         return $this->hasMany(ProformaInvoiceItem::class);
     }
 
-    public function taxes(): MorphMany
+    public function taxes(): HasMany
     {
-        return $this->morphMany(Tax::class, 'taxable');
+        return $this->hasMany(Tax::class);
     }
 
     public function currency(): BelongsTo
