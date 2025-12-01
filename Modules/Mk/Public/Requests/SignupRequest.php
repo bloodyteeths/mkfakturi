@@ -63,22 +63,17 @@ class SignupRequest extends FormRequest
             ],
             'password' => [
                 'required',
-                'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
+                'min:8',
             ],
             'password_confirmation' => [
-                'required',
+                'nullable',
             ],
 
             // Subscription plan
             'plan' => [
                 'required',
                 'string',
-                'in:starter,standard,business,max',
+                'in:free,starter,standard,business,max',
             ],
             'billing_period' => [
                 'required',
@@ -103,14 +98,12 @@ class SignupRequest extends FormRequest
                 'exists:affiliate_links,id',
             ],
 
-            // Terms acceptance
+            // Terms acceptance (optional - implicit acceptance by registering)
             'accept_terms' => [
-                'required',
-                'accepted',
+                'nullable',
             ],
             'accept_privacy' => [
-                'required',
-                'accepted',
+                'nullable',
             ],
         ];
     }

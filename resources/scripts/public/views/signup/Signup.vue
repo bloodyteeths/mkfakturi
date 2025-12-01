@@ -230,7 +230,7 @@
             <BaseButton class="mt-4" @click="loadPlans">Обиди се повторно</BaseButton>
           </div>
 
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div
               v-for="plan in plans"
               :key="plan.id"
@@ -263,8 +263,11 @@
                   {{ plan.name }}
                 </h3>
                 <div class="mb-4">
-                  <span class="text-3xl font-bold text-gray-900">{{ plan.price }} ден</span>
-                  <span class="text-gray-600">/месец</span>
+                  <span v-if="plan.price === 0" class="text-3xl font-bold text-green-600">Бесплатно</span>
+                  <template v-else>
+                    <span class="text-3xl font-bold text-gray-900">{{ plan.price }}</span>
+                    <span class="text-gray-600"> ден/месец</span>
+                  </template>
                 </div>
                 <ul class="text-sm text-left space-y-2 mb-6">
                   <li
@@ -512,19 +515,19 @@ async function loadPlans() {
     plans.value = plansData.map((plan) => ({
       id: plan.id,
       name: plan.name,
-      price: plan.price_monthly || plan.price || 0,
+      price: plan.price || 0,
       price_yearly: plan.price_yearly || 0,
-      stripe_price_id: plan.price_monthly, // The Stripe price ID
+      stripe_price_id: plan.stripe_price_id || null,
       popular: plan.id === 'standard', // Mark standard as popular
       features: plan.features || [],
       description: plan.description || '',
       currency: plan.currency || 'MKD',
     }))
 
-    // Auto-select the popular plan or first plan
+    // Auto-select free plan by default
     if (plans.value.length > 0) {
-      const popularPlan = plans.value.find((p) => p.popular)
-      selectedPlan.value = popularPlan || plans.value[0]
+      const freePlan = plans.value.find((p) => p.id === 'free')
+      selectedPlan.value = freePlan || plans.value[0]
     }
   } catch (error) {
     console.error('Failed to load plans:', error)
