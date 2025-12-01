@@ -51,7 +51,11 @@ return new class extends Migration
             $table->index('proforma_invoice_id');
             $table->index('item_id');
             $table->index('company_id');
-        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
+        });
     }
 
     /**

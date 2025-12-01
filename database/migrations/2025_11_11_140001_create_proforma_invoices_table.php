@@ -73,7 +73,11 @@ return new class extends Migration
             $table->index('status');
             $table->index('proforma_invoice_number');
             $table->index('expiry_date');
-        }).' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
+        });
     }
 
     /**
