@@ -228,7 +228,7 @@ const monthlyCommission = computed(() => {
   }, 0)
   return new Intl.NumberFormat('mk-MK', {
     style: 'currency',
-    currency: 'MKD'
+    currency: 'EUR'
   }).format(total)
 })
 
@@ -248,7 +248,7 @@ const loadClients = async () => {
       commission_rate: client.commission,
       monthly_revenue: new Intl.NumberFormat('mk-MK', {
         style: 'currency',
-        currency: 'MKD'
+        currency: 'EUR'
       }).format(client.mrr),
       monthly_commission: client.commission,
       last_activity: client.signup_date,

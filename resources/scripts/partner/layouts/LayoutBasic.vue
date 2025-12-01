@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-gray-50">
+  <div class="flex flex-col min-h-screen bg-gray-50">
     <!-- Navigation -->
     <nav class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,8 +82,10 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <router-view />
+    <main class="flex-1 overflow-auto">
+      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <router-view />
+      </div>
     </main>
   </div>
 </template>

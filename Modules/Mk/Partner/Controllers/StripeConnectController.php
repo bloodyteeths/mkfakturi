@@ -92,6 +92,7 @@ class StripeConnectController extends Controller
                 // Pre-fill from partner/user data
                 'email' => $request->user()->email,
                 'country' => 'MK', // Macedonia - supported for cross-border payouts
+                'default_currency' => 'eur', // Cross-border payouts must be in EUR
 
                 // Controller properties define the platform's business model
                 // DO NOT use 'type' at top level - use 'controller' instead
