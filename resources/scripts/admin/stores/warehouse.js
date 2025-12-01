@@ -79,7 +79,7 @@ export const useWarehouseStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get('/api/v1/stock/warehouses', { params })
+          const response = await axios.get('/stock/warehouses', { params })
 
           this.warehouses = response.data.data
           this.totalWarehouses = response.data.meta?.total || response.data.data.length
@@ -100,7 +100,7 @@ export const useWarehouseStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get(`/api/v1/stock/warehouses/${id}`)
+          const response = await axios.get(`/stock/warehouses/${id}`)
 
           this.currentWarehouse = response.data.data
 
@@ -121,7 +121,7 @@ export const useWarehouseStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.post('/api/v1/stock/warehouses', data)
+          const response = await axios.post('/stock/warehouses', data)
 
           // Add to local state
           this.warehouses.unshift(response.data.data)
@@ -149,7 +149,7 @@ export const useWarehouseStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.put(`/api/v1/stock/warehouses/${id}`, data)
+          const response = await axios.put(`/stock/warehouses/${id}`, data)
 
           // Update in local state
           const index = this.warehouses.findIndex((w) => w.id === id)
@@ -181,7 +181,7 @@ export const useWarehouseStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.delete(`/api/v1/stock/warehouses/${id}`)
+          const response = await axios.delete(`/stock/warehouses/${id}`)
 
           // Remove from local state
           const index = this.warehouses.findIndex((w) => w.id === id)
@@ -212,7 +212,7 @@ export const useWarehouseStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.post(`/api/v1/stock/warehouses/${id}/set-default`)
+          const response = await axios.post(`/stock/warehouses/${id}/set-default`)
 
           // Update all warehouses - set this one as default, others as non-default
           this.warehouses.forEach((w) => {

@@ -77,7 +77,7 @@ export const useStockStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get('/api/v1/stock/inventory', { params })
+          const response = await axios.get('/stock/inventory', { params })
 
           this.inventory = response.data.data
           this.totalInventory = response.data.meta?.total || response.data.data.length
@@ -101,7 +101,7 @@ export const useStockStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get(`/api/v1/stock/item-card/${itemId}`, { params })
+          const response = await axios.get(`/stock/item-card/${itemId}`, { params })
 
           this.itemCard = response.data.data
 
@@ -123,7 +123,7 @@ export const useStockStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get(`/api/v1/stock/warehouse/${warehouseId}/inventory`)
+          const response = await axios.get(`/stock/warehouse/${warehouseId}/inventory`)
 
           // Store as inventory for the current view
           this.inventory = response.data.data
@@ -146,7 +146,7 @@ export const useStockStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get('/api/v1/stock/valuation-report')
+          const response = await axios.get('/stock/valuation-report')
 
           this.valuationReport = response.data.data
 
@@ -168,7 +168,7 @@ export const useStockStore = (useWindow = false) => {
         this.isLoading = true
 
         try {
-          const response = await axios.get('/api/v1/stock/low-stock', { params })
+          const response = await axios.get('/stock/low-stock', { params })
 
           this.lowStockItems = response.data.data
 
@@ -222,7 +222,7 @@ export const useStockStore = (useWindow = false) => {
         this.isLoadingWarehouses = true
 
         try {
-          const response = await axios.get('/api/v1/stock/warehouses', {
+          const response = await axios.get('/stock/warehouses', {
             params: { limit: 100 },
           })
 
