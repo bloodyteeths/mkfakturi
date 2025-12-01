@@ -7,7 +7,7 @@ use App\Models\Company;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+// Hash not needed - User model has setPasswordAttribute mutator
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -266,7 +266,7 @@ class SignupService
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => $data['password'], // User model has setPasswordAttribute that hashes
             'role' => 'super admin',
         ]);
 
