@@ -640,9 +640,12 @@ async function completeRegistration() {
 
     const response = await axios.post('/public/signup/register', payload)
 
-    // Redirect to Stripe Checkout
-    if (response.data.checkout_url) {
-      window.location.href = response.data.checkout_url
+    // Get checkout URL from response (can be in data.checkout_url or data.data.checkout_url)
+    const checkoutUrl = response.data.data?.checkout_url || response.data.checkout_url
+
+    // Redirect to Stripe Checkout or login page (for free plan)
+    if (checkoutUrl) {
+      window.location.href = checkoutUrl
     } else {
       throw new Error('No checkout URL returned')
     }
@@ -650,15 +653,29 @@ async function completeRegistration() {
     console.error('Registration failed:', error)
     isProcessing.value = false
 
-    if (error.response?.data?.message) {
-      registrationError.value = error.response.data.message
-    } else {
-      registrationError.value = 'Настана грешка при регистрацијата. Ве молиме обидете се повторно.'
+    // Extract error message
+    let errorMsg = 'Настана грешка при регистрацијата. Ве молиме обидете се повторно.'
+
+    if (error.response?.data) {
+      const data = error.response.data
+
+      // Check for validation errors
+      if (data.errors) {
+        // Get first validation error
+        const firstError = Object.values(data.errors)[0]
+        errorMsg = Array.isArray(firstError) ? firstError[0] : firstError
+      } else if (data.message) {
+        errorMsg = data.message
+      }
+    } else if (error.message && error.message !== 'No checkout URL returned') {
+      errorMsg = error.message
     }
+
+    registrationError.value = errorMsg
 
     notificationStore.showNotification({
       type: 'error',
-      message: registrationError.value,
+      message: errorMsg,
     })
   }
 }
