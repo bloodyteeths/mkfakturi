@@ -115,6 +115,12 @@ class StripeConnectController extends Controller
                     'transfers' => ['requested' => true],
                 ],
 
+                // REQUIRED for Macedonia (MK): recipient service agreement
+                // See: https://stripe.com/docs/connect/service-agreement-types
+                'tos_acceptance' => [
+                    'service_agreement' => 'recipient',
+                ],
+
                 // Metadata for tracking
                 'metadata' => [
                     'partner_id' => $partner->id,
