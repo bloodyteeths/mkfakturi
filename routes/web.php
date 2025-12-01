@@ -200,9 +200,10 @@ Route::get('/installation', function () {
 })->name('install')->middleware('redirect-if-installed');
 
 // Public signup page (referral-based registration)
+// No redirect-if-installed middleware - this is a public registration page
 Route::get('/signup', function () {
     return view('app');
-})->name('signup')->middleware(['redirect-if-installed']);
+})->name('signup');
 
 // Move other http requests to the Vue App
 // -------------------------------------------------
