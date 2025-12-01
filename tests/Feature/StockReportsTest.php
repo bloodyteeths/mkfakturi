@@ -49,7 +49,7 @@ class StockReportsTest extends TestCase
         parent::setUp();
 
         // Enable stock module for tests
-        putenv('FACTURINO_STOCK_V1_ENABLED=true');
+        config(['facturino.features.stock' => true]);
 
         $this->stockService = new StockService;
 

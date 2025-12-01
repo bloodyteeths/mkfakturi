@@ -101,6 +101,12 @@ export default {
   EDIT_PROJECT: 'edit-project',
   DELETE_PROJECT: 'delete-project',
 
+  // Warehouses (Stock Module)
+  VIEW_WAREHOUSE: 'view-warehouse',
+  CREATE_WAREHOUSE: 'create-warehouse',
+  EDIT_WAREHOUSE: 'edit-warehouse',
+  DELETE_WAREHOUSE: 'delete-warehouse',
+
   // Stock Reports (Phase 2: Stock Module)
   VIEW_STOCK_REPORTS: 'view-item', // Uses existing item permission - stock reports are read-only
 

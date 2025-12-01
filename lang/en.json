@@ -11,6 +11,8 @@
     "proforma_invoices": "Proforma Invoices",
     "payments": "Payments",
     "projects": "Projects",
+    "stock": "Stock Inventory",
+    "warehouses": "Warehouses",
     "suppliers": "Suppliers",
     "bills": "Bills",
     "bills_inbox": "Bills Inbox",
