@@ -54,6 +54,19 @@
                   Целосен преглед на исплати во Stripe Dashboard
                 </li>
               </ul>
+              <!-- Error Message -->
+              <div v-if="stripeConnect.error" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-red-800">Грешка при поврзување</p>
+                    <p class="text-sm text-red-600 mt-1">{{ stripeConnect.error }}</p>
+                  </div>
+                </div>
+              </div>
+
               <button
                 @click="connectStripe"
                 :disabled="connectingStripe"
@@ -63,7 +76,7 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ connectingStripe ? 'Се креира сметка...' : 'Поврзи се со Stripe' }}
+                {{ connectingStripe ? 'Се креира сметка...' : (stripeConnect.error ? 'Обиди се повторно' : 'Поврзи се со Stripe') }}
               </button>
             </div>
           </div>
@@ -195,26 +208,6 @@
           </div>
         </div>
 
-        <!-- Error State -->
-        <div v-else-if="stripeConnect.error" class="bg-red-50 rounded-lg p-6">
-          <div class="flex items-start gap-4">
-            <div class="flex-shrink-0">
-              <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Грешка</h3>
-              <p class="text-red-600">{{ stripeConnect.error }}</p>
-              <button
-                @click="loadStripeStatus"
-                class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-              >
-                Обиди се повторно
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -659,6 +652,7 @@ export default {
 
     async connectStripe() {
       this.connectingStripe = true
+      this.stripeConnect.error = null // Clear previous error
       try {
         const result = await this.partnerStore.createStripeAccount()
 
@@ -666,11 +660,12 @@ export default {
           // Account created, now get onboarding link
           await this.continueOnboarding()
         } else {
-          alert(result.error || 'Грешка при креирање на сметка')
+          // Show error in UI instead of alert
+          this.stripeConnect.error = result.error || 'Грешка при креирање на сметка'
         }
       } catch (error) {
         console.error('Error connecting Stripe:', error)
-        alert('Грешка при креирање на сметка')
+        this.stripeConnect.error = error.response?.data?.error || 'Грешка при креирање на сметка'
       } finally {
         this.connectingStripe = false
       }
@@ -678,6 +673,7 @@ export default {
 
     async continueOnboarding() {
       this.onboardingLoading = true
+      this.stripeConnect.error = null // Clear previous error
       try {
         const result = await this.partnerStore.getOnboardingLink()
 
@@ -685,11 +681,11 @@ export default {
           // Redirect to Stripe-hosted onboarding
           window.location.href = result.url
         } else {
-          alert(result.error || 'Грешка при креирање на линк')
+          this.stripeConnect.error = result.error || 'Грешка при креирање на линк'
         }
       } catch (error) {
         console.error('Error getting onboarding link:', error)
-        alert('Грешка при креирање на линк')
+        this.stripeConnect.error = error.response?.data?.error || 'Грешка при креирање на линк'
       } finally {
         this.onboardingLoading = false
       }
