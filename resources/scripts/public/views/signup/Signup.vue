@@ -263,7 +263,7 @@
                   {{ plan.name }}
                 </h3>
                 <div class="mb-4">
-                  <span class="text-3xl font-bold text-gray-900">€{{ plan.price }}</span>
+                  <span class="text-3xl font-bold text-gray-900">{{ plan.price }} ден</span>
                   <span class="text-gray-600">/месец</span>
                 </div>
                 <ul class="text-sm text-left space-y-2 mb-6">
@@ -347,7 +347,7 @@
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Цена:</span>
-                  <span class="font-medium text-gray-900">€{{ selectedPlan?.price }}/месец</span>
+                  <span class="font-medium text-gray-900">{{ selectedPlan?.price }} ден/месец</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Компанија:</span>
