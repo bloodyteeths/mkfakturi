@@ -23,3 +23,15 @@ Homestead.yaml
 /.dev/docker-compose.yml
 /.dev/docker-compose.yaml
 package-lock.json
+
+# Stripe setup scripts with API keys
+create_prices_mkd.sh
+create_yearly_prices.sh
+setup_stripe_mkd.sh
+
+# Debug output files
+debug_*.txt
+prices_*.txt
+setup_output.txt
+yearly_prices_output.txt
+products_facturino.txt
