@@ -29,7 +29,7 @@ class ProformaInvoiceRequest extends FormRequest
                 'date',
             ],
             'expiry_date' => [
-                'required',
+                'nullable',
                 'date',
                 'after_or_equal:proforma_invoice_date',
             ],
