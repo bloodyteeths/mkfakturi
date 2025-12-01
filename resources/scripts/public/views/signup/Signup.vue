@@ -35,71 +35,71 @@
           <div class="grid grid-cols-1 gap-6 mb-6">
             <BaseInputGroup
               :label="'Име на компанија'"
-              :error="v$.companyForm.name.$error && v$.companyForm.name.$errors[0].$message"
+              :error="companyV$.companyForm.name.$error && companyV$.companyForm.name.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="companyForm.name"
-                :invalid="v$.companyForm.name.$error"
+                :invalid="companyV$.companyForm.name.$error"
                 type="text"
                 placeholder="Компанија ДООЕЛ"
-                @input="v$.companyForm.name.$touch()"
+                @input="companyV$.companyForm.name.$touch()"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
               :label="'Даночен број (ЕМБС)'"
-              :error="v$.companyForm.tax_id.$error && v$.companyForm.tax_id.$errors[0].$message"
+              :error="companyV$.companyForm.tax_id.$error && companyV$.companyForm.tax_id.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="companyForm.tax_id"
-                :invalid="v$.companyForm.tax_id.$error"
+                :invalid="companyV$.companyForm.tax_id.$error"
                 type="text"
                 placeholder="1234567890123"
-                @input="v$.companyForm.tax_id.$touch()"
+                @input="companyV$.companyForm.tax_id.$touch()"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
               :label="'Адреса'"
-              :error="v$.companyForm.address.$error && v$.companyForm.address.$errors[0].$message"
+              :error="companyV$.companyForm.address.$error && companyV$.companyForm.address.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="companyForm.address"
-                :invalid="v$.companyForm.address.$error"
+                :invalid="companyV$.companyForm.address.$error"
                 type="text"
                 placeholder="Улица бр. 123"
-                @input="v$.companyForm.address.$touch()"
+                @input="companyV$.companyForm.address.$touch()"
               />
             </BaseInputGroup>
 
             <div class="grid grid-cols-2 gap-4">
               <BaseInputGroup
                 :label="'Град'"
-                :error="v$.companyForm.city.$error && v$.companyForm.city.$errors[0].$message"
+                :error="companyV$.companyForm.city.$error && companyV$.companyForm.city.$errors[0]?.$message"
                 required
               >
                 <BaseInput
                   v-model.trim="companyForm.city"
-                  :invalid="v$.companyForm.city.$error"
+                  :invalid="companyV$.companyForm.city.$error"
                   type="text"
                   placeholder="Скопје"
-                  @input="v$.companyForm.city.$touch()"
+                  @input="companyV$.companyForm.city.$touch()"
                 />
               </BaseInputGroup>
 
               <BaseInputGroup
                 :label="'Поштенски број'"
-                :error="v$.companyForm.zip.$error && v$.companyForm.zip.$errors[0].$message"
+                :error="companyV$.companyForm.zip.$error && companyV$.companyForm.zip.$errors[0]?.$message"
               >
                 <BaseInput
                   v-model.trim="companyForm.zip"
-                  :invalid="v$.companyForm.zip.$error"
+                  :invalid="companyV$.companyForm.zip.$error"
                   type="text"
                   placeholder="1000"
-                  @input="v$.companyForm.zip.$touch()"
+                  @input="companyV$.companyForm.zip.$touch()"
                 />
               </BaseInputGroup>
             </div>
@@ -126,42 +126,42 @@
           <div class="grid grid-cols-1 gap-6 mb-6">
             <BaseInputGroup
               :label="'Име и презиме'"
-              :error="v$.userForm.name.$error && v$.userForm.name.$errors[0].$message"
+              :error="userV$.userForm.name.$error && userV$.userForm.name.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="userForm.name"
-                :invalid="v$.userForm.name.$error"
+                :invalid="userV$.userForm.name.$error"
                 type="text"
                 placeholder="Марко Петровски"
-                @input="v$.userForm.name.$touch()"
+                @input="userV$.userForm.name.$touch()"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
               :label="'Email адреса'"
-              :error="v$.userForm.email.$error && v$.userForm.email.$errors[0].$message"
+              :error="userV$.userForm.email.$error && userV$.userForm.email.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="userForm.email"
-                :invalid="v$.userForm.email.$error"
+                :invalid="userV$.userForm.email.$error"
                 type="email"
                 placeholder="marko@kompanija.mk"
-                @input="v$.userForm.email.$touch()"
+                @input="userV$.userForm.email.$touch()"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
               :label="'Лозинка'"
-              :error="v$.userForm.password.$error && v$.userForm.password.$errors[0].$message"
+              :error="userV$.userForm.password.$error && userV$.userForm.password.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="userForm.password"
-                :invalid="v$.userForm.password.$error"
+                :invalid="userV$.userForm.password.$error"
                 :type="showPassword ? 'text' : 'password'"
-                @input="v$.userForm.password.$touch()"
+                @input="userV$.userForm.password.$touch()"
               >
                 <template #right>
                   <BaseIcon
@@ -175,14 +175,14 @@
 
             <BaseInputGroup
               :label="'Потврди лозинка'"
-              :error="v$.userForm.password_confirmation.$error && v$.userForm.password_confirmation.$errors[0].$message"
+              :error="userV$.userForm.password_confirmation.$error && userV$.userForm.password_confirmation.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="userForm.password_confirmation"
-                :invalid="v$.userForm.password_confirmation.$error"
+                :invalid="userV$.userForm.password_confirmation.$error"
                 :type="showPasswordConfirm ? 'text' : 'password'"
-                @input="v$.userForm.password_confirmation.$touch()"
+                @input="userV$.userForm.password_confirmation.$touch()"
               >
                 <template #right>
                   <BaseIcon
@@ -472,10 +472,15 @@ const userRules = {
   },
 }
 
-const v$ = useVuelidate(
-  currentStep.value === 0 ? companyRules : userRules,
-  currentStep.value === 0 ? { companyForm } : { userForm }
-)
+// Separate vuelidate instances for each form
+const companyV$ = useVuelidate(companyRules, { companyForm })
+const userV$ = useVuelidate(userRules, { userForm })
+
+// Computed to get current validator
+const v$ = computed(() => currentStep.value === 0 ? companyV$ : userV$)
+
+// Referral data for registration
+const referralData = ref(null)
 
 // Methods
 async function validateReferralCode() {
@@ -486,8 +491,9 @@ async function validateReferralCode() {
       code: referralCode.value,
     })
 
-    if (response.data.valid) {
-      referralPartnerName.value = response.data.partner_name
+    if (response.data.success && response.data.data) {
+      referralPartnerName.value = response.data.data.partner_name || response.data.data.partner_company
+      referralData.value = response.data.data
     }
   } catch (error) {
     console.error('Failed to validate referral code:', error)
@@ -501,13 +507,18 @@ async function loadPlans() {
 
   try {
     const response = await axios.get('/api/v1/public/signup/plans')
-    plans.value = response.data.data.map((plan) => ({
+    const plansData = response.data.data || response.data || []
+
+    plans.value = plansData.map((plan) => ({
       id: plan.id,
       name: plan.name,
-      price: plan.price,
-      stripe_price_id: plan.stripe_price_id,
-      popular: plan.popular || false,
+      price: plan.price_monthly || plan.price || 0,
+      price_yearly: plan.price_yearly || 0,
+      stripe_price_id: plan.price_monthly, // The Stripe price ID
+      popular: plan.id === 'standard', // Mark standard as popular
       features: plan.features || [],
+      description: plan.description || '',
+      currency: plan.currency || 'MKD',
     }))
 
     // Auto-select the popular plan or first plan
@@ -530,13 +541,11 @@ function selectPlan(plan) {
 async function nextStep() {
   // Validate current step
   if (currentStep.value === 0) {
-    v$.value = useVuelidate(companyRules, { companyForm })
-    await v$.value.$validate()
-    if (v$.value.$error) return
+    await companyV$.value.$validate()
+    if (companyV$.value.$error) return
   } else if (currentStep.value === 1) {
-    v$.value = useVuelidate(userRules, { userForm })
-    await v$.value.$validate()
-    if (v$.value.$error) return
+    await userV$.value.$validate()
+    if (userV$.value.$error) return
   } else if (currentStep.value === 2) {
     if (!selectedPlan.value) {
       notificationStore.showNotification({
@@ -566,12 +575,28 @@ async function completeRegistration() {
   registrationError.value = ''
 
   try {
-    const response = await axios.post('/api/v1/public/signup/register', {
-      company: companyForm,
-      user: userForm,
-      plan_id: selectedPlan.value.id,
-      referral_code: referralCode.value || null,
-    })
+    const payload = {
+      company_name: companyForm.name,
+      tax_id: companyForm.tax_id,
+      address: companyForm.address,
+      city: companyForm.city,
+      zip: companyForm.zip,
+      name: userForm.name,
+      email: userForm.email,
+      password: userForm.password,
+      plan: selectedPlan.value.id,
+      billing_period: 'monthly',
+    }
+
+    // Add referral data if available
+    if (referralData.value) {
+      payload.partner_id = referralData.value.partner_id
+      payload.affiliate_link_id = referralData.value.affiliate_link_id
+    } else if (referralCode.value) {
+      payload.referral_code = referralCode.value
+    }
+
+    const response = await axios.post('/api/v1/public/signup/register', payload)
 
     // Redirect to Stripe Checkout
     if (response.data.checkout_url) {
