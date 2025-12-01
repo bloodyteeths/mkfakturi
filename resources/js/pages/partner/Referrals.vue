@@ -74,8 +74,8 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">QR Код</label>
             <div class="flex items-start gap-4">
-              <div class="bg-white p-4 border border-gray-200 rounded-lg">
-                <canvas ref="qrCanvas" class="w-48 h-48"></canvas>
+              <div class="bg-white p-4 border border-gray-200 rounded-lg inline-block">
+                <canvas ref="qrCanvas" width="192" height="192" style="width: 192px; height: 192px; display: block;"></canvas>
               </div>
               <div class="flex-1">
                 <p class="text-sm text-gray-600 mb-3">Споделете го овој QR код со потенцијални клиенти. Тие можат да го скенираат за да се регистрираат преку вашиот линк.</p>

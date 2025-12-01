@@ -228,6 +228,7 @@ export default [
         path: '',
         name: 'signup',
         component: Signup,
+        meta: { requiresAuth: false, isPublic: true },
       },
     ],
   },

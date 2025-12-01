@@ -26,8 +26,11 @@ router.beforeEach((to, from, next) => {
   let ability = to.meta.ability
   const { isAppLoaded } = globalStore
 
+  // Public routes that don't require authentication
+  const publicRoutes = ['login', 'forgot-password', 'reset-password', 'signup']
+
   // Check if route requires authentication
-  if (to.meta.requiresAuth !== false && to.name !== 'login' && to.name !== 'forgot-password' && to.name !== 'reset-password') {
+  if (to.meta.requiresAuth !== false && !publicRoutes.includes(to.name) && !to.meta.isPublic) {
     // If user is not logged in (no currentUser), redirect to login
     if (!userStore.currentUser && isAppLoaded) {
       next({ name: 'login' })
