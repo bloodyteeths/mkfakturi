@@ -67,7 +67,7 @@ class AffiliateLink extends Model
     public function getUrl(?string $path = null): string
     {
         $baseUrl = config('app.url');
-        $path = $path ?? '/register';
+        $path = $path ?? '/signup';
         $refParam = config('affiliate.ref_param', 'ref');
 
         return $baseUrl.$path.'?'.$refParam.'='.$this->code;

@@ -200,6 +200,11 @@ Route::get('/installation', function () {
     return view('app');
 })->name('install')->middleware('redirect-if-installed');
 
+// Public signup page (referral-based registration)
+Route::get('/signup', function () {
+    return view('app');
+})->name('signup')->middleware(['redirect-if-installed']);
+
 // Move other http requests to the Vue App
 // -------------------------------------------------
 
@@ -763,4 +768,6 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
         return response('<pre>' . implode("\n", $output) . '</pre>');
     });
 }
+
+// CLAUDE-CHECKPOINT
 

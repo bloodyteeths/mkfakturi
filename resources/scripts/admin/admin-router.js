@@ -10,6 +10,7 @@ const ResetPassword = () =>
   import('@/scripts/admin/views/auth/ResetPassword.vue')
 const ForgotPassword = () =>
   import('@/scripts/admin/views/auth/ForgotPassword.vue')
+const Signup = () => import('@/scripts/public/views/signup/Signup.vue')
 
 // Dashboard
 const Dashboard = () => import('@/scripts/admin/views/dashboard/Dashboard.vue')
@@ -216,6 +217,19 @@ export default [
     path: '/customer/invoices/view/:hash',
     component: InvoicePublicPage,
     name: 'invoice.public',
+  },
+
+  {
+    path: '/signup',
+    component: LayoutLogin,
+    meta: { requiresAuth: false, isPublic: true },
+    children: [
+      {
+        path: '',
+        name: 'signup',
+        component: Signup,
+      },
+    ],
   },
 
   {
@@ -908,5 +922,4 @@ export default [
   { path: '/:catchAll(.*)', component: NotFoundPage },
 ]
 
-// LLM-CHECKPOINT
 // CLAUDE-CHECKPOINT

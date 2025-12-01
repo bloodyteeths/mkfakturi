@@ -1229,4 +1229,12 @@ Route::middleware(['auth:sanctum'])->prefix('v1/ai')->group(function () {
     Route::get('/summary', [App\Http\Controllers\AiSummaryController::class, 'getSummary']);
     Route::get('/risk', [App\Http\Controllers\AiSummaryController::class, 'getRisk']);
 });
-// CLAUDE-CHECKPOINT: Rate limiting applied - auth:5/min, public:30/min, strict:10/min for sensitive operations
+
+// Public Signup Routes (No Auth Required)
+// ----------------------------------
+Route::prefix('v1/public/signup')->middleware(['throttle:public'])->group(function () {
+    Route::post('/validate-referral', [\Modules\Mk\Public\Controllers\SignupController::class, 'validateReferral']);
+    Route::get('/plans', [\Modules\Mk\Public\Controllers\SignupController::class, 'getPlans']);
+    Route::post('/register', [\Modules\Mk\Public\Controllers\SignupController::class, 'register'])->middleware('throttle:strict');
+});
+// CLAUDE-CHECKPOINT: Public signup endpoints with referral tracking
