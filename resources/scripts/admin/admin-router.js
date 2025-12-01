@@ -11,6 +11,7 @@ const ResetPassword = () =>
 const ForgotPassword = () =>
   import('@/scripts/admin/views/auth/ForgotPassword.vue')
 const Signup = () => import('@/scripts/public/views/signup/Signup.vue')
+const SignupLayout = () => import('@/scripts/public/views/signup/SignupLayout.vue')
 
 // Dashboard
 const Dashboard = () => import('@/scripts/admin/views/dashboard/Dashboard.vue')
@@ -108,10 +109,16 @@ const ProjectsIndex = () => import('@/scripts/admin/views/projects/Index.vue')
 const ProjectCreate = () => import('@/scripts/admin/views/projects/Create.vue')
 const ProjectView = () => import('@/scripts/admin/views/projects/View.vue')
 
-// Stock Reports (Phase 2: Stock Module)
+// Stock Module (Phase 2)
+const StockInventory = () => import('@/scripts/admin/views/stock/Inventory.vue')
 const StockItemCard = () => import('@/scripts/admin/views/stock/ItemCard.vue')
 const StockWarehouseInventory = () => import('@/scripts/admin/views/stock/WarehouseInventory.vue')
 const StockInventoryValuation = () => import('@/scripts/admin/views/stock/InventoryValuation.vue')
+const StockLowStock = () => import('@/scripts/admin/views/stock/LowStock.vue')
+
+// Warehouses
+const WarehousesIndex = () => import('@/scripts/admin/views/stock/warehouses/Index.vue')
+const WarehouseCreate = () => import('@/scripts/admin/views/stock/warehouses/Create.vue')
 
 // Bills (Accounts Payable)
 const BillsIndex = () => import('@/scripts/admin/views/bills/Index.vue')
@@ -221,7 +228,7 @@ export default [
 
   {
     path: '/signup',
-    component: LayoutLogin,
+    component: SignupLayout,
     meta: { requiresAuth: false, isPublic: true },
     children: [
       {
@@ -348,25 +355,63 @@ export default [
         component: ProjectView,
       },
 
-      // Stock Reports (Phase 2: Stock Module)
+      // Stock Module (Phase 2)
       // Note: These routes are only functional when FACTURINO_STOCK_V1_ENABLED=true
+      {
+        path: 'stock',
+        name: 'stock.index',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockInventory,
+      },
       {
         path: 'stock/item-card',
         name: 'stock.item-card',
-        meta: { ability: abilities.VIEW_STOCK_REPORTS },
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockItemCard,
+      },
+      {
+        path: 'stock/item-card/:id',
+        name: 'stock.item-card.view',
+        meta: { ability: abilities.VIEW_ITEM },
         component: StockItemCard,
       },
       {
         path: 'stock/warehouse-inventory',
         name: 'stock.warehouse-inventory',
-        meta: { ability: abilities.VIEW_STOCK_REPORTS },
+        meta: { ability: abilities.VIEW_ITEM },
         component: StockWarehouseInventory,
       },
       {
         path: 'stock/inventory-valuation',
         name: 'stock.inventory-valuation',
-        meta: { ability: abilities.VIEW_STOCK_REPORTS },
+        meta: { ability: abilities.VIEW_ITEM },
         component: StockInventoryValuation,
+      },
+      {
+        path: 'stock/low-stock',
+        name: 'stock.low-stock',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockLowStock,
+      },
+
+      // Warehouses
+      {
+        path: 'stock/warehouses',
+        name: 'warehouses.index',
+        meta: { ability: abilities.VIEW_WAREHOUSE },
+        component: WarehousesIndex,
+      },
+      {
+        path: 'stock/warehouses/create',
+        name: 'warehouses.create',
+        meta: { ability: abilities.CREATE_WAREHOUSE },
+        component: WarehouseCreate,
+      },
+      {
+        path: 'stock/warehouses/:id/edit',
+        name: 'warehouses.edit',
+        meta: { ability: abilities.EDIT_WAREHOUSE },
+        component: WarehouseCreate,
       },
 
       // Payments
