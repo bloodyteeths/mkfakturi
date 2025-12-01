@@ -487,7 +487,7 @@ async function validateReferralCode() {
   if (!referralCode.value) return
 
   try {
-    const response = await axios.post('/api/v1/public/signup/validate-referral', {
+    const response = await axios.post('/public/signup/validate-referral', {
       code: referralCode.value,
     })
 
@@ -506,7 +506,7 @@ async function loadPlans() {
   plansError.value = ''
 
   try {
-    const response = await axios.get('/api/v1/public/signup/plans')
+    const response = await axios.get('/public/signup/plans')
     const plansData = response.data.data || response.data || []
 
     plans.value = plansData.map((plan) => ({
@@ -596,7 +596,7 @@ async function completeRegistration() {
       payload.referral_code = referralCode.value
     }
 
-    const response = await axios.post('/api/v1/public/signup/register', payload)
+    const response = await axios.post('/public/signup/register', payload)
 
     // Redirect to Stripe Checkout
     if (response.data.checkout_url) {
