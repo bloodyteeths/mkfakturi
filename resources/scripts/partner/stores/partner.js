@@ -136,7 +136,7 @@ export const usePartnerStore = defineStore('partner', () => {
   const loadStripeConnectStatus = async () => {
     stripeConnectLoading.value = true
     try {
-      const { data } = await axios.get('/api/v1/partner/stripe-connect/status')
+      const { data } = await axios.get('/partner/stripe-connect/status')
 
       stripeConnect.value = {
         connected: data.connected,
@@ -162,7 +162,7 @@ export const usePartnerStore = defineStore('partner', () => {
   const createStripeAccount = async () => {
     stripeConnectLoading.value = true
     try {
-      const { data } = await axios.post('/api/v1/partner/stripe-connect/account')
+      const { data } = await axios.post('/partner/stripe-connect/account')
 
       if (data.success) {
         stripeConnect.value.connected = true
@@ -183,7 +183,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const getOnboardingLink = async () => {
     try {
-      const { data } = await axios.post('/api/v1/partner/stripe-connect/account-link')
+      const { data } = await axios.post('/partner/stripe-connect/account-link')
 
       if (data.success && data.url) {
         return { success: true, url: data.url }
@@ -200,7 +200,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const getDashboardLink = async () => {
     try {
-      const { data } = await axios.post('/api/v1/partner/stripe-connect/dashboard-link')
+      const { data } = await axios.post('/partner/stripe-connect/dashboard-link')
 
       if (data.success && data.url) {
         return { success: true, url: data.url }
