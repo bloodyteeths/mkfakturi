@@ -21,7 +21,7 @@ return [
          * - Automatic stock movements from invoices/bills
          * - Stock reports and analytics
          */
-        'stock' => env('FACTURINO_STOCK_V1_ENABLED', false),
+        'stock' => true, // Stock module is always enabled
 
         /*
          * E-Invoice Module

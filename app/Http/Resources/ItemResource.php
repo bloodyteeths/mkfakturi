@@ -27,6 +27,10 @@ class ItemResource extends JsonResource
             'tax_per_item' => $this->tax_per_item,
             'sku' => $this->sku,
             'barcode' => $this->barcode,
+            'track_quantity' => $this->track_quantity,
+            'quantity' => $this->quantity,
+            'minimum_quantity' => $this->minimum_quantity,
+            'category' => $this->category,
             'formatted_created_at' => $this->formattedCreatedAt,
             'unit' => $this->whenLoaded('unit', function () {
                 return UnitResource::make($this->unit);

@@ -890,10 +890,10 @@ Route::prefix('/v1')->group(function () {
             });
 
             // Stock Management Module (Facturino)
-            // Feature flag: FACTURINO_STOCK_V1_ENABLED
+            // Stock module is always enabled - no feature flag needed
             // ----------------------------------
 
-            Route::prefix('stock')->middleware(['feature:stock'])->group(function () {
+            Route::prefix('stock')->group(function () {
                 // Warehouses
                 Route::apiResource('warehouses', \App\Http\Controllers\V1\Admin\Stock\WarehouseController::class);
                 Route::post('/warehouses/{id}/set-default', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'setDefault']);

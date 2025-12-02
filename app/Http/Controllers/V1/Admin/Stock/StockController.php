@@ -63,7 +63,7 @@ class StockController extends Controller
         }
 
         if ($categoryId) {
-            // Assuming category is a string field or relation. 
+            // Assuming category is a string field or relation.
             // Based on Create.vue it seems to be a text field 'category'
             $query->where('category', 'like', "%{$categoryId}%");
         }
@@ -177,7 +177,7 @@ class StockController extends Controller
             ->with(['unit', 'currency'])
             ->firstOrFail();
 
-        if (!$item->track_quantity) {
+        if (! $item->track_quantity) {
             return response()->json([
                 'error' => 'Stock tracking is not enabled for this item',
             ], 400);
@@ -220,21 +220,42 @@ class StockController extends Controller
             ];
         });
 
+        // Calculate opening and closing balance from movements
+        $openingBalance = ['quantity' => 0, 'value' => 0];
+        $closingBalance = [
+            'quantity' => $currentStock['quantity'],
+            'value' => $currentStock['total_value'],
+        ];
+
+        // If there are movements, opening balance is from the first movement
+        if ($movements->isNotEmpty()) {
+            $firstMovement = $movements->last(); // Movements are ordered desc, so last is oldest
+            // Opening is balance BEFORE the first movement
+            $openingBalance = [
+                'quantity' => $firstMovement->balance_quantity - $firstMovement->quantity,
+                'value' => $firstMovement->balance_value - ($firstMovement->quantity * $firstMovement->unit_cost),
+            ];
+        }
+
         return response()->json([
-            'item' => [
-                'id' => $item->id,
-                'name' => $item->name,
-                'sku' => $item->sku,
-                'barcode' => $item->barcode,
-                'unit_name' => $item->unit?->name,
-                'minimum_quantity' => $item->minimum_quantity,
-            ],
-            'current_stock' => $currentStock,
-            'movements' => $formattedMovements,
-            'summary' => [
-                'total_movements' => $movements->count(),
-                'stock_in_count' => $movements->filter(fn($m) => $m->isStockIn())->count(),
-                'stock_out_count' => $movements->filter(fn($m) => $m->isStockOut())->count(),
+            'data' => [
+                'item' => [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'sku' => $item->sku,
+                    'barcode' => $item->barcode,
+                    'unit_name' => $item->unit?->name,
+                    'minimum_quantity' => $item->minimum_quantity,
+                ],
+                'opening_balance' => $openingBalance,
+                'closing_balance' => $closingBalance,
+                'current_stock' => $currentStock,
+                'movements' => $formattedMovements,
+                'summary' => [
+                    'total_movements' => $movements->count(),
+                    'stock_in_count' => $movements->filter(fn ($m) => $m->isStockIn())->count(),
+                    'stock_out_count' => $movements->filter(fn ($m) => $m->isStockOut())->count(),
+                ],
             ],
         ]);
     }
@@ -294,7 +315,7 @@ class StockController extends Controller
             'summary' => [
                 'total_items' => count($inventory),
                 'total_value' => $totalValue,
-                'low_stock_items' => count(array_filter($inventory, fn($i) => $i['is_low_stock'])),
+                'low_stock_items' => count(array_filter($inventory, fn ($i) => $i['is_low_stock'])),
             ],
         ]);
     }
@@ -313,16 +334,52 @@ class StockController extends Controller
     }
 
     /**
-     * Get low stock items.
+     * Get low stock items with pagination.
      */
     public function lowStock(Request $request): JsonResponse
     {
         $companyId = $request->header('company');
+        $warehouseId = $request->query('warehouse_id');
+        $search = $request->query('search');
+        $severity = $request->query('severity');
+        $orderByField = $request->query('orderByField', 'shortage_percentage');
+        $orderBy = $request->query('orderBy', 'desc');
+        $limit = (int) $request->query('limit', 10);
+        $page = (int) $request->query('page', 1);
 
-        $lowStockItems = $this->stockService->getLowStockItems($companyId);
+        // Build query for items with track_quantity and minimum_quantity set
+        $query = Item::where('company_id', $companyId)
+            ->where('track_quantity', true)
+            ->whereNotNull('minimum_quantity')
+            ->where('minimum_quantity', '>', 0)
+            ->with(['unit', 'currency']);
 
-        $formatted = $lowStockItems->map(function ($item) use ($companyId) {
-            $stock = $this->stockService->getItemStock($companyId, $item->id);
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%");
+            });
+        }
+
+        // Get all matching items first
+        $allItems = $query->get();
+
+        // Filter for low stock (quantity <= minimum_quantity)
+        $lowStockItems = $allItems->filter(function ($item) use ($companyId, $warehouseId) {
+            $stock = $this->stockService->getItemStock($companyId, $item->id, $warehouseId);
+
+            return $stock['quantity'] <= $item->minimum_quantity;
+        });
+
+        // Map to response format with shortage calculation
+        $formatted = $lowStockItems->map(function ($item) use ($companyId, $warehouseId) {
+            $stock = $this->stockService->getItemStock($companyId, $item->id, $warehouseId);
+            $shortage = $item->minimum_quantity - $stock['quantity'];
+            $shortagePercentage = $item->minimum_quantity > 0
+                ? round(($shortage / $item->minimum_quantity) * 100, 2)
+                : 0;
 
             return [
                 'item_id' => $item->id,
@@ -332,14 +389,40 @@ class StockController extends Controller
                 'unit_name' => $item->unit?->name,
                 'current_quantity' => $stock['quantity'],
                 'minimum_quantity' => $item->minimum_quantity,
-                'shortage' => $item->minimum_quantity - $stock['quantity'],
+                'shortage' => $shortage,
+                'shortage_percentage' => $shortagePercentage,
                 'weighted_average_cost' => $stock['weighted_average_cost'],
             ];
-        });
+        })->values();
+
+        // Apply severity filter after calculating shortage
+        if ($severity === 'critical') {
+            $formatted = $formatted->filter(fn ($i) => $i['shortage_percentage'] >= 75);
+        } elseif ($severity === 'warning') {
+            $formatted = $formatted->filter(fn ($i) => $i['shortage_percentage'] >= 25 && $i['shortage_percentage'] < 75);
+        } elseif ($severity === 'low') {
+            $formatted = $formatted->filter(fn ($i) => $i['shortage_percentage'] < 25);
+        }
+
+        // Sort
+        $sorted = $formatted->sortBy(function ($item) use ($orderByField) {
+            return $item[$orderByField] ?? 0;
+        }, SORT_REGULAR, $orderBy === 'desc');
+
+        // Manual pagination
+        $total = $sorted->count();
+        $lastPage = max(1, (int) ceil($total / $limit));
+        $offset = ($page - 1) * $limit;
+        $paginatedData = $sorted->slice($offset, $limit)->values();
 
         return response()->json([
-            'low_stock_items' => $formatted,
-            'count' => $formatted->count(),
+            'data' => $paginatedData,
+            'meta' => [
+                'current_page' => $page,
+                'last_page' => $lastPage,
+                'per_page' => $limit,
+                'total' => $total,
+            ],
         ]);
     }
 }

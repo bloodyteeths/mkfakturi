@@ -58,7 +58,7 @@ return [
     ],
 
     'stock' => [
-        'enabled' => env('FACTURINO_STOCK_V1_ENABLED', false),
+        'enabled' => true, // Stock module is always enabled
         'description' => 'Inventory/stock tracking with warehouses, movements, and WAC valuation',
     ],
 ];

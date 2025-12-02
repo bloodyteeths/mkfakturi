@@ -29,6 +29,9 @@ export const useItemStore = (useWindow = false) => {
         tax_per_item: false,
         sku: '',
         barcode: '',
+        track_quantity: false,
+        minimum_quantity: null,
+        category: '',
       },
     }),
     getters: {
@@ -45,6 +48,9 @@ export const useItemStore = (useWindow = false) => {
           taxes: [],
           sku: '',
           barcode: '',
+          track_quantity: false,
+          minimum_quantity: null,
+          category: '',
         }
       },
       // CLAUDE-CHECKPOINT: Added SKU and barcode to item store state
