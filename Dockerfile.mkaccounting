@@ -120,7 +120,9 @@ COPY resources/ ./resources/
 COPY public/ ./public/
 COPY lang/ ./lang/
 
-# Build production assets
+# Build production assets with increased memory
+# Cache buster: 2025-12-02-1
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # ===== Stage 4: Production Image =====
