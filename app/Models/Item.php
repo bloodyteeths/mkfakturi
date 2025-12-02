@@ -82,10 +82,10 @@ class Item extends Model
     public function scopeWhereSearch($query, $search)
     {
         return $query->where(function ($query) use ($search) {
-            $query->where('items.name', 'LIKE', '%' . $search . '%')
-                ->orWhere('items.sku', 'LIKE', '%' . $search . '%')
-                ->orWhere('items.barcode', 'LIKE', '%' . $search . '%')
-                ->orWhere('items.description', 'LIKE', '%' . $search . '%');
+            $query->where('items.name', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.sku', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.barcode', 'LIKE', '%'.$search.'%')
+                ->orWhere('items.description', 'LIKE', '%'.$search.'%');
         });
     }
 
@@ -221,8 +221,8 @@ class Item extends Model
 
             // Validate required fields
             if (
-                !empty($initialStock['warehouse_id']) &&
-                !empty($initialStock['quantity']) &&
+                ! empty($initialStock['warehouse_id']) &&
+                ! empty($initialStock['quantity']) &&
                 $initialStock['quantity'] > 0
             ) {
 

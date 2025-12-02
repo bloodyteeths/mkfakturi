@@ -111,9 +111,9 @@
                 <dt class="text-sm font-medium text-gray-500">{{ $t('items.barcode') }}</dt>
                 <dd class="mt-1 text-sm text-gray-900 font-mono">{{ stockStore.itemCard.item.barcode }}</dd>
               </div>
-              <div v-if="stockStore.itemCard.item?.unit">
+              <div v-if="stockStore.itemCard.item?.unit_name">
                 <dt class="text-sm font-medium text-gray-500">{{ $t('items.unit') }}</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ stockStore.itemCard.item.unit }}</dd>
+                <dd class="mt-1 text-sm text-gray-900">{{ stockStore.itemCard.item.unit_name }}</dd>
               </div>
             </div>
           </BaseCard>
@@ -391,17 +391,23 @@ onMounted(async () => {
   // Check for item_id in query params OR route params
   const itemId = route.query.item_id || route.params.id
   if (itemId) {
-    // Load the item and fetch its stock card
+    // Load the item card directly using the item ID
     isLoadingItems.value = true
     try {
-      const items = await searchItems('')
-      const item = items.find(i => i.id === parseInt(itemId))
-      if (item) {
-        filters.item = item
-        await loadItemCard()
+      // First, fetch the item card data directly
+      await stockStore.fetchItemCard(parseInt(itemId), {})
+
+      // If successful, set a minimal item object for the filters
+      // The actual item data comes from the API response
+      if (stockStore.itemCard.item) {
+        filters.item = {
+          id: stockStore.itemCard.item.id,
+          name: stockStore.itemCard.item.name,
+          sku: stockStore.itemCard.item.sku,
+        }
       }
     } catch (error) {
-      console.error('Failed to load item from query/route param:', error)
+      console.error('Failed to load item card from route param:', error)
     } finally {
       isLoadingItems.value = false
     }

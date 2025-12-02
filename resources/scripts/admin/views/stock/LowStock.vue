@@ -116,13 +116,13 @@
               :to="{ path: `/admin/stock/item-card/${row.data.item_id}` }"
               class="font-medium text-primary-500"
             >
-              <BaseText :text="row.data.name" />
+              <BaseText :text="row.data.item_name" />
             </router-link>
           </template>
 
           <template #cell-sku="{ row }">
             <span class="text-gray-600">
-              {{ row.data.sku || '-' }}
+              {{ row.data.item_sku || '-' }}
             </span>
           </template>
 

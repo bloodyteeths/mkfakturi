@@ -709,7 +709,11 @@
     "initial_quantity_placeholder": "Внесете количина...",
     "unit_cost": "Единечна цена",
     "unit_cost_hint": "Набавна цена по единица за вреднување на залиха",
-    "view_stock": "Преглед на залиха"
+    "view_stock": "Преглед на залиха",
+    "minimum_quantity": "Минимална количина",
+    "minimum_quantity_placeholder": "Внесете минимално ниво...",
+    "minimum_quantity_hint": "Добијте известување кога залихата ќе падне под ова ниво",
+    "category_placeholder": "Внесете категорија..."
   },
   "estimates": {
     "title": "Estimates",

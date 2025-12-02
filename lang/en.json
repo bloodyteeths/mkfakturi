@@ -681,7 +681,11 @@
     "initial_quantity_placeholder": "Enter quantity...",
     "unit_cost": "Unit Cost",
     "unit_cost_hint": "Cost per unit for inventory valuation",
-    "view_stock": "View Stock"
+    "view_stock": "View Stock",
+    "minimum_quantity": "Minimum Quantity",
+    "minimum_quantity_placeholder": "Enter minimum stock level...",
+    "minimum_quantity_hint": "Get alerts when stock falls below this level",
+    "category_placeholder": "Enter category..."
   },
   "estimates": {
     "title": "Estimates",

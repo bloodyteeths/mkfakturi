@@ -161,6 +161,39 @@
             </p>
           </BaseInputGroup>
 
+          <!-- Minimum Quantity (only shows when track_quantity is enabled) -->
+          <BaseInputGroup
+            v-if="stockEnabled && itemStore.currentItem.track_quantity"
+            :label="$t('items.minimum_quantity')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.minimum_quantity"
+              :content-loading="isFetchingInitialData"
+              type="number"
+              step="1"
+              min="0"
+              :placeholder="$t('items.minimum_quantity_placeholder')"
+            />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.minimum_quantity_hint') }}
+            </p>
+          </BaseInputGroup>
+
+          <!-- Category -->
+          <BaseInputGroup
+            v-if="stockEnabled && itemStore.currentItem.track_quantity"
+            :label="$t('items.category')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.category"
+              :content-loading="isFetchingInitialData"
+              type="text"
+              :placeholder="$t('items.category_placeholder')"
+            />
+          </BaseInputGroup>
+
           <!-- Initial Stock Entry (only for new items with track_quantity enabled) -->
           <template v-if="showInitialStock">
             <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
@@ -295,7 +328,8 @@ const taxPerItem = ref(companyStore.selectedCompanySettings.tax_per_item)
 
 let isFetchingInitialData = ref(false)
 
-itemStore.$reset()
+// Reset store only for new items, not for edit mode
+// This is handled in loadData() after route check
 loadData()
 
 const price = computed({
@@ -415,6 +449,12 @@ async function addItemUnit() {
 
 async function loadData() {
   isFetchingInitialData.value = true
+
+  // Reset store state for new items BEFORE loading
+  // For edit mode, we'll populate with fetched data
+  if (!isEdit.value) {
+    itemStore.resetCurrentItem()
+  }
 
   const loadPromises = [
     itemStore.fetchItemUnits({ limit: 'all' }),
