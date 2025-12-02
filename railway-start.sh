@@ -191,9 +191,11 @@ php artisan cache:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
-# Optimize application (rebuild routes, views, etc. without caching config)
-echo "Optimizing application..."
-php artisan optimize || true
+# Optimize application (WITHOUT caching config - env vars must be read at runtime)
+# Note: `php artisan optimize` runs config:cache internally which breaks env vars
+# So we only run view:cache which is safe
+echo "Optimizing views..."
+php artisan view:cache || true
 
 # Regenerate Composer autoloader (critical for Modules directory)
 echo "Regenerating autoloader..."
@@ -460,6 +462,11 @@ echo "QUEUE_CONNECTION: $QUEUE_CONNECTION"
 echo "SESSION_DRIVER: $SESSION_DRIVER"
 echo "REDIS_CLIENT: $REDIS_CLIENT"
 echo "BROADCAST_DRIVER: $BROADCAST_DRIVER"
+
+# Show feature flags status
+echo "=== Feature Flags ==="
+echo "FACTURINO_STOCK_V1_ENABLED: ${FACTURINO_STOCK_V1_ENABLED:-NOT SET}"
+php artisan tinker --execute="echo 'Stock feature from config: ' . (config('features.stock.enabled') ? 'ENABLED' : 'DISABLED');" 2>/dev/null || echo "Could not check stock feature"
 
 # Always run frontend build to ensure latest code and translations
 echo "Building frontend assets..."
