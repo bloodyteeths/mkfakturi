@@ -603,7 +603,8 @@ class Project extends Model
         if ($fromDate && $toDate) {
             $billQuery->whereBetween('bill_date', [$fromDate, $toDate]);
         }
-        $totalBills = $billQuery->sum('base_total') ?? 0;
+        // Bills use 'total' not 'base_total', and may need exchange rate conversion
+        $totalBills = (clone $billQuery)->selectRaw('COALESCE(SUM(total * COALESCE(exchange_rate, 1)), 0) as total')->value('total') ?? 0;
         $billCount = $billQuery->count();
 
         // Net result: invoices received minus expenses and bills paid
