@@ -349,6 +349,8 @@ class Bill extends Model implements HasMedia
             $query->billsBetween($start, $end);
         })->when($filters['supplier_id'] ?? null, function ($query, $supplierId) {
             $query->where('supplier_id', $supplierId);
+        })->when($filters['project_id'] ?? null, function ($query, $projectId) {
+            $query->where('project_id', $projectId);
         })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
             $orderBy = $filters['orderBy'] ?? 'desc';
             $query->orderBy($orderByField, $orderBy);

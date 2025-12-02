@@ -262,22 +262,46 @@
           </template>
 
           <div class="space-y-3">
-            <div class="flex justify-between items-center">
+            <router-link
+              :to="`/admin/invoices?project_id=${route.params.id}`"
+              class="flex justify-between items-center p-2 -mx-2 rounded hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <span class="text-sm text-gray-600">{{ $t('projects.invoices') }}</span>
-              <span class="text-sm font-medium text-gray-900">{{ summary.invoice_count || 0 }}</span>
-            </div>
-            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <span class="text-sm font-medium text-gray-900 mr-2">{{ summary.invoice_count || 0 }}</span>
+                <BaseIcon name="ChevronRightIcon" class="h-4 w-4 text-gray-400" />
+              </div>
+            </router-link>
+            <router-link
+              :to="`/admin/expenses?project_id=${route.params.id}`"
+              class="flex justify-between items-center p-2 -mx-2 rounded hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <span class="text-sm text-gray-600">{{ $t('projects.expenses') }}</span>
-              <span class="text-sm font-medium text-gray-900">{{ summary.expense_count || 0 }}</span>
-            </div>
-            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <span class="text-sm font-medium text-gray-900 mr-2">{{ summary.expense_count || 0 }}</span>
+                <BaseIcon name="ChevronRightIcon" class="h-4 w-4 text-gray-400" />
+              </div>
+            </router-link>
+            <router-link
+              :to="`/admin/payments?project_id=${route.params.id}`"
+              class="flex justify-between items-center p-2 -mx-2 rounded hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <span class="text-sm text-gray-600">{{ $t('projects.payments') }}</span>
-              <span class="text-sm font-medium text-gray-900">{{ summary.payment_count || 0 }}</span>
-            </div>
-            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <span class="text-sm font-medium text-gray-900 mr-2">{{ summary.payment_count || 0 }}</span>
+                <BaseIcon name="ChevronRightIcon" class="h-4 w-4 text-gray-400" />
+              </div>
+            </router-link>
+            <router-link
+              :to="`/admin/bills?project_id=${route.params.id}`"
+              class="flex justify-between items-center p-2 -mx-2 rounded hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <span class="text-sm text-gray-600">{{ $t('projects.bills') }}</span>
-              <span class="text-sm font-medium text-gray-900">{{ summary.bill_count || 0 }}</span>
-            </div>
+              <div class="flex items-center">
+                <span class="text-sm font-medium text-gray-900 mr-2">{{ summary.bill_count || 0 }}</span>
+                <BaseIcon name="ChevronRightIcon" class="h-4 w-4 text-gray-400" />
+              </div>
+            </router-link>
           </div>
         </BaseCard>
       </div>

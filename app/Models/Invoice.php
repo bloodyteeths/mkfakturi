@@ -373,6 +373,8 @@ class Invoice extends Model implements HasMedia
             $query->invoicesBetween($start, $end);
         })->when($filters['customer_id'] ?? null, function ($query, $customerId) {
             $query->where('customer_id', $customerId);
+        })->when($filters['project_id'] ?? null, function ($query, $projectId) {
+            $query->where('project_id', $projectId);
         })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
             $orderBy = $filters['orderBy'] ?? 'desc';
             $query->orderBy($orderByField, $orderBy);

@@ -258,6 +258,10 @@ class Expense extends Model implements HasMedia
         if ($filters->get('search')) {
             $query->whereSearch($filters->get('search'));
         }
+
+        if ($filters->get('project_id')) {
+            $query->where('project_id', $filters->get('project_id'));
+        }
     }
 
     public function scopeWhereExpense($query, $expense_id)

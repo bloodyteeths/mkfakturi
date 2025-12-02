@@ -379,6 +379,10 @@ class Payment extends Model implements HasMedia
             $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'desc';
             $query->whereOrder($field, $orderBy);
         }
+
+        if ($filters->get('project_id')) {
+            $query->where('project_id', $filters->get('project_id'));
+        }
     }
 
     public function scopePaymentsBetween($query, $start, $end)
