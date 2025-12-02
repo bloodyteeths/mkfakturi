@@ -203,6 +203,17 @@
               <span v-else class="text-blue-700 font-semibold">0</span>
             </div>
 
+            <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+              <span class="text-sm font-medium text-orange-700">{{ $t('projects.total_bills') }}</span>
+              <BaseFormatMoney
+                v-if="summary.total_bills !== undefined"
+                :amount="summary.total_bills"
+                :currency="project?.currency"
+                class="text-orange-700 font-semibold"
+              />
+              <span v-else class="text-orange-700 font-semibold">0</span>
+            </div>
+
             <hr class="my-2" />
 
             <div class="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
@@ -301,10 +312,12 @@ const summary = ref({
   total_invoiced: 0,
   total_expenses: 0,
   total_payments: 0,
+  total_bills: 0,
   net_result: 0,
   invoice_count: 0,
   expense_count: 0,
   payment_count: 0,
+  bill_count: 0,
   budget_amount: null,
   budget_remaining: null,
   budget_used_percentage: null,
