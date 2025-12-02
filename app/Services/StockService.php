@@ -37,10 +37,11 @@ class StockService
 {
     /**
      * Check if stock module is enabled.
+     * Stock module is always enabled - no feature flag needed.
      */
     public static function isEnabled(): bool
     {
-        return config('facturino.features.stock', false);
+        return true;
     }
 
     /**

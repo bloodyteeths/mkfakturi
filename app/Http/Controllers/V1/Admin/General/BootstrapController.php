@@ -126,6 +126,8 @@ class BootstrapController extends Controller
             foreach ($features_config as $key => $feature) {
                 $feature_flags[$key] = $feature['enabled'] ?? false;
             }
+            // Stock module is always enabled - no feature flag needed
+            $feature_flags['stock'] = true;
 
             return response()->json([
                 'current_user' => (new UserResource($current_user->load('currency', 'settings')))->toArray($request),
@@ -223,6 +225,8 @@ class BootstrapController extends Controller
             foreach ($features_config as $key => $feature) {
                 $feature_flags[$key] = $feature['enabled'] ?? false;
             }
+            // Stock module is always enabled - no feature flag needed
+            $feature_flags['stock'] = true;
 
             $userPayload = (new UserResource($current_user))->toArray(request());
             $companiesPayload = CompanyResource::collection($companies)->toArray(request());
