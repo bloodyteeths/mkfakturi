@@ -63,6 +63,8 @@
     "back_to_login": "Back to Login?",
     "home": "Home",
     "filter": "Filter",
+    "clear": "Clear",
+    "apply": "Apply",
     "delete": "Delete",
     "edit": "Edit",
     "view": "View",

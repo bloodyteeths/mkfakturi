@@ -200,6 +200,7 @@ class StockController extends Controller
         $formattedMovements = $movements->map(function ($movement) {
             return [
                 'id' => $movement->id,
+                'date' => $movement->movement_date->format('Y-m-d'),
                 'movement_date' => $movement->movement_date->format('Y-m-d'),
                 'source_type' => $movement->source_type,
                 'source_type_label' => $movement->source_type_label,
@@ -210,30 +211,36 @@ class StockController extends Controller
                 'absolute_quantity' => $movement->absolute_quantity,
                 'unit_cost' => $movement->unit_cost,
                 'total_cost' => $movement->total_cost,
+                'line_value' => abs($movement->quantity * $movement->unit_cost),
                 'balance_quantity' => $movement->balance_quantity,
                 'balance_value' => $movement->balance_value,
                 'weighted_average_cost' => $movement->weighted_average_cost,
                 'notes' => $movement->notes,
+                'description' => $movement->notes,
+                'reference' => $movement->source_id ? "#{$movement->source_id}" : null,
                 'created_by' => $movement->creator?->name,
                 'is_stock_in' => $movement->isStockIn(),
                 'is_stock_out' => $movement->isStockOut(),
             ];
         });
 
-        // Calculate opening and closing balance from movements
-        $openingBalance = ['quantity' => 0, 'value' => 0];
+        // Calculate opening and closing balance
+        // Closing balance is the current stock
         $closingBalance = [
             'quantity' => $currentStock['quantity'],
             'value' => $currentStock['total_value'],
         ];
 
-        // If there are movements, opening balance is from the first movement
+        // Opening balance: Calculate from the oldest movement shown
+        // If we have movements, opening is the balance BEFORE the oldest movement
+        $openingBalance = ['quantity' => 0, 'value' => 0];
         if ($movements->isNotEmpty()) {
-            $firstMovement = $movements->last(); // Movements are ordered desc, so last is oldest
-            // Opening is balance BEFORE the first movement
+            // Movements are ordered desc by date, so last() is the oldest
+            $oldestMovement = $movements->last();
+            // Opening is balance BEFORE that movement was applied
             $openingBalance = [
-                'quantity' => $firstMovement->balance_quantity - $firstMovement->quantity,
-                'value' => $firstMovement->balance_value - ($firstMovement->quantity * $firstMovement->unit_cost),
+                'quantity' => $oldestMovement->balance_quantity - $oldestMovement->quantity,
+                'value' => max(0, $oldestMovement->balance_value - abs($oldestMovement->quantity * $oldestMovement->unit_cost)),
             ];
         }
 

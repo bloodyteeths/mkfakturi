@@ -298,9 +298,23 @@ import abilities from '@/scripts/admin/stub/abilities'
 const itemStore = useItemStore()
 const globalStore = useGlobalStore()
 const warehouseStore = useWarehouseStore()
+const taxTypeStore = useTaxTypeStore()
+const modalStore = useModalStore()
+const companyStore = useCompanyStore()
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+
+const isSaving = ref(false)
+const taxPerItem = ref(companyStore.selectedCompanySettings.tax_per_item)
+const isFetchingInitialData = ref(false)
 
 // Stock module is always enabled (no feature flag)
 const stockEnabled = computed(() => true)
+
+// isEdit must be defined BEFORE showInitialStock and loadData()
+const isEdit = computed(() => route.name === 'items.edit')
 
 // Initial stock entry fields (shown when track_quantity is enabled on new item)
 const initialStock = ref({
@@ -315,21 +329,8 @@ const showInitialStock = computed(() => {
     stockEnabled.value &&
     itemStore.currentItem.track_quantity
 })
-const taxTypeStore = useTaxTypeStore()
-const modalStore = useModalStore()
-const companyStore = useCompanyStore()
-const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
 
-const isSaving = ref(false)
-const taxPerItem = ref(companyStore.selectedCompanySettings.tax_per_item)
-
-let isFetchingInitialData = ref(false)
-
-// Reset store only for new items, not for edit mode
-// This is handled in loadData() after route check
+// Load data after all refs and computeds are defined
 loadData()
 
 const price = computed({
@@ -377,8 +378,6 @@ const taxes = computed({
     itemStore.currentItem.taxes = value
   },
 })
-
-const isEdit = computed(() => route.name === 'items.edit')
 
 const pageTitle = computed(() =>
   isEdit.value ? t('items.edit_item') : t('items.new_item')
