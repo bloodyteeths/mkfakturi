@@ -31,7 +31,12 @@ setup_stripe_mkd.sh
 
 # Debug output files
 debug_*.txt
+debug_*.php
 prices_*.txt
 setup_output.txt
 yearly_prices_output.txt
 products_facturino.txt
+
+# Local test/debug scripts
+create_partner_demo.php
+test_enhanced_field_mapper.php

@@ -12,7 +12,6 @@ use App\Models\StockMovement;
 use App\Models\Warehouse;
 use App\Services\StockService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**

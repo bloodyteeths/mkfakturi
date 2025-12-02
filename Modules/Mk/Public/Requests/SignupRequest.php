@@ -3,7 +3,6 @@
 namespace Modules\Mk\Public\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
 
 /**
  * SignupRequest
