@@ -39,13 +39,27 @@ class ItemsRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:100',
-                'unique:items,sku,'.$itemId.',id,company_id,'.$companyId,
+                'unique:items,sku,' . $itemId . ',id,company_id,' . $companyId,
             ],
             'barcode' => [
                 'nullable',
                 'string',
                 'max:100',
-                'unique:items,barcode,'.$itemId.',id,company_id,'.$companyId,
+                'unique:items,barcode,' . $itemId . ',id,company_id,' . $companyId,
+            ],
+            'track_quantity' => [
+                'nullable',
+                'boolean',
+            ],
+            'minimum_quantity' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+            'category' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
         ];
     }

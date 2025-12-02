@@ -18,10 +18,16 @@ export const useStockStore = (useWindow = false) => {
     state: () => ({
       inventory: [],
       totalInventory: 0,
-      itemCard: null,
+      itemCard: {
+        item: null,
+        opening_balance: { quantity: 0, value: 0 },
+        closing_balance: { quantity: 0, value: 0 },
+        movements: []
+      },
       valuationReport: null,
       lowStockItems: [],
       isLoading: false,
+      isLoadingItemCard: false,
       // Stock module is always enabled
       stockEnabled: true,
       // Warehouses for filter dropdowns (fetched from warehouse API)
@@ -56,10 +62,15 @@ export const useStockStore = (useWindow = false) => {
 
     actions: {
       /**
-       * Reset item card to null
+       * Reset item card to default structure
        */
       resetItemCard() {
-        this.itemCard = null
+        this.itemCard = {
+          item: null,
+          opening_balance: { quantity: 0, value: 0 },
+          closing_balance: { quantity: 0, value: 0 },
+          movements: []
+        }
       },
 
       /**
@@ -99,19 +110,26 @@ export const useStockStore = (useWindow = false) => {
        * @param {object} params - Optional params { warehouse_id, from_date, to_date }
        */
       async fetchItemCard(itemId, params = {}) {
-        this.isLoading = true
+        this.isLoadingItemCard = true
 
         try {
           const response = await axios.get(`/stock/item-card/${itemId}`, { params })
 
-          this.itemCard = response.data.data
+          this.itemCard = response.data.data || {
+            item: null,
+            opening_balance: { quantity: 0, value: 0 },
+            closing_balance: { quantity: 0, value: 0 },
+            movements: []
+          }
 
           return response
         } catch (err) {
           handleError(err)
+          // Reset to default structure on error
+          this.resetItemCard()
           throw err
         } finally {
-          this.isLoading = false
+          this.isLoadingItemCard = false
         }
       },
 
