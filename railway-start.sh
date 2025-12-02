@@ -468,17 +468,13 @@ echo "=== Feature Flags ==="
 echo "FACTURINO_STOCK_V1_ENABLED: ${FACTURINO_STOCK_V1_ENABLED:-NOT SET}"
 php artisan tinker --execute="echo 'Stock feature from config: ' . (config('features.stock.enabled') ? 'ENABLED' : 'DISABLED');" 2>/dev/null || echo "Could not check stock feature"
 
-# Always run frontend build to ensure latest code and translations
-echo "Building frontend assets..."
-npm run build || echo "Frontend build failed"
-
-# Verify build completed
+# Verify frontend build exists (built during Nixpacks build phase)
 if [ -d "public/build/assets" ]; then
     ASSET_COUNT=$(ls -1 public/build/assets | wc -l)
-    echo "Build completed successfully with $ASSET_COUNT files"
-    ls -lh public/build/assets | head -10
+    echo "Frontend assets found: $ASSET_COUNT files"
 else
-    echo "ERROR: Build assets directory does not exist after build!"
+    echo "WARNING: Frontend assets directory does not exist!"
+    echo "Frontend should have been built during Nixpacks build phase."
 fi
 
 # Enable detailed Laravel logging
