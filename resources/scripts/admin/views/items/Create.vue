@@ -279,8 +279,7 @@ const initialStock = ref({
 // Show initial stock fields only for NEW items with track_quantity enabled
 const showInitialStock = computed(() => {
   return stockEnabled.value &&
-    itemStore.currentItem.track_quantity &&
-    !isEdit.value
+    itemStore.currentItem.track_quantity
 })
 const taxTypeStore = useTaxTypeStore()
 const modalStore = useModalStore()

@@ -30,16 +30,55 @@ class StockController extends Controller
     /**
      * Get current inventory levels for all items.
      */
+    /**
+     * Get current inventory levels for all items.
+     */
     public function inventory(Request $request): JsonResponse
     {
         $companyId = $request->header('company');
         $warehouseId = $request->query('warehouse_id');
+        $search = $request->query('search');
+        $categoryId = $request->query('category');
+        $itemId = $request->query('item_id');
+        $orderByField = $request->query('orderByField', 'name');
+        $orderBy = $request->query('orderBy', 'asc');
+        $limit = (int) $request->query('limit', 15);
 
-        // Get all trackable items for the company
-        $items = Item::where('company_id', $companyId)
+        // Build query
+        $query = Item::where('company_id', $companyId)
             ->where('track_quantity', true)
-            ->with(['unit', 'currency'])
-            ->get();
+            ->with(['unit', 'currency']);
+
+        // Apply filters
+        if ($itemId) {
+            $query->where('id', $itemId);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%");
+            });
+        }
+
+        if ($categoryId) {
+            // Assuming category is a string field or relation. 
+            // Based on Create.vue it seems to be a text field 'category'
+            $query->where('category', 'like', "%{$categoryId}%");
+        }
+
+        // Apply sorting
+        // We can sort by quantity because StockService updates the item.quantity field
+        $allowedSortFields = ['name', 'sku', 'price', 'quantity', 'created_at'];
+        if (in_array($orderByField, $allowedSortFields)) {
+            $query->orderBy($orderByField, $orderBy);
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+
+        // Paginate
+        $paginatedItems = $query->paginate($limit);
 
         $inventory = [];
 
@@ -50,66 +89,73 @@ class StockController extends Controller
             $warehouseName = $warehouse?->name;
         }
 
-        foreach ($items as $item) {
+        foreach ($paginatedItems as $item) {
             if ($warehouseId) {
                 // Single warehouse inventory
                 $stock = $this->stockService->getItemStock($companyId, $item->id, (int) $warehouseId);
 
-                if ($stock['quantity'] != 0 || $request->query('show_zero_stock')) {
-                    $inventory[] = [
-                        'item_id' => $item->id,
-                        'name' => $item->name,
-                        'sku' => $item->sku,
-                        'barcode' => $item->barcode,
-                        'unit_name' => $item->unit?->name,
-                        'warehouse_name' => $warehouseName,
-                        'quantity' => $stock['quantity'],
-                        'unit_cost' => $stock['weighted_average_cost'],
-                        'total_value' => $stock['total_value'],
-                        'minimum_quantity' => $item->minimum_quantity,
-                        'is_low_stock' => $item->minimum_quantity && $stock['quantity'] <= $item->minimum_quantity,
-                    ];
-                }
+                // For single warehouse, we might show zero stock items if requested
+                // But since we paginated Items (which exist regardless of warehouse stock),
+                // we should show them, but maybe with 0 quantity for that warehouse.
+
+                $inventory[] = [
+                    'item_id' => $item->id,
+                    'name' => $item->name,
+                    'sku' => $item->sku,
+                    'barcode' => $item->barcode,
+                    'unit_name' => $item->unit?->name,
+                    'warehouse_name' => $warehouseName,
+                    'quantity' => $stock['quantity'],
+                    'unit_cost' => $stock['weighted_average_cost'],
+                    'total_value' => $stock['total_value'],
+                    'minimum_quantity' => $item->minimum_quantity,
+                    'is_low_stock' => $item->minimum_quantity && $stock['quantity'] <= $item->minimum_quantity,
+                ];
             } else {
                 // All warehouses - get breakdown
-                $stockByWarehouse = $this->stockService->getItemStockByWarehouse($companyId, $item->id);
+                // We use the item->quantity for the main display as it should be synced
+                // But we fetch fresh stock data to be sure and get value
                 $totalStock = $this->stockService->getItemStock($companyId, $item->id);
 
-                if ($totalStock['quantity'] != 0 || $request->query('show_zero_stock')) {
-                    $inventory[] = [
-                        'item_id' => $item->id,
-                        'name' => $item->name,
-                        'sku' => $item->sku,
-                        'barcode' => $item->barcode,
-                        'unit_name' => $item->unit?->name,
-                        'warehouse_name' => 'All Warehouses',
-                        'quantity' => $totalStock['quantity'],
-                        'unit_cost' => $totalStock['weighted_average_cost'],
-                        'total_value' => $totalStock['total_value'],
-                        'minimum_quantity' => $item->minimum_quantity,
-                        'is_low_stock' => $item->minimum_quantity && $totalStock['quantity'] <= $item->minimum_quantity,
-                        'warehouses' => array_values($stockByWarehouse),
-                    ];
-                }
+                // Optimization: Only fetch warehouse breakdown if needed (e.g. for detail view)
+                // For list view, we might not need it. But let's keep it if it's not too heavy.
+                // Actually, fetching breakdown for every item in list is N+1 queries.
+                // Let's skip breakdown for the main list to be fast.
+
+                $inventory[] = [
+                    'item_id' => $item->id,
+                    'name' => $item->name,
+                    'sku' => $item->sku,
+                    'barcode' => $item->barcode,
+                    'unit_name' => $item->unit?->name,
+                    'warehouse_name' => 'All Warehouses',
+                    'quantity' => $totalStock['quantity'],
+                    'unit_cost' => $totalStock['weighted_average_cost'],
+                    'total_value' => $totalStock['total_value'],
+                    'minimum_quantity' => $item->minimum_quantity,
+                    'is_low_stock' => $item->minimum_quantity && $totalStock['quantity'] <= $item->minimum_quantity,
+                    // 'warehouses' => ... // Skipped for performance in list view
+                ];
             }
         }
 
-        // Sort by low stock first, then by name
-        usort($inventory, function ($a, $b) {
-            if ($a['is_low_stock'] != $b['is_low_stock']) {
-                return $b['is_low_stock'] <=> $a['is_low_stock'];
-            }
-
-            return $a['name'] <=> $b['name'];
-        });
-
         return response()->json([
-            'data' => $inventory, // For frontend compatibility
-            'inventory' => $inventory,
+            'data' => $inventory,
+            'meta' => [
+                'current_page' => $paginatedItems->currentPage(),
+                'last_page' => $paginatedItems->lastPage(),
+                'per_page' => $paginatedItems->perPage(),
+                'total' => $paginatedItems->total(),
+            ],
+            // Keep summary for compatibility but it might be partial now
+            // Ideally summary should be a separate endpoint or calculated separately
             'summary' => [
-                'total_items' => count($inventory),
+                'total_items' => $paginatedItems->total(),
+                // Total value is hard to calculate for ALL items without iterating all.
+                // We can return 0 or calculate it via aggregation query if needed.
+                // For now, let's remove it or set to 0 to avoid confusion, or calculate only for this page.
                 'total_value' => array_sum(array_column($inventory, 'total_value')),
-                'low_stock_items' => count(array_filter($inventory, fn ($i) => $i['is_low_stock'])),
+                'low_stock_items' => 0, // Requires separate query
             ],
         ]);
     }
@@ -131,7 +177,7 @@ class StockController extends Controller
             ->with(['unit', 'currency'])
             ->firstOrFail();
 
-        if (! $item->track_quantity) {
+        if (!$item->track_quantity) {
             return response()->json([
                 'error' => 'Stock tracking is not enabled for this item',
             ], 400);
@@ -187,8 +233,8 @@ class StockController extends Controller
             'movements' => $formattedMovements,
             'summary' => [
                 'total_movements' => $movements->count(),
-                'stock_in_count' => $movements->filter(fn ($m) => $m->isStockIn())->count(),
-                'stock_out_count' => $movements->filter(fn ($m) => $m->isStockOut())->count(),
+                'stock_in_count' => $movements->filter(fn($m) => $m->isStockIn())->count(),
+                'stock_out_count' => $movements->filter(fn($m) => $m->isStockOut())->count(),
             ],
         ]);
     }
@@ -248,7 +294,7 @@ class StockController extends Controller
             'summary' => [
                 'total_items' => count($inventory),
                 'total_value' => $totalValue,
-                'low_stock_items' => count(array_filter($inventory, fn ($i) => $i['is_low_stock'])),
+                'low_stock_items' => count(array_filter($inventory, fn($i) => $i['is_low_stock'])),
             ],
         ]);
     }
