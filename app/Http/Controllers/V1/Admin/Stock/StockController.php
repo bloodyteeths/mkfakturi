@@ -43,6 +43,13 @@ class StockController extends Controller
 
         $inventory = [];
 
+        // Get warehouse name if filtering by warehouse
+        $warehouseName = null;
+        if ($warehouseId) {
+            $warehouse = Warehouse::find($warehouseId);
+            $warehouseName = $warehouse?->name;
+        }
+
         foreach ($items as $item) {
             if ($warehouseId) {
                 // Single warehouse inventory
@@ -51,12 +58,13 @@ class StockController extends Controller
                 if ($stock['quantity'] != 0 || $request->query('show_zero_stock')) {
                     $inventory[] = [
                         'item_id' => $item->id,
-                        'item_name' => $item->name,
-                        'item_sku' => $item->sku,
-                        'item_barcode' => $item->barcode,
+                        'name' => $item->name,
+                        'sku' => $item->sku,
+                        'barcode' => $item->barcode,
                         'unit_name' => $item->unit?->name,
+                        'warehouse_name' => $warehouseName,
                         'quantity' => $stock['quantity'],
-                        'weighted_average_cost' => $stock['weighted_average_cost'],
+                        'unit_cost' => $stock['weighted_average_cost'],
                         'total_value' => $stock['total_value'],
                         'minimum_quantity' => $item->minimum_quantity,
                         'is_low_stock' => $item->minimum_quantity && $stock['quantity'] <= $item->minimum_quantity,
@@ -70,12 +78,13 @@ class StockController extends Controller
                 if ($totalStock['quantity'] != 0 || $request->query('show_zero_stock')) {
                     $inventory[] = [
                         'item_id' => $item->id,
-                        'item_name' => $item->name,
-                        'item_sku' => $item->sku,
-                        'item_barcode' => $item->barcode,
+                        'name' => $item->name,
+                        'sku' => $item->sku,
+                        'barcode' => $item->barcode,
                         'unit_name' => $item->unit?->name,
+                        'warehouse_name' => 'All Warehouses',
                         'quantity' => $totalStock['quantity'],
-                        'weighted_average_cost' => $totalStock['weighted_average_cost'],
+                        'unit_cost' => $totalStock['weighted_average_cost'],
                         'total_value' => $totalStock['total_value'],
                         'minimum_quantity' => $item->minimum_quantity,
                         'is_low_stock' => $item->minimum_quantity && $totalStock['quantity'] <= $item->minimum_quantity,
@@ -91,10 +100,11 @@ class StockController extends Controller
                 return $b['is_low_stock'] <=> $a['is_low_stock'];
             }
 
-            return $a['item_name'] <=> $b['item_name'];
+            return $a['name'] <=> $b['name'];
         });
 
         return response()->json([
+            'data' => $inventory, // For frontend compatibility
             'inventory' => $inventory,
             'summary' => [
                 'total_items' => count($inventory),
