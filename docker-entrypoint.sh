@@ -89,6 +89,11 @@ php artisan cache:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
+# Show feature flags status (for debugging)
+echo "=== Feature Flags ==="
+echo "FACTURINO_STOCK_V1_ENABLED env: ${FACTURINO_STOCK_V1_ENABLED:-NOT SET}"
+php artisan tinker --execute="echo 'Stock feature from config: ' . (config('features.stock.enabled') ? 'ENABLED' : 'DISABLED') . PHP_EOL;" 2>/dev/null || echo "Could not check stock feature"
+
 # Run migrations (Railway)
 if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Running migrations..."
