@@ -17,10 +17,11 @@ RUN apt-get update \
         tesseract-ocr-srp \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# Copy from invoice2data-service subdirectory (Railway builds from repo root)
+COPY invoice2data-service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY invoice2data-service/ .
 
 EXPOSE 8000
 

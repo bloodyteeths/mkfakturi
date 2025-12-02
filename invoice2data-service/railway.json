@@ -2,7 +2,8 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "Dockerfile"
+    "dockerfilePath": "invoice2data-service/Dockerfile",
+    "watchPatterns": ["invoice2data-service/**"]
   },
   "deploy": {
     "startCommand": "uvicorn main:app --host 0.0.0.0 --port 8000",
