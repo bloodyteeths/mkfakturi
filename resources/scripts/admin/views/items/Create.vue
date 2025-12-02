@@ -141,6 +141,26 @@
             />
           </BaseInputGroup>
 
+          <!-- Stock Tracking Toggle (only shows when stock module is enabled) -->
+          <BaseInputGroup
+            v-if="stockEnabled"
+            :label="$t('items.track_quantity')"
+            :content-loading="isFetchingInitialData"
+          >
+            <div class="flex items-center space-x-3">
+              <BaseSwitch
+                v-model="itemStore.currentItem.track_quantity"
+                :content-loading="isFetchingInitialData"
+              />
+              <span class="text-sm text-gray-500">
+                {{ itemStore.currentItem.track_quantity ? $t('items.track_quantity_enabled') : $t('items.track_quantity_disabled') }}
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.track_quantity_hint') }}
+            </p>
+          </BaseInputGroup>
+
           <div>
             <BaseButton
               :content-loading="isFetchingInitialData"
@@ -181,11 +201,19 @@ import { useItemStore } from '@/scripts/admin/stores/item'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useModalStore } from '@/scripts/stores/modal'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 import ItemUnitModal from '@/scripts/admin/components/modal-components/ItemUnitModal.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 
 const itemStore = useItemStore()
+const globalStore = useGlobalStore()
+
+// Stock module integration - check if enabled
+const stockEnabled = computed(() => {
+  const featureFlags = globalStore.featureFlags || {}
+  return featureFlags?.stock?.enabled || featureFlags?.stock || false
+})
 const taxTypeStore = useTaxTypeStore()
 const modalStore = useModalStore()
 const companyStore = useCompanyStore()
@@ -385,3 +413,4 @@ async function submitItem() {
   }
 }
 </script>
+// CLAUDE-CHECKPOINT: Added track_quantity toggle for stock module

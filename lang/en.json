@@ -628,7 +628,11 @@
     "barcode_not_found": "Item not found with barcode: {barcode}",
     "barcode_added": "Item added from barcode scan",
     "category": "Category",
-    "enter_category": "Enter category..."
+    "enter_category": "Enter category...",
+    "track_quantity": "Track Inventory",
+    "track_quantity_enabled": "Stock tracking enabled",
+    "track_quantity_disabled": "Stock tracking disabled",
+    "track_quantity_hint": "Enable to track stock levels for this item in warehouses"
   },
   "estimates": {
     "title": "Estimates",

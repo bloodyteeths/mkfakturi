@@ -658,7 +658,11 @@
     "barcode_not_found": "Не е пронајден артикл со баркод: {barcode}",
     "barcode_added": "Артиклот е додаден од скенирање на баркод",
     "category": "Категорија",
-    "enter_category": "Внесете категорија..."
+    "enter_category": "Внесете категорија...",
+    "track_quantity": "Следи залиха",
+    "track_quantity_enabled": "Следењето на залиха е вклучено",
+    "track_quantity_disabled": "Следењето на залиха е исклучено",
+    "track_quantity_hint": "Вклучете за следење на залихи за овој артикл во магацини"
   },
   "estimates": {
     "title": "Estimates",
