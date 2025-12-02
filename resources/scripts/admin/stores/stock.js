@@ -22,8 +22,8 @@ export const useStockStore = (useWindow = false) => {
       valuationReport: null,
       lowStockItems: [],
       isLoading: false,
-      // Stock module enabled flag
-      stockEnabled: false,
+      // Stock module is always enabled
+      stockEnabled: true,
       // Warehouses for filter dropdowns (fetched from warehouse API)
       warehouses: [],
       isLoadingWarehouses: false,
