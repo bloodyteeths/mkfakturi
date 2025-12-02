@@ -252,7 +252,7 @@ const partnerForm = reactive({
   registration_number: '',
   bank_account: '',
   bank_name: '',
-  commission_rate: 10,
+  commission_rate: 20,
   is_active: true,
   kyc_status: 'pending',
   notes: '',
