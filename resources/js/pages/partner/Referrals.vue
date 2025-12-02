@@ -152,6 +152,91 @@
         </div>
       </div>
 
+      <!-- Partner Referral Section -->
+      <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow p-6 mb-8 border border-purple-200">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-purple-900">Покани партнер</h3>
+            <p class="text-sm text-purple-700">Заработувајте 20% од приходите на партнерите кои ги поканувате</p>
+          </div>
+          <div class="bg-purple-100 rounded-full p-3">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- How it works -->
+        <div class="bg-white/50 rounded-lg p-4 mb-4">
+          <h4 class="text-sm font-medium text-purple-800 mb-2">Како функционира?</h4>
+          <ul class="text-sm text-purple-700 space-y-1">
+            <li>1. Поканете друг сметководител/партнер</li>
+            <li>2. Тој се регистрира и донесува компании</li>
+            <li>3. Вие добивате 20% од секоја претплата на неговите клиенти</li>
+            <li>4. Партнерот исто добива 20% - двајцата заработувате!</li>
+          </ul>
+        </div>
+
+        <!-- Partner Referral Link -->
+        <div v-if="partnerReferralLink" class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-purple-800 mb-2">Линк за покана на партнер</label>
+            <div class="flex gap-2">
+              <input
+                :value="partnerReferralLink"
+                readonly
+                class="flex-1 px-4 py-2 bg-white border border-purple-300 rounded-lg font-mono text-sm"
+              />
+              <button
+                @click="copyToClipboard(partnerReferralLink)"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              >
+                <svg v-if="!copiedPartner" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                <svg v-else class="w-5 h-5 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Partner QR Code -->
+          <div class="flex items-center gap-4">
+            <div class="bg-white p-3 border border-purple-200 rounded-lg">
+              <canvas ref="partnerQrCanvas" width="128" height="128" style="width: 128px; height: 128px; display: block;"></canvas>
+            </div>
+            <div>
+              <button
+                @click="downloadPartnerQRCode"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm"
+              >
+                Преземи QR
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Partner Link Button -->
+        <div v-else>
+          <button
+            @click="generatePartnerLink"
+            :disabled="generatingPartner"
+            class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition font-medium"
+          >
+            {{ generatingPartner ? 'Се генерира...' : 'Генерирај линк за партнер' }}
+          </button>
+        </div>
+
+        <!-- Invited Partners Stats -->
+        <div v-if="invitedPartnersCount > 0" class="mt-4 pt-4 border-t border-purple-200">
+          <div class="flex justify-between text-sm">
+            <span class="text-purple-700">Поканети партнери:</span>
+            <span class="font-semibold text-purple-900">{{ invitedPartnersCount }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Conversion Funnel -->
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-6">Инка на конверзија</h3>
@@ -203,13 +288,18 @@ export default {
       activeLink: null,
       generating: false,
       copied: false,
+      copiedPartner: false,
       loading: true,
       error: null,
       statistics: {
         totalClicks: 0,
         signups: 0,
         activeSubscriptions: 0
-      }
+      },
+      // Partner referral data
+      partnerReferralLink: null,
+      generatingPartner: false,
+      invitedPartnersCount: 0
     }
   },
 
@@ -232,6 +322,7 @@ export default {
 
   mounted() {
     this.fetchReferralData()
+    this.fetchPartnerReferralData()
   },
 
   methods: {
@@ -339,6 +430,66 @@ export default {
     shareViaWhatsApp() {
       const text = encodeURIComponent(`Погледни ја Facturino! Регистрирај се тука: ${this.activeLink.url}`)
       window.open(`https://wa.me/?text=${text}`, '_blank')
+    },
+
+    // Partner referral methods
+    async generatePartnerLink() {
+      this.generatingPartner = true
+      try {
+        const response = await axios.post('/admin/invitations/partner-invite-partner')
+        console.log('Partner referral link response:', response.data)
+        this.partnerReferralLink = response.data.link
+        this.$nextTick(() => {
+          this.generatePartnerQRCode()
+        })
+      } catch (err) {
+        console.error('Failed to generate partner referral link:', err)
+        this.error = 'Не можеше да се генерира линк за партнер.'
+      } finally {
+        this.generatingPartner = false
+      }
+    },
+
+    async generatePartnerQRCode() {
+      if (!this.$refs.partnerQrCanvas || !this.partnerReferralLink) return
+
+      try {
+        await QRCode.toCanvas(this.$refs.partnerQrCanvas, this.partnerReferralLink, {
+          width: 128,
+          margin: 2,
+          color: {
+            dark: '#7C3AED',
+            light: '#FFFFFF'
+          }
+        })
+      } catch (err) {
+        console.error('Failed to generate partner QR code:', err)
+      }
+    },
+
+    downloadPartnerQRCode() {
+      if (!this.$refs.partnerQrCanvas) return
+
+      const link = document.createElement('a')
+      link.download = 'partner-referral-qr.png'
+      link.href = this.$refs.partnerQrCanvas.toDataURL()
+      link.click()
+    },
+
+    async fetchPartnerReferralData() {
+      try {
+        // Try to get existing partner referral link
+        const response = await axios.post('/admin/invitations/partner-invite-partner')
+        if (response.data.link) {
+          this.partnerReferralLink = response.data.link
+          this.$nextTick(() => {
+            this.generatePartnerQRCode()
+          })
+        }
+      } catch (err) {
+        // It's okay if this fails - link doesn't exist yet
+        console.log('No existing partner referral link')
+      }
     }
   }
 }

@@ -241,6 +241,20 @@ export default [
   },
 
   {
+    path: '/partner/signup',
+    component: SignupLayout,
+    meta: { requiresAuth: false, isPublic: true },
+    children: [
+      {
+        path: '',
+        name: 'partner-signup',
+        component: () => import('@/scripts/public/views/partner-signup/PartnerSignup.vue'),
+        meta: { requiresAuth: false, isPublic: true },
+      },
+    ],
+  },
+
+  {
     path: '/',
     component: LayoutLogin,
     meta: { requiresAuth: false, redirectIfAuthenticated: true },

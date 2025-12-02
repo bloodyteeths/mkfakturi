@@ -1239,4 +1239,11 @@ Route::prefix('v1/public/signup')->middleware(['throttle:public'])->group(functi
     Route::get('/plans', [\Modules\Mk\Public\Controllers\SignupController::class, 'getPlans']);
     Route::post('/register', [\Modules\Mk\Public\Controllers\SignupController::class, 'register'])->middleware('throttle:strict');
 });
+
+// Public Partner Signup Routes (No Auth Required)
+// ----------------------------------
+Route::prefix('v1/public/partner-signup')->middleware(['throttle:public'])->group(function () {
+    Route::post('/validate-referral', [\Modules\Mk\Public\Controllers\PartnerSignupController::class, 'validateReferral']);
+    Route::post('/register', [\Modules\Mk\Public\Controllers\PartnerSignupController::class, 'register'])->middleware('throttle:strict');
+});
 // CLAUDE-CHECKPOINT: Public signup endpoints with referral tracking

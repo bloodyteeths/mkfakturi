@@ -205,6 +205,11 @@ Route::get('/signup', function () {
     return view('app');
 })->name('signup');
 
+// Partner signup page (partner-to-partner referral)
+Route::get('/partner/signup', function () {
+    return view('app');
+})->name('partner.signup');
+
 // Move other http requests to the Vue App
 // -------------------------------------------------
 

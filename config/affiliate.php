@@ -12,19 +12,22 @@ return [
     */
 
     // Direct partner commission rate (standard accountant)
+    // Partner who brings companies always gets 20%
     'direct_rate' => env('AFFILIATE_DIRECT_RATE', 0.20), // 20%
 
     // Direct partner commission rate for Partner Plus members
     'direct_rate_plus' => env('AFFILIATE_DIRECT_RATE_PLUS', 0.22), // 22%
 
     // Upline commission rate (for the partner who referred the direct partner)
-    'upline_rate' => env('AFFILIATE_UPLINE_RATE', 0.05), // 5%
+    // Upline partner also gets 20% of what their downline earns
+    'upline_rate' => env('AFFILIATE_UPLINE_RATE', 0.20), // 20% of subscription
 
     // Sales rep commission rate (for Facturino employee/agency who brought the accountant)
     'sales_rep_rate' => env('AFFILIATE_SALES_REP_RATE', 0.05), // 5%
 
-    // When multi-level is enabled, split is: direct 15%, upline 5%
-    'direct_rate_multi_level' => env('AFFILIATE_DIRECT_RATE_ML', 0.15), // 15% (when upline exists)
+    // When multi-level is enabled, both direct and upline get 20%
+    // Example: €100 subscription -> Direct partner: €20, Upline partner: €20
+    'direct_rate_multi_level' => env('AFFILIATE_DIRECT_RATE_ML', 0.20), // 20% (direct keeps full rate)
 
     /*
     |--------------------------------------------------------------------------

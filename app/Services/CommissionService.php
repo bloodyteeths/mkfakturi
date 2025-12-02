@@ -15,6 +15,7 @@ class CommissionService
 {
     /**
      * Calculate multi-level commission (AC-18)
+     * Both direct and upline partners get 20% each
      */
     public function calculateMultiLevel(Company $company, float $amount): array
     {
@@ -22,12 +23,15 @@ class CommissionService
         $directPartner = $this->getDirectPartner($company);
 
         if ($directPartner) {
+            // Direct partner always gets 20% (or 22% for Plus)
             $directRate = $directPartner->isPartnerPlus() ? 0.22 : 0.20;
             $commissions[] = ['partner_id' => $directPartner->id, 'level' => 'direct', 'amount' => $amount * $directRate];
 
             $upline = $this->getUplinePartner($directPartner);
             if ($upline) {
-                $commissions[] = ['partner_id' => $upline->id, 'level' => 'upline', 'amount' => $amount * 0.05];
+                // Upline also gets 20% (not reduced from direct)
+                $uplineRate = config('affiliate.upline_rate', 0.20);
+                $commissions[] = ['partner_id' => $upline->id, 'level' => 'upline', 'amount' => $amount * $uplineRate];
             }
         }
 
@@ -144,12 +148,14 @@ class CommissionService
                 }
 
                 if ($uplinePartner) {
-                    $uplineRate = config('affiliate.upline_rate', 0.05);
+                    // Upline gets 20% of subscription (same as direct partner)
+                    $uplineRate = config('affiliate.upline_rate', 0.20);
                     $uplineCommission = $subscriptionAmount * $uplineRate;
                     $uplinePartnerId = $uplinePartner->id;
 
-                    // Adjust direct commission for multi-level split
-                    $directRate = config('affiliate.direct_rate_multi_level', 0.15);
+                    // Direct partner STILL gets full 20% (no reduction for having upline)
+                    // Both partners get 20% each = 40% total commission cost
+                    $directRate = config('affiliate.direct_rate_multi_level', 0.20);
                     $directCommission = $subscriptionAmount * $directRate;
 
                     // Create upline event
