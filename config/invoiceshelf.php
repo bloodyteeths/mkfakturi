@@ -519,6 +519,17 @@ return [
             'feature_flag' => 'stock',
         ],
         [
+            'title' => 'navigation.stock_adjustments',
+            'group' => 2,
+            'link' => '/admin/stock/adjustments',
+            'icon' => 'AdjustmentsHorizontalIcon',
+            'name' => 'Stock Adjustments',
+            'owner_only' => false,
+            'ability' => 'view-item',
+            'model' => Item::class,
+            'feature_flag' => 'stock',
+        ],
+        [
             'title' => 'navigation.bills_inbox',
             'group' => 2,
             'link' => '/admin/bills/inbox',
