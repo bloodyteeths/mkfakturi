@@ -247,7 +247,7 @@ import axios from 'axios'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useItemStore } from '@/scripts/admin/stores/item'
-import { useNotificationStore } from '@/scripts/admin/stores/notification'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import { debouncedWatch } from '@vueuse/core'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
