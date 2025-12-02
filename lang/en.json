@@ -541,6 +541,8 @@
     "total_items": "Total Items",
     "low_stock": "Low Stock",
     "low_stock_alerts": "Low Stock Alerts",
+    "no_low_stock": "All Stock Levels Good",
+    "no_low_stock_message": "All items have sufficient stock levels. No low stock alerts at this time.",
     "default_warehouse_used": "Default warehouse will be used",
     "adjustments": "Stock Adjustments",
     "adjustments_list": "Stock Adjustments List",
