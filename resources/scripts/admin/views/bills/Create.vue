@@ -118,6 +118,20 @@
                   :close-on-select="false"
                 />
               </BaseInputGroup>
+
+              <!-- Warehouse selector for stock module -->
+              <BaseInputGroup v-if="stockEnabled" :label="$t('stock.warehouse')">
+                <BaseMultiselect
+                  v-model="line.warehouse_id"
+                  :content-loading="stockStore.isLoadingWarehouses"
+                  value-prop="id"
+                  track-by="name"
+                  label="name"
+                  :options="stockStore.warehouses"
+                  :placeholder="$t('stock.select_warehouse')"
+                  :can-deselect="true"
+                />
+              </BaseInputGroup>
             </div>
 
             <BaseButton
@@ -194,6 +208,7 @@ import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
+import { useStockStore } from '@/scripts/admin/stores/stock'
 
 const route = useRoute()
 const router = useRouter()
@@ -201,6 +216,13 @@ const billsStore = useBillsStore()
 const globalStore = useGlobalStore()
 const companyStore = useCompanyStore()
 const taxTypeStore = useTaxTypeStore()
+const stockStore = useStockStore()
+
+// Stock module integration
+const stockEnabled = computed(() => {
+  const featureFlags = globalStore.featureFlags || {}
+  return featureFlags?.stock?.enabled || featureFlags?.stock || false
+})
 
 const currencies = ref([])
 
@@ -224,6 +246,7 @@ const items = reactive([
     quantity: 1,
     price: 0,
     taxes: [],
+    warehouse_id: null, // Stock module: warehouse for stock IN
   },
 ])
 
@@ -302,6 +325,7 @@ function addItemRow() {
     quantity: 1,
     price: 0,
     taxes: [],
+    warehouse_id: null, // Stock module: warehouse for stock IN
   })
 }
 
@@ -366,6 +390,7 @@ function buildPayload() {
         tax: Math.round(lineTax),
         total: Math.round(lineTotal),
         taxes: itemTaxes,
+        warehouse_id: line.warehouse_id || null, // Stock module: warehouse for stock IN
       }
     }),
   }
@@ -384,7 +409,7 @@ function handleSubmit() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   globalStore.fetchCurrencies().then((res) => {
     currencies.value = res.data.data || globalStore.currencies
 
@@ -395,6 +420,15 @@ onMounted(() => {
 
   // Fetch tax types
   taxTypeStore.fetchTaxTypes()
+
+  // Stock module: fetch warehouses if enabled
+  if (stockEnabled.value) {
+    try {
+      await stockStore.fetchWarehouses()
+    } catch (err) {
+      console.warn('Could not load warehouses for stock selector')
+    }
+  }
 
   if (isEdit.value) {
     billsStore.fetchBill(route.params.id).then((response) => {
@@ -408,3 +442,4 @@ onMounted(() => {
   }
 })
 </script>
+// CLAUDE-CHECKPOINT

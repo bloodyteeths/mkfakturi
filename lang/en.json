@@ -537,7 +537,8 @@
     "select_warehouse": "Select warehouse...",
     "total_items": "Total Items",
     "low_stock": "Low Stock",
-    "low_stock_alerts": "Low Stock Alerts"
+    "low_stock_alerts": "Low Stock Alerts",
+    "default_warehouse_used": "Default warehouse will be used"
   },
   "warehouses": {
     "title": "Warehouses",

@@ -567,7 +567,8 @@
     "select_warehouse": "Изберете магацин...",
     "total_items": "Вкупно артикли",
     "low_stock": "Ниска залиха",
-    "low_stock_alerts": "Известувања за ниска залиха"
+    "low_stock_alerts": "Известувања за ниска залиха",
+    "default_warehouse_used": "Ќе се користи стандарден магацин"
   },
   "warehouses": {
     "title": "Магацини",

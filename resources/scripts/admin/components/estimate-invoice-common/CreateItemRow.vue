@@ -168,6 +168,30 @@
               />
             </td>
           </tr>
+          <!-- Warehouse selector for stock-tracked items -->
+          <tr v-if="showWarehouseSelector">
+            <td class="px-5 py-2 text-left align-top" />
+            <td colspan="4" class="px-5 py-2 text-left align-top">
+              <div class="flex items-center space-x-2">
+                <BaseIcon name="BuildingStorefrontIcon" class="w-4 h-4 text-gray-500" />
+                <span class="text-sm text-gray-600">{{ $t('stock.warehouse') }}:</span>
+                <BaseMultiselect
+                  v-model="warehouseId"
+                  :content-loading="stockStore.isLoadingWarehouses"
+                  value-prop="id"
+                  track-by="name"
+                  label="name"
+                  :options="stockStore.warehouses"
+                  :placeholder="$t('stock.select_warehouse')"
+                  :can-deselect="true"
+                  class="w-48"
+                />
+                <span v-if="!warehouseId" class="text-xs text-gray-400 italic">
+                  {{ $t('stock.default_warehouse_used') }}
+                </span>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </td>
@@ -175,7 +199,7 @@
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
+import { computed, ref, inject, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Guid from 'guid'
@@ -193,6 +217,8 @@ import {
 import useVuelidate from '@vuelidate/core'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useItemStore } from '@/scripts/admin/stores/item'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useStockStore } from '@/scripts/admin/stores/stock'
 import DragIcon from '@/scripts/components/icons/DragIcon.vue'
 
 const props = defineProps({
@@ -238,9 +264,44 @@ const emit = defineEmits(['update', 'remove', 'itemValidate'])
 
 const companyStore = useCompanyStore()
 const itemStore = useItemStore()
+const globalStore = useGlobalStore()
+const stockStore = useStockStore()
 
 let route = useRoute()
 const { t } = useI18n()
+
+// Stock module integration - check if enabled via feature flags
+const stockEnabled = computed(() => {
+  const featureFlags = globalStore.featureFlags || {}
+  return featureFlags?.stock?.enabled || featureFlags?.stock || false
+})
+
+// Show warehouse selector when stock is enabled and item tracks quantity
+const showWarehouseSelector = computed(() => {
+  if (!stockEnabled.value) return false
+  // Check if item has track_quantity flag (from item master data)
+  const item = props.itemData
+  return item?.item_id && item?.track_quantity === true
+})
+
+// Computed property for warehouse_id with getter/setter
+const warehouseId = computed({
+  get: () => props.itemData.warehouse_id || null,
+  set: (newValue) => {
+    updateItemAttribute('warehouse_id', newValue)
+  },
+})
+
+// Load warehouses when stock is enabled
+onMounted(async () => {
+  if (stockEnabled.value && stockStore.warehouses.length === 0) {
+    try {
+      await stockStore.fetchWarehouses()
+    } catch (err) {
+      console.warn('Could not load warehouses for stock selector')
+    }
+  }
+})
 
 const quantity = computed({
   get: () => {
@@ -411,6 +472,8 @@ function onSelectItem(itm) {
     state[props.storeProp].items[props.index].description = itm.description
     state[props.storeProp].items[props.index].sku = itm.sku
     state[props.storeProp].items[props.index].barcode = itm.barcode
+    // Stock module: copy track_quantity flag from item master
+    state[props.storeProp].items[props.index].track_quantity = itm.track_quantity || false
 
     if (itm.unit) {
       state[props.storeProp].items[props.index].unit_name = itm.unit.name
@@ -434,7 +497,7 @@ function onSelectItem(itm) {
   itemStore.fetchItems()
   syncItemToStore()
 }
-// CLAUDE-CHECKPOINT: Added SKU and barcode transfer when selecting item
+// CLAUDE-CHECKPOINT: Added SKU, barcode and track_quantity transfer when selecting item
 
 function selectFixed() {
   if (props.itemData.discount_type === 'fixed') {
@@ -490,3 +553,4 @@ function updateItemAttribute(attribute, value) {
   syncItemToStore()
 }
 </script>
+// CLAUDE-CHECKPOINT: Added warehouse selector for stock module integration
