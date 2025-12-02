@@ -91,11 +91,28 @@
 </template>
 
 <script setup>
+import { onMounted, onUnmounted } from 'vue'
 import { useUserStore } from '@/scripts/partner/stores/user'
 import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
 const router = useRouter()
+
+// Override body overflow on mount (fix scroll issue)
+// The app.blade.php has overflow-hidden class on body that blocks scrolling
+onMounted(() => {
+  document.body.classList.remove('overflow-hidden', 'h-full')
+  document.body.classList.add('overflow-auto', 'h-auto')
+  document.documentElement.style.overflow = 'auto'
+  document.documentElement.style.height = 'auto'
+})
+
+onUnmounted(() => {
+  document.body.classList.remove('overflow-auto', 'h-auto')
+  document.body.classList.add('overflow-hidden', 'h-full')
+  document.documentElement.style.overflow = ''
+  document.documentElement.style.height = ''
+})
 
 const handleLogout = async () => {
   await userStore.logout()

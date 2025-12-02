@@ -11,6 +11,150 @@
         </p>
       </div>
 
+      <!-- Client Detail Modal -->
+      <div v-if="showDetailModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <!-- Backdrop -->
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeDetailModal"></div>
+
+          <!-- Modal panel -->
+          <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <!-- Loading state -->
+            <div v-if="loadingDetail" class="p-8 flex justify-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+
+            <!-- Client details -->
+            <div v-else-if="selectedClient">
+              <div class="bg-white px-6 pt-5 pb-4">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-6">
+                  <div class="flex items-center">
+                    <div class="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span class="text-xl font-bold text-blue-600">
+                        {{ selectedClient.name.charAt(0).toUpperCase() }}
+                      </span>
+                    </div>
+                    <div class="ml-4">
+                      <h3 class="text-xl font-bold text-gray-900">{{ selectedClient.name }}</h3>
+                      <p class="text-sm text-gray-500">{{ selectedClient.email }}</p>
+                    </div>
+                  </div>
+                  <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Subscription Info -->
+                <div class="mb-6">
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">Претплата</h4>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <p class="text-xs text-gray-500">План</p>
+                        <p class="text-sm font-medium text-gray-900 capitalize">{{ selectedClient.subscription?.plan || 'Free' }}</p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500">Статус</p>
+                        <span :class="getStatusClass(selectedClient.subscription?.status)">
+                          {{ getStatusLabel(selectedClient.subscription?.status) }}
+                        </span>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500">Период</p>
+                        <p class="text-sm font-medium text-gray-900 capitalize">{{ selectedClient.subscription?.billing_period || 'N/A' }}</p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500">Месечна цена</p>
+                        <p class="text-sm font-medium text-gray-900">{{ formatCurrency(selectedClient.subscription?.price || 0) }}</p>
+                      </div>
+                      <div v-if="selectedClient.subscription?.trial_ends_at">
+                        <p class="text-xs text-gray-500">Пробен период до</p>
+                        <p class="text-sm font-medium text-gray-900">{{ formatDate(selectedClient.subscription.trial_ends_at) }}</p>
+                      </div>
+                      <div v-if="selectedClient.subscription?.current_period_end">
+                        <p class="text-xs text-gray-500">Тековен период до</p>
+                        <p class="text-sm font-medium text-gray-900">{{ formatDate(selectedClient.subscription.current_period_end) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Commission Info -->
+                <div class="mb-6">
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">Провизија</h4>
+                  <div class="bg-green-50 rounded-lg p-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <p class="text-xs text-gray-500">Стапка</p>
+                        <p class="text-sm font-medium text-green-700">
+                          {{ selectedClient.commission?.rate }}%
+                          <span v-if="selectedClient.commission?.is_override" class="text-xs text-green-600">(прилагодена)</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500">Месечна провизија</p>
+                        <p class="text-sm font-medium text-green-700">{{ formatCurrency(selectedClient.commission?.monthly_amount || 0) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Client Info -->
+                <div class="mb-6">
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">Информации</h4>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <p class="text-xs text-gray-500">Регистриран</p>
+                        <p class="text-sm font-medium text-gray-900">{{ formatDate(selectedClient.signup_date) }}</p>
+                      </div>
+                      <div v-if="selectedClient.address">
+                        <p class="text-xs text-gray-500">Локација</p>
+                        <p class="text-sm font-medium text-gray-900">{{ selectedClient.address.city }}, {{ selectedClient.address.country }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Billing History -->
+                <div v-if="selectedClient.billing_history?.length">
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">Историја на плаќања</h4>
+                  <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                      <thead class="bg-gray-100">
+                        <tr>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Датум</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Износ</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200">
+                        <tr v-for="payment in selectedClient.billing_history" :key="payment.id">
+                          <td class="px-4 py-2 text-sm text-gray-900">{{ formatDate(payment.date) }}</td>
+                          <td class="px-4 py-2 text-sm text-gray-900">{{ formatCurrency(payment.amount) }}</td>
+                          <td class="px-4 py-2">
+                            <span :class="getPaymentStatusClass(payment.status)">{{ payment.status }}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 px-6 py-3 flex justify-end">
+                <button @click="closeDetailModal" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                  Затвори
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -216,6 +360,9 @@ const userStore = useUserStore()
 const clients = ref([])
 const isLoading = ref(true)
 const error = ref(null)
+const showDetailModal = ref(false)
+const loadingDetail = ref(false)
+const selectedClient = ref(null)
 
 // Computed
 const activeClients = computed(() => {
@@ -266,10 +413,61 @@ const loadClients = async () => {
   }
 }
 
-const viewClientDetails = (client) => {
-  // Navigate to client detail view or open modal
-  console.log('Viewing details for client:', client.name)
-  // TODO: Implement client detail navigation
+const viewClientDetails = async (client) => {
+  showDetailModal.value = true
+  loadingDetail.value = true
+  selectedClient.value = null
+
+  try {
+    const { data } = await window.axios.get(`/partner/clients/${client.id}`)
+    selectedClient.value = data.data
+  } catch (err) {
+    console.error('Error loading client details:', err)
+    showDetailModal.value = false
+  } finally {
+    loadingDetail.value = false
+  }
+}
+
+const closeDetailModal = () => {
+  showDetailModal.value = false
+  selectedClient.value = null
+}
+
+const getStatusClass = (status) => {
+  const classes = {
+    active: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800',
+    trialing: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800',
+    canceled: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800',
+    suspended: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800',
+  }
+  return classes[status] || 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800'
+}
+
+const getStatusLabel = (status) => {
+  const labels = {
+    active: 'Активна',
+    trialing: 'Пробен период',
+    canceled: 'Откажана',
+    suspended: 'Суспендирана',
+  }
+  return labels[status] || 'Неактивна'
+}
+
+const getPaymentStatusClass = (status) => {
+  const classes = {
+    paid: 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800',
+    pending: 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800',
+    failed: 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800',
+  }
+  return classes[status] || 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800'
+}
+
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('mk-MK', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(amount)
 }
 
 const formatDate = (dateString) => {
@@ -291,4 +489,6 @@ onMounted(() => {
   loadClients()
 })
 </script>
+
+// CLAUDE-CHECKPOINT
 
