@@ -33,16 +33,6 @@
     <!-- Stock Sub-Navigation Tabs -->
     <StockTabNavigation />
 
-    <!-- Stock Module Disabled Warning -->
-    <BaseCard v-if="!stockStore.stockEnabled" class="mb-6">
-      <div class="text-center py-8">
-        <BaseIcon name="ExclamationTriangleIcon" class="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.module_disabled') }}</h3>
-        <p class="text-gray-500 mt-2">{{ $t('stock.module_disabled_message') }}</p>
-      </div>
-    </BaseCard>
-
-    <template v-else>
       <!-- Tabs for Adjustments / Transfers -->
       <div class="mb-6">
         <nav class="flex space-x-4" aria-label="Tabs">
@@ -218,7 +208,6 @@
           </tbody>
         </table>
       </BaseCard>
-    </template>
 
     <!-- Adjustment Modal -->
     <BaseModal :show="showAdjustmentModal" @close="closeAdjustmentModal">
@@ -421,14 +410,12 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
-import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
 const { t } = useI18n()
 const stockStore = useStockStore()
 const itemStore = useItemStore()
-const globalStore = useGlobalStore()
 const dialogStore = useDialogStore()
 
 const activeTab = ref('adjustments')
@@ -650,14 +637,9 @@ async function reverseAdjustment(adjustment) {
 }
 
 onMounted(async () => {
-  // Check if stock is enabled
-  const bootstrap = globalStore.bootstrap
-  stockStore.setStockEnabled(bootstrap?.stock_enabled || false)
-
-  if (stockStore.stockEnabled) {
-    await stockStore.fetchWarehouses()
-    await Promise.all([loadAdjustments(), loadTransfers()])
-  }
+  // Stock module is always enabled - load data
+  await stockStore.fetchWarehouses()
+  await Promise.all([loadAdjustments(), loadTransfers()])
 })
 </script>
 // CLAUDE-CHECKPOINT

@@ -10,16 +10,6 @@
     <!-- Stock Sub-Navigation Tabs -->
     <StockTabNavigation />
 
-    <!-- Stock Module Disabled Warning -->
-    <BaseCard v-if="!stockStore.stockEnabled" class="mb-6">
-      <div class="text-center py-8">
-        <BaseIcon name="ExclamationTriangleIcon" class="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.module_disabled') }}</h3>
-        <p class="text-gray-500 mt-2">{{ $t('stock.module_disabled_message') }}</p>
-      </div>
-    </BaseCard>
-
-    <template v-else>
       <!-- Filters Card -->
       <BaseCard class="mb-6">
         <template #header>
@@ -273,7 +263,6 @@
           <p class="text-gray-500 mt-2">{{ $t('stock.select_item_prompt_message') }}</p>
         </div>
       </BaseCard>
-    </template>
   </BasePage>
 </template>
 
@@ -282,12 +271,10 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
-import { useGlobalStore } from '@/scripts/admin/stores/global'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
 const stockStore = useStockStore()
 const itemStore = useItemStore()
-const globalStore = useGlobalStore()
 const route = useRoute()
 
 const isLoadingItems = ref(false)
@@ -398,31 +385,25 @@ function exportToCsv() {
 }
 
 onMounted(async () => {
-  // Check if stock is enabled via bootstrap data
-  const bootstrap = globalStore.bootstrap
-  stockStore.setStockEnabled(bootstrap?.stock_enabled || false)
+  // Stock module is always enabled - load warehouses
+  await stockStore.fetchWarehouses()
 
-  // Load warehouses
-  if (stockStore.stockEnabled) {
-    await stockStore.fetchWarehouses()
-
-    // Check for item_id in query params (from Items > View Stock action)
-    const itemId = route.query.item_id
-    if (itemId) {
-      // Load the item and fetch its stock card
-      isLoadingItems.value = true
-      try {
-        const items = await searchItems('')
-        const item = items.find(i => i.id === parseInt(itemId))
-        if (item) {
-          filters.item = item
-          await loadItemCard()
-        }
-      } catch (error) {
-        console.error('Failed to load item from query param:', error)
-      } finally {
-        isLoadingItems.value = false
+  // Check for item_id in query params (from Items > View Stock action)
+  const itemId = route.query.item_id
+  if (itemId) {
+    // Load the item and fetch its stock card
+    isLoadingItems.value = true
+    try {
+      const items = await searchItems('')
+      const item = items.find(i => i.id === parseInt(itemId))
+      if (item) {
+        filters.item = item
+        await loadItemCard()
       }
+    } catch (error) {
+      console.error('Failed to load item from query param:', error)
+    } finally {
+      isLoadingItems.value = false
     }
   }
 })

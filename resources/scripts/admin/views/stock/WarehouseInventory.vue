@@ -8,16 +8,6 @@
       </BaseBreadcrumb>
     </BasePageHeader>
 
-    <!-- Stock Module Disabled Warning -->
-    <BaseCard v-if="!stockStore.stockEnabled" class="mb-6">
-      <div class="text-center py-8">
-        <BaseIcon name="ExclamationTriangleIcon" class="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.module_disabled') }}</h3>
-        <p class="text-gray-500 mt-2">{{ $t('stock.module_disabled_message') }}</p>
-      </div>
-    </BaseCard>
-
-    <template v-else>
       <!-- Filters Card -->
       <BaseCard class="mb-6">
         <template #header>
@@ -219,17 +209,14 @@
           <p class="text-gray-500 mt-2">{{ $t('stock.select_warehouse_prompt_message') }}</p>
         </div>
       </BaseCard>
-    </template>
   </BasePage>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStockStore } from '@/scripts/admin/stores/stock'
-import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const stockStore = useStockStore()
-const globalStore = useGlobalStore()
 
 const filters = reactive({
   warehouse: null,
@@ -299,14 +286,8 @@ function exportToCsv() {
 }
 
 onMounted(async () => {
-  // Check if stock is enabled via bootstrap data
-  const bootstrap = globalStore.bootstrap
-  stockStore.setStockEnabled(bootstrap?.stock_enabled || false)
-
-  // Load warehouses
-  if (stockStore.stockEnabled) {
-    await stockStore.fetchWarehouses()
-  }
+  // Stock module is always enabled - load warehouses
+  await stockStore.fetchWarehouses()
 })
 </script>
 // CLAUDE-CHECKPOINT

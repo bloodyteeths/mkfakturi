@@ -208,14 +208,6 @@ export const useStockStore = (useWindow = false) => {
       },
 
       /**
-       * Set stock module enabled flag
-       * @param {boolean} enabled - Whether stock module is enabled
-       */
-      setStockEnabled(enabled) {
-        this.stockEnabled = Boolean(enabled)
-      },
-
-      /**
        * Fetch warehouses for filter dropdowns
        * Uses the warehouse API endpoint
        */

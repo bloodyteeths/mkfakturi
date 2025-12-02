@@ -23,16 +23,6 @@
     <!-- Stock Sub-Navigation Tabs -->
     <StockTabNavigation />
 
-    <!-- Stock Module Disabled Warning -->
-    <BaseCard v-if="!stockStore.stockEnabled" class="mb-6">
-      <div class="text-center py-8">
-        <BaseIcon name="ExclamationTriangleIcon" class="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.module_disabled') }}</h3>
-        <p class="text-gray-500 mt-2">{{ $t('stock.module_disabled_message') }}</p>
-      </div>
-    </BaseCard>
-
-    <template v-else>
       <!-- Filters -->
       <BaseFilterWrapper :show="showFilters" class="mt-5" @clear="clearFilter">
         <BaseInputGroup :label="$t('stock.warehouse')" class="text-left">
@@ -194,7 +184,6 @@
           </template>
         </BaseTable>
       </div>
-    </template>
   </BasePage>
 </template>
 
@@ -203,7 +192,6 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
-import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { debouncedWatch } from '@vueuse/core'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
@@ -211,7 +199,6 @@ const { t } = useI18n()
 
 const stockStore = useStockStore()
 const companyStore = useCompanyStore()
-const globalStore = useGlobalStore()
 
 const showFilters = ref(false)
 const table = ref(null)
@@ -269,16 +256,9 @@ debouncedWatch(
 )
 
 onMounted(async () => {
-  // Check if stock is enabled via feature flags from bootstrap
-  const featureFlags = globalStore.featureFlags || {}
-  const stockEnabled = featureFlags?.stock?.enabled || featureFlags?.stock || false
-  stockStore.setStockEnabled(stockEnabled)
-
-  // Load warehouses and initial inventory data
-  if (stockStore.stockEnabled) {
-    await stockStore.fetchWarehouses()
-    await refreshTable()
-  }
+  // Stock module is always enabled - load data
+  await stockStore.fetchWarehouses()
+  await refreshTable()
 })
 
 function formatNumber(num) {
