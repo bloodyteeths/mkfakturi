@@ -22,14 +22,14 @@
             <BaseMultiselect
               v-model="filters.item"
               :content-loading="isLoadingItems"
-              value-prop="id"
-              track-by="name"
-              label="name"
               :filterResults="false"
               resolve-on-load
               :delay="500"
               searchable
               :options="searchItems"
+              value-prop="id"
+              track-by="name"
+              label="name"
               object
               :placeholder="$t('stock.select_item')"
             >

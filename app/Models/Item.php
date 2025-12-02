@@ -43,6 +43,7 @@ class Item extends Model
     {
         return [
             'price' => 'integer',
+            'track_quantity' => 'boolean',
         ];
     }
 
@@ -81,10 +82,10 @@ class Item extends Model
     public function scopeWhereSearch($query, $search)
     {
         return $query->where(function ($query) use ($search) {
-            $query->where('items.name', 'LIKE', '%'.$search.'%')
-                ->orWhere('items.sku', 'LIKE', '%'.$search.'%')
-                ->orWhere('items.barcode', 'LIKE', '%'.$search.'%')
-                ->orWhere('items.description', 'LIKE', '%'.$search.'%');
+            $query->where('items.name', 'LIKE', '%' . $search . '%')
+                ->orWhere('items.sku', 'LIKE', '%' . $search . '%')
+                ->orWhere('items.barcode', 'LIKE', '%' . $search . '%')
+                ->orWhere('items.description', 'LIKE', '%' . $search . '%');
         });
     }
 
@@ -219,9 +220,11 @@ class Item extends Model
             $initialStock = $request->input('initial_stock');
 
             // Validate required fields
-            if (! empty($initialStock['warehouse_id']) &&
-                ! empty($initialStock['quantity']) &&
-                $initialStock['quantity'] > 0) {
+            if (
+                !empty($initialStock['warehouse_id']) &&
+                !empty($initialStock['quantity']) &&
+                $initialStock['quantity'] > 0
+            ) {
 
                 // Use StockService to record initial stock
                 $stockService = app(\App\Services\StockService::class);
