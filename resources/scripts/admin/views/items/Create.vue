@@ -266,11 +266,8 @@ const itemStore = useItemStore()
 const globalStore = useGlobalStore()
 const warehouseStore = useWarehouseStore()
 
-// Stock module integration - check if enabled
-const stockEnabled = computed(() => {
-  const featureFlags = globalStore.featureFlags || {}
-  return featureFlags?.stock?.enabled || featureFlags?.stock || false
-})
+// Stock module is always enabled (no feature flag)
+const stockEnabled = computed(() => true)
 
 // Initial stock entry fields (shown when track_quantity is enabled on new item)
 const initialStock = ref({
