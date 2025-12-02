@@ -278,8 +278,8 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted, reactive, ref, watch, inject } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onUnmounted, onMounted, reactive, ref, watch, inject } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -329,6 +329,7 @@ const status = ref([
 const isRequestOngoing = ref(true)
 const activeTab = ref('general.draft')
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 let filters = reactive({
@@ -337,6 +338,14 @@ let filters = reactive({
   from_date: '',
   to_date: '',
   invoice_number: '',
+  project_id: '',
+})
+
+// Initialize filters from query params
+onMounted(() => {
+  if (route.query.project_id) {
+    filters.project_id = route.query.project_id
+  }
 })
 
 const invoiceListData = ref([])
@@ -429,6 +438,7 @@ async function fetchData({ page, filter, sort }) {
     from_date: filters.from_date,
     to_date: filters.to_date,
     invoice_number: filters.invoice_number,
+    project_id: filters.project_id,
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,

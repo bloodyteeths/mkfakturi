@@ -202,8 +202,8 @@
 <script setup>
 import { debouncedWatch } from '@vueuse/core'
 
-import { ref, reactive, computed, onUnmounted } from 'vue'
-
+import { ref, reactive, computed, onUnmounted, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { usePaymentStore } from '@/scripts/admin/stores/payment'
@@ -215,6 +215,7 @@ import PaymentDropdown from '@/scripts/admin/components/dropdowns/PaymentIndexDr
 import SendPaymentModal from '@/scripts/admin/components/modal-components/SendPaymentModal.vue'
 
 const { t } = useI18n()
+const route = useRoute()
 let showFilters = ref(false)
 let isFetchingInitialData = ref(true)
 let tableComponent = ref(null)
@@ -223,6 +224,14 @@ const filters = reactive({
   customer: '',
   payment_mode: '',
   payment_number: '',
+  project_id: '',
+})
+
+// Initialize filters from query params
+onMounted(() => {
+  if (route.query.project_id) {
+    filters.project_id = route.query.project_id
+  }
 })
 
 const paymentStore = usePaymentStore()
@@ -312,6 +321,7 @@ async function fetchData({ page, filter, sort }) {
     payment_method_id:
       filters.payment_mode !== null ? filters.payment_mode : '',
     payment_number: filters.payment_number,
+    project_id: filters.project_id,
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,

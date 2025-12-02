@@ -216,6 +216,7 @@
 
 <script setup>
 import { ref, onMounted, computed, reactive, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useExpenseStore } from '@/scripts/admin/stores/expense'
 import { useCategoryStore } from '@/scripts/admin/stores/category'
@@ -234,6 +235,7 @@ const expenseStore = useExpenseStore()
 const dialogStore = useDialogStore()
 const categoryStore = useCategoryStore()
 const userStore = useUserStore()
+const route = useRoute()
 
 let isFetchingInitialData = ref(true)
 let showFilters = ref(null)
@@ -243,6 +245,14 @@ const filters = reactive({
   from_date: '',
   to_date: '',
   customer_id: '',
+  project_id: '',
+})
+
+// Initialize filters from query params
+onMounted(() => {
+  if (route.query.project_id) {
+    filters.project_id = route.query.project_id
+  }
 })
 
 const { t } = useI18n()
