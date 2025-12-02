@@ -1,9 +1,9 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('warehouses.title')">
+    <BasePageHeader :title="$t('stock.title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="$t('warehouses.title')" to="#" active />
+        <BaseBreadcrumbItem :title="$t('stock.title')" to="#" active />
       </BaseBreadcrumb>
 
       <template #actions>
@@ -36,6 +36,9 @@
         </BaseButton>
       </template>
     </BasePageHeader>
+
+    <!-- Stock Sub-Navigation Tabs -->
+    <StockTabNavigation />
 
     <BaseFilterWrapper v-show="showFilters" @clear="clearFilter">
       <BaseInputGroup :label="$t('warehouses.name')">
@@ -137,6 +140,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 import { useWarehouseStore } from '@/scripts/admin/stores/warehouse'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import WarehouseIndexDropdown from '@/scripts/admin/components/dropdowns/WarehouseIndexDropdown.vue'
+import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
 const { t } = useI18n()
 const warehouseStore = useWarehouseStore()

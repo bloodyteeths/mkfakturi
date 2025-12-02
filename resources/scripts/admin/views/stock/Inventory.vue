@@ -1,10 +1,9 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('stock.inventory')">
+    <BasePageHeader :title="$t('stock.title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="$t('stock.title')" to="#" />
-        <BaseBreadcrumbItem :title="$t('stock.inventory')" to="#" active />
+        <BaseBreadcrumbItem :title="$t('stock.title')" to="#" active />
       </BaseBreadcrumb>
 
       <template #actions>
@@ -20,6 +19,9 @@
         </BaseButton>
       </template>
     </BasePageHeader>
+
+    <!-- Stock Sub-Navigation Tabs -->
+    <StockTabNavigation />
 
     <!-- Stock Module Disabled Warning -->
     <BaseCard v-if="!stockStore.stockEnabled" class="mb-6">
@@ -203,6 +205,7 @@ import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { debouncedWatch } from '@vueuse/core'
+import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
 const { t } = useI18n()
 

@@ -1,12 +1,14 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('stock.item_card')">
+    <BasePageHeader :title="$t('stock.title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="$t('stock.title')" to="#" />
-        <BaseBreadcrumbItem :title="$t('stock.item_card')" to="#" active />
+        <BaseBreadcrumbItem :title="$t('stock.title')" to="#" active />
       </BaseBreadcrumb>
     </BasePageHeader>
+
+    <!-- Stock Sub-Navigation Tabs -->
+    <StockTabNavigation />
 
     <!-- Stock Module Disabled Warning -->
     <BaseCard v-if="!stockStore.stockEnabled" class="mb-6">
@@ -281,6 +283,7 @@ import { useRoute } from 'vue-router'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
 const stockStore = useStockStore()
 const itemStore = useItemStore()
