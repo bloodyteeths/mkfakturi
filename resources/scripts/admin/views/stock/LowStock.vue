@@ -315,7 +315,7 @@ async function fetchData({ page, filter, sort }) {
   isRequestOngoing.value = true
 
   try {
-    const response = await stockStore.fetchLowStockItems(data)
+    const response = await stockStore.fetchLowStock(data)
 
     lowStockStore.totalLowStockItems = response.data.meta?.total || 0
 

@@ -388,8 +388,8 @@ onMounted(async () => {
   // Stock module is always enabled - load warehouses
   await stockStore.fetchWarehouses()
 
-  // Check for item_id in query params (from Items > View Stock action)
-  const itemId = route.query.item_id
+  // Check for item_id in query params OR route params
+  const itemId = route.query.item_id || route.params.id
   if (itemId) {
     // Load the item and fetch its stock card
     isLoadingItems.value = true
@@ -401,7 +401,7 @@ onMounted(async () => {
         await loadItemCard()
       }
     } catch (error) {
-      console.error('Failed to load item from query param:', error)
+      console.error('Failed to load item from query/route param:', error)
     } finally {
       isLoadingItems.value = false
     }
