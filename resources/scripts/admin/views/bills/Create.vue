@@ -100,6 +100,7 @@
                   :filter-results="false"
                   :delay="300"
                   searchable
+                  object
                   :options="searchItems"
                   :placeholder="$t('items.select_a_unit')"
                   @update:model-value="(val) => selectItem(index, val)"
@@ -288,13 +289,18 @@ const items = reactive([
 
 // Search items for autocomplete
 async function searchItems(query) {
-  if (!query || query.length < 1) {
-    // Return all items if no query
-    const response = await itemStore.fetchItems({ limit: 50 })
-    return response?.data?.data || itemStore.items || []
+  try {
+    if (!query || query.length < 1) {
+      // Return all items if no query
+      await itemStore.fetchItems({ limit: 50 })
+      return itemStore.items || []
+    }
+    await itemStore.fetchItems({ search: query, limit: 20 })
+    return itemStore.items || []
+  } catch (error) {
+    console.error('Error searching items:', error)
+    return itemStore.items || []
   }
-  const response = await itemStore.fetchItems({ search: query, limit: 20 })
-  return response?.data?.data || itemStore.items || []
 }
 
 // Select item from dropdown
