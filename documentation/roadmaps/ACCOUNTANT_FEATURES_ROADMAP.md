@@ -144,6 +144,29 @@ All changes are additive, backward-compatible, and respect existing codebase str
 | S2-UI-10 | Add WarehouseRequest validation | Backend | `app/Http/Requests/WarehouseRequest.php` | ✅ Complete | |
 | S2-UI-11 | Add feature flag to WarehouseController | Backend | `WarehouseController.php` | ✅ Complete | |
 
+### 2.5 Stock Operations & Validation (2025-12-02)
+
+| Task ID | Title | Agent | Files | Status | Notes |
+|---------|-------|-------|-------|--------|-------|
+| S2-OP-01 | Create Stock Adjustments UI | Frontend | `views/stock/Adjustments.vue` | ✅ Complete | Tab-based UI for adjustments & transfers |
+| S2-OP-02 | Add adjustment store methods | Frontend | `stores/stock.js` | ✅ Complete | fetchAdjustments, createAdjustment, deleteAdjustment |
+| S2-OP-03 | Add transfer store methods | Frontend | `stores/stock.js` | ✅ Complete | fetchTransfers, createTransfer |
+| S2-OP-04 | Add adjustments route | Frontend | `admin-router.js` | ✅ Complete | /admin/stock/adjustments |
+| S2-OP-05 | Add negative stock prevention | Backend | `InvoicesRequest.php` | ✅ Complete | Stock validation before invoice creation |
+| S2-OP-06 | Add allow_negative_stock setting | Both | `PreferencesSetting.vue`, translations | ✅ Complete | Company setting to override validation |
+| S2-OP-07 | Create retroactive stock command | Backend | `CreateRetroactiveStockMovements.php` | ✅ Complete | `php artisan stock:create-retroactive` |
+| S2-OP-08 | Add initial stock entry to items | Both | `Items Create.vue`, `Item.php` | ✅ Complete | Initial stock when creating items |
+| S2-OP-09 | Add View Stock link in items | Frontend | `ItemIndexDropdown.vue`, `ItemCard.vue` | ✅ Complete | Navigate from item list to stock card |
+| S2-OP-10 | Add stock translations | Both | `lang/en.json`, `lang/mk.json` | ✅ Complete | EN + MK translations for all new features |
+
+**Acceptance Criteria:**
+- [x] User can manually adjust stock (add/remove) with reason tracking
+- [x] User can transfer stock between warehouses
+- [x] System prevents selling more than available stock (configurable)
+- [x] User can set initial stock when creating new items
+- [x] User can navigate from item list directly to stock card
+- [x] Existing bills can be migrated to create stock movements (artisan command)
+
 ---
 
 ## PHASE 3 – Closings (Future Sprint)
@@ -242,6 +265,7 @@ For every phase completion:
 | Phase 2.2 - Valuation | Complete | Prior | 2025-12-01 | WAC valuation implemented |
 | Phase 2.3 - Stock Reports | Complete | Prior | 2025-12-01 | Backend + Frontend complete |
 | Phase 2.4 - Stock UI | Complete | 2025-12-01 | 2025-12-01 | All Vue pages + stores created |
+| Phase 2.5 - Stock Operations | Complete | 2025-12-02 | 2025-12-02 | Adjustments, transfers, validation, retroactive |
 | Phase 3.1 - Daily Closing | Pending | | | |
 | Phase 3.2 - Period Locking | Pending | | | |
 | Phase 4.1 - Chart of Accounts | Pending | | | |
@@ -392,4 +416,104 @@ For every phase completion:
 
 ---
 
-_Last updated: 2025-12-01_
+## Completed Work Summary (2025-12-02) - Phase 2.5 Stock Operations
+
+### Phase 2.5 - Stock Operations & Validation
+
+**Files Created:**
+- `resources/scripts/admin/views/stock/Adjustments.vue` - Stock adjustments and transfers UI page (~450 lines)
+- `app/Console/Commands/CreateRetroactiveStockMovements.php` - Artisan command for migrating existing bills/invoices
+
+**Files Modified:**
+
+*Backend:*
+- `app/Http/Requests/InvoicesRequest.php` - Added stock validation to prevent overselling
+- `app/Models/Item.php` - Added initial stock entry support in createItem()
+
+*Frontend:*
+- `resources/scripts/admin/stores/stock.js` - Added adjustment/transfer API methods:
+  - `fetchAdjustments(params)` - List stock adjustments
+  - `createAdjustment(data)` - Create manual stock adjustment
+  - `deleteAdjustment(id)` - Reverse a stock adjustment
+  - `fetchTransfers(params)` - List warehouse transfers
+  - `createTransfer(data)` - Create warehouse transfer
+  - `createInitialStock(data)` - Record initial stock
+  - `getItemStock(itemId, warehouseId)` - Get item stock for validation
+- `resources/scripts/admin/admin-router.js` - Added stock adjustments route
+- `resources/scripts/admin/views/items/Create.vue` - Added initial stock fields for new items
+- `resources/scripts/admin/components/dropdowns/ItemIndexDropdown.vue` - Added "View Stock" action
+- `resources/scripts/admin/views/stock/ItemCard.vue` - Added query param support for item_id
+- `resources/scripts/admin/views/settings/PreferencesSetting.vue` - Added allow_negative_stock toggle
+
+*Translations (lang/en.json & lang/mk.json):*
+- Added ~40 new translation keys for stock operations
+
+**Key Features Implemented:**
+
+1. **Stock Adjustments UI** (`/admin/stock/adjustments`)
+   - Tab-based interface for Adjustments and Transfers
+   - Create adjustments with quantity (+/-), reason, notes
+   - View current stock when selecting item/warehouse
+   - Reverse adjustments functionality
+   - Create transfers between warehouses
+   - Paginated lists with date filtering
+
+2. **Negative Stock Prevention**
+   - Validates stock availability before invoice creation
+   - Per-company setting: `allow_negative_stock` (YES/NO)
+   - Shows specific error messages per item with available vs requested quantities
+   - Handles invoice updates correctly (accounts for existing item quantities)
+
+3. **Initial Stock Entry**
+   - When creating new items with track_quantity enabled
+   - Fields: warehouse, quantity, unit_cost
+   - Creates initial stock movement automatically
+
+4. **View Stock from Items**
+   - "View Stock" action in item list dropdown
+   - Navigates directly to Item Card page with item pre-selected
+
+5. **Retroactive Stock Movements Command**
+   - `php artisan stock:create-retroactive`
+   - Options: `--company=ID`, `--type=bills|invoices`, `--dry-run`, `--force`
+   - Creates stock movements for bills/invoices created before stock module enabled
+   - Shows preview summary before processing
+   - Progress bars and detailed statistics
+
+**Testing Instructions:**
+
+1. **Enable Stock Module:**
+   ```bash
+   # Add to .env
+   FACTURINO_STOCK_V1_ENABLED=true
+   ```
+
+2. **Test Stock Adjustments:**
+   - Navigate to Stock > Adjustments
+   - Create a manual adjustment (positive or negative)
+   - Try to reverse an adjustment
+   - Create a warehouse transfer
+
+3. **Test Negative Stock Prevention:**
+   - Create an invoice with an item that tracks quantity
+   - Try to invoice more than available stock
+   - Should see validation error with available quantity
+   - Toggle "Allow Negative Stock" in Settings > Preferences to override
+
+4. **Test Initial Stock Entry:**
+   - Create a new item with "Track Inventory" enabled
+   - Fill in initial stock fields (warehouse, qty, cost)
+   - Check Item Card to verify stock was recorded
+
+5. **Test Retroactive Stock Movements:**
+   ```bash
+   # Dry run first
+   php artisan stock:create-retroactive --dry-run
+
+   # Execute for real
+   php artisan stock:create-retroactive --force
+   ```
+
+---
+
+_Last updated: 2025-12-02_

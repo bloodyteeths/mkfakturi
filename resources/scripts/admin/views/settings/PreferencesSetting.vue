@@ -196,6 +196,15 @@
           :title="$t('settings.preferences.discount_per_item')"
           :description="$t('settings.preferences.discount_setting_description')"
         />
+
+        <BaseDivider v-if="stockEnabled" class="mt-6 mb-2" />
+
+        <BaseSwitchSection
+          v-if="stockEnabled"
+          v-model="allowNegativeStockField"
+          :title="$t('settings.preferences.allow_negative_stock')"
+          :description="$t('settings.preferences.allow_negative_stock_description')"
+        />
       </ul>
     </BaseSettingCard>
   </form>
@@ -205,13 +214,18 @@
 import { ref, computed, watch, reactive } from 'vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useI18n } from 'vue-i18n'
 import { required, helpers } from '@vuelidate/validators'
 import useVuelidate from '@vuelidate/core'
 
 const companyStore = useCompanyStore()
 const globalStore = useGlobalStore()
+const stockStore = useStockStore()
 const { t, tm } = useI18n()
+
+// Check if stock module is enabled
+const stockEnabled = computed(() => stockStore.stockEnabled)
 
 let isSaving = ref(false)
 let isDataSaving = ref(false)
@@ -288,6 +302,28 @@ const discountPerItemField = computed({
     }
 
     settingsForm.discount_per_item = value
+
+    await companyStore.updateCompanySettings({
+      data,
+      message: 'general.setting_updated',
+    })
+  },
+})
+
+const allowNegativeStockField = computed({
+  get: () => {
+    return settingsForm.allow_negative_stock === 'YES'
+  },
+  set: async (newValue) => {
+    const value = newValue ? 'YES' : 'NO'
+
+    let data = {
+      settings: {
+        allow_negative_stock: value,
+      },
+    }
+
+    settingsForm.allow_negative_stock = value
 
     await companyStore.updateCompanySettings({
       data,

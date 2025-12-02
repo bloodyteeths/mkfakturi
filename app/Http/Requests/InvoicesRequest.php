@@ -5,6 +5,9 @@ namespace App\Http\Requests;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Item;
+use App\Models\Warehouse;
+use App\Services\StockService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -114,6 +117,103 @@ class InvoicesRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * Configure the validator instance.
+     * Adds stock availability validation for tracked items.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $this->validateStockAvailability($validator);
+        });
+    }
+
+    /**
+     * Validate stock availability for items with track_quantity enabled.
+     * Only validates if stock module is enabled and negative stock is not allowed.
+     */
+    protected function validateStockAvailability($validator): void
+    {
+        // Skip if stock module is not enabled
+        if (! StockService::isEnabled()) {
+            return;
+        }
+
+        // Check if company allows negative stock
+        $companyId = $this->header('company');
+        $allowNegative = CompanySetting::getSetting('allow_negative_stock', $companyId);
+        if ($allowNegative === 'YES') {
+            return;
+        }
+
+        $items = $this->input('items', []);
+        if (empty($items)) {
+            return;
+        }
+
+        $stockService = app(StockService::class);
+        $defaultWarehouse = Warehouse::getOrCreateDefault($companyId);
+        $insufficientItems = [];
+
+        foreach ($items as $index => $itemData) {
+            // Skip items without item_id (custom items)
+            if (empty($itemData['item_id'])) {
+                continue;
+            }
+
+            $item = Item::where('company_id', $companyId)
+                ->where('id', $itemData['item_id'])
+                ->first();
+
+            // Skip items that don't track quantity
+            if (! $item || ! $item->track_quantity) {
+                continue;
+            }
+
+            // Get warehouse from item data or use default
+            $warehouseId = $itemData['warehouse_id'] ?? $defaultWarehouse->id;
+            $requestedQty = (float) ($itemData['quantity'] ?? 0);
+
+            // Get current stock
+            $stock = $stockService->getItemStock($companyId, $item->id, $warehouseId);
+            $availableQty = $stock['quantity'];
+
+            // For updates, we need to account for the existing invoice item quantity
+            if ($this->isMethod('PUT')) {
+                $existingItem = $this->route('invoice')
+                    ?->items()
+                    ->where('item_id', $item->id)
+                    ->first();
+                if ($existingItem) {
+                    // Add back the existing quantity since it will be replaced
+                    $availableQty += (float) $existingItem->quantity;
+                }
+            }
+
+            // Check if there's enough stock
+            if ($availableQty < $requestedQty) {
+                $insufficientItems[] = [
+                    'index' => $index,
+                    'item_name' => $item->name,
+                    'requested' => $requestedQty,
+                    'available' => $availableQty,
+                ];
+            }
+        }
+
+        // Add validation errors for insufficient stock
+        foreach ($insufficientItems as $insufficient) {
+            $validator->errors()->add(
+                "items.{$insufficient['index']}.quantity",
+                __('stock.insufficient_stock_for_item', [
+                    'item' => $insufficient['item_name'],
+                    'available' => $insufficient['available'],
+                    'requested' => $insufficient['requested'],
+                ])
+            );
+        }
     }
 
     public function getInvoicePayload(): array

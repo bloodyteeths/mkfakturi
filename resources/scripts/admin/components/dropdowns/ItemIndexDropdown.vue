@@ -7,6 +7,20 @@
       <BaseIcon v-else name="EllipsisHorizontalIcon" class="h-5 text-gray-500" />
     </template>
 
+    <!-- View stock activity (only if stock tracking is enabled) -->
+    <router-link
+      v-if="row.track_quantity && stockEnabled"
+      :to="`/admin/stock/item-card?item_id=${row.id}`"
+    >
+      <BaseDropdownItem>
+        <BaseIcon
+          name="ChartBarIcon"
+          class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+        />
+        {{ $t('items.view_stock') }}
+      </BaseDropdownItem>
+    </router-link>
+
     <!-- edit item  -->
     <router-link
       v-if="userStore.hasAbilities(abilities.EDIT_ITEM)"
@@ -40,8 +54,9 @@ import { useDialogStore } from '@/scripts/stores/dialog'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useI18n } from 'vue-i18n'
 import { useItemStore } from '@/scripts/admin/stores/item'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useRoute, useRouter } from 'vue-router'
-import { inject } from 'vue'
+import { inject, computed } from 'vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -62,6 +77,7 @@ const props = defineProps({
 
 const dialogStore = useDialogStore()
 const notificationStore = useNotificationStore()
+const globalStore = useGlobalStore()
 const { t } = useI18n()
 const itemStore = useItemStore()
 const route = useRoute()
@@ -69,6 +85,12 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const $utils = inject('utils')
+
+// Check if stock module is enabled
+const stockEnabled = computed(() => {
+  const featureFlags = globalStore.featureFlags || {}
+  return featureFlags?.stock?.enabled || featureFlags?.stock || false
+})
 
 function removeItem(id) {
   dialogStore

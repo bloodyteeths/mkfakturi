@@ -161,6 +161,61 @@
             </p>
           </BaseInputGroup>
 
+          <!-- Initial Stock Entry (only for new items with track_quantity enabled) -->
+          <template v-if="showInitialStock">
+            <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ $t('items.initial_stock_title') }}
+              </h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ $t('items.initial_stock_hint') }}
+              </p>
+            </div>
+
+            <BaseInputGroup
+              :label="$t('items.warehouse')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMultiselect
+                v-model="initialStock.warehouse_id"
+                :content-loading="isFetchingInitialData"
+                label="name"
+                :options="warehouseStore.activeWarehouses"
+                value-prop="id"
+                :placeholder="$t('items.select_warehouse')"
+                searchable
+                track-by="name"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.initial_quantity')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="initialStock.quantity"
+                :content-loading="isFetchingInitialData"
+                type="number"
+                step="0.01"
+                min="0"
+                :placeholder="$t('items.initial_quantity_placeholder')"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.unit_cost')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMoney
+                v-model="initialStock.unit_cost"
+                :content-loading="isFetchingInitialData"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.unit_cost_hint') }}
+              </p>
+            </BaseInputGroup>
+          </template>
+
           <div>
             <BaseButton
               :content-loading="isFetchingInitialData"
@@ -185,7 +240,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -202,17 +257,33 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useWarehouseStore } from '@/scripts/admin/stores/warehouse'
 import ItemUnitModal from '@/scripts/admin/components/modal-components/ItemUnitModal.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 
 const itemStore = useItemStore()
 const globalStore = useGlobalStore()
+const warehouseStore = useWarehouseStore()
 
 // Stock module integration - check if enabled
 const stockEnabled = computed(() => {
   const featureFlags = globalStore.featureFlags || {}
   return featureFlags?.stock?.enabled || featureFlags?.stock || false
+})
+
+// Initial stock entry fields (shown when track_quantity is enabled on new item)
+const initialStock = ref({
+  warehouse_id: null,
+  quantity: null,
+  unit_cost: null,
+})
+
+// Show initial stock fields only for NEW items with track_quantity enabled
+const showInitialStock = computed(() => {
+  return stockEnabled.value &&
+    itemStore.currentItem.track_quantity &&
+    !isEdit.value
 })
 const taxTypeStore = useTaxTypeStore()
 const modalStore = useModalStore()
@@ -348,10 +419,20 @@ async function addItemUnit() {
 async function loadData() {
   isFetchingInitialData.value = true
 
-  await itemStore.fetchItemUnits({ limit: 'all' })
+  const loadPromises = [
+    itemStore.fetchItemUnits({ limit: 'all' }),
+  ]
+
   if (userStore.hasAbilities(abilities.VIEW_TAX_TYPE)) {
-    await taxTypeStore.fetchTaxTypes({ limit: 'all' })
+    loadPromises.push(taxTypeStore.fetchTaxTypes({ limit: 'all' }))
   }
+
+  // Load warehouses if stock module is enabled
+  if (stockEnabled.value) {
+    loadPromises.push(warehouseStore.fetchWarehouses({ limit: 'all' }))
+  }
+
+  await Promise.all(loadPromises)
 
   if (isEdit.value) {
     let id = route.params.id
@@ -359,6 +440,11 @@ async function loadData() {
     itemStore.currentItem.tax_per_item === 1
       ? (taxPerItem.value = 'YES')
       : (taxPerItem.value = 'NO')
+  } else {
+    // For new items, set default warehouse if available
+    if (warehouseStore.defaultWarehouse) {
+      initialStock.value.warehouse_id = warehouseStore.defaultWarehouse.id
+    }
   }
 
   isFetchingInitialData.value = false
@@ -391,6 +477,17 @@ async function submitItem() {
           collective_tax: 0,
         }
       })
+    }
+
+    // Include initial stock data for new items with track_quantity enabled
+    if (showInitialStock.value &&
+        initialStock.value.warehouse_id &&
+        initialStock.value.quantity > 0) {
+      data.initial_stock = {
+        warehouse_id: initialStock.value.warehouse_id,
+        quantity: initialStock.value.quantity,
+        unit_cost: initialStock.value.unit_cost || 0,
+      }
     }
 
     const action = isEdit.value ? itemStore.updateItem : itemStore.addItem

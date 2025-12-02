@@ -247,6 +247,170 @@ export const useStockStore = (useWindow = false) => {
       async fetchInventoryList(params = {}) {
         return this.fetchInventory(params)
       },
+
+      // ==========================================
+      // Stock Adjustments API
+      // ==========================================
+
+      /**
+       * Fetch stock adjustments list
+       * @param {object} params - Filter params { warehouse_id, item_id, from_date, to_date, limit }
+       */
+      async fetchAdjustments(params = {}) {
+        this.isLoading = true
+
+        try {
+          const response = await axios.get('/stock/adjustments', { params })
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoading = false
+        }
+      },
+
+      /**
+       * Create a stock adjustment
+       * @param {object} data - { warehouse_id, item_id, quantity, unit_cost, reason, notes }
+       */
+      async createAdjustment(data) {
+        const notificationStore = useNotificationStore()
+        this.isLoading = true
+
+        try {
+          const response = await axios.post('/stock/adjustments', data)
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: window.i18n.global.t('stock.adjustment_created'),
+          })
+
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoading = false
+        }
+      },
+
+      /**
+       * Delete/reverse a stock adjustment
+       * @param {number} id - Adjustment ID
+       */
+      async deleteAdjustment(id) {
+        const notificationStore = useNotificationStore()
+        this.isLoading = true
+
+        try {
+          const response = await axios.delete(`/stock/adjustments/${id}`)
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: window.i18n.global.t('stock.adjustment_reversed'),
+          })
+
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoading = false
+        }
+      },
+
+      // ==========================================
+      // Stock Transfers API
+      // ==========================================
+
+      /**
+       * Fetch stock transfers list
+       * @param {object} params - Filter params { limit }
+       */
+      async fetchTransfers(params = {}) {
+        this.isLoading = true
+
+        try {
+          const response = await axios.get('/stock/transfers', { params })
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoading = false
+        }
+      },
+
+      /**
+       * Create a stock transfer between warehouses
+       * @param {object} data - { from_warehouse_id, to_warehouse_id, item_id, quantity, notes }
+       */
+      async createTransfer(data) {
+        const notificationStore = useNotificationStore()
+        this.isLoading = true
+
+        try {
+          const response = await axios.post('/stock/transfers', data)
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: window.i18n.global.t('stock.transfer_created'),
+          })
+
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoading = false
+        }
+      },
+
+      // ==========================================
+      // Initial Stock API
+      // ==========================================
+
+      /**
+       * Record initial stock for an item
+       * @param {object} data - { warehouse_id, item_id, quantity, unit_cost, notes }
+       */
+      async createInitialStock(data) {
+        const notificationStore = useNotificationStore()
+        this.isLoading = true
+
+        try {
+          const response = await axios.post('/stock/initial-stock', data)
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: window.i18n.global.t('stock.initial_stock_created'),
+          })
+
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoading = false
+        }
+      },
+
+      /**
+       * Get available stock for an item (for UI validation)
+       * @param {number} itemId - Item ID
+       * @param {number} warehouseId - Optional warehouse ID
+       */
+      async getItemStock(itemId, warehouseId = null) {
+        try {
+          const params = warehouseId ? { warehouse_id: warehouseId } : {}
+          const response = await axios.get(`/stock/items/${itemId}/stock`, { params })
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        }
+      },
     },
   })()
 }

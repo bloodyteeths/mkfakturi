@@ -277,6 +277,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -284,6 +285,7 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 const stockStore = useStockStore()
 const itemStore = useItemStore()
 const globalStore = useGlobalStore()
+const route = useRoute()
 
 const isLoadingItems = ref(false)
 
@@ -400,6 +402,25 @@ onMounted(async () => {
   // Load warehouses
   if (stockStore.stockEnabled) {
     await stockStore.fetchWarehouses()
+
+    // Check for item_id in query params (from Items > View Stock action)
+    const itemId = route.query.item_id
+    if (itemId) {
+      // Load the item and fetch its stock card
+      isLoadingItems.value = true
+      try {
+        const items = await searchItems('')
+        const item = items.find(i => i.id === parseInt(itemId))
+        if (item) {
+          filters.item = item
+          await loadItemCard()
+        }
+      } catch (error) {
+        console.error('Failed to load item from query param:', error)
+      } finally {
+        isLoadingItems.value = false
+      }
+    }
   }
 })
 </script>

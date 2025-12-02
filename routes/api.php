@@ -904,6 +904,20 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/warehouse/{warehouse}/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'warehouseInventory']);
                 Route::get('/valuation-report', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'valuationReport']);
                 Route::get('/low-stock', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'lowStock']);
+
+                // Stock Operations (Adjustments, Transfers, Initial Stock)
+                Route::get('/adjustments', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'index']);
+                Route::post('/adjustments', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'store']);
+                Route::get('/adjustments/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'show']);
+                Route::delete('/adjustments/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'destroy']);
+
+                Route::get('/transfers', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'transfers']);
+                Route::post('/transfers', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'transfer']);
+
+                Route::post('/initial-stock', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'initialStock']);
+
+                // Item stock lookup (for UI validation)
+                Route::get('/items/{item}/stock', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'itemStock']);
             });
         });
 

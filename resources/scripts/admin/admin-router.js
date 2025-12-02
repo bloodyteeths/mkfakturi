@@ -115,6 +115,7 @@ const StockItemCard = () => import('@/scripts/admin/views/stock/ItemCard.vue')
 const StockWarehouseInventory = () => import('@/scripts/admin/views/stock/WarehouseInventory.vue')
 const StockInventoryValuation = () => import('@/scripts/admin/views/stock/InventoryValuation.vue')
 const StockLowStock = () => import('@/scripts/admin/views/stock/LowStock.vue')
+const StockAdjustments = () => import('@/scripts/admin/views/stock/Adjustments.vue')
 
 // Warehouses
 const WarehousesIndex = () => import('@/scripts/admin/views/stock/warehouses/Index.vue')
@@ -406,6 +407,12 @@ export default [
         name: 'stock.low-stock',
         meta: { ability: abilities.VIEW_ITEM },
         component: StockLowStock,
+      },
+      {
+        path: 'stock/adjustments',
+        name: 'stock.adjustments',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockAdjustments,
       },
 
       // Warehouses

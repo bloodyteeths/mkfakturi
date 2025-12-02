@@ -214,6 +214,46 @@ class Item extends Model
             }
         }
 
+        // Handle initial stock entry for items with track_quantity enabled
+        if ($item->track_quantity && $request->has('initial_stock')) {
+            $initialStock = $request->input('initial_stock');
+
+            // Validate required fields
+            if (! empty($initialStock['warehouse_id']) &&
+                ! empty($initialStock['quantity']) &&
+                $initialStock['quantity'] > 0) {
+
+                // Use StockService to record initial stock
+                $stockService = app(\App\Services\StockService::class);
+                if (\App\Services\StockService::isEnabled()) {
+                    try {
+                        $stockService->recordInitialStock(
+                            $data['company_id'],
+                            (int) $initialStock['warehouse_id'],
+                            $item->id,
+                            (float) $initialStock['quantity'],
+                            (int) (($initialStock['unit_cost'] ?? 0) * 100), // Convert to cents
+                            'Initial stock entry when creating item',
+                            Auth::id()
+                        );
+
+                        \Log::info('Item::createItem - Initial stock recorded', [
+                            'item_id' => $item->id,
+                            'warehouse_id' => $initialStock['warehouse_id'],
+                            'quantity' => $initialStock['quantity'],
+                            'unit_cost' => $initialStock['unit_cost'] ?? 0,
+                        ]);
+                    } catch (\Exception $e) {
+                        \Log::warning('Item::createItem - Failed to record initial stock', [
+                            'item_id' => $item->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        // Don't fail the item creation if initial stock fails
+                    }
+                }
+            }
+        }
+
         $item = self::with('taxes')->find($item->id);
 
         return $item;
