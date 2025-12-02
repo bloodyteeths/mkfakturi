@@ -80,12 +80,43 @@
               :key="index"
               class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end"
             >
-              <BaseInputGroup :label="$t('bills.item_name')">
-                <BaseInput v-model="line.name" />
-              </BaseInputGroup>
-
-              <BaseInputGroup :label="$t('bills.item_description')">
-                <BaseInput v-model="line.description" />
+              <BaseInputGroup :label="$t('bills.item_name')" class="col-span-2">
+                <!-- Show selected item or search field -->
+                <div v-if="line.item_id" class="relative flex items-center h-10 pl-2 bg-gray-200 border border-gray-200 rounded">
+                  {{ line.name }}
+                  <span
+                    class="absolute text-gray-400 cursor-pointer top-2 right-2"
+                    @click="clearItem(index)"
+                  >
+                    <BaseIcon name="XCircleIcon" />
+                  </span>
+                </div>
+                <BaseMultiselect
+                  v-else
+                  v-model="line.selectedItem"
+                  value-prop="id"
+                  track-by="name"
+                  label="name"
+                  :filter-results="false"
+                  :delay="300"
+                  searchable
+                  :options="searchItems"
+                  :placeholder="$t('items.select_a_unit')"
+                  @update:model-value="(val) => selectItem(index, val)"
+                >
+                  <template #option="{ option }">
+                    <div class="flex justify-between items-center w-full">
+                      <span>{{ option.name }}</span>
+                      <span v-if="option.sku" class="text-gray-500 text-xs ml-2">({{ option.sku }})</span>
+                    </div>
+                  </template>
+                </BaseMultiselect>
+                <!-- Description below item name -->
+                <BaseInput
+                  v-model="line.description"
+                  class="mt-1"
+                  :placeholder="$t('bills.item_description')"
+                />
               </BaseInputGroup>
 
               <BaseInputGroup :label="$t('bills.item_quantity')">
@@ -209,6 +240,7 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useStockStore } from '@/scripts/admin/stores/stock'
+import { useItemStore } from '@/scripts/admin/stores/item'
 
 const route = useRoute()
 const router = useRouter()
@@ -217,6 +249,7 @@ const globalStore = useGlobalStore()
 const companyStore = useCompanyStore()
 const taxTypeStore = useTaxTypeStore()
 const stockStore = useStockStore()
+const itemStore = useItemStore()
 
 // Stock module integration
 const stockEnabled = computed(() => {
@@ -241,14 +274,49 @@ const bill = reactive({
 
 const items = reactive([
   {
+    item_id: null,
     name: '',
     description: '',
     quantity: 1,
     price: 0,
     taxes: [],
     warehouse_id: null, // Stock module: warehouse for stock IN
+    track_quantity: false,
+    selectedItem: null,
   },
 ])
+
+// Search items for autocomplete
+async function searchItems(query) {
+  if (!query || query.length < 1) {
+    // Return all items if no query
+    const response = await itemStore.fetchItems({ limit: 50 })
+    return response?.data?.data || itemStore.items || []
+  }
+  const response = await itemStore.fetchItems({ search: query, limit: 20 })
+  return response?.data?.data || itemStore.items || []
+}
+
+// Select item from dropdown
+function selectItem(index, item) {
+  if (!item) return
+  items[index].item_id = item.id
+  items[index].name = item.name
+  items[index].description = item.description || ''
+  items[index].price = item.price / 100 // Convert from cents
+  items[index].track_quantity = item.track_quantity || false
+  items[index].selectedItem = item
+}
+
+// Clear selected item
+function clearItem(index) {
+  items[index].item_id = null
+  items[index].name = ''
+  items[index].description = ''
+  items[index].price = 0
+  items[index].track_quantity = false
+  items[index].selectedItem = null
+}
 
 const isEdit = computed(() => !!route.params.id)
 
@@ -320,12 +388,15 @@ const calculatedTotal = computed(
 
 function addItemRow() {
   items.push({
+    item_id: null,
     name: '',
     description: '',
     quantity: 1,
     price: 0,
     taxes: [],
     warehouse_id: null, // Stock module: warehouse for stock IN
+    track_quantity: false,
+    selectedItem: null,
   })
 }
 
@@ -381,6 +452,7 @@ function buildPayload() {
       }).filter(Boolean)
 
       return {
+        item_id: line.item_id || null,
         name: line.name || line.description || 'Item',
         description: line.description,
         quantity: Number(line.quantity) || 0,
