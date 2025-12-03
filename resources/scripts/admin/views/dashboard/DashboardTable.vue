@@ -1,4 +1,5 @@
 <template>
+  <ExportXmlModal />
   <div>
     <div class="grid grid-cols-1 gap-6 mt-10 lg:grid-cols-2">
       <!-- Due Invoices -->
@@ -129,6 +130,7 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
 import EstimateDropdown from '@/scripts/admin/components/dropdowns/EstimateIndexDropdown.vue'
+import ExportXmlModal from '@/scripts/admin/components/modal-components/ExportXmlModal.vue'
 
 const dashboardStore = useDashboardStore()
 

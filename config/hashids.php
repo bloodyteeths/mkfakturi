@@ -16,6 +16,7 @@ use App\Models\EmailLog;
 use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\ProformaInvoice;
 use App\Models\Transaction;
 
 return [
@@ -84,6 +85,11 @@ return [
             'salt' => Transaction::class.config('app.key'),
             'length' => 20,
             'alphabet' => 'ADyWE86Cg7jF23vS0bonXrZ5KLH9puIQ4M1T',
+        ],
+        ProformaInvoice::class => [
+            'salt' => ProformaInvoice::class.config('app.key'),
+            'length' => 20,
+            'alphabet' => 'Pf7Rq3Wx5Km9Lt4Nv8Jh2Yc6Ds1Ga0BiZoU',
         ],
     ],
 ];

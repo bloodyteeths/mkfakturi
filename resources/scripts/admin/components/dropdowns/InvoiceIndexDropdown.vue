@@ -100,7 +100,13 @@
     </BaseDropdownItem>
 
     <!-- Export XML (UBL) -->
-    <ExportXml v-if="canExportXml(row)" :invoice="row" />
+    <BaseDropdownItem v-if="canExportXml(row)" @click="openExportXmlModal">
+      <BaseIcon
+        name="DocumentArrowDownIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('invoices.export_xml') }}
+    </BaseDropdownItem>
 
     <!-- Download E-Invoice XML (Signed) -->
     <BaseDropdownItem
@@ -139,7 +145,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { inject, ref, computed, onMounted } from 'vue'
 import abilities from '@/scripts/admin/stub/abilities'
-import ExportXml from '@/scripts/components/ExportXml.vue'
 
 const props = defineProps({
   row: {
@@ -272,6 +277,16 @@ async function sendInvoice(invoice) {
     componentName: 'SendInvoiceModal',
     id: invoice.id,
     data: invoice,
+    variant: 'sm',
+  })
+}
+
+function openExportXmlModal() {
+  modalStore.openModal({
+    title: t('invoices.export_xml_title'),
+    componentName: 'ExportXmlModal',
+    id: props.row.id,
+    data: props.row,
     variant: 'sm',
   })
 }

@@ -1,5 +1,6 @@
 <template>
   <SendInvoiceModal @update="updateSentInvoiceStatus" />
+  <ExportXmlModal />
   <div class="relative table-container">
     <BaseTable
       ref="table"
@@ -56,6 +57,7 @@ import { useRecurringInvoiceStore } from '@/scripts/admin/stores/recurring-invoi
 import abilities from '@/scripts/admin/stub/abilities'
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
+import ExportXmlModal from '@/scripts/admin/components/modal-components/ExportXmlModal.vue'
 
 const recurringInvoiceStore = useRecurringInvoiceStore()
 
