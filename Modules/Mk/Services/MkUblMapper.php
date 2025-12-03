@@ -395,6 +395,8 @@ class MkUblMapper
 
     /**
      * Validate generated UBL XML against XSD schema
+     *
+     * @return array{is_valid: bool, errors: array}
      */
     public function validateUblXml(string $xml): array
     {
@@ -414,7 +416,10 @@ class MkUblMapper
         if (! file_exists($schemaPath)) {
             $errors[] = "UBL Schema file not found: {$schemaPath}";
 
-            return $errors;
+            return [
+                'is_valid' => false,
+                'errors' => $errors,
+            ];
         }
 
         // Validate against schema
@@ -427,7 +432,10 @@ class MkUblMapper
 
         libxml_clear_errors();
 
-        return $errors;
+        return [
+            'is_valid' => empty($errors),
+            'errors' => $errors,
+        ];
     }
 
     /**

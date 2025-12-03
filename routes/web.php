@@ -19,6 +19,7 @@ use App\Http\Controllers\V1\PDF\DownloadReceiptController;
 use App\Http\Controllers\V1\PDF\EstimatePdfController;
 use App\Http\Controllers\V1\PDF\InvoicePdfController;
 use App\Http\Controllers\V1\PDF\PaymentPdfController;
+use App\Http\Controllers\V1\PDF\ProformaInvoicePdfController;
 // use App\Http\Controllers\PrometheusController; // Disabled - dependency not installed
 use App\Models\Company;
 use Illuminate\Support\Facades\Route;
@@ -121,6 +122,10 @@ Route::middleware(['web', 'pdf-company', 'company', 'pdf-auth'])->group(function
     // payment pdf
     // -------------------------------------------------
     Route::get('/payments/pdf/{payment:unique_hash}', PaymentPdfController::class);
+
+    // proforma invoice pdf
+    // -------------------------------------------------
+    Route::get('/proforma-invoices/pdf/{proformaInvoice:unique_hash}', ProformaInvoicePdfController::class);
 });
 
 // customer pdf endpoints for invoice, estimate and Payment

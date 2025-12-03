@@ -239,6 +239,18 @@ class ProformaInvoicesController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Download proforma invoice PDF.
+     */
+    public function downloadPdf(ProformaInvoice $proformaInvoice)
+    {
+        $this->authorize('view', $proformaInvoice);
+
+        $pdf = $proformaInvoice->getPDFData();
+
+        return $pdf->download("proforma-{$proformaInvoice->proforma_invoice_number}.pdf");
+    }
 }
 
 // CLAUDE-CHECKPOINT

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Helpers\PdfTemplateUtils;
 use App\Services\SerialNumberFormatter;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -629,6 +632,151 @@ class ProformaInvoice extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Get PDF data for proforma invoice
+     */
+    public function getPDFData()
+    {
+        $taxes = collect();
+
+        // Aggregate taxes from items
+        foreach ($this->items as $item) {
+            foreach ($item->taxes as $tax) {
+                $found = $taxes->filter(function ($existingTax) use ($tax) {
+                    return $existingTax->tax_type_id == $tax->tax_type_id;
+                })->first();
+
+                if ($found) {
+                    $found->amount += $tax->amount;
+                } else {
+                    $taxes->push($tax);
+                }
+            }
+        }
+
+        $proformaTemplate = self::find($this->id)->template_name;
+
+        $company = Company::find($this->company_id);
+        $locale = CompanySetting::getSetting('language', $company->id);
+        $customFields = CustomField::where('model_type', 'Item')->get();
+
+        App::setLocale($locale);
+
+        // Verify logo file exists before using it
+        $logo = $company->logo_path;
+
+        if ($logo && ! filter_var($logo, FILTER_VALIDATE_URL)) {
+            if (! file_exists($logo)) {
+                $logo = null;
+            }
+        }
+
+        if (! $logo) {
+            $defaultLogo = base_path('logo/facturino_logo.png');
+            $logo = file_exists($defaultLogo) ? $defaultLogo : null;
+        }
+
+        // Share view data - use 'invoice' key for template compatibility
+        view()->share([
+            'invoice' => $this,
+            'customFields' => $customFields,
+            'company_address' => $this->getCompanyAddress(),
+            'shipping_address' => $this->getCustomerShippingAddress(),
+            'billing_address' => $this->getCustomerBillingAddress(),
+            'notes' => $this->getNotes(),
+            'logo' => $logo ?? null,
+            'taxes' => $taxes,
+        ]);
+
+        $template = PdfTemplateUtils::findFormattedTemplate('invoice', $proformaTemplate, '');
+
+        if (! $template) {
+            \Log::warning('PDF template not found, falling back to default', [
+                'requested_template' => $proformaTemplate,
+                'proforma_invoice_id' => $this->id,
+                'company_id' => $this->company_id,
+            ]);
+            $template = ['name' => 'invoice1', 'custom' => false];
+            $proformaTemplate = 'invoice1';
+        }
+
+        $templatePath = $template['custom'] ? sprintf('pdf_templates::invoice.%s', $proformaTemplate) : sprintf('app.pdf.invoice.%s', $proformaTemplate);
+
+        if (request()->has('preview')) {
+            return view($templatePath);
+        }
+
+        return Pdf::loadView($templatePath);
+    }
+
+    /**
+     * Get company address for PDF
+     */
+    public function getCompanyAddress()
+    {
+        if ($this->company && (! $this->company->address()->exists())) {
+            return false;
+        }
+
+        $format = CompanySetting::getSetting('invoice_company_address_format', $this->company_id);
+
+        return $this->getFormattedString($format);
+    }
+
+    /**
+     * Get customer shipping address for PDF
+     */
+    public function getCustomerShippingAddress()
+    {
+        if ($this->customer && (! $this->customer->shippingAddress()->exists())) {
+            return false;
+        }
+
+        $format = CompanySetting::getSetting('invoice_shipping_address_format', $this->company_id);
+
+        return $this->getFormattedString($format);
+    }
+
+    /**
+     * Get customer billing address for PDF
+     */
+    public function getCustomerBillingAddress()
+    {
+        if ($this->customer && (! $this->customer->billingAddress()->exists())) {
+            return false;
+        }
+
+        $format = CompanySetting::getSetting('invoice_billing_address_format', $this->company_id);
+
+        return $this->getFormattedString($format);
+    }
+
+    /**
+     * Get notes formatted for PDF
+     */
+    public function getNotes()
+    {
+        return $this->getFormattedString($this->notes);
+    }
+
+    /**
+     * Get extra fields for PDF template variable replacement
+     */
+    public function getExtraFields()
+    {
+        return [
+            '{PROFORMA_DATE}' => $this->formattedProformaInvoiceDate,
+            '{PROFORMA_EXPIRY_DATE}' => $this->formattedExpiryDate,
+            '{PROFORMA_NUMBER}' => $this->proforma_invoice_number,
+            '{PROFORMA_REF_NUMBER}' => $this->reference_number,
+            // Also include invoice aliases for template compatibility
+            '{INVOICE_DATE}' => $this->formattedProformaInvoiceDate,
+            '{INVOICE_DUE_DATE}' => $this->formattedExpiryDate,
+            '{INVOICE_NUMBER}' => $this->proforma_invoice_number,
+            '{INVOICE_REF_NUMBER}' => $this->reference_number,
+        ];
     }
 }
 
