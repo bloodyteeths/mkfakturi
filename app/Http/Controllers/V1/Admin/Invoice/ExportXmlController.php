@@ -38,11 +38,28 @@ class ExportXmlController extends Controller
             // Validate XML if requested
             if ($validateXml) {
                 $validation = $ublMapper->validateUblXml($xmlContent);
+
+                // Log validation results for debugging
                 if (! $validation['is_valid']) {
+                    Log::warning('XML validation failed', [
+                        'invoice_id' => $invoice->id,
+                        'invoice_number' => $invoice->invoice_number,
+                        'errors' => $validation['errors'],
+                        'skipped' => $validation['skipped'] ?? false,
+                    ]);
+
                     return response()->json([
                         'message' => 'XML validation failed',
                         'errors' => $validation['errors'],
                     ], 422);
+                }
+
+                // Log if validation was skipped
+                if ($validation['skipped'] ?? false) {
+                    Log::info('XML validation skipped', [
+                        'invoice_id' => $invoice->id,
+                        'reason' => $validation['reason'] ?? 'unknown',
+                    ]);
                 }
             }
 
