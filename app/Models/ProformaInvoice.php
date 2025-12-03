@@ -690,15 +690,15 @@ class ProformaInvoice extends Model
 
         App::setLocale($locale);
 
-        // Verify logo file exists before using it
+        // Get logo from company - logo_path returns local path or URL
         $logo = $company->logo_path;
 
-        if ($logo && ! filter_var($logo, FILTER_VALIDATE_URL)) {
-            if (! file_exists($logo)) {
-                $logo = null;
-            }
+        // If logo_path is null, try the logo attribute (URL)
+        if (! $logo) {
+            $logo = $company->logo;
         }
 
+        // If still no logo, use default Facturino logo
         if (! $logo) {
             $defaultLogo = base_path('logo/facturino_logo.png');
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
