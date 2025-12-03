@@ -180,7 +180,7 @@
             </p>
           </BaseInputGroup>
 
-          <!-- Category -->
+          <!-- Category (optional - for grouping items) -->
           <BaseInputGroup
             v-if="stockEnabled && itemStore.currentItem.track_quantity"
             :label="$t('items.category')"
@@ -193,6 +193,20 @@
               :placeholder="$t('items.category_placeholder')"
             />
           </BaseInputGroup>
+
+          <!-- Link to Stock Management (only in edit mode with track_quantity) -->
+          <div v-if="isEdit && stockEnabled && itemStore.currentItem.track_quantity" class="col-span-1 pt-2">
+            <router-link
+              :to="`/admin/stock/item-card/${route.params.id}`"
+              class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
+            >
+              <BaseIcon name="ArchiveBoxIcon" class="h-4 w-4 mr-1" />
+              {{ $t('items.view_stock') }}
+            </router-link>
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.view_stock_hint') }}
+            </p>
+          </div>
 
           <!-- Initial Stock Entry (only for new items with track_quantity enabled) -->
           <template v-if="showInitialStock">

@@ -34,20 +34,8 @@
               :clear-on-select="false"
               :close-on-select="true"
               :placeholder="$t('stock.select_item')"
-            >
-              <template #singlelabel="{ value }">
-                <div class="multiselect-single-label">
-                  <span>{{ value.name }}</span>
-                  <span v-if="value.sku" class="text-gray-500 text-xs ml-2">({{ value.sku }})</span>
-                </div>
-              </template>
-              <template #option="{ option }">
-                <div class="flex justify-between items-center w-full">
-                  <span>{{ option.name }}</span>
-                  <span v-if="option.sku" class="text-gray-500 text-xs">({{ option.sku }})</span>
-                </div>
-              </template>
-            </BaseMultiselect>
+              :can-clear="true"
+            />
           </BaseInputGroup>
 
           <!-- Warehouse Selector -->
