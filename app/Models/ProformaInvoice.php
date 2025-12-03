@@ -657,6 +657,14 @@ class ProformaInvoice extends Model
      */
     public function getPDFData()
     {
+        // Eager load relationships needed for PDF
+        $this->load([
+            'items.taxes.taxType',
+            'company.address',
+            'customer.addresses',
+            'currency',
+        ]);
+
         $taxes = collect();
 
         // Aggregate taxes from items
@@ -674,9 +682,9 @@ class ProformaInvoice extends Model
             }
         }
 
-        $proformaTemplate = self::find($this->id)->template_name;
+        $proformaTemplate = $this->template_name ?? 'proforma_invoice1';
 
-        $company = Company::find($this->company_id);
+        $company = $this->company;
         $locale = CompanySetting::getSetting('language', $company->id);
         $customFields = CustomField::where('model_type', 'Item')->get();
 

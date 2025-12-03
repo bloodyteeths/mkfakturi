@@ -423,14 +423,6 @@
                 {!! $notes !!}
             @endif
         </div>
-
-        <!-- Footer Notice -->
-        <div style="margin-top: 30px; padding: 15px 30px; font-size: 10px; color: #666; border-top: 1px solid #E8E8E8;">
-            <p style="margin: 0;">
-                <strong>Напомена:</strong> Оваа профактура е понуда и не претставува обврска за плаќање.
-                По уплатата, ќе биде издадена официјална фактура.
-            </p>
-        </div>
     </div>
 </body>
 
