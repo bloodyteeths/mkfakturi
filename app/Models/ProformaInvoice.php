@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Helpers\PdfTemplateUtils;
+use App\Space\PdfTemplateUtils;
 use App\Services\SerialNumberFormatter;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
