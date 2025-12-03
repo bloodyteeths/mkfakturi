@@ -273,18 +273,6 @@
             padding-bottom: 10px;
         }
 
-        /* -- Proforma Notice -- */
-
-        .proforma-notice {
-            background-color: #FFF3CD;
-            border: 1px solid #FFECB5;
-            padding: 10px 15px;
-            margin: 20px 30px;
-            font-size: 11px;
-            color: #856404;
-            text-align: center;
-        }
-
         /* -- Helpers -- */
 
         .text-primary {
@@ -362,12 +350,7 @@
 
 
     <div class="content-wrapper">
-        <!-- Proforma Notice Banner -->
-        <div class="proforma-notice">
-            <strong>ПРОФАКТУРА</strong> - Овој документ НЕ е фискален документ и не претставува официјална фактура за даночни цели.
-        </div>
-
-        <div style="padding-top: 10px">
+        <div style="padding-top: 30px">
             <div class="company-address-container">
                 <h1 style="font-size: 13px; margin-bottom: 8px;">ИЗДАВАЧ</h1>
                 <div class="company-address">
