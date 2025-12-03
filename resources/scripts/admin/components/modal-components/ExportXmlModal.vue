@@ -90,7 +90,7 @@ const showUpgradeModal = ref(false)
 
 // Export options
 const exportFormat = ref('ubl')
-const includeSignature = ref(false) // Default to false since certificate may not be configured
+const includeSignature = ref(true) // Will gracefully skip if certificate not configured
 const validateXml = ref(true)
 
 const formatOptions = computed(() => [

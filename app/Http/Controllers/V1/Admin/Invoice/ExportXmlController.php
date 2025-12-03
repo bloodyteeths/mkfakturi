@@ -63,31 +63,37 @@ class ExportXmlController extends Controller
                 }
             }
 
-            // Apply digital signature if requested
+            // Apply digital signature if requested and certificate is configured
+            $wasSigned = false;
             if ($includeSignature || $format === 'ubl_signed') {
                 try {
                     $xmlSigner = new MkXmlSigner;
 
-                    // Validate signer configuration
+                    // Check if signing is configured
                     $config = $xmlSigner->validateConfiguration();
-                    if (! $config['is_valid']) {
-                        return response()->json([
-                            'message' => 'XML signing configuration invalid',
+                    if ($config['is_valid']) {
+                        // Certificate is configured, sign the XML
+                        $xmlContent = $xmlSigner->signUblInvoice($xmlContent);
+                        $wasSigned = true;
+
+                        Log::info('XML signed successfully', [
+                            'invoice_id' => $invoice->id,
+                        ]);
+                    } else {
+                        // Certificate not configured, skip signing gracefully
+                        Log::info('XML signing skipped - certificate not configured', [
+                            'invoice_id' => $invoice->id,
                             'errors' => $config['errors'],
-                        ], 422);
+                            'warnings' => $config['warnings'] ?? [],
+                        ]);
                     }
 
-                    $xmlContent = $xmlSigner->signUblInvoice($xmlContent);
-
                 } catch (\Exception $e) {
-                    Log::error('XML signing failed', [
+                    // Signing failed, but don't block the export - just log and continue unsigned
+                    Log::warning('XML signing failed, exporting unsigned', [
                         'invoice_id' => $invoice->id,
                         'error' => $e->getMessage(),
                     ]);
-
-                    return response()->json([
-                        'message' => 'XML signing failed: '.$e->getMessage(),
-                    ], 500);
                 }
             }
 
@@ -96,12 +102,13 @@ class ExportXmlController extends Controller
                 'invoice_id' => $invoice->id,
                 'invoice_number' => $invoice->invoice_number,
                 'format' => $format,
-                'signed' => $includeSignature,
+                'signed' => $wasSigned,
+                'signature_requested' => $includeSignature,
                 'user_id' => auth()->id(),
             ]);
 
-            // Generate filename
-            $suffix = $includeSignature || $format === 'ubl_signed' ? '-signed' : '';
+            // Generate filename - only add -signed suffix if actually signed
+            $suffix = $wasSigned ? '-signed' : '';
             $filename = "invoice-{$invoice->invoice_number}-ubl{$suffix}.xml";
 
             // Return XML as download
