@@ -3,6 +3,7 @@
 namespace App\Space;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ImageUtils
@@ -25,14 +26,22 @@ class ImageUtils
             $contents = self::readImage($candidate);
 
             if (! $contents) {
+                Log::warning('ImageUtils: Failed to read image', ['path' => $candidate]);
                 continue;
             }
 
             $mimeType = self::detectMimeType($candidate, $contents);
 
             if (! $mimeType) {
+                Log::warning('ImageUtils: Failed to detect MIME type', ['path' => $candidate]);
                 continue;
             }
+
+            Log::info('ImageUtils: Successfully loaded image', [
+                'path' => substr($candidate, 0, 100),
+                'size' => strlen($contents),
+                'mime' => $mimeType,
+            ]);
 
             return sprintf('data:%s;base64,%s', $mimeType, base64_encode($contents));
         }
@@ -44,13 +53,34 @@ class ImageUtils
     {
         try {
             if (filter_var($path, FILTER_VALIDATE_URL)) {
-                $contents = @file_get_contents($path);
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 10,
+                        'user_agent' => 'Facturino/1.0',
+                    ],
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                ]);
+                $contents = @file_get_contents($path, false, $context);
+                if ($contents === false) {
+                    Log::warning('ImageUtils: file_get_contents failed for URL', [
+                        'url' => $path,
+                        'error' => error_get_last()['message'] ?? 'Unknown error',
+                    ]);
+                }
             } elseif (File::exists($path)) {
                 $contents = File::get($path);
             } else {
+                Log::warning('ImageUtils: File does not exist', ['path' => $path]);
                 $contents = null;
             }
         } catch (Throwable $exception) {
+            Log::error('ImageUtils: Exception reading image', [
+                'path' => $path,
+                'error' => $exception->getMessage(),
+            ]);
             $contents = null;
         }
 
