@@ -74,6 +74,7 @@ import { useModalStore } from '@/scripts/stores/modal'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useUserStore } from '@/scripts/admin/stores/user'
 import UpgradeCTA from '@/scripts/admin/components/UpgradeCTA.vue'
 
 const { t } = useI18n()
@@ -81,6 +82,7 @@ const modalStore = useModalStore()
 const notificationStore = useNotificationStore()
 const invoiceStore = useInvoiceStore()
 const companyStore = useCompanyStore()
+const userStore = useUserStore()
 
 // Modal state
 const isExporting = ref(false)
@@ -106,6 +108,11 @@ const invoice = computed(() => {
 
 // Check if company has Standard+ tier for e-Faktura
 const canExportXml = computed(() => {
+  // Super admin bypass
+  if (userStore.currentUser?.role === 'super admin') {
+    return true
+  }
+
   const company = companyStore.selectedCompany
   if (!company || !company.subscription) {
     return false // Default to Free tier
