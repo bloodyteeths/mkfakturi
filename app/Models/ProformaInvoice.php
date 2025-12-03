@@ -704,13 +704,30 @@ class ProformaInvoice extends Model
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
         }
 
+        $companyAddress = $this->getCompanyAddress();
+        $shippingAddress = $this->getCustomerShippingAddress();
+        $billingAddress = $this->getCustomerBillingAddress();
+
+        \Log::info('ProformaInvoice PDF Data', [
+            'proforma_id' => $this->id,
+            'company_id' => $company->id,
+            'logo_path' => $company->logo_path,
+            'logo_url' => $company->logo,
+            'final_logo' => $logo,
+            'company_address' => $companyAddress,
+            'billing_address' => $billingAddress,
+            'shipping_address' => $shippingAddress,
+            'customer_id' => $this->customer_id,
+            'has_customer' => $this->customer ? true : false,
+        ]);
+
         // Share view data - use 'invoice' key for template compatibility
         view()->share([
             'invoice' => $this,
             'customFields' => $customFields,
-            'company_address' => $this->getCompanyAddress(),
-            'shipping_address' => $this->getCustomerShippingAddress(),
-            'billing_address' => $this->getCustomerBillingAddress(),
+            'company_address' => $companyAddress,
+            'shipping_address' => $shippingAddress,
+            'billing_address' => $billingAddress,
             'notes' => $this->getNotes(),
             'logo' => $logo ?? null,
             'taxes' => $taxes,
