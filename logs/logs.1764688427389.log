@@ -1,0 +1,94 @@
+2025-12-02T15:08:15.000000000Z [inf]  Mounting volume on: /var/lib/containers/railwayapp/bind-mounts/ff849905-08c4-4db4-a0b3-9a74beae3ea4/vol_fbj0jmd9ow95b1he
+2025-12-02T15:08:16.000000000Z [inf]  Starting Container
+2025-12-02T15:08:17.160689637Z [inf]  === Application Startup ===
+2025-12-02T15:08:17.160696375Z [inf]  Railway detected: Using individual MySQL variables...
+2025-12-02T15:08:17.160701607Z [inf]  DB configured from Railway variables
+2025-12-02T15:08:17.160707379Z [inf]  Waiting for database at switchback.proxy.rlwy.net:31829...
+2025-12-02T15:08:17.160714289Z [inf]  OK✅ Database is ready!
+2025-12-02T15:08:17.160719975Z [inf]  ✅ Permissions set for www user
+2025-12-02T15:08:17.160725238Z [inf]  Nginx configured to listen on ports 80 and 8080
+2025-12-02T15:08:17.160730529Z [inf]  Clearing caches...
+2025-12-02T15:08:17.160738483Z [inf]  
+2025-12-02T15:08:17.160743967Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-12-02T15:08:17.160749319Z [inf]  
+2025-12-02T15:08:17.165222092Z [inf]  
+2025-12-02T15:08:17.165228401Z [inf]     INFO  Application cache cleared successfully.  
+2025-12-02T15:08:17.165234923Z [inf]  
+2025-12-02T15:08:17.511368776Z [inf]  
+2025-12-02T15:08:17.511377425Z [inf]     INFO  Route cache cleared successfully.  
+2025-12-02T15:08:17.511383653Z [inf]  
+2025-12-02T15:08:18.128642362Z [inf]  
+2025-12-02T15:08:18.128648791Z [inf]     INFO  Compiled views cleared successfully.  
+2025-12-02T15:08:18.128654392Z [inf]  
+2025-12-02T15:08:18.128673906Z [inf]  Running migrations...
+2025-12-02T15:08:18.204769443Z [inf]  
+2025-12-02T15:08:18.204774640Z [inf]     INFO  Nothing to migrate.  
+2025-12-02T15:08:18.204780392Z [inf]  
+2025-12-02T15:08:18.647735423Z [inf]  Profile status: COMPLETED
+2025-12-02T15:08:19.124846719Z [inf]  Database marker exists: YES
+2025-12-02T15:08:19.124852005Z [inf]  Already installed (profile_complete = COMPLETED)
+2025-12-02T15:08:19.124857154Z [inf]  ✅ Installation complete, all markers in place
+2025-12-02T15:08:19.410821389Z [inf]  
+2025-12-02T15:08:19.410825822Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-12-02T15:08:19.410830292Z [inf]  
+2025-12-02T15:08:19.424437399Z [inf]  Verifying Laravel application...
+2025-12-02T15:08:20.206005399Z [inf]  Laravel Framework 12.12.0
+2025-12-02T15:08:20.206015973Z [inf]  Testing PHP bootstrap...
+2025-12-02T15:08:20.224058448Z [inf]  
+2025-12-02T15:08:20.226680238Z [inf]    GET|HEAD        admin/{vue?} ............................... admin.dashboard
+2025-12-02T15:08:20.226690944Z [inf]    GET|HEAD        api/billing/invoices ....................................... 
+2025-12-02T15:08:20.226698646Z [inf]    GET|HEAD        api/billing/subscription ................................... 
+2025-12-02T15:08:20.226724313Z [inf]    GET|HEAD        / ..................................................... home
+2025-12-02T15:08:20.278559896Z [inf]  Testing database connection...
+2025-12-02T15:08:20.671753580Z [inf]  DB OK
+2025-12-02T15:08:20.671757891Z [inf]  Enabling verbose PHP errors for debugging...
+2025-12-02T15:08:20.676064691Z [inf]  Testing home route...
+2025-12-02T15:08:21.204217262Z [inf]  Home route test passed
+2025-12-02T15:08:21.204222254Z [inf]  Validating nginx configuration...
+2025-12-02T15:08:21.204226777Z [inf]  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+2025-12-02T15:08:21.204233009Z [inf]  nginx: configuration file /etc/nginx/nginx.conf test is successful
+2025-12-02T15:08:21.204237784Z [inf]  Validating PHP-FPM configuration...
+2025-12-02T15:08:21.204242704Z [inf]  [02-Dec-2025 15:08:21] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-12-02T15:08:21.204249043Z [inf]  
+2025-12-02T15:08:21.204253744Z [inf]  [02-Dec-2025 15:08:21] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-12-02T15:08:21.204257989Z [inf]  
+2025-12-02T15:08:21.204262447Z [inf]  Setting final permissions before starting services...
+2025-12-02T15:08:21.204268960Z [inf]  ✅ Final permissions set for www user
+2025-12-02T15:08:21.204273410Z [inf]  Starting application services in background...
+2025-12-02T15:08:21.204277710Z [inf]  Waiting for services to be ready...
+2025-12-02T15:08:21.494210309Z [err]  /usr/lib/python3.12/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-12-02T15:08:21.494216593Z [err]    import pkg_resources
+2025-12-02T15:08:21.548569208Z [inf]  2025-12-02 15:08:21,547 INFO Set uid to user 0 succeeded
+2025-12-02T15:08:21.553950092Z [inf]  2025-12-02 15:08:21,552 INFO supervisord started with pid 59
+2025-12-02T15:08:22.558495557Z [inf]  2025-12-02 15:08:22,556 INFO spawned: 'nginx' with pid 61
+2025-12-02T15:08:22.563125646Z [inf]  2025-12-02 15:08:22,558 INFO spawned: 'php-fpm' with pid 62
+2025-12-02T15:08:22.563133588Z [inf]  2025-12-02 15:08:22,560 INFO spawned: 'scheduler' with pid 63
+2025-12-02T15:08:22.602673719Z [err]  [02-Dec-2025 15:08:22] NOTICE: fpm is running, pid 62
+2025-12-02T15:08:22.606146252Z [err]  [02-Dec-2025 15:08:22] NOTICE: ready to handle connections
+2025-12-02T15:08:24.174622129Z [inf]  2025-12-02 15:08:23,922 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-12-02T15:08:24.174698521Z [inf]  2025-12-02 15:08:23,921 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-12-02T15:08:24.174704741Z [inf]  2025-12-02 15:08:23,922 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-12-02T15:08:26.197014116Z [inf]  Checking if PHP-FPM is listening on port 9000...
+2025-12-02T15:08:26.220524564Z [inf]  tcp        0      0 :::9000                 :::*                    LISTEN      
+2025-12-02T15:08:26.220531856Z [inf]  Checking if nginx is listening on port 8080...
+2025-12-02T15:08:26.237602275Z [inf]  tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      
+2025-12-02T15:08:26.237610324Z [inf]  Testing HTTP request through nginx/php-fpm...
+2025-12-02T15:08:27.155347488Z [err]  127.0.0.1 -  02/Dec/2025:15:08:26 +0000 "GET /index.php" 200
+2025-12-02T15:08:27.155354230Z [inf]  ✅ Health check passed (HTTP 200)
+2025-12-02T15:08:27.155361200Z [inf]  Testing home route through HTTP...
+2025-12-02T15:08:27.155367903Z [err]  127.0.0.1 -  02/Dec/2025:15:08:26 +0000 "GET /index.php" 200
+2025-12-02T15:08:27.155375524Z [inf]  ✅ Home route accessible (HTTP 200)
+2025-12-02T15:08:27.155384588Z [inf]  All startup checks complete. Supervisor running with PID 59
+2025-12-02T15:08:27.155392286Z [inf]  Application ready to serve requests.
+2025-12-02T15:12:06.772830359Z [err]  127.0.0.1 -  02/Dec/2025:15:12:01 +0000 "GET /index.php" 200
+2025-12-02T15:12:06.772838899Z [err]  127.0.0.1 -  02/Dec/2025:15:12:02 +0000 "GET /index.php" 200
+2025-12-02T15:12:06.772845617Z [err]  127.0.0.1 -  02/Dec/2025:15:12:03 +0000 "GET /index.php" 200
+2025-12-02T15:13:26.801780655Z [err]  127.0.0.1 -  02/Dec/2025:15:13:24 +0000 "GET /index.php" 200
+2025-12-02T15:13:26.801789139Z [err]  127.0.0.1 -  02/Dec/2025:15:13:24 +0000 "GET /index.php" 200
+2025-12-02T15:13:26.801795378Z [err]  127.0.0.1 -  02/Dec/2025:15:13:24 +0000 "GET /index.php" 200
+2025-12-02T15:13:29.133760931Z [err]  127.0.0.1 -  02/Dec/2025:15:13:29 +0000 "GET /index.php" 200
+2025-12-02T15:13:29.136993175Z [err]  127.0.0.1 -  02/Dec/2025:15:13:28 +0000 "GET /index.php" 200
+2025-12-02T15:13:29.291311452Z [err]  127.0.0.1 -  02/Dec/2025:15:13:29 +0000 "GET /index.php" 200
+2025-12-02T15:13:31.250729114Z [err]  127.0.0.1 -  02/Dec/2025:15:13:31 +0000 "GET /index.php" 200
+2025-12-02T15:13:31.250735100Z [err]  127.0.0.1 -  02/Dec/2025:15:13:31 +0000 "GET /index.php" 200
+2025-12-02T15:13:31.823740978Z [err]  127.0.0.1 -  02/Dec/2025:15:13:31 +0000 "GET /index.php" 200

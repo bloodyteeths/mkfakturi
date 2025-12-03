@@ -80,6 +80,7 @@ class BillsController extends Controller
                 \Log::info('BillsController::store - Processing items', ['item_count' => count($request->items)]);
 
                 // No need to delete items/taxes for a new bill - they don't exist yet
+                // Note: Stock movements are handled by StockBillItemObserver (registered in AppServiceProvider)
                 Bill::createItems($bill, $request->items);
                 \Log::info('BillsController::store - Items created');
 
@@ -136,6 +137,9 @@ class BillsController extends Controller
         $bill->update($request->getBillPayload());
 
         if ($request->has('items')) {
+            // Note: Stock movements are handled by StockBillItemObserver:
+            // - deleted() event reverses stock when items are deleted
+            // - created() event creates stock when new items are added
             $bill->items()->delete();
             $bill->taxes()->delete();
 
@@ -254,3 +258,4 @@ class BillsController extends Controller
         }
     }
 }
+// CLAUDE-CHECKPOINT

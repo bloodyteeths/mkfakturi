@@ -702,7 +702,13 @@
     "minimum_quantity": "Minimum Quantity",
     "minimum_quantity_placeholder": "Enter minimum stock level...",
     "minimum_quantity_hint": "Get alerts when stock falls below this level",
-    "category_placeholder": "Enter category..."
+    "category_placeholder": "Select a category...",
+    "add_category": "Add Category",
+    "category_name": "Category Name",
+    "category_description": "Description",
+    "category_added": "Category created successfully",
+    "category_updated": "Category updated successfully",
+    "category_deleted": "Category deleted successfully"
   },
   "estimates": {
     "title": "Estimates",

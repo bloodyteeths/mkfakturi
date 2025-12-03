@@ -306,6 +306,10 @@ async function searchItems(query) {
 // Select item from dropdown
 function selectItem(index, item) {
   if (!item) return
+
+  console.log('selectItem called with:', { index, item })
+  console.log('Item taxes:', item.taxes)
+
   items[index].item_id = item.id
   items[index].name = item.name
   items[index].description = item.description || ''
@@ -314,6 +318,15 @@ function selectItem(index, item) {
   items[index].price = precision === 0 ? item.price : item.price / 100
   items[index].track_quantity = item.track_quantity || false
   items[index].selectedItem = item
+
+  // Auto-fill taxes from item (extract tax_type_id for multiselect)
+  if (item.taxes && item.taxes.length > 0) {
+    const taxIds = item.taxes.map(t => t.tax_type_id)
+    console.log('Setting taxes to:', taxIds)
+    items[index].taxes = taxIds
+  } else {
+    console.log('No taxes found on item')
+  }
 }
 
 // Clear selected item
@@ -491,7 +504,8 @@ function handleSubmit() {
 
 onMounted(async () => {
   globalStore.fetchCurrencies().then((res) => {
-    currencies.value = res.data.data || globalStore.currencies
+    // Handle both cached (array) and fresh (response object) results
+    currencies.value = res?.data?.data || globalStore.currencies || []
 
     if (!bill.currency_id && companyStore.selectedCompanyCurrency) {
       bill.currency_id = companyStore.selectedCompanyCurrency.id

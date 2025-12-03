@@ -730,7 +730,13 @@
     "minimum_quantity": "Минимална количина",
     "minimum_quantity_placeholder": "Внесете минимално ниво...",
     "minimum_quantity_hint": "Добијте известување кога залихата ќе падне под ова ниво",
-    "category_placeholder": "Внесете категорија..."
+    "category_placeholder": "Изберете категорија...",
+    "add_category": "Додади категорија",
+    "category_name": "Име на категорија",
+    "category_description": "Опис",
+    "category_added": "Категоријата е креирана успешно",
+    "category_updated": "Категоријата е ажурирана успешно",
+    "category_deleted": "Категоријата е избришана успешно"
   },
   "estimates": {
     "title": "Estimates",

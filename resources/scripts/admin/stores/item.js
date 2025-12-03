@@ -15,9 +15,15 @@ export const useItemStore = (useWindow = false) => {
       selectAllField: false,
       selectedItems: [],
       itemUnits: [],
+      itemCategories: [],
       currentItemUnit: {
         id: null,
         name: '',
+      },
+      currentItemCategory: {
+        id: null,
+        name: '',
+        description: '',
       },
       currentItem: {
         name: '',
@@ -32,10 +38,12 @@ export const useItemStore = (useWindow = false) => {
         track_quantity: false,
         minimum_quantity: null,
         category: '',
+        category_id: null,
       },
     }),
     getters: {
       isItemUnitEdit: (state) => (state.currentItemUnit.id ? true : false),
+      isItemCategoryEdit: (state) => (state.currentItemCategory.id ? true : false),
     },
     actions: {
       resetCurrentItem() {
@@ -51,6 +59,7 @@ export const useItemStore = (useWindow = false) => {
           track_quantity: false,
           minimum_quantity: null,
           category: '',
+          category_id: null,
         }
       },
       // CLAUDE-CHECKPOINT: Added SKU and barcode to item store state
@@ -331,6 +340,103 @@ export const useItemStore = (useWindow = false) => {
                   message: global.t(
                     'settings.customization.items.deleted_message'
                   ),
+                })
+              }
+
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      // Item Categories
+      fetchItemCategories(params) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get(`/item-categories`, { params })
+            .then((response) => {
+              this.itemCategories = response.data.data
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      addItemCategory(data) {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/item-categories`, data)
+            .then((response) => {
+              this.itemCategories.push(response.data.data)
+
+              if (response.data.data) {
+                notificationStore.showNotification({
+                  type: 'success',
+                  message: global.t('items.category_added'),
+                })
+              }
+
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      updateItemCategory(data) {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .put(`/item-categories/${data.id}`, data)
+            .then((response) => {
+              let pos = this.itemCategories.findIndex(
+                (cat) => cat.id === response.data.data.id
+              )
+
+              this.itemCategories[pos] = response.data.data
+
+              if (response.data.data) {
+                notificationStore.showNotification({
+                  type: 'success',
+                  message: global.t('items.category_updated'),
+                })
+              }
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      deleteItemCategory(id) {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .delete(`/item-categories/${id}`)
+            .then((response) => {
+              if (!response.data.error) {
+                let index = this.itemCategories.findIndex((cat) => cat.id === id)
+                this.itemCategories.splice(index, 1)
+              }
+
+              if (response.data.success) {
+                notificationStore.showNotification({
+                  type: 'success',
+                  message: global.t('items.category_deleted'),
                 })
               }
 

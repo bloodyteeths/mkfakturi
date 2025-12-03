@@ -9,6 +9,7 @@
     </BasePageHeader>
 
     <ItemUnitModal />
+    <ItemCategoryModal />
 
     <form
       class="grid lg:grid-cols-2 mt-6"
@@ -186,12 +187,26 @@
             :label="$t('items.category')"
             :content-loading="isFetchingInitialData"
           >
-            <BaseInput
-              v-model="itemStore.currentItem.category"
+            <BaseMultiselect
+              v-model="itemStore.currentItem.category_id"
               :content-loading="isFetchingInitialData"
-              type="text"
+              label="name"
+              :options="itemStore.itemCategories"
+              value-prop="id"
               :placeholder="$t('items.category_placeholder')"
-            />
+              searchable
+              track-by="name"
+            >
+              <template #action>
+                <BaseSelectAction @click="addItemCategory">
+                  <BaseIcon
+                    name="PlusIcon"
+                    class="h-4 mr-2 -ml-2 text-center text-primary-400"
+                  />
+                  {{ $t('items.add_category') }}
+                </BaseSelectAction>
+              </template>
+            </BaseMultiselect>
           </BaseInputGroup>
 
           <!-- Link to Stock Management (only in edit mode with track_quantity) -->
@@ -306,6 +321,7 @@ import { useModalStore } from '@/scripts/stores/modal'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useWarehouseStore } from '@/scripts/admin/stores/warehouse'
 import ItemUnitModal from '@/scripts/admin/components/modal-components/ItemUnitModal.vue'
+import ItemCategoryModal from '@/scripts/admin/components/modal-components/ItemCategoryModal.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -460,6 +476,18 @@ async function addItemUnit() {
   })
 }
 
+async function addItemCategory() {
+  modalStore.openModal({
+    title: t('items.add_category'),
+    componentName: 'ItemCategoryModal',
+    size: 'sm',
+    refreshData: () => {
+      // After creating a new category, reload categories
+      itemStore.fetchItemCategories({ limit: 'all' })
+    },
+  })
+}
+
 async function loadData() {
   isFetchingInitialData.value = true
 
@@ -471,6 +499,7 @@ async function loadData() {
 
   const loadPromises = [
     itemStore.fetchItemUnits({ limit: 'all' }),
+    itemStore.fetchItemCategories({ limit: 'all' }),
   ]
 
   if (userStore.hasAbilities(abilities.VIEW_TAX_TYPE)) {

@@ -1,52 +1,260 @@
-Great — AC-11 through AC-17 frontends are complete.
-
-Now switch into **System Integration + Stability Validation Mode**.
-
-Do not generate new features.  
-Do not extend UI.  
-Do not create new endpoints.  
-Focus only on these tasks:
-
-1. Run a full architecture-level validation for AC-08 through AC-18:
-   - Multi-tenant boundaries
-   - Permission flows
-   - Referral and invitation flows
-   - Commission chain correctness
-   - Console vs admin access rules
-   - Entity reassignment logic
-   - Data integrity across all pivot/link tables
-   - Network graph accuracy
-
-2. Generate a comprehensive **E2E Test Matrix**:
-   - Tests for all invitation types
-   - Tests for partner-company permissions
-   - Tests for commission chain payouts
-   - Tests for reassignment and overrides
-   - Tests for network graph API responses
-   - Tests for super-admin bypassing
-
-3. Generate a **Manual QA Checklist** for human testing:
-   - Step-by-step UI testing instructions
-   - Expected behaviors
-   - Edge cases
-   - Failure scenarios
-
-4. Produce a final **File Inventory Report**:
-   - Every file created or modified in AC-08 through AC-18
-   - Grouped by backend, frontend, route, middleware, services, migrations
-   - With short description of purpose
-
-5. Produce a **Merge Readiness Summary**:
-   - What to test before merging into main
-   - What could break in production
-   - Missing optimizations or cleanup
-   - Recommended performance improvements
-   - Any remaining TODOs
-
-6. Break output into small, token-safe chunks (800–900 tokens).
-   After each chunk, continue automatically with the next item until all tasks
-   are complete.
-
-Start with the architecture-level validation for the entire AC-08 → AC-18 scope.
-Do not ask for approval or next steps. Continue automatically until everything is
-delivered.
+main-CVSSaHJ0.js:142 🔥🔥🔥 CUSTOMER STORE MODULE LOADED - VERSION 2025-11-26-03:11 🔥🔥🔥
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.currency' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.exchange_rate' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.currency' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.exchange_rate' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+The specified value "NaN" cannot be parsed, or is out of range.
+The specified value "NaN" cannot be parsed, or is out of range.
+The specified value "NaN" cannot be parsed, or is out of range.
+The specified value "NaN" cannot be parsed, or is out of range.
+The specified value "NaN" cannot be parsed, or is out of range.
+The specified value "NaN" cannot be parsed, or is out of range.
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Index-DCGiK__n.js:1 Object
+Index-DCGiK__n.js:1 API response: Array(10)
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.title' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.subtitle' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.refresh' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.loading' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.title' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.subtitle' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.empty_state' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.example_questions' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.placeholder' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.send' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.disclaimer' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.quick_actions' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.create_invoice_desc' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.create_customer_desc' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'imports.import_data' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.import_data_desc' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'reports.reports' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.view_reports_desc' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.overdue_invoices' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Dashboard-B_BmOF9-.js:1 [AI Insights] Fetching insights...
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.title' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.subtitle' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.clear' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.placeholder' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.send' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.chat.disclaimer' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Dashboard-B_BmOF9-.js:1 [AI Insights] Fetch response: Object
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.title' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.subtitle' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.refresh' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.no_insights' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'ai.insights.generate' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.overdue_invoices' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'dashboard.total_overdue' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.overdue_by' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'general.days' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Index-DCGiK__n.js:1 Object
+Index-DCGiK__n.js:1 API response: Array(10)
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.currency' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.exchange_rate' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Create-C98BhDQh.js:1 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'data')
+    at Create-C98BhDQh.js:1:4180
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.currency' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.exchange_rate' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Index-DCGiK__n.js:1 Object
+Index-DCGiK__n.js:1 API response: Array(10)
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.no_projects' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.in_progress' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.completed' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.on_hold' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.cancelled' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.add_new_project' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.dates' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.view_project' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.project_info' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.dates' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.financial_summary' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.linked_documents' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.invoices' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.expenses' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.payments' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.bills' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.project_info' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.dates' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.financial_summary' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.linked_documents' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.invoices' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.expenses' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.payments' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.bills' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+/admin/stock/warehouses:1 Form submission canceled because the form is not connected
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.dates' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.in_progress' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.completed' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.on_hold' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.cancelled' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.project_info' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.dates' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.financial_summary' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.linked_documents' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.invoices' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.expenses' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.payments' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.bills' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.project_info' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.dates' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.statuses.open' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.financial_summary' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.linked_documents' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.invoices' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.expenses' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.payments' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'projects.bills' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Index-DCGiK__n.js:1 Object
+Index-DCGiK__n.js:1 API response: Array(10)
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.currency' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.exchange_rate' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'bills.item_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72
+Create-C98BhDQh.js:1 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'data')
+    at Create-C98BhDQh.js:1:4180
+main-CVSSaHJ0.js:72 [intlify] Not found 'invoices.select_a_tax' key in 'en' locale messages.
+Ld @ main-CVSSaHJ0.js:72

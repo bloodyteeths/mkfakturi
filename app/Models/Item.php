@@ -190,6 +190,14 @@ class Item extends Model
     }
 
     /**
+     * Get the category this item belongs to.
+     */
+    public function itemCategory(): BelongsTo
+    {
+        return $this->belongsTo(ItemCategory::class, 'category_id');
+    }
+
+    /**
      * Check if this item has stock tracking enabled.
      */
     public function hasStockTracking(): bool

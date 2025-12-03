@@ -1,0 +1,203 @@
+2025-12-02T15:06:33.810521561Z [inf]  scheduling build on Metal builder "builder-bygvuh"
+2025-12-02T15:06:54.909712334Z [inf]  [snapshot] received sha256:9c71d92522c87ba3e7fa9ff88e257e83237d2e6e7e791938ef31b561d8b7830f md5:f8ae7dec157bd8f61a33aaf4e1827ede
+2025-12-02T15:06:54.909793876Z [inf]  receiving snapshot
+2025-12-02T15:06:55.756551946Z [dbg]  skipping 'Dockerfile' at '.dev/adminer/Dockerfile' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:false})
+2025-12-02T15:06:55.756559147Z [dbg]  skipping 'Dockerfile' at '.dev/php/Dockerfile' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:false})
+2025-12-02T15:06:55.756560709Z [dbg]  skipping 'Dockerfile' at 'invoice2data-service/Dockerfile' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:false})
+2025-12-02T15:06:55.756562402Z [dbg]  skipping 'railway.json' at 'invoice2data-service/railway.json' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:true})
+2025-12-02T15:06:55.756563073Z [dbg]  skipping 'Dockerfile' at 'mcp-server/Dockerfile' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:false})
+2025-12-02T15:06:55.756563864Z [dbg]  skipping 'railway.json' at 'mcp-server/railway.json' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:true})
+2025-12-02T15:06:55.756569953Z [dbg]  found 'nixpacks.toml' at 'nixpacks.toml'
+2025-12-02T15:06:55.756571125Z [dbg]  found 'railway.json' at 'railway.json'
+2025-12-02T15:06:55.756571826Z [dbg]  found 'railway.toml' at 'railway.toml'
+2025-12-02T15:06:55.756572738Z [dbg]  skipping 'railway.json' at 'website/railway.json' as it is not rooted at a valid path (root_dir=, fileOpts={directChildOfRepoRoot:true})
+2025-12-02T15:06:55.756736003Z [inf]  analyzing snapshot
+2025-12-02T15:06:59.670699768Z [inf]  uploading snapshot
+2025-12-02T15:07:08.074218411Z [inf]  fetched snapshot sha256:9c71d92522c87ba3e7fa9ff88e257e83237d2e6e7e791938ef31b561d8b7830f (128 MB bytes)
+2025-12-02T15:07:08.074305602Z [inf]  fetching snapshot
+2025-12-02T15:07:09.912431994Z [inf]  unpacking archive
+2025-12-02T15:07:11.945696241Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-12-02T15:07:11.945805124Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-12-02T15:07:11.945864704Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-12-02T15:07:11.969140356Z [inf]  [internal] load build definition from Dockerfile.mkaccounting
+2025-12-02T15:07:11.976547780Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-12-02T15:07:11.976550424Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-12-02T15:07:12.207685508Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2025-12-02T15:07:12.523937350Z [inf]  [internal] load metadata for docker.io/library/php:8.2-fpm-alpine
+2025-12-02T15:07:12.524774456Z [inf]  [internal] load .dockerignore
+2025-12-02T15:07:12.524829839Z [inf]  [internal] load .dockerignore
+2025-12-02T15:07:12.525003219Z [inf]  [internal] load .dockerignore
+2025-12-02T15:07:12.586762132Z [inf]  [internal] load .dockerignore
+2025-12-02T15:07:12.601550050Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
+2025-12-02T15:07:12.601561026Z [inf]  [internal] load build context
+2025-12-02T15:07:12.601561837Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-12-02T15:07:12.601562258Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
+2025-12-02T15:07:12.601562729Z [inf]  [composer-deps 1/5] COPY composer.json composer.lock ./
+2025-12-02T15:07:12.601563079Z [inf]  [php-base 3/5] RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version=2.7.9
+2025-12-02T15:07:12.601563390Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
+2025-12-02T15:07:12.601563700Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-12-02T15:07:12.601563950Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-12-02T15:07:12.601564221Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-12-02T15:07:12.601564441Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+2025-12-02T15:07:12.601564801Z [inf]  [composer-deps 2/5] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-12-02T15:07:12.601565132Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+2025-12-02T15:07:12.601565453Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+2025-12-02T15:07:12.601565813Z [inf]  [composer-deps 3/5] COPY . .
+2025-12-02T15:07:12.601566074Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:16858294071a56ffd4cce9f17b57136cc39e41507b40e245b4f8e906f7a19463
+2025-12-02T15:07:12.601566264Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-12-02T15:07:12.601566504Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
+2025-12-02T15:07:12.601566735Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-12-02T15:07:12.601566955Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-12-02T15:07:12.601567185Z [inf]  [production  7/16] WORKDIR /var/www/html
+2025-12-02T15:07:12.601595668Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+2025-12-02T15:07:12.601596099Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
+2025-12-02T15:07:12.601596329Z [inf]  [production 11/16] RUN cp .env.example .env
+2025-12-02T15:07:12.601596579Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache/data     storage/framework/sessions     storage/framework/views     storage/framework/testing     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
+2025-12-02T15:07:12.601596890Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+2025-12-02T15:07:12.601597130Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
+2025-12-02T15:07:12.601597361Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-12-02T15:07:12.601597781Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-12-02T15:07:12.601598111Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-12-02T15:07:12.601598312Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-12-02T15:07:12.601598562Z [inf]  [frontend-builder  5/10] RUN if [ -f package-lock.json ]; then         echo "package-lock.json detected -> running npm ci";         npm ci --prefer-offline --no-audit;     else         echo "package-lock.json missing -> running npm install";         npm install --prefer-offline --no-audit;     fi
+2025-12-02T15:07:12.601601777Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+2025-12-02T15:07:12.601602258Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
+2025-12-02T15:07:12.601602588Z [inf]  [frontend-builder  4/10] COPY package*.json ./
+2025-12-02T15:07:12.601602829Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-12-02T15:07:12.602022538Z [inf]  [internal] load build context
+2025-12-02T15:07:12.602023440Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:16858294071a56ffd4cce9f17b57136cc39e41507b40e245b4f8e906f7a19463
+2025-12-02T15:07:12.602507576Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-12-02T15:07:12.622053723Z [inf]  [frontend-builder  1/10] FROM docker.io/library/node:20-alpine@sha256:16858294071a56ffd4cce9f17b57136cc39e41507b40e245b4f8e906f7a19463
+2025-12-02T15:07:12.622652532Z [inf]  [internal] load build context
+2025-12-02T15:07:12.625081165Z [inf]  [php-base 1/5] FROM docker.io/library/php:8.2-fpm-alpine@sha256:f5cbb745950ec7ae49117fc1e326fddcd07ec2d0a47e230918e2eaa65f1b80b0
+2025-12-02T15:07:13.266964122Z [inf]  [internal] load build context
+2025-12-02T15:07:13.419733817Z [inf]  [php-base 2/5] RUN apk add --no-cache     curl     git     zip     unzip     bash     jpegoptim     optipng     pngquant     gifsicle     sqlite     mysql-client     postgresql-client     autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     icu-dev     oniguruma-dev     libzip-dev     libpng-dev     libjpeg-turbo-dev     freetype-dev     libxml2-dev     postgresql-dev     imagemagick-dev     curl-dev     && pecl install redis imagick     && docker-php-ext-enable redis imagick     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         pdo         pdo_mysql         pdo_pgsql         mysqli         zip         gd         bcmath         intl         mbstring         xml         curl         opcache         exif     && apk del autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c     && rm -rf /var/cache/apk/* /tmp/*
+2025-12-02T15:07:13.419738754Z [inf]  [php-base 3/5] RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version=2.7.9
+2025-12-02T15:07:13.419739505Z [inf]  [php-base 4/5] RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini &&     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini &&     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+2025-12-02T15:07:13.419739646Z [inf]  [php-base 5/5] WORKDIR /var/www/html
+2025-12-02T15:07:13.419739946Z [inf]  [composer-deps 1/5] COPY composer.json composer.lock ./
+2025-12-02T15:07:13.419740076Z [inf]  [composer-deps 2/5] RUN composer install     --no-dev     --no-scripts     --no-autoloader     --prefer-dist     --no-interaction
+2025-12-02T15:07:13.419741969Z [inf]  [composer-deps 3/5] COPY . .
+2025-12-02T15:07:14.896875361Z [inf]  [composer-deps 3/5] COPY . .
+2025-12-02T15:07:14.904676796Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+2025-12-02T15:07:14.933115387Z [inf]  scheduling build on Metal builder "builder-zwnsbu"
+2025-12-02T15:07:15.128534710Z [inf]  [composer-deps 4/5] RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+2025-12-02T15:07:15.134955835Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
+2025-12-02T15:07:15.407073749Z [inf]  Composer plugins have been disabled for safety in this non-interactive session.
+Set COMPOSER_ALLOW_SUPERUSER=1 if you want to allow plugins to run as root/super user.
+Do not run Composer as root/super user! See https://getcomposer.org/root for details
+
+2025-12-02T15:07:15.523570049Z [inf]  Generating optimized autoload files
+
+2025-12-02T15:07:18.114053463Z [inf]  > Illuminate\Foundation\ComposerScripts::postAutoloadDump
+
+2025-12-02T15:07:18.134990817Z [inf]  > @php artisan package:discover --ansi
+
+2025-12-02T15:07:18.370192573Z [inf]  
+  [37;44m INFO [39;49m Discovering packages.  
+
+
+2025-12-02T15:07:18.373708328Z [inf]    barryvdh/laravel-dompdf 
+2025-12-02T15:07:18.373977622Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.374117121Z [inf]   [32;1mDONE[39;22m
+  coderflex/laravel-ticket 
+2025-12-02T15:07:18.3743164Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.374384492Z [inf]   [32;1mDONE[39;22m
+  ekmungai/eloquent-ifrs 
+2025-12-02T15:07:18.374590842Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.374651193Z [inf]   [32;1mDONE[39;22m
+  invoiceshelf/modules 
+2025-12-02T15:07:18.37490948Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.375099395Z [inf]   [32;1mDONE[39;22m
+  jasonmccreary/laravel-test-assertions 
+2025-12-02T15:07:18.375131333Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.375222329Z [inf]   [32;1mDONE[39;22m
+  laravel/cashier-paddle 
+2025-12-02T15:07:18.375467758Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/fortify 
+2025-12-02T15:07:18.375717873Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.375829881Z [inf]   [32;1mDONE[39;22m
+  laravel/pennant 
+2025-12-02T15:07:18.375947107Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.376087978Z [inf]   [32;1mDONE[39;22m
+  laravel/sanctum 
+2025-12-02T15:07:18.376389991Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.376427888Z [inf]   [32;1mDONE[39;22m
+  laravel/tinker 
+2025-12-02T15:07:18.37662929Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.376732756Z [inf]   [32;1mDONE[39;22m
+  laravel/ui 
+2025-12-02T15:07:18.376934148Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.37714929Z [inf]   [32;1mDONE[39;22m
+  lavary/laravel-menu 
+2025-12-02T15:07:18.377198474Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.377383652Z [inf]   [32;1mDONE[39;22m
+  maatwebsite/excel 
+2025-12-02T15:07:18.377632536Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  nesbot/carbon 
+2025-12-02T15:07:18.377839326Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.377963051Z [inf]   [32;1mDONE[39;22m
+  nunomaduro/termwind 
+2025-12-02T15:07:18.37818875Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.378212075Z [inf]   [32;1mDONE[39;22m
+  silber/bouncer 
+2025-12-02T15:07:18.378493417Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.378529081Z [inf]   [32;1mDONE[39;22m
+  spatie/laravel-backup 
+2025-12-02T15:07:18.378805806Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.378871815Z [inf]   [32;1mDONE[39;22m
+  spatie/laravel-medialibrary 
+2025-12-02T15:07:18.379064564Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.379111014Z [inf]   [32;1mDONE[39;22m
+  spatie/laravel-signal-aware-command 
+2025-12-02T15:07:18.37922841Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.379347679Z [inf]   [32;1mDONE[39;22m
+  vinkla/hashids 
+2025-12-02T15:07:18.379551285Z [inf]  [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m
+2025-12-02T15:07:18.379605956Z [inf]   [32;1mDONE[39;22m
+
+2025-12-02T15:07:18.37963463Z [inf]  
+2025-12-02T15:07:18.393917159Z [inf]  Generated optimized autoload files containing 11297 classes
+
+2025-12-02T15:07:18.504668019Z [inf]  [composer-deps 5/5] RUN composer dump-autoload --optimize --no-dev
+2025-12-02T15:07:19.942787955Z [inf]  [production  2/16] RUN apk add --no-cache     nginx     supervisor     curl     bash     sqlite     mysql-client     postgresql-client     jpegoptim     optipng     pngquant     gifsicle     icu-libs     oniguruma     libzip     libpng     libjpeg-turbo     freetype     libxml2     postgresql-libs     imagemagick     && rm -rf /var/cache/apk/*
+2025-12-02T15:07:19.942803798Z [inf]  [production  3/16] COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+2025-12-02T15:07:19.942805050Z [inf]  [production  4/16] COPY --from=php-base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+2025-12-02T15:07:19.942805691Z [inf]  [production  5/16] RUN addgroup -g 1000 -S www &&     adduser -u 1000 -S www -G www
+2025-12-02T15:07:19.942806142Z [inf]  [production  6/16] RUN mkdir -p /var/www/html &&     mkdir -p /var/log/supervisor &&     mkdir -p /run/nginx &&     chown -R www:www /var/www /var/log/supervisor /run/nginx
+2025-12-02T15:07:19.942806583Z [inf]  [production  7/16] WORKDIR /var/www/html
+2025-12-02T15:07:19.942806893Z [inf]  [frontend-builder  2/10] RUN apk add --no-cache python3 make g++
+2025-12-02T15:07:19.942807213Z [inf]  [frontend-builder  3/10] WORKDIR /app
+2025-12-02T15:07:19.942807514Z [inf]  [frontend-builder  4/10] COPY package*.json ./
+2025-12-02T15:07:19.942807824Z [inf]  [frontend-builder  5/10] RUN if [ -f package-lock.json ]; then         echo "package-lock.json detected -> running npm ci";         npm ci --prefer-offline --no-audit;     else         echo "package-lock.json missing -> running npm install";         npm install --prefer-offline --no-audit;     fi
+2025-12-02T15:07:19.942808445Z [inf]  [frontend-builder  6/10] COPY vite.config.js postcss.config.cjs tailwind.config.js ./
+2025-12-02T15:07:19.942811980Z [inf]  [frontend-builder  7/10] COPY resources/ ./resources/
+2025-12-02T15:07:19.942812371Z [inf]  [frontend-builder  8/10] COPY public/ ./public/
+2025-12-02T15:07:19.942812672Z [inf]  [frontend-builder  9/10] COPY lang/ ./lang/
+2025-12-02T15:07:19.942812992Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-12-02T15:07:19.942813302Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
+2025-12-02T15:07:19.942818060Z [inf]  [frontend-builder 10/10] RUN npm run build
+2025-12-02T15:07:22.799081599Z [inf]  [production  8/16] COPY --from=composer-deps --chown=www:www /var/www/html .
+2025-12-02T15:07:22.806959499Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+2025-12-02T15:07:23.112015833Z [inf]  [production  9/16] COPY --from=frontend-builder --chown=www:www /app/public/build ./public/build
+2025-12-02T15:07:23.121619272Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache/data     storage/framework/sessions     storage/framework/views     storage/framework/testing     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
+2025-12-02T15:07:23.406486906Z [inf]  [production 10/16] RUN mkdir -p storage/app/public     storage/framework/cache/data     storage/framework/sessions     storage/framework/views     storage/framework/testing     storage/logs     bootstrap/cache     && chown -R www:www storage bootstrap/cache     && chmod -R 775 storage bootstrap/cache
+2025-12-02T15:07:23.412696543Z [inf]  [production 11/16] RUN cp .env.example .env
+2025-12-02T15:07:23.596158167Z [inf]  [production 11/16] RUN cp .env.example .env
+2025-12-02T15:07:23.607453194Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
+2025-12-02T15:07:23.685743230Z [inf]  [production 12/16] COPY docker-nginx.conf /etc/nginx/nginx.conf
+2025-12-02T15:07:23.695164796Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+2025-12-02T15:07:23.753520373Z [inf]  [production 13/16] COPY docker-php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+2025-12-02T15:07:23.759168247Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+2025-12-02T15:07:23.819993589Z [inf]  [production 14/16] COPY docker-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+2025-12-02T15:07:23.826924638Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
+2025-12-02T15:07:23.899009674Z [inf]  [production 15/16] COPY docker-entrypoint.sh /entrypoint.sh
+2025-12-02T15:07:23.908849247Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
+2025-12-02T15:07:24.095714248Z [inf]  [production 16/16] RUN chmod +x /entrypoint.sh
+2025-12-02T15:07:24.107219080Z [inf]  exporting to docker image format
+2025-12-02T15:07:27.469908527Z [inf]  exporting to docker image format
+2025-12-02T15:07:27.577724884Z [inf]  containerimage.descriptor: eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQub2NpLmltYWdlLm1hbmlmZXN0LnYxK2pzb24iLCJkaWdlc3QiOiJzaGEyNTY6ZGUzMTQxZTE2M2Q4Mjc0YmRkYzEwN2Y0MTcwMDQzNTc4OTUwYmNlN2IwNjg1NjM5OGM0OWYzNWZiY2E3M2IzYiIsInNpemUiOjU0MTMsImFubm90YXRpb25zIjp7Im9yZy5vcGVuY29udGFpbmVycy5pbWFnZS5jcmVhdGVkIjoiMjAyNS0xMi0wMlQxNTowNzoyNloifSwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19
+2025-12-02T15:07:27.577749321Z [inf]  containerimage.config.digest: sha256:8be4263308d3d1f114723a502427e51c5c9be30382b4192532333444e0158a14
+2025-12-02T15:07:27.577751904Z [inf]  containerimage.digest: sha256:de3141e163d8274bddc107f4170043578950bce7b06856398c49f35fbca73b3b
+2025-12-02T15:07:48.443685224Z [inf]  image push
+2025-12-02T15:07:48.443777592Z [inf]  image push

@@ -61,6 +61,11 @@ class ItemsRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'category_id' => [
+                'nullable',
+                'integer',
+                'exists:item_categories,id',
+            ],
         ];
     }
 

@@ -178,6 +178,16 @@
           />
         </template>
 
+        <template #cell-quantity="{ row }">
+          <span v-if="row.data.track_quantity" class="text-gray-900">
+            {{ row.data.quantity ?? 0 }}
+            <span v-if="row.data.minimum_quantity && row.data.quantity <= row.data.minimum_quantity" class="ml-1 text-xs text-red-500">
+              (Low)
+            </span>
+          </span>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+
         <template #cell-created_at="{ row }">
           <span>{{ row.data.formatted_created_at }}</span>
         </template>
@@ -256,6 +266,7 @@ const itemColumns = computed(() => {
     { key: 'sku', label: t('items.sku') },
     { key: 'unit_name', label: t('items.unit') },
     { key: 'price', label: t('items.price') },
+    { key: 'quantity', label: t('stock.quantity') },
     { key: 'created_at', label: t('items.added_on') },
 
     {
