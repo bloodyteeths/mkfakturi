@@ -1,117 +1,130 @@
-main-Bg-zeasb.js:142 🔥🔥🔥 CUSTOMER STORE MODULE LOADED - VERSION 2025-11-26-03:11 🔥🔥🔥
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Starting deletion for ID: 34
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Sending payload: {ids: Array(1)}
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] About to make axios call
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] THEN BLOCK EXECUTED - Success!
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Success response: {data: {…}, status: 200, statusText: '', headers: Si, config: {…}, …}
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Response data: {success: true}
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Response status: 200
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Response headers: Si {access-control-allow-origin: '*', cache-control: 'no-cache, private', content-security-policy: "default-src 'self'; script-src 'self' 'unsafe-inli…stors 'self'; base-uri 'self'; form-action 'self'", content-type: 'application/json', date: 'Wed, 26 Nov 2025 02:19:59 GMT', …}
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] CATCH BLOCK EXECUTED - Error!
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.catch
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error caught: TypeError: _.tc is not a function
-    at main-Bg-zeasb.js:142:12912
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.catch
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error response: undefined
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.catch
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error request: undefined
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.catch
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error message: _.tc is not a function
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.catch
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] Error config: undefined
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.catch
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
-main-Bg-zeasb.js:142 [DELETE CUSTOMER] FINALLY BLOCK EXECUTED
-main-Bg-zeasb.js:142 Uncaught (in promise) TypeError: _.tc is not a function
-    at main-Bg-zeasb.js:142:12912
-(anonymous) @ main-Bg-zeasb.js:142
-Promise.then
-(anonymous) @ main-Bg-zeasb.js:142
-deleteCustomer @ main-Bg-zeasb.js:142
-U @ main-Bg-zeasb.js:42
-(anonymous) @ CustomerIndexDropdown-By_W2OgJ.js:1
-Promise.then
-I @ CustomerIndexDropdown-By_W2OgJ.js:1
-e.hasAbilities.a.onClick.c.<computed>.c.<computed> @ CustomerIndexDropdown-By_W2OgJ.js:1
-onClick @ main-Bg-zeasb.js:154
-onClick @ main-Bg-zeasb.js:154
-_c @ main-Bg-zeasb.js:20
-Zi @ main-Bg-zeasb.js:20
-a @ main-Bg-zeasb.js:26
+[2025-12-03 16:30:59] production.ERROR: SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'item_categories' already exists (Connection: mysql, SQL: create table `item_categories` (`id` bigint unsigned not null auto_increment primary key, `company_id` bigint unsigned not null, `name` varchar(100) not null, `description` varchar(255) null, `created_at` timestamp null, `updated_at` timestamp null) default character set utf8 collate 'utf8_unicode_ci') {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S01): SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'item_categories' already exists (Connection: mysql, SQL: create table `item_categories` (`id` bigint unsigned not null auto_increment primary key, `company_id` bigint unsigned not null, `name` varchar(100) not null, `description` varchar(255) null, `created_at` timestamp null, `updated_at` timestamp null) default character set utf8 collate 'utf8_unicode_ci') at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:822)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('create table `i...', Array, Object(Closure))
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(557): Illuminate\\Database\\Connection->run('create table `i...', Array, Object(Closure))
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Blueprint.php(119): Illuminate\\Database\\Connection->statement('create table `i...')
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(621): Illuminate\\Database\\Schema\\Blueprint->build()
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(475): Illuminate\\Database\\Schema\\Builder->build(Object(Illuminate\\Database\\Schema\\Blueprint))
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\Schema\\Builder->create('item_categories', Object(Closure))
+#6 /var/www/html/database/migrations/2025_12_03_140242_create_item_categories_table.php(14): Illuminate\\Support\\Facades\\Facade::__callStatic('create', Array)
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_12_03_1402...', Object(Closure))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_12_03_1402...', Object(Closure))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 57, false)
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#26 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#28 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#33 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#34 {main}
+
+[previous exception] [object] (PDOException(code: 42S01): SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'item_categories' already exists at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:568)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(568): PDOStatement->execute()
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(809): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('create table `i...', Array)
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(776): Illuminate\\Database\\Connection->runQueryCallback('create table `i...', Array, Object(Closure))
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(557): Illuminate\\Database\\Connection->run('create table `i...', Array, Object(Closure))
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Blueprint.php(119): Illuminate\\Database\\Connection->statement('create table `i...')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(621): Illuminate\\Database\\Schema\\Blueprint->build()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(475): Illuminate\\Database\\Schema\\Builder->build(Object(Illuminate\\Database\\Schema\\Blueprint))
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Illuminate\\Database\\Schema\\Builder->create('item_categories', Object(Closure))
+#8 /var/www/html/database/migrations/2025_12_03_140242_create_item_categories_table.php(14): Illuminate\\Support\\Facades\\Facade::__callStatic('create', Array)
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(514): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(439): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(448): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(41): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(805): Illuminate\\Console\\View\\Components\\Task->render('2025_12_03_1402...', Object(Closure))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(250): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2025_12_03_1402...', Object(Closure))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(210): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/html/d...', 57, false)
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(137): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#28 /var/www/html/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#30 /var/www/html/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/html/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#32 /var/www/html/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#35 /var/www/html/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#36 {main}
+"} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:01] production.INFO: IntelligentFieldMapper initialized {"matcher_count":4,"matchers":["App\\Services\\Import\\Intelligent\\Matchers\\ExactMatcher","App\\Services\\Import\\Intelligent\\Matchers\\SynonymMatcher","App\\Services\\Import\\Intelligent\\Matchers\\FuzzyMatcher","App\\Services\\Import\\Intelligent\\Matchers\\PatternMatcher"]} 
+[2025-12-03 16:31:01] production.INFO: ImportService initialized {"intelligent_enabled":true,"fallback_enabled":true} 
+[2025-12-03 16:31:08] production.WARNING: Health check: Certificate file not found {"path":"/var/www/html/storage/certificates/certificate.pem"} 
+[2025-12-03 16:31:08] production.WARNING: Health check: Missing Paddle configuration {"missing":["cashier.seller_id","cashier.api_key","cashier.public_key","cashier.webhook.secret"],"note":"Paddle not configured yet - this is expected until production setup"} 
+[2025-12-03 16:31:48] production.WARNING: Slow operation detected {"operation":"req_693065f386b18","execution_time_ms":765.92,"memory_used_bytes":16777216,"memory_used_mb":16.0} 
+[2025-12-03 16:31:48] production.WARNING: Slow request detected {"operation":"req_693065f386b18","execution_time_ms":765.92,"memory_used_bytes":16777216,"memory_used_mb":16.0,"method":"GET","url":"https://app.facturino.mk/api/v1/bootstrap","route":null,"user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-12-03 16:31:48] production.INFO: PartnerScopeMiddleware START {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET"} 
+[2025-12-03 16:31:48] production.INFO: PartnerScopeMiddleware - Partner found {"partner_id":2,"is_active":true} 
+[2025-12-03 16:31:48] production.INFO: PartnerScopeMiddleware - Company context {"company_id":null,"url":"https://app.facturino.mk/api/v1/console/companies"} 
+[2025-12-03 16:31:48] production.INFO: PartnerScopeMiddleware - Skipping company check for console/listing route  
+[2025-12-03 16:31:48] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index START {"user_id":2,"user_email":"your-email@example.com"} 
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Partner found {"partner_id":2,"partner_email":"your-email@example.com"} 
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Fetching managed companies  
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Managed companies fetched {"count":0} 
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Fetching referred companies  
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Referred companies fetched {"count":0} 
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Fetching pending invitations  
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index - Pending invitations fetched {"count":0,"data":[]} 
+[2025-12-03 16:31:48] production.INFO: AccountantConsoleController::index response {"partner_id":2,"managed_count":0,"referred_count":0,"pending_count":0} 
+[2025-12-03 16:31:49] production.WARNING: Slow operation detected {"operation":"req_693065f482bbf","execution_time_ms":911.92,"memory_used_bytes":0,"memory_used_mb":0.0} 
+[2025-12-03 16:31:49] production.WARNING: Slow request detected {"operation":"req_693065f482bbf","execution_time_ms":911.92,"memory_used_bytes":0,"memory_used_mb":0.0,"method":"GET","url":"https://app.facturino.mk/api/v1/customers","route":"customers.index","user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-12-03 16:31:51] production.WARNING: Slow operation detected {"operation":"req_693065f4847d6","execution_time_ms":2898.59,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
+[2025-12-03 16:31:51] production.WARNING: Slow request detected {"operation":"req_693065f4847d6","execution_time_ms":2898.59,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-12-03 16:31:54] production.WARNING: Slow operation detected {"operation":"req_693065fa6f29d","execution_time_ms":372.82,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-12-03 16:31:54] production.WARNING: Slow request detected {"operation":"req_693065fa6f29d","execution_time_ms":372.82,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices/40","route":null,"user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-12-03 16:31:54] production.INFO: [EInvoiceController::showByInvoice] Request received {"invoice_id":40,"user_id":2,"user_email":"your-email@example.com","company_id":"N/A","is_owner":true} 
+[2025-12-03 16:31:54] production.INFO: [EInvoicePolicy::viewAny] Authorization check {"user_id":2,"user_email":"your-email@example.com","is_owner":true,"company_id":"N/A"} 
+[2025-12-03 16:31:54] production.INFO: [EInvoicePolicy::viewAny] User is owner - AUTHORIZED  
+[2025-12-03 16:31:54] production.INFO: [EInvoiceController::showByInvoice] Authorization PASSED  
+[2025-12-03 16:31:55] production.WARNING: Slow operation detected {"operation":"req_693065fae8190","execution_time_ms":558.34,"memory_used_bytes":6291456,"memory_used_mb":6.0} 
+[2025-12-03 16:31:55] production.WARNING: Slow request detected {"operation":"req_693065fae8190","execution_time_ms":558.34,"memory_used_bytes":6291456,"memory_used_mb":6.0,"method":"GET","url":"https://app.facturino.mk/invoices/pdf/7jWmLAD968zA6OGYz5P8","route":null,"user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-12-03 16:31:57] production.WARNING: Slow operation detected {"operation":"req_693065fa72a2e","execution_time_ms":2851.1,"memory_used_bytes":4194304,"memory_used_mb":4.0} 
+[2025-12-03 16:31:57] production.WARNING: Slow request detected {"operation":"req_693065fa72a2e","execution_time_ms":2851.1,"memory_used_bytes":4194304,"memory_used_mb":4.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices","route":null,"user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 
+[2025-12-03 16:32:00] production.WARNING: Slow operation detected {"operation":"req_693065ffe39a4","execution_time_ms":481.29,"memory_used_bytes":2097152,"memory_used_mb":2.0} 
+[2025-12-03 16:32:00] production.WARNING: Slow request detected {"operation":"req_693065ffe39a4","execution_time_ms":481.29,"memory_used_bytes":2097152,"memory_used_mb":2.0,"method":"GET","url":"https://app.facturino.mk/api/v1/invoices/40","route":null,"user_id":2,"company_id":"2","ip":"77.28.47.225","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","response_status":200} 

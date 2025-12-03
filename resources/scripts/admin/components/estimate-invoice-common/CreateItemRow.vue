@@ -435,9 +435,12 @@ function updateTax(data) {
      state[props.storeProp].items[props.index]['taxes'][data.index] = data.item
   })
 
-  let lastTax = props.itemData.taxes[props.itemData.taxes.length - 1]
+  // Only add an empty tax slot if the last one is filled AND there isn't already an empty one
+  const taxes = props.itemData.taxes
+  const hasEmptySlot = taxes.some(tax => tax.tax_type_id === 0 || !tax.tax_type_id)
+  const lastTax = taxes[taxes.length - 1]
 
-  if (lastTax?.tax_type_id !== 0) {
+  if (lastTax?.tax_type_id !== 0 && !hasEmptySlot) {
     props.store.$patch((state) => {
       state[props.storeProp].items[props.index].taxes.push({
         ...TaxStub,

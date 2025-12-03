@@ -1,41 +1,105 @@
-{
-    "message": "Request failed with status code 422",
-    "name": "AxiosError",
-    "stack": "AxiosError: Request failed with status code 422\n    at _A (https://app.facturino.mk/build/assets/main-CsJ6glZ7.js:4:1088)\n    at XMLHttpRequest.y (https://app.facturino.mk/build/assets/main-CsJ6glZ7.js:4:5847)\n    at Ul.request (https://app.facturino.mk/build/assets/main-CsJ6glZ7.js:6:2094)\n    at async Y (https://app.facturino.mk/build/assets/Signup-DWfYtpaK.js:1:4871)",
-    "config": {
-        "transitional": {
-            "silentJSONParsing": true,
-            "forcedJSONParsing": true,
-            "clarifyTimeoutError": false
-        },
-        "adapter": [
-            "xhr",
-            "http",
-            "fetch"
-        ],
-        "transformRequest": [
-            null
-        ],
-        "transformResponse": [
-            null
-        ],
-        "timeout": 0,
-        "xsrfCookieName": "XSRF-TOKEN",
-        "xsrfHeaderName": "X-XSRF-TOKEN",
-        "maxContentLength": -1,
-        "maxBodyLength": -1,
-        "env": {},
-        "headers": {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        },
-        "withCredentials": true,
-        "baseURL": "/api/v1",
-        "method": "post",
-        "url": "/public/signup/register",
-        "data": "{\"company_name\":\"sara doo\",\"tax_id\":\"1234567994125\",\"address\":\"test adres\",\"city\":\"skopje\",\"zip\":\"1000\",\"name\":\"marko test\",\"email\":\"atillatkulu@gmail.com\",\"password\":\"password123\",\"plan\":\"starter\",\"billing_period\":\"monthly\",\"partner_id\":3,\"affiliate_link_id\":1}",
-        "allowAbsoluteUrls": true
-    },
-    "code": "ERR_BAD_REQUEST",
-    "status": 422
-}
+main-DlgftOp2.js:109 🔥🔥🔥 CUSTOMER STORE MODULE LOADED - VERSION 2025-11-26-03:11 🔥🔥🔥
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.efaktura_sending' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.efaktura_sending' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.qes_signing' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.qes_signing' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.multi_users' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.multi_users' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.200_invoices' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.200_invoices' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.upgrade_required' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.upgrade_required' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+Index-NA3SZ5CU.js:1 Object
+Index-NA3SZ5CU.js:1 API response: Array(10)
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.efaktura_sending' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.efaktura_sending' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.qes_signing' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.qes_signing' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.multi_users' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.multi_users' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.200_invoices' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.200_invoices' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.upgrade_required' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.upgrade_required' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:20 TypeError: Cannot read properties of null (reading 'title')
+    at main-DlgftOp2.js:137:38367
+    at Object.n (main-DlgftOp2.js:20:3963)
+    at sy (main-DlgftOp2.js:118:64657)
+    at ia (main-DlgftOp2.js:118:64362)
+    at Proxy.<anonymous> (main-DlgftOp2.js:121:61899)
+    at Cp (main-DlgftOp2.js:22:19933)
+    at jc.G [as fn] (main-DlgftOp2.js:22:30071)
+    at jc.run (main-DlgftOp2.js:16:1910)
+    at de (main-DlgftOp2.js:22:30475)
+    at Ne (main-DlgftOp2.js:22:28993)
+h$ @ main-DlgftOp2.js:20
+main-DlgftOp2.js:20 TypeError: Cannot read properties of null (reading 'title')
+    at main-DlgftOp2.js:137:38367
+    at Object.n (main-DlgftOp2.js:20:3963)
+    at sy (main-DlgftOp2.js:118:64657)
+    at ia (main-DlgftOp2.js:118:64362)
+    at Proxy.<anonymous> (main-DlgftOp2.js:121:61899)
+    at Cp (main-DlgftOp2.js:22:19933)
+    at jc.G [as fn] (main-DlgftOp2.js:22:29526)
+    at jc.run (main-DlgftOp2.js:16:1910)
+    at Me (main-DlgftOp2.js:22:29147)
+    at ie (main-DlgftOp2.js:22:28768)
+h$ @ main-DlgftOp2.js:20
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.efaktura_sending' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.efaktura_sending' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.qes_signing' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.qes_signing' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.multi_users' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.multi_users' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.features.200_invoices' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.features.200_invoices' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Not found 'subscriptions.upgrade_required' key in 'mk' locale messages.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:72 [intlify] Fall back to translate 'subscriptions.upgrade_required' key with 'en' locale.
+rd @ main-DlgftOp2.js:72
+main-DlgftOp2.js:20 TypeError: Cannot read properties of null (reading 'title')
+    at main-DlgftOp2.js:137:38367
+    at Object.n [as default] (main-DlgftOp2.js:20:3963)
+    at sy (main-DlgftOp2.js:118:64657)
+    at ia (main-DlgftOp2.js:118:64362)
+    at Proxy.<anonymous> (main-DlgftOp2.js:121:61899)
+    at Cp (main-DlgftOp2.js:22:19933)
+    at jc.G [as fn] (main-DlgftOp2.js:22:29526)
+    at jc.run (main-DlgftOp2.js:16:1910)
+    at Me (main-DlgftOp2.js:22:29147)
+    at ie (main-DlgftOp2.js:22:28768)
+h$ @ main-DlgftOp2.js:20
+/api/v1/invoices/40/export-xml:1  Failed to load resource: the server responded with a status of 422 ()
+ExportXmlModal-CeaEaAEJ.js:1 XML export failed: It
+j @ ExportXmlModal-CeaEaAEJ.js:1
+/api/v1/invoices/40/export-xml:1  Failed to load resource: the server responded with a status of 422 ()
+ExportXmlModal-CeaEaAEJ.js:1 XML export failed: It
+j @ ExportXmlModal-CeaEaAEJ.js:1
