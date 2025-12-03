@@ -85,12 +85,14 @@
         </BaseInputGroup>
 
         <BaseInputGroup :label="$t('items.category')" class="text-left">
-          <BaseInput
-            v-model="filters.category"
-            type="text"
-            name="category"
-            :placeholder="$t('items.enter_category')"
-            autocomplete="off"
+          <BaseMultiselect
+            v-model="filters.category_id"
+            :content-loading="isLoadingCategories"
+            value-prop="id"
+            track-by="name"
+            label="name"
+            :options="itemStore.itemCategories"
+            :placeholder="$t('stock.all_categories')"
           />
         </BaseInputGroup>
       </BaseFilterWrapper>
@@ -268,11 +270,13 @@ const isLoadingItems = ref(false)
 const filters = reactive({
   warehouse_id: '',
   item_id: null,
-  category: '',
+  category_id: '',
 })
 
+const isLoadingCategories = ref(false)
+
 const showEmptyScreen = computed(
-  () => inventoryData.value.length === 0 && !isRequestOngoing.value && !filters.item_id && !filters.warehouse_id && !filters.category
+  () => inventoryData.value.length === 0 && !isRequestOngoing.value && !filters.item_id && !filters.warehouse_id && !filters.category_id
 )
 
 const hasInventoryData = computed(
@@ -327,6 +331,12 @@ debouncedWatch(
 onMounted(async () => {
   // Stock module is always enabled - load data
   await stockStore.fetchWarehouses()
+
+  // Load item categories for filter
+  isLoadingCategories.value = true
+  await itemStore.fetchItemCategories({ limit: 'all' })
+  isLoadingCategories.value = false
+
   await refreshTable()
 })
 
@@ -356,7 +366,7 @@ function toggleFilter() {
 function clearFilter() {
   filters.warehouse_id = ''
   filters.item_id = null
-  filters.category = ''
+  filters.category_id = ''
 }
 
 function refreshTable() {
@@ -367,7 +377,7 @@ async function fetchData({ page, filter, sort }) {
   const data = {
     warehouse_id: filters.warehouse_id || '',
     item_id: filters.item_id?.id || '',
-    category: filters.category || '',
+    category_id: filters.category_id || '',
     orderByField: sort.fieldName || 'name',
     orderBy: sort.order || 'asc',
     page,

@@ -38,7 +38,7 @@ class StockController extends Controller
         $companyId = $request->header('company');
         $warehouseId = $request->query('warehouse_id');
         $search = $request->query('search');
-        $categoryId = $request->query('category');
+        $categoryId = $request->query('category_id');
         $itemId = $request->query('item_id');
         $orderByField = $request->query('orderByField', 'name');
         $orderBy = $request->query('orderBy', 'asc');
@@ -47,7 +47,7 @@ class StockController extends Controller
         // Build query
         $query = Item::where('company_id', $companyId)
             ->where('track_quantity', true)
-            ->with(['unit', 'currency']);
+            ->with(['unit', 'currency', 'itemCategory']);
 
         // Apply filters
         if ($itemId) {
@@ -63,9 +63,7 @@ class StockController extends Controller
         }
 
         if ($categoryId) {
-            // Assuming category is a string field or relation.
-            // Based on Create.vue it seems to be a text field 'category'
-            $query->where('category', 'like', "%{$categoryId}%");
+            $query->where('category_id', $categoryId);
         }
 
         // Apply sorting

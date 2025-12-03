@@ -533,6 +533,32 @@ onMounted(async () => {
     if (route.query.scanned_receipt_path) {
       bill.scanned_receipt_path = route.query.scanned_receipt_path
     }
+
+    // Pre-fill item from low stock reorder action
+    if (route.query.prefill_item_id) {
+      const itemId = parseInt(route.query.prefill_item_id)
+      const itemName = route.query.prefill_item_name || ''
+      const quantity = parseInt(route.query.prefill_quantity) || 1
+
+      // Fetch the item to get full details
+      itemStore.fetchItem(itemId).then(() => {
+        const item = itemStore.currentItem
+        if (item && item.id) {
+          selectItem(0, item)
+          items[0].quantity = quantity
+        } else {
+          // Fallback: just set name and quantity if item fetch fails
+          items[0].item_id = itemId
+          items[0].name = itemName
+          items[0].quantity = quantity
+        }
+      }).catch(() => {
+        // Fallback on error
+        items[0].item_id = itemId
+        items[0].name = itemName
+        items[0].quantity = quantity
+      })
+    }
   }
 })
 </script>

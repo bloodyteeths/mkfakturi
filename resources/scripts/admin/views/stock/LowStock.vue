@@ -352,11 +352,15 @@ function viewItemCard(itemId) {
 }
 
 function createPurchaseOrder(item) {
-  // Placeholder for future feature
-  notificationStore.showMessage({
-    title: t('stock.reorder_feature_coming_soon'),
-    description: t('stock.reorder_feature_coming_soon_message', { item: item.name }),
-    type: 'info',
+  // Navigate to create bill with item pre-selected
+  // Pass item info via query params so the bill form can pre-fill
+  router.push({
+    path: '/admin/bills/create',
+    query: {
+      prefill_item_id: item.item_id,
+      prefill_item_name: item.item_name,
+      prefill_quantity: item.shortage > 0 ? item.shortage : 1,
+    },
   })
 }
 
