@@ -214,10 +214,11 @@ class Item extends Model
         $data['currency_id'] = $company_currency;
         $item = self::create($data);
 
-        if ($request->has('taxes')) {
+        if ($request->has('taxes') && count($request->taxes) > 0) {
+            $item->tax_per_item = true;
+            $item->save();
+
             foreach ($request->taxes as $tax) {
-                $item->tax_per_item = true;
-                $item->save();
                 $tax['company_id'] = $request->header('company');
                 $item->taxes()->create($tax);
             }
@@ -276,10 +277,11 @@ class Item extends Model
 
         $this->taxes()->delete();
 
-        if ($request->has('taxes')) {
+        if ($request->has('taxes') && count($request->taxes) > 0) {
+            $this->tax_per_item = true;
+            $this->save();
+
             foreach ($request->taxes as $tax) {
-                $this->tax_per_item = true;
-                $this->save();
                 $tax['company_id'] = $request->header('company');
                 $this->taxes()->create($tax);
             }
