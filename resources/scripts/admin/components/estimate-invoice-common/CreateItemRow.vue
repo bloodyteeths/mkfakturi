@@ -432,22 +432,34 @@ const v$ = useVuelidate(
 
 function updateTax(data) {
   props.store.$patch((state) => {
-     state[props.storeProp].items[props.index]['taxes'][data.index] = data.item
-  })
+    // Update the tax at the given index
+    state[props.storeProp].items[props.index]['taxes'][data.index] = data.item
 
-  // Only add an empty tax slot if the last one is filled AND there isn't already an empty one
-  const taxes = props.itemData.taxes
-  const hasEmptySlot = taxes.some(tax => tax.tax_type_id === 0 || !tax.tax_type_id)
-  const lastTax = taxes[taxes.length - 1]
-
-  if (lastTax?.tax_type_id !== 0 && !hasEmptySlot) {
-    props.store.$patch((state) => {
-      state[props.storeProp].items[props.index].taxes.push({
-        ...TaxStub,
-        id: Guid.raw(),
-      })
+    // Clean up: remove duplicate taxes (same tax_type_id) keeping only the first occurrence
+    const taxes = state[props.storeProp].items[props.index].taxes
+    const seenTaxIds = new Set()
+    const cleanedTaxes = taxes.filter(tax => {
+      if (!tax.tax_type_id || tax.tax_type_id === 0) {
+        // Keep empty slots (but we'll ensure only one exists below)
+        return true
+      }
+      if (seenTaxIds.has(tax.tax_type_id)) {
+        return false // Duplicate, remove it
+      }
+      seenTaxIds.add(tax.tax_type_id)
+      return true
     })
-  }
+
+    // Ensure exactly one empty slot at the end
+    const emptySlots = cleanedTaxes.filter(tax => !tax.tax_type_id || tax.tax_type_id === 0)
+    const filledTaxes = cleanedTaxes.filter(tax => tax.tax_type_id && tax.tax_type_id !== 0)
+
+    // Keep only filled taxes + one empty slot
+    state[props.storeProp].items[props.index].taxes = [
+      ...filledTaxes,
+      emptySlots.length > 0 ? emptySlots[0] : { ...TaxStub, id: Guid.raw() }
+    ]
+  })
 
   syncItemToStore()
 }
@@ -483,12 +495,14 @@ function onSelectItem(itm) {
     }
 
     if (props.store[props.storeProp].tax_per_item === 'YES' && itm.taxes) {
-      // Replace all taxes with the item's taxes plus one empty slot
-      // This avoids the issue where updateTax adds an empty slot after each tax
-      const itemTaxes = itm.taxes.map(tax => ({
-        ...tax,
-        id: Guid.raw(),
-      }))
+      // Deduplicate taxes by tax_type_id - some items may have duplicate tax entries
+      const uniqueTaxMap = new Map()
+      itm.taxes.forEach(tax => {
+        if (tax.tax_type_id && !uniqueTaxMap.has(tax.tax_type_id)) {
+          uniqueTaxMap.set(tax.tax_type_id, { ...tax, id: Guid.raw() })
+        }
+      })
+      const itemTaxes = Array.from(uniqueTaxMap.values())
       // Add one empty slot at the end for adding more taxes
       itemTaxes.push({ ...TaxStub, id: Guid.raw() })
       state[props.storeProp].items[props.index].taxes = itemTaxes
