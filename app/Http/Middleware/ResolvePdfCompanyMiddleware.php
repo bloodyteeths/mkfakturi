@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\ProformaInvoice;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +25,7 @@ class ResolvePdfCompanyMiddleware
             'invoice' => Invoice::class,
             'estimate' => Estimate::class,
             'payment' => Payment::class,
+            'proformaInvoice' => ProformaInvoice::class,
         ];
 
         foreach ($map as $parameter => $modelClass) {
