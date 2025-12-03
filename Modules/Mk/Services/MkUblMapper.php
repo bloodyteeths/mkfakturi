@@ -454,14 +454,30 @@ class MkUblMapper
         // 2. resources/schemas (backup location for Docker deployments)
 
         $storagePath = storage_path('schemas/maindoc/UBL-Invoice-2.1.xsd');
+        $resourcesPath = resource_path('schemas/maindoc/UBL-Invoice-2.1.xsd');
+
+        \Log::info('UBL Schema path resolution', [
+            'storage_path' => $storagePath,
+            'storage_exists' => file_exists($storagePath),
+            'resources_path' => $resourcesPath,
+            'resources_exists' => file_exists($resourcesPath),
+        ]);
+
         if (file_exists($storagePath)) {
+            \Log::info('Using storage schema path', ['path' => $storagePath]);
+
             return $storagePath;
         }
 
-        $resourcesPath = resource_path('schemas/maindoc/UBL-Invoice-2.1.xsd');
         if (file_exists($resourcesPath)) {
+            \Log::info('Using resources schema path', ['path' => $resourcesPath]);
+
             return $resourcesPath;
         }
+
+        \Log::warning('No UBL schema file found at any location', [
+            'checked_paths' => [$storagePath, $resourcesPath],
+        ]);
 
         // Return storage path as fallback (validation will handle missing file)
         return $storagePath;
