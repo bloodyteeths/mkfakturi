@@ -488,7 +488,10 @@ function onSelectItem(itm) {
       })
     }
 
-    if (state[props.storeProp].exchange_rate) {
+    // Only apply exchange rate if:
+    // 1. showExchangeRate is true (document currency differs from company currency)
+    // 2. AND exchange_rate is actually set
+    if (props.store.showExchangeRate && state[props.storeProp].exchange_rate) {
       state[props.storeProp].items[props.index].price /=
         state[props.storeProp].exchange_rate
     }
