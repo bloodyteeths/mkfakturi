@@ -605,6 +605,8 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/proforma-invoices/delete', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'delete']);
 
+            Route::get('/proforma-invoices/templates', \App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoiceTemplatesController::class);
+
             Route::apiResource('proforma-invoices', \App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class);
 
             // Audit Logs

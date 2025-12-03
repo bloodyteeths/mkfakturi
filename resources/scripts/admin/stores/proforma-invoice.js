@@ -419,9 +419,9 @@ export const useProformaInvoiceStore = (useWindow = false) => {
       fetchProformaInvoiceTemplates(params) {
         return new Promise((resolve, reject) => {
           axios
-            .get(`/invoices/templates`, { params })
+            .get(`/proforma-invoices/templates`, { params })
             .then((response) => {
-              this.templates = response.data.invoiceTemplates
+              this.templates = response.data.proformaInvoiceTemplates
               resolve(response)
             })
             .catch((err) => {
