@@ -480,12 +480,15 @@ function onSelectItem(itm) {
     }
 
     if (props.store[props.storeProp].tax_per_item === 'YES' && itm.taxes) {
-      let index = 0
-
-      itm.taxes.forEach((tax) => {
-        updateTax({ index, item: { ...tax } })
-        index++
-      })
+      // Replace all taxes with the item's taxes plus one empty slot
+      // This avoids the issue where updateTax adds an empty slot after each tax
+      const itemTaxes = itm.taxes.map(tax => ({
+        ...tax,
+        id: Guid.raw(),
+      }))
+      // Add one empty slot at the end for adding more taxes
+      itemTaxes.push({ ...TaxStub, id: Guid.raw() })
+      state[props.storeProp].items[props.index].taxes = itemTaxes
     }
 
     // Only apply exchange rate if:

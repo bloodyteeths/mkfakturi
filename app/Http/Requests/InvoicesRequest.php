@@ -154,7 +154,6 @@ class InvoicesRequest extends FormRequest
         }
 
         $stockService = app(StockService::class);
-        $defaultWarehouse = Warehouse::getOrCreateDefault($companyId);
         $insufficientItems = [];
 
         foreach ($items as $index => $itemData) {
@@ -172,13 +171,20 @@ class InvoicesRequest extends FormRequest
                 continue;
             }
 
-            // Get warehouse from item data or use default
-            $warehouseId = $itemData['warehouse_id'] ?? $defaultWarehouse->id;
             $requestedQty = (float) ($itemData['quantity'] ?? 0);
 
-            // Get current stock
-            $stock = $stockService->getItemStock($companyId, $item->id, $warehouseId);
+            // Get stock across ALL warehouses (not just a specific one)
+            // This is more flexible and handles cases where:
+            // 1. Items were created before stock movements were implemented
+            // 2. Stock is spread across multiple warehouses
+            $stock = $stockService->getItemStock($companyId, $item->id, null);
             $availableQty = $stock['quantity'];
+
+            // If no stock movements exist, fall back to the item's quantity field
+            // This handles legacy items created before the stock module
+            if ($availableQty == 0 && $item->quantity > 0) {
+                $availableQty = (float) $item->quantity;
+            }
 
             // For updates, we need to account for the existing invoice item quantity
             if ($this->isMethod('PUT')) {
