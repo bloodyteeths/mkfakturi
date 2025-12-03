@@ -22,15 +22,17 @@
             <BaseMultiselect
               v-model="filters.item"
               :content-loading="isLoadingItems"
-              :filterResults="false"
-              resolve-on-load
-              :delay="500"
-              searchable
-              :options="searchItems"
+              :filter-results="false"
+              :min-chars="0"
+              :delay="300"
+              :searchable="true"
+              :options="asyncSearchItems"
               value-prop="id"
               track-by="name"
               label="name"
-              object
+              :object="true"
+              :clear-on-select="false"
+              :close-on-select="true"
               :placeholder="$t('stock.select_item')"
             >
               <template #singlelabel="{ value }">
@@ -314,11 +316,22 @@ function getSourceColor(sourceType) {
   return colors[sourceType] || '#6B7280'
 }
 
-async function searchItems(search) {
-  isLoadingItems.value = true
+/**
+ * Async search function for item multiselect
+ * Returns items that have track_quantity enabled
+ */
+async function asyncSearchItems(search) {
   try {
-    const res = await itemStore.fetchItems({ search, track_quantity: true })
-    return res.data.data
+    isLoadingItems.value = true
+    const res = await itemStore.fetchItems({
+      search: search || '',
+      track_quantity: true,
+      limit: 50,
+    })
+    return res.data.data || []
+  } catch (error) {
+    console.error('Failed to search items:', error)
+    return []
   } finally {
     isLoadingItems.value = false
   }
