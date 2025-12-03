@@ -690,12 +690,16 @@ class ProformaInvoice extends Model
 
         App::setLocale($locale);
 
-        // Get logo from company - logo_path returns local path or URL
-        $logo = $company->logo_path;
+        // Get logo - prefer full URL for cloud storage, fall back to local path
+        $logo = $company->logo; // This returns full URL
 
-        // If logo_path is null, try the logo attribute (URL)
+        // If no URL, try logo_path (local file path)
         if (! $logo) {
-            $logo = $company->logo;
+            $logoPath = $company->logo_path;
+            // Only use logo_path if it's an absolute path or URL
+            if ($logoPath && (str_starts_with($logoPath, '/') || filter_var($logoPath, FILTER_VALIDATE_URL))) {
+                $logo = $logoPath;
+            }
         }
 
         // If still no logo, use default Facturino logo
@@ -711,12 +715,12 @@ class ProformaInvoice extends Model
         \Log::info('ProformaInvoice PDF Data', [
             'proforma_id' => $this->id,
             'company_id' => $company->id,
-            'logo_path' => $company->logo_path,
-            'logo_url' => $company->logo,
+            'logo_path_raw' => $company->logo_path,
+            'logo_url_raw' => $company->logo,
             'final_logo' => $logo,
-            'company_address' => $companyAddress,
-            'billing_address' => $billingAddress,
-            'shipping_address' => $shippingAddress,
+            'company_address' => $companyAddress ?: '(empty or false)',
+            'billing_address' => $billingAddress ?: '(empty or false)',
+            'shipping_address' => $shippingAddress ?: '(empty or false)',
             'customer_id' => $this->customer_id,
             'has_customer' => $this->customer ? true : false,
         ]);

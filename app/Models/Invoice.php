@@ -669,12 +669,16 @@ class Invoice extends Model implements HasMedia
 
         App::setLocale($locale);
 
-        // Get logo from company - logo_path returns local path or URL
-        $logo = $company->logo_path;
+        // Get logo - prefer full URL for cloud storage, fall back to local path
+        $logo = $company->logo; // This returns full URL
 
-        // If logo_path is null, try the logo attribute (URL)
+        // If no URL, try logo_path (local file path)
         if (! $logo) {
-            $logo = $company->logo;
+            $logoPath = $company->logo_path;
+            // Only use logo_path if it's an absolute path or URL
+            if ($logoPath && (str_starts_with($logoPath, '/') || filter_var($logoPath, FILTER_VALIDATE_URL))) {
+                $logo = $logoPath;
+            }
         }
 
         // If still no logo, use default Facturino logo
