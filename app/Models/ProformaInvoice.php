@@ -708,19 +708,17 @@ class ProformaInvoice extends Model
             'taxes' => $taxes,
         ]);
 
-        $template = PdfTemplateUtils::findFormattedTemplate('invoice', $proformaTemplate, '');
+        // First try to find a proforma-specific template
+        $template = PdfTemplateUtils::findFormattedTemplate('proforma_invoice', $proformaTemplate, '');
 
-        if (! $template) {
-            \Log::warning('PDF template not found, falling back to default', [
-                'requested_template' => $proformaTemplate,
-                'proforma_invoice_id' => $this->id,
-                'company_id' => $this->company_id,
-            ]);
-            $template = ['name' => 'invoice1', 'custom' => false];
-            $proformaTemplate = 'invoice1';
+        if ($template) {
+            $templatePath = $template['custom']
+                ? sprintf('pdf_templates::proforma_invoice.%s', $proformaTemplate)
+                : sprintf('app.pdf.proforma_invoice.%s', $proformaTemplate);
+        } else {
+            // Fall back to proforma_invoice1 template
+            $templatePath = 'app.pdf.proforma_invoice.proforma_invoice1';
         }
-
-        $templatePath = $template['custom'] ? sprintf('pdf_templates::invoice.%s', $proformaTemplate) : sprintf('app.pdf.invoice.%s', $proformaTemplate);
 
         if (request()->has('preview')) {
             return view($templatePath);
