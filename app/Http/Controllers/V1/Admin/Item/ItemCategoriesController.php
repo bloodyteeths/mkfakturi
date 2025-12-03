@@ -19,12 +19,17 @@ class ItemCategoriesController extends Controller
     {
         $limit = $request->has('limit') ? $request->limit : 100;
 
-        $categories = ItemCategory::whereCompany($request->header('company'))
+        $query = ItemCategory::whereCompany($request->header('company'))
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->where('name', 'LIKE', '%' . $request->search . '%');
             })
-            ->orderBy('name')
-            ->paginate($limit);
+            ->orderBy('name');
+
+        if ($limit == 'all') {
+            $categories = $query->get();
+        } else {
+            $categories = $query->paginate($limit);
+        }
 
         return ItemCategoryResource::collection($categories);
     }
