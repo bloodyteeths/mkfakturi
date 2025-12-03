@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.ujp.gov.mk/ddv04"
+           xmlns:ddv="http://www.ujp.gov.mk/ddv04"
+           elementFormDefault="qualified">
+
+    <!-- Macedonia ДДВ-04 VAT Return Schema -->
+    <!-- Based on Public Revenue Office of North Macedonia VAT return requirements -->
+    
+    <xs:element name="DDV04" type="ddv:DDV04Type"/>
+    
+    <xs:complexType name="DDV04Type">
+        <xs:sequence>
+            <xs:element name="Header" type="ddv:HeaderType"/>
+            <xs:element name="TaxPayer" type="ddv:TaxPayerType"/>
+            <xs:element name="TaxPeriod" type="ddv:TaxPeriodType"/>
+            <xs:element name="VATCalculation" type="ddv:VATCalculationType"/>
+            <xs:element name="VATSummary" type="ddv:VATSummaryType"/>
+            <xs:element name="Declaration" type="ddv:DeclarationType"/>
+        </xs:sequence>
+        <xs:attribute name="version" type="xs:string" fixed="1.0"/>
+    </xs:complexType>
+    
+    <xs:complexType name="HeaderType">
+        <xs:sequence>
+            <xs:element name="DocumentType" type="xs:string" fixed="DDV-04"/>
+            <xs:element name="SubmissionDate" type="xs:date"/>
+            <xs:element name="FormVersion" type="xs:string" default="2024"/>
+            <xs:element name="SoftwareInfo" type="ddv:SoftwareInfoType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="SoftwareInfoType">
+        <xs:sequence>
+            <xs:element name="SoftwareName" type="xs:string"/>
+            <xs:element name="SoftwareVersion" type="xs:string"/>
+            <xs:element name="SoftwareProvider" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="TaxPayerType">
+        <xs:sequence>
+            <xs:element name="VATNumber" type="ddv:VATNumberType"/>
+            <xs:element name="CompanyName" type="xs:string"/>
+            <xs:element name="Address" type="ddv:AddressType"/>
+            <xs:element name="ContactInfo" type="ddv:ContactInfoType"/>
+            <xs:element name="TaxPayerCategory" type="ddv:TaxPayerCategoryType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="VATNumberType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="MK[0-9]{11}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="AddressType">
+        <xs:sequence>
+            <xs:element name="Street" type="xs:string"/>
+            <xs:element name="City" type="xs:string"/>
+            <xs:element name="PostalCode" type="xs:string"/>
+            <xs:element name="Country" type="xs:string" default="MK"/>
+            <xs:element name="Municipality" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ContactInfoType">
+        <xs:sequence>
+            <xs:element name="Phone" type="xs:string" minOccurs="0"/>
+            <xs:element name="Email" type="xs:string" minOccurs="0"/>
+            <xs:element name="Website" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="TaxPayerCategoryType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="STANDARD"/>
+            <xs:enumeration value="SMALL_BUSINESS"/>
+            <xs:enumeration value="MICRO_BUSINESS"/>
+            <xs:enumeration value="AGRICULTURAL"/>
+            <xs:enumeration value="NON_PROFIT"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="TaxPeriodType">
+        <xs:sequence>
+            <xs:element name="Year" type="xs:gYear"/>
+            <xs:element name="Period" type="ddv:PeriodType"/>
+            <xs:element name="PeriodStart" type="xs:date"/>
+            <xs:element name="PeriodEnd" type="xs:date"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="PeriodType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="MONTHLY"/>
+            <xs:enumeration value="QUARTERLY"/>
+            <xs:enumeration value="ANNUAL"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="VATCalculationType">
+        <xs:sequence>
+            <xs:element name="StandardRate" type="ddv:VATRateType"/>
+            <xs:element name="ReducedRate" type="ddv:VATRateType"/>
+            <xs:element name="ZeroRate" type="ddv:VATRateType"/>
+            <xs:element name="ExemptSupplies" type="ddv:VATRateType"/>
+            <xs:element name="InputVAT" type="ddv:InputVATType"/>
+            <xs:element name="Adjustments" type="ddv:AdjustmentsType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="VATRateType">
+        <xs:sequence>
+            <xs:element name="Rate" type="ddv:PercentageType"/>
+            <xs:element name="TaxableBase" type="ddv:MonetaryAmountType"/>
+            <xs:element name="VATAmount" type="ddv:MonetaryAmountType"/>
+            <xs:element name="TransactionCount" type="xs:nonNegativeInteger" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="InputVATType">
+        <xs:sequence>
+            <xs:element name="PurchaseVAT" type="ddv:MonetaryAmountType"/>
+            <xs:element name="ImportVAT" type="ddv:MonetaryAmountType"/>
+            <xs:element name="CapitalGoodsVAT" type="ddv:MonetaryAmountType"/>
+            <xs:element name="OtherDeductibleVAT" type="ddv:MonetaryAmountType"/>
+            <xs:element name="TotalInputVAT" type="ddv:MonetaryAmountType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="AdjustmentsType">
+        <xs:sequence>
+            <xs:element name="PreviousPeriodAdjustments" type="ddv:MonetaryAmountType"/>
+            <xs:element name="BadDebtAdjustments" type="ddv:MonetaryAmountType"/>
+            <xs:element name="CorrectionAdjustments" type="ddv:MonetaryAmountType"/>
+            <xs:element name="OtherAdjustments" type="ddv:MonetaryAmountType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="VATSummaryType">
+        <xs:sequence>
+            <xs:element name="TotalOutputVAT" type="ddv:MonetaryAmountType"/>
+            <xs:element name="TotalInputVAT" type="ddv:MonetaryAmountType"/>
+            <xs:element name="NetVATDue" type="ddv:MonetaryAmountType"/>
+            <xs:element name="VATRefund" type="ddv:MonetaryAmountType"/>
+            <xs:element name="PreviousPeriodCredit" type="ddv:MonetaryAmountType"/>
+            <xs:element name="VATToPay" type="ddv:MonetaryAmountType"/>
+            <xs:element name="VATCarryForward" type="ddv:MonetaryAmountType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="DeclarationType">
+        <xs:sequence>
+            <xs:element name="DeclarantName" type="xs:string"/>
+            <xs:element name="DeclarantPosition" type="xs:string"/>
+            <xs:element name="DeclarantSignature" type="xs:string" minOccurs="0"/>
+            <xs:element name="DeclarationDate" type="xs:date"/>
+            <xs:element name="ResponsiblePerson" type="ddv:ResponsiblePersonType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ResponsiblePersonType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="Position" type="xs:string"/>
+            <xs:element name="TaxID" type="xs:string" minOccurs="0"/>
+            <xs:element name="Phone" type="xs:string" minOccurs="0"/>
+            <xs:element name="Email" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Common Types -->
+    <xs:simpleType name="MonetaryAmountType">
+        <xs:restriction base="xs:decimal">
+            <xs:fractionDigits value="2"/>
+            <xs:minInclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="PercentageType">
+        <xs:restriction base="xs:decimal">
+            <xs:fractionDigits value="2"/>
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="100"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

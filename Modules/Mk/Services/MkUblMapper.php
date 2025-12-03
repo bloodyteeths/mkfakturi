@@ -449,8 +449,22 @@ class MkUblMapper
      */
     protected function getUblSchemaPath(): string
     {
-        // Path to UBL 2.1 Invoice schema in proper directory structure
-        return storage_path('schemas/maindoc/UBL-Invoice-2.1.xsd');
+        // Try multiple paths for UBL schema:
+        // 1. storage/schemas (original location)
+        // 2. resources/schemas (backup location for Docker deployments)
+
+        $storagePath = storage_path('schemas/maindoc/UBL-Invoice-2.1.xsd');
+        if (file_exists($storagePath)) {
+            return $storagePath;
+        }
+
+        $resourcesPath = resource_path('schemas/maindoc/UBL-Invoice-2.1.xsd');
+        if (file_exists($resourcesPath)) {
+            return $resourcesPath;
+        }
+
+        // Return storage path as fallback (validation will handle missing file)
+        return $storagePath;
     }
 
     /**
