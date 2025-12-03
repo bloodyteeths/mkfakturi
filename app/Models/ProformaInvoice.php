@@ -190,6 +190,24 @@ class ProformaInvoice extends Model
         return Carbon::parse($this->expiry_date)->translatedFormat($dateFormat);
     }
 
+    // Invoice-compatible accessors for PDF template compatibility
+    // These allow using the same invoice PDF templates for proforma invoices
+
+    public function getInvoiceNumberAttribute(): string
+    {
+        return $this->proforma_invoice_number ?? '';
+    }
+
+    public function getFormattedInvoiceDateAttribute(): string
+    {
+        return $this->formattedProformaInvoiceDate;
+    }
+
+    public function getFormattedDueDateAttribute(): string
+    {
+        return $this->formattedExpiryDate;
+    }
+
     // Scopes
 
     public function scopeWhereStatus($query, string $status)
