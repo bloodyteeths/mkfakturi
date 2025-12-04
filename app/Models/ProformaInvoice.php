@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Facades\PDF;
 use App\Space\PdfTemplateUtils;
 use App\Services\SerialNumberFormatter;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -753,7 +753,7 @@ class ProformaInvoice extends Model
             return view($templatePath);
         }
 
-        return Pdf::loadView($templatePath);
+        return PDF::loadView($templatePath);
     }
 
     /**

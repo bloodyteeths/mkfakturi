@@ -26,7 +26,9 @@ trait GeneratesPdfTrait
 
         $pdf = $this->getPDFData();
 
-        return response()->make($pdf->stream(), 200, [
+        // Use output() to get string content, as stream() may return a Response object
+        // depending on the PDF driver (Gotenberg vs DomPDF)
+        return response()->make($pdf->output(), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$this[$collection_name.'_number'].'.pdf"',
         ]);
