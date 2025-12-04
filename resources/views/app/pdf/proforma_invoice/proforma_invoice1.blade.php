@@ -6,139 +6,152 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     <style type="text/css">
-        /* -- Base -- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: "DejaVu Sans";
-            font-size: 12px;
-            color: #333;
-            margin: 0;
+            font-size: 11px;
+            color: #2d3748;
+            line-height: 1.5;
             padding: 0;
-        }
-
-        html {
             margin: 0;
-            padding: 0;
         }
 
-        table {
-            border-collapse: collapse;
+        /* Header */
+        .header {
+            padding: 25px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        /* -- Header Section -- */
-        .header-container {
+        .header-table {
             width: 100%;
-            padding: 20px 30px 15px 30px;
-            border-bottom: 2px solid #5851DB;
         }
 
-        .header-logo {
-            height: 55px;
-            max-width: 180px;
+        .logo-cell {
+            vertical-align: middle;
         }
 
-        .header-logo-text {
-            font-size: 22px;
+        .logo {
+            height: 60px;
+            max-width: 200px;
+        }
+
+        .company-name {
+            font-size: 20px;
             font-weight: bold;
-            color: #5851DB;
-            margin: 0;
-            padding: 0;
+            color: white;
         }
 
-        .document-title {
-            font-size: 28px;
+        .title-cell {
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .doc-title {
+            font-size: 24px;
             font-weight: bold;
-            color: #5851DB;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 0;
-            text-align: right;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
         }
 
-        .document-number {
-            font-size: 14px;
-            color: #666;
-            text-align: right;
-            margin-top: 5px;
+        .doc-number {
+            font-size: 13px;
+            opacity: 0.9;
         }
 
-        /* -- Content Wrapper -- */
-        .content-wrapper {
-            padding: 25px 30px;
+        /* Main Content */
+        .content {
+            padding: 30px 35px;
         }
 
-        /* -- Info Sections -- */
-        .info-section {
+        /* Party Info Cards */
+        .parties-table {
             width: 100%;
             margin-bottom: 25px;
         }
 
-        .info-box {
+        .party-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 18px;
             vertical-align: top;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
         }
 
-        .info-box-label {
-            font-size: 10px;
+        .party-label {
+            font-size: 9px;
             font-weight: bold;
-            color: #5851DB;
+            color: #667eea;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
         }
 
-        .info-box-content {
-            font-size: 11px;
-            line-height: 16px;
-            color: #444;
+        .party-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #1a202c;
+            margin-bottom: 5px;
         }
 
-        .info-box-content strong {
-            color: #333;
+        .party-details {
+            font-size: 10px;
+            color: #4a5568;
+            line-height: 1.6;
         }
 
-        /* -- Details Table -- */
-        .details-table {
+        /* Meta Info */
+        .meta-section {
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+        }
+
+        .meta-table {
             width: 100%;
-            margin-bottom: 20px;
         }
 
-        .details-table td {
-            padding: 6px 0;
-            vertical-align: top;
+        .meta-label {
+            font-size: 10px;
+            color: #718096;
+            padding-right: 10px;
         }
 
-        .details-label {
+        .meta-value {
             font-size: 11px;
-            color: #666;
-            width: 140px;
+            font-weight: bold;
+            color: #2d3748;
         }
 
-        .details-value {
-            font-size: 11px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        /* -- Items Table -- */
+        /* Items Table */
         .items-table {
             width: 100%;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            border-collapse: collapse;
+        }
+
+        .items-table thead tr {
+            background: #667eea;
         }
 
         .items-table thead th {
-            background-color: #5851DB;
-            color: #fff;
-            font-size: 11px;
+            color: white;
+            font-size: 10px;
             font-weight: bold;
-            padding: 10px 8px;
-            text-align: left;
+            padding: 12px 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .items-table thead th.text-left {
+            text-align: left;
         }
 
         .items-table thead th.text-center {
@@ -150,215 +163,213 @@
         }
 
         .items-table tbody td {
-            padding: 10px 8px;
-            font-size: 11px;
-            border-bottom: 1px solid #e8e8e8;
+            padding: 12px 10px;
+            font-size: 10px;
+            border-bottom: 1px solid #e2e8f0;
             vertical-align: top;
         }
 
         .items-table tbody tr:nth-child(even) {
-            background-color: #fafafa;
+            background: #f7fafc;
         }
 
         .item-name {
-            font-weight: 500;
-            color: #333;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 2px;
         }
 
-        .item-description {
-            font-size: 10px;
-            color: #777;
-            margin-top: 3px;
+        .item-desc {
+            font-size: 9px;
+            color: #718096;
         }
 
-        /* -- Totals Section -- */
-        .totals-section {
+        /* Totals */
+        .totals-wrapper {
             width: 100%;
-            margin-top: 20px;
         }
 
         .totals-table {
             float: right;
             width: 280px;
+            border-collapse: collapse;
         }
 
         .totals-table td {
-            padding: 8px 12px;
+            padding: 10px 15px;
             font-size: 11px;
         }
 
-        .totals-table .label {
-            color: #666;
+        .totals-table .label-cell {
+            color: #718096;
             text-align: left;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .totals-table .value {
-            color: #333;
+        .totals-table .value-cell {
+            color: #2d3748;
             text-align: right;
-            font-weight: 500;
+            font-weight: bold;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .totals-table .total-row {
-            background-color: #5851DB;
-            color: #fff;
-        }
-
-        .totals-table .total-row .label,
-        .totals-table .total-row .value {
-            color: #fff;
+        .totals-table .grand-total td {
+            background: #667eea;
+            color: white;
             font-size: 13px;
             font-weight: bold;
-            padding: 12px;
+            padding: 14px 15px;
         }
 
-        /* -- Notes Section -- */
+        .totals-table .grand-total .label-cell,
+        .totals-table .grand-total .value-cell {
+            background: #667eea;
+            color: white;
+            border: none;
+        }
+
+        /* Notes */
         .notes-section {
             clear: both;
-            margin-top: 40px;
+            margin-top: 35px;
             padding-top: 20px;
-            border-top: 1px solid #e8e8e8;
+            border-top: 2px solid #e2e8f0;
         }
 
-        .notes-label {
-            font-size: 12px;
+        .notes-title {
+            font-size: 11px;
             font-weight: bold;
-            color: #5851DB;
+            color: #667eea;
             margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
-        .notes-content {
-            font-size: 11px;
-            color: #555;
-            line-height: 16px;
+        .notes-text {
+            font-size: 10px;
+            color: #4a5568;
+            line-height: 1.6;
         }
 
-        /* -- Footer -- */
+        /* Footer */
         .footer {
             margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #e8e8e8;
-            font-size: 10px;
-            color: #999;
+            padding: 15px;
+            background: #f7fafc;
+            border-top: 1px solid #e2e8f0;
             text-align: center;
+            font-size: 9px;
+            color: #a0aec0;
         }
 
-        /* -- Helpers -- */
-        .text-left { text-align: left; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .clearfix { clear: both; }
+        /* Utility */
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
     </style>
 </head>
 
 <body>
     <!-- Header -->
-    <div class="header-container">
-        <table width="100%">
+    <div class="header">
+        <table class="header-table">
             <tr>
-                <td width="50%" style="vertical-align: middle;">
+                <td class="logo-cell" width="60%">
                     @if ($logo)
-                        <img class="header-logo" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
+                        <img class="logo" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
                     @else
                         @if ($invoice->company)
-                            <h1 class="header-logo-text">{{ $invoice->company->name }}</h1>
+                            <div class="company-name">{{ $invoice->company->name }}</div>
                         @endif
                     @endif
                 </td>
-                <td width="50%" style="vertical-align: middle;">
-                    <div class="document-title">Профактура</div>
-                    <div class="document-number">{{ $invoice->proforma_invoice_number }}</div>
+                <td class="title-cell" width="40%">
+                    <div class="doc-title">ПРОФАКТУРА</div>
+                    <div class="doc-number">{{ $invoice->proforma_invoice_number }}</div>
                 </td>
             </tr>
         </table>
     </div>
 
     <!-- Content -->
-    <div class="content-wrapper">
-        <!-- Company and Customer Info -->
-        <table class="info-section">
+    <div class="content">
+        <!-- Parties -->
+        <table class="parties-table">
             <tr>
-                <td width="48%" class="info-box">
-                    <div class="info-box-label">Издавач</div>
-                    <div class="info-box-content">
-                        @if ($invoice->company)
-                            <strong>{{ $invoice->company->name }}</strong><br>
-                        @endif
+                <td class="party-card" width="48%">
+                    <div class="party-label">Издавач</div>
+                    @if ($invoice->company)
+                        <div class="party-name">{{ $invoice->company->name }}</div>
+                    @endif
+                    <div class="party-details">
                         @if ($company_address)
                             {!! $company_address !!}
                         @endif
                         @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
-                            <br><strong>ЕДБ:</strong> {{ $invoice->company->vat_id }}
+                            <br>ЕДБ: {{ $invoice->company->vat_id }}
                         @endif
                         @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
-                            <br><strong>ЕМБС:</strong> {{ $invoice->company->tax_id }}
+                            <br>ЕМБС: {{ $invoice->company->tax_id }}
                         @endif
                     </div>
                 </td>
                 <td width="4%"></td>
-                <td width="48%" class="info-box">
-                    <div class="info-box-label">Примател</div>
-                    <div class="info-box-content">
-                        @if ($invoice->customer)
-                            <strong>{{ $invoice->customer->name }}</strong><br>
-                        @endif
+                <td class="party-card" width="48%">
+                    <div class="party-label">Примател</div>
+                    @if ($invoice->customer)
+                        <div class="party-name">{{ $invoice->customer->name }}</div>
+                    @endif
+                    <div class="party-details">
                         @if ($billing_address)
                             {!! $billing_address !!}
                         @endif
                         @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
-                            <br><strong>ЕДБ:</strong> {{ $invoice->customer->vat_number }}
+                            <br>ЕДБ: {{ $invoice->customer->vat_number }}
                         @endif
                     </div>
                 </td>
             </tr>
         </table>
 
-        <!-- Document Details -->
-        <table class="details-table">
-            <tr>
-                <td class="details-label">Датум на издавање:</td>
-                <td class="details-value">{{ $invoice->formattedProformaInvoiceDate }}</td>
-                <td width="30%"></td>
-                <td class="details-label">Важи до:</td>
-                <td class="details-value">{{ $invoice->formattedExpiryDate }}</td>
-            </tr>
-            @if($invoice->reference_number)
-            <tr>
-                <td class="details-label">Референтен број:</td>
-                <td class="details-value">{{ $invoice->reference_number }}</td>
-                <td width="30%"></td>
-                <td></td>
-                <td></td>
-            </tr>
-            @endif
-        </table>
+        <!-- Meta Info -->
+        <div class="meta-section">
+            <table class="meta-table">
+                <tr>
+                    <td class="meta-label">Датум:</td>
+                    <td class="meta-value" width="25%">{{ $invoice->formattedProformaInvoiceDate }}</td>
+                    <td class="meta-label">Важи до:</td>
+                    <td class="meta-value" width="25%">{{ $invoice->formattedExpiryDate }}</td>
+                    @if($invoice->reference_number)
+                    <td class="meta-label">Реф. број:</td>
+                    <td class="meta-value">{{ $invoice->reference_number }}</td>
+                    @endif
+                </tr>
+            </table>
+        </div>
 
         @if ($shipping_address)
-        <table style="width: 100%; margin-bottom: 15px;">
-            <tr>
-                <td width="48%"></td>
-                <td width="4%"></td>
-                <td width="48%" style="font-size: 11px;">
-                    <strong style="color: #5851DB;">Адреса за испорака:</strong><br>
-                    <span style="color: #555;">{!! $shipping_address !!}</span>
-                </td>
-            </tr>
-        </table>
+        <div style="margin-bottom: 20px; font-size: 10px;">
+            <strong style="color: #667eea;">Адреса за испорака:</strong>
+            <span style="color: #4a5568;">{!! $shipping_address !!}</span>
+        </div>
         @endif
 
-        <!-- Items Table -->
+        <!-- Items -->
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width: 5%;" class="text-center">#</th>
-                    <th style="width: 40%;">Опис</th>
-                    <th style="width: 12%;" class="text-center">Количина</th>
-                    <th style="width: 15%;" class="text-right">Цена</th>
+                    <th class="text-center" style="width: 5%;">#</th>
+                    <th class="text-left" style="width: 45%;">Опис</th>
+                    <th class="text-center" style="width: 12%;">Количина</th>
+                    <th class="text-right" style="width: 15%;">Цена</th>
                     @if($invoice->discount_per_item === 'YES')
-                    <th style="width: 10%;" class="text-right">Попуст</th>
+                    <th class="text-right" style="width: 10%;">Попуст</th>
                     @endif
-                    <th style="width: 18%;" class="text-right">Износ</th>
+                    <th class="text-right" style="width: 15%;">Износ</th>
                 </tr>
             </thead>
             <tbody>
@@ -368,77 +379,74 @@
                     <td>
                         <div class="item-name">{{ $item->name }}</div>
                         @if ($item->description)
-                            <div class="item-description">{{ $item->description }}</div>
+                            <div class="item-desc">{{ $item->description }}</div>
                         @endif
                     </td>
                     <td class="text-center">{{ $item->quantity }} {{ $item->unit_name ?? '' }}</td>
-                    <td class="text-right">{{ format_money_pdf($item->price, $invoice->customer->currency) }}</td>
+                    <td class="text-right">{!! format_money_pdf($item->price, $invoice->customer->currency) !!}</td>
                     @if($invoice->discount_per_item === 'YES')
                     <td class="text-right">
                         @if($item->discount_type === 'fixed')
-                            {{ format_money_pdf($item->discount_val, $invoice->customer->currency) }}
+                            {!! format_money_pdf($item->discount_val, $invoice->customer->currency) !!}
                         @else
                             {{ $item->discount }}%
                         @endif
                     </td>
                     @endif
-                    <td class="text-right">{{ format_money_pdf($item->total, $invoice->customer->currency) }}</td>
+                    <td class="text-right">{!! format_money_pdf($item->total, $invoice->customer->currency) !!}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
 
         <!-- Totals -->
-        <div class="totals-section">
+        <div class="totals-wrapper clearfix">
             <table class="totals-table">
                 <tr>
-                    <td class="label">Меѓузбир:</td>
-                    <td class="value">{{ format_money_pdf($invoice->sub_total, $invoice->customer->currency) }}</td>
+                    <td class="label-cell">Меѓузбир</td>
+                    <td class="value-cell">{!! format_money_pdf($invoice->sub_total, $invoice->customer->currency) !!}</td>
                 </tr>
 
                 @if ($invoice->discount > 0)
                 <tr>
-                    <td class="label">
+                    <td class="label-cell">
                         Попуст
                         @if($invoice->discount_type === 'percentage')
                             ({{ $invoice->discount }}%)
                         @endif
-                        :
                     </td>
-                    <td class="value">- {{ format_money_pdf($invoice->discount_val, $invoice->customer->currency) }}</td>
+                    <td class="value-cell">- {!! format_money_pdf($invoice->discount_val, $invoice->customer->currency) !!}</td>
                 </tr>
                 @endif
 
                 @if ($invoice->tax_per_item === 'YES')
                     @foreach ($taxes as $tax)
                     <tr>
-                        <td class="label">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%):</td>
-                        <td class="value">{{ format_money_pdf($tax->amount, $invoice->customer->currency) }}</td>
+                        <td class="label-cell">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%)</td>
+                        <td class="value-cell">{!! format_money_pdf($tax->amount, $invoice->customer->currency) !!}</td>
                     </tr>
                     @endforeach
                 @else
                     @foreach ($invoice->taxes as $tax)
                     <tr>
-                        <td class="label">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%):</td>
-                        <td class="value">{{ format_money_pdf($tax->amount, $invoice->customer->currency) }}</td>
+                        <td class="label-cell">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%)</td>
+                        <td class="value-cell">{!! format_money_pdf($tax->amount, $invoice->customer->currency) !!}</td>
                     </tr>
                     @endforeach
                 @endif
 
-                <tr class="total-row">
-                    <td class="label">Вкупно:</td>
-                    <td class="value">{{ format_money_pdf($invoice->total, $invoice->customer->currency) }}</td>
+                <tr class="grand-total">
+                    <td class="label-cell">Вкупно</td>
+                    <td class="value-cell">{!! format_money_pdf($invoice->total, $invoice->customer->currency) !!}</td>
                 </tr>
             </table>
         </div>
 
-        <div class="clearfix"></div>
-
         <!-- Notes -->
         @if ($notes)
         <div class="notes-section">
-            <div class="notes-label">Белешки</div>
-            <div class="notes-content">{!! $notes !!}</div>
+            <div class="notes-title">Белешки</div>
+            <div class="notes-text">{!! $notes !!}</div>
         </div>
         @endif
 
