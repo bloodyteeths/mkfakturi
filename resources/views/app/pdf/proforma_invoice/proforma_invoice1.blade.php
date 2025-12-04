@@ -9,419 +9,442 @@
         /* -- Base -- */
         body {
             font-family: "DejaVu Sans";
+            font-size: 12px;
+            color: #333;
+            margin: 0;
+            padding: 0;
         }
 
         html {
-            margin: 0px;
-            padding: 0px;
-            margin-top: 50px;
+            margin: 0;
+            padding: 0;
         }
 
-        .text-center {
-            text-align: center;
+        table {
+            border-collapse: collapse;
         }
 
-        hr {
-            margin: 0 30px 0 30px;
-            color: rgba(0, 0, 0, 0.2);
-            border: 0.5px solid #EAF1FB;
-        }
-
-        /* -- Header -- */
-
-        .header-bottom-divider {
-            color: rgba(0, 0, 0, 0.2);
-            top: 90px;
-            left: 0px;
-            width: 100%;
-            margin-left: 0%;
-        }
-
+        /* -- Header Section -- */
         .header-container {
-            position: absolute;
             width: 100%;
-            height: 90px;
-            left: 0px;
-            top: -50px;
+            padding: 20px 30px 15px 30px;
+            border-bottom: 2px solid #5851DB;
         }
 
         .header-logo {
-            margin-top: 20px;
-            padding-bottom: 20px;
-            text-transform: capitalize;
-            color: #7675ff;
+            height: 55px;
+            max-width: 180px;
         }
 
-        .content-wrapper {
-            display: block;
-            margin-top: 0px;
-            padding-top: 16px;
-            padding-bottom: 20px;
+        .header-logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #5851DB;
+            margin: 0;
+            padding: 0;
         }
 
-        .company-address-container {
-            padding-top: 15px;
-            padding-left: 30px;
-            float: left;
-            width: 30%;
-            margin-bottom: 2px;
-        }
-
-        .company-address-container h1 {
-            font-size: 15px;
-            line-height: 22px;
-            letter-spacing: 0.05em;
-            margin-bottom: 0px;
-            margin-top: 10px;
-        }
-
-        .company-address {
-            margin-top: 16px;
-            text-align: left;
-            font-size: 12px;
-            line-height: 15px;
-            color: #595959;
-            width: 280px;
-            word-wrap: break-word;
-        }
-
-        .invoice-details-container {
-            float: right;
-            padding: 10px 30px 0 0;
-            margin-top: 18px;
-        }
-
-        .attribute-label {
-            font-size: 12px;
-            line-height: 18px;
-            padding-right: 40px;
-            text-align: left;
-            color: #55547A;
-        }
-
-        .attribute-value {
-            font-size: 12px;
-            line-height: 18px;
+        .document-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #5851DB;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
             text-align: right;
         }
 
-        /* -- Shipping -- */
-
-        .shipping-address-container {
-            float: right;
-            padding-left: 40px;
-            width: 160px;
+        .document-number {
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+            margin-top: 5px;
         }
 
-        .shipping-address {
-            font-size: 12px;
-            line-height: 15px;
-            color: #595959;
-            padding: 45px 0px 0px 40px;
-            margin: 0px;
-            width: 160px;
-            word-wrap: break-word;
+        /* -- Content Wrapper -- */
+        .content-wrapper {
+            padding: 25px 30px;
         }
 
-        /* -- Billing -- */
-
-        .billing-address-container {
-            padding-top: 50px;
-            float: left;
-            padding-left: 30px;
+        /* -- Info Sections -- */
+        .info-section {
+            width: 100%;
+            margin-bottom: 25px;
         }
 
-        .billing-address-label {
-            font-size: 12px;
-            line-height: 18px;
-            padding: 0px;
-            margin-top: 27px;
-            margin-bottom: 0px;
+        .info-box {
+            vertical-align: top;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
         }
 
-        .billing-address-name {
-            max-width: 160px;
-            font-size: 15px;
-            line-height: 22px;
-            padding: 0px;
-            margin: 0px;
+        .info-box-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #5851DB;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
         }
 
-        .billing-address {
-            font-size: 12px;
-            line-height: 15px;
-            color: #595959;
-            padding: 45px 0px 0px 30px;
-            margin: 0px;
-            width: 160px;
-            word-wrap: break-word;
+        .info-box-content {
+            font-size: 11px;
+            line-height: 16px;
+            color: #444;
+        }
+
+        .info-box-content strong {
+            color: #333;
+        }
+
+        /* -- Details Table -- */
+        .details-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .details-table td {
+            padding: 6px 0;
+            vertical-align: top;
+        }
+
+        .details-label {
+            font-size: 11px;
+            color: #666;
+            width: 140px;
+        }
+
+        .details-value {
+            font-size: 11px;
+            color: #333;
+            font-weight: 500;
         }
 
         /* -- Items Table -- */
-
         .items-table {
-            margin-top: 35px;
-            padding: 0px 30px 10px 30px;
-            page-break-before: avoid;
-            page-break-after: auto;
+            width: 100%;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        .items-table hr {
-            height: 0.1px;
+        .items-table thead th {
+            background-color: #5851DB;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 10px 8px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .item-table-heading {
-            font-size: 13.5;
+        .items-table thead th.text-center {
             text-align: center;
-            color: rgba(0, 0, 0, 0.85);
-            padding: 5px;
-            color: #55547A;
         }
 
-        tr.item-table-heading-row th {
-            border-bottom: 0.620315px solid #E8E8E8;
-            font-size: 12px;
-            line-height: 18px;
+        .items-table thead th.text-right {
+            text-align: right;
         }
 
-        tr.item-row td {
-            font-size: 12px;
-            line-height: 18px;
+        .items-table tbody td {
+            padding: 10px 8px;
+            font-size: 11px;
+            border-bottom: 1px solid #e8e8e8;
+            vertical-align: top;
         }
 
-        .item-cell {
-            font-size: 13;
-            text-align: center;
-            padding: 5px;
-            padding-top: 10px;
-            color: #040405;
+        .items-table tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
         }
 
         .item-description {
-            color: #595959;
-            font-size: 9px;
-            line-height: 12px;
+            font-size: 10px;
+            color: #777;
+            margin-top: 3px;
         }
 
-        /* -- Total Display Table -- */
-
-        .total-display-container {
-            padding: 0 25px;
-        }
-
-        .total-display-table {
-            border-top: none;
-            page-break-inside: avoid;
-            page-break-before: auto;
-            page-break-after: auto;
+        /* -- Totals Section -- */
+        .totals-section {
+            width: 100%;
             margin-top: 20px;
+        }
+
+        .totals-table {
             float: right;
-            width: auto;
+            width: 280px;
         }
 
-        .total-table-attribute-label {
-            font-size: 13px;
-            color: #55547A;
+        .totals-table td {
+            padding: 8px 12px;
+            font-size: 11px;
+        }
+
+        .totals-table .label {
+            color: #666;
             text-align: left;
-            padding-left: 10px;
         }
 
-        .total-table-attribute-value {
-            font-weight: bold;
+        .totals-table .value {
+            color: #333;
             text-align: right;
+            font-weight: 500;
+        }
+
+        .totals-table .total-row {
+            background-color: #5851DB;
+            color: #fff;
+        }
+
+        .totals-table .total-row .label,
+        .totals-table .total-row .value {
+            color: #fff;
             font-size: 13px;
-            color: #040405;
-            padding-right: 10px;
-            padding-top: 2px;
-            padding-bottom: 2px;
+            font-weight: bold;
+            padding: 12px;
         }
 
-        .total-border-left {
-            border: 1px solid #E8E8E8 !important;
-            border-right: 0px !important;
-            padding-top: 0px;
-            padding: 8px !important;
-        }
-
-        .total-border-right {
-            border: 1px solid #E8E8E8 !important;
-            border-left: 0px !important;
-            padding-top: 0px;
-            padding: 8px !important;
-        }
-
-        /* -- Notes -- */
-
-        .notes {
-            font-size: 12px;
-            color: #595959;
-            margin-top: 15px;
-            margin-left: 30px;
-            width: 442px;
-            text-align: left;
-            page-break-inside: avoid;
+        /* -- Notes Section -- */
+        .notes-section {
+            clear: both;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e8e8e8;
         }
 
         .notes-label {
-            font-size: 15px;
-            line-height: 22px;
-            letter-spacing: 0.05em;
-            color: #040405;
-            width: 108px;
-            white-space: nowrap;
-            height: 19.87px;
-            padding-bottom: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #5851DB;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .notes-content {
+            font-size: 11px;
+            color: #555;
+            line-height: 16px;
+        }
+
+        /* -- Footer -- */
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #e8e8e8;
+            font-size: 10px;
+            color: #999;
+            text-align: center;
         }
 
         /* -- Helpers -- */
-
-        .text-primary {
-            color: #5851DB;
-        }
-
-
-        table .text-left {
-            text-align: left;
-        }
-
-        table .text-right {
-            text-align: right;
-        }
-
-        .border-0 {
-            border: none;
-        }
-
-        .py-2 {
-            padding-top: 2px;
-            padding-bottom: 2px;
-        }
-
-        .py-8 {
-            padding-top: 8px;
-            padding-bottom: 8px;
-        }
-
-        .py-3 {
-            padding: 3px 0;
-        }
-
-        .pr-20 {
-            padding-right: 20px;
-        }
-
-        .pr-10 {
-            padding-right: 10px;
-        }
-
-        .pl-20 {
-            padding-left: 20px;
-        }
-
-        .pl-10 {
-            padding-left: 10px;
-        }
-
-        .pl-0 {
-            padding-left: 0;
-        }
-
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .clearfix { clear: both; }
     </style>
-
 </head>
 
 <body>
+    <!-- Header -->
     <div class="header-container">
         <table width="100%">
             <tr>
-                <td class="text-center">
+                <td width="50%" style="vertical-align: middle;">
                     @if ($logo)
-                        <img class="header-logo" style="height:50px" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого на компанија">
+                        <img class="header-logo" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
                     @else
                         @if ($invoice->company)
-                            <h2 class="header-logo"> {{ $invoice->company->name }}</h2>
+                            <h1 class="header-logo-text">{{ $invoice->company->name }}</h1>
                         @endif
                     @endif
                 </td>
+                <td width="50%" style="vertical-align: middle;">
+                    <div class="document-title">Профактура</div>
+                    <div class="document-number">{{ $invoice->proforma_invoice_number }}</div>
+                </td>
             </tr>
         </table>
-        <hr class="header-bottom-divider" style="border: 0.620315px solid #E8E8E8;" />
     </div>
 
-
+    <!-- Content -->
     <div class="content-wrapper">
-        <div style="padding-top: 30px">
-            <div class="company-address-container">
-                <h1 style="font-size: 13px; margin-bottom: 8px;">ИЗДАВАЧ</h1>
-                <div class="company-address">
-                    {!! $company_address !!}
-                </div>
-                @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
-                    <div style="margin-top: 5px; font-size: 11px;"><strong>ЕДБ за ДДВ:</strong> {{ $invoice->company->vat_id }}</div>
-                @endif
-                @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
-                    <div style="margin-top: 3px; font-size: 11px;"><strong>Даночен број:</strong> {{ $invoice->company->tax_id }}</div>
-                @endif
-            </div>
+        <!-- Company and Customer Info -->
+        <table class="info-section">
+            <tr>
+                <td width="48%" class="info-box">
+                    <div class="info-box-label">Издавач</div>
+                    <div class="info-box-content">
+                        @if ($invoice->company)
+                            <strong>{{ $invoice->company->name }}</strong><br>
+                        @endif
+                        @if ($company_address)
+                            {!! $company_address !!}
+                        @endif
+                        @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
+                            <br><strong>ЕДБ:</strong> {{ $invoice->company->vat_id }}
+                        @endif
+                        @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
+                            <br><strong>ЕМБС:</strong> {{ $invoice->company->tax_id }}
+                        @endif
+                    </div>
+                </td>
+                <td width="4%"></td>
+                <td width="48%" class="info-box">
+                    <div class="info-box-label">Примател</div>
+                    <div class="info-box-content">
+                        @if ($invoice->customer)
+                            <strong>{{ $invoice->customer->name }}</strong><br>
+                        @endif
+                        @if ($billing_address)
+                            {!! $billing_address !!}
+                        @endif
+                        @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
+                            <br><strong>ЕДБ:</strong> {{ $invoice->customer->vat_number }}
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-            <div class="invoice-details-container">
-                <table>
-                    <tr>
-                        <td class="attribute-label">Број на профактура</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->proforma_invoice_number }}</td>
-                    </tr>
-                    <tr>
-                        <td class="attribute-label">Датум на издавање</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->formattedProformaInvoiceDate }}</td>
-                    </tr>
-                    <tr>
-                        <td class="attribute-label">Важи до</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->formattedExpiryDate }}</td>
-                    </tr>
-                    @if($invoice->reference_number)
-                    <tr>
-                        <td class="attribute-label">Референтен број</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->reference_number }}</td>
-                    </tr>
+        <!-- Document Details -->
+        <table class="details-table">
+            <tr>
+                <td class="details-label">Датум на издавање:</td>
+                <td class="details-value">{{ $invoice->formattedProformaInvoiceDate }}</td>
+                <td width="30%"></td>
+                <td class="details-label">Важи до:</td>
+                <td class="details-value">{{ $invoice->formattedExpiryDate }}</td>
+            </tr>
+            @if($invoice->reference_number)
+            <tr>
+                <td class="details-label">Референтен број:</td>
+                <td class="details-value">{{ $invoice->reference_number }}</td>
+                <td width="30%"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            @endif
+        </table>
+
+        @if ($shipping_address)
+        <table style="width: 100%; margin-bottom: 15px;">
+            <tr>
+                <td width="48%"></td>
+                <td width="4%"></td>
+                <td width="48%" style="font-size: 11px;">
+                    <strong style="color: #5851DB;">Адреса за испорака:</strong><br>
+                    <span style="color: #555;">{!! $shipping_address !!}</span>
+                </td>
+            </tr>
+        </table>
+        @endif
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 40%;">Опис</th>
+                    <th style="width: 12%;" class="text-center">Количина</th>
+                    <th style="width: 15%;" class="text-right">Цена</th>
+                    @if($invoice->discount_per_item === 'YES')
+                    <th style="width: 10%;" class="text-right">Попуст</th>
                     @endif
-                </table>
-            </div>
+                    <th style="width: 18%;" class="text-right">Износ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($invoice->items as $index => $item)
+                <tr>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>
+                        <div class="item-name">{{ $item->name }}</div>
+                        @if ($item->description)
+                            <div class="item-description">{{ $item->description }}</div>
+                        @endif
+                    </td>
+                    <td class="text-center">{{ $item->quantity }} {{ $item->unit_name ?? '' }}</td>
+                    <td class="text-right">{{ format_money_pdf($item->price, $invoice->customer->currency) }}</td>
+                    @if($invoice->discount_per_item === 'YES')
+                    <td class="text-right">
+                        @if($item->discount_type === 'fixed')
+                            {{ format_money_pdf($item->discount_val, $invoice->customer->currency) }}
+                        @else
+                            {{ $item->discount }}%
+                        @endif
+                    </td>
+                    @endif
+                    <td class="text-right">{{ format_money_pdf($item->total, $invoice->customer->currency) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
 
-            <div style="clear: both;"></div>
-        </div>
+        <!-- Totals -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td class="label">Меѓузбир:</td>
+                    <td class="value">{{ format_money_pdf($invoice->sub_total, $invoice->customer->currency) }}</td>
+                </tr>
 
-        <div class="billing-address-container">
-            @if ($billing_address)
-                <h1 style="font-size: 13px; margin-bottom: 8px;">ПРИМАТЕЛ</h1>
-                <div class="billing-address">
-                    {!! $billing_address !!}
-                </div>
-                @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
-                    <div style="margin-top: 5px; font-size: 11px; padding-left: 30px;"><strong>Даночен број:</strong> {{ $invoice->customer->vat_number }}</div>
+                @if ($invoice->discount > 0)
+                <tr>
+                    <td class="label">
+                        Попуст
+                        @if($invoice->discount_type === 'percentage')
+                            ({{ $invoice->discount }}%)
+                        @endif
+                        :
+                    </td>
+                    <td class="value">- {{ format_money_pdf($invoice->discount_val, $invoice->customer->currency) }}</td>
+                </tr>
                 @endif
-            @endif
+
+                @if ($invoice->tax_per_item === 'YES')
+                    @foreach ($taxes as $tax)
+                    <tr>
+                        <td class="label">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%):</td>
+                        <td class="value">{{ format_money_pdf($tax->amount, $invoice->customer->currency) }}</td>
+                    </tr>
+                    @endforeach
+                @else
+                    @foreach ($invoice->taxes as $tax)
+                    <tr>
+                        <td class="label">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%):</td>
+                        <td class="value">{{ format_money_pdf($tax->amount, $invoice->customer->currency) }}</td>
+                    </tr>
+                    @endforeach
+                @endif
+
+                <tr class="total-row">
+                    <td class="label">Вкупно:</td>
+                    <td class="value">{{ format_money_pdf($invoice->total, $invoice->customer->currency) }}</td>
+                </tr>
+            </table>
         </div>
 
-        <div class="shipping-address-container shipping-address" @if ($billing_address !== '</br>') style="float:left;" @else style="display:block; float:left: padding-left: 0px;" @endif>
-            @if ($shipping_address)
-                <b>Адреса за испорака</b> <br>
+        <div class="clearfix"></div>
 
-                {!! $shipping_address !!}
-            @endif
+        <!-- Notes -->
+        @if ($notes)
+        <div class="notes-section">
+            <div class="notes-label">Белешки</div>
+            <div class="notes-content">{!! $notes !!}</div>
         </div>
+        @endif
 
-        <div style="position: relative; clear: both;">
-            @include('app.pdf.invoice.partials.table')
-        </div>
-
-        <div class="notes">
-            @if ($notes)
-                <div class="notes-label">
-                    Белешки
-                </div>
-
-                {!! $notes !!}
-            @endif
+        <!-- Footer -->
+        <div class="footer">
+            Овој документ е профактура и не претставува даночен документ.
         </div>
     </div>
 </body>
