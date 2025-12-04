@@ -47,6 +47,7 @@ class ProcessWebhookEvent implements ShouldQueue
                 'cpay' => $this->handleCpay(...),
                 'nlb' => $this->handleBankNlb(...),
                 'stopanska' => $this->handleBankStopanska(...),
+                'stripe' => $this->handleStripe(...),
                 default => throw new \Exception("Unknown provider: {$this->event->provider}"),
             };
 
@@ -281,6 +282,156 @@ class ProcessWebhookEvent implements ShouldQueue
         );
 
         Log::info("Bank transaction created from {$provider} webhook");
+    }
+
+    /**
+     * Handle Stripe webhook events
+     */
+    protected function handleStripe(): void
+    {
+        $payload = $this->event->payload;
+        $eventType = $this->event->event_type;
+
+        match ($eventType) {
+            'payment_intent.succeeded' => $this->handleStripePaymentSucceeded($payload),
+            'payment_intent.payment_failed' => $this->handleStripePaymentFailed($payload),
+            'checkout.session.completed' => $this->handleStripeCheckoutCompleted($payload),
+            'invoice.paid' => $this->handleStripeInvoicePaid($payload),
+            'invoice.payment_failed' => $this->handleStripeInvoicePaymentFailed($payload),
+            'charge.succeeded' => $this->handleStripeChargeSucceeded($payload),
+            'charge.failed' => $this->handleStripeChargeFailed($payload),
+            default => Log::info("Unhandled Stripe event: {$eventType}", ['event_id' => $this->event->event_id]),
+        };
+    }
+
+    /**
+     * Handle Stripe payment_intent.succeeded event
+     */
+    protected function handleStripePaymentSucceeded(array $payload): void
+    {
+        $paymentIntent = $payload['data']['object'] ?? [];
+        $metadata = $paymentIntent['metadata'] ?? [];
+
+        Log::info('Stripe payment succeeded', [
+            'payment_intent_id' => $paymentIntent['id'] ?? null,
+            'amount' => $paymentIntent['amount'] ?? 0,
+            'metadata' => $metadata,
+        ]);
+
+        // If we have an invoice_id in metadata, create a payment record
+        $invoiceId = $metadata['invoice_id'] ?? null;
+        if ($invoiceId && $this->event->company_id) {
+            $invoice = Invoice::where('id', $invoiceId)
+                ->where('company_id', $this->event->company_id)
+                ->first();
+
+            if ($invoice) {
+                $amount = ($paymentIntent['amount'] ?? 0) / 100; // Stripe uses cents
+
+                Payment::create([
+                    'invoice_id' => $invoice->id,
+                    'company_id' => $invoice->company_id,
+                    'amount' => $amount * 100, // Convert back to smallest currency unit
+                    'payment_date' => now(),
+                    'payment_number' => 'STRIPE-'.($paymentIntent['id'] ?? uniqid()),
+                    'payment_method' => 'CREDIT_CARD',
+                    'transaction_reference' => $paymentIntent['id'] ?? null,
+                    'notes' => 'Stripe payment',
+                ]);
+
+                Log::info("Stripe payment created for invoice {$invoiceId}");
+            }
+        }
+    }
+
+    /**
+     * Handle Stripe payment_intent.payment_failed event
+     */
+    protected function handleStripePaymentFailed(array $payload): void
+    {
+        $paymentIntent = $payload['data']['object'] ?? [];
+        $error = $paymentIntent['last_payment_error'] ?? [];
+
+        Log::warning('Stripe payment failed', [
+            'payment_intent_id' => $paymentIntent['id'] ?? null,
+            'error_code' => $error['code'] ?? 'unknown',
+            'error_message' => $error['message'] ?? 'Unknown error',
+        ]);
+    }
+
+    /**
+     * Handle Stripe checkout.session.completed event
+     */
+    protected function handleStripeCheckoutCompleted(array $payload): void
+    {
+        $session = $payload['data']['object'] ?? [];
+        $metadata = $session['metadata'] ?? [];
+
+        Log::info('Stripe checkout completed', [
+            'session_id' => $session['id'] ?? null,
+            'payment_status' => $session['payment_status'] ?? null,
+            'metadata' => $metadata,
+        ]);
+
+        // Payment handling will be done by payment_intent.succeeded event
+    }
+
+    /**
+     * Handle Stripe invoice.paid event (for subscriptions)
+     */
+    protected function handleStripeInvoicePaid(array $payload): void
+    {
+        $invoice = $payload['data']['object'] ?? [];
+
+        Log::info('Stripe invoice paid', [
+            'invoice_id' => $invoice['id'] ?? null,
+            'subscription_id' => $invoice['subscription'] ?? null,
+            'amount_paid' => $invoice['amount_paid'] ?? 0,
+        ]);
+    }
+
+    /**
+     * Handle Stripe invoice.payment_failed event
+     */
+    protected function handleStripeInvoicePaymentFailed(array $payload): void
+    {
+        $invoice = $payload['data']['object'] ?? [];
+
+        Log::warning('Stripe invoice payment failed', [
+            'invoice_id' => $invoice['id'] ?? null,
+            'subscription_id' => $invoice['subscription'] ?? null,
+        ]);
+    }
+
+    /**
+     * Handle Stripe charge.succeeded event
+     */
+    protected function handleStripeChargeSucceeded(array $payload): void
+    {
+        $charge = $payload['data']['object'] ?? [];
+
+        Log::info('Stripe charge succeeded', [
+            'charge_id' => $charge['id'] ?? null,
+            'amount' => $charge['amount'] ?? 0,
+            'payment_intent' => $charge['payment_intent'] ?? null,
+        ]);
+
+        // Payment creation handled by payment_intent.succeeded
+    }
+
+    /**
+     * Handle Stripe charge.failed event
+     */
+    protected function handleStripeChargeFailed(array $payload): void
+    {
+        $charge = $payload['data']['object'] ?? [];
+        $failureMessage = $charge['failure_message'] ?? 'Unknown failure';
+
+        Log::warning('Stripe charge failed', [
+            'charge_id' => $charge['id'] ?? null,
+            'failure_message' => $failureMessage,
+            'failure_code' => $charge['failure_code'] ?? null,
+        ]);
     }
 }
 // CLAUDE-CHECKPOINT
