@@ -335,21 +335,42 @@
             </tr>
         </table>
 
-        <!-- Meta Info -->
-        <div class="meta-section">
-            <table class="meta-table">
-                <tr>
-                    <td class="meta-label">Датум:</td>
-                    <td class="meta-value" width="25%">{{ $invoice->formattedProformaInvoiceDate }}</td>
-                    <td class="meta-label">Важи до:</td>
-                    <td class="meta-value" width="25%">{{ $invoice->formattedExpiryDate }}</td>
-                    @if($invoice->reference_number)
-                    <td class="meta-label">Реф. број:</td>
-                    <td class="meta-value">{{ $invoice->reference_number }}</td>
-                    @endif
-                </tr>
-            </table>
-        </div>
+        <!-- Document Details -->
+        <table style="width: 100%; margin-bottom: 25px;">
+            <tr>
+                <td width="60%" style="vertical-align: top;">
+                    <!-- Left side spacer or additional info can go here -->
+                </td>
+                <td width="40%" style="vertical-align: top;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 12px; background: #667eea; color: white; font-size: 10px; font-weight: bold;">Број на профактура</td>
+                            <td style="padding: 8px 12px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 11px; font-weight: bold; text-align: right;">{{ $invoice->proforma_invoice_number }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 12px; background: #edf2f7; color: #4a5568; font-size: 10px;">Датум на издавање</td>
+                            <td style="padding: 8px 12px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 10px; text-align: right;">{{ $invoice->formattedProformaInvoiceDate }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 12px; background: #edf2f7; color: #4a5568; font-size: 10px;">Важи до</td>
+                            <td style="padding: 8px 12px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 10px; text-align: right;">{{ $invoice->formattedExpiryDate }}</td>
+                        </tr>
+                        @if($invoice->reference_number)
+                        <tr>
+                            <td style="padding: 8px 12px; background: #edf2f7; color: #4a5568; font-size: 10px;">Референтен број</td>
+                            <td style="padding: 8px 12px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 10px; text-align: right;">{{ $invoice->reference_number }}</td>
+                        </tr>
+                        @endif
+                        @if($invoice->customer_po_number)
+                        <tr>
+                            <td style="padding: 8px 12px; background: #edf2f7; color: #4a5568; font-size: 10px;">ПО број на клиент</td>
+                            <td style="padding: 8px 12px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 10px; text-align: right;">{{ $invoice->customer_po_number }}</td>
+                        </tr>
+                        @endif
+                    </table>
+                </td>
+            </tr>
+        </table>
 
         @if ($shipping_address)
         <div style="margin-bottom: 20px; font-size: 10px;">
