@@ -660,6 +660,7 @@ class ProformaInvoice extends Model
         // Eager load relationships needed for PDF
         $this->load([
             'items.taxes.taxType',
+            'taxes.taxType',
             'company.address',
             'customer.addresses',
             'currency',

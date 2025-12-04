@@ -440,14 +440,14 @@
                 </tr>
                 @endif
 
-                @if ($invoice->tax_per_item === 'YES')
+                @if ($taxes && $taxes->count() > 0)
                     @foreach ($taxes as $tax)
                     <tr>
                         <td class="label-cell">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%)</td>
                         <td class="value-cell">{!! format_money_pdf($tax->amount, $invoice->customer->currency) !!}</td>
                     </tr>
                     @endforeach
-                @else
+                @elseif ($invoice->taxes && $invoice->taxes->count() > 0)
                     @foreach ($invoice->taxes as $tax)
                     <tr>
                         <td class="label-cell">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%)</td>
