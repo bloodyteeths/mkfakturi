@@ -12,13 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('payouts', function (Blueprint $table) {
-            // Stripe transfer ID (tr_xxx) when payout is via Stripe Connect
-            $table->string('stripe_transfer_id')->nullable()->after('payment_reference');
+        // Stripe transfer ID (tr_xxx) when payout is via Stripe Connect
+        if (! Schema::hasColumn('payouts', 'stripe_transfer_id')) {
+            Schema::table('payouts', function (Blueprint $table) {
+                $table->string('stripe_transfer_id')->nullable()->after('payment_reference');
+            });
+        }
 
-            // Stripe payout ID (po_xxx) for tracking the actual bank payout
-            $table->string('stripe_payout_id')->nullable()->after('stripe_transfer_id');
-        });
+        // Stripe payout ID (po_xxx) for tracking the actual bank payout
+        if (! Schema::hasColumn('payouts', 'stripe_payout_id')) {
+            Schema::table('payouts', function (Blueprint $table) {
+                $table->string('stripe_payout_id')->nullable()->after('stripe_transfer_id');
+            });
+        }
     }
 
     /**
