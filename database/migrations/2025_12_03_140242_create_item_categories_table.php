@@ -11,29 +11,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('item_categories', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('company_id');
-            $table->string('name', 100);
-            $table->string('description', 255)->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('item_categories')) {
+            Schema::create('item_categories', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('company_id');
+                $table->string('name', 100);
+                $table->string('description', 255)->nullable();
+                $table->timestamps();
 
-            $table->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('cascade');
+                $table->foreign('company_id')
+                    ->references('id')
+                    ->on('companies')
+                    ->onDelete('cascade');
 
-            $table->unique(['company_id', 'name']);
-        });
+                $table->unique(['company_id', 'name']);
+            });
+        }
 
         // Add category_id column to items table
-        Schema::table('items', function (Blueprint $table) {
-            $table->unsignedBigInteger('category_id')->nullable()->after('category');
-            $table->foreign('category_id')
-                ->references('id')
-                ->on('item_categories')
-                ->onDelete('set null');
-        });
+        if (! Schema::hasColumn('items', 'category_id')) {
+            Schema::table('items', function (Blueprint $table) {
+                $table->unsignedBigInteger('category_id')->nullable()->after('category');
+                $table->foreign('category_id')
+                    ->references('id')
+                    ->on('item_categories')
+                    ->onDelete('set null');
+            });
+        }
     }
 
     /**
