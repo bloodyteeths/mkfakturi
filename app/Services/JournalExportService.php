@@ -242,18 +242,51 @@ class JournalExportService
      */
     protected function getAccountCode(string $mapping, string $type, ?int $categoryId = null): string
     {
-        // Try to find a mapping first
-        $query = AccountMapping::where('company_id', $this->companyId)
-            ->where('mapping_type', $mapping);
+        // Try to find a mapping first based on entity_type and transaction_type
+        // The mapping parameter maps to different entity types:
+        // 'accounts_receivable', 'revenue', 'tax_payable' -> 'default' entity with transaction type
+        // 'expense' with categoryId -> 'expense_category' entity
 
-        if ($categoryId) {
-            $query->where('entity_id', $categoryId);
+        $accountMapping = null;
+
+        if ($mapping === 'expense' && $categoryId) {
+            // For expenses with category, use ENTITY_EXPENSE_CATEGORY
+            $accountMapping = AccountMapping::findForEntity(
+                $this->companyId,
+                AccountMapping::ENTITY_EXPENSE_CATEGORY,
+                $categoryId,
+                AccountMapping::TRANSACTION_EXPENSE
+            );
+        } else {
+            // For other mappings, use default entity with appropriate transaction type
+            $transactionType = match($type) {
+                self::TYPE_INVOICE => AccountMapping::TRANSACTION_INVOICE,
+                self::TYPE_PAYMENT => AccountMapping::TRANSACTION_PAYMENT,
+                self::TYPE_EXPENSE => AccountMapping::TRANSACTION_EXPENSE,
+                default => null,
+            };
+
+            $accountMapping = AccountMapping::findForEntity(
+                $this->companyId,
+                AccountMapping::ENTITY_DEFAULT,
+                null,
+                $transactionType
+            );
         }
 
-        $accountMapping = $query->first();
-
-        if ($accountMapping && $accountMapping->account) {
-            return $accountMapping->account->code;
+        // Use debit account for AR/expense, credit account for revenue/AP/tax
+        if ($accountMapping) {
+            if (in_array($mapping, ['accounts_receivable', 'expense', 'cash'])) {
+                // These typically appear as debits
+                if ($accountMapping->debitAccount) {
+                    return $accountMapping->debitAccount->code;
+                }
+            } else {
+                // These typically appear as credits (revenue, payables, tax)
+                if ($accountMapping->creditAccount) {
+                    return $accountMapping->creditAccount->code;
+                }
+            }
         }
 
         // Return default codes based on standard Macedonian chart of accounts

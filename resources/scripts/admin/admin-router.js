@@ -930,6 +930,32 @@ export default [
         component: NetworkGraph,
       },
 
+      // Partner Accounting (PAF-04, PAF-05, PAF-09)
+      {
+        path: 'partner/accounting/chart-of-accounts',
+        name: 'partner.accounting.chart-of-accounts',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/ChartOfAccounts.vue'),
+      },
+      {
+        path: 'partner/accounting/mappings',
+        name: 'partner.accounting.mappings',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/AccountMappings.vue'),
+      },
+      {
+        path: 'partner/accounting/journal-entries',
+        name: 'partner.accounting.journal-entries',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/JournalEntries.vue'),
+      },
+      {
+        path: 'partner/accounting/export',
+        name: 'partner.accounting.export',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/JournalExport.vue'),
+      },
+
       // Banking
       {
         path: 'banking',

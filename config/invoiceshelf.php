@@ -627,6 +627,34 @@ return [
             'ability' => 'viewAny',
             'model' => \Coderflex\LaravelTicket\Models\Ticket::class,
         ],
+        [
+            'title' => 'Accounting',
+            'group' => 'partner.accounting',
+            'icon' => 'CalculatorIcon',
+            'isPartner' => true,
+            'children' => [
+                [
+                    'title' => 'Chart of Accounts',
+                    'link' => '/admin/partner/accounting/chart-of-accounts',
+                    'name' => 'partner.accounting.chart-of-accounts',
+                ],
+                [
+                    'title' => 'Account Mappings',
+                    'link' => '/admin/partner/accounting/mappings',
+                    'name' => 'partner.accounting.mappings',
+                ],
+                [
+                    'title' => 'Journal Entries',
+                    'link' => '/admin/partner/accounting/journal-entries',
+                    'name' => 'partner.accounting.journal-entries',
+                ],
+                [
+                    'title' => 'Export Journal',
+                    'link' => '/admin/partner/accounting/export',
+                    'name' => 'partner.accounting.export',
+                ],
+            ],
+        ],
     ],
 
     /*
@@ -736,3 +764,4 @@ return [
 // CLAUDE-CHECKPOINT
 
 // LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT PAF-10: Added partner accounting navigation menu

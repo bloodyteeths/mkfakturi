@@ -215,26 +215,253 @@ All changes are additive, backward-compatible, and respect existing codebase str
 
 ---
 
-## PHASE 4 – Accountant Tools (Future Sprint)
+## PHASE 4 – Accountant Tools (Current Sprint)
 
-### 4.1 Chart of Accounts
+> **Architecture Note**: This phase creates a **mapping layer** between Facturino transactions and
+> external accounting software (Pantheon, Zonel, etc.). Partners/accountants map customers, suppliers,
+> and categories to account codes, then export journal entries that can be directly imported into
+> their accounting systems.
+
+### 4.0 Audit Results (2025-12-12)
+
+**Already Implemented (Admin-Only):**
+- ✅ `accounts` table with hierarchical structure (parent_id)
+- ✅ `account_mappings` table linking entities to accounts
+- ✅ `Account` model with full hierarchy support
+- ✅ `AccountMapping` model with polymorphic relationships
+- ✅ `AccountSuggestionService` with learning algorithm
+- ✅ `JournalExportService` with Pantheon/Zonel/CSV formats
+- ✅ Admin UI: `ChartOfAccountsSetting.vue`, `JournalExportSetting.vue`
+
+**Critical Bug Found:**
+- ⚠️ `JournalExportService.php` line 247 queries `mapping_type` column that DOES NOT EXIST
+- Must be fixed before any journal export functionality can work
+
+**Missing for Phase 4:**
+- ❌ Partner-facing endpoints (all accounting is admin-only currently)
+- ❌ Partner Vue UI pages for accounting features
+- ❌ Account mapping workflow for partners
+- ❌ Journal entry review/confirmation UI
+
+---
+
+### 4.1 Bug Fixes (Prerequisite - MUST DO FIRST)
 
 | Task ID | Title | Agent | Files | Status | Notes |
 |---------|-------|-------|-------|--------|-------|
-| COA-01 | Create accounts table | Backend | Migration | Pending | |
-| COA-02 | Create account_mappings table | Backend | Migration | Pending | |
-| COA-03 | Chart of accounts management | Backend | Controllers | Pending | |
-| COA-04 | CSV/Excel import for accounts | Backend | Service | Pending | |
-| COA-05 | Partner portal UI for accounts | Frontend | Vue pages | Pending | |
+| BUG-01 | Fix JournalExportService mapping_type query | Backend | `app/Services/JournalExportService.php:247` | Pending | Column doesn't exist - breaks all exports |
+| BUG-02 | Add missing mapping_type column OR fix query logic | Backend | Migration or Service fix | Pending | Decide: add column or change query approach |
+| BUG-03 | Write unit tests for JournalExportService | QA | `tests/Unit/JournalExportServiceTest.php` | Pending | Ensure exports work for all formats |
 
-### 4.2 AI Account Suggestion
+---
+
+### 4.2 Chart of Accounts (Infrastructure - Already Complete)
 
 | Task ID | Title | Agent | Files | Status | Notes |
 |---------|-------|-------|-------|--------|-------|
-| AI-01 | Account suggestion service | Backend | Service | Pending | |
-| AI-02 | Add suggested/confirmed account fields | Backend | Migration | Pending | |
-| AI-03 | Partner review UI | Frontend | Vue pages | Pending | |
-| AI-04 | CSV/Excel export for accounting software | Backend | Service | Pending | |
+| COA-01 | Create accounts table | Backend | `database/migrations/2025_*_create_accounts_table.php` | ✅ Complete | Hierarchical with parent_id |
+| COA-02 | Create account_mappings table | Backend | `database/migrations/2025_*_create_account_mappings_table.php` | ✅ Complete | Polymorphic mapping |
+| COA-03 | Create Account model | Backend | `app/Models/Account.php` | ✅ Complete | Full hierarchy support |
+| COA-04 | Create AccountMapping model | Backend | `app/Models/AccountMapping.php` | ✅ Complete | Entity-to-account links |
+| COA-05 | Create AccountController (Admin) | Backend | `app/Http/Controllers/V1/Admin/Accounting/AccountController.php` | ✅ Complete | CRUD operations |
+| COA-06 | Create AccountMappingController (Admin) | Backend | `app/Http/Controllers/V1/Admin/Accounting/AccountMappingController.php` | ✅ Complete | Mapping management |
+| COA-07 | Create AccountSuggestionService | Backend | `app/Services/AccountSuggestionService.php` | ✅ Complete | AI suggestion with learning |
+| COA-08 | Create JournalExportService | Backend | `app/Services/JournalExportService.php` | ✅ Complete | Pantheon/Zonel/CSV export |
+| COA-09 | Create Admin Chart of Accounts UI | Frontend | `resources/scripts/admin/views/settings/ChartOfAccountsSetting.vue` | ✅ Complete | Admin settings page |
+| COA-10 | Create Admin Journal Export UI | Frontend | `resources/scripts/admin/views/settings/JournalExportSetting.vue` | ✅ Complete | Admin settings page |
+
+---
+
+### 4.3 Partner Accounting Backend (Parallel Track A)
+
+> **Agent**: Backend
+> **Dependency**: BUG-01, BUG-02 must be complete first
+> **Can run parallel with**: 4.4 (Frontend), 4.5 (QA)
+
+| Task ID | Title | Agent | Files | Status | Notes |
+|---------|-------|-------|-------|--------|-------|
+| PAB-01 | Create PartnerAccountController | Backend | `app/Http/Controllers/V1/Partner/PartnerAccountController.php` | Pending | Partner-scoped account CRUD |
+| PAB-02 | Create PartnerAccountMappingController | Backend | `app/Http/Controllers/V1/Partner/PartnerAccountMappingController.php` | Pending | Partner-scoped mappings |
+| PAB-03 | Create PartnerJournalExportController | Backend | `app/Http/Controllers/V1/Partner/PartnerJournalExportController.php` | Pending | Export for linked companies |
+| PAB-04 | Create PartnerJournalEntryController | Backend | `app/Http/Controllers/V1/Partner/PartnerJournalEntryController.php` | Pending | Review/confirm entries |
+| PAB-05 | Add partner accounting routes | Backend | `routes/api.php` | Pending | `/v1/partner/accounts/*` |
+| PAB-06 | Create PartnerAccountRequest | Backend | `app/Http/Requests/PartnerAccountRequest.php` | Pending | Validation for accounts |
+| PAB-07 | Create PartnerAccountMappingRequest | Backend | `app/Http/Requests/PartnerAccountMappingRequest.php` | Pending | Validation for mappings |
+| PAB-08 | Create PartnerExportRequest | Backend | `app/Http/Requests/PartnerExportRequest.php` | Pending | Validation for exports |
+| PAB-09 | Extend JournalExportService for partner context | Backend | `app/Services/JournalExportService.php` | Pending | Support partner-company filtering |
+| PAB-10 | Add account/mapping abilities to PartnerPolicy | Backend | `app/Policies/PartnerPolicy.php` | Pending | Authorization rules |
+
+**API Endpoints to Create:**
+```
+GET    /v1/partner/accounts                    - List chart of accounts
+POST   /v1/partner/accounts                    - Create account
+PUT    /v1/partner/accounts/{id}               - Update account
+DELETE /v1/partner/accounts/{id}               - Delete account
+POST   /v1/partner/accounts/import             - Import accounts from CSV
+
+GET    /v1/partner/mappings                    - List account mappings
+POST   /v1/partner/mappings                    - Create mapping (customer/supplier/category → account)
+PUT    /v1/partner/mappings/{id}               - Update mapping
+DELETE /v1/partner/mappings/{id}               - Delete mapping
+POST   /v1/partner/mappings/auto-suggest       - Get AI suggestions for entity
+
+GET    /v1/partner/journal-entries             - List journal entries for date range
+GET    /v1/partner/journal-entries/{id}        - Get single entry details
+PUT    /v1/partner/journal-entries/{id}        - Confirm/adjust entry
+POST   /v1/partner/journal/export              - Export to Pantheon/Zonel/CSV
+```
+
+---
+
+### 4.4 Partner Accounting Frontend (Parallel Track B)
+
+> **Agent**: Frontend
+> **Dependency**: Can start immediately (mock API responses initially)
+> **Can run parallel with**: 4.3 (Backend), 4.5 (QA)
+
+| Task ID | Title | Agent | Files | Status | Notes |
+|---------|-------|-------|-------|--------|-------|
+| PAF-01 | Create partner accounting store | Frontend | `resources/scripts/admin/stores/partner-accounting.js` | Pending | Pinia store for all accounting |
+| PAF-02 | Create PartnerChartOfAccounts.vue | Frontend | `resources/scripts/admin/views/partner/accounting/ChartOfAccounts.vue` | Pending | Account tree with CRUD |
+| PAF-03 | Create PartnerAccountMappings.vue | Frontend | `resources/scripts/admin/views/partner/accounting/AccountMappings.vue` | Pending | Entity-to-account mapping UI |
+| PAF-04 | Create PartnerJournalEntries.vue | Frontend | `resources/scripts/admin/views/partner/accounting/JournalEntries.vue` | Pending | Entry list with filters |
+| PAF-05 | Create PartnerJournalExport.vue | Frontend | `resources/scripts/admin/views/partner/accounting/JournalExport.vue` | Pending | Export wizard UI |
+| PAF-06 | Create AccountTreeComponent.vue | Frontend | `resources/scripts/admin/components/accounting/AccountTreeComponent.vue` | Pending | Reusable tree view |
+| PAF-07 | Create MappingWizard.vue | Frontend | `resources/scripts/admin/components/accounting/MappingWizard.vue` | Pending | Step-by-step mapping helper |
+| PAF-08 | Create AccountSuggestionBadge.vue | Frontend | `resources/scripts/admin/components/accounting/AccountSuggestionBadge.vue` | Pending | AI suggestion indicator |
+| PAF-09 | Add partner accounting routes | Frontend | `resources/scripts/admin/admin-router.js` | Pending | Router configuration |
+| PAF-10 | Add partner accounting navigation | Frontend | `config/invoiceshelf.php` | Pending | Sidebar menu items |
+| PAF-11 | Add accounting translations (EN) | Frontend | `lang/en.json` | Pending | ~50 new translation keys |
+| PAF-12 | Add accounting translations (MK) | Frontend | `lang/mk.json` | Pending | Macedonian translations |
+
+**UI Pages to Create:**
+
+1. **Chart of Accounts** (`/partner/accounting/chart-of-accounts`)
+   - Hierarchical tree view with expand/collapse
+   - Inline editing of account codes and names
+   - Import from CSV button
+   - Filter by account type (asset, liability, equity, income, expense)
+
+2. **Account Mappings** (`/partner/accounting/mappings`)
+   - Three tabs: Customers, Suppliers, Categories
+   - Table with entity name, current mapping, AI suggestion
+   - Bulk mapping actions
+   - "Apply AI Suggestions" button
+
+3. **Journal Entries** (`/partner/accounting/journal-entries`)
+   - Date range filter
+   - Company filter (for multi-company partners)
+   - Status filter: All, Suggested, Confirmed
+   - Click to expand entry details
+   - Confirm/Edit/Skip actions
+
+4. **Journal Export** (`/partner/accounting/export`)
+   - Step 1: Select date range and companies
+   - Step 2: Review unconfirmed entries (optional)
+   - Step 3: Choose format (Pantheon XML, Zonel CSV, Generic CSV)
+   - Step 4: Download or send to email
+
+---
+
+### 4.5 Testing & QA (Parallel Track C)
+
+> **Agent**: QA
+> **Dependency**: None (can write tests before implementation)
+> **Can run parallel with**: 4.3 (Backend), 4.4 (Frontend)
+
+| Task ID | Title | Agent | Files | Status | Notes |
+|---------|-------|-------|-------|--------|-------|
+| QA-01 | Write unit tests for AccountSuggestionService | QA | `tests/Unit/AccountSuggestionServiceTest.php` | Pending | Test learning algorithm |
+| QA-02 | Write unit tests for JournalExportService | QA | `tests/Unit/JournalExportServiceTest.php` | Pending | Test all export formats |
+| QA-03 | Write feature tests for partner accounts | QA | `tests/Feature/PartnerAccountsTest.php` | Pending | CRUD + authorization |
+| QA-04 | Write feature tests for partner mappings | QA | `tests/Feature/PartnerAccountMappingsTest.php` | Pending | CRUD + suggestions |
+| QA-05 | Write feature tests for partner export | QA | `tests/Feature/PartnerJournalExportTest.php` | Pending | Export formats + filtering |
+| QA-06 | Write E2E tests for mapping workflow | QA | `tests/Browser/PartnerMappingWorkflowTest.php` | Pending | Full user flow |
+| QA-07 | Create test fixtures for accounting data | QA | `tests/fixtures/accounting/` | Pending | Sample accounts, mappings |
+
+---
+
+### 4.6 Integration & Documentation (Final)
+
+> **Agent**: Backend + Frontend
+> **Dependency**: 4.3 and 4.4 must be complete
+> **Sequential after**: All parallel tracks complete
+
+| Task ID | Title | Agent | Files | Status | Notes |
+|---------|-------|-------|-------|--------|-------|
+| INT-01 | Integration testing of full workflow | QA | Manual testing | Pending | End-to-end verification |
+| INT-02 | Performance testing for large exports | QA | Load testing | Pending | Test with 10k+ entries |
+| INT-03 | Create partner accounting documentation | Backend | `docs/api/partner-accounting.md` | Pending | API docs for partners |
+| INT-04 | Create user guide for accountants | Frontend | TBD | Pending | How-to guide |
+
+---
+
+### Phase 4 Acceptance Criteria
+
+**Chart of Accounts:**
+- [ ] Partner can create/edit/delete accounts in hierarchical structure
+- [ ] Partner can import accounts from CSV
+- [ ] Account codes follow Macedonian accounting standards (optional)
+- [ ] Accounts are company-scoped (each linked company has own chart)
+
+**Account Mappings:**
+- [ ] Partner can map customers to accounts (e.g., "Customer X → Account 1200")
+- [ ] Partner can map suppliers to accounts (e.g., "Supplier Y → Account 4100")
+- [ ] Partner can map item categories to accounts
+- [ ] AI suggests accounts based on entity name/history
+- [ ] Partner can accept or override AI suggestions
+- [ ] Suggestions improve over time (learning)
+
+**Journal Export:**
+- [ ] Partner can view journal entries for any linked company
+- [ ] Partner can filter by date range, status, company
+- [ ] Partner can export to Pantheon XML format
+- [ ] Partner can export to Zonel CSV format
+- [ ] Partner can export to generic CSV format
+- [ ] Export includes proper account codes from mappings
+
+**Authorization:**
+- [ ] Partners can only access linked companies' data
+- [ ] Regular users cannot access partner accounting features
+- [ ] Admin can still manage global chart of accounts
+
+---
+
+### Multi-Agent Parallel Implementation Plan
+
+```
+Week 1 (Parallel Execution):
+├── Agent A (Backend): BUG-01, BUG-02, PAB-01 through PAB-05
+├── Agent B (Frontend): PAF-01 through PAF-06 (with mock data)
+└── Agent C (QA): QA-01, QA-02, QA-07 (test fixtures)
+
+Week 2 (Parallel Execution):
+├── Agent A (Backend): PAB-06 through PAB-10
+├── Agent B (Frontend): PAF-07 through PAF-12
+└── Agent C (QA): QA-03, QA-04, QA-05
+
+Week 3 (Integration):
+├── Agent A + B: Connect frontend to real API
+├── Agent C (QA): QA-06, INT-01
+└── All: Bug fixes from integration testing
+
+Week 4 (Polish):
+├── INT-02: Performance testing
+├── INT-03, INT-04: Documentation
+└── Final QA sign-off
+```
+
+**Task Dependencies Graph:**
+```
+BUG-01 ──┬──> PAB-03 (JournalExportController needs fixed service)
+BUG-02 ──┘
+
+PAF-01 ──> PAF-02, PAF-03, PAF-04, PAF-05 (store needed for all pages)
+
+PAB-05 ──> PAF-09 (routes must exist before frontend routes)
+
+QA-07 ──> QA-03, QA-04, QA-05 (fixtures needed for tests)
+```
 
 ---
 
@@ -292,8 +519,12 @@ For every phase completion:
 | Phase 2.5 - Stock Operations | Complete | 2025-12-02 | 2025-12-02 | Adjustments, transfers, validation, retroactive |
 | Phase 3.1 - Period Lock Infra | Complete | Prior | Prior | Infrastructure already existed |
 | Phase 3.2 - Period Lock Enforce | Complete | 2025-12-12 | 2025-12-12 | All 9 tasks done |
-| Phase 4.1 - Chart of Accounts | Pending | | | |
-| Phase 4.2 - AI Suggestion | Pending | | | |
+| Phase 4.1 - Bug Fixes | Pending | | | Critical: JournalExportService broken |
+| Phase 4.2 - COA Infrastructure | Complete | Prior | Prior | Admin-only, already implemented |
+| Phase 4.3 - Partner Backend | Pending | | | 10 tasks for partner API |
+| Phase 4.4 - Partner Frontend | Pending | | | 12 tasks for partner Vue UI |
+| Phase 4.5 - Testing | Pending | | | 7 test tasks |
+| Phase 4.6 - Integration | Pending | | | Final polish + docs |
 | Phase 5 - Zonel | Pending | | | |
 
 ---
@@ -563,9 +794,14 @@ software (Xero, QuickBooks, FreshBooks, Wave) uses period locking instead:
 | Phase 1 (Projects, Proforma, Duplicates) | 45 | 0 |
 | Phase 2 (Stock Module) | 36 | 0 |
 | Phase 3 (Period Locking) | 20 | 0 |
-| Phase 4 (Accountant Tools) | 0 | 9 |
+| Phase 4.1 (Bug Fixes) | 0 | 3 |
+| Phase 4.2 (COA Infrastructure) | 10 | 0 |
+| Phase 4.3 (Partner Backend) | 0 | 10 |
+| Phase 4.4 (Partner Frontend) | 0 | 12 |
+| Phase 4.5 (Testing) | 0 | 7 |
+| Phase 4.6 (Integration) | 0 | 4 |
 | Phase 5 (Zonel) | 0 | 2 |
-| **Total** | **101** | **11** |
+| **Total** | **111** | **38** |
 
 ---
 
@@ -601,4 +837,70 @@ software (Xero, QuickBooks, FreshBooks, Wave) uses period locking instead:
 
 ---
 
-_Last updated: 2025-12-12_
+---
+
+## Phase 4 Audit Summary (2025-12-12)
+
+### Existing Accounting Infrastructure (Admin-Only)
+
+**Models:**
+- `app/Models/Account.php` - Hierarchical accounts with parent_id, type, code, name
+- `app/Models/AccountMapping.php` - Polymorphic mapping (mappable_type/id → account_id)
+
+**Services:**
+- `app/Services/AccountSuggestionService.php` - Learning-based AI suggestions
+- `app/Services/JournalExportService.php` - Multi-format export (HAS BUG)
+
+**Controllers (Admin):**
+- `app/Http/Controllers/V1/Admin/Accounting/AccountController.php`
+- `app/Http/Controllers/V1/Admin/Accounting/AccountMappingController.php`
+- `app/Http/Controllers/V1/Admin/Accounting/JournalExportController.php`
+
+**Vue Components (Admin):**
+- `resources/scripts/admin/views/settings/ChartOfAccountsSetting.vue`
+- `resources/scripts/admin/views/settings/JournalExportSetting.vue`
+
+### Critical Bug Detail
+
+**File:** `app/Services/JournalExportService.php`
+**Line:** ~247
+**Issue:** Query references `mapping_type` column that does not exist in `account_mappings` table
+
+```php
+// Current broken code
+->where('mapping_type', $type)
+
+// Table schema (from migration)
+Schema::create('account_mappings', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('company_id');
+    $table->foreignId('account_id');
+    $table->morphs('mappable');  // Creates mappable_type, mappable_id
+    // NO mapping_type column!
+});
+```
+
+**Fix Options:**
+1. Change query to use `mappable_type` instead of `mapping_type`
+2. Add `mapping_type` column via migration (not recommended - redundant)
+
+### Partner Portal Gap Analysis
+
+Partners currently have access to:
+- ✅ Company list (`/v1/partner/companies`)
+- ✅ Commission tracking (`/v1/partner/commissions`)
+- ✅ Basic dashboard
+
+Partners currently CANNOT access:
+- ❌ Chart of Accounts
+- ❌ Account Mappings
+- ❌ Journal Entries
+- ❌ Journal Export
+- ❌ Invoices/Expenses of linked companies
+- ❌ AI Account Suggestions
+
+This is the core gap Phase 4 addresses.
+
+---
+
+_Last updated: 2025-12-12 (Phase 4 Plan Added)_

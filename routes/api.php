@@ -99,6 +99,9 @@ use App\Http\Controllers\V1\Admin\Update\MigrateUpdateController;
 use App\Http\Controllers\V1\Admin\Update\UnzipUpdateController;
 use App\Http\Controllers\V1\Admin\Users\UsersController;
 use App\Http\Controllers\V1\Customer\Auth\ForgotPasswordController as AuthForgotPasswordController;
+use App\Http\Controllers\V1\Partner\PartnerAccountController;
+use App\Http\Controllers\V1\Partner\PartnerAccountMappingController;
+use App\Http\Controllers\V1\Partner\PartnerJournalExportController;
 use App\Http\Controllers\V1\Customer\Auth\ResetPasswordController as AuthResetPasswordController;
 use App\Http\Controllers\V1\Customer\Estimate\AcceptEstimateController as CustomerAcceptEstimateController;
 use App\Http\Controllers\V1\Customer\Estimate\EstimatesController as CustomerEstimatesController;
@@ -1243,6 +1246,31 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         // Bank account management
         Route::put('/bank-account', [\Modules\Mk\Partner\Controllers\StripeConnectController::class, 'updateBankAccount'])->middleware('throttle:strict');
     });
+
+    // Partner Accounting Routes (PAB-05)
+    // Chart of Accounts
+    Route::get('/companies/{company}/accounts', [PartnerAccountController::class, 'index']);
+    Route::get('/companies/{company}/accounts/tree', [PartnerAccountController::class, 'tree']);
+    Route::get('/companies/{company}/accounts/{account}', [PartnerAccountController::class, 'show']);
+    Route::post('/companies/{company}/accounts', [PartnerAccountController::class, 'store']);
+    Route::put('/companies/{company}/accounts/{account}', [PartnerAccountController::class, 'update']);
+    Route::delete('/companies/{company}/accounts/{account}', [PartnerAccountController::class, 'destroy']);
+    Route::post('/companies/{company}/accounts/import', [PartnerAccountController::class, 'import']);
+
+    // Account Mappings
+    Route::get('/companies/{company}/mappings', [PartnerAccountMappingController::class, 'index']);
+    Route::get('/companies/{company}/mappings/{mapping}', [PartnerAccountMappingController::class, 'show']);
+    Route::post('/companies/{company}/mappings', [PartnerAccountMappingController::class, 'store']);
+    Route::put('/companies/{company}/mappings/{mapping}', [PartnerAccountMappingController::class, 'update']);
+    Route::delete('/companies/{company}/mappings/{mapping}', [PartnerAccountMappingController::class, 'destroy']);
+    Route::post('/companies/{company}/mappings/suggest', [PartnerAccountMappingController::class, 'suggest']);
+
+    // Journal Export
+    Route::get('/companies/{company}/journal-entries', [PartnerJournalExportController::class, 'entries']);
+    Route::get('/companies/{company}/journal-entries/{entry}', [PartnerJournalExportController::class, 'show']);
+    Route::put('/companies/{company}/journal-entries/{entry}', [PartnerJournalExportController::class, 'confirm']);
+    Route::post('/companies/{company}/journal/export', [PartnerJournalExportController::class, 'export']);
+    // CLAUDE-CHECKPOINT
 });
 
 // AI Financial Assistant Routes

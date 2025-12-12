@@ -1,0 +1,385 @@
+<?php
+
+namespace App\Http\Controllers\V1\Partner;
+
+use App\Http\Controllers\Controller;
+use App\Models\Partner;
+use App\Services\JournalExportService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+/**
+ * Partner Journal Export Controller (PAB-03)
+ *
+ * Manages journal entry viewing and export for companies linked to partners.
+ * Partners can view, export, and manage journal entries for their client companies.
+ */
+class PartnerJournalExportController extends Controller
+{
+    /**
+     * List journal entries for a company.
+     *
+     * Returns paginated journal entries with optional filtering by date range and status.
+     * Includes related invoice/expense/payment data.
+     *
+     * @param Request $request
+     * @param int $company Company ID from route
+     * @return JsonResponse
+     */
+    public function entries(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'status' => 'sometimes|in:all,suggested,confirmed',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
+        $service = new JournalExportService(
+            $company,
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
+
+        $entries = $service->getJournalEntries();
+
+        // Filter by status if requested
+        // Note: Current implementation doesn't track confirmed/suggested status
+        // All entries are treated as "suggested" until confirmation feature is implemented
+        $status = $request->input('status', 'all');
+        if ($status !== 'all') {
+            // TODO: Implement status filtering when journal entry confirmation is added
+            // For now, all entries are treated as "suggested"
+        }
+
+        // Paginate results
+        $perPage = $request->input('per_page', 20);
+        $page = $request->input('page', 1);
+        $total = $entries->count();
+        $paginatedEntries = $entries
+            ->slice(($page - 1) * $perPage, $perPage)
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $paginatedEntries,
+            'meta' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => (int) ceil($total / $perPage),
+            ],
+        ]);
+    }
+
+    /**
+     * Get single journal entry details.
+     *
+     * Returns full entry details with all line items.
+     * Note: Current implementation uses entry reference and date to identify entries
+     * since journal entries are generated on-the-fly, not stored.
+     *
+     * @param Request $request
+     * @param int $company Company ID
+     * @param string $reference Entry reference (invoice/payment/expense number)
+     * @return JsonResponse
+     */
+    public function show(Request $request, int $company, string $reference): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        // Get journal entries for the date range around the requested date
+        $date = Carbon::parse($request->input('date'));
+        $service = new JournalExportService(
+            $company,
+            $date->copy()->subDays(1)->format('Y-m-d'),
+            $date->copy()->addDays(1)->format('Y-m-d')
+        );
+
+        $entries = $service->getJournalEntries();
+
+        // Filter to only entries matching the reference
+        $matchingEntries = $entries->filter(function ($entry) use ($reference) {
+            return $entry['reference'] === $reference;
+        })->values();
+
+        if ($matchingEntries->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Journal entry not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'reference' => $reference,
+                'date' => $matchingEntries->first()['date'],
+                'type' => $matchingEntries->first()['type'],
+                'entries' => $matchingEntries,
+                'is_balanced' => abs($matchingEntries->sum('debit') - $matchingEntries->sum('credit')) < 0.01,
+                'total_debit' => $matchingEntries->sum('debit'),
+                'total_credit' => $matchingEntries->sum('credit'),
+                // Note: Account suggestions/confirmations not yet implemented
+                'status' => 'suggested',
+            ],
+        ]);
+    }
+
+    /**
+     * Confirm or adjust a journal entry.
+     *
+     * Note: This feature requires a journal_entries table to store confirmed entries
+     * and account mapping preferences. Currently not implemented in the base system.
+     *
+     * @param Request $request
+     * @param int $company Company ID
+     * @param string $reference Entry reference
+     * @return JsonResponse
+     */
+    public function confirm(Request $request, int $company, string $reference): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'date' => 'required|date',
+            'line_item_index' => 'required|integer|min:0',
+            'account_id' => 'required|integer|exists:accounts,id',
+        ]);
+
+        // TODO: Implement journal entry confirmation feature
+        // This requires:
+        // 1. A journal_entries table to store confirmed entries
+        // 2. A journal_entry_lines table for individual line items
+        // 3. Logic to update account mappings based on confirmations
+        // 4. Validation that the account belongs to the company
+        //
+        // For now, return a not implemented response
+        return response()->json([
+            'success' => false,
+            'message' => 'Journal entry confirmation feature not yet implemented. Please update account mappings directly to change default accounts.',
+            'note' => 'This feature requires database schema additions (journal_entries, journal_entry_lines tables)',
+        ], 501); // 501 Not Implemented
+    }
+
+    /**
+     * Export journal entries to file.
+     *
+     * Exports journal entries for the specified date range in the requested format.
+     * Supported formats: csv, pantheon, zonel
+     *
+     * @param Request $request
+     * @param int $company Company ID
+     * @return Response
+     */
+    public function export(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response('Partner not found', 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response('No access to this company', 403);
+        }
+
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'format' => 'sometimes|in:csv,pantheon,zonel',
+        ]);
+
+        $format = $request->input('format', 'csv');
+
+        $service = new JournalExportService(
+            $company,
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
+
+        // Generate CSV based on format
+        $csv = match ($format) {
+            JournalExportService::FORMAT_PANTHEON => $service->toPantheonCSV(),
+            JournalExportService::FORMAT_ZONEL => $service->toZonelCSV(),
+            default => $service->toCSV(),
+        };
+
+        // Generate filename
+        $from = Carbon::parse($request->input('start_date'))->format('Ymd');
+        $to = Carbon::parse($request->input('end_date'))->format('Ymd');
+        $filename = "company_{$company}_journals_{$format}_{$from}_{$to}.csv";
+
+        return response($csv, 200)
+            ->header('Content-Type', 'text/csv; charset=UTF-8')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
+            ->header('Content-Length', strlen($csv));
+    }
+
+    /**
+     * Get journal export summary.
+     *
+     * Returns summary statistics for the export period without paginating.
+     *
+     * @param Request $request
+     * @param int $company Company ID
+     * @return JsonResponse
+     */
+    public function summary(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $service = new JournalExportService(
+            $company,
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
+
+        $summary = $service->getSummary();
+
+        return response()->json([
+            'success' => true,
+            'data' => $summary,
+        ]);
+    }
+
+    /**
+     * Get available export formats.
+     *
+     * Returns list of supported export formats for journal entries.
+     *
+     * @return JsonResponse
+     */
+    public function formats(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                [
+                    'value' => 'csv',
+                    'label' => 'Generic CSV',
+                    'description' => 'Standard CSV format compatible with most systems',
+                ],
+                [
+                    'value' => 'pantheon',
+                    'label' => 'Pantheon',
+                    'description' => 'Format for Pantheon accounting software (Macedonian)',
+                ],
+                [
+                    'value' => 'zonel',
+                    'label' => 'Zonel',
+                    'description' => 'Format for Zonel accounting software (Macedonian)',
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Get partner from authenticated request.
+     *
+     * @param Request $request
+     * @return Partner|null
+     */
+    protected function getPartnerFromRequest(Request $request): ?Partner
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return null;
+        }
+
+        return Partner::where('user_id', $user->id)->first();
+    }
+
+    /**
+     * Check if partner has access to a company.
+     *
+     * @param Partner $partner
+     * @param int $companyId
+     * @return bool
+     */
+    protected function hasCompanyAccess(Partner $partner, int $companyId): bool
+    {
+        return $partner->companies()
+            ->where('companies.id', $companyId)
+            ->where('partner_company_links.is_active', true)
+            ->exists();
+    }
+}
+
+// CLAUDE-CHECKPOINT

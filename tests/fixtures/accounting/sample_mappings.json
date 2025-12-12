@@ -1,0 +1,142 @@
+{
+  "customer_mappings": [
+    {
+      "entity_type": "customer",
+      "entity_id": 1,
+      "transaction_type": "invoice",
+      "debit_account_code": "1121",
+      "credit_account_code": "4110",
+      "description": "Customer 1 - Product sales invoice mapping"
+    },
+    {
+      "entity_type": "customer",
+      "entity_id": 2,
+      "transaction_type": "invoice",
+      "debit_account_code": "1121",
+      "credit_account_code": "4120",
+      "description": "Customer 2 - Service revenue invoice mapping"
+    },
+    {
+      "entity_type": "customer",
+      "entity_id": 3,
+      "transaction_type": "invoice",
+      "debit_account_code": "1121",
+      "credit_account_code": "4110",
+      "description": "Customer 3 - Product sales invoice mapping"
+    }
+  ],
+  "supplier_mappings": [
+    {
+      "entity_type": "supplier",
+      "entity_id": 1,
+      "transaction_type": "expense",
+      "debit_account_code": "5100",
+      "credit_account_code": "2110",
+      "description": "Supplier 1 - Cost of goods expense mapping"
+    },
+    {
+      "entity_type": "supplier",
+      "entity_id": 2,
+      "transaction_type": "expense",
+      "debit_account_code": "5220",
+      "credit_account_code": "2110",
+      "description": "Supplier 2 - Rent expense mapping"
+    },
+    {
+      "entity_type": "supplier",
+      "entity_id": 3,
+      "transaction_type": "expense",
+      "debit_account_code": "5230",
+      "credit_account_code": "2110",
+      "description": "Supplier 3 - Utilities expense mapping"
+    }
+  ],
+  "expense_category_mappings": [
+    {
+      "entity_type": "expense_category",
+      "entity_id": 1,
+      "transaction_type": "expense",
+      "debit_account_code": "5210",
+      "credit_account_code": "1112",
+      "description": "Salaries category - paid from bank"
+    },
+    {
+      "entity_type": "expense_category",
+      "entity_id": 2,
+      "transaction_type": "expense",
+      "debit_account_code": "5220",
+      "credit_account_code": "1112",
+      "description": "Rent category - paid from bank"
+    },
+    {
+      "entity_type": "expense_category",
+      "entity_id": 3,
+      "transaction_type": "expense",
+      "debit_account_code": "5230",
+      "credit_account_code": "1112",
+      "description": "Utilities category - paid from bank"
+    },
+    {
+      "entity_type": "expense_category",
+      "entity_id": 4,
+      "transaction_type": "expense",
+      "debit_account_code": "5240",
+      "credit_account_code": "1111",
+      "description": "Office supplies - paid from petty cash"
+    }
+  ],
+  "payment_method_mappings": [
+    {
+      "entity_type": "payment_method",
+      "entity_id": 1,
+      "transaction_type": "payment",
+      "debit_account_code": "1112",
+      "credit_account_code": "1121",
+      "description": "Bank transfer payment method"
+    },
+    {
+      "entity_type": "payment_method",
+      "entity_id": 2,
+      "transaction_type": "payment",
+      "debit_account_code": "1111",
+      "credit_account_code": "1121",
+      "description": "Cash payment method"
+    }
+  ],
+  "tax_type_mappings": [
+    {
+      "entity_type": "tax_type",
+      "entity_id": 1,
+      "transaction_type": "invoice",
+      "debit_account_code": "1121",
+      "credit_account_code": "2121",
+      "description": "VAT 18% on sales"
+    }
+  ],
+  "default_mappings": [
+    {
+      "entity_type": "default",
+      "entity_id": null,
+      "transaction_type": "invoice",
+      "debit_account_code": "1121",
+      "credit_account_code": "4100",
+      "description": "Default invoice mapping - receivables to sales"
+    },
+    {
+      "entity_type": "default",
+      "entity_id": null,
+      "transaction_type": "payment",
+      "debit_account_code": "1112",
+      "credit_account_code": "1121",
+      "description": "Default payment mapping - bank to receivables"
+    },
+    {
+      "entity_type": "default",
+      "entity_id": null,
+      "transaction_type": "expense",
+      "debit_account_code": "5200",
+      "credit_account_code": "2110",
+      "description": "Default expense mapping - operating expense to payables"
+    }
+  ]
+}

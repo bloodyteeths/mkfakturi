@@ -1,0 +1,244 @@
+{
+  "accounts": [
+    {
+      "code": "1000",
+      "name": "Assets",
+      "type": "asset",
+      "parent_id": null,
+      "is_active": true,
+      "description": "Total Assets"
+    },
+    {
+      "code": "1100",
+      "name": "Current Assets",
+      "type": "asset",
+      "parent_id": "1000",
+      "is_active": true,
+      "description": "Current Assets - Tekovna Sredstva"
+    },
+    {
+      "code": "1110",
+      "name": "Cash and Cash Equivalents",
+      "type": "asset",
+      "parent_id": "1100",
+      "is_active": true,
+      "description": "Pari i Parični Ekvivalenti"
+    },
+    {
+      "code": "1111",
+      "name": "Petty Cash",
+      "type": "asset",
+      "parent_id": "1110",
+      "is_active": true,
+      "description": "Gotovina vo Kasa"
+    },
+    {
+      "code": "1112",
+      "name": "Bank Account - Primary",
+      "type": "asset",
+      "parent_id": "1110",
+      "is_active": true,
+      "description": "Žiro Smetka"
+    },
+    {
+      "code": "1120",
+      "name": "Accounts Receivable",
+      "type": "asset",
+      "parent_id": "1100",
+      "is_active": true,
+      "description": "Pobaruvanja od Kupuvači"
+    },
+    {
+      "code": "1121",
+      "name": "Trade Receivables",
+      "type": "asset",
+      "parent_id": "1120",
+      "is_active": true,
+      "description": "Trudovni Pobaruvanja"
+    },
+    {
+      "code": "1130",
+      "name": "Inventory",
+      "type": "asset",
+      "parent_id": "1100",
+      "is_active": true,
+      "description": "Zalihi"
+    },
+    {
+      "code": "1200",
+      "name": "Non-Current Assets",
+      "type": "asset",
+      "parent_id": "1000",
+      "is_active": true,
+      "description": "Dolgoročni Sredstva"
+    },
+    {
+      "code": "1210",
+      "name": "Property, Plant and Equipment",
+      "type": "asset",
+      "parent_id": "1200",
+      "is_active": true,
+      "description": "Nedvižen Imot, Postrojki i Oprema"
+    },
+    {
+      "code": "2000",
+      "name": "Liabilities",
+      "type": "liability",
+      "parent_id": null,
+      "is_active": true,
+      "description": "Total Liabilities"
+    },
+    {
+      "code": "2100",
+      "name": "Current Liabilities",
+      "type": "liability",
+      "parent_id": "2000",
+      "is_active": true,
+      "description": "Tekovna Obvrski"
+    },
+    {
+      "code": "2110",
+      "name": "Accounts Payable",
+      "type": "liability",
+      "parent_id": "2100",
+      "is_active": true,
+      "description": "Obvrski kon Dobavuvači"
+    },
+    {
+      "code": "2120",
+      "name": "VAT Payable",
+      "type": "liability",
+      "parent_id": "2100",
+      "is_active": true,
+      "description": "DDV Obvrska"
+    },
+    {
+      "code": "2121",
+      "name": "VAT on Sales",
+      "type": "liability",
+      "parent_id": "2120",
+      "is_active": true,
+      "description": "DDV na Prodažba"
+    },
+    {
+      "code": "2130",
+      "name": "Salary Payable",
+      "type": "liability",
+      "parent_id": "2100",
+      "is_active": true,
+      "description": "Plati za Isplata"
+    },
+    {
+      "code": "3000",
+      "name": "Equity",
+      "type": "equity",
+      "parent_id": null,
+      "is_active": true,
+      "description": "Kapital"
+    },
+    {
+      "code": "3100",
+      "name": "Share Capital",
+      "type": "equity",
+      "parent_id": "3000",
+      "is_active": true,
+      "description": "Osnoven Kapital"
+    },
+    {
+      "code": "3200",
+      "name": "Retained Earnings",
+      "type": "equity",
+      "parent_id": "3000",
+      "is_active": true,
+      "description": "Zadržana Dobit"
+    },
+    {
+      "code": "4000",
+      "name": "Revenue",
+      "type": "revenue",
+      "parent_id": null,
+      "is_active": true,
+      "description": "Prihodi"
+    },
+    {
+      "code": "4100",
+      "name": "Sales Revenue",
+      "type": "revenue",
+      "parent_id": "4000",
+      "is_active": true,
+      "description": "Prihodi od Prodažba"
+    },
+    {
+      "code": "4110",
+      "name": "Product Sales",
+      "type": "revenue",
+      "parent_id": "4100",
+      "is_active": true,
+      "description": "Prodažba na Proizvodi"
+    },
+    {
+      "code": "4120",
+      "name": "Service Revenue",
+      "type": "revenue",
+      "parent_id": "4100",
+      "is_active": true,
+      "description": "Prihodi od Uslugi"
+    },
+    {
+      "code": "5000",
+      "name": "Expenses",
+      "type": "expense",
+      "parent_id": null,
+      "is_active": true,
+      "description": "Troškovi"
+    },
+    {
+      "code": "5100",
+      "name": "Cost of Goods Sold",
+      "type": "expense",
+      "parent_id": "5000",
+      "is_active": true,
+      "description": "Trošoci za Prodadena Stoka"
+    },
+    {
+      "code": "5200",
+      "name": "Operating Expenses",
+      "type": "expense",
+      "parent_id": "5000",
+      "is_active": true,
+      "description": "Operativni Troškovi"
+    },
+    {
+      "code": "5210",
+      "name": "Salaries and Wages",
+      "type": "expense",
+      "parent_id": "5200",
+      "is_active": true,
+      "description": "Plati i Nadomesti"
+    },
+    {
+      "code": "5220",
+      "name": "Rent Expense",
+      "type": "expense",
+      "parent_id": "5200",
+      "is_active": true,
+      "description": "Troškovi za Naem"
+    },
+    {
+      "code": "5230",
+      "name": "Utilities",
+      "type": "expense",
+      "parent_id": "5200",
+      "is_active": true,
+      "description": "Komunalii"
+    },
+    {
+      "code": "5240",
+      "name": "Office Supplies",
+      "type": "expense",
+      "parent_id": "5200",
+      "is_active": true,
+      "description": "Kancelarijski Materijali"
+    }
+  ]
+}
