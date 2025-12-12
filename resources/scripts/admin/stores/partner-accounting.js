@@ -71,7 +71,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        const response = await axios.get(`/api/v1/partner/companies/${companyId}/accounts`, {
+        const response = await axios.get(`/partner/companies/${companyId}/accounts`, {
           params,
         })
 
@@ -94,7 +94,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        const response = await axios.get(`/api/v1/partner/companies/${companyId}/accounts/tree`)
+        const response = await axios.get(`/partner/companies/${companyId}/accounts/tree`)
 
         this.accountTree = response.data.data || []
         return response.data
@@ -117,7 +117,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
       try {
         const response = await axios.post(
-          `/api/v1/partner/companies/${companyId}/accounts`,
+          `/partner/companies/${companyId}/accounts`,
           data
         )
 
@@ -148,7 +148,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
       try {
         const response = await axios.put(
-          `/api/v1/partner/companies/${companyId}/accounts/${accountId}`,
+          `/partner/companies/${companyId}/accounts/${accountId}`,
           data
         )
 
@@ -180,7 +180,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        await axios.delete(`/api/v1/partner/companies/${companyId}/accounts/${accountId}`)
+        await axios.delete(`/partner/companies/${companyId}/accounts/${accountId}`)
 
         const index = this.accounts.findIndex((a) => a.id === accountId)
         if (index > -1) {
@@ -211,7 +211,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
         formData.append('file', file)
 
         const response = await axios.post(
-          `/api/v1/partner/companies/${companyId}/accounts/import`,
+          `/partner/companies/${companyId}/accounts/import`,
           formData,
           {
             headers: {
@@ -248,7 +248,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       try {
         const params = type ? { type } : {}
         const response = await axios.get(
-          `/api/v1/partner/companies/${companyId}/account-mappings`,
+          `/partner/companies/${companyId}/mappings`,
           { params }
         )
 
@@ -273,7 +273,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
       try {
         const response = await axios.post(
-          `/api/v1/partner/companies/${companyId}/account-mappings`,
+          `/partner/companies/${companyId}/mappings`,
           data
         )
 
@@ -304,7 +304,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
       try {
         const response = await axios.put(
-          `/api/v1/partner/companies/${companyId}/account-mappings/${mappingId}`,
+          `/partner/companies/${companyId}/mappings/${mappingId}`,
           data
         )
 
@@ -337,7 +337,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
       try {
         await axios.delete(
-          `/api/v1/partner/companies/${companyId}/account-mappings/${mappingId}`
+          `/partner/companies/${companyId}/mappings/${mappingId}`
         )
 
         const index = this.mappings.findIndex((m) => m.id === mappingId)
@@ -363,8 +363,9 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        const response = await axios.get(
-          `/api/v1/partner/companies/${companyId}/account-mappings/suggest/${entityType}/${entityId}`
+        const response = await axios.post(
+          `/partner/companies/${companyId}/mappings/suggest`,
+          { entity_type: entityType, entity_id: entityId }
         )
 
         // Store suggestion for this entity
@@ -388,7 +389,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
       try {
         const response = await axios.get(
-          `/api/v1/partner/companies/${companyId}/journal-entries`,
+          `/partner/companies/${companyId}/journal-entries`,
           { params }
         )
 
@@ -422,8 +423,8 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        const response = await axios.post(
-          `/api/v1/partner/companies/${companyId}/journal-entries/${entryId}/confirm`,
+        const response = await axios.put(
+          `/partner/companies/${companyId}/journal-entries/${entryId}`,
           { account_id: accountId }
         )
 
@@ -456,10 +457,10 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        const response = await axios.get(
-          `/api/v1/partner/companies/${companyId}/journal-entries/export`,
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/export`,
+          params,
           {
-            params,
             responseType: 'blob',
           }
         )
