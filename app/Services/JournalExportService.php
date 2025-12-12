@@ -95,7 +95,7 @@ class JournalExportService
     protected function invoiceToJournalEntries(Invoice $invoice): array
     {
         $entries = [];
-        $date = $invoice->invoice_date->format('Y-m-d');
+        $date = \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d');
         $reference = $invoice->invoice_number;
         $description = "Invoice {$reference} - {$invoice->customer->name}";
 
@@ -156,7 +156,7 @@ class JournalExportService
     protected function paymentToJournalEntries(Payment $payment): array
     {
         $entries = [];
-        $date = $payment->payment_date->format('Y-m-d');
+        $date = \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d');
         $reference = $payment->payment_number;
         $description = "Payment {$reference} - {$payment->customer->name}";
 
@@ -199,7 +199,7 @@ class JournalExportService
     protected function expenseToJournalEntries(Expense $expense): array
     {
         $entries = [];
-        $date = $expense->expense_date->format('Y-m-d');
+        $date = \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d');
         $reference = $expense->invoice_number ?? 'EXP-'.$expense->id;
         $categoryName = $expense->category->name ?? 'Expense';
         $description = "{$categoryName} - {$reference}";
