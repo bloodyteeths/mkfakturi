@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\CompanySetting;
 use App\Models\Customer;
+use App\Services\PeriodLockService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -77,6 +78,59 @@ class PaymentRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * Configure the validator instance.
+     * Adds period lock validation.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $this->validatePeriodLock($validator);
+        });
+    }
+
+    /**
+     * Validate that the payment date is not in a locked period.
+     */
+    protected function validatePeriodLock($validator): void
+    {
+        $companyId = $this->header('company');
+        $paymentDate = $this->input('payment_date');
+
+        if (! $companyId || ! $paymentDate) {
+            return;
+        }
+
+        $lockService = app(PeriodLockService::class);
+
+        // Check if the new date is locked
+        if ($lockService->isDateLocked($companyId, $paymentDate)) {
+            $lockReason = $lockService->getLockReason($companyId, $paymentDate);
+            $validator->errors()->add(
+                'payment_date',
+                __('period_lock.date_is_locked', [
+                    'date' => $paymentDate,
+                    'reason' => $lockReason['message'] ?? '',
+                ])
+            );
+        }
+
+        // For updates, also check if the original date was locked
+        if ($this->isMethod('PUT') && $this->route('payment')) {
+            $originalDate = $this->route('payment')->payment_date;
+            if ($originalDate && $lockService->isDateLocked($companyId, $originalDate)) {
+                $lockReason = $lockService->getLockReason($companyId, $originalDate);
+                $validator->errors()->add(
+                    'payment_date',
+                    __('period_lock.original_date_locked', [
+                        'date' => $originalDate->format('Y-m-d'),
+                        'reason' => $lockReason['message'] ?? '',
+                    ])
+                );
+            }
+        }
     }
 
     public function getPaymentPayload()

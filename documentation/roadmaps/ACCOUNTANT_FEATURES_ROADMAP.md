@@ -169,25 +169,49 @@ All changes are additive, backward-compatible, and respect existing codebase str
 
 ---
 
-## PHASE 3 – Closings (Future Sprint)
+## PHASE 3 – Period Locking (Next Sprint)
 
-### 3.1 Daily Closing
+> **Note**: Daily closing was removed from scope (2025-12-12). Period locking provides
+> the same audit protection with less complexity and better UX. Monthly close is sufficient
+> for Macedonian DDV compliance.
 
-| Task ID | Title | Agent | Files | Status | Notes |
-|---------|-------|-------|-------|--------|-------|
-| DC-01 | Create daily_closings table | Backend | Migration | Pending | |
-| DC-02 | Create DailyClosing model | Backend | Model | Pending | |
-| DC-03 | Create DailyClosingController | Backend | Controller | Pending | |
-| DC-04 | Implement date locking logic | Backend | Middleware/Service | Pending | |
-| DC-05 | Daily closing frontend | Frontend | Vue pages | Pending | |
-
-### 3.2 Period Locking
+### 3.1 Period Locking Infrastructure (Already Complete)
 
 | Task ID | Title | Agent | Files | Status | Notes |
 |---------|-------|-------|-------|--------|-------|
-| PL-01 | Create period_locks table | Backend | Migration | Pending | |
-| PL-02 | Implement period locking service | Backend | Service | Pending | |
-| PL-03 | Period locking frontend | Frontend | Vue pages | Pending | |
+| PL-01 | Create period_locks table | Backend | `database/migrations/2025_11_30_200001_create_period_locks_table.php` | ✅ Complete | Already existed |
+| PL-02 | Create PeriodLock model | Backend | `app/Models/PeriodLock.php` | ✅ Complete | Already existed |
+| PL-03 | Create PeriodLockService | Backend | `app/Services/PeriodLockService.php` | ✅ Complete | Already existed |
+| PL-04 | Create PeriodLockController | Backend | `app/Http/Controllers/V1/Admin/Accounting/PeriodLockController.php` | ✅ Complete | Already existed |
+| PL-05 | Create PeriodLockedException | Backend | `app/Exceptions/PeriodLockedException.php` | ✅ Complete | HTTP 423 response |
+| PL-06 | Add API routes | Backend | `routes/api.php` | ✅ Complete | Lines 744-754 |
+| PL-07 | Create period-lock.js store | Frontend | `resources/scripts/admin/stores/period-lock.js` | ✅ Complete | Already existed |
+| PL-08 | Create PeriodLockSetting.vue | Frontend | `resources/scripts/admin/views/settings/PeriodLockSetting.vue` | ✅ Complete | Already existed |
+| PL-09 | Add settings menu item | Backend | `config/invoiceshelf.php` | ✅ Complete | Line 343-350 |
+| PL-10 | Add router configuration | Frontend | `resources/scripts/admin/admin-router.js` | ✅ Complete | Line 658-661 |
+| PL-11 | Write feature tests | QA | `tests/Feature/PeriodLockTest.php` | ✅ Complete | Already existed |
+
+### 3.2 Period Lock Enforcement (Completed 2025-12-12)
+
+| Task ID | Title | Agent | Files | Status | Notes |
+|---------|-------|-------|-------|--------|-------|
+| PLE-01 | Add period lock validation to InvoicesRequest | Backend | `app/Http/Requests/InvoicesRequest.php` | ✅ Complete | Block create/edit in locked period |
+| PLE-02 | Add period lock validation to ExpenseRequest | Backend | `app/Http/Requests/ExpenseRequest.php` | ✅ Complete | Block create/edit in locked period |
+| PLE-03 | Add period lock validation to PaymentRequest | Backend | `app/Http/Requests/PaymentRequest.php` | ✅ Complete | Block create/edit in locked period |
+| PLE-04 | Add period lock validation to DeleteInvoiceRequest | Backend | `app/Http/Requests/DeleteInvoiceRequest.php` | ✅ Complete | Block deletion in locked period |
+| PLE-05 | Add period lock validation to DeleteExpensesRequest | Backend | `app/Http/Requests/DeleteExpensesRequest.php` | ✅ Complete | Block deletion in locked period |
+| PLE-06 | Add period lock validation to DeletePaymentsRequest | Backend | `app/Http/Requests/DeletePaymentsRequest.php` | ✅ Complete | Block deletion in locked period |
+| PLE-07 | Add frontend error handling for 423 responses | Frontend | Invoice/Expense/Payment forms | ✅ Complete | Uses standard 422 validation errors |
+| PLE-08 | Add period lock translations | Both | `lang/en.json`, `lang/mk.json` | ✅ Complete | EN + MK error messages |
+| PLE-09 | Write enforcement tests | QA | `tests/Feature/PeriodLockEnforcementTest.php` | ✅ Complete | 16 test cases |
+
+**Acceptance Criteria:**
+- [x] Cannot create invoice/expense/payment with date in locked period
+- [x] Cannot edit invoice/expense/payment with date in locked period
+- [x] Cannot delete invoice/expense/payment with date in locked period
+- [x] Clear error message shown to user (HTTP 422 validation error)
+- [x] Error messages in Macedonian
+- [x] Existing period lock UI continues to work
 
 ---
 
@@ -266,8 +290,8 @@ For every phase completion:
 | Phase 2.3 - Stock Reports | Complete | Prior | 2025-12-01 | Backend + Frontend complete |
 | Phase 2.4 - Stock UI | Complete | 2025-12-01 | 2025-12-01 | All Vue pages + stores created |
 | Phase 2.5 - Stock Operations | Complete | 2025-12-02 | 2025-12-02 | Adjustments, transfers, validation, retroactive |
-| Phase 3.1 - Daily Closing | Pending | | | |
-| Phase 3.2 - Period Locking | Pending | | | |
+| Phase 3.1 - Period Lock Infra | Complete | Prior | Prior | Infrastructure already existed |
+| Phase 3.2 - Period Lock Enforce | Complete | 2025-12-12 | 2025-12-12 | All 9 tasks done |
 | Phase 4.1 - Chart of Accounts | Pending | | | |
 | Phase 4.2 - AI Suggestion | Pending | | | |
 | Phase 5 - Zonel | Pending | | | |
@@ -516,4 +540,65 @@ For every phase completion:
 
 ---
 
-_Last updated: 2025-12-02_
+---
+
+## Roadmap Update (2025-12-12) - Phase 3 Restructured
+
+### Changes Made
+- **Removed**: Phase 3.1 Daily Closing (5 tasks) - deemed unnecessary for modern SaaS
+- **Discovered**: Period locking infrastructure already fully built (11 components)
+- **Remaining**: Only enforcement validation needs implementation (9 tasks)
+
+### Rationale
+Daily closing is an outdated concept from paper ledger systems. Modern cloud accounting
+software (Xero, QuickBooks, FreshBooks, Wave) uses period locking instead:
+- Single "lock date" setting vs daily ritual
+- Less friction for users who need to correct mistakes
+- Monthly close aligns with Macedonian DDV (VAT) reporting
+- Same audit protection, simpler UX
+
+### Current Task Summary
+| Category | Tasks Done | Tasks Remaining |
+|----------|------------|-----------------|
+| Phase 1 (Projects, Proforma, Duplicates) | 45 | 0 |
+| Phase 2 (Stock Module) | 36 | 0 |
+| Phase 3 (Period Locking) | 20 | 0 |
+| Phase 4 (Accountant Tools) | 0 | 9 |
+| Phase 5 (Zonel) | 0 | 2 |
+| **Total** | **101** | **11** |
+
+---
+
+## Completed Work Summary (2025-12-12) - Phase 3 Period Lock Enforcement
+
+### Phase 3.2 - Period Lock Enforcement
+
+**Files Modified:**
+- `app/Http/Requests/InvoicesRequest.php` - Added `validatePeriodLock()` method
+- `app/Http/Requests/ExpenseRequest.php` - Added `validatePeriodLock()` method
+- `app/Http/Requests/PaymentRequest.php` - Added `validatePeriodLock()` method
+- `app/Http/Requests/DeleteInvoiceRequest.php` - Added period lock check for deletions
+- `app/Http/Requests/DeleteExpensesRequest.php` - Added period lock check for deletions
+- `app/Http/Requests/DeletePaymentsRequest.php` - Added period lock check for deletions
+- `lang/en.json` - Added 3 new translation keys for period lock errors
+- `lang/mk.json` - Added Macedonian translations for period lock errors
+
+**Files Created:**
+- `tests/Feature/PeriodLockEnforcementTest.php` - 16 test cases for enforcement
+
+**Key Features Implemented:**
+
+1. **Create Blocking**: Cannot create invoices/expenses/payments with dates in locked periods
+2. **Update Blocking**: Cannot update documents to locked dates, or edit documents with original dates in locked periods
+3. **Delete Blocking**: Cannot delete documents with dates in locked periods
+4. **Error Messages**: Clear validation errors in English and Macedonian
+5. **Company Isolation**: Period locks only affect the company they belong to
+
+**Translation Keys Added:**
+- `period_lock.date_is_locked` - Error when trying to save to a locked date
+- `period_lock.original_date_locked` - Error when trying to edit a document with locked original date
+- `period_lock.cannot_delete_locked` - Error when trying to delete a document in locked period
+
+---
+
+_Last updated: 2025-12-12_

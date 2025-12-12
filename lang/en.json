@@ -1878,7 +1878,10 @@
       "unlock_day_confirm": "Are you sure you want to unlock {date}? Documents for this date will be editable again.",
       "unlock_period_confirm": "Are you sure you want to unlock this period? Documents within this date range will be editable again.",
       "already_closed": "This date is already closed",
-      "overlapping_period": "This period overlaps with an existing lock"
+      "overlapping_period": "This period overlaps with an existing lock",
+      "date_is_locked": "Cannot save: Date {date} is in a locked period. {reason}",
+      "original_date_locked": "Cannot edit: The original date {date} is in a locked period. {reason}",
+      "cannot_delete_locked": "Cannot delete {document}: Date {date} is in a locked period. {reason}"
     },
     "accounts": {
       "title": "Chart of Accounts",

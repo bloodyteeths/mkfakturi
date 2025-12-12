@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Warehouse;
+use App\Services\PeriodLockService;
 use App\Services\StockService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -121,13 +122,56 @@ class InvoicesRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     * Adds stock availability validation for tracked items.
+     * Adds stock availability and period lock validation.
      */
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            $this->validatePeriodLock($validator);
             $this->validateStockAvailability($validator);
         });
+    }
+
+    /**
+     * Validate that the invoice date is not in a locked period.
+     */
+    protected function validatePeriodLock($validator): void
+    {
+        $companyId = $this->header('company');
+        $invoiceDate = $this->input('invoice_date');
+
+        if (! $companyId || ! $invoiceDate) {
+            return;
+        }
+
+        $lockService = app(PeriodLockService::class);
+
+        // Check if the new date is locked
+        if ($lockService->isDateLocked($companyId, $invoiceDate)) {
+            $lockReason = $lockService->getLockReason($companyId, $invoiceDate);
+            $validator->errors()->add(
+                'invoice_date',
+                __('period_lock.date_is_locked', [
+                    'date' => $invoiceDate,
+                    'reason' => $lockReason['message'] ?? '',
+                ])
+            );
+        }
+
+        // For updates, also check if the original date was locked
+        if ($this->isMethod('PUT') && $this->route('invoice')) {
+            $originalDate = $this->route('invoice')->invoice_date;
+            if ($originalDate && $lockService->isDateLocked($companyId, $originalDate)) {
+                $lockReason = $lockService->getLockReason($companyId, $originalDate);
+                $validator->errors()->add(
+                    'invoice_date',
+                    __('period_lock.original_date_locked', [
+                        'date' => $originalDate->format('Y-m-d'),
+                        'reason' => $lockReason['message'] ?? '',
+                    ])
+                );
+            }
+        }
     }
 
     /**

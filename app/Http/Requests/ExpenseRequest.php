@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\CompanySetting;
+use App\Models\Expense;
+use App\Services\PeriodLockService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ExpenseRequest extends FormRequest
@@ -83,6 +85,59 @@ class ExpenseRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * Configure the validator instance.
+     * Adds period lock validation.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $this->validatePeriodLock($validator);
+        });
+    }
+
+    /**
+     * Validate that the expense date is not in a locked period.
+     */
+    protected function validatePeriodLock($validator): void
+    {
+        $companyId = $this->header('company');
+        $expenseDate = $this->input('expense_date');
+
+        if (! $companyId || ! $expenseDate) {
+            return;
+        }
+
+        $lockService = app(PeriodLockService::class);
+
+        // Check if the new date is locked
+        if ($lockService->isDateLocked($companyId, $expenseDate)) {
+            $lockReason = $lockService->getLockReason($companyId, $expenseDate);
+            $validator->errors()->add(
+                'expense_date',
+                __('period_lock.date_is_locked', [
+                    'date' => $expenseDate,
+                    'reason' => $lockReason['message'] ?? '',
+                ])
+            );
+        }
+
+        // For updates, also check if the original date was locked
+        if ($this->isMethod('PUT') && $this->route('expense')) {
+            $originalDate = $this->route('expense')->expense_date;
+            if ($originalDate && $lockService->isDateLocked($companyId, $originalDate)) {
+                $lockReason = $lockService->getLockReason($companyId, $originalDate);
+                $validator->errors()->add(
+                    'expense_date',
+                    __('period_lock.original_date_locked', [
+                        'date' => $originalDate->format('Y-m-d'),
+                        'reason' => $lockReason['message'] ?? '',
+                    ])
+                );
+            }
+        }
     }
 
     public function getExpensePayload()
