@@ -33,7 +33,7 @@
 
         <BaseInputGroup :label="$t('general.from')">
           <BaseDatePicker
-            v-model="filters.date_from"
+            v-model="filters.start_date"
             :calendar-button="true"
             calendar-button-icon="calendar"
             @update:model-value="onFilterChange"
@@ -42,7 +42,7 @@
 
         <BaseInputGroup :label="$t('general.to')">
           <BaseDatePicker
-            v-model="filters.date_to"
+            v-model="filters.end_date"
             :calendar-button="true"
             calendar-button-icon="calendar"
             @update:model-value="onFilterChange"
@@ -196,8 +196,8 @@ const isRefreshing = ref(false)
 const changedEntries = ref(new Map())
 
 const filters = reactive({
-  date_from: null,
-  date_to: null,
+  start_date: null,
+  end_date: null,
 })
 
 // Computed
@@ -245,10 +245,11 @@ async function loadInitialData() {
 
 async function loadEntriesWithSuggestions() {
   if (!selectedCompanyId.value) return
+  if (!filters.start_date || !filters.end_date) return
 
   const params = {
-    date_from: filters.date_from,
-    date_to: filters.date_to,
+    start_date: filters.start_date,
+    end_date: filters.end_date,
   }
 
   try {
@@ -260,8 +261,8 @@ async function loadEntriesWithSuggestions() {
 
 function onCompanyChange() {
   changedEntries.value.clear()
-  filters.date_from = null
-  filters.date_to = null
+  filters.start_date = null
+  filters.end_date = null
 
   loadInitialData()
 }

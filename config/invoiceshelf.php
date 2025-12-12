@@ -658,6 +658,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'Journal Review',
+            'group' => 'partner.accounting',
+            'link' => '/admin/partner/accounting/review',
+            'icon' => 'ClipboardDocumentCheckIcon',
+            'name' => 'partner.accounting.review',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'Export Journal',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/export',
