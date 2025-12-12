@@ -350,7 +350,57 @@ class JournalExportService
     }
 
     /**
-     * Export to Pantheon CSV format.
+     * Export to Pantheon XML format.
+     * Pantheon uses specific XML schema for journal entry import.
+     */
+    public function toPantheonXML(): string
+    {
+        $entries = $this->getJournalEntries();
+
+        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Dnevnik></Dnevnik>');
+
+        // Add metadata
+        $xml->addChild('DatumOd', $this->fromDate->format('Y-m-d'));
+        $xml->addChild('DatumDo', $this->toDate->format('Y-m-d'));
+        $xml->addChild('Firma', $this->companyId);
+
+        // Group entries by document reference
+        $groupedEntries = collect($entries)->groupBy('reference');
+
+        $stavki = $xml->addChild('Stavki');
+
+        foreach ($groupedEntries as $reference => $docEntries) {
+            $dokument = $stavki->addChild('Dokument');
+            $firstEntry = $docEntries->first();
+
+            $dokument->addChild('Datum', Carbon::parse($firstEntry['date'])->format('Y-m-d'));
+            $dokument->addChild('BrojDokument', htmlspecialchars($reference));
+            $dokument->addChild('Opis', htmlspecialchars(mb_substr($firstEntry['description'], 0, 100)));
+
+            $knizenja = $dokument->addChild('Knizenja');
+
+            foreach ($docEntries as $entry) {
+                $knizenje = $knizenja->addChild('Knizenje');
+                $knizenje->addChild('Konto', $entry['account_code']);
+                $knizenje->addChild('Partner', htmlspecialchars($entry['customer_name'] ?? ''));
+                $knizenje->addChild('Opis', htmlspecialchars(mb_substr($entry['description'], 0, 50)));
+                $knizenje->addChild('Dolzuva', number_format($entry['debit'], 2, '.', ''));
+                $knizenje->addChild('Pobaruva', number_format($entry['credit'], 2, '.', ''));
+                $knizenje->addChild('Valuta', $entry['currency']);
+            }
+        }
+
+        // Format XML with proper indentation
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML($xml->asXML());
+
+        return $dom->saveXML();
+    }
+
+    /**
+     * Export to Pantheon CSV format (legacy/alternative).
      * Pantheon uses specific column format for import.
      */
     public function toPantheonCSV(): string

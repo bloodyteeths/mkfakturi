@@ -253,22 +253,33 @@ class PartnerJournalExportController extends Controller
             $request->input('end_date')
         );
 
-        // Generate CSV based on format
-        $csv = match ($format) {
-            JournalExportService::FORMAT_PANTHEON => $service->toPantheonCSV(),
+        // Generate export content based on format
+        $content = match ($format) {
+            JournalExportService::FORMAT_PANTHEON => $service->toPantheonXML(),
             JournalExportService::FORMAT_ZONEL => $service->toZonelCSV(),
             default => $service->toCSV(),
+        };
+
+        // Determine file extension and content type
+        $extension = match ($format) {
+            JournalExportService::FORMAT_PANTHEON => 'xml',
+            default => 'csv',
+        };
+
+        $contentType = match ($format) {
+            JournalExportService::FORMAT_PANTHEON => 'application/xml; charset=UTF-8',
+            default => 'text/csv; charset=UTF-8',
         };
 
         // Generate filename
         $from = Carbon::parse($request->input('start_date'))->format('Ymd');
         $to = Carbon::parse($request->input('end_date'))->format('Ymd');
-        $filename = "company_{$company}_journals_{$format}_{$from}_{$to}.csv";
+        $filename = "company_{$company}_journals_{$format}_{$from}_{$to}.{$extension}";
 
-        return response($csv, 200)
-            ->header('Content-Type', 'text/csv; charset=UTF-8')
+        return response($content, 200)
+            ->header('Content-Type', $contentType)
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
-            ->header('Content-Length', strlen($csv));
+            ->header('Content-Length', strlen($content));
     }
 
     /**
