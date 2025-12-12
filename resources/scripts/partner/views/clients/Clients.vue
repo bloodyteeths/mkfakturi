@@ -47,9 +47,37 @@
                   </button>
                 </div>
 
-                <!-- Subscription Info -->
-                <div class="mb-6">
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Претплата</h4>
+                <!-- Tab Navigation -->
+                <div class="flex border-b border-gray-200 mb-6">
+                  <button
+                    @click="activeTab = 'info'"
+                    :class="[
+                      'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+                      activeTab === 'info'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ]"
+                  >
+                    Информации
+                  </button>
+                  <button
+                    @click="activeTab = 'accounting'; setDefaultDateRange()"
+                    :class="[
+                      'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+                      activeTab === 'accounting'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ]"
+                  >
+                    Книговодство
+                  </button>
+                </div>
+
+                <!-- Info Tab Content -->
+                <div v-if="activeTab === 'info'">
+                  <!-- Subscription Info -->
+                  <div class="mb-6">
+                    <h4 class="text-sm font-medium text-gray-900 mb-3">Претплата</h4>
                   <div class="bg-gray-50 rounded-lg p-4">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
@@ -119,28 +147,134 @@
                   </div>
                 </div>
 
-                <!-- Billing History -->
-                <div v-if="selectedClient.billing_history?.length">
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Историја на плаќања</h4>
-                  <div class="bg-gray-50 rounded-lg overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                      <thead class="bg-gray-100">
-                        <tr>
-                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Датум</th>
-                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Износ</th>
-                          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Статус</th>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-gray-200">
-                        <tr v-for="payment in selectedClient.billing_history" :key="payment.id">
-                          <td class="px-4 py-2 text-sm text-gray-900">{{ formatDate(payment.date) }}</td>
-                          <td class="px-4 py-2 text-sm text-gray-900">{{ formatCurrency(payment.amount) }}</td>
-                          <td class="px-4 py-2">
-                            <span :class="getPaymentStatusClass(payment.status)">{{ payment.status }}</span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <!-- Billing History -->
+                  <div v-if="selectedClient.billing_history?.length">
+                    <h4 class="text-sm font-medium text-gray-900 mb-3">Историја на плаќања</h4>
+                    <div class="bg-gray-50 rounded-lg overflow-hidden">
+                      <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                          <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Датум</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Износ</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Статус</th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                          <tr v-for="payment in selectedClient.billing_history" :key="payment.id">
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ formatDate(payment.date) }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ formatCurrency(payment.amount) }}</td>
+                            <td class="px-4 py-2">
+                              <span :class="getPaymentStatusClass(payment.status)">{{ payment.status }}</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Accounting Tab Content -->
+                <div v-if="activeTab === 'accounting'">
+                  <div class="space-y-6">
+                    <!-- Export Description -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                      <p class="text-sm text-blue-700">
+                        Извезете книговодствени записи за оваа компанија во формат компатибилен со Пантеон, Corel или како CSV.
+                      </p>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Датум од</label>
+                        <input
+                          v-model="exportDateFrom"
+                          type="date"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Датум до</label>
+                        <input
+                          v-model="exportDateTo"
+                          type="date"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Export Format -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Формат на извоз</label>
+                      <div class="grid grid-cols-3 gap-3">
+                        <label
+                          :class="[
+                            'relative flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-colors',
+                            exportFormat === 'csv'
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 hover:border-gray-300'
+                          ]"
+                        >
+                          <input v-model="exportFormat" type="radio" value="csv" class="sr-only" />
+                          <div class="text-center">
+                            <svg class="h-8 w-8 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="text-sm font-medium">CSV</span>
+                          </div>
+                        </label>
+                        <label
+                          :class="[
+                            'relative flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-colors',
+                            exportFormat === 'pantheon'
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 hover:border-gray-300'
+                          ]"
+                        >
+                          <input v-model="exportFormat" type="radio" value="pantheon" class="sr-only" />
+                          <div class="text-center">
+                            <svg class="h-8 w-8 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            <span class="text-sm font-medium">Пантеон</span>
+                          </div>
+                        </label>
+                        <label
+                          :class="[
+                            'relative flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-colors',
+                            exportFormat === 'zonel'
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 hover:border-gray-300'
+                          ]"
+                        >
+                          <input v-model="exportFormat" type="radio" value="zonel" class="sr-only" />
+                          <div class="text-center">
+                            <svg class="h-8 w-8 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                            </svg>
+                            <span class="text-sm font-medium">Zonel</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Export Button -->
+                    <div class="pt-4">
+                      <button
+                        @click="exportJournal"
+                        :disabled="isExporting || !exportDateFrom || !exportDateTo"
+                        class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <svg v-if="isExporting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <svg v-else class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        {{ isExporting ? 'Извезување...' : 'Извези дневник' }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -352,9 +486,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/scripts/partner/stores/user'
+import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 // Stores
 const userStore = useUserStore()
+const accountingStore = usePartnerAccountingStore()
+const notificationStore = useNotificationStore()
 
 // State
 const clients = ref([])
@@ -363,6 +501,13 @@ const error = ref(null)
 const showDetailModal = ref(false)
 const loadingDetail = ref(false)
 const selectedClient = ref(null)
+
+// Export state
+const activeTab = ref('info') // 'info' or 'accounting'
+const exportDateFrom = ref('')
+const exportDateTo = ref('')
+const exportFormat = ref('csv')
+const isExporting = ref(false)
 
 // Computed
 const activeClients = computed(() => {
@@ -432,6 +577,57 @@ const viewClientDetails = async (client) => {
 const closeDetailModal = () => {
   showDetailModal.value = false
   selectedClient.value = null
+  activeTab.value = 'info'
+  exportDateFrom.value = ''
+  exportDateTo.value = ''
+  exportFormat.value = 'csv'
+}
+
+// Export journal for selected client
+const exportJournal = async () => {
+  if (!selectedClient.value) return
+
+  if (!exportDateFrom.value || !exportDateTo.value) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: 'Изберете датум од и до за извоз'
+    })
+    return
+  }
+
+  isExporting.value = true
+
+  try {
+    await accountingStore.exportJournal(selectedClient.value.id, {
+      format: exportFormat.value,
+      date_from: exportDateFrom.value,
+      date_to: exportDateTo.value,
+      scope: 'all'
+    })
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: 'Дневникот е успешно извезен'
+    })
+  } catch (err) {
+    console.error('Export failed:', err)
+    notificationStore.showNotification({
+      type: 'error',
+      message: err.response?.data?.message || 'Грешка при извоз на дневникот'
+    })
+  } finally {
+    isExporting.value = false
+  }
+}
+
+// Set default date range (current month)
+const setDefaultDateRange = () => {
+  const now = new Date()
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+  exportDateFrom.value = firstDay.toISOString().split('T')[0]
+  exportDateTo.value = lastDay.toISOString().split('T')[0]
 }
 
 const getStatusClass = (status) => {
