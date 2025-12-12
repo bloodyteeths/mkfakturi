@@ -472,12 +472,15 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         // Get filename from Content-Disposition header or generate one
         const contentDisposition = response.headers['content-disposition']
-        let filename = `journal_export_${params.format || 'csv'}.${params.format || 'csv'}`
+        const extension = params.format === 'pantheon' ? 'xml' : 'csv'
+        let filename = `journal_export_${params.format || 'csv'}.${extension}`
 
         if (contentDisposition) {
-          const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
+          // Match filename with or without quotes, non-greedy
+          const filenameMatch = contentDisposition.match(/filename="([^"]+)"/) ||
+                                contentDisposition.match(/filename=([^;\s]+)/)
           if (filenameMatch) {
-            filename = filenameMatch[1]
+            filename = filenameMatch[1].replace(/["']/g, '') // Remove any quotes
           }
         }
 
