@@ -1,5 +1,5 @@
 # Claude Rules – Facturino v1
-(Last update 2025-07-25)
+(Last update 2025-12-12)
 
 ## 0 Mission
 Build a Macedonian-localised fork of InvoiceShelf with bank-feed,
@@ -72,6 +72,17 @@ Resume from the last checkpoint if interrupted.
   to avoid collation errors (errno 150)
 * Foreign keys `ON DELETE RESTRICT`
 * Test migrations with `php artisan migrate:fresh` before marking done
+* **IMPORTANT**: Make migrations idempotent (use `Schema::hasTable()` / `Schema::hasColumn()` checks)
+  because migrations run automatically on every Railway deployment
+
+---
+
+## 6.1 Deployment (Railway)
+* Hosted on **Railway** at `app.facturino.mk`
+* Deployments triggered by push to `main` branch
+* **Migrations run automatically** on deploy via `railway.start` script
+* No manual SSH needed—Railway handles it
+* Logs viewable in Railway dashboard or via `logs/` directory
 
 ---
 
