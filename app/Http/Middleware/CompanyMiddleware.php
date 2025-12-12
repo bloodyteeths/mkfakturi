@@ -41,7 +41,14 @@ class CompanyMiddleware
             if (! $request->header('company')) {
                 $request->headers->set('company', $firstCompany->id);
             } elseif (! $user->hasCompany($request->header('company'))) {
-                abort(403, 'Unauthorized company context.');
+                // Instead of 403, gracefully fallback to user's first company
+                // This handles cases where user lost access or company was deleted
+                \Log::warning('User attempted to access unauthorized company, falling back to first company', [
+                    'user_id' => $user->id,
+                    'attempted_company' => $request->header('company'),
+                    'fallback_company' => $firstCompany->id,
+                ]);
+                $request->headers->set('company', $firstCompany->id);
             }
 
             // CLAUDE-CHECKPOINT: Hydrate user's IFRS entity from company
