@@ -600,9 +600,8 @@ const exportJournal = async () => {
   try {
     await accountingStore.exportJournal(selectedClient.value.id, {
       format: exportFormat.value,
-      date_from: exportDateFrom.value,
-      date_to: exportDateTo.value,
-      scope: 'all'
+      start_date: exportDateFrom.value,
+      end_date: exportDateTo.value
     })
 
     notificationStore.showNotification({
