@@ -1,0 +1,28 @@
+[
+    {
+        "entity_type": "customer",
+        "entity_id": 1,
+        "entity_name": "Технологија ДООЕЛ",
+        "account_code": "220100",
+        "debit_account_code": "220100",
+        "credit_account_code": "400100",
+        "transaction_type": "invoice"
+    },
+    {
+        "entity_type": "supplier",
+        "entity_id": 1,
+        "entity_name": "Офис Депо",
+        "account_code": "540200",
+        "debit_account_code": "540200",
+        "credit_account_code": "220200",
+        "transaction_type": "expense"
+    },
+    {
+        "entity_type": "expense_category",
+        "entity_id": 1,
+        "entity_name": "Канцелариски материјали",
+        "debit_account_code": "540200",
+        "credit_account_code": "100100",
+        "transaction_type": "expense"
+    }
+]

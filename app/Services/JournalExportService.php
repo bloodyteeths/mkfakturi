@@ -99,51 +99,64 @@ class JournalExportService
         $reference = $invoice->invoice_number;
         $description = "Invoice {$reference} - {$invoice->customer->name}";
 
-        // Debit: Accounts Receivable
-        $arAccount = $this->getAccountCode('accounts_receivable', self::TYPE_INVOICE);
+        // Debit: Accounts Receivable (check for learned customer mapping)
+        $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_INVOICE, 'customer', $invoice->user_id);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_INVOICE,
-            'account_code' => $arAccount,
+            'account_code' => $arAccountData['code'],
             'account_name' => 'Accounts Receivable',
             'description' => $description,
             'debit' => $invoice->total / 100,
             'credit' => 0,
             'customer_name' => $invoice->customer->name ?? '',
             'currency' => $invoice->currency->code ?? 'MKD',
+            'entity' => [
+                'type' => 'customer',
+                'id' => $invoice->user_id,
+                'name' => $invoice->customer->name ?? '',
+            ],
+            'mapping_status' => $arAccountData['status'],
         ];
 
         // Credit: Revenue (subtotal)
-        $revenueAccount = $this->getAccountCode('revenue', self::TYPE_INVOICE);
+        $revenueAccountData = $this->getAccountCodeWithStatus('revenue', self::TYPE_INVOICE);
         $subtotal = $invoice->sub_total / 100;
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_INVOICE,
-            'account_code' => $revenueAccount,
+            'account_code' => $revenueAccountData['code'],
             'account_name' => 'Revenue',
             'description' => $description,
             'debit' => 0,
             'credit' => $subtotal,
             'customer_name' => $invoice->customer->name ?? '',
             'currency' => $invoice->currency->code ?? 'MKD',
+            'entity' => [
+                'type' => 'customer',
+                'id' => $invoice->user_id,
+                'name' => $invoice->customer->name ?? '',
+            ],
+            'mapping_status' => $revenueAccountData['status'],
         ];
 
         // Credit: Tax Payable (if applicable)
         if ($invoice->tax > 0) {
-            $taxAccount = $this->getAccountCode('tax_payable', self::TYPE_INVOICE);
+            $taxAccountData = $this->getAccountCodeWithStatus('tax_payable', self::TYPE_INVOICE);
             $entries[] = [
                 'date' => $date,
                 'reference' => $reference,
                 'type' => self::TYPE_INVOICE,
-                'account_code' => $taxAccount,
+                'account_code' => $taxAccountData['code'],
                 'account_name' => 'Tax Payable',
                 'description' => $description.' - VAT',
                 'debit' => 0,
                 'credit' => $invoice->tax / 100,
                 'customer_name' => $invoice->customer->name ?? '',
                 'currency' => $invoice->currency->code ?? 'MKD',
+                'mapping_status' => $taxAccountData['status'],
             ];
         }
 
@@ -161,33 +174,45 @@ class JournalExportService
         $description = "Payment {$reference} - {$payment->customer->name}";
 
         // Debit: Cash/Bank
-        $cashAccount = $this->getAccountCode('cash', self::TYPE_PAYMENT);
+        $cashAccountData = $this->getAccountCodeWithStatus('cash', self::TYPE_PAYMENT);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_PAYMENT,
-            'account_code' => $cashAccount,
+            'account_code' => $cashAccountData['code'],
             'account_name' => 'Cash/Bank',
             'description' => $description,
             'debit' => $payment->amount / 100,
             'credit' => 0,
             'customer_name' => $payment->customer->name ?? '',
             'currency' => $payment->currency->code ?? 'MKD',
+            'entity' => [
+                'type' => 'customer',
+                'id' => $payment->customer_id,
+                'name' => $payment->customer->name ?? '',
+            ],
+            'mapping_status' => $cashAccountData['status'],
         ];
 
-        // Credit: Accounts Receivable
-        $arAccount = $this->getAccountCode('accounts_receivable', self::TYPE_PAYMENT);
+        // Credit: Accounts Receivable (check for learned customer mapping)
+        $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_PAYMENT, 'customer', $payment->customer_id);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_PAYMENT,
-            'account_code' => $arAccount,
+            'account_code' => $arAccountData['code'],
             'account_name' => 'Accounts Receivable',
             'description' => $description,
             'debit' => 0,
             'credit' => $payment->amount / 100,
             'customer_name' => $payment->customer->name ?? '',
             'currency' => $payment->currency->code ?? 'MKD',
+            'entity' => [
+                'type' => 'customer',
+                'id' => $payment->customer_id,
+                'name' => $payment->customer->name ?? '',
+            ],
+            'mapping_status' => $arAccountData['status'],
         ];
 
         return $entries;
@@ -204,37 +229,109 @@ class JournalExportService
         $categoryName = $expense->category->name ?? 'Expense';
         $description = "{$categoryName} - {$reference}";
 
-        // Debit: Expense account (based on category)
-        $expenseAccount = $this->getAccountCode('expense', self::TYPE_EXPENSE, $expense->expense_category_id);
+        // Debit: Expense account (check for learned category mapping)
+        $expenseAccountData = $this->getAccountCodeWithStatus('expense', self::TYPE_EXPENSE, 'expense_category', $expense->expense_category_id);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_EXPENSE,
-            'account_code' => $expenseAccount,
+            'account_code' => $expenseAccountData['code'],
             'account_name' => $categoryName,
             'description' => $description,
             'debit' => $expense->amount / 100,
             'credit' => 0,
             'customer_name' => $expense->supplier->name ?? '',
             'currency' => $expense->currency->code ?? 'MKD',
+            'entity' => [
+                'type' => 'expense_category',
+                'id' => $expense->expense_category_id,
+                'name' => $categoryName,
+            ],
+            'mapping_status' => $expenseAccountData['status'],
         ];
 
-        // Credit: Cash/Accounts Payable
-        $payableAccount = $this->getAccountCode('accounts_payable', self::TYPE_EXPENSE);
+        // Credit: Cash/Accounts Payable (check for learned supplier mapping if supplier exists)
+        $payableAccountData = $expense->supplier_id
+            ? $this->getAccountCodeWithStatus('accounts_payable', self::TYPE_EXPENSE, 'supplier', $expense->supplier_id)
+            : $this->getAccountCodeWithStatus('accounts_payable', self::TYPE_EXPENSE);
+
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_EXPENSE,
-            'account_code' => $payableAccount,
+            'account_code' => $payableAccountData['code'],
             'account_name' => 'Accounts Payable',
             'description' => $description,
             'debit' => 0,
             'credit' => $expense->amount / 100,
             'customer_name' => $expense->supplier->name ?? '',
             'currency' => $expense->currency->code ?? 'MKD',
+            'entity' => $expense->supplier_id ? [
+                'type' => 'supplier',
+                'id' => $expense->supplier_id,
+                'name' => $expense->supplier->name ?? '',
+            ] : null,
+            'mapping_status' => $payableAccountData['status'],
         ];
 
         return $entries;
+    }
+
+    /**
+     * Get account code with mapping status information.
+     *
+     * Returns account code and status showing if it's learned, default, etc.
+     *
+     * @param string $mapping Account mapping type (accounts_receivable, revenue, etc.)
+     * @param string $type Transaction type (invoice, payment, expense)
+     * @param string|null $entityType Entity type for learned mappings (customer, supplier, expense_category)
+     * @param int|null $entityId Entity ID for learned mappings
+     * @return array ['code' => string, 'status' => array]
+     */
+    protected function getAccountCodeWithStatus(string $mapping, string $type, ?string $entityType = null, ?int $entityId = null): array
+    {
+        $hasLearnedMapping = false;
+        $confidence = 0.0;
+        $isDefault = true;
+        $accountCode = null;
+
+        // First check if there's a learned mapping for this specific entity
+        if ($entityType && $entityId) {
+            $mappingEntityType = match($entityType) {
+                'customer' => AccountMapping::ENTITY_CUSTOMER,
+                'supplier' => AccountMapping::ENTITY_SUPPLIER,
+                'expense_category' => AccountMapping::ENTITY_EXPENSE_CATEGORY,
+                default => null,
+            };
+
+            if ($mappingEntityType) {
+                $accountMapping = AccountMapping::where('company_id', $this->companyId)
+                    ->where('entity_type', $mappingEntityType)
+                    ->where('entity_id', $entityId)
+                    ->first();
+
+                if ($accountMapping && $accountMapping->debitAccount) {
+                    $accountCode = $accountMapping->debitAccount->code;
+                    $hasLearnedMapping = true;
+                    $isDefault = false;
+                    $confidence = $accountMapping->meta['confidence'] ?? 1.0;
+                }
+            }
+        }
+
+        // Fall back to existing logic if no learned mapping found
+        if (!$accountCode) {
+            $accountCode = $this->getAccountCode($mapping, $type, $entityType === 'expense_category' ? $entityId : null);
+        }
+
+        return [
+            'code' => $accountCode,
+            'status' => [
+                'has_learned_mapping' => $hasLearnedMapping,
+                'confidence' => $confidence,
+                'is_default' => $isDefault,
+            ],
+        ];
     }
 
     /**

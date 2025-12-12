@@ -950,6 +950,12 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/JournalEntries.vue'),
       },
       {
+        path: 'partner/accounting/review',
+        name: 'partner.accounting.review',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/JournalReview.vue'),
+      },
+      {
         path: 'partner/accounting/export',
         name: 'partner.accounting.export',
         meta: { isPartner: true },

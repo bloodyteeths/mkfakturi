@@ -378,6 +378,145 @@ class PartnerJournalExportController extends Controller
     }
 
     /**
+     * Learn account mappings from accountant review.
+     *
+     * Accepts or overrides AI suggestions to improve future account selection.
+     * When accepted=true, reinforces the suggestion. When accepted=false, learns the override.
+     *
+     * @param Request $request
+     * @param int $company Company ID
+     * @return JsonResponse
+     */
+    public function learn(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'mappings' => 'required|array|min:1',
+            'mappings.*.entity_type' => 'required|in:customer,supplier,expense_category',
+            'mappings.*.entity_id' => 'required|integer',
+            'mappings.*.account_id' => 'required|integer|exists:accounts,id',
+            'mappings.*.accepted' => 'required|boolean',
+        ]);
+
+        $mappings = $request->input('mappings');
+        $learnedCount = 0;
+
+        foreach ($mappings as $mappingData) {
+            // Map entity type to model class
+            $entityType = match($mappingData['entity_type']) {
+                'customer' => \App\Models\AccountMapping::ENTITY_CUSTOMER,
+                'supplier' => \App\Models\AccountMapping::ENTITY_SUPPLIER,
+                'expense_category' => \App\Models\AccountMapping::ENTITY_EXPENSE_CATEGORY,
+            };
+
+            // Verify account belongs to this company
+            $account = \App\Models\Account::where('id', $mappingData['account_id'])
+                ->where('company_id', $company)
+                ->first();
+
+            if (!$account) {
+                continue; // Skip invalid accounts
+            }
+
+            // Update or create the mapping
+            // We store the mapping in the debit_account_id for simplicity
+            // (The service will use the appropriate account based on transaction type)
+            \App\Models\AccountMapping::updateOrCreate(
+                [
+                    'company_id' => $company,
+                    'entity_type' => $entityType,
+                    'entity_id' => $mappingData['entity_id'],
+                ],
+                [
+                    'debit_account_id' => $account->id,
+                    'credit_account_id' => $account->id,
+                    'meta' => [
+                        'learned_at' => now()->toIso8601String(),
+                        'learned_by_partner_id' => $partner->id,
+                        'accepted_suggestion' => $mappingData['accepted'],
+                        'confidence' => $mappingData['accepted'] ? 1.0 : 0.9,
+                    ],
+                ]
+            );
+
+            $learnedCount++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'learned_count' => $learnedCount,
+            'message' => 'Mappings saved successfully',
+        ]);
+    }
+
+    /**
+     * Accept all AI suggestions above confidence threshold.
+     *
+     * Bulk accepts suggestions and saves them as learned mappings.
+     *
+     * @param Request $request
+     * @param int $company Company ID
+     * @return JsonResponse
+     */
+    public function acceptAll(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'min_confidence' => 'sometimes|numeric|min:0|max:1',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+        ]);
+
+        $minConfidence = $request->input('min_confidence', 0.8);
+
+        // For now, return a success response indicating this feature would
+        // accept all high-confidence suggestions from the specified date range.
+        // Full implementation would require tracking suggestions with confidence scores.
+        return response()->json([
+            'success' => true,
+            'message' => 'Bulk accept feature - requires AI suggestion tracking to be implemented',
+            'note' => 'This endpoint will accept all suggestions above confidence threshold once AI suggestions are tracked',
+            'parameters' => [
+                'min_confidence' => $minConfidence,
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
+            ],
+        ]);
+    }
+
+    /**
      * Check if partner has access to a company.
      *
      * @param Partner $partner

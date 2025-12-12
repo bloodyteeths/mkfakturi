@@ -449,6 +449,128 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
     },
 
     /**
+     * Fetch journal entries with AI suggestions
+     */
+    async fetchJournalWithSuggestions(companyId, params = {}) {
+      this.isLoading = true
+      this.error = null
+
+      try {
+        const response = await axios.get(
+          `/partner/companies/${companyId}/journal-entries`,
+          {
+            params: {
+              ...params,
+              with_suggestions: true,
+            },
+          }
+        )
+
+        this.journalEntries = response.data.data || []
+
+        if (response.data.pagination) {
+          this.journalPagination = {
+            currentPage: response.data.pagination.current_page || 1,
+            totalPages: response.data.pagination.last_page || 1,
+            perPage: response.data.pagination.per_page || 20,
+            total: response.data.pagination.total || 0,
+          }
+        }
+
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to fetch journal entries with suggestions'
+        handleError(error)
+        throw error
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    /**
+     * Get AI suggestions for specific entries
+     */
+    async getSuggestions(companyId, entryIds) {
+      this.error = null
+
+      try {
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/suggest`,
+          { entry_ids: entryIds }
+        )
+
+        // Update suggestions in journalEntries
+        const suggestions = response.data.data || []
+        suggestions.forEach((suggestion) => {
+          const index = this.journalEntries.findIndex((e) => e.id === suggestion.entry_id)
+          if (index > -1) {
+            this.journalEntries[index] = {
+              ...this.journalEntries[index],
+              account_id: suggestion.account_id,
+              confidence: suggestion.confidence,
+              suggestion_reason: suggestion.reason,
+            }
+          }
+        })
+
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to get suggestions'
+        handleError(error)
+        throw error
+      }
+    },
+
+    /**
+     * Save learned mapping (when accountant overrides)
+     */
+    async learnMapping(companyId, mappings) {
+      const notificationStore = useNotificationStore()
+      this.error = null
+
+      try {
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/learn`,
+          { mappings }
+        )
+
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to save learned mapping'
+        handleError(error)
+        throw error
+      }
+    },
+
+    /**
+     * Bulk accept all high-confidence suggestions
+     */
+    async acceptAllSuggestions(companyId, minConfidence = 0.8, dateFrom = null, dateTo = null) {
+      const notificationStore = useNotificationStore()
+      this.isSaving = true
+      this.error = null
+
+      try {
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/accept-all`,
+          {
+            min_confidence: minConfidence,
+            date_from: dateFrom,
+            date_to: dateTo,
+          }
+        )
+
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to accept all suggestions'
+        handleError(error)
+        throw error
+      } finally {
+        this.isSaving = false
+      }
+    },
+
+    /**
      * Export journal entries to various formats
      */
     async exportJournal(companyId, params = {}) {

@@ -1,0 +1,44 @@
+[
+    {
+        "code": "220100",
+        "name": "Accounts Receivable",
+        "type": "asset",
+        "description": "Customer receivables account"
+    },
+    {
+        "code": "220200",
+        "name": "Accounts Payable",
+        "type": "liability",
+        "description": "Supplier payables account"
+    },
+    {
+        "code": "400100",
+        "name": "Sales Revenue",
+        "type": "revenue",
+        "description": "Revenue from sales"
+    },
+    {
+        "code": "540100",
+        "name": "Material Expenses",
+        "type": "expense",
+        "description": "Material costs"
+    },
+    {
+        "code": "540200",
+        "name": "Office Supplies Expense",
+        "type": "expense",
+        "description": "Office supplies"
+    },
+    {
+        "code": "100100",
+        "name": "Cash",
+        "type": "asset",
+        "description": "Cash account"
+    },
+    {
+        "code": "100200",
+        "name": "Bank Account",
+        "type": "asset",
+        "description": "Bank account"
+    }
+]

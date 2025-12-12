@@ -3579,7 +3579,29 @@
         "filter_all": "All",
         "filter_pending": "Pending",
         "filter_confirmed": "Confirmed"
-      }
+      },
+      "journal_review": "Journal Review",
+      "accept_all": "Accept All",
+      "accept_all_above": "Accept All (>{threshold}%)",
+      "refresh_suggestions": "Refresh Suggestions",
+      "confidence": "Confidence",
+      "high_confidence": "High confidence",
+      "medium_confidence": "Needs review",
+      "low_confidence": "Manual input required",
+      "learned_mapping": "Learned from previous",
+      "pattern_match": "Pattern match",
+      "default_account": "Default account",
+      "account": "Account",
+      "select_account": "Select account",
+      "mapping_saved": "Mapping saved successfully",
+      "all_accepted": "All suggestions accepted",
+      "accept_all_confirm": "This will accept {count} high-confidence suggestions. Are you sure?",
+      "suggestions_refreshed": "Suggestions refreshed successfully",
+      "no_entries_found": "No entries found for the selected date range",
+      "select_company_to_view": "Please select a company to view journal entries",
+      "learned_mapping_help": "This account was learned from your previous selections",
+      "pattern_match_help": "This account was matched based on similar entries",
+      "default_account_help": "This is the default account for this type of entry"
     }
   }
 }

@@ -3541,7 +3541,29 @@
         "filter_all": "Сите",
         "filter_pending": "Во чекање",
         "filter_confirmed": "Потврдени"
-      }
+      },
+      "journal_review": "Преглед на книжења",
+      "accept_all": "Прифати ги сите",
+      "accept_all_above": "Прифати ги сите (>{threshold}%)",
+      "refresh_suggestions": "Освежи предлози",
+      "confidence": "Сигурност",
+      "high_confidence": "Висока сигурност",
+      "medium_confidence": "Потребен преглед",
+      "low_confidence": "Потребен рачен внес",
+      "learned_mapping": "Научено од претходни",
+      "pattern_match": "Препознаен образец",
+      "default_account": "Стандардна сметка",
+      "account": "Конто",
+      "select_account": "Избери конто",
+      "mapping_saved": "Мапирањето е зачувано",
+      "all_accepted": "Сите предлози се прифатени",
+      "accept_all_confirm": "Ова ќе прифати {count} предлози со висока сигурност. Дали сте сигурни?",
+      "suggestions_refreshed": "Предлозите се успешно освежени",
+      "no_entries_found": "Нема пронајдени книжења за избраниот период",
+      "select_company_to_view": "Ве молиме изберете компанија за да ги видите книжењата",
+      "learned_mapping_help": "Ова конто е научено од вашите претходни избори",
+      "pattern_match_help": "Ова конто е избрано врз основа на слични книжења",
+      "default_account_help": "Ова е стандардното конто за овој вид на книжење"
     }
   }
 }

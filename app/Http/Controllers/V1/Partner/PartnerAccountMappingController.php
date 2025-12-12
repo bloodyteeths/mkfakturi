@@ -431,6 +431,107 @@ class PartnerAccountMappingController extends Controller
     }
 
     /**
+     * Batch suggest accounts for multiple entities with AI confidence scoring.
+     *
+     * This endpoint accepts multiple entities and returns AI-powered account
+     * suggestions with confidence scores, reasoning, and alternatives.
+     *
+     * POST /api/v1/partner/companies/{company}/journal/suggest
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function batchSuggest(Request $request): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        $companyId = $request->header('company');
+
+        if (!$companyId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Company header required',
+            ], 400);
+        }
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $companyId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        $request->validate([
+            'entries' => 'required|array|min:1',
+            'entries.*.type' => 'required|in:customer,supplier,category,expense_category',
+            'entries.*.entity_id' => 'nullable|integer',
+            'entries.*.name' => 'required|string',
+            'entries.*.description' => 'nullable|string',
+        ]);
+
+        try {
+            $suggestions = [];
+
+            foreach ($request->entries as $entry) {
+                // Normalize entity type
+                $entityType = $entry['type'];
+                if ($entityType === 'category') {
+                    $entityType = 'expense_category';
+                }
+
+                // Get AI suggestion with confidence scoring
+                $suggestion = $this->suggestionService->suggestWithConfidence(
+                    $entityType,
+                    $entry['name'],
+                    $entry['description'] ?? null,
+                    $companyId
+                );
+
+                $suggestions[] = [
+                    'entity_type' => $entry['type'],
+                    'entity_id' => $entry['entity_id'] ?? null,
+                    'entity_name' => $entry['name'],
+                    'suggested_account' => [
+                        'id' => $suggestion['account_id'],
+                        'code' => $suggestion['account_code'],
+                        'name' => $suggestion['account_name'],
+                        'confidence' => $suggestion['confidence'],
+                        'reason' => $suggestion['reason'],
+                    ],
+                    'alternatives' => array_map(function ($alt) {
+                        return [
+                            'id' => $alt['account_id'] ?? null,
+                            'code' => $alt['account_code'] ?? null,
+                            'name' => $alt['account_name'] ?? null,
+                            'confidence' => $alt['confidence'] ?? 0.0,
+                        ];
+                    }, $suggestion['alternatives'] ?? []),
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'suggestions' => $suggestions,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not generate suggestions: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Check if partner has access to a company.
      */
     protected function hasCompanyAccess(Partner $partner, int $companyId): bool

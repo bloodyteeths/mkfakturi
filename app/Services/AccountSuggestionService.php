@@ -426,5 +426,351 @@ class AccountSuggestionService
             ]
         );
     }
+
+    /**
+     * Suggest accounts with detailed confidence scoring and alternatives.
+     *
+     * This method provides AI-powered account suggestions for any entity
+     * (customer, supplier, expense_category) with confidence scores,
+     * reasoning, and alternative suggestions.
+     *
+     * @param string $entityType Entity type (customer, supplier, expense_category)
+     * @param string $entityName Name of the entity for pattern matching
+     * @param string|null $description Optional transaction description
+     * @param int|null $companyId Company ID (required)
+     * @return array Suggestion with confidence, reason, and alternatives
+     */
+    public function suggestWithConfidence(
+        string $entityType,
+        string $entityName,
+        ?string $description = null,
+        ?int $companyId = null
+    ): array {
+        if (!$companyId) {
+            return [
+                'account_id' => null,
+                'account_code' => null,
+                'account_name' => null,
+                'confidence' => 0.0,
+                'reason' => 'no_company',
+                'alternatives' => [],
+            ];
+        }
+
+        // Step 1: Check for exact learned mapping (entity_id based)
+        // This would require the actual entity_id, but since we only have the name,
+        // we'll check by pattern matching on entity name
+        $suggestions = [];
+
+        // Step 2: Pattern matching on entity name
+        $patternSuggestion = $this->suggestByPattern($entityName, $description, $companyId, $entityType);
+        if ($patternSuggestion) {
+            $suggestions[] = $patternSuggestion;
+        }
+
+        // Step 3: Category-based matching (for expense categories)
+        if ($entityType === AccountMapping::ENTITY_EXPENSE_CATEGORY) {
+            $categorySuggestion = $this->suggestByCategory($entityName, $companyId);
+            if ($categorySuggestion) {
+                $suggestions[] = $categorySuggestion;
+            }
+        }
+
+        // Step 4: Default account for entity type
+        $defaultSuggestion = $this->suggestDefault($entityType, $companyId);
+        if ($defaultSuggestion) {
+            $suggestions[] = $defaultSuggestion;
+        }
+
+        // Sort suggestions by confidence (highest first)
+        usort($suggestions, function ($a, $b) {
+            return $b['confidence'] <=> $a['confidence'];
+        });
+
+        // Return top suggestion with alternatives
+        if (empty($suggestions)) {
+            return [
+                'account_id' => null,
+                'account_code' => null,
+                'account_name' => null,
+                'confidence' => 0.0,
+                'reason' => 'no_match',
+                'alternatives' => [],
+            ];
+        }
+
+        $topSuggestion = array_shift($suggestions);
+        $topSuggestion['alternatives'] = array_slice($suggestions, 0, 3); // Top 3 alternatives
+
+        return $topSuggestion;
+    }
+
+    /**
+     * Suggest account based on pattern matching (keywords in name/description).
+     *
+     * @param string $entityName
+     * @param string|null $description
+     * @param int $companyId
+     * @param string $entityType
+     * @return array|null
+     */
+    protected function suggestByPattern(
+        string $entityName,
+        ?string $description,
+        int $companyId,
+        string $entityType
+    ): ?array {
+        $searchText = strtolower($entityName . ' ' . ($description ?? ''));
+
+        // Pattern keywords mapped to account codes (Macedonian)
+        $patterns = [
+            // Bank and cash patterns
+            'банка' => '1020',
+            'bank' => '1020',
+            'каса' => '1010',
+            'cash' => '1010',
+            'готовина' => '1010',
+
+            // VAT patterns
+            'ддв' => '2710',
+            'vat' => '2710',
+            'данок' => '2410',
+            'tax' => '2410',
+
+            // Salary patterns
+            'плата' => '5610',
+            'salary' => '5610',
+            'wage' => '5610',
+            'персонал' => '5600',
+
+            // Utilities
+            'комунални' => '5420',
+            'струја' => '5420',
+            'electricity' => '5420',
+            'вода' => '5420',
+            'water' => '5420',
+
+            // Rent
+            'кирија' => '5410',
+            'rent' => '5410',
+            'закуп' => '5410',
+
+            // Marketing
+            'маркетинг' => '5450',
+            'реклама' => '5450',
+            'marketing' => '5450',
+            'advertising' => '5450',
+
+            // Office supplies
+            'канцелариски' => '5210',
+            'office' => '5210',
+
+            // Consulting
+            'консалтинг' => '4030',
+            'консултантски' => '5470',
+            'consulting' => '4030',
+            'advisory' => '5470',
+
+            // Services
+            'услуги' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4020' : '5400'),
+            'service' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4020' : '5400'),
+
+            // Sales
+            'продажба' => '4010',
+            'sales' => '4010',
+            'приходи' => '4000',
+            'revenue' => '4000',
+
+            // Bank fees
+            'провизија' => '5480',
+            'fee' => '5480',
+            'provision' => '5480',
+
+            // Interest
+            'камата' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4610' : '5910'),
+            'interest' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4610' : '5910'),
+        ];
+
+        foreach ($patterns as $keyword => $accountCode) {
+            if (str_contains($searchText, $keyword)) {
+                $account = Account::where('company_id', $companyId)
+                    ->where('code', $accountCode)
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($account) {
+                    return [
+                        'account_id' => $account->id,
+                        'account_code' => $account->code,
+                        'account_name' => $account->name,
+                        'confidence' => 0.9,
+                        'reason' => 'pattern_match',
+                        'alternatives' => [],
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Suggest account based on expense category matching.
+     *
+     * @param string $categoryName
+     * @param int $companyId
+     * @return array|null
+     */
+    protected function suggestByCategory(string $categoryName, int $companyId): ?array
+    {
+        $categoryLower = strtolower($categoryName);
+
+        // Category to account code mapping
+        $categoryMap = [
+            'office supplies' => '5210',
+            'rent' => '5410',
+            'utilities' => '5420',
+            'salaries' => '5610',
+            'marketing' => '5450',
+            'consulting' => '5470',
+            'legal' => '5470',
+            'travel' => '5630',
+            'insurance' => '5940',
+            'банкарски' => '5480',
+            'кирија' => '5410',
+            'плата' => '5610',
+        ];
+
+        foreach ($categoryMap as $keyword => $accountCode) {
+            if (str_contains($categoryLower, $keyword)) {
+                $account = Account::where('company_id', $companyId)
+                    ->where('code', $accountCode)
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($account) {
+                    return [
+                        'account_id' => $account->id,
+                        'account_code' => $account->code,
+                        'account_name' => $account->name,
+                        'confidence' => 0.7,
+                        'reason' => 'category_match',
+                        'alternatives' => [],
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Suggest default account for entity type.
+     *
+     * @param string $entityType
+     * @param int $companyId
+     * @return array|null
+     */
+    protected function suggestDefault(string $entityType, int $companyId): ?array
+    {
+        // Default account codes by entity type
+        $defaults = [
+            AccountMapping::ENTITY_CUSTOMER => '1610', // Domestic receivables
+            AccountMapping::ENTITY_SUPPLIER => '2210', // Domestic payables
+            AccountMapping::ENTITY_EXPENSE_CATEGORY => '5900', // Other expenses
+        ];
+
+        $accountCode = $defaults[$entityType] ?? null;
+        if (!$accountCode) {
+            return null;
+        }
+
+        $account = Account::where('company_id', $companyId)
+            ->where('code', $accountCode)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$account) {
+            // Fallback to any account of the appropriate type
+            $typeMap = [
+                AccountMapping::ENTITY_CUSTOMER => Account::TYPE_ASSET,
+                AccountMapping::ENTITY_SUPPLIER => Account::TYPE_LIABILITY,
+                AccountMapping::ENTITY_EXPENSE_CATEGORY => Account::TYPE_EXPENSE,
+            ];
+
+            $account = Account::where('company_id', $companyId)
+                ->where('type', $typeMap[$entityType] ?? Account::TYPE_EXPENSE)
+                ->where('is_active', true)
+                ->first();
+        }
+
+        if ($account) {
+            return [
+                'account_id' => $account->id,
+                'account_code' => $account->code,
+                'account_name' => $account->name,
+                'confidence' => 0.3,
+                'reason' => 'default',
+                'alternatives' => [],
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Learn a new account mapping from user confirmation.
+     *
+     * This method stores a mapping between an entity and an account
+     * so future suggestions can use this learned information.
+     *
+     * @param string $entityType Entity type (customer, supplier, expense_category)
+     * @param int $entityId ID of the entity
+     * @param int $accountId Account ID to map to
+     * @param int $companyId Company ID
+     * @return void
+     */
+    public function learnMapping(
+        string $entityType,
+        int $entityId,
+        int $accountId,
+        int $companyId
+    ): void {
+        try {
+            // For single-sided mappings, we'll use the account for both debit and credit
+            // The caller can specify transaction type if needed
+            AccountMapping::updateOrCreate(
+                [
+                    'company_id' => $companyId,
+                    'entity_type' => $entityType,
+                    'entity_id' => $entityId,
+                    'transaction_type' => null, // Generic mapping
+                ],
+                [
+                    'debit_account_id' => $accountId,
+                    'credit_account_id' => null,
+                    'meta' => [
+                        'learned_at' => now()->toIso8601String(),
+                        'method' => 'ai_suggestion',
+                    ],
+                ]
+            );
+
+            Log::info('Account mapping learned', [
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'account_id' => $accountId,
+                'company_id' => $companyId,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to learn account mapping', [
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'account_id' => $accountId,
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }
 // CLAUDE-CHECKPOINT

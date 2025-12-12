@@ -1270,6 +1270,13 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     Route::get('/companies/{company}/journal-entries/{entry}', [PartnerJournalExportController::class, 'show']);
     Route::put('/companies/{company}/journal-entries/{entry}', [PartnerJournalExportController::class, 'confirm']);
     Route::post('/companies/{company}/journal/export', [PartnerJournalExportController::class, 'export']);
+
+    // Journal Learning System (AI Account Suggestions)
+    Route::post('/companies/{company}/journal/learn', [PartnerJournalExportController::class, 'learn']);
+    Route::post('/companies/{company}/journal/accept-all', [PartnerJournalExportController::class, 'acceptAll']);
+
+    // Batch AI Account Suggestions (QuickBooks-style)
+    Route::post('/companies/{company}/journal/suggest', [PartnerAccountMappingController::class, 'batchSuggest']);
     // CLAUDE-CHECKPOINT
 });
 
