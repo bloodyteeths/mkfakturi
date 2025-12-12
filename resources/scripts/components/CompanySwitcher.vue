@@ -297,9 +297,8 @@ const companySwitchBar = ref(null)
 
 // Check if current user is a partner
 const isPartner = computed(() => {
-  // This would be determined by checking if user has partner role/permissions
-  // For now, we'll check if console store has companies (indicating partner status)
-  return consoleStore.companies.length > 0 || consoleStore.partner !== null
+  // Check user role directly - only show partner UI for actual partner users
+  return userStore.currentUser?.role === 'partner'
 })
 
 watch(route, () => {
@@ -327,14 +326,14 @@ function addNewCompany() {
   })
 }
 
-// Initialize console store for partners
+// Initialize console store only for partner users
 onMounted(async () => {
-  try {
-    // Try to initialize console store to check if user is a partner
-    await consoleStore.initialize()
-  } catch (error) {
-    // Not a partner, ignore the error
-    console.debug('User is not a partner:', error)
+  if (userStore.currentUser?.role === 'partner') {
+    try {
+      await consoleStore.initialize()
+    } catch (error) {
+      console.debug('Failed to initialize partner console:', error)
+    }
   }
 })
 
