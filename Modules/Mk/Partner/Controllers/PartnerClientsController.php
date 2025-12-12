@@ -158,7 +158,7 @@ class PartnerClientsController extends Controller
 
         // Verify this company belongs to the partner
         $company = $partner->companies()
-            ->with(['subscription', 'owner', 'addresses'])
+            ->with(['subscription', 'owner', 'address'])
             ->where('companies.id', $companyId)
             ->first();
 
@@ -197,11 +197,11 @@ class PartnerClientsController extends Controller
                 'email' => $company->owner ? $company->owner->email : null,
                 'phone' => $company->phone ?? null,
                 'logo' => $company->logo_path ? asset('storage/'.$company->logo_path) : null,
-                'address' => $company->addresses->first() ? [
-                    'street' => $company->addresses->first()->address_street_1,
-                    'city' => $company->addresses->first()->city,
-                    'zip' => $company->addresses->first()->zip,
-                    'country' => $company->addresses->first()->country_id,
+                'address' => $company->address ? [
+                    'street' => $company->address->address_street_1,
+                    'city' => $company->address->city,
+                    'zip' => $company->address->zip,
+                    'country' => $company->address->country_id,
                 ] : null,
                 'subscription' => $subscription ? [
                     'plan' => $subscription->plan_tier ?? 'free',

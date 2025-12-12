@@ -258,7 +258,7 @@
           <label
             class="relative flex cursor-pointer rounded-lg border p-4 hover:bg-gray-50"
             :class="[
-              exportForm.format === 'pantheon_xml'
+              exportForm.format === 'pantheon'
                 ? 'border-primary-600 bg-primary-50'
                 : 'border-gray-300',
             ]"
@@ -266,7 +266,7 @@
             <input
               v-model="exportForm.format"
               type="radio"
-              value="pantheon_xml"
+              value="pantheon"
               class="sr-only"
             />
             <span class="flex flex-1">
@@ -280,7 +280,7 @@
               </span>
             </span>
             <BaseIcon
-              v-if="exportForm.format === 'pantheon_xml'"
+              v-if="exportForm.format === 'pantheon'"
               name="CheckCircleIcon"
               class="h-5 w-5 text-primary-600"
             />
@@ -290,7 +290,7 @@
           <label
             class="relative flex cursor-pointer rounded-lg border p-4 hover:bg-gray-50"
             :class="[
-              exportForm.format === 'zonel_csv'
+              exportForm.format === 'zonel'
                 ? 'border-primary-600 bg-primary-50'
                 : 'border-gray-300',
             ]"
@@ -298,7 +298,7 @@
             <input
               v-model="exportForm.format"
               type="radio"
-              value="zonel_csv"
+              value="zonel"
               class="sr-only"
             />
             <span class="flex flex-1">
@@ -312,7 +312,7 @@
               </span>
             </span>
             <BaseIcon
-              v-if="exportForm.format === 'zonel_csv'"
+              v-if="exportForm.format === 'zonel'"
               name="CheckCircleIcon"
               class="h-5 w-5 text-primary-600"
             />
@@ -322,7 +322,7 @@
           <label
             class="relative flex cursor-pointer rounded-lg border p-4 hover:bg-gray-50"
             :class="[
-              exportForm.format === 'generic_csv'
+              exportForm.format === 'csv'
                 ? 'border-primary-600 bg-primary-50'
                 : 'border-gray-300',
             ]"
@@ -330,7 +330,7 @@
             <input
               v-model="exportForm.format"
               type="radio"
-              value="generic_csv"
+              value="csv"
               class="sr-only"
             />
             <span class="flex flex-1">
@@ -344,7 +344,7 @@
               </span>
             </span>
             <BaseIcon
-              v-if="exportForm.format === 'generic_csv'"
+              v-if="exportForm.format === 'csv'"
               name="CheckCircleIcon"
               class="h-5 w-5 text-primary-600"
             />
@@ -487,7 +487,7 @@ const exportForm = reactive({
   company_id: null,
   start_date: null,
   end_date: null,
-  format: 'pantheon_xml',
+  format: 'pantheon',
 })
 
 const steps = computed(() => [
@@ -629,7 +629,7 @@ function resetWizard() {
   currentStep.value = 1
   exportForm.start_date = null
   exportForm.end_date = null
-  exportForm.format = 'pantheon_xml'
+  exportForm.format = 'pantheon'
   entriesCount.value = null
   unconfirmedCount.value = 0
   exportSuccess.value = false
@@ -643,11 +643,11 @@ function formatDate(date) {
 
 function getFormatLabel(format) {
   switch (format) {
-    case 'pantheon_xml':
+    case 'pantheon':
       return t('partner.accounting.format_pantheon_xml')
-    case 'zonel_csv':
+    case 'zonel':
       return t('partner.accounting.format_zonel_csv')
-    case 'generic_csv':
+    case 'csv':
       return t('partner.accounting.format_generic_csv')
     default:
       return format
