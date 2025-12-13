@@ -63,13 +63,33 @@ class PartnerJournalExportController extends Controller
 
         $entries = $service->getJournalEntries();
 
+        // Add confidence and suggestion data to each entry
+        // This enables the AI suggestion UI to work properly
+        $entries = $entries->map(function ($entry, $index) use ($company) {
+            // Generate unique ID for frontend
+            $entry['id'] = $index + 1;
+
+            // Add default confidence (0.3 = default account suggestion)
+            // In the future, this will use AccountSuggestionService for real AI suggestions
+            $entry['confidence'] = $entry['confidence'] ?? 0.3;
+            $entry['suggestion_reason'] = $entry['suggestion_reason'] ?? 'default';
+
+            // Add entity info for learning system
+            $entry['entity_type'] = $entry['entity_type'] ??
+                ($entry['type'] === 'expense' ? 'expense_category' :
+                ($entry['type'] === 'invoice' || $entry['type'] === 'payment' ? 'customer' : null));
+            $entry['entity_id'] = $entry['entity_id'] ?? null;
+
+            // Use account_code as account_id placeholder if not set
+            $entry['account_id'] = $entry['account_id'] ?? null;
+
+            return $entry;
+        });
+
         // Filter by status if requested
-        // Note: Current implementation doesn't track confirmed/suggested status
-        // All entries are treated as "suggested" until confirmation feature is implemented
         $status = $request->input('status', 'all');
         if ($status !== 'all') {
             // TODO: Implement status filtering when journal entry confirmation is added
-            // For now, all entries are treated as "suggested"
         }
 
         // Paginate results

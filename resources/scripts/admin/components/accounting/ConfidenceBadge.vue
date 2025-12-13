@@ -32,8 +32,8 @@ const { t } = useI18n()
 const props = defineProps({
   confidence: {
     type: Number,
-    required: true,
-    validator: (value) => value >= 0 && value <= 1,
+    default: 0.3,
+    validator: (value) => !isNaN(value) && value >= 0 && value <= 1,
   },
   reason: {
     type: String,
@@ -55,7 +55,8 @@ const props = defineProps({
 
 // Computed
 const confidencePercent = computed(() => {
-  return Math.round(props.confidence * 100)
+  const value = props.confidence ?? 0.3
+  return isNaN(value) ? 30 : Math.round(value * 100)
 })
 
 const badgeColor = computed(() => {

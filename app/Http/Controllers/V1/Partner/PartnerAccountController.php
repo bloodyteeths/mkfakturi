@@ -22,7 +22,7 @@ class PartnerAccountController extends Controller
     /**
      * List all accounts for partner's linked companies.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, int $company): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -33,14 +33,8 @@ class PartnerAccountController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        // Use route parameter instead of header
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {

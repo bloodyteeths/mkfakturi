@@ -89,19 +89,19 @@
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {{ $t('partner.accounting.date') }}
+                {{ $t('partner.accounting.journal.date') }}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {{ $t('partner.accounting.document') }}
+                {{ $t('partner.accounting.journal.document') }}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {{ $t('partner.accounting.description') }}
+                {{ $t('partner.accounting.journal.description') }}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {{ $t('partner.accounting.account') }}
+                {{ $t('partner.accounting.mappings.select_account') }}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {{ $t('partner.accounting.confidence') }}
+                {{ $t('partner.accounting.mappings.confidence') }}
               </th>
             </tr>
           </thead>
