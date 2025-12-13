@@ -3613,6 +3613,11 @@
       "default_account_help": "This is the default account for this type of entry"
     }
   },
+  "mail.reset_password_subject": "Reset Your Password",
+  "mail.reset_password_greeting": "You are receiving this email because we received a password reset request for your account.",
+  "mail.reset_password_action": "Reset Password",
+  "mail.reset_password_expiry": "This password reset link will expire in :minutes minutes.",
+  "mail.reset_password_ignore": "If you did not request a password reset, no further action is required.",
   "user_invitation.subject": "You've been invited to join :company on Facturino",
   "user_invitation.greeting": "Hello :name!",
   "user_invitation.intro": "You have been invited to join :company on Facturino, the invoicing and accounting platform.",
