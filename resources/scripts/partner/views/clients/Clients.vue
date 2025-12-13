@@ -179,7 +179,7 @@
                     <!-- Export Description -->
                     <div class="bg-blue-50 rounded-lg p-4">
                       <p class="text-sm text-blue-700">
-                        Извезете книговодствени записи за оваа компанија во формат компатибилен со Пантеон, Corel или како CSV.
+                        Прегледајте и проверете ги книговодствените записи со АИ класификација на сметки, или директно извезете во формат компатибилен со Пантеон, Zonel или CSV.
                       </p>
                     </div>
 
@@ -200,6 +200,43 @@
                           type="date"
                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         />
+                      </div>
+                    </div>
+
+                    <!-- Review Entries Button (Recommended) -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                          <h4 class="text-sm font-medium text-green-800">Препорачано: Преглед пред извоз</h4>
+                          <p class="mt-1 text-sm text-green-700">
+                            АИ автоматски класифицира записи (стока, услуга, производ). Прегледајте и потврдете ги сметките пред извоз.
+                          </p>
+                          <button
+                            @click="goToJournalReview"
+                            :disabled="!exportDateFrom || !exportDateTo"
+                            class="mt-3 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            Прегледај записи
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="relative">
+                      <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                      </div>
+                      <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">или директен извоз</span>
                       </div>
                     </div>
 
@@ -258,12 +295,12 @@
                       </div>
                     </div>
 
-                    <!-- Export Button -->
-                    <div class="pt-4">
+                    <!-- Direct Export Button -->
+                    <div class="pt-2">
                       <button
                         @click="exportJournal"
                         :disabled="isExporting || !exportDateFrom || !exportDateTo"
-                        class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         <svg v-if="isExporting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -272,8 +309,11 @@
                         <svg v-else class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        {{ isExporting ? 'Извезување...' : 'Извези дневник' }}
+                        {{ isExporting ? 'Извезување...' : 'Директен извоз (без преглед)' }}
                       </button>
+                      <p class="mt-2 text-xs text-gray-500 text-center">
+                        Директниот извоз користи АИ класификација, но без рачна проверка
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -485,11 +525,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/scripts/partner/stores/user'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
 // Stores
+const router = useRouter()
 const userStore = useUserStore()
 const accountingStore = usePartnerAccountingStore()
 const notificationStore = useNotificationStore()
@@ -627,6 +669,24 @@ const setDefaultDateRange = () => {
 
   exportDateFrom.value = firstDay.toISOString().split('T')[0]
   exportDateTo.value = lastDay.toISOString().split('T')[0]
+}
+
+// Navigate to Journal Review page with company pre-selected
+const goToJournalReview = () => {
+  if (!selectedClient.value) return
+
+  // Close modal first
+  closeDetailModal()
+
+  // Navigate to Journal Review with company and dates
+  router.push({
+    name: 'partner.accounting.review',
+    query: {
+      company_id: selectedClient.value.id,
+      start_date: exportDateFrom.value,
+      end_date: exportDateTo.value,
+    },
+  })
 }
 
 const getStatusClass = (status) => {

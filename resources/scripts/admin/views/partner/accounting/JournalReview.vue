@@ -181,7 +181,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -192,6 +192,7 @@ import BaseTablePagination from '@/scripts/components/base/base-table/BaseTableP
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const consoleStore = useConsoleStore()
 const partnerAccountingStore = usePartnerAccountingStore()
 const notificationStore = useNotificationStore()
@@ -239,16 +240,33 @@ const pagination = computed(() => {
 
 // Lifecycle
 onMounted(async () => {
-  // Set default date range to last month
-  const today = new Date()
-  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-  filters.start_date = lastMonth.toISOString().split('T')[0]
-  filters.end_date = today.toISOString().split('T')[0]
+  // Check for query params (coming from Partner Clients page)
+  const query = route.query
+  const hasQueryParams = query.company_id || query.start_date || query.end_date
+
+  if (hasQueryParams) {
+    // Use query params if provided
+    if (query.start_date) {
+      filters.start_date = query.start_date
+    }
+    if (query.end_date) {
+      filters.end_date = query.end_date
+    }
+  } else {
+    // Set default date range to last month
+    const today = new Date()
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    filters.start_date = lastMonth.toISOString().split('T')[0]
+    filters.end_date = today.toISOString().split('T')[0]
+  }
 
   await consoleStore.fetchCompanies()
 
-  // Auto-select first company if available
-  if (companies.value.length > 0) {
+  // Pre-select company from query param or auto-select first
+  if (query.company_id) {
+    selectedCompanyId.value = parseInt(query.company_id)
+    await loadInitialData()
+  } else if (companies.value.length > 0) {
     selectedCompanyId.value = companies.value[0].id
     await loadInitialData()
   }
