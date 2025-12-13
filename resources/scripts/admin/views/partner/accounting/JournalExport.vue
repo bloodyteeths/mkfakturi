@@ -467,11 +467,14 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useDialogStore } from '@/scripts/stores/dialog'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const consoleStore = useConsoleStore()
 const partnerAccountingStore = usePartnerAccountingStore()
 const dialogStore = useDialogStore()
@@ -516,14 +519,34 @@ const canProceedFromStep1 = computed(() => {
   )
 })
 
+// Track if coming from review page
+const fromReview = ref(false)
+
 // Lifecycle
 onMounted(async () => {
   await consoleStore.fetchCompanies()
 
-  // Auto-select first company if available
-  if (companies.value.length > 0) {
-    exportForm.company_id = companies.value[0].id
-    await onCompanyChange()
+  // Check if coming from Journal Review page with pre-filled data
+  const query = route.query
+  if (query.from_review === 'true' && query.company_id && query.start_date && query.end_date) {
+    // Pre-fill form from Review page
+    fromReview.value = true
+    exportForm.company_id = parseInt(query.company_id)
+    exportForm.start_date = query.start_date
+    exportForm.end_date = query.end_date
+
+    // Fetch entries count to validate
+    await fetchEntriesCount()
+
+    // Skip directly to format selection (step 3)
+    // Steps 1 (scope) and 2 (review) already done on Review page
+    currentStep.value = 3
+  } else {
+    // Normal flow - auto-select first company if available
+    if (companies.value.length > 0) {
+      exportForm.company_id = companies.value[0].id
+      await onCompanyChange()
+    }
   }
 })
 
@@ -569,6 +592,14 @@ function nextStep() {
 }
 
 function previousStep() {
+  // If on step 3 and coming from review, go back to review page
+  if (currentStep.value === 3 && fromReview.value) {
+    router.push({
+      name: 'partner.accounting.review',
+    })
+    return
+  }
+
   if (currentStep.value > 1) {
     currentStep.value--
   }
@@ -577,6 +608,10 @@ function previousStep() {
 function goToStep(stepNumber) {
   // Only allow going back, not forward
   if (stepNumber < currentStep.value) {
+    // If coming from review page, don't allow going back to steps 1-2
+    if (fromReview.value && stepNumber < 3) {
+      return
+    }
     currentStep.value = stepNumber
   }
 }

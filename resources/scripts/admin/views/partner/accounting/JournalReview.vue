@@ -406,8 +406,10 @@ function goToExport() {
   router.push({
     name: 'partner.accounting.export',
     query: {
-      date_from: filters.date_from,
-      date_to: filters.date_to,
+      company_id: selectedCompanyId.value,
+      start_date: filters.start_date,
+      end_date: filters.end_date,
+      from_review: 'true', // Skip to format selection step
     },
   })
 }
