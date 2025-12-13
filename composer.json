@@ -43,6 +43,7 @@
         "spatie/laravel-medialibrary": "^11.11",
         "stripe/stripe-php": "^19.0",
         "symfony/http-client": "^7.2",
+        "symfony/postmark-mailer": "^7.4",
         "vinkla/hashids": "^13.0.0"
     },
     "require-dev": {

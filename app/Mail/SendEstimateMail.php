@@ -34,7 +34,7 @@ class SendEstimateMail extends Mailable
     public function build()
     {
         $log = EmailLog::create([
-            'from' => $this->data['from'],
+            'from' => config('mail.from.address'),
             'to' => $this->data['to'],
             'subject' => $this->data['subject'],
             'body' => $this->data['body'],
@@ -47,7 +47,13 @@ class SendEstimateMail extends Mailable
 
         $this->data['url'] = route('estimate', ['email_log' => $log->token]);
 
-        $mailContent = $this->from($this->data['from'], config('mail.from.name'))
+        // Use centralized Facturino email with company name
+        $companyName = $this->data['company']['name'] ?? config('mail.from.name');
+        $fromName = $companyName . ' преку Facturino';
+        $replyTo = $this->data['from'] ?? config('mail.from.address');
+
+        $mailContent = $this->from(config('mail.from.address'), $fromName)
+            ->replyTo($replyTo, $companyName)
             ->subject($this->data['subject'])
             ->markdown('emails.send.estimate', ['data' => $this->data]);
 
