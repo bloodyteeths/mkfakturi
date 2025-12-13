@@ -7,8 +7,10 @@ use App\Models\Company;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Database\QueryException;
 
 class PartnerInvitationController extends Controller
 {
@@ -181,6 +183,13 @@ class PartnerInvitationController extends Controller
             'invitee_email' => 'nullable|email',
         ]);
 
+        // Defensive: ensure required columns exist before inserting
+        if (! Schema::hasTable('partner_referrals') || ! Schema::hasColumn('partner_referrals', 'referral_token')) {
+            return response()->json([
+                'message' => 'Partner referrals are not available. Please run the partner_referrals migration.',
+            ], 500);
+        }
+
         $token = Str::random(32);
 
         $payload = [
@@ -196,7 +205,17 @@ class PartnerInvitationController extends Controller
             $payload['invitee_email'] = $validated['invitee_email'] ?? null;
         }
 
-        DB::table('partner_referrals')->insert($payload);
+        try {
+            DB::table('partner_referrals')->insert($payload);
+        } catch (QueryException $e) {
+            Log::error('Partner invite insert failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Partner invite could not be created. Please ensure partner_referrals schema is up to date.',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Partner invitation sent',
