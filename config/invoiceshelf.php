@@ -538,16 +538,6 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'navigation.support',
-            'group' => 2,
-            'link' => '/admin/support',
-            'icon' => 'LifebuoyIcon',
-            'name' => 'Support',
-            'owner_only' => false,
-            'ability' => '',
-            'model' => '',
-        ],
-        [
             'title' => 'navigation.billing',
             'group' => 3,
             'link' => '/admin/billing',
