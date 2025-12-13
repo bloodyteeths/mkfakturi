@@ -31,7 +31,7 @@ class SecurityHeaders
             "img-src 'self' data: https:",
             "font-src 'self' data:",
             "connect-src 'self' https://api.postmarkapp.com",
-            "frame-src 'self'", // Allow frames from same origin
+            "frame-src 'self' blob:", // Allow frames from same origin and blob URLs for email preview
             "frame-ancestors 'self'", // Allow being framed by same origin
             "base-uri 'self'",
             "form-action 'self'",
