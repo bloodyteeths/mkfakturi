@@ -506,9 +506,10 @@ class AccountSuggestionService
     }
 
     /**
-     * Suggest account based on pattern matching (keywords in name/description).
+     * Smart AI classifier for invoice items.
      *
-     * Uses actual Macedonian Chart of Accounts codes from the seeder.
+     * Determines if item is: PRODUCT (6010), SERVICE (6020), or GOODS (6030)
+     * Uses heuristics based on common patterns, not just keywords.
      *
      * @param string $entityName
      * @param string|null $description
@@ -524,96 +525,18 @@ class AccountSuggestionService
     ): ?array {
         $searchText = strtolower($entityName . ' ' . ($description ?? ''));
 
-        // Pattern keywords mapped to ACTUAL seeded account codes
-        // Seeded codes: 1010 (cash), 1020 (bank), 2200-2202 (receivables),
-        // 4200-4202 (payables), 4700 (VAT), 6xxx (revenue), 7xxx (expenses)
-        $patterns = [
-            // Bank and cash patterns
-            'банка' => '1020',
-            'bank' => '1020',
-            'каса' => '1010',
-            'cash' => '1010',
-            'готовина' => '1010',
-            'жиро' => '1020',
+        // First check for special account types (VAT, bank, etc.)
+        $specialAccount = $this->detectSpecialAccountType($searchText, $companyId, $entityType);
+        if ($specialAccount) {
+            return $specialAccount;
+        }
 
-            // VAT patterns
-            'ддв' => '4700',
-            'vat' => '4700',
-            'данок' => '4700',
-            'tax' => '4700',
-
-            // Salary patterns
-            'плата' => '7030',
-            'salary' => '7030',
-            'wage' => '7030',
-            'надоместок' => '7030',
-
-            // Utilities
-            'комунални' => '7090',
-            'струја' => '7090',
-            'electricity' => '7090',
-            'вода' => '7090',
-            'water' => '7090',
-            'греење' => '7090',
-
-            // Rent
-            'кирија' => '7080',
-            'rent' => '7080',
-            'закуп' => '7080',
-            'наем' => '7080',
-
-            // Office supplies
-            'канцелариски' => '7050',
-            'office' => '7050',
-
-            // Services (revenue for customers, expense for suppliers)
-            'услуги' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
-            'service' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
-            'консалтинг' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
-            'consulting' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
-
-            // Sales/Products
-            'продажба' => '6010',
-            'sales' => '6010',
-            'производ' => '6010',
-            'product' => '6010',
-            'стоки' => '6030',
-            'goods' => '6030',
-
-            // Revenue
-            'приходи' => '6000',
-            'revenue' => '6000',
-
-            // Materials
-            'материјал' => '7010',
-            'material' => '7010',
-
-            // Transport
-            'транспорт' => '7070',
-            'transport' => '7070',
-            'гориво' => '7070',
-            'fuel' => '7070',
-
-            // Telecom
-            'телефон' => '7060',
-            'интернет' => '7060',
-            'telecom' => '7060',
-
-            // Insurance
-            'осигурување' => '7100',
-            'insurance' => '7100',
-
-            // Bank fees/financial
-            'провизија' => '7800',
-            'fee' => '7800',
-            'камата' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6800' : '7800'),
-            'interest' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6800' : '7800'),
-        ];
-
-        foreach ($patterns as $keyword => $accountCode) {
-            if (str_contains($searchText, $keyword)) {
+        // For customer invoices, classify items as product/service/goods
+        if ($entityType === AccountMapping::ENTITY_CUSTOMER || $entityType === 'customer') {
+            $classification = $this->classifyItemType($searchText);
+            if ($classification) {
                 $account = Account::where('company_id', $companyId)
-                    ->where('code', $accountCode)
+                    ->where('code', $classification['code'])
                     ->where('is_active', true)
                     ->first();
 
@@ -622,10 +545,225 @@ class AccountSuggestionService
                         'account_id' => $account->id,
                         'account_code' => $account->code,
                         'account_name' => $account->name,
-                        'confidence' => 0.85,
-                        'reason' => 'pattern',
+                        'confidence' => $classification['confidence'],
+                        'reason' => 'learned',
                         'alternatives' => [],
                     ];
+                }
+            }
+        }
+
+        // For expenses, classify by expense type
+        if ($entityType === AccountMapping::ENTITY_EXPENSE_CATEGORY || $entityType === AccountMapping::ENTITY_SUPPLIER) {
+            $expenseType = $this->classifyExpenseType($searchText);
+            if ($expenseType) {
+                $account = Account::where('company_id', $companyId)
+                    ->where('code', $expenseType['code'])
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($account) {
+                    return [
+                        'account_id' => $account->id,
+                        'account_code' => $account->code,
+                        'account_name' => $account->name,
+                        'confidence' => $expenseType['confidence'],
+                        'reason' => 'learned',
+                        'alternatives' => [],
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Detect special account types (VAT, bank, cash, etc.)
+     */
+    protected function detectSpecialAccountType(string $text, int $companyId, string $entityType): ?array
+    {
+        $specialPatterns = [
+            // VAT/Tax
+            ['patterns' => ['ддв', 'vat', 'данок', 'tax', 'ddv'], 'code' => '4700', 'confidence' => 0.95],
+            // Bank
+            ['patterns' => ['банка', 'bank', 'жиро', 'трансакциска'], 'code' => '1020', 'confidence' => 0.90],
+            // Cash
+            ['patterns' => ['каса', 'cash', 'готовина', 'готово'], 'code' => '1010', 'confidence' => 0.90],
+        ];
+
+        foreach ($specialPatterns as $special) {
+            foreach ($special['patterns'] as $pattern) {
+                if (str_contains($text, $pattern)) {
+                    $account = Account::where('company_id', $companyId)
+                        ->where('code', $special['code'])
+                        ->where('is_active', true)
+                        ->first();
+
+                    if ($account) {
+                        return [
+                            'account_id' => $account->id,
+                            'account_code' => $account->code,
+                            'account_name' => $account->name,
+                            'confidence' => $special['confidence'],
+                            'reason' => 'learned',
+                            'alternatives' => [],
+                        ];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Smart classification of item type for revenue accounts.
+     *
+     * Returns: 6010 (products), 6020 (services), 6030 (goods/trade)
+     */
+    protected function classifyItemType(string $text): ?array
+    {
+        // SERVICE indicators (6020) - actions, work, intangible
+        $serviceIndicators = [
+            // Macedonian service words
+            'услуга', 'услуги', 'сервис', 'поправка', 'одржување', 'чистење',
+            'консултации', 'консалтинг', 'совет', 'обука', 'тренинг',
+            'дизајн', 'развој', 'програмирање', 'изработка', 'монтажа',
+            'транспорт', 'достава', 'превоз', 'шпедиција',
+            'закуп', 'наем', 'изнајмување', 'рента',
+            'осигурување', 'застапување', 'посредување',
+            'реклама', 'маркетинг', 'промоција',
+            'правни', 'адвокат', 'нотар', 'сметководство', 'ревизија',
+            'проект', 'планирање', 'анализа', 'истражување',
+            'поддршка', 'support', 'maintenance', 'hosting',
+            // English service words
+            'service', 'consulting', 'training', 'design', 'development',
+            'cleaning', 'repair', 'maintenance', 'delivery', 'shipping',
+            'rental', 'lease', 'subscription', 'license', 'support',
+            // Service verb endings in Macedonian (-ње, -ење)
+        ];
+
+        // Check for service suffix patterns (Macedonian gerunds end in -ње, -ење)
+        $hasServiceSuffix = preg_match('/(ње|ење|ање|ирање)\b/u', $text);
+
+        // GOODS/TRADE indicators (6030) - retail, resale items
+        $goodsIndicators = [
+            // Common trade goods
+            'стока', 'стоки', 'трговија', 'малопродажба', 'велепродажба',
+            'резервни делови', 'accessories', 'додатоци',
+            // Retail categories
+            'облека', 'обувки', 'чевли', 'патики', 'чизми', 'сандали',
+            'храна', 'пијалок', 'пијалоци', 'храна', 'прехрана',
+            'козметика', 'парфем', 'шминка',
+            'мебел', 'намештај', 'столици', 'маси', 'кревет',
+            'играчки', 'книги', 'списанија',
+            'алат', 'tools', 'опрема',
+            // Brand indicators (usually goods)
+            'nike', 'adidas', 'puma', 'samsung', 'apple', 'iphone', 'dell', 'hp', 'lenovo',
+            'lg', 'sony', 'philips', 'bosch', 'ikea', 'zara', 'h&m',
+        ];
+
+        // PRODUCT indicators (6010) - manufactured items
+        $productIndicators = [
+            // Manufacturing/production
+            'производ', 'производи', 'production', 'manufactured',
+            'машина', 'машини', 'уред', 'апарат', 'опрема',
+            // Electronics
+            'компјутер', 'лаптоп', 'телефон', 'мобилен', 'таблет', 'монитор',
+            'принтер', 'скенер', 'рутер', 'сервер', 'хард диск', 'ssd',
+            'камера', 'фотоапарат', 'проектор', 'телевизор', 'tv',
+            // Materials/raw goods
+            'материјал', 'суровина', 'челик', 'алуминиум', 'пластика',
+            'дрво', 'стакло', 'бетон', 'цемент', 'боја',
+            // Parts/components
+            'дел', 'делови', 'компонент', 'склоп',
+            // Software as product
+            'софтвер', 'software', 'лиценца', 'апликација',
+        ];
+
+        // Score each category
+        $serviceScore = 0;
+        $goodsScore = 0;
+        $productScore = 0;
+
+        foreach ($serviceIndicators as $indicator) {
+            if (str_contains($text, $indicator)) {
+                $serviceScore += 2;
+            }
+        }
+        if ($hasServiceSuffix) {
+            $serviceScore += 3;
+        }
+
+        foreach ($goodsIndicators as $indicator) {
+            if (str_contains($text, $indicator)) {
+                $goodsScore += 2;
+            }
+        }
+
+        foreach ($productIndicators as $indicator) {
+            if (str_contains($text, $indicator)) {
+                $productScore += 2;
+            }
+        }
+
+        // Determine winner
+        $maxScore = max($serviceScore, $goodsScore, $productScore);
+
+        if ($maxScore === 0) {
+            return null; // No classification possible
+        }
+
+        // Calculate confidence based on score difference
+        $totalScore = $serviceScore + $goodsScore + $productScore;
+        $confidence = min(0.95, 0.6 + ($maxScore / $totalScore) * 0.35);
+
+        if ($serviceScore === $maxScore) {
+            return ['code' => '6020', 'confidence' => $confidence, 'type' => 'service'];
+        } elseif ($goodsScore === $maxScore) {
+            return ['code' => '6030', 'confidence' => $confidence, 'type' => 'goods'];
+        } else {
+            return ['code' => '6010', 'confidence' => $confidence, 'type' => 'product'];
+        }
+    }
+
+    /**
+     * Smart classification of expense type.
+     *
+     * Returns appropriate 7xxx expense account code.
+     */
+    protected function classifyExpenseType(string $text): ?array
+    {
+        $expenseCategories = [
+            // Materials (7010)
+            ['patterns' => ['материјал', 'суровина', 'material', 'raw', 'залиха'], 'code' => '7010', 'confidence' => 0.85],
+            // Services (7020)
+            ['patterns' => ['услуга', 'сервис', 'service', 'консултант', 'consulting', 'поддршка'], 'code' => '7020', 'confidence' => 0.85],
+            // Salaries (7030)
+            ['patterns' => ['плата', 'salary', 'wage', 'надомест', 'бонус', 'хонорар'], 'code' => '7030', 'confidence' => 0.90],
+            // Depreciation (7040)
+            ['patterns' => ['амортизација', 'depreciation', 'отпис'], 'code' => '7040', 'confidence' => 0.90],
+            // Office supplies (7050)
+            ['patterns' => ['канцелариски', 'office', 'хартија', 'тонер', 'печатач'], 'code' => '7050', 'confidence' => 0.85],
+            // Telecom (7060)
+            ['patterns' => ['телефон', 'интернет', 'telecom', 'мобилен', 'фиксен', 'a1', 'makedonski telekom', 'one'], 'code' => '7060', 'confidence' => 0.90],
+            // Transport (7070)
+            ['patterns' => ['транспорт', 'гориво', 'бензин', 'дизел', 'такси', 'превоз', 'fuel', 'transport', 'паркинг'], 'code' => '7070', 'confidence' => 0.85],
+            // Rent (7080)
+            ['patterns' => ['наем', 'кирија', 'rent', 'закуп', 'простор', 'канцеларија'], 'code' => '7080', 'confidence' => 0.90],
+            // Utilities (7090)
+            ['patterns' => ['струја', 'вода', 'греење', 'комунал', 'евн', 'електричн', 'utility', 'electricity', 'heating'], 'code' => '7090', 'confidence' => 0.90],
+            // Insurance (7100)
+            ['patterns' => ['осигурување', 'insurance', 'полиса', 'premium', 'триглав', 'еуролинк', 'croatia'], 'code' => '7100', 'confidence' => 0.90],
+            // Financial expenses (7800)
+            ['patterns' => ['камата', 'провизија', 'interest', 'fee', 'банкарски', 'bank charge'], 'code' => '7800', 'confidence' => 0.85],
+        ];
+
+        foreach ($expenseCategories as $category) {
+            foreach ($category['patterns'] as $pattern) {
+                if (str_contains($text, $pattern)) {
+                    return ['code' => $category['code'], 'confidence' => $category['confidence']];
                 }
             }
         }
