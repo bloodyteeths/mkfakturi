@@ -508,6 +508,8 @@ class AccountSuggestionService
     /**
      * Suggest account based on pattern matching (keywords in name/description).
      *
+     * Uses actual Macedonian Chart of Accounts codes from the seeder.
+     *
      * @param string $entityName
      * @param string|null $description
      * @param int $companyId
@@ -522,7 +524,9 @@ class AccountSuggestionService
     ): ?array {
         $searchText = strtolower($entityName . ' ' . ($description ?? ''));
 
-        // Pattern keywords mapped to account codes (Macedonian)
+        // Pattern keywords mapped to ACTUAL seeded account codes
+        // Seeded codes: 1010 (cash), 1020 (bank), 2200-2202 (receivables),
+        // 4200-4202 (payables), 4700 (VAT), 6xxx (revenue), 7xxx (expenses)
         $patterns = [
             // Bank and cash patterns
             'банка' => '1020',
@@ -530,65 +534,80 @@ class AccountSuggestionService
             'каса' => '1010',
             'cash' => '1010',
             'готовина' => '1010',
+            'жиро' => '1020',
 
             // VAT patterns
-            'ддв' => '2710',
-            'vat' => '2710',
-            'данок' => '2410',
-            'tax' => '2410',
+            'ддв' => '4700',
+            'vat' => '4700',
+            'данок' => '4700',
+            'tax' => '4700',
 
             // Salary patterns
-            'плата' => '5610',
-            'salary' => '5610',
-            'wage' => '5610',
-            'персонал' => '5600',
+            'плата' => '7030',
+            'salary' => '7030',
+            'wage' => '7030',
+            'надоместок' => '7030',
 
             // Utilities
-            'комунални' => '5420',
-            'струја' => '5420',
-            'electricity' => '5420',
-            'вода' => '5420',
-            'water' => '5420',
+            'комунални' => '7090',
+            'струја' => '7090',
+            'electricity' => '7090',
+            'вода' => '7090',
+            'water' => '7090',
+            'греење' => '7090',
 
             // Rent
-            'кирија' => '5410',
-            'rent' => '5410',
-            'закуп' => '5410',
-
-            // Marketing
-            'маркетинг' => '5450',
-            'реклама' => '5450',
-            'marketing' => '5450',
-            'advertising' => '5450',
+            'кирија' => '7080',
+            'rent' => '7080',
+            'закуп' => '7080',
+            'наем' => '7080',
 
             // Office supplies
-            'канцелариски' => '5210',
-            'office' => '5210',
+            'канцелариски' => '7050',
+            'office' => '7050',
 
-            // Consulting
-            'консалтинг' => '4030',
-            'консултантски' => '5470',
-            'consulting' => '4030',
-            'advisory' => '5470',
+            // Services (revenue for customers, expense for suppliers)
+            'услуги' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
+            'service' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
+            'консалтинг' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
+            'consulting' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6020' : '7020'),
 
-            // Services
-            'услуги' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4020' : '5400'),
-            'service' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4020' : '5400'),
+            // Sales/Products
+            'продажба' => '6010',
+            'sales' => '6010',
+            'производ' => '6010',
+            'product' => '6010',
+            'стоки' => '6030',
+            'goods' => '6030',
 
-            // Sales
-            'продажба' => '4010',
-            'sales' => '4010',
-            'приходи' => '4000',
-            'revenue' => '4000',
+            // Revenue
+            'приходи' => '6000',
+            'revenue' => '6000',
 
-            // Bank fees
-            'провизија' => '5480',
-            'fee' => '5480',
-            'provision' => '5480',
+            // Materials
+            'материјал' => '7010',
+            'material' => '7010',
 
-            // Interest
-            'камата' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4610' : '5910'),
-            'interest' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '4610' : '5910'),
+            // Transport
+            'транспорт' => '7070',
+            'transport' => '7070',
+            'гориво' => '7070',
+            'fuel' => '7070',
+
+            // Telecom
+            'телефон' => '7060',
+            'интернет' => '7060',
+            'telecom' => '7060',
+
+            // Insurance
+            'осигурување' => '7100',
+            'insurance' => '7100',
+
+            // Bank fees/financial
+            'провизија' => '7800',
+            'fee' => '7800',
+            'камата' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6800' : '7800'),
+            'interest' => ($entityType === AccountMapping::ENTITY_CUSTOMER ? '6800' : '7800'),
         ];
 
         foreach ($patterns as $keyword => $accountCode) {
@@ -603,8 +622,8 @@ class AccountSuggestionService
                         'account_id' => $account->id,
                         'account_code' => $account->code,
                         'account_name' => $account->name,
-                        'confidence' => 0.9,
-                        'reason' => 'pattern_match',
+                        'confidence' => 0.85,
+                        'reason' => 'pattern',
                         'alternatives' => [],
                     ];
                 }
@@ -617,6 +636,8 @@ class AccountSuggestionService
     /**
      * Suggest account based on expense category matching.
      *
+     * Uses actual Macedonian Chart of Accounts codes from the seeder.
+     *
      * @param string $categoryName
      * @param int $companyId
      * @return array|null
@@ -625,20 +646,35 @@ class AccountSuggestionService
     {
         $categoryLower = strtolower($categoryName);
 
-        // Category to account code mapping
+        // Category to ACTUAL seeded account code mapping
         $categoryMap = [
-            'office supplies' => '5210',
-            'rent' => '5410',
-            'utilities' => '5420',
-            'salaries' => '5610',
-            'marketing' => '5450',
-            'consulting' => '5470',
-            'legal' => '5470',
-            'travel' => '5630',
-            'insurance' => '5940',
-            'банкарски' => '5480',
-            'кирија' => '5410',
-            'плата' => '5610',
+            'office' => '7050',        // Канцелариски материјал
+            'канцелариски' => '7050',
+            'rent' => '7080',          // Наем
+            'кирија' => '7080',
+            'наем' => '7080',
+            'utilities' => '7090',     // Комунални трошоци
+            'комунални' => '7090',
+            'salaries' => '7030',      // Плати и надоместоци
+            'плата' => '7030',
+            'transport' => '7070',     // Транспортни трошоци
+            'транспорт' => '7070',
+            'гориво' => '7070',
+            'telecom' => '7060',       // Телекомуникации
+            'телефон' => '7060',
+            'интернет' => '7060',
+            'insurance' => '7100',     // Осигурување
+            'осигурување' => '7100',
+            'материјал' => '7010',     // Трошоци за материјали
+            'material' => '7010',
+            'услуги' => '7020',        // Трошоци за услуги
+            'service' => '7020',
+            'консалтинг' => '7020',
+            'consulting' => '7020',
+            'банкарски' => '7800',     // Финансиски расходи
+            'bank fee' => '7800',
+            'амортизација' => '7040',  // Амортизација
+            'depreciation' => '7040',
         ];
 
         foreach ($categoryMap as $keyword => $accountCode) {
@@ -654,7 +690,7 @@ class AccountSuggestionService
                         'account_code' => $account->code,
                         'account_name' => $account->name,
                         'confidence' => 0.7,
-                        'reason' => 'category_match',
+                        'reason' => 'pattern',
                         'alternatives' => [],
                     ];
                 }
@@ -667,17 +703,20 @@ class AccountSuggestionService
     /**
      * Suggest default account for entity type.
      *
+     * Uses actual Macedonian Chart of Accounts codes from the seeder.
+     *
      * @param string $entityType
      * @param int $companyId
      * @return array|null
      */
     protected function suggestDefault(string $entityType, int $companyId): ?array
     {
-        // Default account codes by entity type
+        // Default account codes by entity type (using ACTUAL seeded codes)
+        // Seeded: 2201 = Domestic receivables, 4201 = Domestic payables, 7000 = Expenses
         $defaults = [
-            AccountMapping::ENTITY_CUSTOMER => '1610', // Domestic receivables
-            AccountMapping::ENTITY_SUPPLIER => '2210', // Domestic payables
-            AccountMapping::ENTITY_EXPENSE_CATEGORY => '5900', // Other expenses
+            AccountMapping::ENTITY_CUSTOMER => '2201', // Побарувања од купувачи - домашни
+            AccountMapping::ENTITY_SUPPLIER => '4201', // Обврски кон добавувачи - домашни
+            AccountMapping::ENTITY_EXPENSE_CATEGORY => '7000', // Расходи (general expenses)
         ];
 
         $accountCode = $defaults[$entityType] ?? null;
@@ -691,15 +730,29 @@ class AccountSuggestionService
             ->first();
 
         if (!$account) {
-            // Fallback to any account of the appropriate type
-            $typeMap = [
-                AccountMapping::ENTITY_CUSTOMER => Account::TYPE_ASSET,
-                AccountMapping::ENTITY_SUPPLIER => Account::TYPE_LIABILITY,
-                AccountMapping::ENTITY_EXPENSE_CATEGORY => Account::TYPE_EXPENSE,
+            // Fallback to parent account codes
+            $fallbacks = [
+                AccountMapping::ENTITY_CUSTOMER => '2200', // Побарувања
+                AccountMapping::ENTITY_SUPPLIER => '4200', // Обврски кон добавувачи
+                AccountMapping::ENTITY_EXPENSE_CATEGORY => '7000', // Расходи
             ];
 
             $account = Account::where('company_id', $companyId)
-                ->where('type', $typeMap[$entityType] ?? Account::TYPE_EXPENSE)
+                ->where('code', $fallbacks[$entityType] ?? '7000')
+                ->where('is_active', true)
+                ->first();
+        }
+
+        if (!$account) {
+            // Last resort: any account of the appropriate type
+            $typeMap = [
+                AccountMapping::ENTITY_CUSTOMER => 'asset',
+                AccountMapping::ENTITY_SUPPLIER => 'liability',
+                AccountMapping::ENTITY_EXPENSE_CATEGORY => 'expense',
+            ];
+
+            $account = Account::where('company_id', $companyId)
+                ->where('type', $typeMap[$entityType] ?? 'expense')
                 ->where('is_active', true)
                 ->first();
         }
