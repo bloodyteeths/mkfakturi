@@ -96,6 +96,7 @@ class JournalExportService
 
     /**
      * Convert invoice to journal entries (double-entry).
+     * Includes detailed item breakdown, tax rates, and customer tax ID for Pantheon.
      */
     protected function invoiceToJournalEntries(Invoice $invoice): array
     {
@@ -108,31 +109,74 @@ class JournalExportService
         $description = "Invoice {$reference} - {$invoice->customer->name}";
         $itemContext = $itemDescriptions ?: $invoice->notes ?? '';
 
-        // Debit: Accounts Receivable (check for learned customer mapping)
+        // Customer details for Pantheon
+        $customerTaxId = $invoice->customer->tax_id ?? $invoice->customer->vat_number ?? '';
+        $customerCode = $customerTaxId ?: 'C' . str_pad($invoice->customer_id, 6, '0', STR_PAD_LEFT);
+
+        // Collect detailed item information
+        $itemsDetails = [];
+        $taxBreakdown = [];
+        foreach ($invoice->items as $item) {
+            $itemsDetails[] = [
+                'name' => $item->name,
+                'description' => $item->description ?? '',
+                'quantity' => $item->quantity,
+                'price' => $item->price / 100,
+                'total' => $item->total / 100,
+                'tax' => $item->tax / 100,
+                'unit' => $item->unit_name ?? 'kom',
+            ];
+
+            // Group taxes by rate
+            if ($item->taxes && $item->taxes->count() > 0) {
+                foreach ($item->taxes as $tax) {
+                    $rate = $tax->percent ?? 18;
+                    if (!isset($taxBreakdown[$rate])) {
+                        $taxBreakdown[$rate] = ['rate' => $rate, 'base' => 0, 'amount' => 0];
+                    }
+                    $taxBreakdown[$rate]['base'] += ($item->total - $item->tax) / 100;
+                    $taxBreakdown[$rate]['amount'] += $item->tax / 100;
+                }
+            } elseif ($item->tax > 0) {
+                // Default 18% VAT if no specific tax
+                $rate = 18;
+                if (!isset($taxBreakdown[$rate])) {
+                    $taxBreakdown[$rate] = ['rate' => $rate, 'base' => 0, 'amount' => 0];
+                }
+                $taxBreakdown[$rate]['base'] += ($item->total - $item->tax) / 100;
+                $taxBreakdown[$rate]['amount'] += $item->tax / 100;
+            }
+        }
+
+        // Debit: Accounts Receivable
         $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_INVOICE, 'customer', $invoice->customer_id);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_INVOICE,
+            'doc_type' => 'FI', // Фактура Издадена (Invoice Issued)
             'account_code' => $arAccountData['code'],
-            'account_name' => 'Accounts Receivable',
+            'account_name' => 'Побарувања од купувачи',
             'description' => $description,
             'item_context' => $itemContext,
             'debit' => $invoice->total / 100,
             'credit' => 0,
             'customer_name' => $invoice->customer->name ?? '',
+            'customer_code' => $customerCode,
+            'customer_tax_id' => $customerTaxId,
             'currency' => $invoice->currency->code ?? 'MKD',
             'entity' => [
                 'type' => 'customer',
                 'id' => $invoice->customer_id,
                 'name' => $invoice->customer->name ?? '',
-                'items' => $itemDescriptions,
+                'tax_id' => $customerTaxId,
             ],
+            'items' => $itemsDetails,
+            'tax_breakdown' => array_values($taxBreakdown),
             'mapping_status' => $arAccountData['status'],
         ];
 
         // Credit: Revenue (subtotal) - Use AI to classify based on invoice items
-        // AI classifies items as goods (4010), services (4020), consulting (4030), or products (4040)
         $aiContext = trim(($invoice->customer->name ?? '') . ' ' . $itemContext);
         $revenueAccountData = $this->getRevenueAccountWithAI($aiContext, $invoice->customer_id);
         $subtotal = $invoice->sub_total / 100;
@@ -140,43 +184,84 @@ class JournalExportService
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_INVOICE,
+            'doc_type' => 'FI',
             'account_code' => $revenueAccountData['code'],
-            'account_name' => $revenueAccountData['name'] ?? 'Revenue',
+            'account_name' => $revenueAccountData['name'] ?? 'Приходи',
             'description' => $description,
             'item_context' => $itemContext,
             'debit' => 0,
             'credit' => $subtotal,
             'customer_name' => $invoice->customer->name ?? '',
+            'customer_code' => $customerCode,
+            'customer_tax_id' => $customerTaxId,
             'currency' => $invoice->currency->code ?? 'MKD',
             'entity' => [
                 'type' => 'customer',
                 'id' => $invoice->customer_id,
                 'name' => $invoice->customer->name ?? '',
-                'items' => $itemDescriptions,
+                'tax_id' => $customerTaxId,
             ],
+            'items' => $itemsDetails,
+            'tax_breakdown' => array_values($taxBreakdown),
             'mapping_status' => $revenueAccountData['status'],
         ];
 
-        // Credit: Tax Payable (if applicable)
-        if ($invoice->tax > 0) {
+        // Credit: Tax Payable - one entry per tax rate
+        if (!empty($taxBreakdown)) {
+            $taxAccountData = $this->getAccountCodeWithStatus('tax_payable', self::TYPE_INVOICE);
+            foreach ($taxBreakdown as $rate => $taxData) {
+                if ($taxData['amount'] > 0) {
+                    $entries[] = [
+                        'date' => $date,
+                        'reference' => $reference,
+                        'type' => self::TYPE_INVOICE,
+                        'doc_type' => 'FI',
+                        'account_code' => $taxAccountData['code'],
+                        'account_name' => "ДДВ {$rate}%",
+                        'description' => "{$description} - ДДВ {$rate}%",
+                        'item_context' => "ДДВ {$rate}%",
+                        'debit' => 0,
+                        'credit' => $taxData['amount'],
+                        'customer_name' => $invoice->customer->name ?? '',
+                        'customer_code' => $customerCode,
+                        'customer_tax_id' => $customerTaxId,
+                        'currency' => $invoice->currency->code ?? 'MKD',
+                        'entity' => [
+                            'type' => 'tax',
+                            'id' => null,
+                            'name' => "ДДВ {$rate}%",
+                            'rate' => $rate,
+                        ],
+                        'tax_base' => $taxData['base'],
+                        'tax_rate' => $rate,
+                        'mapping_status' => $taxAccountData['status'],
+                    ];
+                }
+            }
+        } elseif ($invoice->tax > 0) {
+            // Fallback if no tax breakdown available
             $taxAccountData = $this->getAccountCodeWithStatus('tax_payable', self::TYPE_INVOICE);
             $entries[] = [
                 'date' => $date,
                 'reference' => $reference,
                 'type' => self::TYPE_INVOICE,
+                'doc_type' => 'FI',
                 'account_code' => $taxAccountData['code'],
-                'account_name' => 'Tax Payable',
-                'description' => $description.' - VAT',
+                'account_name' => 'ДДВ 18%',
+                'description' => $description . ' - ДДВ',
                 'item_context' => 'ДДВ VAT',
                 'debit' => 0,
                 'credit' => $invoice->tax / 100,
                 'customer_name' => $invoice->customer->name ?? '',
+                'customer_code' => $customerCode,
+                'customer_tax_id' => $customerTaxId,
                 'currency' => $invoice->currency->code ?? 'MKD',
                 'entity' => [
                     'type' => 'tax',
                     'id' => null,
                     'name' => 'ДДВ',
                 ],
+                'tax_rate' => 18,
                 'mapping_status' => $taxAccountData['status'],
             ];
         }
@@ -186,6 +271,7 @@ class JournalExportService
 
     /**
      * Convert payment to journal entries.
+     * Includes customer tax ID and document type for Pantheon.
      */
     protected function paymentToJournalEntries(Payment $payment): array
     {
@@ -194,44 +280,62 @@ class JournalExportService
         $reference = $payment->payment_number;
         $description = "Payment {$reference} - {$payment->customer->name}";
 
+        // Customer details
+        $customerTaxId = $payment->customer->tax_id ?? $payment->customer->vat_number ?? '';
+        $customerCode = $customerTaxId ?: 'C' . str_pad($payment->customer_id, 6, '0', STR_PAD_LEFT);
+
+        // Payment method for document type
+        $paymentMethod = $payment->paymentMethod->name ?? 'Cash';
+        $docType = 'PL'; // Плаќање (Payment)
+
         // Debit: Cash/Bank
         $cashAccountData = $this->getAccountCodeWithStatus('cash', self::TYPE_PAYMENT);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_PAYMENT,
+            'doc_type' => $docType,
             'account_code' => $cashAccountData['code'],
-            'account_name' => 'Cash/Bank',
+            'account_name' => 'Парични средства',
             'description' => $description,
             'debit' => $payment->amount / 100,
             'credit' => 0,
             'customer_name' => $payment->customer->name ?? '',
+            'customer_code' => $customerCode,
+            'customer_tax_id' => $customerTaxId,
             'currency' => $payment->currency->code ?? 'MKD',
+            'payment_method' => $paymentMethod,
             'entity' => [
                 'type' => 'customer',
                 'id' => $payment->customer_id,
                 'name' => $payment->customer->name ?? '',
+                'tax_id' => $customerTaxId,
             ],
             'mapping_status' => $cashAccountData['status'],
         ];
 
-        // Credit: Accounts Receivable (check for learned customer mapping)
+        // Credit: Accounts Receivable
         $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_PAYMENT, 'customer', $payment->customer_id);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_PAYMENT,
+            'doc_type' => $docType,
             'account_code' => $arAccountData['code'],
-            'account_name' => 'Accounts Receivable',
+            'account_name' => 'Побарувања од купувачи',
             'description' => $description,
             'debit' => 0,
             'credit' => $payment->amount / 100,
             'customer_name' => $payment->customer->name ?? '',
+            'customer_code' => $customerCode,
+            'customer_tax_id' => $customerTaxId,
             'currency' => $payment->currency->code ?? 'MKD',
+            'payment_method' => $paymentMethod,
             'entity' => [
                 'type' => 'customer',
                 'id' => $payment->customer_id,
                 'name' => $payment->customer->name ?? '',
+                'tax_id' => $customerTaxId,
             ],
             'mapping_status' => $arAccountData['status'],
         ];
@@ -241,6 +345,7 @@ class JournalExportService
 
     /**
      * Convert expense to journal entries.
+     * Includes supplier tax ID and document type for Pantheon.
      */
     protected function expenseToJournalEntries(Expense $expense): array
     {
@@ -249,6 +354,17 @@ class JournalExportService
         $reference = $expense->invoice_number ?? 'EXP-'.$expense->id;
         $categoryName = $expense->category->name ?? 'Expense';
         $description = "{$categoryName} - {$reference}";
+        $docType = 'FP'; // Фактура Примена (Invoice Received / Expense)
+
+        // Supplier details
+        $supplierTaxId = '';
+        $supplierCode = '';
+        $supplierName = '';
+        if ($expense->supplier_id && $expense->supplier) {
+            $supplierTaxId = $expense->supplier->tax_id ?? $expense->supplier->vat_number ?? '';
+            $supplierCode = $supplierTaxId ?: 'S' . str_pad($expense->supplier_id, 6, '0', STR_PAD_LEFT);
+            $supplierName = $expense->supplier->name ?? '';
+        }
 
         // Debit: Expense account (check for learned category mapping)
         $expenseAccountData = $this->getAccountCodeWithStatus('expense', self::TYPE_EXPENSE, 'expense_category', $expense->expense_category_id);
@@ -256,12 +372,15 @@ class JournalExportService
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_EXPENSE,
+            'doc_type' => $docType,
             'account_code' => $expenseAccountData['code'],
             'account_name' => $categoryName,
             'description' => $description,
             'debit' => $expense->amount / 100,
             'credit' => 0,
-            'customer_name' => $expense->supplier->name ?? '',
+            'customer_name' => $supplierName,
+            'customer_code' => $supplierCode,
+            'customer_tax_id' => $supplierTaxId,
             'currency' => $expense->currency->code ?? 'MKD',
             'entity' => [
                 'type' => 'expense_category',
@@ -280,17 +399,21 @@ class JournalExportService
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_EXPENSE,
+            'doc_type' => $docType,
             'account_code' => $payableAccountData['code'],
-            'account_name' => 'Accounts Payable',
+            'account_name' => 'Обврски кон добавувачи',
             'description' => $description,
             'debit' => 0,
             'credit' => $expense->amount / 100,
-            'customer_name' => $expense->supplier->name ?? '',
+            'customer_name' => $supplierName,
+            'customer_code' => $supplierCode,
+            'customer_tax_id' => $supplierTaxId,
             'currency' => $expense->currency->code ?? 'MKD',
             'entity' => $expense->supplier_id ? [
                 'type' => 'supplier',
                 'id' => $expense->supplier_id,
-                'name' => $expense->supplier->name ?? '',
+                'name' => $supplierName,
+                'tax_id' => $supplierTaxId,
             ] : null,
             'mapping_status' => $payableAccountData['status'],
         ];
@@ -625,6 +748,13 @@ class JournalExportService
     /**
      * Export to Pantheon XML format.
      * Pantheon uses specific XML schema for journal entry import.
+     *
+     * Includes:
+     * - Document type codes (FI=Фактура Издадена, FP=Фактура Примена, PL=Плаќање)
+     * - Customer/Supplier tax ID (EDB)
+     * - Partner codes
+     * - Detailed item breakdown
+     * - Tax rate information
      */
     public function toPantheonXML(): string
     {
@@ -646,20 +776,66 @@ class JournalExportService
             $dokument = $stavki->addChild('Dokument');
             $firstEntry = $docEntries->first();
 
+            // Document header
             $dokument->addChild('Datum', Carbon::parse($firstEntry['date'])->format('Y-m-d'));
+            $dokument->addChild('TipDokument', $firstEntry['doc_type'] ?? 'XX'); // FI, FP, PL
             $dokument->addChild('BrojDokument', htmlspecialchars($reference));
             $dokument->addChild('Opis', htmlspecialchars(mb_substr($firstEntry['description'], 0, 100)));
 
+            // Partner info (customer/supplier)
+            $partner = $dokument->addChild('Partner');
+            $partner->addChild('Sifra', htmlspecialchars($firstEntry['customer_code'] ?? ''));
+            $partner->addChild('Naziv', htmlspecialchars($firstEntry['customer_name'] ?? ''));
+            $partner->addChild('EDB', htmlspecialchars($firstEntry['customer_tax_id'] ?? '')); // Единствен Даночен Број
+
+            // Invoice items (if available on first entry - for invoices)
+            if (!empty($firstEntry['items']) && is_array($firstEntry['items'])) {
+                $stavkiNode = $dokument->addChild('StavkiFaktura');
+                foreach ($firstEntry['items'] as $item) {
+                    $stavka = $stavkiNode->addChild('Stavka');
+                    $stavka->addChild('Naziv', htmlspecialchars(mb_substr($item['name'], 0, 100)));
+                    $stavka->addChild('Opis', htmlspecialchars(mb_substr($item['description'] ?? '', 0, 200)));
+                    $stavka->addChild('Kolicina', number_format($item['quantity'], 2, '.', ''));
+                    $stavka->addChild('Edinica', htmlspecialchars($item['unit'] ?? 'kom'));
+                    $stavka->addChild('Cena', number_format($item['price'], 2, '.', ''));
+                    $stavka->addChild('Vkupno', number_format($item['total'], 2, '.', ''));
+                    $stavka->addChild('DDV', number_format($item['tax'], 2, '.', ''));
+                }
+            }
+
+            // Tax breakdown (if available)
+            if (!empty($firstEntry['tax_breakdown']) && is_array($firstEntry['tax_breakdown'])) {
+                $ddvNode = $dokument->addChild('DDVPregled');
+                foreach ($firstEntry['tax_breakdown'] as $taxData) {
+                    $ddvStavka = $ddvNode->addChild('DDVStavka');
+                    $ddvStavka->addChild('Stapka', $taxData['rate'] ?? 18);
+                    $ddvStavka->addChild('Osnova', number_format($taxData['base'] ?? 0, 2, '.', ''));
+                    $ddvStavka->addChild('Iznos', number_format($taxData['amount'] ?? 0, 2, '.', ''));
+                }
+            }
+
+            // Journal entries (double-entry bookkeeping)
             $knizenja = $dokument->addChild('Knizenja');
 
             foreach ($docEntries as $entry) {
                 $knizenje = $knizenja->addChild('Knizenje');
                 $knizenje->addChild('Konto', $entry['account_code']);
+                $knizenje->addChild('NazivKonto', htmlspecialchars(mb_substr($entry['account_name'] ?? '', 0, 50)));
+                $knizenje->addChild('SifraPartner', htmlspecialchars($entry['customer_code'] ?? ''));
                 $knizenje->addChild('Partner', htmlspecialchars($entry['customer_name'] ?? ''));
-                $knizenje->addChild('Opis', htmlspecialchars(mb_substr($entry['description'], 0, 50)));
+                $knizenje->addChild('EDB', htmlspecialchars($entry['customer_tax_id'] ?? ''));
+                $knizenje->addChild('Opis', htmlspecialchars(mb_substr($entry['description'], 0, 100)));
                 $knizenje->addChild('Dolzuva', number_format($entry['debit'], 2, '.', ''));
                 $knizenje->addChild('Pobaruva', number_format($entry['credit'], 2, '.', ''));
                 $knizenje->addChild('Valuta', $entry['currency']);
+
+                // Tax details for tax entries
+                if (isset($entry['tax_rate'])) {
+                    $knizenje->addChild('DDVStapka', $entry['tax_rate']);
+                }
+                if (isset($entry['tax_base'])) {
+                    $knizenje->addChild('DDVOsnova', number_format($entry['tax_base'], 2, '.', ''));
+                }
             }
         }
 
