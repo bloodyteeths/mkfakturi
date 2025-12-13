@@ -430,6 +430,10 @@ php artisan db:seed --class=PartnerSeeder --force 2>/dev/null || echo "PartnerSe
 echo "Running PartnerUserSeeder to create demo partner user..."
 php artisan db:seed --class=PartnerUserSeeder --force 2>/dev/null || echo "PartnerUserSeeder already run or failed"
 
+# Seed Macedonian Chart of Accounts for all companies (Phase 4 Partner Accounting)
+echo "Running MacedonianChartOfAccountsSeeder to ensure standard accounts exist..."
+php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force 2>/dev/null || echo "MacedonianChartOfAccountsSeeder already run or failed"
+
 # Always run IFRS seeder to ensure entities and chart of accounts exist
 if [ "$FEATURE_ACCOUNTING_BACKBONE" = "true" ]; then
     echo "IFRS accounting feature enabled - ensuring chart of accounts..."
