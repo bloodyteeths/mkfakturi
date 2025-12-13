@@ -77,10 +77,12 @@ class PartnerJournalExportController extends Controller
             // Extract entity info from nested object (JournalExportService returns entity.type and entity.id)
             $entityData = $entry['entity'] ?? null;
             $entityName = '';
+            $itemContext = '';
             if ($entityData && is_array($entityData)) {
                 $entry['entity_type'] = $entityData['type'] ?? null;
                 $entry['entity_id'] = $entityData['id'] ?? null;
                 $entityName = $entityData['name'] ?? '';
+                $itemContext = $entityData['items'] ?? '';
             } else {
                 // Fallback: determine entity type from entry type
                 $entry['entity_type'] = $entry['entity_type'] ??
@@ -89,11 +91,14 @@ class PartnerJournalExportController extends Controller
                 $entry['entity_id'] = $entry['entity_id'] ?? null;
             }
 
+            // Build context for AI: combine entity name, item descriptions, and entry description
+            $aiContext = trim($entityName . ' ' . $itemContext . ' ' . ($entry['item_context'] ?? ''));
+
             // Use AI suggestion service for account recommendations
-            if ($entry['entity_type'] && $entityName) {
+            if ($entry['entity_type']) {
                 $suggestion = $suggestionService->suggestWithConfidence(
                     $entry['entity_type'],
-                    $entityName,
+                    $aiContext ?: $entityName,
                     $entry['description'] ?? null,
                     $company
                 );

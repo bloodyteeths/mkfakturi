@@ -717,6 +717,7 @@ class AccountSuggestionService
             AccountMapping::ENTITY_CUSTOMER => '2201', // Побарувања од купувачи - домашни
             AccountMapping::ENTITY_SUPPLIER => '4201', // Обврски кон добавувачи - домашни
             AccountMapping::ENTITY_EXPENSE_CATEGORY => '7000', // Расходи (general expenses)
+            'tax' => '4700', // ДДВ обврска (VAT liability)
         ];
 
         $accountCode = $defaults[$entityType] ?? null;
@@ -735,6 +736,7 @@ class AccountSuggestionService
                 AccountMapping::ENTITY_CUSTOMER => '2200', // Побарувања
                 AccountMapping::ENTITY_SUPPLIER => '4200', // Обврски кон добавувачи
                 AccountMapping::ENTITY_EXPENSE_CATEGORY => '7000', // Расходи
+                'tax' => '4700', // ДДВ обврска
             ];
 
             $account = Account::where('company_id', $companyId)
@@ -749,6 +751,7 @@ class AccountSuggestionService
                 AccountMapping::ENTITY_CUSTOMER => 'asset',
                 AccountMapping::ENTITY_SUPPLIER => 'liability',
                 AccountMapping::ENTITY_EXPENSE_CATEGORY => 'expense',
+                'tax' => 'liability',
             ];
 
             $account = Account::where('company_id', $companyId)

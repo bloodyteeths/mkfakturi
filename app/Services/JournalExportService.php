@@ -97,10 +97,14 @@ class JournalExportService
         $entries = [];
         $date = \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d');
         $reference = $invoice->invoice_number;
+
+        // Collect item descriptions for AI suggestions
+        $itemDescriptions = $invoice->items->pluck('name')->filter()->implode(', ');
         $description = "Invoice {$reference} - {$invoice->customer->name}";
+        $itemContext = $itemDescriptions ?: $invoice->notes ?? '';
 
         // Debit: Accounts Receivable (check for learned customer mapping)
-        $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_INVOICE, 'customer', $invoice->user_id);
+        $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_INVOICE, 'customer', $invoice->customer_id);
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
@@ -108,14 +112,16 @@ class JournalExportService
             'account_code' => $arAccountData['code'],
             'account_name' => 'Accounts Receivable',
             'description' => $description,
+            'item_context' => $itemContext,
             'debit' => $invoice->total / 100,
             'credit' => 0,
             'customer_name' => $invoice->customer->name ?? '',
             'currency' => $invoice->currency->code ?? 'MKD',
             'entity' => [
                 'type' => 'customer',
-                'id' => $invoice->user_id,
+                'id' => $invoice->customer_id,
                 'name' => $invoice->customer->name ?? '',
+                'items' => $itemDescriptions,
             ],
             'mapping_status' => $arAccountData['status'],
         ];
@@ -130,14 +136,16 @@ class JournalExportService
             'account_code' => $revenueAccountData['code'],
             'account_name' => 'Revenue',
             'description' => $description,
+            'item_context' => $itemContext,
             'debit' => 0,
             'credit' => $subtotal,
             'customer_name' => $invoice->customer->name ?? '',
             'currency' => $invoice->currency->code ?? 'MKD',
             'entity' => [
                 'type' => 'customer',
-                'id' => $invoice->user_id,
+                'id' => $invoice->customer_id,
                 'name' => $invoice->customer->name ?? '',
+                'items' => $itemDescriptions,
             ],
             'mapping_status' => $revenueAccountData['status'],
         ];
@@ -152,10 +160,16 @@ class JournalExportService
                 'account_code' => $taxAccountData['code'],
                 'account_name' => 'Tax Payable',
                 'description' => $description.' - VAT',
+                'item_context' => 'ДДВ VAT',
                 'debit' => 0,
                 'credit' => $invoice->tax / 100,
                 'customer_name' => $invoice->customer->name ?? '',
                 'currency' => $invoice->currency->code ?? 'MKD',
+                'entity' => [
+                    'type' => 'tax',
+                    'id' => null,
+                    'name' => 'ДДВ',
+                ],
                 'mapping_status' => $taxAccountData['status'],
             ];
         }
