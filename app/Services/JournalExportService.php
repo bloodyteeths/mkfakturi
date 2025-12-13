@@ -708,6 +708,7 @@ class JournalExportService
 
     /**
      * Export to generic CSV format.
+     * Includes all available data fields.
      */
     public function toCSV(): string
     {
@@ -716,6 +717,7 @@ class JournalExportService
         $csv = Writer::createFromString('');
         $csv->insertOne([
             'Date',
+            'Doc Type',
             'Reference',
             'Type',
             'Account Code',
@@ -723,22 +725,27 @@ class JournalExportService
             'Description',
             'Debit',
             'Credit',
-            'Customer/Supplier',
+            'Partner Code',
+            'Partner Tax ID',
+            'Partner Name',
             'Currency',
         ]);
 
         foreach ($entries as $entry) {
             $csv->insertOne([
                 $entry['date'],
+                $entry['doc_type'] ?? '',
                 $entry['reference'],
                 $entry['type'],
                 $entry['account_code'],
-                $entry['account_name'],
+                $entry['account_name'] ?? '',
                 $entry['description'],
                 number_format($entry['debit'], 2, '.', ''),
                 number_format($entry['credit'], 2, '.', ''),
-                $entry['customer_name'],
-                $entry['currency'],
+                $entry['customer_code'] ?? '',
+                $entry['customer_tax_id'] ?? '',
+                $entry['customer_name'] ?? '',
+                $entry['currency'] ?? 'MKD',
             ]);
         }
 
@@ -851,18 +858,23 @@ class JournalExportService
     /**
      * Export to Pantheon CSV format (legacy/alternative).
      * Pantheon uses specific column format for import.
+     * Includes partner code (EDB/tax ID) and document type.
      */
     public function toPantheonCSV(): string
     {
         $entries = $this->getJournalEntries();
 
         $csv = Writer::createFromString('');
-        // Pantheon format: Datum;Dokument;Konto;Partner;Opis;Dolg;Potr;Valuta
+        // Pantheon CSV format with full details
         $csv->setDelimiter(';');
         $csv->insertOne([
             'Datum',
+            'TipDok',
             'Dokument',
             'Konto',
+            'NazivKonto',
+            'SifraPartner',
+            'EDB',
             'Partner',
             'Opis',
             'Dolg',
@@ -873,13 +885,17 @@ class JournalExportService
         foreach ($entries as $entry) {
             $csv->insertOne([
                 Carbon::parse($entry['date'])->format('d.m.Y'), // Macedonian date format
+                $entry['doc_type'] ?? 'XX',
                 $entry['reference'],
                 $entry['account_code'],
-                $entry['customer_name'],
-                mb_substr($entry['description'], 0, 50), // Pantheon has character limit
+                mb_substr($entry['account_name'] ?? '', 0, 30),
+                $entry['customer_code'] ?? '',
+                $entry['customer_tax_id'] ?? '',
+                mb_substr($entry['customer_name'] ?? '', 0, 50),
+                mb_substr($entry['description'], 0, 100),
                 number_format($entry['debit'], 2, ',', ''),
                 number_format($entry['credit'], 2, ',', ''),
-                $entry['currency'],
+                $entry['currency'] ?? 'MKD',
             ]);
         }
 
@@ -889,6 +905,7 @@ class JournalExportService
     /**
      * Export to Zonel CSV format.
      * Zonel uses specific column format for import.
+     * Includes partner code (EDB/tax ID) and document type.
      */
     public function toZonelCSV(): string
     {
@@ -900,13 +917,16 @@ class JournalExportService
         $csv->insertOne([
             'DATUM',
             'BROJ_DOK',
+            'TIP_DOK',
             'SIFRA_KONTO',
             'NAZIV_KONTO',
             'OPIS',
             'DOLZUVA',
             'POBARUVA',
             'SIFRA_PARTNER',
+            'EDB',
             'NAZIV_PARTNER',
+            'VALUTA',
         ]);
 
         $docNumber = 1;
@@ -922,13 +942,16 @@ class JournalExportService
             $csv->insertOne([
                 Carbon::parse($entry['date'])->format('dmY'), // Zonel date format
                 str_pad($docNumber, 6, '0', STR_PAD_LEFT),
+                $entry['doc_type'] ?? 'XX',
                 $entry['account_code'],
-                mb_substr($entry['account_name'], 0, 30),
+                mb_substr($entry['account_name'] ?? '', 0, 30),
                 mb_substr($entry['description'], 0, 100),
                 number_format($entry['debit'], 2, '.', ''),
                 number_format($entry['credit'], 2, '.', ''),
-                '', // Partner code - would need to be mapped
-                mb_substr($entry['customer_name'], 0, 50),
+                $entry['customer_code'] ?? '',
+                $entry['customer_tax_id'] ?? '',
+                mb_substr($entry['customer_name'] ?? '', 0, 50),
+                $entry['currency'] ?? 'MKD',
             ]);
         }
 
