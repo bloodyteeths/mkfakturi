@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class PartnerInvitationController extends Controller
