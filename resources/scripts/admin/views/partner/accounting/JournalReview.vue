@@ -219,6 +219,12 @@ const hasHighConfidenceEntries = computed(() => {
 
 // Lifecycle
 onMounted(async () => {
+  // Set default date range to last month
+  const today = new Date()
+  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  filters.start_date = lastMonth.toISOString().split('T')[0]
+  filters.end_date = today.toISOString().split('T')[0]
+
   await consoleStore.fetchCompanies()
 
   // Auto-select first company if available
@@ -284,11 +290,18 @@ function onAccountChange(entry) {
 async function saveLearning(entry) {
   if (!selectedCompanyId.value) return
 
+  // Skip saving if we don't have entity info for learning
+  if (!entry.entity_type || !entry.entity_id) {
+    console.log('Skipping learning - no entity info for entry:', entry.id)
+    return
+  }
+
   try {
     const mapping = {
       entity_type: entry.entity_type,
       entity_id: entry.entity_id,
       account_id: entry.account_id,
+      accepted: true, // User explicitly selected this account
     }
 
     await partnerAccountingStore.learnMapping(selectedCompanyId.value, [mapping])

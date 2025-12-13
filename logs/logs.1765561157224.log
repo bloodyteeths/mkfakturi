@@ -1,0 +1,318 @@
+2025-12-12T17:34:31.000000000Z [inf]  Mounting volume on: /var/lib/containers/railwayapp/bind-mounts/deb6a235-4fde-4035-a946-d7d386f0903c/vol_fbj0jmd9ow95b1he
+2025-12-12T17:34:32.000000000Z [inf]  Starting Container
+2025-12-12T17:34:32.868975337Z [inf]  === Application Startup ===
+2025-12-12T17:34:32.868984100Z [inf]  Railway detected: Using individual MySQL variables...
+2025-12-12T17:34:32.869015758Z [inf]  DB configured from Railway variables
+2025-12-12T17:34:32.869024560Z [inf]  Waiting for database at switchback.proxy.rlwy.net:31829...
+2025-12-12T17:34:32.869032551Z [inf]  OK✅ Database is ready!
+2025-12-12T17:34:32.869040665Z [inf]  ✅ Permissions set for www user
+2025-12-12T17:34:32.869048790Z [inf]  Nginx configured to listen on ports 80 and 8080
+2025-12-12T17:34:32.869062014Z [inf]  Clearing caches...
+2025-12-12T17:34:32.869073143Z [inf]  
+2025-12-12T17:34:32.869081950Z [inf]     INFO  Configuration cache cleared successfully.  
+2025-12-12T17:34:32.869090839Z [inf]  
+2025-12-12T17:34:32.872549395Z [inf]  
+2025-12-12T17:34:32.872554125Z [inf]     INFO  Application cache cleared successfully.  
+2025-12-12T17:34:32.872558821Z [inf]  
+2025-12-12T17:34:33.182173292Z [inf]  
+2025-12-12T17:34:33.182178702Z [inf]     INFO  Route cache cleared successfully.  
+2025-12-12T17:34:33.182183992Z [inf]  
+2025-12-12T17:34:33.914289257Z [inf]  
+2025-12-12T17:34:33.914294718Z [inf]     INFO  Compiled views cleared successfully.  
+2025-12-12T17:34:33.914299610Z [inf]  
+2025-12-12T17:34:33.914304675Z [inf]  === Feature Flags ===
+2025-12-12T17:34:33.914311037Z [inf]  FACTURINO_STOCK_V1_ENABLED env: true
+2025-12-12T17:34:33.942977897Z [inf]  Stock feature from config: ENABLED
+2025-12-12T17:34:33.960522059Z [inf]  Running migrations...
+2025-12-12T17:34:34.281283140Z [inf]  
+2025-12-12T17:34:34.281289593Z [inf]     INFO  Nothing to migrate.  
+2025-12-12T17:34:34.281295241Z [inf]  
+2025-12-12T17:34:34.902383653Z [inf]  Profile status: COMPLETED
+2025-12-12T17:34:35.060203292Z [inf]  Database marker exists: YES
+2025-12-12T17:34:35.060209662Z [inf]  Already installed (profile_complete = COMPLETED)
+2025-12-12T17:34:35.060215696Z [inf]  ✅ Installation complete, all markers in place
+2025-12-12T17:34:35.396675630Z [inf]  
+2025-12-12T17:34:35.396686317Z [inf]     INFO  The [public/storage] link has been connected to [storage/app/public].  
+2025-12-12T17:34:35.396692639Z [inf]  
+2025-12-12T17:34:35.419179028Z [inf]  Verifying Laravel application...
+2025-12-12T17:34:35.972522883Z [inf]  Laravel Framework 12.12.0
+2025-12-12T17:34:35.972539251Z [inf]  Testing PHP bootstrap...
+2025-12-12T17:34:36.230324641Z [inf]  
+2025-12-12T17:34:36.233351661Z [inf]    GET|HEAD        / ..................................................... home
+2025-12-12T17:34:36.233358240Z [inf]    GET|HEAD        admin/{vue?} ............................... admin.dashboard
+2025-12-12T17:34:36.233363029Z [inf]    GET|HEAD        api/billing/invoices ....................................... 
+2025-12-12T17:34:36.233369054Z [inf]    GET|HEAD        api/billing/subscription ................................... 
+2025-12-12T17:34:36.286119107Z [inf]  Testing database connection...
+2025-12-12T17:34:36.866288763Z [inf]  DB OK
+2025-12-12T17:34:36.866293363Z [inf]  Enabling verbose PHP errors for debugging...
+2025-12-12T17:34:36.866298118Z [inf]  Testing home route...
+2025-12-12T17:34:37.152823605Z [inf]  Home route test passed
+2025-12-12T17:34:37.152833022Z [inf]  Validating nginx configuration...
+2025-12-12T17:34:37.162931123Z [inf]  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+2025-12-12T17:34:37.162939520Z [inf]  nginx: configuration file /etc/nginx/nginx.conf test is successful
+2025-12-12T17:34:37.162946052Z [inf]  Validating PHP-FPM configuration...
+2025-12-12T17:34:37.200389897Z [inf]  [12-Dec-2025 17:34:37] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-12-12T17:34:37.200397726Z [inf]  
+2025-12-12T17:34:37.200403332Z [inf]  [12-Dec-2025 17:34:37] NOTICE: configuration file /usr/local/etc/php-fpm.conf test is successful
+2025-12-12T17:34:37.200408702Z [inf]  
+2025-12-12T17:34:37.203521776Z [inf]  Setting final permissions before starting services...
+2025-12-12T17:34:37.213640140Z [inf]  ✅ Final permissions set for www user
+2025-12-12T17:34:37.213647186Z [inf]  Starting application services in background...
+2025-12-12T17:34:37.213661908Z [inf]  Waiting for services to be ready...
+2025-12-12T17:34:37.350623577Z [inf]  2025-12-12 17:34:37,348 INFO Set uid to user 0 succeeded
+2025-12-12T17:34:37.352378772Z [inf]  2025-12-12 17:34:37,350 INFO supervisord started with pid 62
+2025-12-12T17:34:38.365860405Z [inf]  2025-12-12 17:34:38,353 INFO spawned: 'nginx' with pid 64
+2025-12-12T17:34:38.365871555Z [inf]  2025-12-12 17:34:38,356 INFO spawned: 'php-fpm' with pid 65
+2025-12-12T17:34:38.365890029Z [inf]  2025-12-12 17:34:38,358 INFO spawned: 'scheduler' with pid 66
+2025-12-12T17:34:38.413734913Z [err]  [12-Dec-2025 17:34:38] NOTICE: fpm is running, pid 65
+2025-12-12T17:34:38.413741131Z [err]  [12-Dec-2025 17:34:38] NOTICE: ready to handle connections
+2025-12-12T17:34:39.950157246Z [inf]  2025-12-12 17:34:39,715 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-12-12T17:34:39.950168436Z [inf]  2025-12-12 17:34:39,715 INFO success: scheduler entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-12-12T17:34:39.950219324Z [inf]  2025-12-12 17:34:39,715 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-12-12T17:34:41.145134936Z [err]  127.0.0.1 -  12/Dec/2025:17:34:40 +0000 "GET /index.php" 500
+2025-12-12T17:34:42.214721144Z [inf]  Checking if PHP-FPM is listening on port 9000...
+2025-12-12T17:34:42.241942095Z [inf]  tcp        0      0 :::9000                 :::*                    LISTEN      
+2025-12-12T17:34:42.241949232Z [inf]  Checking if nginx is listening on port 8080...
+2025-12-12T17:34:42.250548213Z [inf]  tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      
+2025-12-12T17:34:42.250557283Z [inf]  Testing HTTP request through nginx/php-fpm...
+2025-12-12T17:34:42.316884191Z [err]  127.0.0.1 -  12/Dec/2025:17:34:42 +0000 "GET /index.php" 500
+2025-12-12T17:34:42.321084998Z [inf]  ❌ Health check failed (HTTP 500)
+2025-12-12T17:34:42.321092644Z [inf]  Response: <!DOCTYPE html>
+2025-12-12T17:34:42.321097395Z [inf]  <html lang="en">
+2025-12-12T17:34:42.321101826Z [inf]  <head>
+2025-12-12T17:34:42.321108241Z [inf]      <meta charset="utf-8">
+2025-12-12T17:34:42.321113385Z [inf]      <meta name="viewport" content="width=device-width, initial-scale=1">
+2025-12-12T17:34:42.321118130Z [inf]      <title>Server Error - Facturino</title>
+2025-12-12T17:34:42.321127339Z [inf]      <link rel="preload" as="style" href="http://127.0.0.1:8080/build/assets/main-_mx2V2Jn.css" /><link rel="modulepreload" href="http://127.0.0.1:8080/build/assets/main-UPgIwTcy.js" /><link rel="stylesheet" href="http://127.0.0.1:8080/build/assets/main-_mx2V2Jn.css" /><script type="module" src="http://127.0.0.1:8080/build/assets/main-UPgIwTcy.js"></script></head>
+2025-12-12T17:34:42.321132150Z [inf]  <body class="antialiased bg-gray-50">
+2025-12-12T17:34:42.321136607Z [inf]      <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+2025-12-12T17:34:42.321141658Z [inf]          <div class="max-w-md w-full space-y-8 text-center">
+2025-12-12T17:34:42.321150616Z [inf]              <!-- Error Icon -->
+2025-12-12T17:34:42.321156147Z [inf]              <div class="mx-auto h-24 w-24 text-red-600">
+2025-12-12T17:34:42.321160531Z [inf]                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+2025-12-12T17:34:42.321164956Z [inf]                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+2025-12-12T17:34:42.321171392Z [inf]                  </svg>
+2025-12-12T17:34:42.321176062Z [inf]              </div>
+2025-12-12T17:34:42.321181521Z [inf]  
+2025-12-12T17:34:42.323135247Z [inf]              <!-- Error Code -->
+2025-12-12T17:34:42.323143812Z [inf]              <div>
+2025-12-12T17:34:42.323149346Z [inf]                  <h1 class="text-8xl font-bold text-gray-900">500</h1>
+2025-12-12T17:34:42.323155383Z [inf]                  <h2 class="mt-4 text-2xl font-semibold text-gray-700">Internal Server Error</h2>
+2025-12-12T17:34:42.323161255Z [inf]              </div>
+2025-12-12T17:34:42.323167400Z [inf]  
+2025-12-12T17:34:42.323176418Z [inf]              <!-- Error Message -->
+2025-12-12T17:34:42.323184438Z [inf]              <div class="space-y-4">
+2025-12-12T17:34:42.323191647Z [inf]                  <p class="text-gray-600">
+2025-12-12T17:34:42.323200012Z [inf]                      Something went wrong on our end. We've been notified and are working to fix the issue.
+2025-12-12T17:34:42.323206784Z [inf]                  </p>
+2025-12-12T17:34:42.323212791Z [inf]                  
+2025-12-12T17:34:42.323218138Z [inf]                  <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+2025-12-12T17:34:42.323223970Z [inf]                      <div class="flex">
+2025-12-12T17:34:42.323229455Z [inf]                          <div class="flex-shrink-0">
+2025-12-12T17:34:42.323234873Z [inf]                              <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+2025-12-12T17:34:42.323240028Z [inf]                                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+2025-12-12T17:34:42.323246854Z [inf]                              </svg>
+2025-12-12T17:34:42.323252950Z [inf]                          </div>
+2025-12-12T17:34:42.323260903Z [inf]                          <div class="ml-3">
+2025-12-12T17:34:42.325414878Z [inf]                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+2025-12-12T17:34:42.325421632Z [inf]                              <p class="text-sm text-red-700">
+2025-12-12T17:34:42.325428759Z [inf]                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+2025-12-12T17:34:42.325432050Z [inf]                                  Our technical team has been automatically notified. Please try again in a few minutes.
+2025-12-12T17:34:42.325439751Z [inf]                              </p>
+2025-12-12T17:34:42.325440197Z [inf]                      </svg>
+2025-12-12T17:34:42.325449168Z [inf]                          </div>
+2025-12-12T17:34:42.325450574Z [inf]                      Try Again
+2025-12-12T17:34:42.325460352Z [inf]                      </div>
+2025-12-12T17:34:42.325463818Z [inf]                  </button>
+2025-12-12T17:34:42.325472642Z [inf]                  
+2025-12-12T17:34:42.325473814Z [inf]                  </div>
+2025-12-12T17:34:42.325483269Z [inf]              </div>
+2025-12-12T17:34:42.325483471Z [inf]                  <a href="http://127.0.0.1:8080" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+2025-12-12T17:34:42.325489407Z [inf]  
+2025-12-12T17:34:42.325494337Z [inf]              <!-- Action Buttons -->
+2025-12-12T17:34:42.325498812Z [inf]              <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+2025-12-12T17:34:42.325504405Z [inf]                  <button onclick="window.location.reload()" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+2025-12-12T17:34:42.327784940Z [inf]  
+2025-12-12T17:34:42.327787103Z [inf]                      <li>• Contact our support team with the error code below</li>
+2025-12-12T17:34:42.327793507Z [inf]                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+2025-12-12T17:34:42.327798227Z [inf]              <!-- Help Section -->
+2025-12-12T17:34:42.327802646Z [inf]                  </ul>
+2025-12-12T17:34:42.327807802Z [inf]              <div class="bg-gray-100 rounded-lg p-4">
+2025-12-12T17:34:42.327813294Z [inf]                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+2025-12-12T17:34:42.327814544Z [inf]              </div>
+2025-12-12T17:34:42.327825916Z [inf]                      </svg>
+2025-12-12T17:34:42.327827270Z [inf]                  <h3 class="text-sm font-medium text-gray-900 mb-2">If this problem persists:</h3>
+2025-12-12T17:34:42.327827407Z [inf]  
+2025-12-12T17:34:42.327838310Z [inf]                      Go Home
+2025-12-12T17:34:42.327839129Z [inf]              <!-- Debug Information (Development Only) -->
+2025-12-12T17:34:42.327844888Z [inf]                  <ul class="text-sm text-gray-600 space-y-1">
+2025-12-12T17:34:42.327852158Z [inf]                  </a>
+2025-12-12T17:34:42.327853730Z [inf]              
+2025-12-12T17:34:42.327856709Z [inf]                      <li>• Check your internet connection</li>
+2025-12-12T17:34:42.327863929Z [inf]              <!-- Footer -->
+2025-12-12T17:34:42.327864969Z [inf]              </div>
+2025-12-12T17:34:42.327872391Z [inf]                      <li>• Clear your browser cache and cookies</li>
+2025-12-12T17:34:42.327875491Z [inf]              <div class="pt-8 text-xs text-gray-400">
+2025-12-12T17:34:42.327883199Z [inf]                      <li>• Try using a different browser</li>
+2025-12-12T17:34:42.330565904Z [inf]  #7 /var/www/html/app/Providers/AppServiceProvider.php(68): App\\Providers\\AppServiceProvider->addMenus()
+2025-12-12T17:34:42.330581536Z [inf]                  Error ID: fac15bf8-d236-4eb7-8fb1-a56b2939b932<br>
+2025-12-12T17:34:42.330584180Z [inf]  #8 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): App\\Providers\\AppServiceProvider->boot()
+2025-12-12T17:34:42.330596852Z [inf]  #9 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+2025-12-12T17:34:42.330597117Z [inf]                  Time: 2025-12-12 17:34:42 UTC
+2025-12-12T17:34:42.330610092Z [inf]  #10 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+2025-12-12T17:34:42.330611177Z [inf]              </div>
+2025-12-12T17:34:42.330623122Z [inf]          </div>
+2025-12-12T17:34:42.330623836Z [inf]  #11 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+2025-12-12T17:34:42.330632366Z [inf]      </div>
+2025-12-12T17:34:42.330639003Z [inf]  </body>
+2025-12-12T17:34:42.330644574Z [inf]  </html>
+2025-12-12T17:34:42.330650537Z [inf]  HTTP_CODE:500
+2025-12-12T17:34:42.330656727Z [inf]  === PHP-FPM Error Logs ===
+2025-12-12T17:34:42.330662696Z [inf]  No php-fpm error log found
+2025-12-12T17:34:42.330667663Z [inf]  === Laravel Error Logs ===
+2025-12-12T17:34:42.330673260Z [inf]  #4 /var/www/html/vendor/lavary/laravel-menu/src/Lavary/Menu/Menu.php(81): call_user_func(Object(Closure), Object(Lavary\\Menu\\Builder))
+2025-12-12T17:34:42.330680096Z [inf]  #5 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Lavary\\Menu\\Menu->make('main_menu', Object(Closure))
+2025-12-12T17:34:42.330685721Z [inf]  #6 /var/www/html/app/Providers/AppServiceProvider.php(135): Illuminate\\Support\\Facades\\Facade::__callStatic('make', Array)
+2025-12-12T17:34:42.332490162Z [inf]  #12 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+2025-12-12T17:34:42.332495989Z [inf]  #13 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1150): Illuminate\\Container\\Container->call(Array)
+2025-12-12T17:34:42.332500613Z [inf]  #14 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1131): Illuminate\\Foundation\\Application->bootProvider(Object(App\\Providers\\AppServiceProvider))
+2025-12-12T17:34:42.332505615Z [inf]  #15 [internal function]: Illuminate\\Foundation\\Application->Illuminate\\Foundation\\{closure}(Object(App\\Providers\\AppServiceProvider), 'App\\\\Providers\\\\A...')
+2025-12-12T17:34:42.332510201Z [inf]  #16 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1130): array_walk(Array, Object(Closure))
+2025-12-12T17:34:42.332515110Z [inf]  #17 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate\\Foundation\\Application->boot()
+2025-12-12T17:34:42.332519040Z [inf]  #18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(341): Illuminate\\Foundation\\Bootstrap\\BootProviders->bootstrap(Object(Illuminate\\Foundation\\Application))
+2025-12-12T17:34:42.332523315Z [inf]  #19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(186): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+2025-12-12T17:34:42.332527685Z [inf]  #20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(170): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+2025-12-12T17:34:42.332531565Z [inf]  #21 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+2025-12-12T17:34:42.334784392Z [inf]  #22 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+2025-12-12T17:34:42.334793644Z [inf]  #23 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+2025-12-12T17:34:42.334800501Z [inf]  #24 {main}
+2025-12-12T17:34:42.334805973Z [inf]  "} 
+2025-12-12T17:34:42.334812427Z [inf]  [2025-12-12 17:34:42] production.ERROR: Undefined array key "link" {"exception":"[object] (ErrorException(code: 0): Undefined array key \"link\" at /var/www/html/app/Providers/AppServiceProvider.php:157)
+2025-12-12T17:34:42.334818503Z [inf]  [stacktrace]
+2025-12-12T17:34:42.334825240Z [inf]  #0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Undefined array...', '/var/www/html/a...', 157)
+2025-12-12T17:34:42.334830512Z [inf]  #1 /var/www/html/app/Providers/AppServiceProvider.php(157): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'Undefined array...', '/var/www/html/a...', 157)
+2025-12-12T17:34:42.334836962Z [inf]  #2 /var/www/html/app/Providers/AppServiceProvider.php(137): App\\Providers\\AppServiceProvider->generateMenu(Object(Lavary\\Menu\\Builder), Array)
+2025-12-12T17:34:42.334842826Z [inf]  #3 [internal function]: App\\Providers\\AppServiceProvider->App\\Providers\\{closure}(Object(Lavary\\Menu\\Builder))
+2025-12-12T17:34:42.334847972Z [inf]  #4 /var/www/html/vendor/lavary/laravel-menu/src/Lavary/Menu/Menu.php(81): call_user_func(Object(Closure), Object(Lavary\\Menu\\Builder))
+2025-12-12T17:34:42.334854050Z [inf]  #5 /var/www/html/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(361): Lavary\\Menu\\Menu->make('main_menu', Object(Closure))
+2025-12-12T17:34:42.334859664Z [inf]  #6 /var/www/html/app/Providers/AppServiceProvider.php(135): Illuminate\\Support\\Facades\\Facade::__callStatic('make', Array)
+2025-12-12T17:34:42.337216913Z [inf]  #14 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1131): Illuminate\\Foundation\\Application->bootProvider(Object(App\\Providers\\AppServiceProvider))
+2025-12-12T17:34:42.337223785Z [inf]  #15 [internal function]: Illuminate\\Foundation\\Application->Illuminate\\Foundation\\{closure}(Object(App\\Providers\\AppServiceProvider), 'App\\\\Providers\\\\A...')
+2025-12-12T17:34:42.337228904Z [inf]  #16 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1130): array_walk(Array, Object(Closure))
+2025-12-12T17:34:42.337235352Z [inf]  #17 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate\\Foundation\\Application->boot()
+2025-12-12T17:34:42.337244007Z [inf]  #7 /var/www/html/app/Providers/AppServiceProvider.php(68): App\\Providers\\AppServiceProvider->addMenus()
+2025-12-12T17:34:42.337249853Z [inf]  #8 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): App\\Providers\\AppServiceProvider->boot()
+2025-12-12T17:34:42.337255721Z [inf]  #9 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+2025-12-12T17:34:42.337260316Z [inf]  #10 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+2025-12-12T17:34:42.337264793Z [inf]  #11 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+2025-12-12T17:34:42.337270271Z [inf]  #12 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+2025-12-12T17:34:42.337275192Z [inf]  #13 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1150): Illuminate\\Container\\Container->call(Array)
+2025-12-12T17:34:42.339805076Z [inf]  #18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(341): Illuminate\\Foundation\\Bootstrap\\BootProviders->bootstrap(Object(Illuminate\\Foundation\\Application))
+2025-12-12T17:34:42.339815770Z [inf]  #19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(186): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+2025-12-12T17:34:42.339821895Z [inf]  #20 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(170): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+2025-12-12T17:34:42.339829740Z [inf]  #21 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+2025-12-12T17:34:42.339834579Z [inf]  #22 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+2025-12-12T17:34:42.339840005Z [inf]  #23 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+2025-12-12T17:34:42.339845181Z [inf]  #24 {main}
+2025-12-12T17:34:42.339850001Z [inf]  "} 
+2025-12-12T17:34:42.339861497Z [inf]  === Nginx Error Logs ===
+2025-12-12T17:34:42.339868104Z [inf]  Testing home route through HTTP...
+2025-12-12T17:34:42.358580007Z [err]  127.0.0.1 -  12/Dec/2025:17:34:42 +0000 "GET /index.php" 500
+2025-12-12T17:34:42.362386585Z [inf]  <body class="antialiased bg-gray-50">
+2025-12-12T17:34:42.362397435Z [inf]      <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+2025-12-12T17:34:42.362404168Z [inf]          <div class="max-w-md w-full space-y-8 text-center">
+2025-12-12T17:34:42.362410125Z [inf]              <!-- Error Icon -->
+2025-12-12T17:34:42.362415845Z [inf]              <div class="mx-auto h-24 w-24 text-red-600">
+2025-12-12T17:34:42.362420422Z [inf]                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+2025-12-12T17:34:42.362424995Z [inf]                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+2025-12-12T17:34:42.362429254Z [inf]                  </svg>
+2025-12-12T17:34:42.362433913Z [inf]              </div>
+2025-12-12T17:34:42.362440751Z [inf]  
+2025-12-12T17:34:42.362451976Z [inf]  ❌ Home route failed (HTTP 500)
+2025-12-12T17:34:42.362459194Z [inf]  Response: <!DOCTYPE html>
+2025-12-12T17:34:42.362463732Z [inf]  <html lang="en">
+2025-12-12T17:34:42.362468136Z [inf]  <head>
+2025-12-12T17:34:42.362473386Z [inf]      <meta charset="utf-8">
+2025-12-12T17:34:42.362477556Z [inf]      <meta name="viewport" content="width=device-width, initial-scale=1">
+2025-12-12T17:34:42.362481879Z [inf]      <title>Server Error - Facturino</title>
+2025-12-12T17:34:42.362486029Z [inf]      <link rel="preload" as="style" href="http://127.0.0.1:8080/build/assets/main-_mx2V2Jn.css" /><link rel="modulepreload" href="http://127.0.0.1:8080/build/assets/main-UPgIwTcy.js" /><link rel="stylesheet" href="http://127.0.0.1:8080/build/assets/main-_mx2V2Jn.css" /><script type="module" src="http://127.0.0.1:8080/build/assets/main-UPgIwTcy.js"></script></head>
+2025-12-12T17:34:42.364358570Z [inf]              <!-- Error Code -->
+2025-12-12T17:34:42.364369955Z [inf]              <div>
+2025-12-12T17:34:42.364384336Z [inf]                  <h1 class="text-8xl font-bold text-gray-900">500</h1>
+2025-12-12T17:34:42.364394288Z [inf]                  <h2 class="mt-4 text-2xl font-semibold text-gray-700">Internal Server Error</h2>
+2025-12-12T17:34:42.364400771Z [inf]              </div>
+2025-12-12T17:34:42.364408130Z [inf]  
+2025-12-12T17:34:42.364414285Z [inf]              <!-- Error Message -->
+2025-12-12T17:34:42.364420052Z [inf]              <div class="space-y-4">
+2025-12-12T17:34:42.364425456Z [inf]                  <p class="text-gray-600">
+2025-12-12T17:34:42.364433366Z [inf]                      Something went wrong on our end. We've been notified and are working to fix the issue.
+2025-12-12T17:34:42.364439360Z [inf]                  </p>
+2025-12-12T17:34:42.364445065Z [inf]                  
+2025-12-12T17:34:42.364451360Z [inf]                  <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+2025-12-12T17:34:42.364457465Z [inf]                      <div class="flex">
+2025-12-12T17:34:42.364463694Z [inf]                          <div class="flex-shrink-0">
+2025-12-12T17:34:42.364469987Z [inf]                              <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+2025-12-12T17:34:42.364476081Z [inf]                                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+2025-12-12T17:34:42.364484640Z [inf]                              </svg>
+2025-12-12T17:34:42.364490399Z [inf]                          </div>
+2025-12-12T17:34:42.364496781Z [inf]                          <div class="ml-3">
+2025-12-12T17:34:42.366259341Z [inf]                              <p class="text-sm text-red-700">
+2025-12-12T17:34:42.366271792Z [inf]                                  Our technical team has been automatically notified. Please try again in a few minutes.
+2025-12-12T17:34:42.366276198Z [inf]                  <a href="http://127.0.0.1:8080" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+2025-12-12T17:34:42.366279553Z [inf]  
+2025-12-12T17:34:42.366282778Z [inf]                              </p>
+2025-12-12T17:34:42.366290066Z [inf]                          </div>
+2025-12-12T17:34:42.366293857Z [inf]              <!-- Action Buttons -->
+2025-12-12T17:34:42.366298035Z [inf]                      </div>
+2025-12-12T17:34:42.366302086Z [inf]              <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+2025-12-12T17:34:42.366306545Z [inf]                  </div>
+2025-12-12T17:34:42.366308326Z [inf]                  <button onclick="window.location.reload()" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+2025-12-12T17:34:42.366314438Z [inf]                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+2025-12-12T17:34:42.366322206Z [inf]                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+2025-12-12T17:34:42.366322573Z [inf]              </div>
+2025-12-12T17:34:42.366329722Z [inf]                      </svg>
+2025-12-12T17:34:42.366335938Z [inf]                      Try Again
+2025-12-12T17:34:42.366341578Z [inf]                  </button>
+2025-12-12T17:34:42.366349012Z [inf]                  
+2025-12-12T17:34:42.368044324Z [inf]              </div>
+2025-12-12T17:34:42.368050023Z [inf]                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+2025-12-12T17:34:42.368052323Z [inf]  
+2025-12-12T17:34:42.368058903Z [inf]              <!-- Debug Information (Development Only) -->
+2025-12-12T17:34:42.368059988Z [inf]                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+2025-12-12T17:34:42.368064879Z [inf]              
+2025-12-12T17:34:42.368066431Z [inf]                      </svg>
+2025-12-12T17:34:42.368071069Z [inf]              <!-- Footer -->
+2025-12-12T17:34:42.368074545Z [inf]                      Go Home
+2025-12-12T17:34:42.368077186Z [inf]              <div class="pt-8 text-xs text-gray-400">
+2025-12-12T17:34:42.368079974Z [inf]                  </a>
+2025-12-12T17:34:42.368083916Z [inf]              </div>
+2025-12-12T17:34:42.368088041Z [inf]  
+2025-12-12T17:34:42.368091937Z [inf]              <!-- Help Section -->
+2025-12-12T17:34:42.368095913Z [inf]              <div class="bg-gray-100 rounded-lg p-4">
+2025-12-12T17:34:42.368100260Z [inf]                  <h3 class="text-sm font-medium text-gray-900 mb-2">If this problem persists:</h3>
+2025-12-12T17:34:42.368104969Z [inf]                  <ul class="text-sm text-gray-600 space-y-1">
+2025-12-12T17:34:42.368110308Z [inf]                      <li>• Check your internet connection</li>
+2025-12-12T17:34:42.368115572Z [inf]                      <li>• Clear your browser cache and cookies</li>
+2025-12-12T17:34:42.368133835Z [inf]                      <li>• Try using a different browser</li>
+2025-12-12T17:34:42.368138826Z [inf]                      <li>• Contact our support team with the error code below</li>
+2025-12-12T17:34:42.368192349Z [inf]                  </ul>
+2025-12-12T17:34:42.370014282Z [inf]                  Error ID: 07b03739-5c3c-4cd8-a6cd-da1de8d3cb03<br>
+2025-12-12T17:34:42.370021027Z [inf]                  Time: 2025-12-12 17:34:42 UTC
+2025-12-12T17:34:42.370026026Z [inf]              </div>
+2025-12-12T17:34:42.370031028Z [inf]          </div>
+2025-12-12T17:34:42.370035901Z [inf]      </div>
+2025-12-12T17:34:42.370040624Z [inf]  </body>
+2025-12-12T17:34:42.370046679Z [inf]  </html>
+2025-12-12T17:34:42.370051825Z [inf]  HTTP_CODE:500
+2025-12-12T17:34:42.370060898Z [inf]  All startup checks complete. Supervisor running with PID 62
+2025-12-12T17:34:42.370066314Z [inf]  Application ready to serve requests.
+2025-12-12T17:38:03.419170921Z [err]  127.0.0.1 -  12/Dec/2025:17:37:56 +0000 "POST /index.php" 500
+2025-12-12T17:38:03.419176055Z [err]  127.0.0.1 -  12/Dec/2025:17:37:59 +0000 "GET /index.php" 500
+2025-12-12T17:38:03.611122371Z [err]  127.0.0.1 -  12/Dec/2025:17:38:03 +0000 "GET /index.php" 500
+2025-12-12T17:38:23.160047643Z [err]  127.0.0.1 -  12/Dec/2025:17:38:13 +0000 "GET /index.php" 500
+2025-12-12T17:38:23.160058434Z [err]  127.0.0.1 -  12/Dec/2025:17:38:14 +0000 "GET /index.php" 500
+2025-12-12T17:38:23.160064382Z [err]  127.0.0.1 -  12/Dec/2025:17:38:16 +0000 "GET /index.php" 500
+2025-12-12T17:38:23.160070446Z [err]  127.0.0.1 -  12/Dec/2025:17:38:21 +0000 "GET /index.php" 500
+2025-12-12T17:38:32.880376308Z [err]  127.0.0.1 -  12/Dec/2025:17:38:32 +0000 "GET /index.php" 500
+2025-12-12T17:38:35.227232751Z [err]  127.0.0.1 -  12/Dec/2025:17:38:35 +0000 "GET /index.php" 500
+2025-12-12T17:38:38.800541492Z [err]  127.0.0.1 -  12/Dec/2025:17:38:38 +0000 "GET /index.php" 500

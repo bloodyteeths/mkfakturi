@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountMapping;
 use App\Models\Partner;
+use App\Services\AccountSuggestionService;
 use App\Services\JournalExportService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -63,25 +65,48 @@ class PartnerJournalExportController extends Controller
 
         $entries = $service->getJournalEntries();
 
+        // AI suggestion service for account recommendations
+        $suggestionService = new AccountSuggestionService();
+
         // Add confidence and suggestion data to each entry
         // This enables the AI suggestion UI to work properly
-        $entries = $entries->map(function ($entry, $index) use ($company) {
+        $entries = $entries->map(function ($entry, $index) use ($company, $suggestionService) {
             // Generate unique ID for frontend
             $entry['id'] = $index + 1;
 
-            // Add default confidence (0.3 = default account suggestion)
-            // In the future, this will use AccountSuggestionService for real AI suggestions
-            $entry['confidence'] = $entry['confidence'] ?? 0.3;
-            $entry['suggestion_reason'] = $entry['suggestion_reason'] ?? 'default';
+            // Extract entity info from nested object (JournalExportService returns entity.type and entity.id)
+            $entityData = $entry['entity'] ?? null;
+            $entityName = '';
+            if ($entityData && is_array($entityData)) {
+                $entry['entity_type'] = $entityData['type'] ?? null;
+                $entry['entity_id'] = $entityData['id'] ?? null;
+                $entityName = $entityData['name'] ?? '';
+            } else {
+                // Fallback: determine entity type from entry type
+                $entry['entity_type'] = $entry['entity_type'] ??
+                    ($entry['type'] === 'expense' ? 'expense_category' :
+                    ($entry['type'] === 'invoice' || $entry['type'] === 'payment' ? 'customer' : null));
+                $entry['entity_id'] = $entry['entity_id'] ?? null;
+            }
 
-            // Add entity info for learning system
-            $entry['entity_type'] = $entry['entity_type'] ??
-                ($entry['type'] === 'expense' ? 'expense_category' :
-                ($entry['type'] === 'invoice' || $entry['type'] === 'payment' ? 'customer' : null));
-            $entry['entity_id'] = $entry['entity_id'] ?? null;
+            // Use AI suggestion service for account recommendations
+            if ($entry['entity_type'] && $entityName) {
+                $suggestion = $suggestionService->suggestWithConfidence(
+                    $entry['entity_type'],
+                    $entityName,
+                    $entry['description'] ?? null,
+                    $company
+                );
 
-            // Use account_code as account_id placeholder if not set
-            $entry['account_id'] = $entry['account_id'] ?? null;
+                $entry['account_id'] = $suggestion['account_id'];
+                $entry['confidence'] = $suggestion['confidence'];
+                $entry['suggestion_reason'] = $suggestion['reason'] ?? 'default';
+            } else {
+                // No entity info, use default suggestion
+                $entry['account_id'] = null;
+                $entry['confidence'] = 0.3;
+                $entry['suggestion_reason'] = 'default';
+            }
 
             return $entry;
         });

@@ -1,299 +1,200 @@
-2025-12-02T15:52:45.000000000Z [inf]  Starting Container
-2025-12-02T15:52:47.115513940Z [inf]  DB_CONNECTION: mysql
-2025-12-02T15:52:47.115514017Z [inf]  MYSQLDATABASE=railway
-2025-12-02T15:52:47.115526263Z [inf]  DB_HOST: switchback.proxy.rlwy.net
-2025-12-02T15:52:47.115529504Z [inf]  MYSQLHOST=switchback.proxy.rlwy.net
-2025-12-02T15:52:47.115531200Z [inf]  MYSQLHOST=switchback.proxy.rlwy.net
-2025-12-02T15:52:47.115538934Z [inf]  MYSQLPASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-12-02T15:52:47.115542092Z [inf]  MYSQLDATABASE=railway
-2025-12-02T15:52:47.115542714Z [inf]  MYSQL_ROOT_PASSWORD=uJZQdkQyPqITDiCiarqPQNlZzEpJLZxx
-2025-12-02T15:52:47.115543482Z [inf]  MYSQLPORT=31829
-2025-12-02T15:52:47.115550517Z [inf]  Using Railway individual MySQL variables...
-2025-12-02T15:52:47.115553217Z [inf]  QUEUE_CONNECTION=database
-2025-12-02T15:52:47.115554338Z [inf]  MYSQLUSER=root
-2025-12-02T15:52:47.115557648Z [inf]  Using Railway MySQL variables:
-2025-12-02T15:52:47.115567465Z [inf]  SESSION_DRIVER=database
-2025-12-02T15:52:47.115575024Z [inf]  MYSQLPORT=31829
-2025-12-02T15:52:47.115577274Z [inf]  DB_HOST: switchback.proxy.rlwy.net
-2025-12-02T15:52:47.115579385Z [inf]  MYSQL_URL=NOT SET
-2025-12-02T15:52:47.115581508Z [inf]  
-2025-12-02T15:52:47.115584750Z [inf]  MYSQLUSER=root
-2025-12-02T15:52:47.115587097Z [inf]  DB_PORT: 31829
-2025-12-02T15:52:47.115588857Z [inf]  DATABASE_URL=NOT SET
-2025-12-02T15:52:47.115591004Z [inf]  DB_DATABASE: railway
-2025-12-02T15:52:47.115593311Z [inf]  Checking specific variables:
-2025-12-02T15:52:47.115604191Z [inf]  === Railway Startup Script ===
-2025-12-02T15:52:47.115605194Z [inf]  DB_USERNAME: root
-2025-12-02T15:52:47.115612625Z [inf]  Environment variables check:
-2025-12-02T15:52:47.115613004Z [inf]  Final DB config:
-2025-12-02T15:52:47.115620213Z [inf]  All environment variables (searching for MySQL related):
-2025-12-02T15:52:47.115626313Z [inf]  DB_FOREIGN_KEYS=false
-2025-12-02T15:52:47.118503698Z [inf]  DB_PORT: 31829
-2025-12-02T15:52:47.118507899Z [inf]  DB_DATABASE: railway
-2025-12-02T15:52:47.118512128Z [inf]  DB_USERNAME: root
-2025-12-02T15:52:47.118516861Z [inf]  Creating minimal .env file for installation wizard...
-2025-12-02T15:52:47.118520768Z [inf]  Checking if auto-install needed...
-2025-12-02T15:52:47.118524564Z [inf]  Profile status: COMPLETED
-2025-12-02T15:52:47.118529596Z [inf]  Already installed (profile_complete = COMPLETED), skipping...
-2025-12-02T15:52:47.118533728Z [inf]  Creating storage directories...
-2025-12-02T15:52:47.118537870Z [inf]  Ensuring /tmp/nginx_client_body exists and is writable...
-2025-12-02T15:52:47.118541948Z [inf]  Checking for PSD2 certificates in environment...
-2025-12-02T15:52:47.118546102Z [inf]  Decoding NLB certificate from environment variable...
-2025-12-02T15:52:47.118549927Z [inf]  ✅ NLB certificate decoded successfully
-2025-12-02T15:52:47.118553875Z [inf]  Decoding NLB private key from environment variable...
-2025-12-02T15:52:47.118557840Z [inf]  ✅ NLB private key decoded successfully
-2025-12-02T15:52:47.118561720Z [inf]  Configuring session for Railway domain: app.facturino.mk
-2025-12-02T15:52:47.118565924Z [inf]  Clearing caches...
-2025-12-02T15:52:47.118570363Z [inf]  
-2025-12-02T15:52:47.118574543Z [inf]     INFO  Configuration cache cleared successfully.  
-2025-12-02T15:52:47.118578443Z [inf]  
-2025-12-02T15:52:47.118582690Z [inf]  
-2025-12-02T15:52:47.118586777Z [inf]     INFO  Application cache cleared successfully.  
-2025-12-02T15:52:47.118590610Z [inf]  
-2025-12-02T15:52:47.253551735Z [inf]  
-2025-12-02T15:52:47.253559402Z [inf]     INFO  Route cache cleared successfully.  
-2025-12-02T15:52:47.253565480Z [inf]  
-2025-12-02T15:52:47.569841269Z [inf]  
-2025-12-02T15:52:47.569847043Z [inf]     INFO  Compiled views cleared successfully.  
-2025-12-02T15:52:47.569854142Z [inf]  
-2025-12-02T15:52:47.579004302Z [inf]  Optimizing views...
-2025-12-02T15:52:48.043812796Z [inf]  
-2025-12-02T15:52:48.043817823Z [inf]  
-2025-12-02T15:52:48.043822721Z [inf]     INFO  Blade templates cached successfully.  
-2025-12-02T15:52:48.043827534Z [inf]  
-2025-12-02T15:52:48.043832827Z [inf]  Regenerating autoloader...
-2025-12-02T15:52:48.043837560Z [inf]  Generating optimized autoload files
-2025-12-02T15:52:50.190596668Z [err]  > Illuminate\Foundation\ComposerScripts::postAutoloadDump
-2025-12-02T15:52:50.215303337Z [err]  > @php artisan package:discover --ansi
-2025-12-02T15:52:50.457742961Z [inf]  
-2025-12-02T15:52:50.457749004Z [inf]    [37;44m INFO [39;49m Discovering packages.  
-2025-12-02T15:52:50.457754746Z [inf]  
-2025-12-02T15:52:50.462449503Z [inf]    barryvdh/laravel-dompdf [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.462455699Z [inf]    coderflex/laravel-ticket [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.462461423Z [inf]    ekmungai/eloquent-ifrs [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.464069132Z [inf]    invoiceshelf/modules [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.464075648Z [inf]    jasonmccreary/laravel-test-assertions [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.464081439Z [inf]    laravel/cashier-paddle [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.466159926Z [inf]    laravel/fortify [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.466168134Z [inf]    laravel/pennant [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.467970621Z [inf]    laravel/sanctum [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.467976265Z [inf]    laravel/tinker [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.467997848Z [inf]    laravel/ui [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.470248816Z [inf]    lavary/laravel-menu [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.470252929Z [inf]    maatwebsite/excel [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.470256496Z [inf]    nesbot/carbon [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.472276522Z [inf]    nunomaduro/termwind [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.472284123Z [inf]    silber/bouncer [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.472290106Z [inf]    spatie/laravel-backup [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.474285352Z [inf]    spatie/laravel-medialibrary [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.474292740Z [inf]    spatie/laravel-signal-aware-command [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.474298011Z [inf]    vinkla/hashids [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
-2025-12-02T15:52:50.474303505Z [inf]  
-2025-12-02T15:52:50.483811618Z [inf]  Generated optimized autoload files containing 11297 classes
-2025-12-02T15:52:50.493972533Z [inf]  Running migrations...
-2025-12-02T15:52:50.493979577Z [inf]  Checking for existing tables to skip duplicate migrations...
-2025-12-02T15:52:51.074224282Z [inf]  Running main migrations batch...
-2025-12-02T15:52:51.407596026Z [inf]  
-2025-12-02T15:52:51.407604193Z [inf]     INFO  Nothing to migrate.  
-2025-12-02T15:52:51.407612267Z [inf]  
-2025-12-02T15:52:51.418713893Z [inf]  Ensuring banking tables exist...
-2025-12-02T15:52:52.139273414Z [inf]  bank_accounts table exists
-2025-12-02T15:52:52.139282268Z [inf]  bank_transactions table exists
-2025-12-02T15:52:52.279700821Z [inf]  
-2025-12-02T15:52:52.279706549Z [inf]     INFO  Goodbye.
-2025-12-02T15:52:52.279710662Z [inf]  
-2025-12-02T15:52:52.572233181Z [inf]  
-2025-12-02T15:52:52.572239156Z [inf]     INFO  Goodbye.
-2025-12-02T15:52:52.572244888Z [inf]  
-2025-12-02T15:52:52.578198240Z [inf]  Ensuring IFRS entity migrations are run...
-2025-12-02T15:52:53.140302123Z [inf]  IFRS entity columns already exist - skipping migrations
-2025-12-02T15:52:53.140307188Z [inf]  
-2025-12-02T15:52:53.140312123Z [inf]     INFO  Goodbye.
-2025-12-02T15:52:53.140316770Z [inf]  
-2025-12-02T15:52:53.140321087Z [inf]  IFRS columns already exist in database, marking migrations as completed...
-2025-12-02T15:52:53.518341466Z [inf]  Migration already recorded: 2025_11_04_000000_add_ifrs_entity_id_to_companies_table
-2025-12-02T15:52:53.520269502Z [inf]  Migration already recorded: 2025_11_04_000001_add_entity_id_to_users_table
-2025-12-02T15:52:53.530835772Z [inf]  Ensuring MKD currency has correct precision...
-2025-12-02T15:52:54.064284176Z [inf]  Current MKD precision: 0
-2025-12-02T15:52:54.064288974Z [inf]  ✅ MKD precision already correct (0)
-2025-12-02T15:52:54.064292983Z [inf]  =========================================
-2025-12-02T15:52:54.064297726Z [inf]  RAILWAY_SKIP_INSTALL enabled - forcing installation complete...
-2025-12-02T15:52:54.064303208Z [inf]  =========================================
-2025-12-02T15:52:54.064307043Z [inf]  Creating database_created marker file via Laravel Storage...
-2025-12-02T15:52:54.092425322Z [inf]  Marker created via Storage::disk(local)
-2025-12-02T15:52:54.100815788Z [inf]  Verifying database marker file...
-2025-12-02T15:52:54.100821399Z [inf]  ✅ File exists: storage/app/database_created
-2025-12-02T15:52:54.102794490Z [inf]  -rw-r--r-- 1 root root 10 Dec  2 15:52 storage/app/database_created
-2025-12-02T15:52:54.441178308Z [inf]  Storage::disk(local)->has(database_created): TRUE
-2025-12-02T15:52:55.065971614Z [inf]  InstallUtils::dbMarkerExists(): TRUE
-2025-12-02T15:52:55.259453304Z [inf]  InstallUtils::isDbCreated(): TRUE
-2025-12-02T15:52:55.277167041Z [inf]  Checking existing users in database...
-2025-12-02T15:52:55.641460761Z [inf]  admin@invoiceshelf.com - Jane Doe
-2025-12-02T15:52:55.641470249Z [inf]  your-email@example.com - Администратор
-2025-12-02T15:52:55.641478033Z [inf]  partner@demo.mk - Demo Partner
-2025-12-02T15:52:55.641485369Z [inf]  atillatkulu@gmail.com - test trajkovski
-2025-12-02T15:52:55.641492362Z [inf]  atanrikulu@e-listele.com - test trajkovski
-2025-12-02T15:52:55.641499301Z [inf]  sara@demo.mk - test marko
-2025-12-02T15:52:55.641506642Z [inf]  marko@demo.mk - marko test
-2025-12-02T15:52:55.641513197Z [inf]  test1@demo.mk - marko
-2025-12-02T15:52:55.641521314Z [inf]  marko@gmail.com - marko qweqwe
-2025-12-02T15:52:56.100827075Z [inf]  Creating/resetting admin user with email: your-email@example.com
-2025-12-02T15:52:56.100838056Z [inf]  Admin user already exists - skipping creation
-2025-12-02T15:52:56.100844429Z [inf]  Verifying user settings...
-2025-12-02T15:52:56.322812228Z [inf]  User has 2 settingslanguage: mk
-2025-12-02T15:52:56.322817433Z [inf]  currency: 74
-2025-12-02T15:52:56.334206162Z [inf]  Setting profile_complete to 'COMPLETED'...
-2025-12-02T15:52:57.077918041Z [inf]  Verifying profile_complete setting...
-2025-12-02T15:52:57.077927253Z [inf]  ✅ profile_complete is now: COMPLETED
-2025-12-02T15:52:57.077932708Z [inf]  Double-checking settings table...
-2025-12-02T15:52:57.077941941Z [inf]  Could not set profile_complete
-2025-12-02T15:52:57.403883420Z [inf]  Found: option=profile_complete, value=COMPLETED
-2025-12-02T15:52:58.138763200Z [inf]  Login credentials:
-2025-12-02T15:52:58.138770419Z [inf]    Password: [configured]
-2025-12-02T15:52:58.138772855Z [inf]    Email: your-email@example.com
-2025-12-02T15:52:58.138773949Z [inf]    - InstallUtils::isDbCreated() → should find storage/app/database_created
-2025-12-02T15:52:58.138779292Z [inf]  =========================================
-2025-12-02T15:52:58.138785070Z [inf]    - Setting::getSetting('profile_complete') → should return 'COMPLETED'
-2025-12-02T15:52:58.138787175Z [inf]  Number of users in database: 9
-2025-12-02T15:52:58.138788572Z [inf]  
-2025-12-02T15:52:58.138795394Z [inf]  =========================================
-2025-12-02T15:52:58.138797365Z [inf]  Database marker file created successfully
-2025-12-02T15:52:58.138797584Z [inf]  Installation checks that should pass:
-2025-12-02T15:52:58.138801639Z [inf]  Running PartnerSeeder to ensure Partner records exist for admin users...
-2025-12-02T15:52:58.138805882Z [inf]  =========================================
-2025-12-02T15:52:58.138812334Z [inf]  ✅ Installation bypass complete!
-2025-12-02T15:52:58.138819700Z [inf]  =========================================
-2025-12-02T15:52:58.193029507Z [inf]  
-2025-12-02T15:52:58.193036790Z [inf]     INFO  Seeding database.  
-2025-12-02T15:52:58.193042978Z [inf]  
-2025-12-02T15:52:58.193049263Z [inf]  Starting Partner creation for admin/accountant users...
-2025-12-02T15:52:58.201933044Z [inf]  Partner already exists for user admin@invoiceshelf.com (ID: 1)
-2025-12-02T15:52:58.204183737Z [inf]  Partner already exists for user your-email@example.com (ID: 2)
-2025-12-02T15:52:58.206664082Z [inf]  Partner already exists for user partner@demo.mk (ID: 8)
-2025-12-02T15:52:58.208963297Z [inf]  Partner already exists for user atillatkulu@gmail.com (ID: 11)
-2025-12-02T15:52:58.211618155Z [inf]  Partner already exists for user atanrikulu@e-listele.com (ID: 12)
-2025-12-02T15:52:58.213929195Z [inf]  Partner already exists for user sara@demo.mk (ID: 13)
-2025-12-02T15:52:58.216923148Z [inf]  Partner already exists for user marko@demo.mk (ID: 14)
-2025-12-02T15:52:58.221756516Z [inf]  Partner already exists for user test1@demo.mk (ID: 15)
-2025-12-02T15:52:58.228808692Z [inf]  Partner already exists for user marko@gmail.com (ID: 16)
-2025-12-02T15:52:58.228813592Z [inf]  Partner seeding completed!
-2025-12-02T15:52:58.228819607Z [inf]  Total users processed: 9
-2025-12-02T15:52:58.228825938Z [inf]  Partners created: 0
-2025-12-02T15:52:58.228831243Z [inf]  Partners skipped (already exist): 9
-2025-12-02T15:52:58.234818138Z [inf]  Running PartnerUserSeeder to create demo partner user...
-2025-12-02T15:52:58.499545996Z [inf]  
-2025-12-02T15:52:58.499552076Z [inf]     INFO  Seeding database.  
-2025-12-02T15:52:58.499558482Z [inf]  
-2025-12-02T15:52:58.505830521Z [inf]  Partner user already exists (partner@demo.mk)
-2025-12-02T15:52:58.517207640Z [inf]  IFRS accounting feature enabled - ensuring chart of accounts...
-2025-12-02T15:52:59.164676743Z [inf]  
-2025-12-02T15:52:59.164682626Z [inf]     INFO  Seeding database.  
-2025-12-02T15:52:59.164688020Z [inf]  
-2025-12-02T15:52:59.164693192Z [inf]  Seeding Macedonian Chart of Accounts...
-2025-12-02T15:52:59.164699946Z [inf]  Seeding chart of accounts for company: xyz
-2025-12-02T15:52:59.164705402Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:52:59.164710617Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:52:59.164715537Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:52:59.164723687Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:52:59.164729032Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:52:59.164734275Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:52:59.164740414Z [inf]  Seeding chart of accounts for company: Teknomed DOO
-2025-12-02T15:52:59.164746001Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:52:59.164751274Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:52:59.164756899Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:52:59.168357623Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:52:59.189742924Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:52:59.247697582Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:52:59.247702304Z [inf]  Seeding chart of accounts for company: Demo Company Ltd
-2025-12-02T15:52:59.253131452Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:52:59.361286964Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:52:59.402521587Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:52:59.413675664Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:52:59.436310810Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:52:59.477524918Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:52:59.477529547Z [inf]  Seeding chart of accounts for company: sara doo
-2025-12-02T15:52:59.486234423Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:52:59.579529290Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:52:59.614040239Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:52:59.626319324Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:52:59.650662701Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:53:00.150805380Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:53:00.150809961Z [inf]  Seeding chart of accounts for company: sara doo
-2025-12-02T15:53:00.150814451Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:53:00.150818925Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:53:00.150822742Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:53:00.150826888Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:53:00.150831145Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:53:00.150840437Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:53:00.150847937Z [inf]  Seeding chart of accounts for company: test coman doo
-2025-12-02T15:53:00.150852786Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:53:00.150858390Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:53:00.150863505Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:53:00.150868890Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:53:00.150874123Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:53:00.150880796Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:53:00.150886677Z [inf]  Seeding chart of accounts for company: testq doo
-2025-12-02T15:53:00.150891956Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:53:00.186399908Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:53:00.224113555Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:53:00.236117965Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:53:00.260458018Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:53:00.308351339Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:53:00.308356029Z [inf]  Seeding chart of accounts for company: test 123
-2025-12-02T15:53:00.314208724Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:53:00.415231077Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:53:00.449275011Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:53:00.463909924Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:53:00.485206342Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:53:00.527417618Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:53:00.527421428Z [inf]  Seeding chart of accounts for company: test 123
-2025-12-02T15:53:00.536817403Z [inf]    → 2025 reporting period already exists
-2025-12-02T15:53:00.638262062Z [inf]  Asset accounts seeded (1000-1999)
-2025-12-02T15:53:01.162059014Z [inf]  Equity accounts seeded (3000-3999)
-2025-12-02T15:53:01.162069540Z [inf]  Revenue accounts seeded (4000-4999)
-2025-12-02T15:53:01.162077742Z [inf]  Expense accounts seeded (5000-5999)
-2025-12-02T15:53:01.162084019Z [inf]  Macedonian Chart of Accounts seeded successfully!
-2025-12-02T15:53:01.162091356Z [inf]  Syncing abilities for all companies from config...
-2025-12-02T15:53:01.162104169Z [inf]  🔄 Syncing abilities for all companies...
-2025-12-02T15:53:01.162115320Z [inf]  Reading abilities from: config/abilities.php
-2025-12-02T15:53:01.162121786Z [inf]  
-2025-12-02T15:53:01.162128549Z [inf]  Found 9 companies
-2025-12-02T15:53:01.162135106Z [inf]  
-2025-12-02T15:53:01.162214401Z [inf]  Liability accounts seeded (2000-2999)
-2025-12-02T15:53:21.184615628Z [inf]  Creating storage link...
-2025-12-02T15:53:21.184623167Z [inf]  
-2025-12-02T15:53:21.184627677Z [inf]  
-2025-12-02T15:53:21.184630397Z [inf]     INFO  The [public/storage] link has been connected to [storagepublic].  
-2025-12-02T15:53:21.184635055Z [inf]  
-2025-12-02T15:53:21.184636954Z [inf]  
-2025-12-02T15:53:21.184642206Z [inf]  === Final Environment Check ===
-2025-12-02T15:53:21.184643116Z [inf]  ✅ Abilities synced successfully for all companies!
-2025-12-02T15:53:21.184648343Z [inf]  CACHE_STORE: file
-2025-12-02T15:53:21.184649609Z [inf]  All tenants now have up-to-date abilities from config/abilities.php
-2025-12-02T15:53:21.184653881Z [inf]  CACHE_DRIVER: file
-2025-12-02T15:53:21.184656502Z [inf]  Setting up admin roles for all companies...
-2025-12-02T15:53:21.184659917Z [inf]  QUEUE_CONNECTION: database
-2025-12-02T15:53:21.184666098Z [inf]  Setting up admin roles for all companies...
-2025-12-02T15:53:21.184674543Z [inf]  Admin role already exists for company: xyz
-2025-12-02T15:53:21.184679949Z [inf]  Admin role already exists for company: Teknomed DOO
-2025-12-02T15:53:21.184685492Z [inf]  Admin role already exists for company: Demo Company Ltd
-2025-12-02T15:53:21.184690672Z [inf]  Admin role already exists for company: sara doo
-2025-12-02T15:53:21.184697112Z [inf]  Admin role already exists for company: sara doo
-2025-12-02T15:53:21.184703140Z [inf]  Admin role already exists for company: test coman doo
-2025-12-02T15:53:21.184708406Z [inf]  Admin role already exists for company: testq doo
-2025-12-02T15:53:21.184714018Z [inf]  Admin role already exists for company: test 123
-2025-12-02T15:53:21.184723361Z [inf]  Admin role already exists for company: test 123
-2025-12-02T15:53:21.184731209Z [inf]  ✓ Created admin roles for 0 companies
-2025-12-02T15:53:21.184735592Z [inf]  Skipping config cache to allow dynamic environment variables...
-2025-12-02T15:53:21.189263869Z [inf]  [Tue Dec  2 15:53:16 2025] PHP 8.2.27 Development Server (http://0.0.0.0:8080) started
-2025-12-02T15:53:21.189265801Z [inf]  BROADCAST_DRIVER: log
-2025-12-02T15:53:21.189266046Z [inf]  Starting PHP server on port 8080...
-2025-12-02T15:53:21.189279670Z [inf]  === Feature Flags ===
-2025-12-02T15:53:21.189280724Z [inf]  Laravel logs will be written to storage/logs/laravel.log
-2025-12-02T15:53:21.189292415Z [inf]  FACTURINO_STOCK_V1_ENABLED: true
-2025-12-02T15:53:21.189293988Z [inf]  Server starting - Railway health checks should now pass
-2025-12-02T15:53:21.189303699Z [inf]  Stock feature from config: ENABLED
-2025-12-02T15:53:21.189305692Z [inf]  SESSION_DRIVER: database
-2025-12-02T15:53:21.189307412Z [inf]  Initialization will continue in the background
-2025-12-02T15:53:21.189314474Z [inf]  Frontend assets found: 234 files
-2025-12-02T15:53:21.189325127Z [inf]  REDIS_CLIENT: 
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Company context {"company_id":2,"url":"https://app.facturino.mk/api/v1/console/companies"} 
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Skipping company check for console/listing route  
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index START {"user_id":8,"user_email":"partner@demo.mk"} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Partner found {"partner_id":3,"partner_email":"partner@demo.mk"} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Fetching managed companies  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Managed companies fetched {"count":7} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Fetching referred companies  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Referred companies fetched {"count":0} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Fetching pending invitations  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Pending invitations fetched {"count":0,"data":[]} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index response {"partner_id":3,"managed_count":7,"referred_count":0,"pending_count":0} 
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware START {"url":"https://app.facturino.mk/api/v1/console/companies","method":"GET"} 
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Partner found {"partner_id":3,"is_active":true} 
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Company context {"company_id":2,"url":"https://app.facturino.mk/api/v1/console/companies"} 
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Skipping company check for console/listing route  
+[2025-12-12 19:52:09] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index START {"user_id":8,"user_email":"partner@demo.mk"} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Partner found {"partner_id":3,"partner_email":"partner@demo.mk"} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Fetching managed companies  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Managed companies fetched {"count":7} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Fetching referred companies  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Referred companies fetched {"count":0} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Fetching pending invitations  
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index - Pending invitations fetched {"count":0,"data":[]} 
+[2025-12-12 19:52:09] production.INFO: AccountantConsoleController::index response {"partner_id":3,"managed_count":7,"referred_count":0,"pending_count":0} 
+[2025-12-12 19:52:20] production.INFO: PartnerScopeMiddleware START {"url":"https://app.facturino.mk/api/v1/partner/companies/2/journal-entries","method":"GET"} 
+[2025-12-12 19:52:20] production.INFO: PartnerScopeMiddleware - Partner found {"partner_id":3,"is_active":true} 
+[2025-12-12 19:52:20] production.INFO: PartnerScopeMiddleware - Company context {"company_id":2,"url":"https://app.facturino.mk/api/v1/partner/companies/2/journal-entries"} 
+[2025-12-12 19:52:20] production.INFO: PartnerScopeMiddleware - Access check {"company_id":2,"has_access":true} 
+[2025-12-12 19:52:20] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-12-12 19:52:21] production.ERROR: Call to a member function format() on string {"userId":8,"exception":"[object] (Error(code: 0): Call to a member function format() on string at /var/www/html/app/Services/JournalExportService.php:98)
+[stacktrace]
+#0 /var/www/html/app/Services/JournalExportService.php(66): App\\Services\\JournalExportService->invoiceToJournalEntries(Object(App\\Models\\Invoice))
+#1 /var/www/html/app/Http/Controllers/V1/Partner/PartnerJournalExportController.php(64): App\\Services\\JournalExportService->getJournalEntries()
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Partner\\PartnerJournalExportController->entries(Object(Illuminate\\Http\\Request), 2)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('entries', Array)
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Partner\\PartnerJournalExportController), 'entries')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(126): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(88): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter(Object(Illuminate\\Http\\Request), Object(Closure), 'api', Object(Closure))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'api')
+#12 /var/www/html/app/Http/Middleware/PartnerScopeMiddleware.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PartnerScopeMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /var/www/html/app/Http/Middleware/Authenticate.php(19): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#22 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#35 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#38 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(40): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /var/www/html/app/Http/Middleware/SecurityHeaders.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\SecurityHeaders->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#73 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#74 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#75 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#76 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#77 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#78 {main}
+"} 
+[2025-12-12 19:52:21] production.INFO: PartnerScopeMiddleware START {"url":"https://app.facturino.mk/api/v1/partner/companies/2/journal-entries","method":"GET"} 
+[2025-12-12 19:52:21] production.INFO: PartnerScopeMiddleware - Partner found {"partner_id":3,"is_active":true} 
+[2025-12-12 19:52:21] production.INFO: PartnerScopeMiddleware - Company context {"company_id":2,"url":"https://app.facturino.mk/api/v1/partner/companies/2/journal-entries"} 
+[2025-12-12 19:52:21] production.INFO: PartnerScopeMiddleware - Access check {"company_id":2,"has_access":true} 
+[2025-12-12 19:52:21] production.INFO: PartnerScopeMiddleware - Passing to controller  
+[2025-12-12 19:52:21] production.ERROR: Call to a member function format() on string {"userId":8,"exception":"[object] (Error(code: 0): Call to a member function format() on string at /var/www/html/app/Services/JournalExportService.php:98)
+[stacktrace]
+#0 /var/www/html/app/Services/JournalExportService.php(66): App\\Services\\JournalExportService->invoiceToJournalEntries(Object(App\\Models\\Invoice))
+#1 /var/www/html/app/Http/Controllers/V1/Partner/PartnerJournalExportController.php(64): App\\Services\\JournalExportService->getJournalEntries()
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\V1\\Partner\\PartnerJournalExportController->entries(Object(Illuminate\\Http\\Request), 2)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction('entries', Array)
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\V1\\Partner\\PartnerJournalExportController), 'entries')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(126): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(88): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter(Object(Illuminate\\Http\\Request), Object(Closure), 'api', Object(Closure))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'api')
+#12 /var/www/html/app/Http/Middleware/PartnerScopeMiddleware.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PartnerScopeMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#17 /var/www/html/app/Http/Middleware/Authenticate.php(19): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(91): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest(Object(Illuminate\\Http\\Request), Object(Closure), Array)
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle(Object(Illuminate\\Http\\Request), Object(Closure), '180', '1')
+#22 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#35 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(190): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->Laravel\\Sanctum\\Http\\Middleware\\{closure}(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#38 /var/www/html/vendor/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php(25): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(169): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/app/Http/Middleware/PerformanceMonitoringMiddleware.php(42): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\PerformanceMonitoringMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#49 /var/www/html/app/Http/Middleware/LocaleMiddleware.php(40): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\LocaleMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 /var/www/html/app/Http/Middleware/ConfigMiddleware.php(38): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\ConfigMiddleware->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 /var/www/html/app/Http/Middleware/SecurityHeaders.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): App\\Http\\Middleware\\SecurityHeaders->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#56 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#58 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#59 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#60 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#61 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#62 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#63 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#64 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#65 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#66 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#67 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#68 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#69 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#70 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#71 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#72 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(208): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#73 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(126): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#74 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#75 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#76 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1219): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#77 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#78 {main}
+"} 

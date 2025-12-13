@@ -267,7 +267,7 @@ class SignupService
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'], // User model has setPasswordAttribute that hashes
-            'role' => 'super admin',
+            'role' => 'user',
         ]);
 
         // Attach user to company
@@ -276,9 +276,9 @@ class SignupService
         // Set company as owner
         $company->update(['owner_id' => $user->id]);
 
-        // Assign super admin role within company scope
+        // Assign admin role within company scope so the owner can manage everything without global super admin privileges
         \Silber\Bouncer\BouncerFacade::scope()->to($company->id);
-        \Silber\Bouncer\BouncerFacade::assign('super admin')->to($user);
+        \Silber\Bouncer\BouncerFacade::assign('admin')->to($user);
 
         return $user;
     }
