@@ -30,7 +30,7 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self' data:",
-            "connect-src 'self'",
+            "connect-src 'self' https://api.postmarkapp.com",
             "frame-src 'self'", // Allow frames from same origin
             "frame-ancestors 'self'", // Allow being framed by same origin
             "base-uri 'self'",
