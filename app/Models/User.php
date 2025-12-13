@@ -504,11 +504,28 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
 
     public static function deleteUsers($ids)
     {
+        $currentUserId = auth()->id();
+
         foreach ($ids as $id) {
+            // Skip if trying to delete yourself
+            if ($id == $currentUserId) {
+                continue;
+            }
+
+            // Skip user ID 1 (super admin protection)
+            if ($id == 1) {
+                continue;
+            }
+
             $user = self::find($id);
 
             // Skip if user doesn't exist
             if (! $user) {
+                continue;
+            }
+
+            // Skip if user owns any companies (cannot delete company owners)
+            if (Company::where('owner_id', $id)->exists()) {
                 continue;
             }
 
@@ -543,6 +560,9 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
             if ($user->settings()->exists()) {
                 $user->settings()->delete();
             }
+
+            // Detach from all companies
+            $user->companies()->detach();
 
             $user->delete();
         }
