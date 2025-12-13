@@ -17,12 +17,13 @@ return new class extends Migration
 
         Schema::table('partner_referrals', function (Blueprint $table) {
             if (! Schema::hasColumn('partner_referrals', 'referral_token')) {
-                $table->string('referral_token', 64)->unique()->after('invitee_email');
+                // Put after inviter_partner_id to avoid missing invitee_email column errors
+                $table->string('referral_token', 64)->unique()->after('inviter_partner_id');
                 $table->index('referral_token');
             }
 
             if (! Schema::hasColumn('partner_referrals', 'status')) {
-                $table->string('status')->default('pending')->after('referral_token');
+                $table->string('status')->default('pending')->after('inviter_partner_id');
             }
 
             if (! Schema::hasColumn('partner_referrals', 'invited_at')) {
@@ -83,4 +84,3 @@ return new class extends Migration
         });
     }
 };
-
