@@ -675,17 +675,20 @@ const setDefaultDateRange = () => {
 const goToJournalReview = () => {
   if (!selectedClient.value) return
 
+  const companyId = selectedClient.value.id
+  const startDate = exportDateFrom.value
+  const endDate = exportDateTo.value
+
   // Close modal first
   closeDetailModal()
 
-  // Navigate to Journal Review with company and dates
-  router.push({
-    name: 'partner.accounting.review',
-    query: {
-      company_id: selectedClient.value.id,
-      start_date: exportDateFrom.value,
-      end_date: exportDateTo.value,
-    },
+  // Navigate to Journal Review with company and dates using path
+  // Use path instead of name for cross-router navigation
+  const url = `/admin/partner/accounting/review?company_id=${companyId}&start_date=${startDate}&end_date=${endDate}`
+  router.push(url).catch((err) => {
+    console.error('Navigation failed:', err)
+    // Fallback to window.location if router.push fails
+    window.location.href = url
   })
 }
 
