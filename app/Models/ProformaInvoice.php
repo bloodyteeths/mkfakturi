@@ -824,6 +824,92 @@ class ProformaInvoice extends Model
             '{INVOICE_REF_NUMBER}' => $this->reference_number,
         ];
     }
+
+    /**
+     * Prepare data for sending proforma invoice email
+     */
+    public function sendProformaInvoiceData($data)
+    {
+        $data['proforma_invoice'] = $this->toArray();
+        $data['customer'] = $this->customer->toArray();
+        $data['company'] = Company::find($this->company_id);
+        $data['subject'] = $this->getEmailString($data['subject']);
+        $data['body'] = $this->getEmailString($data['body']);
+        $data['attach']['data'] = ($this->getEmailAttachmentSetting()) ? $this->getPDFData() : null;
+
+        return $data;
+    }
+
+    /**
+     * Preview proforma invoice email
+     */
+    public function preview($data)
+    {
+        $data = $this->sendProformaInvoiceData($data);
+
+        return [
+            'type' => 'preview',
+            'view' => new \App\Mail\SendProformaInvoiceMail($data),
+        ];
+    }
+
+    /**
+     * Send proforma invoice email
+     */
+    public function send($data)
+    {
+        $data = $this->sendProformaInvoiceData($data);
+
+        \Mail::to($data['to'])->send(new \App\Mail\SendProformaInvoiceMail($data));
+
+        if ($this->status == self::STATUS_DRAFT) {
+            $this->status = self::STATUS_SENT;
+            $this->save();
+        }
+
+        return [
+            'success' => true,
+            'type' => 'send',
+        ];
+    }
+
+    /**
+     * Get email attachment setting
+     */
+    public function getEmailAttachmentSetting()
+    {
+        // Use estimate setting as proforma is similar to estimate
+        $attachmentSetting = CompanySetting::getSetting('estimate_email_attachment', $this->company_id);
+
+        if ($attachmentSetting == 'NO') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Replace placeholders in email string
+     */
+    public function getEmailString($string)
+    {
+        $replacements = [
+            '{PROFORMA_NUMBER}' => $this->proforma_invoice_number,
+            '{PROFORMA_DATE}' => $this->formattedProformaInvoiceDate,
+            '{PROFORMA_EXPIRY_DATE}' => $this->formattedExpiryDate,
+            '{PROFORMA_REF_NUMBER}' => $this->reference_number,
+            '{COMPANY_NAME}' => $this->company->name ?? '',
+            '{CUSTOMER_NAME}' => $this->customer->name ?? '',
+            '{CUSTOMER_EMAIL}' => $this->customer->email ?? '',
+            '{PROFORMA_TOTAL}' => $this->formattedTotal,
+            // Aliases for invoice compatibility
+            '{INVOICE_NUMBER}' => $this->proforma_invoice_number,
+            '{INVOICE_DATE}' => $this->formattedProformaInvoiceDate,
+            '{INVOICE_DUE_DATE}' => $this->formattedExpiryDate,
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $string);
+    }
 }
 
 // CLAUDE-CHECKPOINT

@@ -594,6 +594,7 @@ Route::prefix('/v1')->group(function () {
             // Proforma Invoices
             // ----------------------------------
 
+            Route::get('/proforma-invoices/{proformaInvoice}/send/preview', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'sendPreview']);
             Route::post('/proforma-invoices/{proformaInvoice}/send', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'send']);
 
             Route::post('/proforma-invoices/{proformaInvoice}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsViewed']);

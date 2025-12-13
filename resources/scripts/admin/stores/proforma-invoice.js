@@ -249,6 +249,20 @@ export const useProformaInvoiceStore = (useWindow = false) => {
         })
       },
 
+      previewProformaInvoice(data) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get(`/proforma-invoices/${data.id}/send/preview`, { params: data })
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       sendProformaInvoice(data) {
         return new Promise((resolve, reject) => {
           axios

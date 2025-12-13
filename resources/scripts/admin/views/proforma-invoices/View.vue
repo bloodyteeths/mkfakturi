@@ -7,9 +7,11 @@ import { debounce } from 'lodash'
 import { useProformaInvoiceStore } from '@/scripts/admin/stores/proforma-invoice'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useModalStore } from '@/scripts/stores/modal'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
 import ProformaInvoiceDropdown from '@/scripts/admin/components/dropdowns/ProformaInvoiceIndexDropdown.vue'
+import SendProformaInvoiceModal from '@/scripts/admin/components/modal-components/SendProformaInvoiceModal.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
@@ -17,6 +19,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 const proformaInvoiceStore = useProformaInvoiceStore()
 const userStore = useUserStore()
 const dialogStore = useDialogStore()
+const modalStore = useModalStore()
 const notificationStore = useNotificationStore()
 
 const { t } = useI18n()
@@ -63,6 +66,19 @@ watch(route, (to, from) => {
     loadProformaInvoice()
   }
 })
+
+async function onSendProformaInvoice() {
+  modalStore.openModal({
+    title: t('proforma_invoices.send_proforma_invoice'),
+    componentName: 'SendProformaInvoiceModal',
+    id: proformaInvoiceData.value.id,
+    data: proformaInvoiceData.value,
+  })
+}
+
+function updateSentProformaInvoice() {
+  proformaInvoiceData.value.status = 'SENT'
+}
 
 async function onConvertToInvoice() {
   dialogStore
@@ -261,6 +277,21 @@ onSearched = debounce(onSearched, 500)
   <BasePage v-if="proformaInvoiceData" class="xl:pl-96 xl:ml-8">
     <BasePageHeader :title="pageTitle">
       <template #actions>
+        <!-- Send Proforma Invoice Button -->
+        <BaseButton
+          v-if="
+            (proformaInvoiceData.status === 'DRAFT' || proformaInvoiceData.status === 'SENT') &&
+            !proformaInvoiceData.is_expired &&
+            userStore.hasAbilities(abilities.SEND_ESTIMATE)
+          "
+          variant="primary"
+          class="mr-3"
+          @click="onSendProformaInvoice"
+        >
+          <BaseIcon name="PaperAirplaneIcon" class="h-5 mr-2" />
+          {{ $t('proforma_invoices.send_proforma_invoice') }}
+        </BaseButton>
+
         <!-- Convert to Invoice Button -->
         <BaseButton
           v-if="
@@ -570,6 +601,8 @@ onSearched = debounce(onSearched, 500)
         </BaseTab>
       </BaseTabGroup>
     </BaseCard>
+
+    <SendProformaInvoiceModal @update="updateSentProformaInvoice" />
   </BasePage>
 </template>
 // CLAUDE-CHECKPOINT

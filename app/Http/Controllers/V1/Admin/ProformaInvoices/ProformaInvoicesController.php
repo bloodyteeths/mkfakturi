@@ -143,32 +143,32 @@ class ProformaInvoicesController extends Controller
         $this->authorize('send', $proformaInvoice);
 
         $request->validate([
+            'from' => 'required|email',
             'to' => 'required|email',
             'subject' => 'required|string',
             'body' => 'required|string',
         ]);
 
-        try {
-            $data = [
-                'to' => $request->to,
-                'subject' => $request->subject,
-                'body' => $request->body,
-            ];
+        $proformaInvoice->send($request->all());
 
-            // Send email logic would go here (similar to Invoice::send)
-            // For now, just mark as sent
-            $proformaInvoice->markAsSent();
+        return response()->json([
+            'success' => true,
+        ]);
+    }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Proforma invoice sent successfully',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
+    /**
+     * Preview proforma invoice email.
+     */
+    public function sendPreview(Request $request, ProformaInvoice $proformaInvoice)
+    {
+        $this->authorize('send', $proformaInvoice);
+
+        $markdown = new \Illuminate\Mail\Markdown(view(), config('mail.markdown'));
+
+        $data = $proformaInvoice->sendProformaInvoiceData($request->all());
+        $data['url'] = $proformaInvoice->proformaInvoicePdfUrl ?? '';
+
+        return $markdown->render('emails.send.proforma-invoice', ['data' => $data]);
     }
 
     /**

@@ -483,6 +483,11 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         foreach ($ids as $id) {
             $user = self::find($id);
 
+            // Skip if user doesn't exist
+            if (! $user) {
+                continue;
+            }
+
             if ($user->invoices()->exists()) {
                 $user->invoices()->update(['creator_id' => null]);
             }

@@ -847,7 +847,15 @@
     "marked_as_rejected_message": "Proforma Invoice marked as rejected",
     "not_fiscal_notice": "Proforma invoices are not fiscal documents and cannot be used as official invoices.",
     "no_proforma_invoices": "No proforma invoices yet!",
-    "list_of_proforma_invoices": "This section will contain the list of proforma invoices."
+    "list_of_proforma_invoices": "This section will contain the list of proforma invoices.",
+    "send_proforma_invoice": "Send Proforma Invoice",
+    "sent_successfully": "Proforma invoice sent successfully",
+    "something_went_wrong": "Something went wrong while sending the proforma invoice",
+    "marked_as_viewed": "Proforma invoice marked as viewed",
+    "marked_as_expired": "Proforma invoice marked as expired",
+    "marked_as_rejected": "Proforma invoice marked as rejected",
+    "converted_successfully": "Proforma invoice converted to invoice successfully",
+    "converting": "Converting..."
   },
   "invoices": {
     "title": "Invoices",
@@ -2502,6 +2510,7 @@
   "mail_view_invoice": "View Invoice",
   "mail_viewed_invoice": ":name viewed this Invoice.",
   "mail_view_payment": "View Payment",
+  "mail_view_proforma_invoice": "View Proforma Invoice",
   "notification_view_estimate": "[Notification] Estimate viewed",
   "notification_view_invoice": "[Notification] Invoice viewed",
   "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:": "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:",
