@@ -6,7 +6,8 @@
       :searchable="true"
       :groups="true"
       group-label="type"
-      group-values="accounts"
+      group-options="accounts"
+      group-hide-empty
       track-by="id"
       label="display_name"
       value-prop="id"
