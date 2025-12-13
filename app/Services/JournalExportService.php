@@ -14,9 +14,13 @@ use League\Csv\Writer;
 /**
  * Service for exporting journal entries to external accounting systems.
  * Supports CSV formats for Pantheon and Zonel accounting software.
+ *
+ * Uses AI-powered account classification for revenue accounts based on
+ * invoice item content (goods, services, products, consulting).
  */
 class JournalExportService
 {
+    protected ?AccountSuggestionService $suggestionService = null;
     /**
      * Export formats supported
      */
@@ -46,6 +50,7 @@ class JournalExportService
         $this->companyId = $companyId;
         $this->fromDate = Carbon::parse($from)->startOfDay();
         $this->toDate = Carbon::parse($to)->endOfDay();
+        $this->suggestionService = new AccountSuggestionService();
     }
 
     /**
@@ -126,15 +131,17 @@ class JournalExportService
             'mapping_status' => $arAccountData['status'],
         ];
 
-        // Credit: Revenue (subtotal)
-        $revenueAccountData = $this->getAccountCodeWithStatus('revenue', self::TYPE_INVOICE);
+        // Credit: Revenue (subtotal) - Use AI to classify based on invoice items
+        // AI classifies items as goods (4010), services (4020), consulting (4030), or products (4040)
+        $aiContext = trim(($invoice->customer->name ?? '') . ' ' . $itemContext);
+        $revenueAccountData = $this->getRevenueAccountWithAI($aiContext, $invoice->customer_id);
         $subtotal = $invoice->sub_total / 100;
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
             'type' => self::TYPE_INVOICE,
             'account_code' => $revenueAccountData['code'],
-            'account_name' => 'Revenue',
+            'account_name' => $revenueAccountData['name'] ?? 'Revenue',
             'description' => $description,
             'item_context' => $itemContext,
             'debit' => 0,
@@ -410,15 +417,95 @@ class JournalExportService
     protected function getDefaultAccountCode(string $mapping): string
     {
         $defaults = [
-            'accounts_receivable' => '220100', // Побарувања од купувачи
-            'revenue' => '660100', // Приходи од продажба
-            'tax_payable' => '270100', // ДДВ обврска
-            'cash' => '240100', // Жиро сметка
-            'accounts_payable' => '220200', // Обврски кон добавувачи
-            'expense' => '540100', // Општи трошоци
+            'accounts_receivable' => '1610', // Побарувања од купувачи - домашни
+            'revenue' => '4000', // Приходи од продажба
+            'tax_payable' => '2710', // ДДВ за уплата
+            'cash' => '1020', // Жиро сметка
+            'accounts_payable' => '2210', // Обврски - домашни добавувачи
+            'expense' => '5000', // Набавна вредност на продадена стока
         ];
 
-        return $defaults[$mapping] ?? '999999';
+        return $defaults[$mapping] ?? '5000';
+    }
+
+    /**
+     * Get revenue account using AI classification based on invoice item content.
+     *
+     * First checks for learned mappings, then falls back to AI classification.
+     * Returns classified revenue account:
+     * - 4010: Приходи од продажба на стока (Goods/Trade)
+     * - 4020: Приходи од услуги (Services)
+     * - 4030: Приходи од консалтинг (Consulting)
+     * - 4040: Приходи од производи (Products)
+     *
+     * @param string $aiContext Item descriptions and customer context
+     * @param int|null $customerId Customer ID for learned mapping lookup
+     * @return array ['code' => string, 'name' => string, 'status' => array]
+     */
+    protected function getRevenueAccountWithAI(string $aiContext, ?int $customerId): array
+    {
+        // First check for learned mapping for this customer
+        if ($customerId) {
+            $learnedMapping = AccountMapping::where('company_id', $this->companyId)
+                ->where('entity_type', AccountMapping::ENTITY_CUSTOMER)
+                ->where('entity_id', $customerId)
+                ->first();
+
+            if ($learnedMapping && $learnedMapping->debitAccount) {
+                return [
+                    'code' => $learnedMapping->debitAccount->code,
+                    'name' => $learnedMapping->debitAccount->name,
+                    'status' => [
+                        'has_learned_mapping' => true,
+                        'confidence' => $learnedMapping->meta['confidence'] ?? 1.0,
+                        'is_default' => false,
+                    ],
+                ];
+            }
+        }
+
+        // Use AI suggestion service to classify based on item content
+        if ($this->suggestionService && !empty($aiContext)) {
+            $suggestion = $this->suggestionService->suggestWithConfidence(
+                'customer',
+                $aiContext,
+                null,
+                $this->companyId
+            );
+
+            if ($suggestion && isset($suggestion['account_id'])) {
+                $account = Account::find($suggestion['account_id']);
+                if ($account) {
+                    return [
+                        'code' => $account->code,
+                        'name' => $account->name,
+                        'status' => [
+                            'has_learned_mapping' => false,
+                            'confidence' => $suggestion['confidence'] ?? 0.5,
+                            'is_default' => false,
+                            'ai_reason' => $suggestion['reason'] ?? 'pattern',
+                        ],
+                    ];
+                }
+            }
+        }
+
+        // Fallback to default revenue account
+        $defaultCode = '4000'; // Приходи од продажба
+        $account = Account::where('company_id', $this->companyId)
+            ->where('code', $defaultCode)
+            ->where('is_active', true)
+            ->first();
+
+        return [
+            'code' => $account ? $account->code : $defaultCode,
+            'name' => $account ? $account->name : 'Revenue',
+            'status' => [
+                'has_learned_mapping' => false,
+                'confidence' => 0.3,
+                'is_default' => true,
+            ],
+        ];
     }
 
     /**
