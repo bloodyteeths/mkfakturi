@@ -476,6 +476,17 @@ class JournalExportService
             if ($suggestion && isset($suggestion['account_id'])) {
                 $account = Account::find($suggestion['account_id']);
                 if ($account) {
+                    // Auto-save this AI suggestion as learned mapping (implicit acceptance during export)
+                    if ($customerId) {
+                        $this->autoSaveMapping(
+                            AccountMapping::ENTITY_CUSTOMER,
+                            $customerId,
+                            $account->id,
+                            $suggestion['confidence'] ?? 0.5,
+                            $suggestion['reason'] ?? 'ai_classification'
+                        );
+                    }
+
                     return [
                         'code' => $account->code,
                         'name' => $account->name,
@@ -484,6 +495,7 @@ class JournalExportService
                             'confidence' => $suggestion['confidence'] ?? 0.5,
                             'is_default' => false,
                             'ai_reason' => $suggestion['reason'] ?? 'pattern',
+                            'auto_saved' => (bool) $customerId,
                         ],
                     ];
                 }
@@ -497,6 +509,17 @@ class JournalExportService
             ->where('is_active', true)
             ->first();
 
+        // Auto-save default mapping too (so next time it's consistent)
+        if ($customerId && $account) {
+            $this->autoSaveMapping(
+                AccountMapping::ENTITY_CUSTOMER,
+                $customerId,
+                $account->id,
+                0.3,
+                'default_fallback'
+            );
+        }
+
         return [
             'code' => $account ? $account->code : $defaultCode,
             'name' => $account ? $account->name : 'Revenue',
@@ -504,8 +527,54 @@ class JournalExportService
                 'has_learned_mapping' => false,
                 'confidence' => 0.3,
                 'is_default' => true,
+                'auto_saved' => (bool) ($customerId && $account),
             ],
         ];
+    }
+
+    /**
+     * Auto-save an AI suggestion as a learned mapping.
+     * This happens during export when user implicitly accepts the suggestion.
+     *
+     * @param string $entityType Entity type (customer, supplier, expense_category)
+     * @param int $entityId Entity ID
+     * @param int $accountId Account ID to map to
+     * @param float $confidence AI confidence score
+     * @param string $reason Reason for the suggestion
+     */
+    protected function autoSaveMapping(
+        string $entityType,
+        int $entityId,
+        int $accountId,
+        float $confidence,
+        string $reason
+    ): void {
+        try {
+            AccountMapping::updateOrCreate(
+                [
+                    'company_id' => $this->companyId,
+                    'entity_type' => $entityType,
+                    'entity_id' => $entityId,
+                ],
+                [
+                    'debit_account_id' => $accountId,
+                    'meta' => [
+                        'auto_accepted' => true,
+                        'confidence' => $confidence,
+                        'reason' => $reason,
+                        'accepted_at' => now()->toIso8601String(),
+                    ],
+                ]
+            );
+        } catch (\Exception $e) {
+            // Log but don't fail export if auto-save fails
+            \Log::warning('Failed to auto-save account mapping during export', [
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'account_id' => $accountId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
