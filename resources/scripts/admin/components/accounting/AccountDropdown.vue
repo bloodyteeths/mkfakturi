@@ -53,7 +53,7 @@ const props = defineProps({
   },
   accounts: {
     type: Array,
-    required: true,
+    default: () => [],
   },
   confidence: {
     type: Number,
@@ -82,6 +82,11 @@ const accountTypeLabels = {
 
 // Computed
 const groupedAccounts = computed(() => {
+  // Guard: return empty array if accounts not loaded yet
+  if (!props.accounts || !Array.isArray(props.accounts) || props.accounts.length === 0) {
+    return []
+  }
+
   // Group accounts by type
   const groups = {}
 
@@ -105,6 +110,7 @@ const groupedAccounts = computed(() => {
 
 // Methods
 function getAccountDisplay(accountId) {
+  if (!props.accounts || !Array.isArray(props.accounts)) return ''
   const account = props.accounts.find((a) => a.id === accountId)
   if (!account) return ''
   return `${account.code} - ${account.name}`

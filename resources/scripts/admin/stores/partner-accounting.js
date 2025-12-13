@@ -71,13 +71,17 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
+        console.log('[PartnerAccounting] Fetching accounts for company:', companyId)
         const response = await axios.get(`/partner/companies/${companyId}/accounts`, {
           params,
         })
 
+        console.log('[PartnerAccounting] Accounts response:', response.data)
         this.accounts = response.data.data || []
+        console.log('[PartnerAccounting] Stored accounts count:', this.accounts.length)
         return response.data
       } catch (error) {
+        console.error('[PartnerAccounting] Fetch accounts error:', error.response?.status, error.response?.data)
         this.error = error.response?.data?.message || 'Failed to fetch accounts'
         handleError(error)
         throw error
