@@ -13,6 +13,7 @@ use App\Http\Controllers\V1\Customer\Auth\LoginController as CustomerLoginContro
 use App\Http\Controllers\V1\Customer\EstimatePdfController as CustomerEstimatePdfController;
 use App\Http\Controllers\V1\Customer\InvoicePdfController as CustomerInvoicePdfController;
 use App\Http\Controllers\V1\Customer\PaymentPdfController as CustomerPaymentPdfController;
+use App\Http\Controllers\V1\Customer\ProformaInvoicePdfController as CustomerProformaInvoicePdfController;
 use App\Http\Controllers\V1\Modules\ScriptController;
 use App\Http\Controllers\V1\Modules\StyleController;
 use App\Http\Controllers\V1\PDF\DownloadReceiptController;
@@ -140,6 +141,9 @@ Route::prefix('/customer')->group(function () {
 
     Route::get('/payments/{email_log:token}', [CustomerPaymentPdfController::class, 'getPayment']);
     Route::get('/payments/view/{email_log:token}', [CustomerPaymentPdfController::class, 'getPdf'])->name('payment');
+
+    Route::get('/proforma-invoices/{email_log:token}', [CustomerProformaInvoicePdfController::class, 'getProformaInvoice']);
+    Route::get('/proforma-invoices/view/{email_log:token}', [CustomerProformaInvoicePdfController::class, 'getPdf'])->name('proforma-invoice');
 });
 
 // CPAY Payment Callback
