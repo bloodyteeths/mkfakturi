@@ -3612,5 +3612,14 @@
       "pattern_match_help": "This account was matched based on similar entries",
       "default_account_help": "This is the default account for this type of entry"
     }
+  },
+  "user_invitation": {
+    "subject": "You've been invited to join :company on Facturino",
+    "greeting": "Hello :name!",
+    "intro": "You have been invited to join :company on Facturino, the invoicing and accounting platform.",
+    "instructions": "To get started, please click the button below to set your password:",
+    "set_password_button": "Set Your Password",
+    "link_expiry": "This link will expire in 60 minutes.",
+    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
   }
 }

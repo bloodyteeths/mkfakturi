@@ -433,7 +433,31 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
 
         $user->attachCompanies($request->companies);
 
+        // Send invitation email with password reset link
+        $user->sendInvitationEmail($request->header('company'));
+
         return $user;
+    }
+
+    /**
+     * Send invitation email to newly created user
+     */
+    public function sendInvitationEmail($companyId = null)
+    {
+        // Generate password reset token
+        $token = app('auth.password.broker')->createToken($this);
+
+        // Get company name for email
+        $companyName = 'Facturino';
+        if ($companyId) {
+            $company = Company::find($companyId);
+            if ($company) {
+                $companyName = $company->name;
+            }
+        }
+
+        // Send invitation email
+        \Mail::to($this->email)->send(new \App\Mail\UserInvitationMail($this, $token, $companyName));
     }
 
     public function updateFromRequest(UserRequest $request)
