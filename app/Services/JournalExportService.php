@@ -316,8 +316,14 @@ class JournalExportService
         $isDefault = true;
         $accountCode = null;
 
-        // First check if there's a learned mapping for this specific entity
-        if ($entityType && $entityId) {
+        // Only use learned entity mappings for appropriate account types:
+        // - Customer mappings are for REVENUE accounts (what to credit for sales)
+        // - Supplier mappings are for EXPENSE/AP accounts
+        // - Expense category mappings are for EXPENSE accounts
+        // DO NOT use learned mappings for accounts_receivable, cash, tax_payable - those use standard accounts
+        $shouldUseLearned = $entityType && $entityId && !in_array($mapping, ['accounts_receivable', 'cash', 'tax_payable']);
+
+        if ($shouldUseLearned) {
             $mappingEntityType = match($entityType) {
                 'customer' => AccountMapping::ENTITY_CUSTOMER,
                 'supplier' => AccountMapping::ENTITY_SUPPLIER,
