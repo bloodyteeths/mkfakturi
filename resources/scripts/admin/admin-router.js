@@ -535,11 +535,12 @@ export default [
             meta: { isOwner: true },
             component: Preferences,
           },
-          {
-            path: 'ai-insights',
-            name: 'ai.insights',
-            component: AiInsightsSetting,
-          },
+          // Removed: AI Insights - no backend implementation
+          // {
+          //   path: 'ai-insights',
+          //   name: 'ai.insights',
+          //   component: AiInsightsSetting,
+          // },
           {
             path: 'customization',
             name: 'customization',
@@ -570,12 +571,13 @@ export default [
             meta: { ability: abilities.VIEW_TAX_TYPE },
             component: TaxTypes,
           },
-          {
-            path: 'vat-return',
-            name: 'vat.return',
-            meta: { ability: abilities.VIEW_TAX_TYPE },
-            component: VatReturn,
-          },
+          // Removed: VAT Return - no backend generation logic
+          // {
+          //   path: 'vat-return',
+          //   name: 'vat.return',
+          //   meta: { ability: abilities.VIEW_TAX_TYPE },
+          //   component: VatReturn,
+          // },
           {
             path: 'notes',
             name: 'notes',
@@ -618,12 +620,13 @@ export default [
             meta: { isOwner: true },
             component: Backup,
           },
-          {
-            path: 'update-app',
-            name: 'updateapp',
-            meta: { isOwner: true },
-            component: UpdateApp,
-          },
+          // Removed: Update App - external service offline
+          // {
+          //   path: 'update-app',
+          //   name: 'updateapp',
+          //   meta: { isOwner: true },
+          //   component: UpdateApp,
+          // },
           {
             path: 'pdf-generation',
             name: 'pdf.generation',
@@ -642,12 +645,13 @@ export default [
             meta: { isOwner: true },
             component: FeatureFlagsSettings,
           },
-          {
-            path: 'certificates',
-            name: 'settings.certificates',
-            meta: { isOwner: true },
-            component: () => import('@/js/pages/settings/CertUpload.vue'),
-          },
+          // Certificates route removed - no UI component available
+          // {
+          //   path: 'certificates',
+          //   name: 'settings.certificates',
+          //   meta: { isOwner: true },
+          //   component: () => import('@/js/pages/settings/CertUpload.vue'),
+          // },
           {
             path: 'daily-closing',
             name: 'settings.daily-closing',
@@ -1021,4 +1025,5 @@ export default [
   { path: '/:catchAll(.*)', component: NotFoundPage },
 ]
 
+// CLAUDE-CHECKPOINT: Removed certificates route - no UI component available
 // CLAUDE-CHECKPOINT
