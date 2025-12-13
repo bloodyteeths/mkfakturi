@@ -152,6 +152,16 @@
         </div>
         <p class="text-sm text-gray-600 mb-4">Споделете партнерска покана (рефераль за партнери) со вашиот линк или QR код.</p>
 
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Email на партнерот</label>
+          <input
+            v-model="inviteEmail"
+            type="email"
+            placeholder="partner@example.com"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
         <div v-if="inviteError" class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-red-700">
           {{ inviteError }}
         </div>
@@ -186,27 +196,21 @@
             </div>
             <div class="flex-1 min-w-[240px]">
               <p class="text-sm text-gray-600 mb-3">Скенирајте или споделете го QR кодот за партнер покана.</p>
-              <div class="flex gap-2">
-                <button
-                  @click="downloadPartnerQR"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  Преземи QR
-                </button>
-                <button
-                  @click="sendPartnerEmailInvite"
-                  :disabled="sendingInviteEmail"
-                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {{ sendingInviteEmail ? 'Се праќа...' : 'Испрати email покана' }}
-                </button>
-              </div>
-              <input
-                v-model="inviteEmail"
-                type="email"
-                placeholder="email@example.com"
-                class="mt-3 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+            <div class="flex gap-2">
+              <button
+                @click="downloadPartnerQR"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Преземи QR
+              </button>
+              <button
+                @click="sendPartnerEmailInvite"
+                :disabled="sendingInviteEmail"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ sendingInviteEmail ? 'Се праќа...' : 'Испрати email покана' }}
+              </button>
+            </div>
             </div>
           </div>
         </div>
@@ -363,14 +367,20 @@ export default {
 
     // Partner-to-partner invitation helpers
     async loadPartnerInvite() {
+      if (!this.inviteEmail) {
+        this.inviteError = 'Внесете email на партнерот.'
+        return
+      }
       this.inviteLoading = true
       this.inviteError = null
       try {
-        const response = await axios.post('/invitations/partner-to-partner')
+        const response = await axios.post('/invitations/partner-to-partner', {
+          invitee_email: this.inviteEmail,
+        })
         this.partnerInvite = response.data
       } catch (err) {
         console.error('Failed to load partner invite link:', err)
-        this.inviteError = 'Не можеше да се генерира партнерски линк.'
+        this.inviteError = err?.response?.data?.message || 'Не можеше да се генерира партнерски линк.'
       } finally {
         this.inviteLoading = false
       }
