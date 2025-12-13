@@ -28,7 +28,7 @@
     {{-- Footer --}}
     @slot('footer')
         @component('mail::footer')
-            Powered by <a class="footer-link" href="https://facturino.com" target="_blank">Facturino</a>
+            Powered by <a class="footer-link" href="https://facturino.mk" target="_blank">Facturino</a>
         @endcomponent
     @endslot
 @endcomponent
