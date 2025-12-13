@@ -80,11 +80,10 @@ use App\Http\Controllers\V1\Admin\Settings\CompanyController;
 use App\Http\Controllers\V1\Admin\Settings\CompanyCurrencyCheckTransactionsController;
 use App\Http\Controllers\V1\Admin\Settings\DiskController;
 use App\Http\Controllers\V1\Admin\Settings\FeatureFlagsController;
-use App\Http\Controllers\V1\Admin\Settings\GetCompanyMailConfigurationController;
+// Mail configuration controllers removed - using centralized Postmark setup
 use App\Http\Controllers\V1\Admin\Settings\GetCompanySettingsController;
 use App\Http\Controllers\V1\Admin\Settings\GetSettingsController;
 use App\Http\Controllers\V1\Admin\Settings\GetUserSettingsController;
-use App\Http\Controllers\V1\Admin\Settings\MailConfigurationController;
 use App\Http\Controllers\V1\Admin\Settings\PDFConfigurationController;
 use App\Http\Controllers\V1\Admin\Settings\TaxTypesController;
 use App\Http\Controllers\V1\Admin\Settings\UpdateCompanySettingsController;
@@ -502,18 +501,8 @@ Route::prefix('/v1')->group(function () {
             Route::post('/certificates/{id}/verify', [CertUploadController::class, 'verify']);
             Route::delete('/certificates/{id}', [CertUploadController::class, 'delete']);
 
-            // Mails
+            // Mails - removed, using centralized Postmark setup
             // ----------------------------------
-
-            Route::get('/mail/drivers', [MailConfigurationController::class, 'getMailDrivers']);
-
-            Route::get('/mail/config', [MailConfigurationController::class, 'getMailEnvironment']);
-
-            Route::post('/mail/config', [MailConfigurationController::class, 'saveMailEnvironment']);
-
-            Route::post('/mail/test', [MailConfigurationController::class, 'testEmailConfig']);
-
-            Route::get('/company/mail/config', GetCompanyMailConfigurationController::class);
 
             // PDF Generation
             // ----------------------------------

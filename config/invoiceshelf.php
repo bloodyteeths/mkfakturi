@@ -261,17 +261,7 @@ return [
             'ability' => 'view-expense',
             'model' => Expense::class,
         ],
-        [
-            'title' => 'settings.mail.mail_config',
-            'group' => '',
-            'name' => 'Mail Configuration',
-            'link' => '/admin/settings/mail-configuration',
-            'icon' => 'EnvelopeIcon',
-            'owner_only' => true,
-            'super_admin_only' => true,
-            'ability' => '',
-            'model' => '',
-        ],
+        // Mail Configuration removed - using centralized Postmark setup
         [
             'title' => 'settings.menu_title.file_disk',
             'group' => '',

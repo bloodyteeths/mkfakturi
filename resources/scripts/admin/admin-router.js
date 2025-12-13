@@ -51,8 +51,7 @@ const ExpenseCategory = () =>
   import('@/scripts/admin/views/settings/ExpenseCategorySetting.vue')
 const ExchangeRateSetting = () =>
   import('@/scripts/admin/views/settings/ExchangeRateProviderSetting.vue')
-const MailConfig = () =>
-  import('@/scripts/admin/views/settings/MailConfigSetting.vue')
+// MailConfig removed - using centralized Postmark setup
 const FileDisk = () =>
   import('@/scripts/admin/views/settings/FileDiskSetting.vue')
 const Backup = () => import('@/scripts/admin/views/settings/BackupSetting.vue')
@@ -602,12 +601,7 @@ export default [
             component: ExpenseCategory,
           },
 
-          {
-            path: 'mail-configuration',
-            name: 'mailconfig',
-            meta: { isOwner: true },
-            component: MailConfig,
-          },
+          // Removed: Mail Configuration - using centralized Postmark setup
           {
             path: 'file-disk',
             name: 'file-disk',
