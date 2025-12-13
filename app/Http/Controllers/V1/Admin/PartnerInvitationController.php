@@ -182,14 +182,20 @@ class PartnerInvitationController extends Controller
 
         $token = Str::random(32);
 
-        DB::table('partner_referrals')->insert([
+        $payload = [
             'inviter_partner_id' => $partner->id,
-            'invitee_email' => $validated['invitee_email'] ?? null,
             'referral_token' => $token,
             'status' => 'pending',
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ];
+
+        // Backward compatibility: only include invitee_email if column exists (older DBs may not have it)
+        if (Schema::hasColumn('partner_referrals', 'invitee_email')) {
+            $payload['invitee_email'] = $validated['invitee_email'] ?? null;
+        }
+
+        DB::table('partner_referrals')->insert($payload);
 
         return response()->json([
             'message' => 'Partner invitation sent',
