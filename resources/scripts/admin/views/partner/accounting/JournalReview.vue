@@ -145,6 +145,12 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination -->
+        <BaseTablePagination
+          :pagination="pagination"
+          @pageChange="onPageChange"
+        />
       </div>
     </div>
 
@@ -182,6 +188,7 @@ import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import AccountDropdown from '@/scripts/admin/components/accounting/AccountDropdown.vue'
 import ConfidenceBadge from '@/scripts/admin/components/accounting/ConfidenceBadge.vue'
+import BaseTablePagination from '@/scripts/components/base/base-table/BaseTablePagination.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -194,6 +201,7 @@ const dialogStore = useDialogStore()
 const selectedCompanyId = ref(null)
 const isRefreshing = ref(false)
 const changedEntries = ref(new Map())
+const currentPage = ref(1)
 
 const filters = reactive({
   start_date: null,
@@ -215,6 +223,18 @@ const entries = computed(() => {
 
 const hasHighConfidenceEntries = computed(() => {
   return entries.value.some((e) => e.confidence >= 0.8 && !e.confirmed)
+})
+
+// Pagination computed - transform store format to BaseTablePagination format
+const pagination = computed(() => {
+  const p = partnerAccountingStore.journalPagination
+  return {
+    currentPage: p.currentPage,
+    totalPages: p.totalPages,
+    limit: p.perPage,
+    totalCount: p.total,
+    count: entries.value.length,
+  }
 })
 
 // Lifecycle
@@ -249,13 +269,17 @@ async function loadInitialData() {
   }
 }
 
-async function loadEntriesWithSuggestions() {
+async function loadEntriesWithSuggestions(page = 1) {
   if (!selectedCompanyId.value) return
   if (!filters.start_date || !filters.end_date) return
+
+  currentPage.value = page
 
   const params = {
     start_date: filters.start_date,
     end_date: filters.end_date,
+    page: page,
+    per_page: 20,
   }
 
   try {
@@ -274,7 +298,12 @@ function onCompanyChange() {
 }
 
 function onFilterChange() {
-  loadEntriesWithSuggestions()
+  currentPage.value = 1
+  loadEntriesWithSuggestions(1)
+}
+
+function onPageChange(page) {
+  loadEntriesWithSuggestions(page)
 }
 
 function onAccountChange(entry) {

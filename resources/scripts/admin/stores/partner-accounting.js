@@ -399,12 +399,14 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         this.journalEntries = response.data.data || []
 
-        if (response.data.pagination) {
+        // API returns pagination in 'meta' object
+        const paginationData = response.data.meta || response.data.pagination
+        if (paginationData) {
           this.journalPagination = {
-            currentPage: response.data.pagination.current_page || 1,
-            totalPages: response.data.pagination.last_page || 1,
-            perPage: response.data.pagination.per_page || 20,
-            total: response.data.pagination.total || 0,
+            currentPage: paginationData.current_page || 1,
+            totalPages: paginationData.last_page || 1,
+            perPage: paginationData.per_page || 20,
+            total: paginationData.total || 0,
           }
         }
 
@@ -472,12 +474,14 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         this.journalEntries = response.data.data || []
 
-        if (response.data.pagination) {
+        // API returns pagination in 'meta' object
+        const paginationData = response.data.meta || response.data.pagination
+        if (paginationData) {
           this.journalPagination = {
-            currentPage: response.data.pagination.current_page || 1,
-            totalPages: response.data.pagination.last_page || 1,
-            perPage: response.data.pagination.per_page || 20,
-            total: response.data.pagination.total || 0,
+            currentPage: paginationData.current_page || 1,
+            totalPages: paginationData.last_page || 1,
+            perPage: paginationData.per_page || 20,
+            total: paginationData.total || 0,
           }
         }
 
