@@ -580,14 +580,20 @@ class AccountSuggestionService
 
     /**
      * Detect special account types (VAT, bank, cash, etc.)
+     *
+     * Uses actual seeded account codes:
+     * - 2710 = ДДВ за уплата (VAT payable)
+     * - 1630 = ДДВ за поврат (VAT receivable)
+     * - 1020 = Жиро сметка (Bank)
+     * - 1010 = Каса (Cash)
      */
     protected function detectSpecialAccountType(string $text, int $companyId, string $entityType): ?array
     {
         $specialPatterns = [
-            // VAT/Tax
-            ['patterns' => ['ддв', 'vat', 'данок', 'tax', 'ddv'], 'code' => '4700', 'confidence' => 0.95],
+            // VAT/Tax payable
+            ['patterns' => ['ддв', 'vat', 'данок', 'tax', 'ddv'], 'code' => '2710', 'confidence' => 0.92],
             // Bank
-            ['patterns' => ['банка', 'bank', 'жиро', 'трансакциска'], 'code' => '1020', 'confidence' => 0.90],
+            ['patterns' => ['банка', 'bank', 'жиро', 'трансакциска', 'комерцијална', 'стопанска', 'халк'], 'code' => '1020', 'confidence' => 0.90],
             // Cash
             ['patterns' => ['каса', 'cash', 'готовина', 'готово'], 'code' => '1010', 'confidence' => 0.90],
         ];
@@ -606,7 +612,7 @@ class AccountSuggestionService
                             'account_code' => $account->code,
                             'account_name' => $account->name,
                             'confidence' => $special['confidence'],
-                            'reason' => 'learned',
+                            'reason' => 'special',
                             'alternatives' => [],
                         ];
                     }
@@ -620,51 +626,57 @@ class AccountSuggestionService
     /**
      * Smart classification of item type for revenue accounts.
      *
-     * Returns: 6010 (products), 6020 (services), 6030 (goods/trade)
+     * Uses ACTUAL seeded Macedonian chart of accounts:
+     * - 4040 = Приходи од производи (Products)
+     * - 4020 = Приходи од услуги (Services)
+     * - 4010 = Приходи од продажба на стока (Goods/Trade)
+     * - 4030 = Приходи од консалтинг (Consulting - special service)
      */
     protected function classifyItemType(string $text): ?array
     {
-        // SERVICE indicators (6020) - actions, work, intangible
+        // CONSULTING indicators (4030) - professional advisory services
+        $consultingIndicators = [
+            'консултации', 'консалтинг', 'consulting', 'советување',
+            'анализа', 'истражување', 'ревизија', 'audit',
+            'стратегија', 'планирање', 'проект',
+        ];
+
+        // SERVICE indicators (4020) - actions, work, intangible
         $serviceIndicators = [
             // Macedonian service words
             'услуга', 'услуги', 'сервис', 'поправка', 'одржување', 'чистење',
-            'консултации', 'консалтинг', 'совет', 'обука', 'тренинг',
+            'обука', 'тренинг', 'едукација',
             'дизајн', 'развој', 'програмирање', 'изработка', 'монтажа',
             'транспорт', 'достава', 'превоз', 'шпедиција',
             'закуп', 'наем', 'изнајмување', 'рента',
             'осигурување', 'застапување', 'посредување',
             'реклама', 'маркетинг', 'промоција',
-            'правни', 'адвокат', 'нотар', 'сметководство', 'ревизија',
-            'проект', 'планирање', 'анализа', 'истражување',
+            'правни', 'адвокат', 'нотар', 'сметководство',
             'поддршка', 'support', 'maintenance', 'hosting',
             // English service words
-            'service', 'consulting', 'training', 'design', 'development',
-            'cleaning', 'repair', 'maintenance', 'delivery', 'shipping',
-            'rental', 'lease', 'subscription', 'license', 'support',
-            // Service verb endings in Macedonian (-ње, -ење)
+            'service', 'training', 'design', 'development',
+            'cleaning', 'repair', 'delivery', 'shipping',
+            'rental', 'lease', 'subscription', 'license',
         ];
 
-        // Check for service suffix patterns (Macedonian gerunds end in -ње, -ење)
-        $hasServiceSuffix = preg_match('/(ње|ење|ање|ирање)\b/u', $text);
-
-        // GOODS/TRADE indicators (6030) - retail, resale items
+        // GOODS/TRADE indicators (4010) - retail, resale items
         $goodsIndicators = [
             // Common trade goods
             'стока', 'стоки', 'трговија', 'малопродажба', 'велепродажба',
             'резервни делови', 'accessories', 'додатоци',
             // Retail categories
             'облека', 'обувки', 'чевли', 'патики', 'чизми', 'сандали',
-            'храна', 'пијалок', 'пијалоци', 'храна', 'прехрана',
+            'храна', 'пијалок', 'пијалоци', 'прехрана',
             'козметика', 'парфем', 'шминка',
             'мебел', 'намештај', 'столици', 'маси', 'кревет',
             'играчки', 'книги', 'списанија',
-            'алат', 'tools', 'опрема',
+            'алат', 'tools',
             // Brand indicators (usually goods)
             'nike', 'adidas', 'puma', 'samsung', 'apple', 'iphone', 'dell', 'hp', 'lenovo',
             'lg', 'sony', 'philips', 'bosch', 'ikea', 'zara', 'h&m',
         ];
 
-        // PRODUCT indicators (6010) - manufactured items
+        // PRODUCT indicators (4040) - manufactured items
         $productIndicators = [
             // Manufacturing/production
             'производ', 'производи', 'production', 'manufactured',
@@ -682,10 +694,20 @@ class AccountSuggestionService
             'софтвер', 'software', 'лиценца', 'апликација',
         ];
 
+        // Check for service suffix patterns (Macedonian gerunds end in -ње, -ење)
+        $hasServiceSuffix = preg_match('/(ње|ење|ање|ирање)\b/u', $text);
+
         // Score each category
+        $consultingScore = 0;
         $serviceScore = 0;
         $goodsScore = 0;
         $productScore = 0;
+
+        foreach ($consultingIndicators as $indicator) {
+            if (str_contains($text, $indicator)) {
+                $consultingScore += 3; // Higher weight for consulting
+            }
+        }
 
         foreach ($serviceIndicators as $indicator) {
             if (str_contains($text, $indicator)) {
@@ -709,55 +731,87 @@ class AccountSuggestionService
         }
 
         // Determine winner
-        $maxScore = max($serviceScore, $goodsScore, $productScore);
+        $maxScore = max($consultingScore, $serviceScore, $goodsScore, $productScore);
 
         if ($maxScore === 0) {
             return null; // No classification possible
         }
 
         // Calculate confidence based on score difference
-        $totalScore = $serviceScore + $goodsScore + $productScore;
-        $confidence = min(0.95, 0.6 + ($maxScore / $totalScore) * 0.35);
+        $totalScore = $consultingScore + $serviceScore + $goodsScore + $productScore;
+        $confidence = min(0.95, 0.55 + ($maxScore / $totalScore) * 0.40);
 
-        if ($serviceScore === $maxScore) {
-            return ['code' => '6020', 'confidence' => $confidence, 'type' => 'service'];
+        // Return appropriate account code based on winner
+        if ($consultingScore === $maxScore) {
+            return ['code' => '4030', 'confidence' => $confidence, 'type' => 'consulting'];
+        } elseif ($serviceScore === $maxScore) {
+            return ['code' => '4020', 'confidence' => $confidence, 'type' => 'service'];
         } elseif ($goodsScore === $maxScore) {
-            return ['code' => '6030', 'confidence' => $confidence, 'type' => 'goods'];
+            return ['code' => '4010', 'confidence' => $confidence, 'type' => 'goods'];
         } else {
-            return ['code' => '6010', 'confidence' => $confidence, 'type' => 'product'];
+            return ['code' => '4040', 'confidence' => $confidence, 'type' => 'product'];
         }
     }
 
     /**
      * Smart classification of expense type.
      *
-     * Returns appropriate 7xxx expense account code.
+     * Uses ACTUAL seeded Macedonian chart of accounts (5xxx):
+     * - 5010 = Набавка на стока
+     * - 5020 = Набавка на материјали
+     * - 5210 = Канцелариски материјал
+     * - 5410 = Кирија
+     * - 5420 = Комунални услуги
+     * - 5430 = Телефон и интернет
+     * - 5440 = Транспорт и гориво
+     * - 5450 = Маркетинг и реклама
+     * - 5460 = Сметководствени услуги
+     * - 5470 = Правни и консултантски услуги
+     * - 5480 = Банкарски провизии
+     * - 5610 = Бруто плати
+     * - 5800 = Амортизација
+     * - 5910 = Камати
+     * - 5940 = Застрахување
      */
     protected function classifyExpenseType(string $text): ?array
     {
         $expenseCategories = [
-            // Materials (7010)
-            ['patterns' => ['материјал', 'суровина', 'material', 'raw', 'залиха'], 'code' => '7010', 'confidence' => 0.85],
-            // Services (7020)
-            ['patterns' => ['услуга', 'сервис', 'service', 'консултант', 'consulting', 'поддршка'], 'code' => '7020', 'confidence' => 0.85],
-            // Salaries (7030)
-            ['patterns' => ['плата', 'salary', 'wage', 'надомест', 'бонус', 'хонорар'], 'code' => '7030', 'confidence' => 0.90],
-            // Depreciation (7040)
-            ['patterns' => ['амортизација', 'depreciation', 'отпис'], 'code' => '7040', 'confidence' => 0.90],
-            // Office supplies (7050)
-            ['patterns' => ['канцелариски', 'office', 'хартија', 'тонер', 'печатач'], 'code' => '7050', 'confidence' => 0.85],
-            // Telecom (7060)
-            ['patterns' => ['телефон', 'интернет', 'telecom', 'мобилен', 'фиксен', 'a1', 'makedonski telekom', 'one'], 'code' => '7060', 'confidence' => 0.90],
-            // Transport (7070)
-            ['patterns' => ['транспорт', 'гориво', 'бензин', 'дизел', 'такси', 'превоз', 'fuel', 'transport', 'паркинг'], 'code' => '7070', 'confidence' => 0.85],
-            // Rent (7080)
-            ['patterns' => ['наем', 'кирија', 'rent', 'закуп', 'простор', 'канцеларија'], 'code' => '7080', 'confidence' => 0.90],
-            // Utilities (7090)
-            ['patterns' => ['струја', 'вода', 'греење', 'комунал', 'евн', 'електричн', 'utility', 'electricity', 'heating'], 'code' => '7090', 'confidence' => 0.90],
-            // Insurance (7100)
-            ['patterns' => ['осигурување', 'insurance', 'полиса', 'premium', 'триглав', 'еуролинк', 'croatia'], 'code' => '7100', 'confidence' => 0.90],
-            // Financial expenses (7800)
-            ['patterns' => ['камата', 'провизија', 'interest', 'fee', 'банкарски', 'bank charge'], 'code' => '7800', 'confidence' => 0.85],
+            // Cost of goods (5010)
+            ['patterns' => ['стока', 'набавка', 'залиха', 'inventory', 'goods'], 'code' => '5010', 'confidence' => 0.85],
+            // Materials (5020)
+            ['patterns' => ['материјал', 'суровина', 'material', 'raw'], 'code' => '5020', 'confidence' => 0.85],
+            // Office supplies (5210)
+            ['patterns' => ['канцелариски', 'office', 'хартија', 'тонер', 'печатач', 'потрепштини'], 'code' => '5210', 'confidence' => 0.85],
+            // Rent (5410)
+            ['patterns' => ['наем', 'кирија', 'rent', 'закуп', 'простор'], 'code' => '5410', 'confidence' => 0.90],
+            // Utilities (5420)
+            ['patterns' => ['струја', 'вода', 'греење', 'комунал', 'евн', 'електричн', 'utility', 'electricity', 'heating'], 'code' => '5420', 'confidence' => 0.90],
+            // Telecom (5430)
+            ['patterns' => ['телефон', 'интернет', 'telecom', 'мобилен', 'фиксен', 'a1', 'makedonski telekom', 'one', 't-mobile'], 'code' => '5430', 'confidence' => 0.90],
+            // Transport (5440)
+            ['patterns' => ['транспорт', 'гориво', 'бензин', 'дизел', 'такси', 'превоз', 'fuel', 'transport', 'паркинг', 'makpetrol', 'okta'], 'code' => '5440', 'confidence' => 0.85],
+            // Marketing (5450)
+            ['patterns' => ['маркетинг', 'реклама', 'промоција', 'marketing', 'advertising', 'facebook', 'google ads'], 'code' => '5450', 'confidence' => 0.85],
+            // Accounting services (5460)
+            ['patterns' => ['сметководство', 'сметководствен', 'accounting', 'bookkeeping'], 'code' => '5460', 'confidence' => 0.90],
+            // Legal & consulting (5470)
+            ['patterns' => ['адвокат', 'правни', 'консултант', 'consulting', 'нотар', 'legal'], 'code' => '5470', 'confidence' => 0.85],
+            // Bank fees (5480)
+            ['patterns' => ['провизија', 'банкарск', 'bank fee', 'bank charge', 'комерцијална', 'стопанска', 'халк'], 'code' => '5480', 'confidence' => 0.90],
+            // Salaries (5610)
+            ['patterns' => ['плата', 'salary', 'wage', 'бруто', 'нето', 'хонорар'], 'code' => '5610', 'confidence' => 0.90],
+            // Contributions (5620)
+            ['patterns' => ['придонес', 'пио', 'здравствен', 'contribution', 'пензиско'], 'code' => '5620', 'confidence' => 0.90],
+            // Travel (5630)
+            ['patterns' => ['дневница', 'патни', 'командировка', 'travel', 'патување'], 'code' => '5630', 'confidence' => 0.85],
+            // Depreciation (5800)
+            ['patterns' => ['амортизација', 'depreciation', 'отпис'], 'code' => '5800', 'confidence' => 0.90],
+            // Interest (5910)
+            ['patterns' => ['камата', 'interest', 'каматни'], 'code' => '5910', 'confidence' => 0.90],
+            // Insurance (5940)
+            ['patterns' => ['осигурување', 'insurance', 'полиса', 'premium', 'триглав', 'еуролинк', 'croatia', 'сава'], 'code' => '5940', 'confidence' => 0.90],
+            // Representation (5950)
+            ['patterns' => ['репрезентација', 'угостителство', 'ресторан', 'кафе', 'entertainment'], 'code' => '5950', 'confidence' => 0.85],
         ];
 
         foreach ($expenseCategories as $category) {
@@ -774,7 +828,7 @@ class AccountSuggestionService
     /**
      * Suggest account based on expense category matching.
      *
-     * Uses actual Macedonian Chart of Accounts codes from the seeder.
+     * Uses actual Macedonian Chart of Accounts codes from the seeder (5xxx).
      *
      * @param string $categoryName
      * @param int $companyId
@@ -784,35 +838,44 @@ class AccountSuggestionService
     {
         $categoryLower = strtolower($categoryName);
 
-        // Category to ACTUAL seeded account code mapping
+        // Category to ACTUAL seeded account code mapping (5xxx series)
         $categoryMap = [
-            'office' => '7050',        // Канцелариски материјал
-            'канцелариски' => '7050',
-            'rent' => '7080',          // Наем
-            'кирија' => '7080',
-            'наем' => '7080',
-            'utilities' => '7090',     // Комунални трошоци
-            'комунални' => '7090',
-            'salaries' => '7030',      // Плати и надоместоци
-            'плата' => '7030',
-            'transport' => '7070',     // Транспортни трошоци
-            'транспорт' => '7070',
-            'гориво' => '7070',
-            'telecom' => '7060',       // Телекомуникации
-            'телефон' => '7060',
-            'интернет' => '7060',
-            'insurance' => '7100',     // Осигурување
-            'осигурување' => '7100',
-            'материјал' => '7010',     // Трошоци за материјали
-            'material' => '7010',
-            'услуги' => '7020',        // Трошоци за услуги
-            'service' => '7020',
-            'консалтинг' => '7020',
-            'consulting' => '7020',
-            'банкарски' => '7800',     // Финансиски расходи
-            'bank fee' => '7800',
-            'амортизација' => '7040',  // Амортизација
-            'depreciation' => '7040',
+            'office' => '5210',        // Канцелариски материјал
+            'канцелариски' => '5210',
+            'rent' => '5410',          // Кирија
+            'кирија' => '5410',
+            'наем' => '5410',
+            'закуп' => '5410',
+            'utilities' => '5420',     // Комунални услуги
+            'комунални' => '5420',
+            'струја' => '5420',
+            'salaries' => '5610',      // Бруто плати
+            'плата' => '5610',
+            'плати' => '5610',
+            'transport' => '5440',     // Транспорт и гориво
+            'транспорт' => '5440',
+            'гориво' => '5440',
+            'превоз' => '5440',
+            'telecom' => '5430',       // Телефон и интернет
+            'телефон' => '5430',
+            'интернет' => '5430',
+            'insurance' => '5940',     // Застрахување
+            'осигурување' => '5940',
+            'материјал' => '5020',     // Набавка на материјали
+            'material' => '5020',
+            'услуги' => '5400',        // Трошоци за услуги
+            'service' => '5400',
+            'консалтинг' => '5470',    // Правни и консултантски услуги
+            'consulting' => '5470',
+            'банкарски' => '5480',     // Банкарски провизии
+            'bank' => '5480',
+            'провизија' => '5480',
+            'амортизација' => '5800',  // Амортизација
+            'depreciation' => '5800',
+            'маркетинг' => '5450',     // Маркетинг и реклама
+            'реклама' => '5450',
+            'сметководство' => '5460', // Сметководствени услуги
+            'accounting' => '5460',
         ];
 
         foreach ($categoryMap as $keyword => $accountCode) {
@@ -827,8 +890,8 @@ class AccountSuggestionService
                         'account_id' => $account->id,
                         'account_code' => $account->code,
                         'account_name' => $account->name,
-                        'confidence' => 0.7,
-                        'reason' => 'pattern',
+                        'confidence' => 0.75,
+                        'reason' => 'category',
                         'alternatives' => [],
                     ];
                 }
@@ -842,6 +905,12 @@ class AccountSuggestionService
      * Suggest default account for entity type.
      *
      * Uses actual Macedonian Chart of Accounts codes from the seeder.
+     * Seeded accounts:
+     * - 1610 = Побарувања од купувачи - домашни (Customer receivables)
+     * - 2210 = Обврски - домашни добавувачи (Supplier payables)
+     * - 5000 = Набавна вредност на продадена стока (General expense)
+     * - 2710 = ДДВ за уплата (VAT payable)
+     * - 4000 = Приходи од продажба (Revenue)
      *
      * @param string $entityType
      * @param int $companyId
@@ -850,12 +919,14 @@ class AccountSuggestionService
     protected function suggestDefault(string $entityType, int $companyId): ?array
     {
         // Default account codes by entity type (using ACTUAL seeded codes)
-        // Seeded: 2201 = Domestic receivables, 4201 = Domestic payables, 7000 = Expenses
         $defaults = [
-            AccountMapping::ENTITY_CUSTOMER => '2201', // Побарувања од купувачи - домашни
-            AccountMapping::ENTITY_SUPPLIER => '4201', // Обврски кон добавувачи - домашни
-            AccountMapping::ENTITY_EXPENSE_CATEGORY => '7000', // Расходи (general expenses)
-            'tax' => '4700', // ДДВ обврска (VAT liability)
+            AccountMapping::ENTITY_CUSTOMER => '4000', // Приходи од продажба (Revenue for customer invoices)
+            'customer' => '4000',
+            AccountMapping::ENTITY_SUPPLIER => '2210', // Обврски - домашни добавувачи
+            'supplier' => '2210',
+            AccountMapping::ENTITY_EXPENSE_CATEGORY => '5000', // Набавна вредност на продадена стока
+            'expense_category' => '5000',
+            'tax' => '2710', // ДДВ за уплата
         ];
 
         $accountCode = $defaults[$entityType] ?? null;
@@ -871,14 +942,17 @@ class AccountSuggestionService
         if (!$account) {
             // Fallback to parent account codes
             $fallbacks = [
-                AccountMapping::ENTITY_CUSTOMER => '2200', // Побарувања
-                AccountMapping::ENTITY_SUPPLIER => '4200', // Обврски кон добавувачи
-                AccountMapping::ENTITY_EXPENSE_CATEGORY => '7000', // Расходи
-                'tax' => '4700', // ДДВ обврска
+                AccountMapping::ENTITY_CUSTOMER => '4000', // Приходи од продажба
+                'customer' => '4000',
+                AccountMapping::ENTITY_SUPPLIER => '2200', // Обврски кон добавувачи
+                'supplier' => '2200',
+                AccountMapping::ENTITY_EXPENSE_CATEGORY => '5400', // Трошоци за услуги
+                'expense_category' => '5400',
+                'tax' => '2700', // ДДВ обврски
             ];
 
             $account = Account::where('company_id', $companyId)
-                ->where('code', $fallbacks[$entityType] ?? '7000')
+                ->where('code', $fallbacks[$entityType] ?? '5000')
                 ->where('is_active', true)
                 ->first();
         }
@@ -886,14 +960,17 @@ class AccountSuggestionService
         if (!$account) {
             // Last resort: any account of the appropriate type
             $typeMap = [
-                AccountMapping::ENTITY_CUSTOMER => 'asset',
-                AccountMapping::ENTITY_SUPPLIER => 'liability',
-                AccountMapping::ENTITY_EXPENSE_CATEGORY => 'expense',
-                'tax' => 'liability',
+                AccountMapping::ENTITY_CUSTOMER => Account::TYPE_REVENUE,
+                'customer' => Account::TYPE_REVENUE,
+                AccountMapping::ENTITY_SUPPLIER => Account::TYPE_LIABILITY,
+                'supplier' => Account::TYPE_LIABILITY,
+                AccountMapping::ENTITY_EXPENSE_CATEGORY => Account::TYPE_EXPENSE,
+                'expense_category' => Account::TYPE_EXPENSE,
+                'tax' => Account::TYPE_LIABILITY,
             ];
 
             $account = Account::where('company_id', $companyId)
-                ->where('type', $typeMap[$entityType] ?? 'expense')
+                ->where('type', $typeMap[$entityType] ?? Account::TYPE_EXPENSE)
                 ->where('is_active', true)
                 ->first();
         }
@@ -903,7 +980,7 @@ class AccountSuggestionService
                 'account_id' => $account->id,
                 'account_code' => $account->code,
                 'account_name' => $account->name,
-                'confidence' => 0.3,
+                'confidence' => 0.35,
                 'reason' => 'default',
                 'alternatives' => [],
             ];
