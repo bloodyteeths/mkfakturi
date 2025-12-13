@@ -628,7 +628,7 @@ return [
             'model' => \Coderflex\LaravelTicket\Models\Ticket::class,
         ],
         [
-            'title' => 'Chart of Accounts',
+            'title' => 'partner.accounting.chart_of_accounts',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/chart-of-accounts',
             'icon' => 'CalculatorIcon',
@@ -638,7 +638,7 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'Account Mappings',
+            'title' => 'partner.accounting.account_mappings',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/mappings',
             'icon' => 'LinkIcon',
@@ -648,7 +648,7 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'Journal Entries',
+            'title' => 'partner.accounting.journal_entries',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/journal-entries',
             'icon' => 'DocumentTextIcon',
@@ -658,7 +658,7 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'Journal Review',
+            'title' => 'partner.accounting.journal_review',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/review',
             'icon' => 'ClipboardDocumentCheckIcon',
@@ -668,7 +668,7 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'Export Journal',
+            'title' => 'partner.accounting.export',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/export',
             'icon' => 'ArrowDownTrayIcon',
