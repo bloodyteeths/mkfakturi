@@ -3613,13 +3613,11 @@
       "default_account_help": "This is the default account for this type of entry"
     }
   },
-  "user_invitation": {
-    "subject": "You've been invited to join :company on Facturino",
-    "greeting": "Hello :name!",
-    "intro": "You have been invited to join :company on Facturino, the invoicing and accounting platform.",
-    "instructions": "To get started, please click the button below to set your password:",
-    "set_password_button": "Set Your Password",
-    "link_expiry": "This link will expire in 60 minutes.",
-    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
-  }
+  "user_invitation.subject": "You've been invited to join :company on Facturino",
+  "user_invitation.greeting": "Hello :name!",
+  "user_invitation.intro": "You have been invited to join :company on Facturino, the invoicing and accounting platform.",
+  "user_invitation.instructions": "To get started, please click the button below to set your password:",
+  "user_invitation.set_password_button": "Set Your Password",
+  "user_invitation.link_expiry": "This link will expire in 60 minutes.",
+  "user_invitation.ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
 }
