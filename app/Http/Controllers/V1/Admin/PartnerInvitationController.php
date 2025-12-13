@@ -177,14 +177,14 @@ class PartnerInvitationController extends Controller
         }
 
         $validated = $request->validate([
-            'invitee_email' => 'required|email',
+            'invitee_email' => 'nullable|email',
         ]);
 
         $token = Str::random(32);
 
         DB::table('partner_referrals')->insert([
             'inviter_partner_id' => $partner->id,
-            'invitee_email' => $validated['invitee_email'],
+            'invitee_email' => $validated['invitee_email'] ?? null,
             'referral_token' => $token,
             'status' => 'pending',
             'created_at' => now(),

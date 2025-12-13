@@ -152,16 +152,6 @@
         </div>
         <p class="text-sm text-gray-600 mb-4">Споделете партнерска покана (рефераль за партнери) со вашиот линк или QR код.</p>
 
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email на партнерот</label>
-          <input
-            v-model="inviteEmail"
-            type="email"
-            placeholder="partner@example.com"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
         <div v-if="inviteError" class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-red-700">
           {{ inviteError }}
         </div>
@@ -204,13 +194,36 @@
                 Преземи QR
               </button>
               <button
-                @click="sendPartnerEmailInvite"
-                :disabled="sendingInviteEmail"
-                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                @click="sharePartnerEmail"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
               >
-                {{ sendingInviteEmail ? 'Се праќа...' : 'Испрати email покана' }}
+                Email share
+              </button>
+              <button
+                @click="sharePartnerWhatsApp"
+                class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              >
+                WhatsApp
               </button>
             </div>
+              <div class="mt-4">
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Испрати email покана</h4>
+                <div class="flex flex-col gap-2">
+                  <input
+                    v-model="inviteEmail"
+                    type="email"
+                    placeholder="partner@example.com"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <button
+                    @click="sendPartnerEmailInvite"
+                    :disabled="sendingInviteEmail || !inviteEmail"
+                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {{ sendingInviteEmail ? 'Се праќа...' : 'Испрати email покана' }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -367,16 +380,10 @@ export default {
 
     // Partner-to-partner invitation helpers
     async loadPartnerInvite() {
-      if (!this.inviteEmail) {
-        this.inviteError = 'Внесете email на партнерот.'
-        return
-      }
       this.inviteLoading = true
       this.inviteError = null
       try {
-        const response = await axios.post('/invitations/partner-to-partner', {
-          invitee_email: this.inviteEmail,
-        })
+        const response = await axios.post('/invitations/partner-to-partner')
         this.partnerInvite = response.data
       } catch (err) {
         console.error('Failed to load partner invite link:', err)
@@ -405,6 +412,19 @@ export default {
       link.href = this.partnerInvite.qr_code_url
       link.download = 'partner-referral-qr.png'
       link.click()
+    },
+
+    sharePartnerEmail() {
+      if (!this.partnerInvite?.link) return
+      const subject = encodeURIComponent('Стани партнер на Facturino')
+      const body = encodeURIComponent(`Приклучи се во партнер мрежата на Facturino.\n\nРегистрирај се преку овој линк: ${this.partnerInvite.link}`)
+      window.location.href = `mailto:?subject=${subject}&body=${body}`
+    },
+
+    sharePartnerWhatsApp() {
+      if (!this.partnerInvite?.link) return
+      const text = encodeURIComponent(`Стани партнер на Facturino: ${this.partnerInvite.link}`)
+      window.open(`https://wa.me/?text=${text}`, '_blank')
     },
 
     async sendPartnerEmailInvite() {
