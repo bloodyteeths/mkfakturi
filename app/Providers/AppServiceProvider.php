@@ -259,6 +259,9 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\InvoiceItem::observe(\App\Observers\StockInvoiceItemObserver::class);
             \App\Models\BillItem::observe(\App\Observers\StockBillItemObserver::class);
         }
+
+        // Company observer - seeds chart of accounts for new companies (Partner Accounting Phase 4)
+        \App\Models\Company::observe(\App\Observers\CompanyObserver::class);
     }
 
     /**
