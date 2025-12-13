@@ -194,6 +194,7 @@ class PartnerInvitationController extends Controller
 
         $payload = [
             'inviter_partner_id' => $partner->id,
+            'invitee_partner_id' => null,
             'referral_token' => $token,
             'status' => 'pending',
             'created_at' => now(),
