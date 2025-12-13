@@ -151,7 +151,6 @@ return [
             'model' => '',
         ],
         [
-        [
             'title' => 'settings.menu_title.customization',
             'group' => '',
             'name' => 'Customization',
@@ -168,6 +167,7 @@ return [
             'link' => '/admin/settings/pdf-generation',
             'icon' => 'DocumentIcon',
             'owner_only' => true,
+            'super_admin_only' => true,
             'ability' => '',
             'model' => '',
         ],
@@ -268,6 +268,7 @@ return [
             'link' => '/admin/settings/mail-configuration',
             'icon' => 'EnvelopeIcon',
             'owner_only' => true,
+            'super_admin_only' => true,
             'ability' => '',
             'model' => '',
         ],
@@ -278,6 +279,7 @@ return [
             'link' => '/admin/settings/file-disk',
             'icon' => 'FolderIcon',
             'owner_only' => true,
+            'super_admin_only' => true,
             'ability' => '',
             'model' => '',
         ],
@@ -288,10 +290,10 @@ return [
             'link' => '/admin/settings/backup',
             'icon' => 'CircleStackIcon',
             'owner_only' => true,
+            'super_admin_only' => true,
             'ability' => '',
             'model' => '',
         ],
-        [
         [
             'title' => 'settings.feature_flags.title',
             'group' => '',
@@ -299,6 +301,7 @@ return [
             'link' => '/admin/settings/feature-flags',
             'icon' => 'FlagIcon',
             'owner_only' => true,
+            'super_admin_only' => true,
             'ability' => '',
             'model' => '',
         ],
@@ -549,7 +552,6 @@ return [
             'ability' => 'view-financial-reports',
             'model' => '',
         ],
-        [
         [
             'title' => 'navigation.migration_wizard',
             'group' => 3,

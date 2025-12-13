@@ -16,10 +16,17 @@ trait GeneratesMenuTrait
             $menu = \Menu::get($key);
             $items = $menu ? $menu->items->toArray() : [];
 
-            // Check if user is a partner
+            // Check user roles
             $isPartner = $user->role === 'partner';
+            $isSuperAdmin = $user->role === 'super admin';
 
             foreach ($items as $data) {
+                // Super admin only menu items (infrastructure settings)
+                $superAdminOnly = $data->data['super_admin_only'] ?? false;
+                if ($superAdminOnly && !$isSuperAdmin) {
+                    continue;
+                }
+
                 // Partner-only menu items (group starts with 'partner.')
                 $group = $data->data['group'] ?? '';
                 if (is_string($group) && str_starts_with($group, 'partner.')) {
