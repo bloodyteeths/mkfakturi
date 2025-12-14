@@ -30,17 +30,31 @@ return [
                 'customers' => true,
                 'items' => true,
                 'pdf_export' => true,
-                'csv_import' => true, // Free alternative to bank feeds
+                'csv_import' => true,
 
-                // Locked features
-                'recurring_invoices' => false,
+                // Preview features with limits (let users taste premium)
+                'expenses' => true,           // Limited to 5/month
+                'custom_fields' => true,      // Limited to 2 fields
+                'reports' => true,            // Basic reports only
+                'recurring_invoices' => true, // Limited to 1 active
+                'estimates' => true,          // Limited to 3/month
+
+                // Locked features (require paid plan)
                 'efaktura_sending' => false,
                 'qes_signing' => false,
                 'bank_connections' => false,
                 'auto_reconciliation' => false,
                 'multi_currency' => false,
-                'custom_fields' => false,
                 'api_access' => false,
+                'ai_suggestions' => 'preview', // Limited AI preview (3/month)
+            ],
+            // Usage limits for preview features
+            'limits' => [
+                'expenses_per_month' => 5,
+                'custom_fields' => 2,
+                'recurring_invoices_active' => 1,
+                'estimates_per_month' => 3,
+                'ai_queries_per_month' => 3,  // AI preview limit
             ],
         ],
 
@@ -57,6 +71,10 @@ return [
                 'csv_import' => true,
                 'recurring_invoices' => true,
                 'estimates' => true,
+                'expenses' => true,
+                'custom_fields' => true,
+                'reports' => true,
+                'ai_suggestions' => 'basic',  // Basic AI suggestions
 
                 // Locked features
                 'efaktura_sending' => false,
@@ -64,8 +82,13 @@ return [
                 'bank_connections' => false,
                 'auto_reconciliation' => false,
                 'multi_currency' => false,
-                'custom_fields' => false,
                 'api_access' => false,
+            ],
+            'limits' => [
+                'expenses_per_month' => 50,
+                'custom_fields' => 5,
+                'recurring_invoices_active' => 5,
+                'estimates_per_month' => 20,
             ],
         ],
 
@@ -82,17 +105,25 @@ return [
                 'csv_import' => true,
                 'recurring_invoices' => true,
                 'estimates' => true,
-                'efaktura_sending' => true, // Standard+ only
-                'qes_signing' => true, // Standard+ only
+                'efaktura_sending' => true,
+                'qes_signing' => true,
                 'expenses' => true,
                 'reports' => true,
+                'custom_fields' => true,
+                'bank_connections' => true,   // PSD2 available in Standard (matches landing page)
+                'auto_reconciliation' => true,
+                'ai_suggestions' => 'standard', // Standard AI
 
                 // Locked features
-                'bank_connections' => false,
-                'auto_reconciliation' => false,
                 'multi_currency' => false,
-                'custom_fields' => false,
                 'api_access' => false,
+            ],
+            'limits' => [
+                'expenses_per_month' => null, // Unlimited
+                'custom_fields' => 15,
+                'recurring_invoices_active' => 20,
+                'estimates_per_month' => null,
+                'bank_accounts' => 2,         // Limit bank connections in Standard
             ],
         ],
 
@@ -113,13 +144,20 @@ return [
                 'qes_signing' => true,
                 'expenses' => true,
                 'reports' => true,
-                'bank_connections' => true, // Business+ only
-                'auto_reconciliation' => true, // Business+ only
+                'bank_connections' => true,
+                'auto_reconciliation' => true,
                 'multi_currency' => true,
                 'custom_fields' => true,
-
-                // Locked features
-                'api_access' => false,
+                'api_access' => true,         // API available in Business (matches landing page)
+                'ai_suggestions' => 'advanced', // Advanced AI
+            ],
+            'limits' => [
+                'expenses_per_month' => null,
+                'custom_fields' => null,      // Unlimited
+                'recurring_invoices_active' => null,
+                'estimates_per_month' => null,
+                'bank_accounts' => 5,
+                'api_requests_per_day' => 1000,
             ],
         ],
 
@@ -144,8 +182,20 @@ return [
                 'auto_reconciliation' => true,
                 'multi_currency' => true,
                 'custom_fields' => true,
-                'api_access' => true, // Max only
+                'api_access' => true,
+                'ai_suggestions' => 'advanced',
                 'priority_support' => true,
+                'multi_location' => true,
+                'ifrs_reports' => true,
+            ],
+            'limits' => [
+                // All unlimited
+                'expenses_per_month' => null,
+                'custom_fields' => null,
+                'recurring_invoices_active' => null,
+                'estimates_per_month' => null,
+                'bank_accounts' => null,
+                'api_requests_per_day' => null,
             ],
         ],
     ],
@@ -175,34 +225,42 @@ return [
     | Maps features to minimum required plan.
     | Used by middleware and authorization checks.
     |
+    | Note: Features marked 'free' may still have usage limits defined
+    | in the 'limits' array of each tier. The middleware should check
+    | both feature access AND usage limits.
+    |
     */
     'feature_requirements' => [
-        // Free tier features
+        // Free tier features (available to all, may have limits)
         'basic_invoicing' => 'free',
         'customers' => 'free',
         'items' => 'free',
         'pdf_export' => 'free',
         'csv_import' => 'free',
+        'expenses' => 'free',           // Available but limited on free
+        'custom_fields' => 'free',      // Available but limited on free
+        'reports' => 'free',            // Basic reports on free
+        'recurring_invoices' => 'free', // Limited to 1 on free
+        'estimates' => 'free',          // Limited on free
 
-        // Starter tier features
-        'recurring_invoices' => 'starter',
-        'estimates' => 'starter',
-
-        // Standard tier features (e-Faktura)
+        // Standard tier features (e-Faktura + PSD2)
         'efaktura_sending' => 'standard',
         'qes_signing' => 'standard',
-        'expenses' => 'standard',
-        'reports' => 'standard',
+        'bank_connections' => 'standard',     // PSD2 in Standard (matches landing page)
+        'auto_reconciliation' => 'standard',
 
-        // Business tier features (bank feeds)
-        'bank_connections' => 'business',
-        'auto_reconciliation' => 'business',
+        // Business tier features
         'multi_currency' => 'business',
-        'custom_fields' => 'business',
+        'api_access' => 'business',           // API in Business (matches landing page)
 
         // Max tier features
-        'api_access' => 'max',
         'priority_support' => 'max',
+        'multi_location' => 'max',
+        'ifrs_reports' => 'max',
+
+        // AI tiers (special handling - level based with usage limits)
+        'ai_suggestions' => 'free',           // Preview AI for all (limited on free)
+        'ai_advanced' => 'business',          // Advanced AI at Business+
     ],
 
     /*
