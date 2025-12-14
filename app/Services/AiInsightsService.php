@@ -236,6 +236,16 @@ class AiInsightsService
                 'response' => $response,
             ]);
 
+            // Safety check for empty response
+            if (empty(trim($response))) {
+                Log::warning('[AiInsightsService] AI returned empty response', [
+                    'company_id' => $company->id,
+                    'question' => $question,
+                    'provider' => $this->aiProvider->getProviderName(),
+                ]);
+                throw new \Exception('AI provider returned an empty response');
+            }
+
             return $response;
 
         } catch (\Exception $e) {
