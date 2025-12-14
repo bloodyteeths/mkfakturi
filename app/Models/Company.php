@@ -35,9 +35,10 @@ class Company extends Model implements HasMedia
         'tax_id',
         'ifrs_entity_id',
         'paddle_id',
+        'stripe_id',
         'subscription_tier',
         'trial_ends_at',
-    ]; // CLAUDE-CHECKPOINT: Added Paddle subscription fields
+    ]; // CLAUDE-CHECKPOINT: Added Stripe and Paddle subscription fields
 
     public const COMPANY_LEVEL = 'company_level';
 

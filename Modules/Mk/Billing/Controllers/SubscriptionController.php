@@ -8,12 +8,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Laravel\Paddle\Checkout;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeCheckoutSession;
+use Stripe\Customer as StripeCustomer;
+use Stripe\BillingPortal\Session as StripeBillingSession;
+use Stripe\Subscription as StripeSubscription;
 
 /**
  * Subscription Controller for Company Billing
  *
- * Handles company subscription management with Paddle
+ * Handles company subscription management with Stripe
  * Supports 5 tiers: Free (€0), Starter (€12), Standard (€29), Business (€59), Max (€149)
  */
 class SubscriptionController extends Controller
@@ -106,12 +110,13 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Create Paddle checkout session for company subscription
+     * Create Stripe checkout session for company subscription
      */
     public function checkout(Request $request, int $companyId): JsonResponse
     {
         $request->validate([
             'tier' => 'required|in:starter,standard,business,max',
+            'interval' => 'sometimes|in:monthly,yearly',
         ]);
 
         $company = Company::findOrFail($companyId);
@@ -120,45 +125,96 @@ class SubscriptionController extends Controller
         $this->authorize('manage-billing', $company);
 
         $tier = $request->input('tier');
-        $priceId = config("services.paddle.prices.{$tier}");
+        $interval = $request->input('interval', 'monthly');
+
+        // Get Stripe price ID based on tier and interval
+        $priceId = config("services.stripe.prices.{$tier}.{$interval}");
 
         if (! $priceId) {
+            Log::warning('Stripe price not configured', [
+                'tier' => $tier,
+                'interval' => $interval,
+                'config_path' => "services.stripe.prices.{$tier}.{$interval}",
+            ]);
+
             return response()->json([
                 'error' => 'Invalid tier or price not configured',
             ], 400);
         }
 
         try {
-            // Create or retrieve Paddle customer
-            if (! $company->paddle_id) {
-                $company->createAsCustomer([
+            // Initialize Stripe
+            Stripe::setApiKey(config('services.stripe.secret'));
+
+            // Create or retrieve Stripe customer
+            $stripeCustomerId = $company->stripe_id;
+            $userEmail = $company->owner->email ?? Auth::user()->email;
+
+            if (! $stripeCustomerId) {
+                $customer = StripeCustomer::create([
                     'name' => $company->name,
-                    'email' => $company->owner->email ?? Auth::user()->email,
+                    'email' => $userEmail,
+                    'metadata' => [
+                        'company_id' => $company->id,
+                    ],
                 ]);
+                $stripeCustomerId = $customer->id;
+
+                // Save customer ID to company
+                $company->update(['stripe_id' => $stripeCustomerId]);
             }
 
-            // Build checkout session
-            $checkout = $company->checkout($priceId)
-                ->customData([
+            // Build success and cancel URLs
+            $successUrl = url('/admin/billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = url('/admin/pricing');
+
+            // Create Stripe Checkout Session
+            $session = StripeCheckoutSession::create([
+                'customer' => $stripeCustomerId,
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price' => $priceId,
+                    'quantity' => 1,
+                ]],
+                'mode' => 'subscription',
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'subscription_data' => [
+                    'trial_period_days' => 14, // 14-day free trial
+                    'metadata' => [
+                        'company_id' => $company->id,
+                        'tier' => $tier,
+                    ],
+                ],
+                'metadata' => [
                     'company_id' => $company->id,
                     'tier' => $tier,
-                ])
-                ->returnTo(route('subscription.success', ['company' => $companyId]));
+                ],
+                'allow_promotion_codes' => true,
+            ]);
+
+            Log::info('Stripe checkout session created', [
+                'company_id' => $companyId,
+                'tier' => $tier,
+                'interval' => $interval,
+                'session_id' => $session->id,
+            ]);
 
             return response()->json([
-                'checkout_url' => $checkout->url(),
-                'transaction_id' => $checkout->id(),
+                'checkout_url' => $session->url,
+                'session_id' => $session->id,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Paddle checkout creation failed', [
+            Log::error('Stripe checkout creation failed', [
                 'company_id' => $companyId,
                 'tier' => $tier,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'error' => 'Failed to create checkout session',
+                'error' => 'Failed to create checkout session: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -184,7 +240,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Subscription management dashboard
+     * Subscription management dashboard - opens Stripe Customer Portal
      */
     public function manage(int $companyId): JsonResponse
     {
@@ -193,27 +249,39 @@ class SubscriptionController extends Controller
         // Check authorization
         $this->authorize('manage-billing', $company);
 
-        $subscription = $company->subscription('default');
-
-        if (! $subscription) {
+        if (! $company->stripe_id) {
             return response()->json([
-                'error' => 'No active subscription found',
+                'error' => 'No billing account found',
             ], 404);
         }
 
-        return response()->json([
-            'subscription' => [
-                'tier' => $company->subscription_tier,
-                'status' => $subscription->status,
-                'paddle_id' => $subscription->paddle_id,
-                'trial_ends_at' => $subscription->trial_ends_at,
-                'paused_at' => $subscription->paused_at,
-                'ends_at' => $subscription->ends_at,
-                'created_at' => $subscription->created_at,
-            ],
-            'update_payment_method_url' => $subscription->updatePaymentMethodUrl(),
-            'cancel_url' => route('subscription.cancel', ['company' => $companyId]),
-        ]);
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+
+            // Create Stripe Billing Portal session
+            $session = StripeBillingSession::create([
+                'customer' => $company->stripe_id,
+                'return_url' => url('/admin/billing'),
+            ]);
+
+            return response()->json([
+                'portal_url' => $session->url,
+                'subscription' => [
+                    'tier' => $company->subscription_tier ?? 'free',
+                    'stripe_id' => $company->stripe_id,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Stripe portal session failed', [
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to open billing portal',
+            ], 500);
+        }
     }
 
     /**

@@ -256,25 +256,6 @@ export default {
         standard: 17990,
         business: 36990,
         max: 91990
-      },
-      // Paddle price IDs from environment
-      paddlePriceIds: {
-        starter: {
-          monthly: import.meta.env.VITE_PADDLE_STARTER_PRICE_ID,
-          yearly: import.meta.env.VITE_PADDLE_STARTER_YEARLY_PRICE_ID,
-        },
-        standard: {
-          monthly: import.meta.env.VITE_PADDLE_STANDARD_PRICE_ID,
-          yearly: import.meta.env.VITE_PADDLE_STANDARD_YEARLY_PRICE_ID,
-        },
-        business: {
-          monthly: import.meta.env.VITE_PADDLE_BUSINESS_PRICE_ID,
-          yearly: import.meta.env.VITE_PADDLE_BUSINESS_YEARLY_PRICE_ID,
-        },
-        max: {
-          monthly: import.meta.env.VITE_PADDLE_MAX_PRICE_ID,
-          yearly: import.meta.env.VITE_PADDLE_MAX_YEARLY_PRICE_ID,
-        },
       }
     }
   },
@@ -377,32 +358,9 @@ export default {
           return
         }
 
-        // Fallback: Try opening Paddle checkout directly
-        const priceId = this.paddlePriceIds[tier]?.[this.billingInterval]
-
-        if (typeof Paddle !== 'undefined' && priceId) {
-          try {
-            Paddle.Checkout.open({
-              product: priceId,
-              passthrough: JSON.stringify({
-                company_id: this.effectiveCompanyId,
-                tier: tier,
-              }),
-              successCallback: () => {
-                alert('Претплатата е успешно започната!')
-                window.location.reload()
-              },
-              closeCallback: () => {
-                this.loading = false
-              },
-            })
-            return
-          } catch (paddleError) {
-            console.error('Paddle checkout failed', paddleError)
-          }
-        }
-
-        alert('Неуспешно започнување на претплата. Обидете се повторно.')
+        // Show error message from server or generic message
+        const errorMessage = error.response?.data?.error || 'Неуспешно започнување на претплата. Обидете се повторно.'
+        alert(errorMessage)
       } finally {
         this.loading = false
       }
