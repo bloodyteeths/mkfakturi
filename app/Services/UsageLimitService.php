@@ -112,7 +112,12 @@ class UsageLimitService
      */
     public function getCompanyTier(Company $company): string
     {
-        // Check if company has an active subscription
+        // First check company's subscription_tier column (set by Stripe webhooks)
+        if ($company->subscription_tier && in_array($company->subscription_tier, ['free', 'starter', 'standard', 'business', 'max'])) {
+            return $company->subscription_tier;
+        }
+
+        // Fallback: Check company_subscriptions table if exists
         if (! $company->relationLoaded('subscription')) {
             $company->load('subscription');
         }
@@ -120,7 +125,7 @@ class UsageLimitService
         $subscription = $company->subscription;
 
         // If no subscription or inactive, return 'free'
-        if (! $subscription || ! in_array($subscription->status, ['trial', 'active'])) {
+        if (! $subscription || ! in_array($subscription->status ?? '', ['trial', 'active'])) {
             return 'free';
         }
 
@@ -376,7 +381,7 @@ class UsageLimitService
             'current_tier' => $currentTier,
             'required_tier' => $requiredTier ?? 'starter',
             'usage' => $usage,
-            'upgrade_url' => '/admin/settings/billing',
+            'upgrade_url' => '/admin/pricing',
         ];
     }
 }

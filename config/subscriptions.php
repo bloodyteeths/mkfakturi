@@ -194,6 +194,7 @@ return [
                 'custom_fields' => null,
                 'recurring_invoices_active' => null,
                 'estimates_per_month' => null,
+                'ai_queries_per_month' => null,
                 'bank_accounts' => null,
                 'api_requests_per_day' => null,
             ],

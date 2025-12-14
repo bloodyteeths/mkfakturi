@@ -683,6 +683,12 @@ export default [
             meta: { ability: abilities.MANAGE_CLOSINGS },
             component: AccountReviewSetting,
           },
+          {
+            path: 'billing',
+            name: 'settings.billing',
+            meta: { isOwner: true },
+            component: PricingPage,
+          },
         ],
       },
 
