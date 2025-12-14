@@ -47,6 +47,31 @@ class RecurringInvoiceController extends Controller
     {
         $this->authorize('create', RecurringInvoice::class);
 
+        // Enforce usage limit for active recurring invoices
+        if ($request->status === RecurringInvoice::ACTIVE) {
+            $companyId = $request->header('company');
+            $company = \App\Models\Company::find($companyId);
+
+            if ($company) {
+                $tier = $company->subscription_tier ?? 'free';
+                $limit = config("subscriptions.tiers.{$tier}.limits.recurring_invoices_active");
+
+                if ($limit !== null) {
+                    $activeCount = RecurringInvoice::where('company_id', $company->id)
+                        ->where('status', RecurringInvoice::ACTIVE)
+                        ->count();
+
+                    if ($activeCount >= $limit) {
+                        return response()->json([
+                            'error' => 'limit_exceeded',
+                            'message' => "You've reached your active recurring invoice limit ({$limit}). Upgrade or pause existing ones.",
+                            'usage' => ['active' => $activeCount, 'limit' => $limit],
+                        ], 403);
+                    }
+                }
+            }
+        }
+
         $recurringInvoice = RecurringInvoice::createFromRequest($request);
 
         $recurringInvoice->load([
@@ -96,6 +121,32 @@ class RecurringInvoiceController extends Controller
     {
         $this->authorize('update', $recurringInvoice);
 
+        // Enforce usage limit when activating/resuming a recurring invoice
+        // Check if status is changing to ACTIVE from a non-ACTIVE status
+        if ($request->status === RecurringInvoice::ACTIVE && $recurringInvoice->status !== RecurringInvoice::ACTIVE) {
+            $companyId = $request->header('company');
+            $company = \App\Models\Company::find($companyId);
+
+            if ($company) {
+                $tier = $company->subscription_tier ?? 'free';
+                $limit = config("subscriptions.tiers.{$tier}.limits.recurring_invoices_active");
+
+                if ($limit !== null) {
+                    $activeCount = RecurringInvoice::where('company_id', $company->id)
+                        ->where('status', RecurringInvoice::ACTIVE)
+                        ->count();
+
+                    if ($activeCount >= $limit) {
+                        return response()->json([
+                            'error' => 'limit_exceeded',
+                            'message' => "You've reached your active recurring invoice limit ({$limit}). Upgrade or pause existing ones.",
+                            'usage' => ['active' => $activeCount, 'limit' => $limit],
+                        ], 403);
+                    }
+                }
+            }
+        }
+
         $recurringInvoice->updateFromRequest($request);
 
         $recurringInvoice->load([
@@ -129,3 +180,4 @@ class RecurringInvoiceController extends Controller
         ]);
     }
 }
+// CLAUDE-CHECKPOINT

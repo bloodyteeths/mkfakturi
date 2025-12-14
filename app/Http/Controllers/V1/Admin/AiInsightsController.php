@@ -5,10 +5,13 @@ namespace App\Http\Controllers\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Services\AiInsightsService;
+use App\Services\AiProvider\AiProviderInterface;
+use App\Services\UsageLimitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * AI Insights Controller
@@ -21,7 +24,8 @@ class AiInsightsController extends Controller
      * Create a new controller instance
      */
     public function __construct(
-        private AiInsightsService $aiService
+        private AiInsightsService $aiService,
+        private AiProviderInterface $aiProvider
     ) {}
 
     /**
@@ -80,6 +84,19 @@ class AiInsightsController extends Controller
 
         $this->authorize('view dashboard', $company);
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         try {
             // Execute synchronously instead of queuing to avoid queue processing issues
             // In production, this ensures immediate execution regardless of queue configuration
@@ -97,6 +114,9 @@ class AiInsightsController extends Controller
                 'provider' => $insights['provider'] ?? null,
                 'model' => $insights['model'] ?? null,
             ]);
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json([
                 'message' => 'AI insights generation completed',
@@ -136,12 +156,28 @@ class AiInsightsController extends Controller
 
         $this->authorize('view dashboard', $company);
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         try {
             // Clear cache first
             $this->aiService->clearCache($company);
 
             // Generate new insights synchronously
             $insights = $this->aiService->analyzeFinancials($company);
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json([
                 'insights' => $insights['items'] ?? [],
@@ -185,11 +221,27 @@ class AiInsightsController extends Controller
             'message' => 'required|string|max:'.config('ai.chat.max_message_length', 1000),
         ]);
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         try {
             $response = $this->aiService->answerQuestion(
                 $company,
                 $validated['message']
             );
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json([
                 'response' => $response,
@@ -208,6 +260,124 @@ class AiInsightsController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Streaming AI chat for real-time responses
+     *
+     * POST /api/v1/ai/insights/chat-stream
+     *
+     * NOTE: Add this route to routes/api.php:
+     * Route::post('ai/insights/chat-stream', [AiInsightsController::class, 'chatStream']);
+     */
+    public function chatStream(Request $request): StreamedResponse
+    {
+        $company = Company::find($request->header('company'));
+
+        if (! $company) {
+            return response()->stream(function () {
+                echo "data: ".json_encode(['error' => 'Company not found'])."\n\n";
+                flush();
+            }, 404);
+        }
+
+        $this->authorize('view dashboard', $company);
+
+        $validated = $request->validate([
+            'message' => 'required|string|max:'.config('ai.chat.max_message_length', 1000),
+        ]);
+
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->stream(function () use ($usage) {
+                echo "data: ".json_encode([
+                    'error' => 'ai_limit_exceeded',
+                    'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                    'usage' => $usage,
+                    'upgrade_url' => '/admin/settings/billing',
+                ])."\n\n";
+                flush();
+            }, 403);
+        }
+
+        return response()->stream(function () use ($company, $validated, $usageService) {
+            // Set headers for SSE
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            header('Connection: keep-alive');
+            header('X-Accel-Buffering: no'); // Disable nginx buffering
+
+            try {
+                // Build context-aware prompt with company financial data
+                $prompt = $this->buildChatPrompt($company, $validated['message']);
+
+                // Stream the response
+                $this->aiProvider->generateStream(
+                    $prompt,
+                    function ($chunk) {
+                        // Send each chunk as SSE
+                        echo "data: ".json_encode(['chunk' => $chunk])."\n\n";
+                        if (ob_get_level() > 0) {
+                            ob_flush();
+                        }
+                        flush();
+                    }
+                );
+
+                // Increment usage after successful AI call
+                $usageService->incrementUsage($company, 'ai_queries_per_month');
+
+                // Send completion event
+                echo "data: ".json_encode(['done' => true, 'timestamp' => now()->toDateTimeString()])."\n\n";
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
+                flush();
+
+            } catch (\Exception $e) {
+                Log::error('AI chat stream failed', [
+                    'company_id' => $company->id,
+                    'message' => $validated['message'],
+                    'error' => $e->getMessage(),
+                ]);
+
+                echo "data: ".json_encode(['error' => 'Failed to process chat message', 'message' => $e->getMessage()])."\n\n";
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
+                flush();
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
+    /**
+     * Build a context-aware chat prompt with company financial data
+     *
+     * @param  Company  $company
+     * @param  string  $message
+     * @return string
+     */
+    private function buildChatPrompt(Company $company, string $message): string
+    {
+        // Build basic company context
+        $context = "You are a financial assistant for {$company->name}.\n\n";
+        $context .= "Company Information:\n";
+        $context .= "- Name: {$company->name}\n";
+        $context .= "- Currency: {$company->currency}\n\n";
+
+        // Add the user's question
+        $context .= "User Question: {$message}\n\n";
+        $context .= "Please provide a helpful response in Macedonian language.";
+
+        return $context;
     }
 
     /**
@@ -302,8 +472,24 @@ class AiInsightsController extends Controller
 
         $this->authorize('view dashboard', $company);
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         try {
             $risks = $this->aiService->detectRisks($company);
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json($risks);
 
@@ -320,3 +506,5 @@ class AiInsightsController extends Controller
         }
     }
 }
+
+// CLAUDE-CHECKPOINT

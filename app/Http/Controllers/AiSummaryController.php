@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
+use App\Services\UsageLimitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -36,6 +38,28 @@ class AiSummaryController extends Controller
 
         $companyId = $request->query('company_id');
 
+        // Get company for usage limit check
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json([
+                'error' => 'Company not found',
+            ], 404);
+        }
+
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         try {
             // Check cache first (15 minute cache)
             $cacheKey = "ai_summary_{$companyId}";
@@ -59,6 +83,9 @@ class AiSummaryController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
+
+                // Increment usage after successful AI call
+                $usageService->incrementUsage($company, 'ai_queries_per_month');
 
                 // Cache for 15 minutes
                 Cache::put($cacheKey, $data, 900);
@@ -142,6 +169,28 @@ class AiSummaryController extends Controller
 
         $companyId = $request->query('company_id');
 
+        // Get company for usage limit check
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json([
+                'error' => 'Company not found',
+            ], 404);
+        }
+
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         try {
             // Check cache first (30 minute cache for risk data)
             $cacheKey = "ai_risk_{$companyId}";
@@ -170,6 +219,9 @@ class AiSummaryController extends Controller
                 $riskData = [
                     'risk_score' => $data['overallRisk'] ?? 0.5,
                 ];
+
+                // Increment usage after successful AI call
+                $usageService->incrementUsage($company, 'ai_queries_per_month');
 
                 // Cache for 30 minutes
                 Cache::put($cacheKey, $riskData, 1800);

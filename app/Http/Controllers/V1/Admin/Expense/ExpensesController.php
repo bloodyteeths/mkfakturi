@@ -7,6 +7,7 @@ use App\Http\Requests\DeleteExpensesRequest;
 use App\Http\Requests\ExpenseRequest;
 use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
+use App\Services\UsageLimitService;
 use Illuminate\Http\Request;
 
 class ExpensesController extends Controller
@@ -30,9 +31,20 @@ class ExpensesController extends Controller
             ->select('expenses.*', 'expense_categories.name', 'customers.name as user_name')
             ->paginateData($limit);
 
+        // Get company and usage stats
+        $companyId = $request->header('company');
+        $company = \App\Models\Company::find($companyId);
+        $usageStats = null;
+
+        if ($company) {
+            $usageService = app(UsageLimitService::class);
+            $usageStats = $usageService->getUsage($company, 'expenses_per_month');
+        }
+
         return ExpenseResource::collection($expenses)
             ->additional(['meta' => [
                 'expense_total_count' => Expense::whereCompany()->count(),
+                'usage' => $usageStats,
             ]]);
     }
 
@@ -45,10 +57,36 @@ class ExpensesController extends Controller
     {
         $this->authorize('create', Expense::class);
 
+        // Get company from request
+        $companyId = $request->header('company');
+        $company = \App\Models\Company::find($companyId);
+
+        if (! $company) {
+            return response()->json([
+                'error' => 'company_not_found',
+                'message' => 'Company not found',
+            ], 404);
+        }
+
+        // Check usage limit for expenses
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'expenses_per_month')) {
+            $tier = $usageService->getCompanyTier($company);
+            $upgradeMessages = config('subscriptions.upgrade_messages.expenses', []);
+            $message = is_array($upgradeMessages)
+                ? ($upgradeMessages[$tier] ?? 'Upgrade to create more expenses')
+                : $upgradeMessages;
+
+            return response()->json([
+                'error' => 'limit_exceeded',
+                'message' => $message,
+                'usage' => $usageService->getUsage($company, 'expenses_per_month'),
+            ], 403);
+        }
+
         // Check for duplicates if supplier_id and invoice_number are provided
         $supplierId = $request->input('supplier_id');
         $invoiceNumber = $request->input('invoice_number');
-        $companyId = $request->header('company');
 
         if ($supplierId && $invoiceNumber && ! $request->allowsDuplicate()) {
             $duplicates = Expense::findPotentialDuplicates(
@@ -76,6 +114,9 @@ class ExpensesController extends Controller
         }
 
         $expense = Expense::createExpense($request);
+
+        // Increment usage after successful creation
+        $usageService->incrementUsage($company, 'expenses_per_month');
 
         return new ExpenseResource($expense);
     }
@@ -150,3 +191,4 @@ class ExpensesController extends Controller
         ]);
     }
 }
+// CLAUDE-CHECKPOINT

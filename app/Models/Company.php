@@ -218,6 +218,11 @@ class Company extends Model implements HasMedia
         return $this->hasMany(BankAccount::class);
     }
 
+    public function usageTracking(): HasMany
+    {
+        return $this->hasMany(UsageTracking::class);
+    }
+
     /**
      * Company's IFRS Entity relationship
      */

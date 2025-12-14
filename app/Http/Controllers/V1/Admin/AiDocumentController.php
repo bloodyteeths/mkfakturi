@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Services\AiInsightsService;
 use App\Services\McpDataProvider;
 use App\Services\PdfImageConverter;
+use App\Services\UsageLimitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -70,6 +71,19 @@ class AiDocumentController extends Controller
             ], 403);
         }
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         // Validate request
         $validated = $request->validate([
             'file' => 'required|file|max:'.(self::MAX_FILE_SIZE / 1024),
@@ -105,6 +119,9 @@ class AiDocumentController extends Controller
 
             // Process document
             $analysis = $this->processDocument($file, $question, $company);
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json([
                 'success' => true,
@@ -153,6 +170,19 @@ class AiDocumentController extends Controller
             ], 403);
         }
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         // Validate request
         $validated = $request->validate([
             'file' => 'required|file|max:'.(self::MAX_FILE_SIZE / 1024),
@@ -183,6 +213,9 @@ class AiDocumentController extends Controller
 
             // Parse structured data from response
             $extractedData = $this->parseReceiptData($analysis);
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json([
                 'success' => true,
@@ -231,6 +264,19 @@ class AiDocumentController extends Controller
             ], 403);
         }
 
+        // Check usage limit for AI queries
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'ai_limit_exceeded',
+                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
+                'usage' => $usage,
+                'upgrade_url' => '/admin/settings/billing',
+            ], 403);
+        }
+
         // Validate request
         $validated = $request->validate([
             'file' => 'required|file|max:'.(self::MAX_FILE_SIZE / 1024),
@@ -261,6 +307,9 @@ class AiDocumentController extends Controller
 
             // Parse structured data from response
             $extractedData = $this->parseInvoiceData($analysis);
+
+            // Increment usage after successful AI call
+            $usageService->incrementUsage($company, 'ai_queries_per_month');
 
             return response()->json([
                 'success' => true,

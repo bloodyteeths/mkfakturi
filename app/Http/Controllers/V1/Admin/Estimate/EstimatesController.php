@@ -7,7 +7,9 @@ use App\Http\Requests\DeleteEstimatesRequest;
 use App\Http\Requests\EstimatesRequest;
 use App\Http\Resources\EstimateResource;
 use App\Jobs\GenerateEstimatePdfJob;
+use App\Models\Company;
 use App\Models\Estimate;
+use App\Services\UsageLimitService;
 use Illuminate\Http\Request;
 
 class EstimatesController extends Controller
@@ -35,6 +37,26 @@ class EstimatesController extends Controller
     {
         $this->authorize('create', Estimate::class);
 
+        // Get company from request header
+        $company = Company::find($request->header('company'));
+
+        if (! $company) {
+            return response()->json([
+                'error' => 'company_not_found',
+                'message' => 'Company not found.',
+            ], 404);
+        }
+
+        // Check usage limits
+        $usageService = app(UsageLimitService::class);
+        if (! $usageService->canUse($company, 'estimates_per_month')) {
+            return response()->json([
+                'error' => 'limit_exceeded',
+                'message' => 'You\'ve reached your monthly estimate limit. Upgrade for more estimates.',
+                'usage' => $usageService->getUsage($company, 'estimates_per_month'),
+            ], 403);
+        }
+
         $estimate = Estimate::createEstimate($request);
 
         if ($request->has('estimateSend')) {
@@ -42,6 +64,9 @@ class EstimatesController extends Controller
         }
 
         GenerateEstimatePdfJob::dispatch($estimate);
+
+        // Increment usage counter after successful creation
+        $usageService->incrementUsage($company, 'estimates_per_month');
 
         return new EstimateResource($estimate);
     }
@@ -75,3 +100,4 @@ class EstimatesController extends Controller
         ]);
     }
 }
+// CLAUDE-CHECKPOINT

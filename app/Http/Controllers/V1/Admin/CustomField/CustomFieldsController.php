@@ -39,6 +39,26 @@ class CustomFieldsController extends Controller
     {
         $this->authorize('create', CustomField::class);
 
+        // Enforce usage limit for custom fields
+        $companyId = $request->header('company');
+        $company = \App\Models\Company::find($companyId);
+
+        if ($company) {
+            $tier = $company->subscription_tier ?? 'free';
+            $limit = config("subscriptions.tiers.{$tier}.limits.custom_fields");
+
+            if ($limit !== null) {
+                $currentCount = CustomField::where('company_id', $company->id)->count();
+                if ($currentCount >= $limit) {
+                    return response()->json([
+                        'error' => 'limit_exceeded',
+                        'message' => "You've reached your custom field limit ({$limit}). Upgrade to add more.",
+                        'usage' => ['used' => $currentCount, 'limit' => $limit],
+                    ], 403);
+                }
+            }
+        }
+
         $customField = CustomField::createCustomField($request);
 
         return new CustomFieldResource($customField);
@@ -94,3 +114,4 @@ class CustomFieldsController extends Controller
         ]);
     }
 }
+// CLAUDE-CHECKPOINT
