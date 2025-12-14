@@ -1,225 +1,341 @@
 <template>
-  <div class="pricing-page">
-    <div class="container mx-auto px-4 py-12">
-      <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          Choose the Perfect Plan for Your Business
+  <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <!-- Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
+          Изберете го вашиот план
         </h1>
-        <p class="text-xl text-gray-600">
-          Simple, transparent pricing. Upgrade or downgrade at any time.
+        <p class="mt-4 text-xl text-gray-500">
+          Едноставни и транспарентни цени. Без скриени трошоци.
         </p>
 
         <!-- Billing Toggle -->
-        <div class="flex items-center justify-center mt-8 gap-4">
-          <span :class="billingInterval === 'monthly' ? 'text-gray-900 font-semibold' : 'text-gray-500'">
-            Месечно
-          </span>
-          <button
-            @click="toggleBillingInterval"
-            class="relative inline-flex h-8 w-16 items-center rounded-full transition-colors"
-            :class="billingInterval === 'yearly' ? 'bg-blue-600' : 'bg-gray-300'"
-          >
-            <span
-              class="inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform"
-              :class="billingInterval === 'yearly' ? 'translate-x-9' : 'translate-x-1'"
-            ></span>
-          </button>
-          <span :class="billingInterval === 'yearly' ? 'text-gray-900 font-semibold' : 'text-gray-500'">
-            Годишно
-            <span class="ml-1 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-              Заштеда 17%
-            </span>
-          </span>
+        <div class="mt-10 flex items-center justify-center">
+          <div class="relative bg-gray-100 p-1 rounded-xl flex">
+            <button
+              @click="billingInterval = 'monthly'"
+              :class="[
+                'relative py-2.5 px-6 text-sm font-medium rounded-lg transition-all duration-200',
+                billingInterval === 'monthly'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900'
+              ]"
+            >
+              Месечно
+            </button>
+            <button
+              @click="billingInterval = 'yearly'"
+              :class="[
+                'relative py-2.5 px-6 text-sm font-medium rounded-lg transition-all duration-200',
+                billingInterval === 'yearly'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900'
+              ]"
+            >
+              Годишно
+              <span class="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                -17%
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-        <!-- Free Plan -->
-        <div class="pricing-card border rounded-lg p-6 bg-white hover:shadow-lg transition">
-          <h3 class="text-xl font-semibold mb-2">Free</h3>
-          <div class="text-3xl font-bold mb-4">0 ден<span class="text-sm text-gray-500">/мес</span></div>
-          <ul class="space-y-2 mb-6 text-sm">
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Основно фактурирање
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              До 5 клиенти
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Email поддршка
-            </li>
-          </ul>
-          <button
-            class="w-full py-2 px-4 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-            :class="{ 'bg-blue-600 text-white hover:bg-blue-700': currentPlan === 'free' }"
-            :disabled="currentPlan === 'free'"
-          >
-            {{ currentPlan === 'free' ? 'Актуелен план' : 'Започни' }}
-          </button>
-        </div>
-
+      <!-- Pricing Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
         <!-- Starter Plan -->
-        <div class="pricing-card border-2 border-blue-500 rounded-lg p-6 bg-white hover:shadow-lg transition">
-          <div class="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block mb-2">
-            ПОПУЛАРЕН
+        <div class="relative bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col">
+          <div class="p-8 flex-1">
+            <h3 class="text-lg font-semibold text-gray-900">Starter</h3>
+            <p class="mt-2 text-sm text-gray-500">За мали бизниси кои штотуку почнуваат</p>
+
+            <div class="mt-6">
+              <span class="text-4xl font-bold text-gray-900">{{ formatPrice(prices.starter) }}</span>
+              <span class="text-gray-500 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            </div>
+            <p v-if="billingInterval === 'yearly'" class="mt-1 text-sm text-green-600">
+              {{ Math.round(prices.starter / 12).toLocaleString() }} ден месечно
+            </p>
+
+            <ul class="mt-8 space-y-4">
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">50 фактури месечно</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Неограничени клиенти</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Понуди и проформи</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Email поддршка</span>
+              </li>
+            </ul>
           </div>
-          <h3 class="text-xl font-semibold mb-2">Starter</h3>
-          <div class="text-3xl font-bold mb-4">
-            {{ formatPrice(prices.starter) }} ден
-            <span class="text-sm text-gray-500">{{ billingInterval === 'monthly' ? '/мес' : '/год' }}</span>
+
+          <div class="p-8 pt-0">
+            <button
+              @click="subscribe('starter')"
+              :disabled="loading || currentPlan === 'starter'"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-all duration-200',
+                currentPlan === 'starter'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-900 text-white hover:bg-gray-800'
+              ]"
+            >
+              {{ currentPlan === 'starter' ? 'Актуелен план' : 'Започни пробен период' }}
+            </button>
           </div>
-          <div v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mb-2">
-            {{ Math.round(prices.starter / 12).toLocaleString() }} ден/мес
-          </div>
-          <ul class="space-y-2 mb-6 text-sm">
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              50 фактури месечно
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Неограничени клиенти
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Понуди и проформи
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Приоритетна поддршка
-            </li>
-          </ul>
-          <button
-            @click="subscribe('starter')"
-            class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            :class="{ 'bg-green-600 hover:bg-green-700': currentPlan === 'starter' }"
-            :disabled="loading || currentPlan === 'starter'"
-          >
-            {{ currentPlan === 'starter' ? 'Актуелен план' : 'Претплати се' }}
-          </button>
         </div>
 
-        <!-- Standard Plan -->
-        <div class="pricing-card border rounded-lg p-6 bg-white hover:shadow-lg transition">
-          <h3 class="text-xl font-semibold mb-2">Standard</h3>
-          <div class="text-3xl font-bold mb-4">
-            {{ formatPrice(prices.standard) }} ден
-            <span class="text-sm text-gray-500">{{ billingInterval === 'monthly' ? '/мес' : '/год' }}</span>
+        <!-- Standard Plan - Most Popular -->
+        <div class="relative bg-white rounded-2xl shadow-xl border-2 border-blue-500 flex flex-col">
+          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <span class="bg-blue-500 text-white text-sm font-semibold px-4 py-1 rounded-full">
+              Најпопуларен
+            </span>
           </div>
-          <div v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mb-2">
-            {{ Math.round(prices.standard / 12).toLocaleString() }} ден/мес
+
+          <div class="p-8 flex-1">
+            <h3 class="text-lg font-semibold text-gray-900">Standard</h3>
+            <p class="mt-2 text-sm text-gray-500">За растечки бизниси со повеќе потреби</p>
+
+            <div class="mt-6">
+              <span class="text-4xl font-bold text-gray-900">{{ formatPrice(prices.standard) }}</span>
+              <span class="text-gray-500 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            </div>
+            <p v-if="billingInterval === 'yearly'" class="mt-1 text-sm text-green-600">
+              {{ Math.round(prices.standard / 12).toLocaleString() }} ден месечно
+            </p>
+
+            <ul class="mt-8 space-y-4">
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">200 фактури месечно</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">е-Фактура интеграција</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Следење на трошоци</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Финансиски извештаи</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Приоритетна поддршка</span>
+              </li>
+            </ul>
           </div>
-          <ul class="space-y-2 mb-6 text-sm">
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              200 фактури месечно
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              е-Фактура интеграција
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Следење на трошоци
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Финансиски извештаи
-            </li>
-          </ul>
-          <button
-            @click="subscribe('standard')"
-            class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            :class="{ 'bg-green-600 hover:bg-green-700': currentPlan === 'standard' }"
-            :disabled="loading || currentPlan === 'standard'"
-          >
-            {{ currentPlan === 'standard' ? 'Актуелен план' : 'Претплати се' }}
-          </button>
+
+          <div class="p-8 pt-0">
+            <button
+              @click="subscribe('standard')"
+              :disabled="loading || currentPlan === 'standard'"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-all duration-200',
+                currentPlan === 'standard'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              ]"
+            >
+              {{ currentPlan === 'standard' ? 'Актуелен план' : 'Започни пробен период' }}
+            </button>
+          </div>
         </div>
 
         <!-- Business Plan -->
-        <div class="pricing-card border rounded-lg p-6 bg-white hover:shadow-lg transition">
-          <h3 class="text-xl font-semibold mb-2">Business</h3>
-          <div class="text-3xl font-bold mb-4">
-            {{ formatPrice(prices.business) }} ден
-            <span class="text-sm text-gray-500">{{ billingInterval === 'monthly' ? '/мес' : '/год' }}</span>
+        <div class="relative bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col">
+          <div class="p-8 flex-1">
+            <h3 class="text-lg font-semibold text-gray-900">Business</h3>
+            <p class="mt-2 text-sm text-gray-500">За компании со напредни потреби</p>
+
+            <div class="mt-6">
+              <span class="text-4xl font-bold text-gray-900">{{ formatPrice(prices.business) }}</span>
+              <span class="text-gray-500 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            </div>
+            <p v-if="billingInterval === 'yearly'" class="mt-1 text-sm text-green-600">
+              {{ Math.round(prices.business / 12).toLocaleString() }} ден месечно
+            </p>
+
+            <ul class="mt-8 space-y-4">
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">1,000 фактури месечно</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Банкарски поврзувања</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Повеќе валути</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">До 5 корисници</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Напредни AI функции</span>
+              </li>
+            </ul>
           </div>
-          <div v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mb-2">
-            {{ Math.round(prices.business / 12).toLocaleString() }} ден/мес
+
+          <div class="p-8 pt-0">
+            <button
+              @click="subscribe('business')"
+              :disabled="loading || currentPlan === 'business'"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-all duration-200',
+                currentPlan === 'business'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-900 text-white hover:bg-gray-800'
+              ]"
+            >
+              {{ currentPlan === 'business' ? 'Актуелен план' : 'Започни пробен период' }}
+            </button>
           </div>
-          <ul class="space-y-2 mb-6 text-sm">
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              1000 фактури месечно
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Банкарски фидови
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Повеќе валути
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Тимска соработка
-            </li>
-          </ul>
-          <button
-            @click="subscribe('business')"
-            class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            :class="{ 'bg-green-600 hover:bg-green-700': currentPlan === 'business' }"
-            :disabled="loading || currentPlan === 'business'"
-          >
-            {{ currentPlan === 'business' ? 'Актуелен план' : 'Претплати се' }}
-          </button>
         </div>
 
         <!-- Max Plan -->
-        <div class="pricing-card border rounded-lg p-6 bg-white hover:shadow-lg transition">
-          <h3 class="text-xl font-semibold mb-2">Max</h3>
-          <div class="text-3xl font-bold mb-4">
-            {{ formatPrice(prices.max) }} ден
-            <span class="text-sm text-gray-500">{{ billingInterval === 'monthly' ? '/мес' : '/год' }}</span>
+        <div class="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-xl flex flex-col text-white">
+          <div class="p-8 flex-1">
+            <h3 class="text-lg font-semibold">Max</h3>
+            <p class="mt-2 text-sm text-gray-300">За ентерпрајз со неограничени потреби</p>
+
+            <div class="mt-6">
+              <span class="text-4xl font-bold">{{ formatPrice(prices.max) }}</span>
+              <span class="text-gray-300 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            </div>
+            <p v-if="billingInterval === 'yearly'" class="mt-1 text-sm text-green-400">
+              {{ Math.round(prices.max / 12).toLocaleString() }} ден месечно
+            </p>
+
+            <ul class="mt-8 space-y-4">
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-200">Неограничени фактури</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-200">Неограничени корисници</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-200">API пристап</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-200">White-label опции</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="ml-3 text-gray-200">Посветена поддршка 24/7</span>
+              </li>
+            </ul>
           </div>
-          <div v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mb-2">
-            {{ Math.round(prices.max / 12).toLocaleString() }} ден/мес
+
+          <div class="p-8 pt-0">
+            <button
+              @click="subscribe('max')"
+              :disabled="loading || currentPlan === 'max'"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-all duration-200',
+                currentPlan === 'max'
+                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-900 hover:bg-gray-100'
+              ]"
+            >
+              {{ currentPlan === 'max' ? 'Актуелен план' : 'Контактирајте нè' }}
+            </button>
           </div>
-          <ul class="space-y-2 mb-6 text-sm">
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Неограничено сè
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              API пристап
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              White-label опции
-            </li>
-            <li class="flex items-start">
-              <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Посветена поддршка
-            </li>
-          </ul>
-          <button
-            @click="subscribe('max')"
-            class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            :class="{ 'bg-green-600 hover:bg-green-700': currentPlan === 'max' }"
-            :disabled="loading || currentPlan === 'max'"
-          >
-            {{ currentPlan === 'max' ? 'Актуелен план' : 'Претплати се' }}
-          </button>
         </div>
       </div>
 
-      <div class="text-center text-sm text-gray-600">
-        <p>Сите планови вклучуваат 14-дневен бесплатен пробен период. Откажете кога сакате.</p>
-        <p class="mt-2">Потребна помош? <a href="#" class="text-blue-600 hover:underline">Контактирајте нè</a></p>
+      <!-- Footer -->
+      <div class="mt-16 text-center">
+        <p class="text-gray-500">
+          Сите планови вклучуваат 14-дневен бесплатен пробен период. Откажете кога сакате.
+        </p>
+        <p class="mt-4 text-sm text-gray-400">
+          Имате прашања?
+          <a href="mailto:support@facturino.mk" class="text-blue-600 hover:text-blue-700 font-medium">
+            Контактирајте нè
+          </a>
+        </p>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="mt-16 border-t border-gray-200 pt-12">
+        <div class="flex flex-wrap justify-center items-center gap-8 text-gray-400">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            <span class="text-sm">SSL заштитено</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>
+            <span class="text-sm">Безбедно плаќање со Stripe</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="text-sm">Откажете кога сакате</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -243,8 +359,7 @@ export default {
       currentPlan: 'free',
       loading: false,
       selectedCompanyId: null,
-      billingInterval: 'monthly', // 'monthly' or 'yearly'
-      // MKD prices
+      billingInterval: 'monthly',
       monthlyPrices: {
         starter: 799,
         standard: 1799,
@@ -271,21 +386,15 @@ export default {
   },
 
   mounted() {
-    // Get selected company from localStorage
     const companyId = Ls.get('selectedCompany')
     this.selectedCompanyId = companyId ? parseInt(companyId) : null
 
-    // Try to fetch current plan (will fail silently if not authenticated)
     if (this.effectiveCompanyId) {
       this.fetchCurrentPlan()
     }
   },
 
   methods: {
-    toggleBillingInterval() {
-      this.billingInterval = this.billingInterval === 'monthly' ? 'yearly' : 'monthly'
-    },
-
     formatPrice(price) {
       return price.toLocaleString()
     },
@@ -294,17 +403,14 @@ export default {
       if (!this.effectiveCompanyId) return
 
       try {
-        // Note: axios baseURL is /api/v1, so we use /companies/... not /api/companies/...
         const response = await axios.get(`/companies/${this.effectiveCompanyId}/subscription`)
         this.currentPlan = response.data.current_plan?.tier || 'free'
       } catch (error) {
-        // If 401/403, user is not authenticated - that's fine for public pricing page
         if (error.response?.status === 401 || error.response?.status === 403) {
           console.log('User not authenticated, showing default plan')
         } else {
           console.error('Failed to fetch current plan', error)
         }
-        // Default to free if we can't fetch the plan
         this.currentPlan = 'free'
       }
     },
@@ -315,7 +421,6 @@ export default {
       this.loading = true
 
       try {
-        // If no company selected, try to get from localStorage first
         if (!this.effectiveCompanyId) {
           const companyId = Ls.get('selectedCompany')
           if (companyId) {
@@ -323,42 +428,35 @@ export default {
           }
         }
 
-        // If still no company, redirect to login (they need to log in and select a company)
         if (!this.effectiveCompanyId) {
-          // Store the selected tier for after login
           Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
           this.$router.push({ name: 'login' })
           return
         }
 
-        // Try server-side checkout
         const response = await axios.post(`/companies/${this.effectiveCompanyId}/subscription/checkout`, {
           tier,
           interval: this.billingInterval
         })
 
-        // Redirect to checkout
         if (response.data.checkout_url) {
           window.location.href = response.data.checkout_url
         }
       } catch (error) {
         console.error('Failed to create checkout session', error)
 
-        // If 401, redirect to login
         if (error.response?.status === 401) {
           Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
           this.$router.push({ name: 'login' })
           return
         }
 
-        // If 403, might be authorization issue - show error
         if (error.response?.status === 403) {
           alert('Немате дозвола за оваа акција. Ве молиме контактирајте го сопственикот на компанијата.')
           this.loading = false
           return
         }
 
-        // Show error message from server or generic message
         const errorMessage = error.response?.data?.error || 'Неуспешно започнување на претплата. Обидете се повторно.'
         alert(errorMessage)
       } finally {
@@ -368,14 +466,4 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.pricing-card {
-  transition: all 0.3s ease;
-}
-
-.pricing-card:hover {
-  transform: translateY(-4px);
-}
-</style>
 <!-- CLAUDE-CHECKPOINT -->
