@@ -71,17 +71,10 @@ class ExpensesController extends Controller
         // Check usage limit for expenses
         $usageService = app(UsageLimitService::class);
         if (! $usageService->canUse($company, 'expenses_per_month')) {
-            $tier = $usageService->getCompanyTier($company);
-            $upgradeMessages = config('subscriptions.upgrade_messages.expenses', []);
-            $message = is_array($upgradeMessages)
-                ? ($upgradeMessages[$tier] ?? 'Upgrade to create more expenses')
-                : $upgradeMessages;
-
-            return response()->json([
-                'error' => 'limit_exceeded',
-                'message' => $message,
-                'usage' => $usageService->getUsage($company, 'expenses_per_month'),
-            ], 403);
+            return response()->json(
+                $usageService->buildLimitExceededResponse($company, 'expenses_per_month'),
+                403
+            );
         }
 
         // Check for duplicates if supplier_id and invoice_number are provided

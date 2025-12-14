@@ -53,21 +53,12 @@ class RecurringInvoiceController extends Controller
             $company = \App\Models\Company::find($companyId);
 
             if ($company) {
-                $tier = $company->subscription_tier ?? 'free';
-                $limit = config("subscriptions.tiers.{$tier}.limits.recurring_invoices_active");
-
-                if ($limit !== null) {
-                    $activeCount = RecurringInvoice::where('company_id', $company->id)
-                        ->where('status', RecurringInvoice::ACTIVE)
-                        ->count();
-
-                    if ($activeCount >= $limit) {
-                        return response()->json([
-                            'error' => 'limit_exceeded',
-                            'message' => "You've reached your active recurring invoice limit ({$limit}). Upgrade or pause existing ones.",
-                            'usage' => ['active' => $activeCount, 'limit' => $limit],
-                        ], 403);
-                    }
+                $usageService = app(\App\Services\UsageLimitService::class);
+                if (! $usageService->canUse($company, 'recurring_invoices_active')) {
+                    return response()->json(
+                        $usageService->buildLimitExceededResponse($company, 'recurring_invoices_active'),
+                        403
+                    );
                 }
             }
         }

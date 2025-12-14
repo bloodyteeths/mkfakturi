@@ -214,6 +214,11 @@ Route::get('/signup', function () {
     return view('app');
 })->name('signup');
 
+// Public pricing page (accessible without authentication)
+Route::get('/pricing', function () {
+    return view('app');
+})->name('pricing');
+
 // Partner signup page (partner-to-partner referral)
 Route::get('/partner/signup', function () {
     return view('app');

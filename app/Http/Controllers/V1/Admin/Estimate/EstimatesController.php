@@ -50,11 +50,10 @@ class EstimatesController extends Controller
         // Check usage limits
         $usageService = app(UsageLimitService::class);
         if (! $usageService->canUse($company, 'estimates_per_month')) {
-            return response()->json([
-                'error' => 'limit_exceeded',
-                'message' => 'You\'ve reached your monthly estimate limit. Upgrade for more estimates.',
-                'usage' => $usageService->getUsage($company, 'estimates_per_month'),
-            ], 403);
+            return response()->json(
+                $usageService->buildLimitExceededResponse($company, 'estimates_per_month'),
+                403
+            );
         }
 
         $estimate = Estimate::createEstimate($request);

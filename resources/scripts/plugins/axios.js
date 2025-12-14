@@ -11,9 +11,8 @@ axios.defaults.headers.common = {
 }
 
 /**
- * Interceptors
+ * Request Interceptor
  */
-
 axios.interceptors.request.use(function (config) {
   // Pass selected company to header on all requests
   const companyId = Ls.get('selectedCompany')
@@ -35,5 +34,33 @@ axios.interceptors.request.use(function (config) {
 
   return config
 })
+
+/**
+ * Response Interceptor - Handle limit_exceeded errors globally
+ */
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Check if this is a limit_exceeded error (403 with specific error code)
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data &&
+      error.response.data.error === 'limit_exceeded'
+    ) {
+      // Import and use the upgrade store dynamically to avoid circular imports
+      import('@/scripts/stores/upgrade.js').then(({ useUpgradeStore }) => {
+        const upgradeStore = useUpgradeStore()
+        upgradeStore.showLimitExceeded(error.response.data)
+      })
+
+      // Still reject the promise so the calling code knows the request failed
+      return Promise.reject(error)
+    }
+
+    // For all other errors, just pass them through
+    return Promise.reject(error)
+  }
+)
 
 export default axios

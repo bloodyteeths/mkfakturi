@@ -295,5 +295,89 @@ class UsageLimitService
 
         return $usage;
     }
+
+    /**
+     * Get the minimum required tier to unlock/increase a feature limit
+     *
+     * @param  string  $currentTier
+     * @param  string  $feature
+     * @return string|null The next tier that unlocks more capacity, or null if already at max
+     */
+    public function getRequiredTierForFeature(string $currentTier, string $feature): ?string
+    {
+        $tierHierarchy = ['free', 'starter', 'standard', 'business', 'max'];
+        $currentIndex = array_search($currentTier, $tierHierarchy);
+
+        // Check each higher tier for better limits
+        for ($i = $currentIndex + 1; $i < count($tierHierarchy); $i++) {
+            $nextTier = $tierHierarchy[$i];
+            $currentLimit = config("subscriptions.tiers.{$currentTier}.limits.{$feature}");
+            $nextLimit = config("subscriptions.tiers.{$nextTier}.limits.{$feature}");
+
+            // If next tier has unlimited (null) or higher limit, return it
+            if ($nextLimit === null || ($currentLimit !== null && $nextLimit > $currentLimit)) {
+                return $nextTier;
+            }
+        }
+
+        return null; // Already at max or feature doesn't scale
+    }
+
+    /**
+     * Build a standardized limit exceeded response
+     *
+     * @param  Company  $company
+     * @param  string  $feature
+     * @return array Response data for 403 limit exceeded
+     */
+    public function buildLimitExceededResponse(Company $company, string $feature): array
+    {
+        $currentTier = $this->getCompanyTier($company);
+        $requiredTier = $this->getRequiredTierForFeature($currentTier, $feature);
+        $usage = $this->getUsage($company, $feature);
+
+        // Map feature keys to human-readable names
+        $featureNames = [
+            'expenses_per_month' => 'Expenses',
+            'estimates_per_month' => 'Estimates',
+            'custom_fields' => 'Custom Fields',
+            'recurring_invoices_active' => 'Recurring Invoices',
+            'ai_queries_per_month' => 'AI Insights',
+        ];
+
+        // Map feature keys to config upgrade message keys
+        $messageKeys = [
+            'expenses_per_month' => 'expenses',
+            'estimates_per_month' => 'estimates',
+            'custom_fields' => 'custom_fields',
+            'recurring_invoices_active' => 'recurring_invoices',
+            'ai_queries_per_month' => 'ai_suggestions',
+        ];
+
+        $featureName = $featureNames[$feature] ?? $feature;
+        $messageKey = $messageKeys[$feature] ?? null;
+
+        // Get upgrade message from config
+        $message = null;
+        if ($messageKey) {
+            $messages = config("subscriptions.upgrade_messages.{$messageKey}");
+            $message = is_array($messages) ? ($messages[$currentTier] ?? null) : $messages;
+        }
+
+        if (! $message) {
+            $message = "You've reached your {$featureName} limit. Upgrade to continue.";
+        }
+
+        return [
+            'error' => 'limit_exceeded',
+            'message' => $message,
+            'feature' => $feature,
+            'feature_name' => $featureName,
+            'current_tier' => $currentTier,
+            'required_tier' => $requiredTier ?? 'starter',
+            'usage' => $usage,
+            'upgrade_url' => '/admin/settings/billing',
+        ];
+    }
 }
 // CLAUDE-CHECKPOINT

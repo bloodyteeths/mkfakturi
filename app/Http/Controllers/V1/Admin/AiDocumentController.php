@@ -74,14 +74,10 @@ class AiDocumentController extends Controller
         // Check usage limit for AI queries
         $usageService = app(UsageLimitService::class);
         if (! $usageService->canUse($company, 'ai_queries_per_month')) {
-            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
-
-            return response()->json([
-                'error' => 'ai_limit_exceeded',
-                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
-                'usage' => $usage,
-                'upgrade_url' => '/admin/settings/billing',
-            ], 403);
+            return response()->json(
+                $usageService->buildLimitExceededResponse($company, 'ai_queries_per_month'),
+                403
+            );
         }
 
         // Validate request
@@ -173,14 +169,10 @@ class AiDocumentController extends Controller
         // Check usage limit for AI queries
         $usageService = app(UsageLimitService::class);
         if (! $usageService->canUse($company, 'ai_queries_per_month')) {
-            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
-
-            return response()->json([
-                'error' => 'ai_limit_exceeded',
-                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
-                'usage' => $usage,
-                'upgrade_url' => '/admin/settings/billing',
-            ], 403);
+            return response()->json(
+                $usageService->buildLimitExceededResponse($company, 'ai_queries_per_month'),
+                403
+            );
         }
 
         // Validate request
@@ -267,14 +259,10 @@ class AiDocumentController extends Controller
         // Check usage limit for AI queries
         $usageService = app(UsageLimitService::class);
         if (! $usageService->canUse($company, 'ai_queries_per_month')) {
-            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
-
-            return response()->json([
-                'error' => 'ai_limit_exceeded',
-                'message' => "You've used all {$usage['limit']} free AI queries this month. Upgrade to Starter for unlimited AI insights.",
-                'usage' => $usage,
-                'upgrade_url' => '/admin/settings/billing',
-            ], 403);
+            return response()->json(
+                $usageService->buildLimitExceededResponse($company, 'ai_queries_per_month'),
+                403
+            );
         }
 
         // Validate request

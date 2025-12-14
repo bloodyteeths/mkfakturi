@@ -280,6 +280,13 @@ export default [
       },
     ],
   },
+  // Public pricing page (accessible without login)
+  {
+    path: '/pricing',
+    name: 'public-pricing',
+    component: PricingPage,
+    meta: { requiresAuth: false, isPublic: true },
+  },
   {
     path: '/admin',
     component: LayoutBasic,

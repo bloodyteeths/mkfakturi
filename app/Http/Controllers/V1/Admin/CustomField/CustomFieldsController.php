@@ -44,18 +44,12 @@ class CustomFieldsController extends Controller
         $company = \App\Models\Company::find($companyId);
 
         if ($company) {
-            $tier = $company->subscription_tier ?? 'free';
-            $limit = config("subscriptions.tiers.{$tier}.limits.custom_fields");
-
-            if ($limit !== null) {
-                $currentCount = CustomField::where('company_id', $company->id)->count();
-                if ($currentCount >= $limit) {
-                    return response()->json([
-                        'error' => 'limit_exceeded',
-                        'message' => "You've reached your custom field limit ({$limit}). Upgrade to add more.",
-                        'usage' => ['used' => $currentCount, 'limit' => $limit],
-                    ], 403);
-                }
+            $usageService = app(\App\Services\UsageLimitService::class);
+            if (! $usageService->canUse($company, 'custom_fields')) {
+                return response()->json(
+                    $usageService->buildLimitExceededResponse($company, 'custom_fields'),
+                    403
+                );
             }
         }
 
