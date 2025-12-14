@@ -104,6 +104,16 @@ class NullAiProvider implements AiProviderInterface
 
         return 'Анализата на документи е моментално недостапна. Ве молиме конфигурирајте го AI провајдерот пред повторно да пробате.';
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function generateStream(string $prompt, callable $onChunk, array $options = []): string
+    {
+        $response = 'AI асистентот е привремено недостапен. Ве молиме конфигурирајте го AI провајдерот.';
+        $onChunk($response);
+        return $response;
+    }
 }
 
 // CLAUDE-CHECKPOINT

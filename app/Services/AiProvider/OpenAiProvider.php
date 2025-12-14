@@ -225,6 +225,24 @@ class OpenAiProvider implements AiProviderInterface
         // TODO: Implement OpenAI vision API support (GPT-4 Vision)
         throw new \Exception('Document analysis is not yet implemented for OpenAI provider. Please use Claude provider for document analysis.');
     }
+
+    /**
+     * Generate a streaming response from a single prompt
+     *
+     * @param  string  $prompt  The prompt to send
+     * @param  callable  $onChunk  Callback for each chunk
+     * @param  array<string, mixed>  $options  Additional options
+     * @return string Complete response
+     */
+    public function generateStream(string $prompt, callable $onChunk, array $options = []): string
+    {
+        // OpenAI streaming not implemented - fall back to regular generate
+        $response = $this->generate($prompt, $options);
+        $onChunk($response);
+        return $response;
+    }
 }
+
+// CLAUDE-CHECKPOINT
 
 // CLAUDE-CHECKPOINT

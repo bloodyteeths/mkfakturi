@@ -27,7 +27,7 @@ class GeminiProvider implements AiProviderInterface
         $config = config('ai.providers.gemini');
 
         $this->apiKey = $config['api_key'] ?? '';
-        $this->model = $config['model'] ?? 'gemini-pro';
+        $this->model = $config['model'] ?? 'gemini-1.5-flash';
         $this->apiUrl = rtrim($config['api_url'] ?? 'https://generativelanguage.googleapis.com/v1beta/models', '/');
         $this->maxTokens = $config['max_tokens'] ?? 2048;
         $this->temperature = $config['temperature'] ?? 0.7;
@@ -213,6 +213,22 @@ class GeminiProvider implements AiProviderInterface
     {
         // TODO: Implement Gemini vision API support
         throw new \Exception('Document analysis is not yet implemented for Gemini provider. Please use Claude provider for document analysis.');
+    }
+
+    /**
+     * Generate a streaming response from a single prompt
+     *
+     * @param  string  $prompt  The prompt to send
+     * @param  callable  $onChunk  Callback for each chunk
+     * @param  array<string, mixed>  $options  Additional options
+     * @return string Complete response
+     */
+    public function generateStream(string $prompt, callable $onChunk, array $options = []): string
+    {
+        // Gemini streaming not implemented - fall back to regular generate
+        $response = $this->generate($prompt, $options);
+        $onChunk($response);
+        return $response;
     }
 }
 
