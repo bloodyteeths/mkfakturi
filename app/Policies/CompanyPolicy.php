@@ -57,4 +57,28 @@ class CompanyPolicy
 
         return false;
     }
+
+    /**
+     * Determine if the user can manage billing for the company.
+     * Only company owners and super admins can manage billing.
+     */
+    public function manageBilling(User $user, Company $company): bool
+    {
+        // Super admin can always manage billing
+        if ($user->role === 'super admin' || $user->is_super_admin) {
+            return true;
+        }
+
+        // Company owner can manage billing
+        if ($user->id == $company->owner_id) {
+            return true;
+        }
+
+        // Check if user is an owner-level user in this company
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        return false;
+    }
 }

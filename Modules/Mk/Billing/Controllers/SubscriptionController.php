@@ -45,66 +45,27 @@ class SubscriptionController extends Controller
 
         $company = Company::findOrFail($companyId);
 
-        Log::info('SubscriptionController::index - Company found', [
-            'company_id' => $company->id,
-            'paddle_id' => $company->paddle_id,
-        ]);
+        // Get current subscription tier from company (set by Stripe webhooks)
+        $currentTier = $company->subscription_tier ?? 'free';
 
-        // Check authorization - skip for now to allow viewing
-        // $this->authorize('manage-billing', $company);
-
-        // Try to get subscription safely
-        $currentPlan = null;
-        try {
-            // Check directly in database to avoid calling Paddle methods
-            $subscription = \DB::table('subscriptions')
-                ->where('billable_id', $company->id)
-                ->where('billable_type', 'App\\Models\\Company')
-                ->where('name', 'default')
-                ->whereNull('ends_at')
-                ->orWhere('ends_at', '>', now())
-                ->first();
-
-            if ($subscription) {
-                Log::info('SubscriptionController::index - Active subscription found', [
-                    'subscription_id' => $subscription->id,
-                    'status' => $subscription->status,
-                ]);
-
-                $currentPlan = [
-                    'tier' => $company->subscription_tier ?? 'starter',
-                    'status' => $subscription->status ?? 'active',
-                    'ends_at' => $subscription->ends_at,
-                    'trial_ends_at' => $subscription->trial_ends_at,
-                    'paused_at' => $subscription->paused_at ?? null,
-                ];
-            }
-        } catch (\Exception $e) {
-            Log::warning('SubscriptionController::index - Error checking subscription', [
-                'error' => $e->getMessage(),
-                'company_id' => $company->id,
-            ]);
-        }
-
-        // If no valid subscription, return default free tier
-        if (! $currentPlan) {
-            Log::info('SubscriptionController::index - No subscription, returning free tier');
-            $currentPlan = [
-                'tier' => 'free',
-                'status' => 'active',
-                'ends_at' => null,
-                'trial_ends_at' => null,
-                'paused_at' => null,
-            ];
-        }
+        $currentPlan = [
+            'tier' => $currentTier,
+            'status' => $currentTier !== 'free' ? 'active' : 'none',
+            'ends_at' => null,
+            'trial_ends_at' => $company->trial_ends_at,
+            'paused_at' => null,
+        ];
 
         $response = [
             'tiers' => self::TIERS,
             'current_plan' => $currentPlan,
-            'paddle_customer_id' => $company->paddle_id,
+            'stripe_customer_id' => $company->stripe_id,
         ];
 
-        Log::info('SubscriptionController::index - Returning response', $response);
+        Log::info('SubscriptionController::index - Returning response', [
+            'company_id' => $companyId,
+            'tier' => $currentTier,
+        ]);
 
         return response()->json($response);
     }
