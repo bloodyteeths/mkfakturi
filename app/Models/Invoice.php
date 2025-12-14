@@ -223,31 +223,51 @@ class Invoice extends Model implements HasMedia
         return $this->getNotes();
     }
 
+    /**
+     * Get cached date format settings to avoid repeated DB queries.
+     * Cache key is per-company and cached for the duration of the request.
+     */
+    private function getCachedDateFormat(): string
+    {
+        static $formatCache = [];
+
+        $companyId = $this->company_id;
+        if (!isset($formatCache[$companyId])) {
+            $formatCache[$companyId] = CompanySetting::getSetting('carbon_date_format', $companyId) ?: 'Y-m-d';
+        }
+
+        return $formatCache[$companyId];
+    }
+
     public function getFormattedCreatedAtAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->created_at)->format($dateFormat);
+        return Carbon::parse($this->created_at)->format($this->getCachedDateFormat());
     }
 
     public function getFormattedDueDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
+        return Carbon::parse($this->due_date)->translatedFormat($this->getCachedDateFormat());
     }
 
     public function getFormattedInvoiceDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-        $timeFormat = CompanySetting::getSetting('carbon_time_format', $this->company_id);
-        $invoiceTimeEnabled = CompanySetting::getSetting('invoice_use_time', $this->company_id);
+        static $timeCache = [];
 
-        if ($invoiceTimeEnabled === 'YES') {
-            $dateFormat .= ' '.$timeFormat;
+        $companyId = $this->company_id;
+        $dateFormat = $this->getCachedDateFormat();
+
+        // Cache time format check per company
+        if (!isset($timeCache[$companyId])) {
+            $invoiceTimeEnabled = CompanySetting::getSetting('invoice_use_time', $companyId);
+            if ($invoiceTimeEnabled === 'YES') {
+                $timeFormat = CompanySetting::getSetting('carbon_time_format', $companyId) ?: 'H:i';
+                $timeCache[$companyId] = $dateFormat . ' ' . $timeFormat;
+            } else {
+                $timeCache[$companyId] = $dateFormat;
+            }
         }
 
-        return Carbon::parse($this->invoice_date)->translatedFormat($dateFormat);
+        return Carbon::parse($this->invoice_date)->translatedFormat($timeCache[$companyId]);
     }
 
     /**
@@ -335,13 +355,25 @@ class Invoice extends Model implements HasMedia
 
     public function scopeWhereSearch($query, $search)
     {
-        foreach (explode(' ', $search) as $term) {
-            $query->whereHas('customer', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
+        // Use a single JOIN instead of multiple whereHas subqueries for better performance
+        // This avoids N+1 subqueries when searching with multiple terms
+        return $query->where(function ($q) use ($search) {
+            // Search in invoice number first (most common search)
+            $q->where('invoices.invoice_number', 'LIKE', '%' . $search . '%');
+
+            // Join customers table once and search all name fields
+            $q->orWhereExists(function ($subQuery) use ($search) {
+                $subQuery->selectRaw('1')
+                    ->from('customers')
+                    ->whereColumn('customers.id', 'invoices.customer_id')
+                    ->where(function ($customerQuery) use ($search) {
+                        $customerQuery->where('customers.name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('customers.contact_name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('customers.company_name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('customers.email', 'LIKE', '%' . $search . '%');
+                    });
             });
-        }
+        });
     }
 
     public function scopeWhereOrder($query, $orderByField, $orderBy)

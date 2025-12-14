@@ -13,7 +13,22 @@ use Illuminate\Http\Request;
 class InvoicesController extends Controller
 {
     /**
-     * Relations required to render the invoice resource without N+1 queries.
+     * Minimal relations for list view - only what's displayed in the table.
+     * This dramatically reduces query count and memory usage.
+     *
+     * @return array<int, string>
+     */
+    private function invoiceListRelations(): array
+    {
+        return [
+            'customer:id,name,email',
+            'currency:id,name,code,symbol',
+            'company:id,name',
+        ];
+    }
+
+    /**
+     * Full relations for single invoice view/edit.
      *
      * @return array<int, string>
      */
@@ -52,8 +67,8 @@ class InvoicesController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $invoices = Invoice::with($this->invoiceResourceRelations())
-            ->with('payments')
+        // Build base query with filters first
+        $query = Invoice::query()
             ->applyFilters($request->only([
                 'search',
                 'customer_id',
@@ -62,13 +77,20 @@ class InvoicesController extends Controller
                 'orderByField',
                 'orderBy',
             ]))
-            ->whereCompany()
+            ->whereCompany();
+
+        // Get total count from filtered query (not all invoices)
+        $totalCount = (clone $query)->count();
+
+        // Load minimal relations for list view performance
+        $invoices = $query
+            ->with($this->invoiceListRelations())
             ->paginateData($limit);
 
         return InvoiceResource::collection($invoices)
             ->additional([
                 'meta' => [
-                    'invoice_total_count' => Invoice::whereCompany()->count(),
+                    'invoice_total_count' => $totalCount,
                 ],
             ]);
     }
