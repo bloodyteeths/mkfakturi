@@ -226,13 +226,15 @@
 </template>
 
 <script>
+import Ls from '@/scripts/services/ls.js'
+
 export default {
   name: 'CompaniesPricing',
 
   props: {
     companyId: {
       type: Number,
-      required: true
+      default: null
     }
   },
 
@@ -240,6 +242,8 @@ export default {
     return {
       currentPlan: 'free',
       loading: false,
+      isLoggedIn: false,
+      selectedCompanyId: null,
       billingInterval: 'monthly', // 'monthly' or 'yearly'
       // MKD prices
       monthlyPrices: {
@@ -253,6 +257,25 @@ export default {
         standard: 17990,
         business: 36990,
         max: 91990
+      },
+      // Paddle price IDs from environment
+      paddlePriceIds: {
+        starter: {
+          monthly: import.meta.env.VITE_PADDLE_STARTER_PRICE_ID,
+          yearly: import.meta.env.VITE_PADDLE_STARTER_YEARLY_PRICE_ID,
+        },
+        standard: {
+          monthly: import.meta.env.VITE_PADDLE_STANDARD_PRICE_ID,
+          yearly: import.meta.env.VITE_PADDLE_STANDARD_YEARLY_PRICE_ID,
+        },
+        business: {
+          monthly: import.meta.env.VITE_PADDLE_BUSINESS_PRICE_ID,
+          yearly: import.meta.env.VITE_PADDLE_BUSINESS_YEARLY_PRICE_ID,
+        },
+        max: {
+          monthly: import.meta.env.VITE_PADDLE_MAX_PRICE_ID,
+          yearly: import.meta.env.VITE_PADDLE_MAX_YEARLY_PRICE_ID,
+        },
       }
     }
   },
@@ -260,11 +283,24 @@ export default {
   computed: {
     prices() {
       return this.billingInterval === 'monthly' ? this.monthlyPrices : this.yearlyPrices
+    },
+
+    effectiveCompanyId() {
+      return this.companyId || this.selectedCompanyId
     }
   },
 
   mounted() {
-    this.fetchCurrentPlan()
+    // Check if user is logged in by looking for auth token and company
+    const authToken = Ls.get('auth.token')
+    const companyId = Ls.get('selectedCompany')
+
+    this.isLoggedIn = !!authToken
+    this.selectedCompanyId = companyId ? parseInt(companyId) : null
+
+    if (this.isLoggedIn && this.effectiveCompanyId) {
+      this.fetchCurrentPlan()
+    }
   },
 
   methods: {
@@ -277,31 +313,78 @@ export default {
     },
 
     async fetchCurrentPlan() {
+      if (!this.effectiveCompanyId) return
+
       try {
-        const response = await axios.get(`/api/companies/${this.companyId}/subscription`)
+        // Note: axios baseURL is /api/v1, so we use /companies/... not /api/companies/...
+        const response = await axios.get(`/companies/${this.effectiveCompanyId}/subscription`)
         this.currentPlan = response.data.current_plan?.tier || 'free'
       } catch (error) {
         console.error('Failed to fetch current plan', error)
+        // Default to free if we can't fetch the plan
+        this.currentPlan = 'free'
       }
     },
 
     async subscribe(tier) {
       if (this.loading) return
 
+      // If user is not logged in, redirect to signup
+      if (!this.isLoggedIn) {
+        // Store the selected tier and redirect to signup
+        Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
+        this.$router.push({ name: 'signup' })
+        return
+      }
+
+      // If no company selected, redirect to dashboard to select/create one
+      if (!this.effectiveCompanyId) {
+        alert('Ве молиме прво изберете компанија.')
+        this.$router.push({ name: 'dashboard' })
+        return
+      }
+
       this.loading = true
 
       try {
-        const response = await axios.post(`/api/companies/${this.companyId}/subscription/checkout`, {
+        // Try server-side checkout first
+        const response = await axios.post(`/companies/${this.effectiveCompanyId}/subscription/checkout`, {
           tier,
           interval: this.billingInterval
         })
 
-        // Redirect to Stripe checkout
+        // Redirect to checkout
         if (response.data.checkout_url) {
           window.location.href = response.data.checkout_url
         }
       } catch (error) {
         console.error('Failed to create checkout session', error)
+
+        // Fallback: Try opening Paddle checkout directly
+        const priceId = this.paddlePriceIds[tier]?.[this.billingInterval]
+
+        if (typeof Paddle !== 'undefined' && priceId) {
+          try {
+            Paddle.Checkout.open({
+              product: priceId,
+              passthrough: JSON.stringify({
+                company_id: this.effectiveCompanyId,
+                tier: tier,
+              }),
+              successCallback: () => {
+                alert('Претплатата е успешно започната!')
+                window.location.reload()
+              },
+              closeCallback: () => {
+                this.loading = false
+              },
+            })
+            return
+          } catch (paddleError) {
+            console.error('Paddle checkout failed', paddleError)
+          }
+        }
+
         alert('Неуспешно започнување на претплата. Обидете се повторно.')
       } finally {
         this.loading = false
