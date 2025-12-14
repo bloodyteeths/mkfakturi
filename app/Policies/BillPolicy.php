@@ -38,7 +38,11 @@ class BillPolicy
             return true;
         }
 
-        if (($user->can('view-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($bill->company_id);
+        }
+
+        if ($user->can('view-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return true;
         }
 
@@ -70,7 +74,11 @@ class BillPolicy
             return $bill->allow_edit;
         }
 
-        if (($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner' && $user->hasPartnerAccessToCompany($bill->company_id)) {
+            return $bill->allow_edit;
+        }
+
+        if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return $bill->allow_edit;
         }
 
@@ -86,7 +94,11 @@ class BillPolicy
             return true;
         }
 
-        if (($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($bill->company_id);
+        }
+
+        if ($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return true;
         }
 
@@ -134,7 +146,11 @@ class BillPolicy
             return true;
         }
 
-        if (($user->can('send-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($bill->company_id);
+        }
+
+        if ($user->can('send-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return true;
         }
 
@@ -150,7 +166,11 @@ class BillPolicy
             return true;
         }
 
-        if (($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($bill->company_id);
+        }
+
+        if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return true;
         }
 
@@ -166,7 +186,11 @@ class BillPolicy
             return true;
         }
 
-        if (($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($bill->company_id);
+        }
+
+        if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return true;
         }
 

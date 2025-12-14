@@ -39,7 +39,11 @@ class ExpensePolicy
             return true;
         }
 
-        if (($user->can('view-expense', $expense) && $user->hasCompany($expense->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($expense->company_id);
+        }
+
+        if ($user->can('view-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -75,7 +79,11 @@ class ExpensePolicy
             return true;
         }
 
-        if (($user->can('edit-expense', $expense) && $user->hasCompany($expense->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($expense->company_id);
+        }
+
+        if ($user->can('edit-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -93,7 +101,11 @@ class ExpensePolicy
             return true;
         }
 
-        if (($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($expense->company_id);
+        }
+
+        if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
 

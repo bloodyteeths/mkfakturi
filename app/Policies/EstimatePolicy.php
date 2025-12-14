@@ -39,7 +39,11 @@ class EstimatePolicy
             return true;
         }
 
-        if (($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($estimate->company_id);
+        }
+
+        if ($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -75,7 +79,11 @@ class EstimatePolicy
             return true;
         }
 
-        if (($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($estimate->company_id);
+        }
+
+        if ($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -93,7 +101,11 @@ class EstimatePolicy
             return true;
         }
 
-        if (($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($estimate->company_id);
+        }
+
+        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -148,7 +160,11 @@ class EstimatePolicy
             return true;
         }
 
-        if (($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($estimate->company_id);
+        }
+
+        if ($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 

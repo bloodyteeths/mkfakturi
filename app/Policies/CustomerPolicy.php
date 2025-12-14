@@ -41,7 +41,11 @@ class CustomerPolicy
             return true;
         }
 
-        if ($user->can('view-customer', $customer) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($customer->company_id);
+        }
+
+        if ($user->can('view-customer', $customer) && $user->hasCompany($customer->company_id)) {
             return true;
         }
 

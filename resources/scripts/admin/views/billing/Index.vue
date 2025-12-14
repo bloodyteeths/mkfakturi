@@ -1,6 +1,6 @@
 <template>
   <BasePage>
-    <BasePageHeader title="Billing & Subscription">
+    <BasePageHeader :title="$t('billing.title')">
       <template #actions>
         <BaseButton
           v-if="!subscription || subscription.status === 'canceled'"
@@ -10,7 +10,7 @@
           <template #left>
             <CreditCardIcon class="h-5 w-5" />
           </template>
-          Subscribe Now
+          {{ $t('billing.subscribe_now') }}
         </BaseButton>
       </template>
     </BasePageHeader>
@@ -18,7 +18,7 @@
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-12">
       <BaseSpinner class="h-8 w-8" />
-      <p class="ml-3 text-gray-600">Loading subscription details...</p>
+      <p class="ml-3 text-gray-600">{{ $t('billing.loading_subscription') }}</p>
     </div>
 
     <!-- Error State -->
@@ -32,8 +32,8 @@
         <div class="p-6">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h2 class="text-xl font-semibold text-gray-900">Current Subscription</h2>
-              <p class="text-sm text-gray-500 mt-1">Manage your subscription and billing</p>
+              <h2 class="text-xl font-semibold text-gray-900">{{ $t('billing.current_subscription') }}</h2>
+              <p class="text-sm text-gray-500 mt-1">{{ $t('billing.manage_subscription') }}</p>
             </div>
             <BaseBadge
               :variant="getStatusVariant(subscription.status)"
@@ -45,7 +45,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
-              <p class="text-sm text-gray-500">Plan</p>
+              <p class="text-sm text-gray-500">{{ $t('billing.plan') }}</p>
               <div class="flex items-center mt-1">
                 <BaseBadge :variant="getPlanVariant(subscription.plan_name)" class="mr-2">
                   {{ subscription.plan_name }}
@@ -53,19 +53,19 @@
                 <span class="text-2xl font-bold text-gray-900">
                   €{{ subscription.price }}
                 </span>
-                <span class="text-gray-500 ml-1">/month</span>
+                <span class="text-gray-500 ml-1">{{ $t('billing.per_month') }}</span>
               </div>
             </div>
 
             <div v-if="subscription.next_billing_date">
-              <p class="text-sm text-gray-500">Next Billing Date</p>
+              <p class="text-sm text-gray-500">{{ $t('billing.next_billing_date') }}</p>
               <p class="text-lg font-semibold text-gray-900 mt-1">
                 {{ formatDate(subscription.next_billing_date) }}
               </p>
             </div>
 
             <div v-if="subscription.trial_ends_at">
-              <p class="text-sm text-gray-500">Trial Ends</p>
+              <p class="text-sm text-gray-500">{{ $t('billing.trial_ends') }}</p>
               <p class="text-lg font-semibold text-gray-900 mt-1">
                 {{ formatDate(subscription.trial_ends_at) }}
               </p>
@@ -82,7 +82,7 @@
               <template #left>
                 <ArrowUpIcon class="h-5 w-5" />
               </template>
-              Upgrade Plan
+              {{ $t('billing.upgrade_plan') }}
             </BaseButton>
 
             <BaseButton
@@ -92,7 +92,7 @@
               <template #left>
                 <CreditCardIcon class="h-5 w-5" />
               </template>
-              Update Payment Method
+              {{ $t('billing.update_payment_method') }}
             </BaseButton>
 
             <BaseButton
@@ -103,7 +103,7 @@
               <template #left>
                 <XCircleIcon class="h-5 w-5" />
               </template>
-              Cancel Subscription
+              {{ $t('billing.cancel_subscription') }}
             </BaseButton>
 
             <BaseButton
@@ -112,7 +112,7 @@
               @click="resumeSubscription"
               :disabled="isProcessing"
             >
-              Resume Subscription
+              {{ $t('billing.resume_subscription') }}
             </BaseButton>
           </div>
         </div>
@@ -122,16 +122,16 @@
       <BaseCard v-else class="mb-6">
         <div class="p-12 text-center">
           <CreditCardIcon class="mx-auto h-12 w-12 text-gray-400" />
-          <h3 class="mt-2 text-lg font-medium text-gray-900">No Active Subscription</h3>
+          <h3 class="mt-2 text-lg font-medium text-gray-900">{{ $t('billing.no_active_subscription') }}</h3>
           <p class="mt-1 text-sm text-gray-500">
-            Subscribe to a plan to unlock all features
+            {{ $t('billing.subscribe_to_unlock') }}
           </p>
           <div class="mt-6">
             <BaseButton
               variant="primary"
               @click="$router.push({ name: 'billing.pricing' })"
             >
-              View Plans
+              {{ $t('billing.view_plans') }}
             </BaseButton>
           </div>
         </div>
@@ -140,7 +140,7 @@
       <!-- Billing History -->
       <BaseCard>
         <div class="p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Billing History</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('billing.billing_history') }}</h3>
 
           <!-- Invoices Table -->
           <div v-if="invoices.length > 0" class="overflow-x-auto">
@@ -148,19 +148,19 @@
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
+                    {{ $t('billing.date') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                    {{ $t('billing.description') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
+                    {{ $t('billing.amount') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {{ $t('billing.status') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {{ $t('billing.actions') }}
                   </th>
                 </tr>
               </thead>
@@ -187,7 +187,7 @@
                       target="_blank"
                       class="text-primary-600 hover:text-primary-900"
                     >
-                      Download PDF
+                      {{ $t('billing.download_pdf') }}
                     </a>
                   </td>
                 </tr>
@@ -198,20 +198,20 @@
           <!-- Empty State -->
           <div v-else class="text-center py-8">
             <DocumentTextIcon class="mx-auto h-12 w-12 text-gray-400" />
-            <p class="mt-2 text-sm text-gray-500">No invoices yet</p>
+            <p class="mt-2 text-sm text-gray-500">{{ $t('billing.no_invoices_yet') }}</p>
           </div>
         </div>
       </BaseCard>
     </div>
 
     <!-- Cancel Subscription Modal -->
-    <BaseDialog v-model="showCancelModal" title="Cancel Subscription">
+    <BaseDialog v-model="showCancelModal" :title="$t('billing.cancel_modal_title')">
       <div class="space-y-4">
         <p class="text-sm text-gray-700">
-          Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your billing period.
+          {{ $t('billing.cancel_modal_text') }}
         </p>
         <p class="text-sm text-gray-500">
-          Your subscription will remain active until {{ formatDate(subscription?.next_billing_date) }}.
+          {{ $t('billing.subscription_active_until', { date: formatDate(subscription?.next_billing_date) }) }}
         </p>
       </div>
 
@@ -221,14 +221,14 @@
             variant="white"
             @click="showCancelModal = false"
           >
-            Keep Subscription
+            {{ $t('billing.keep_subscription') }}
           </BaseButton>
           <BaseButton
             variant="danger"
             :disabled="isProcessing"
             @click="cancelSubscription"
           >
-            Cancel Subscription
+            {{ $t('billing.cancel_subscription') }}
           </BaseButton>
         </div>
       </template>
@@ -239,6 +239,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   CreditCardIcon,
   ArrowUpIcon,
@@ -258,6 +259,7 @@ import BaseSpinner from '@/scripts/components/base/BaseSpinner.vue'
 import BaseDialog from '@/scripts/components/base/BaseDialog.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const isLoading = ref(true)
 const isProcessing = ref(false)
 const error = ref(null)
@@ -276,7 +278,7 @@ const fetchSubscription = async () => {
     subscription.value = response.data.data
   } catch (err) {
     if (err.response?.status !== 404) {
-      error.value = 'Failed to load subscription details'
+      error.value = t('billing.error_load_subscription')
       console.error('Failed to fetch subscription:', err)
     }
   }
@@ -385,7 +387,7 @@ const openUpdatePaymentMethod = async () => {
     })
   } catch (err) {
     console.error('Failed to open payment method update:', err)
-    error.value = 'Failed to open payment method update. Please try again.'
+    error.value = t('billing.error_payment_method')
   }
 }
 
@@ -402,10 +404,10 @@ const cancelSubscription = async () => {
     await fetchSubscription()
 
     // Show success message (you can add a toast notification here)
-    alert('Subscription canceled successfully')
+    alert(t('billing.success_canceled'))
   } catch (err) {
     console.error('Failed to cancel subscription:', err)
-    error.value = err.response?.data?.message || 'Failed to cancel subscription'
+    error.value = err.response?.data?.message || t('billing.error_cancel')
   } finally {
     isProcessing.value = false
   }
@@ -423,10 +425,10 @@ const resumeSubscription = async () => {
     await fetchSubscription()
 
     // Show success message
-    alert('Subscription resumed successfully')
+    alert(t('billing.success_resumed'))
   } catch (err) {
     console.error('Failed to resume subscription:', err)
-    error.value = err.response?.data?.message || 'Failed to resume subscription'
+    error.value = err.response?.data?.message || t('billing.error_resume')
   } finally {
     isProcessing.value = false
   }

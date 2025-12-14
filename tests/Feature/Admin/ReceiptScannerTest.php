@@ -74,6 +74,11 @@ test('upload jpeg creates draft bill via parser', function () {
                 ],
             ];
         }
+
+        public function ocr(int $companyId, string $filePath, string $originalName): array
+        {
+            return [];
+        }
     };
     $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
@@ -178,6 +183,11 @@ test('receipt scanner respects tenant isolation', function () {
                 'line_items' => [],
             ];
         }
+
+        public function ocr(int $companyId, string $filePath, string $originalName): array
+        {
+            return [];
+        }
     };
     $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
@@ -270,6 +280,11 @@ test('parser fallback generates bill_number when missing', function () {
                 ],
                 'line_items' => [],
             ];
+        }
+
+        public function ocr(int $companyId, string $filePath, string $originalName): array
+        {
+            return [];
         }
     };
     $this->app->instance(InvoiceParserClient::class, $fakeParserClient);

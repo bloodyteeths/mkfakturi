@@ -38,7 +38,11 @@ class SupplierPolicy
             return true;
         }
 
-        if (($user->can('view-supplier', $supplier) && $user->hasCompany($supplier->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($supplier->company_id);
+        }
+
+        if ($user->can('view-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
             return true;
         }
 
@@ -70,7 +74,11 @@ class SupplierPolicy
             return true;
         }
 
-        if (($user->can('edit-supplier', $supplier) && $user->hasCompany($supplier->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($supplier->company_id);
+        }
+
+        if ($user->can('edit-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
             return true;
         }
 
@@ -86,7 +94,11 @@ class SupplierPolicy
             return true;
         }
 
-        if (($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($supplier->company_id);
+        }
+
+        if ($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
             return true;
         }
 

@@ -41,7 +41,11 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if (($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($recurringInvoice->company_id);
+        }
+
+        if ($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -77,7 +81,11 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if (($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($recurringInvoice->company_id);
+        }
+
+        if ($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -95,7 +103,11 @@ class RecurringInvoicePolicy
             return true;
         }
 
-        if (($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($recurringInvoice->company_id);
+        }
+
+        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 

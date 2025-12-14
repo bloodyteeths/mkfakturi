@@ -36,7 +36,7 @@ class InvoicePolicy
     public function view(User $user, Invoice $invoice)
     {
         if ($user->role === 'partner') {
-            return true;
+            return $user->hasPartnerAccessToCompany($invoice->company_id);
         }
 
         return $user->hasCompany($invoice->company_id);
@@ -71,7 +71,7 @@ class InvoicePolicy
             return $invoice->allow_edit;
         }
 
-        if ($user->can('edit-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
+        if ($user->can('edit-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
             return $invoice->allow_edit;
         }
 
@@ -89,7 +89,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
+        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
             return true;
         }
 
@@ -107,7 +107,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
+        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
             return true;
         }
 
@@ -125,7 +125,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
+        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
             return true;
         }
 
@@ -144,7 +144,7 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('send-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || $user->role === 'partner')) {
+        if ($user->can('send-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
             return true;
         }
 
@@ -169,3 +169,4 @@ class InvoicePolicy
         return false;
     }
 }
+// CLAUDE-CHECKPOINT

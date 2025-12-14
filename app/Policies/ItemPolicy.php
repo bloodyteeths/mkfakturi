@@ -39,7 +39,11 @@ class ItemPolicy
             return true;
         }
 
-        if (($user->can('view-item', $item) && $user->hasCompany($item->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($item->company_id);
+        }
+
+        if ($user->can('view-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -75,7 +79,11 @@ class ItemPolicy
             return true;
         }
 
-        if (($user->can('edit-item', $item) && $user->hasCompany($item->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($item->company_id);
+        }
+
+        if ($user->can('edit-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -93,7 +101,11 @@ class ItemPolicy
             return true;
         }
 
-        if (($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($item->company_id);
+        }
+
+        if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
 

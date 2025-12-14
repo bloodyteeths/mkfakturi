@@ -44,7 +44,11 @@ class CreditNotePolicy
             return true;
         }
 
-        if (($user->can('view-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($creditNote->company_id);
+        }
+
+        if ($user->can('view-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
             return true;
         }
 
@@ -80,7 +84,11 @@ class CreditNotePolicy
             return $creditNote->allow_edit;
         }
 
-        if (($user->can('edit-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner' && $user->hasPartnerAccessToCompany($creditNote->company_id)) {
+            return $creditNote->allow_edit;
+        }
+
+        if ($user->can('edit-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
             return $creditNote->allow_edit;
         }
 
@@ -99,7 +107,11 @@ class CreditNotePolicy
             return true;
         }
 
-        if (($user->can('delete-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($creditNote->company_id);
+        }
+
+        if ($user->can('delete-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
             return true;
         }
 
@@ -147,7 +159,11 @@ class CreditNotePolicy
             return true;
         }
 
-        if (($user->can('send-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($creditNote->company_id);
+        }
+
+        if ($user->can('send-credit-note', $creditNote) && $user->hasCompany($creditNote->company_id)) {
             return true;
         }
 

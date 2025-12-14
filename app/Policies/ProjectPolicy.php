@@ -45,7 +45,7 @@ class ProjectPolicy
         }
 
         if ($user->role === 'partner') {
-            return true;
+            return $user->hasPartnerAccessToCompany($project->company_id);
         }
 
         return $user->can('view-project', $project);
@@ -77,7 +77,7 @@ class ProjectPolicy
         }
 
         if ($user->role === 'partner') {
-            return true;
+            return $user->hasPartnerAccessToCompany($project->company_id);
         }
 
         return $user->can('edit-project', $project);
@@ -93,7 +93,7 @@ class ProjectPolicy
         }
 
         if ($user->role === 'partner') {
-            return true;
+            return $user->hasPartnerAccessToCompany($project->company_id);
         }
 
         return $user->can('delete-project', $project);

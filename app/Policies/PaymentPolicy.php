@@ -39,7 +39,11 @@ class PaymentPolicy
             return true;
         }
 
-        if (($user->can('view-payment', $payment) && $user->hasCompany($payment->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($payment->company_id);
+        }
+
+        if ($user->can('view-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -75,7 +79,11 @@ class PaymentPolicy
             return true;
         }
 
-        if (($user->can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($payment->company_id);
+        }
+
+        if ($user->can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -93,7 +101,11 @@ class PaymentPolicy
             return true;
         }
 
-        if (($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            return $user->hasPartnerAccessToCompany($payment->company_id);
+        }
+
+        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
 

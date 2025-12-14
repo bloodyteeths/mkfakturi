@@ -432,7 +432,7 @@ class EInvoiceController extends Controller
                 DB::commit();
 
                 // Dispatch job to submit to tax authority
-                dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id))->onQueue('einvoice');
+                dispatch(new \App\Jobs\SubmitEInvoiceJob($eInvoice->id))->onQueue('einvoice');
 
                 // Reload e-invoice with relationships
                 $eInvoice = $eInvoice->fresh([
@@ -579,7 +579,7 @@ class EInvoiceController extends Controller
             $submission->retry();
 
             // Dispatch job again
-            dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->id));
+            dispatch(new \App\Jobs\SubmitEInvoiceJob($eInvoice->id));
 
             // Reload e-invoice with relationships
             $eInvoice = $submission->eInvoice->fresh([
@@ -793,4 +793,5 @@ class EInvoiceController extends Controller
     }
 }
 
+// CLAUDE-CHECKPOINT
 // CLAUDE-CHECKPOINT
