@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Models\Account;
 use App\Models\AccountMapping;
+use App\Models\AccountSuggestionFeedback;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -434,6 +436,8 @@ class AccountSuggestionService
      * (customer, supplier, expense_category) with confidence scores,
      * reasoning, and alternative suggestions.
      *
+     * Now includes calibrated confidence based on historical accuracy!
+     *
      * @param string $entityType Entity type (customer, supplier, expense_category)
      * @param string $entityName Name of the entity for pattern matching
      * @param string|null $description Optional transaction description
@@ -452,7 +456,9 @@ class AccountSuggestionService
                 'account_code' => null,
                 'account_name' => null,
                 'confidence' => 0.0,
+                'calibrated_confidence' => 0.0,
                 'reason' => 'no_company',
+                'sample_size' => 0,
                 'alternatives' => [],
             ];
         }
@@ -494,12 +500,24 @@ class AccountSuggestionService
                 'account_code' => null,
                 'account_name' => null,
                 'confidence' => 0.0,
+                'calibrated_confidence' => 0.0,
                 'reason' => 'no_match',
+                'sample_size' => 0,
                 'alternatives' => [],
             ];
         }
 
         $topSuggestion = array_shift($suggestions);
+
+        // Apply confidence calibration based on historical accuracy
+        $staticConfidence = $topSuggestion['confidence'];
+        $historicalAccuracy = $this->getHistoricalAccuracy($companyId, $entityType, $topSuggestion['reason']);
+
+        // Blend static confidence (60%) with historical accuracy (40%)
+        $calibratedConfidence = ($staticConfidence * 0.6) + ($historicalAccuracy['rate'] * 0.4);
+
+        $topSuggestion['calibrated_confidence'] = round($calibratedConfidence, 3);
+        $topSuggestion['sample_size'] = $historicalAccuracy['sample_size'];
         $topSuggestion['alternatives'] = array_slice($suggestions, 0, 3); // Top 3 alternatives
 
         return $topSuggestion;
@@ -1042,6 +1060,153 @@ class AccountSuggestionService
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Record feedback for a suggestion to enable confidence calibration.
+     *
+     * This method should be called whenever a user accepts or modifies
+     * an account suggestion to build historical accuracy data.
+     *
+     * @param int $companyId Company ID
+     * @param string $entityType Entity type (customer, supplier, expense_category)
+     * @param string $reason Suggestion reason (learned, pattern, category, default, special)
+     * @param int $suggestedAccountId Account that was suggested by the AI
+     * @param int|null $acceptedAccountId Account that user actually selected
+     * @param float $originalConfidence Original static confidence score (0.000 to 1.000)
+     * @return void
+     */
+    public function recordFeedback(
+        int $companyId,
+        string $entityType,
+        string $reason,
+        int $suggestedAccountId,
+        ?int $acceptedAccountId,
+        float $originalConfidence
+    ): void {
+        try {
+            $wasAccepted = $suggestedAccountId === $acceptedAccountId;
+            $wasModified = !$wasAccepted && $acceptedAccountId !== null;
+
+            AccountSuggestionFeedback::create([
+                'company_id' => $companyId,
+                'entity_type' => $entityType,
+                'suggestion_reason' => $reason,
+                'suggested_account_id' => $suggestedAccountId,
+                'accepted_account_id' => $acceptedAccountId,
+                'original_confidence' => $originalConfidence,
+                'was_accepted' => $wasAccepted,
+                'was_modified' => $wasModified,
+            ]);
+
+            // Clear cache for this company+entity+reason combination
+            $cacheKey = $this->getAccuracyCacheKey($companyId, $entityType, $reason);
+            Cache::forget($cacheKey);
+
+            Log::info('Account suggestion feedback recorded', [
+                'company_id' => $companyId,
+                'entity_type' => $entityType,
+                'reason' => $reason,
+                'was_accepted' => $wasAccepted,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to record account suggestion feedback', [
+                'company_id' => $companyId,
+                'entity_type' => $entityType,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Get historical accuracy rate for a specific suggestion type.
+     *
+     * Returns acceptance rate from last 100 suggestions with caching.
+     * Falls back to 0.5 if insufficient data (< 10 samples).
+     *
+     * @param int $companyId Company ID
+     * @param string $entityType Entity type (customer, supplier, expense_category)
+     * @param string $reason Suggestion reason (learned, pattern, category, default, special)
+     * @return array ['rate' => float, 'sample_size' => int]
+     */
+    public function getHistoricalAccuracy(
+        int $companyId,
+        string $entityType,
+        string $reason
+    ): array {
+        $cacheKey = $this->getAccuracyCacheKey($companyId, $entityType, $reason);
+
+        return Cache::remember($cacheKey, 3600, function () use ($companyId, $entityType, $reason) {
+            $accuracy = AccountSuggestionFeedback::calculateAccuracyRate(
+                $companyId,
+                $entityType,
+                $reason,
+                100 // Last 100 suggestions
+            );
+
+            // Fall back to neutral 0.5 if not enough data
+            if ($accuracy['sample_size'] < 10) {
+                return [
+                    'rate' => 0.5,
+                    'sample_size' => $accuracy['sample_size'],
+                ];
+            }
+
+            return $accuracy;
+        });
+    }
+
+    /**
+     * Learn from user feedback when they confirm or change an account selection.
+     *
+     * This method combines the existing mapping learning with the new feedback tracking.
+     * Call this when a user makes a final account selection (accepts or modifies a suggestion).
+     *
+     * @param int $companyId Company ID
+     * @param string $entityType Entity type
+     * @param int|null $entityId Entity ID (if available)
+     * @param int $suggestedAccountId Account that was suggested
+     * @param int $selectedAccountId Account that user selected
+     * @param float $originalConfidence Original confidence score
+     * @param string $suggestionReason Reason for the suggestion
+     * @return void
+     */
+    public function learnFromFeedback(
+        int $companyId,
+        string $entityType,
+        ?int $entityId,
+        int $suggestedAccountId,
+        int $selectedAccountId,
+        float $originalConfidence,
+        string $suggestionReason
+    ): void {
+        // Record feedback for calibration
+        $this->recordFeedback(
+            $companyId,
+            $entityType,
+            $suggestionReason,
+            $suggestedAccountId,
+            $selectedAccountId,
+            $originalConfidence
+        );
+
+        // Learn the mapping if entity ID is available
+        if ($entityId !== null) {
+            $this->learnMapping($entityType, $entityId, $selectedAccountId, $companyId);
+        }
+    }
+
+    /**
+     * Generate cache key for accuracy data.
+     *
+     * @param int $companyId
+     * @param string $entityType
+     * @param string $reason
+     * @return string
+     */
+    protected function getAccuracyCacheKey(int $companyId, string $entityType, string $reason): string
+    {
+        return "account_suggestion_accuracy:{$companyId}:{$entityType}:{$reason}";
     }
 }
 // CLAUDE-CHECKPOINT

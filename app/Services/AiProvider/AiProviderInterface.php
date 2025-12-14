@@ -69,6 +69,18 @@ interface AiProviderInterface
      * @throws \Exception If the API call fails or provider doesn't support vision
      */
     public function analyzeDocument(array $images, string $prompt, array $options = []): string;
+
+    /**
+     * Generate a streaming response from a single prompt
+     *
+     * @param  string  $prompt  The prompt to send to the AI
+     * @param  callable  $onChunk  Callback function called for each chunk of text
+     * @param  array<string, mixed>  $options  Additional options (max_tokens, temperature, etc.)
+     * @return string The complete AI response (accumulated from all chunks)
+     *
+     * @throws \Exception If the API call fails
+     */
+    public function generateStream(string $prompt, callable $onChunk, array $options = []): string;
 }
 
 // CLAUDE-CHECKPOINT

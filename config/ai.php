@@ -91,6 +91,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Streaming Settings
+    |--------------------------------------------------------------------------
+    |
+    | Enable or disable streaming responses for real-time AI chat.
+    |
+    */
+    'enable_streaming' => env('AI_STREAMING', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cost Tracking
     |--------------------------------------------------------------------------
     |
@@ -99,6 +109,43 @@ return [
     */
     'log_api_calls' => env('AI_LOG_API_CALLS', true),
     'log_channel' => env('AI_LOG_CHANNEL', 'stack'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Model Routing
+    |--------------------------------------------------------------------------
+    |
+    | Configure which models to use for different operation types.
+    | Classification uses Haiku for 10x cheaper intent detection.
+    |
+    */
+    'model_routing' => [
+        'classification' => env('AI_MODEL_CLASSIFICATION', 'claude-3-haiku-20240307'),
+        'chat' => env('AI_MODEL_CHAT', 'claude-3-5-sonnet-20241022'),
+        'analysis' => env('AI_MODEL_ANALYSIS', 'claude-3-5-sonnet-20241022'),
+        'vision' => env('AI_MODEL_VISION', 'claude-3-5-sonnet-20241022'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fast Classification
+    |--------------------------------------------------------------------------
+    |
+    | Use Haiku model for fast intent classification to reduce costs.
+    |
+    */
+    'use_fast_classification' => env('AI_USE_FAST_CLASSIFICATION', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prompt Caching
+    |--------------------------------------------------------------------------
+    |
+    | Enable Anthropic's prompt caching feature to reduce costs by 90% and
+    | latency by 85%. This caches static system prompts across API calls.
+    |
+    */
+    'enable_prompt_caching' => env('AI_PROMPT_CACHING', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -143,6 +190,22 @@ return [
         'pdf_analysis' => env('AI_FEATURE_PDF_ANALYSIS', false),
         'receipt_scanning' => env('AI_FEATURE_RECEIPT_SCANNING', false),
         'invoice_extraction' => env('AI_FEATURE_INVOICE_EXTRACTION', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retry Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for retry logic with exponential backoff for handling
+    | transient API failures such as rate limits and server errors.
+    |
+    */
+    'retry' => [
+        'max_attempts' => env('AI_RETRY_MAX_ATTEMPTS', 3),
+        'initial_delay_ms' => env('AI_RETRY_INITIAL_DELAY', 1000),
+        'multiplier' => env('AI_RETRY_MULTIPLIER', 2),
+        'retryable_status_codes' => [429, 500, 502, 503, 529],
     ],
 ];
 

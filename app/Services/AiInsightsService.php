@@ -184,13 +184,27 @@ class AiInsightsService
             ]);
 
             // Detect query context and determine required data
-            $contextTypes = $this->detectQueryContext($question);
+            // Use fast classification if enabled, otherwise use regex patterns
+            if (config('ai.use_fast_classification', true)) {
+                $classificationResult = $this->classifyQueryIntentFast($question);
+                $contextTypes = $classificationResult['contexts'];
 
-            Log::info('[AiInsightsService] Query context detected', [
-                'company_id' => $company->id,
-                'question' => $question,
-                'detected_contexts' => $contextTypes,
-            ]);
+                Log::info('[AiInsightsService] Query context detected (fast)', [
+                    'company_id' => $company->id,
+                    'question' => $question,
+                    'detected_contexts' => $contextTypes,
+                    'method' => 'haiku_classification',
+                ]);
+            } else {
+                $contextTypes = $this->detectQueryContext($question);
+
+                Log::info('[AiInsightsService] Query context detected (regex)', [
+                    'company_id' => $company->id,
+                    'question' => $question,
+                    'detected_contexts' => $contextTypes,
+                    'method' => 'regex_patterns',
+                ]);
+            }
 
             // Fetch contextual data based on detected context types
             $contextualData = $this->fetchContextualData($company, $contextTypes);
@@ -232,6 +246,88 @@ class AiInsightsService
             ]);
 
             throw $e;
+        }
+    }
+
+    /**
+     * Classify query intent using fast Haiku model
+     *
+     * Uses Claude Haiku for 10x cheaper intent classification.
+     *
+     * @param  string  $question  The user's question
+     * @return array{contexts: array<string>} Array with detected context types
+     *
+     * @throws \Exception If classification fails
+     */
+    private function classifyQueryIntentFast(string $question): array
+    {
+        try {
+            Log::info('[AiInsightsService] Fast classification started', [
+                'question' => $question,
+            ]);
+
+            $prompt = <<<'PROMPT'
+Classify this financial question into one or more categories. Return ONLY the category names as a comma-separated list.
+
+Categories:
+- invoices: Questions about specific invoices, invoice lists, overdue/unpaid invoices
+- customers: Questions about customers who owe money, customer details, outstanding balances
+- trends: Questions about revenue trends, cash flow patterns, growth over time
+- payment_timing: Questions about late payments, payment speed, average payment time
+- top_customers: Questions about best customers, customer rankings, biggest clients
+- basic: General questions about company stats
+
+Question: {$question}
+
+Response (comma-separated categories only):
+PROMPT;
+
+            $classificationModel = config('ai.model_routing.classification', 'claude-3-haiku-20240307');
+
+            // Use generateWithModel to override model
+            if ($this->aiProvider instanceof \App\Services\AiProvider\ClaudeProvider) {
+                $response = $this->aiProvider->generateWithModel($prompt, $classificationModel, [
+                    'max_tokens' => 100,
+                    'temperature' => 0.3,
+                ]);
+            } else {
+                // Fallback for other providers
+                $response = $this->aiProvider->generate($prompt, [
+                    'max_tokens' => 100,
+                    'temperature' => 0.3,
+                ]);
+            }
+
+            // Parse the response - expect comma-separated list
+            $response = trim($response);
+            $contexts = array_map('trim', explode(',', $response));
+            $contexts = array_filter($contexts); // Remove empty values
+
+            // Validate against known categories
+            $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'basic'];
+            $contexts = array_intersect($contexts, $validCategories);
+
+            // Default to 'basic' if no valid contexts found
+            if (empty($contexts)) {
+                $contexts = ['basic'];
+            }
+
+            Log::info('[AiInsightsService] Fast classification completed', [
+                'question' => $question,
+                'classified_contexts' => $contexts,
+                'model_used' => $classificationModel,
+            ]);
+
+            return ['contexts' => array_values($contexts)];
+
+        } catch (\Exception $e) {
+            Log::error('[AiInsightsService] Fast classification failed', [
+                'question' => $question,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Fallback to basic context on error
+            return ['contexts' => ['basic']];
         }
     }
 

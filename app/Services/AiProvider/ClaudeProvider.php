@@ -60,36 +60,40 @@ class ClaudeProvider implements AiProviderInterface
         $startTime = microtime(true);
 
         try {
-            $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'anthropic-version' => $this->apiVersion,
-                'content-type' => 'application/json',
-            ])
-                ->timeout(30)
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'max_tokens' => $maxTokens,
-                    'temperature' => $temperature,
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
+            $text = $this->callWithRetry(function () use ($prompt, $maxTokens, $temperature, $startTime) {
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(30)
+                    ->post($this->apiUrl, [
+                        'model' => $this->model,
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'messages' => [
+                            [
+                                'role' => 'user',
+                                'content' => $prompt,
+                            ],
                         ],
-                    ],
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('generate', $prompt, null, $response->status(), microtime(true) - $startTime);
+                    throw new \Exception('Claude API request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                $this->logApiCall('generate', $prompt, $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
                 ]);
 
-            if ($response->failed()) {
-                $this->logApiCall('generate', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API request failed: '.$response->body());
-            }
-
-            $data = $response->json();
-            $text = $data['content'][0]['text'] ?? '';
-
-            $this->logApiCall('generate', $prompt, $text, 200, microtime(true) - $startTime, [
-                'input_tokens' => $data['usage']['input_tokens'] ?? 0,
-                'output_tokens' => $data['usage']['output_tokens'] ?? 0,
-            ]);
+                return $text;
+            });
 
             return $text;
 
@@ -112,31 +116,35 @@ class ClaudeProvider implements AiProviderInterface
         $startTime = microtime(true);
 
         try {
-            $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'anthropic-version' => $this->apiVersion,
-                'content-type' => 'application/json',
-            ])
-                ->timeout(30)
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'max_tokens' => $this->maxTokens,
-                    'temperature' => $this->temperature,
-                    'messages' => $messages,
+            $text = $this->callWithRetry(function () use ($messages, $startTime) {
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(30)
+                    ->post($this->apiUrl, [
+                        'model' => $this->model,
+                        'max_tokens' => $this->maxTokens,
+                        'temperature' => $this->temperature,
+                        'messages' => $messages,
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('chat', json_encode($messages), null, $response->status(), microtime(true) - $startTime);
+                    throw new \Exception('Claude API chat request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                $this->logApiCall('chat', json_encode($messages), $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
                 ]);
 
-            if ($response->failed()) {
-                $this->logApiCall('chat', json_encode($messages), null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API chat request failed: '.$response->body());
-            }
-
-            $data = $response->json();
-            $text = $data['content'][0]['text'] ?? '';
-
-            $this->logApiCall('chat', json_encode($messages), $text, 200, microtime(true) - $startTime, [
-                'input_tokens' => $data['usage']['input_tokens'] ?? 0,
-                'output_tokens' => $data['usage']['output_tokens'] ?? 0,
-            ]);
+                return $text;
+            });
 
             return $text;
 
@@ -165,54 +173,58 @@ class ClaudeProvider implements AiProviderInterface
         $startTime = microtime(true);
 
         try {
-            // Build multimodal content array
-            $content = [
-                [
-                    'type' => 'image',
-                    'source' => [
-                        'type' => 'base64',
-                        'media_type' => $mediaType,
-                        'data' => $imageData,
-                    ],
-                ],
-                [
-                    'type' => 'text',
-                    'text' => $prompt,
-                ],
-            ];
-
-            $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'anthropic-version' => $this->apiVersion,
-                'content-type' => 'application/json',
-            ])
-                ->timeout(60) // Longer timeout for image analysis
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'max_tokens' => $maxTokens,
-                    'temperature' => $temperature,
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $content,
+            $text = $this->callWithRetry(function () use ($imageData, $mediaType, $prompt, $maxTokens, $temperature, $startTime) {
+                // Build multimodal content array
+                $content = [
+                    [
+                        'type' => 'image',
+                        'source' => [
+                            'type' => 'base64',
+                            'media_type' => $mediaType,
+                            'data' => $imageData,
                         ],
                     ],
+                    [
+                        'type' => 'text',
+                        'text' => $prompt,
+                    ],
+                ];
+
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(60) // Longer timeout for image analysis
+                    ->post($this->apiUrl, [
+                        'model' => $this->model,
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'messages' => [
+                            [
+                                'role' => 'user',
+                                'content' => $content,
+                            ],
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('analyzeImage', $prompt, null, $response->status(), microtime(true) - $startTime);
+                    throw new \Exception('Claude API image analysis request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                $this->logApiCall('analyzeImage', $prompt, $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                    'media_type' => $mediaType,
+                    'image_size_bytes' => strlen($imageData),
                 ]);
 
-            if ($response->failed()) {
-                $this->logApiCall('analyzeImage', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API image analysis request failed: '.$response->body());
-            }
-
-            $data = $response->json();
-            $text = $data['content'][0]['text'] ?? '';
-
-            $this->logApiCall('analyzeImage', $prompt, $text, 200, microtime(true) - $startTime, [
-                'input_tokens' => $data['usage']['input_tokens'] ?? 0,
-                'output_tokens' => $data['usage']['output_tokens'] ?? 0,
-                'media_type' => $mediaType,
-                'image_size_bytes' => strlen($imageData),
-            ]);
+                return $text;
+            });
 
             return $text;
 
@@ -240,57 +252,61 @@ class ClaudeProvider implements AiProviderInterface
         $startTime = microtime(true);
 
         try {
-            // Build multimodal content array with multiple images
-            $content = [];
+            $text = $this->callWithRetry(function () use ($images, $prompt, $maxTokens, $temperature, $startTime) {
+                // Build multimodal content array with multiple images
+                $content = [];
 
-            foreach ($images as $index => $image) {
-                $content[] = [
-                    'type' => 'image',
-                    'source' => [
-                        'type' => 'base64',
-                        'media_type' => $image['media_type'],
-                        'data' => $image['data'],
-                    ],
-                ];
-            }
-
-            // Add text prompt at the end
-            $content[] = [
-                'type' => 'text',
-                'text' => $prompt,
-            ];
-
-            $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'anthropic-version' => $this->apiVersion,
-                'content-type' => 'application/json',
-            ])
-                ->timeout(120) // Even longer timeout for multi-page documents
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'max_tokens' => $maxTokens,
-                    'temperature' => $temperature,
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $content,
+                foreach ($images as $index => $image) {
+                    $content[] = [
+                        'type' => 'image',
+                        'source' => [
+                            'type' => 'base64',
+                            'media_type' => $image['media_type'],
+                            'data' => $image['data'],
                         ],
-                    ],
+                    ];
+                }
+
+                // Add text prompt at the end
+                $content[] = [
+                    'type' => 'text',
+                    'text' => $prompt,
+                ];
+
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(120) // Even longer timeout for multi-page documents
+                    ->post($this->apiUrl, [
+                        'model' => $this->model,
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'messages' => [
+                            [
+                                'role' => 'user',
+                                'content' => $content,
+                            ],
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('analyzeDocument', $prompt, null, $response->status(), microtime(true) - $startTime);
+                    throw new \Exception('Claude API document analysis request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                $this->logApiCall('analyzeDocument', $prompt, $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                    'page_count' => count($images),
                 ]);
 
-            if ($response->failed()) {
-                $this->logApiCall('analyzeDocument', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('Claude API document analysis request failed: '.$response->body());
-            }
-
-            $data = $response->json();
-            $text = $data['content'][0]['text'] ?? '';
-
-            $this->logApiCall('analyzeDocument', $prompt, $text, 200, microtime(true) - $startTime, [
-                'input_tokens' => $data['usage']['input_tokens'] ?? 0,
-                'output_tokens' => $data['usage']['output_tokens'] ?? 0,
-                'page_count' => count($images),
-            ]);
+                return $text;
+            });
 
             return $text;
 
@@ -354,6 +370,145 @@ class ClaudeProvider implements AiProviderInterface
         }
 
         Log::channel(config('ai.log_channel', 'stack'))->info('AI API Call', $logData);
+    }
+
+    /**
+     * Execute an API call with retry logic and exponential backoff
+     *
+     * @param  callable  $apiCall  The API call to execute
+     * @param  int|null  $maxRetries  Maximum number of retry attempts (null = use config)
+     * @return mixed The result of the API call
+     *
+     * @throws \Exception If all retry attempts fail
+     */
+    private function callWithRetry(callable $apiCall, ?int $maxRetries = null): mixed
+    {
+        $maxAttempts = $maxRetries ?? config('ai.retry.max_attempts', 3);
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                return $apiCall();
+            } catch (\Exception $e) {
+                $lastException = $e;
+
+                // Extract status code if it's an HTTP exception
+                $statusCode = 0;
+                if (method_exists($e, 'getResponse') && $e->getResponse()) {
+                    $statusCode = $e->getResponse()->getStatusCode();
+                } elseif (strpos($e->getMessage(), 'failed:') !== false) {
+                    // Try to extract status code from exception message
+                    if (preg_match('/status code (\d+)/i', $e->getMessage(), $matches)) {
+                        $statusCode = (int) $matches[1];
+                    }
+                }
+
+                // Check if error is retryable
+                if (! $this->isRetryableError($e, $statusCode)) {
+                    // Non-retryable error, throw immediately
+                    throw $e;
+                }
+
+                // If this was the last attempt, throw the exception
+                if ($attempt >= $maxAttempts) {
+                    Log::channel(config('ai.log_channel', 'stack'))->warning(
+                        'AI API call failed after max retry attempts',
+                        [
+                            'attempts' => $attempt,
+                            'error' => $e->getMessage(),
+                            'status_code' => $statusCode,
+                        ]
+                    );
+                    throw $e;
+                }
+
+                // Calculate backoff delay with jitter
+                $delay = $this->calculateBackoffDelay($attempt);
+
+                // Log retry attempt
+                Log::channel(config('ai.log_channel', 'stack'))->info(
+                    'Retrying AI API call after failure',
+                    [
+                        'attempt' => $attempt,
+                        'max_attempts' => $maxAttempts,
+                        'delay_ms' => $delay,
+                        'error' => $e->getMessage(),
+                        'status_code' => $statusCode,
+                    ]
+                );
+
+                // Wait before retrying (convert ms to microseconds)
+                usleep($delay * 1000);
+            }
+        }
+
+        // This should never be reached, but for type safety
+        throw $lastException ?? new \Exception('API call failed without exception');
+    }
+
+    /**
+     * Check if an error is retryable
+     *
+     * @param  \Exception  $e  The exception
+     * @param  int  $statusCode  HTTP status code (0 if not available)
+     * @return bool True if the error should be retried
+     */
+    private function isRetryableError(\Exception $e, int $statusCode = 0): bool
+    {
+        $retryableCodes = config('ai.retry.retryable_status_codes', [429, 500, 502, 503, 529]);
+
+        // Check if status code is retryable
+        if ($statusCode > 0 && in_array($statusCode, $retryableCodes)) {
+            return true;
+        }
+
+        // Check for timeout errors
+        $message = strtolower($e->getMessage());
+        if (
+            strpos($message, 'timeout') !== false ||
+            strpos($message, 'timed out') !== false ||
+            strpos($message, 'operation timed out') !== false
+        ) {
+            return true;
+        }
+
+        // Check for connection errors
+        if (
+            strpos($message, 'connection refused') !== false ||
+            strpos($message, 'connection reset') !== false ||
+            strpos($message, 'could not connect') !== false ||
+            strpos($message, 'connection failed') !== false ||
+            strpos($message, 'network error') !== false
+        ) {
+            return true;
+        }
+
+        // Do not retry client errors (4xx except 429)
+        if ($statusCode >= 400 && $statusCode < 500 && $statusCode !== 429) {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculate exponential backoff delay with jitter
+     *
+     * @param  int  $attempt  The current attempt number (1-based)
+     * @return int Delay in milliseconds
+     */
+    private function calculateBackoffDelay(int $attempt): int
+    {
+        $initialDelay = config('ai.retry.initial_delay_ms', 1000);
+        $multiplier = config('ai.retry.multiplier', 2);
+
+        // Calculate base delay: initialDelay * (multiplier ^ (attempt - 1))
+        $baseDelay = $initialDelay * pow($multiplier, $attempt - 1);
+
+        // Add jitter: random value between 0 and baseDelay/2
+        $jitter = random_int(0, (int) ($baseDelay / 2));
+
+        return (int) ($baseDelay + $jitter);
     }
 }
 
