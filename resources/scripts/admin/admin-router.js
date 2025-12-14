@@ -978,8 +978,8 @@ export default [
       // Billing & Subscription
       {
         path: 'pricing',
-        name: 'pricing',
-        meta: { requiresAuth: false },
+        name: 'billing.pricing',
+        meta: { requiresAuth: true },
         component: PricingPage,
       },
       {

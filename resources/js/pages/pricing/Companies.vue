@@ -242,7 +242,6 @@ export default {
     return {
       currentPlan: 'free',
       loading: false,
-      isLoggedIn: false,
       selectedCompanyId: null,
       billingInterval: 'monthly', // 'monthly' or 'yearly'
       // MKD prices
@@ -291,14 +290,12 @@ export default {
   },
 
   mounted() {
-    // Check if user is logged in by looking for auth token and company
-    const authToken = Ls.get('auth.token')
+    // Get selected company from localStorage
     const companyId = Ls.get('selectedCompany')
-
-    this.isLoggedIn = !!authToken
     this.selectedCompanyId = companyId ? parseInt(companyId) : null
 
-    if (this.isLoggedIn && this.effectiveCompanyId) {
+    // Try to fetch current plan (will fail silently if not authenticated)
+    if (this.effectiveCompanyId) {
       this.fetchCurrentPlan()
     }
   },
@@ -320,7 +317,12 @@ export default {
         const response = await axios.get(`/companies/${this.effectiveCompanyId}/subscription`)
         this.currentPlan = response.data.current_plan?.tier || 'free'
       } catch (error) {
-        console.error('Failed to fetch current plan', error)
+        // If 401/403, user is not authenticated - that's fine for public pricing page
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.log('User not authenticated, showing default plan')
+        } else {
+          console.error('Failed to fetch current plan', error)
+        }
         // Default to free if we can't fetch the plan
         this.currentPlan = 'free'
       }
@@ -329,25 +331,26 @@ export default {
     async subscribe(tier) {
       if (this.loading) return
 
-      // If user is not logged in, redirect to signup
-      if (!this.isLoggedIn) {
-        // Store the selected tier and redirect to signup
-        Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
-        this.$router.push({ name: 'signup' })
-        return
-      }
-
-      // If no company selected, redirect to dashboard to select/create one
-      if (!this.effectiveCompanyId) {
-        alert('Ве молиме прво изберете компанија.')
-        this.$router.push({ name: 'dashboard' })
-        return
-      }
-
       this.loading = true
 
       try {
-        // Try server-side checkout first
+        // If no company selected, try to get from localStorage first
+        if (!this.effectiveCompanyId) {
+          const companyId = Ls.get('selectedCompany')
+          if (companyId) {
+            this.selectedCompanyId = parseInt(companyId)
+          }
+        }
+
+        // If still no company, redirect to login (they need to log in and select a company)
+        if (!this.effectiveCompanyId) {
+          // Store the selected tier for after login
+          Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
+          this.$router.push({ name: 'login' })
+          return
+        }
+
+        // Try server-side checkout
         const response = await axios.post(`/companies/${this.effectiveCompanyId}/subscription/checkout`, {
           tier,
           interval: this.billingInterval
@@ -359,6 +362,20 @@ export default {
         }
       } catch (error) {
         console.error('Failed to create checkout session', error)
+
+        // If 401, redirect to login
+        if (error.response?.status === 401) {
+          Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
+          this.$router.push({ name: 'login' })
+          return
+        }
+
+        // If 403, might be authorization issue - show error
+        if (error.response?.status === 403) {
+          alert('Немате дозвола за оваа акција. Ве молиме контактирајте го сопственикот на компанијата.')
+          this.loading = false
+          return
+        }
 
         // Fallback: Try opening Paddle checkout directly
         const priceId = this.paddlePriceIds[tier]?.[this.billingInterval]
