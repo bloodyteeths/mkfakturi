@@ -120,10 +120,33 @@ class GeminiProvider implements AiProviderInterface
             }
 
             $data = $response->json();
-            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+            // Check for blocked content or empty response
+            if (empty($data['candidates'])) {
+                $blockReason = $data['promptFeedback']['blockReason'] ?? 'Unknown';
+                Log::warning('Gemini returned no candidates', [
+                    'block_reason' => $blockReason,
+                    'prompt_feedback' => $data['promptFeedback'] ?? null,
+                ]);
+                throw new \Exception('Gemini blocked the request: ' . $blockReason);
+            }
+
+            // Check if the candidate has content
+            $candidate = $data['candidates'][0] ?? null;
+            if (!$candidate || empty($candidate['content']['parts'])) {
+                $finishReason = $candidate['finishReason'] ?? 'Unknown';
+                Log::warning('Gemini candidate has no content', [
+                    'finish_reason' => $finishReason,
+                    'candidate' => $candidate,
+                ]);
+                throw new \Exception('Gemini returned empty response: ' . $finishReason);
+            }
+
+            $text = $candidate['content']['parts'][0]['text'] ?? '';
 
             $this->logApiCall($method, $requestPayload, $text, 200, $duration, [
                 'prompt_feedback' => $data['promptFeedback'] ?? null,
+                'finish_reason' => $candidate['finishReason'] ?? null,
             ]);
 
             return $text;
