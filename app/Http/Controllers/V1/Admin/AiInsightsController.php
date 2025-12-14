@@ -5,7 +5,6 @@ namespace App\Http\Controllers\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Services\AiInsightsService;
-use App\Services\AiProvider\AiProviderInterface;
 use App\Services\UsageLimitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,8 +23,7 @@ class AiInsightsController extends Controller
      * Create a new controller instance
      */
     public function __construct(
-        private AiInsightsService $aiService,
-        private AiProviderInterface $aiProvider
+        private AiInsightsService $aiService
     ) {}
 
     /**
@@ -286,7 +284,10 @@ class AiInsightsController extends Controller
             }, 403);
         }
 
-        return response()->stream(function () use ($company, $validated, $usageService) {
+        // Get AI provider from container
+        $aiProvider = $this->resolveAiProvider();
+
+        return response()->stream(function () use ($company, $validated, $usageService, $aiProvider) {
             // Set headers for SSE
             header('Content-Type: text/event-stream');
             header('Cache-Control: no-cache');
@@ -298,7 +299,7 @@ class AiInsightsController extends Controller
                 $prompt = $this->buildChatPrompt($company, $validated['message']);
 
                 // Stream the response
-                $this->aiProvider->generateStream(
+                $aiProvider->generateStream(
                     $prompt,
                     function ($chunk) {
                         // Send each chunk as SSE
@@ -361,6 +362,23 @@ class AiInsightsController extends Controller
         $context .= "Please provide a helpful response in Macedonian language.";
 
         return $context;
+    }
+
+    /**
+     * Resolve the AI provider from configuration
+     *
+     * @return \App\Services\AiProvider\AiProviderInterface
+     */
+    private function resolveAiProvider(): \App\Services\AiProvider\AiProviderInterface
+    {
+        $provider = config('ai.default_provider', 'claude');
+
+        return match ($provider) {
+            'claude' => new \App\Services\AiProvider\ClaudeProvider(),
+            'openai' => new \App\Services\AiProvider\OpenAiProvider(),
+            'gemini' => new \App\Services\AiProvider\GeminiProvider(),
+            default => new \App\Services\AiProvider\NullAiProvider($provider, 'Unknown provider'),
+        };
     }
 
     /**
