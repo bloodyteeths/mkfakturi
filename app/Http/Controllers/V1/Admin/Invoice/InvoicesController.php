@@ -22,7 +22,8 @@ class InvoicesController extends Controller
     {
         return [
             'customer:id,name,email',
-            'currency:id,name,code,symbol',
+            // Currency needs all formatting fields (thousand_separator, decimal_separator, etc.)
+            'currency',
             'company:id,name',
         ];
     }

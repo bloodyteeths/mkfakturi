@@ -347,46 +347,52 @@ Route::prefix('/v1')->group(function () {
 
             Route::apiResource('credit-notes', CreditNoteController::class);
 
-            // Recurring Invoice
+            // Recurring Invoice (Starter+ tier)
             // -------------------------------------------------
 
-            Route::get('/recurring-invoice-frequency', RecurringInvoiceFrequencyController::class);
+            Route::middleware('tier:starter')->group(function () {
+                Route::get('/recurring-invoice-frequency', RecurringInvoiceFrequencyController::class);
 
-            Route::post('/recurring-invoices/delete', [RecurringInvoiceController::class, 'delete']);
+                Route::post('/recurring-invoices/delete', [RecurringInvoiceController::class, 'delete']);
 
-            Route::apiResource('recurring-invoices', RecurringInvoiceController::class);
+                Route::apiResource('recurring-invoices', RecurringInvoiceController::class);
+            });
 
-            // Estimates
+            // Estimates (Starter+ tier)
             // -------------------------------------------------
 
-            Route::get('/estimates/{estimate}/send/preview', SendEstimatePreviewController::class);
+            Route::middleware('tier:starter')->group(function () {
+                Route::get('/estimates/{estimate}/send/preview', SendEstimatePreviewController::class);
 
-            Route::post('/estimates/{estimate}/send', SendEstimateController::class);
+                Route::post('/estimates/{estimate}/send', SendEstimateController::class);
 
-            Route::post('/estimates/{estimate}/clone', CloneEstimateController::class);
+                Route::post('/estimates/{estimate}/clone', CloneEstimateController::class);
 
-            Route::post('/estimates/{estimate}/status', ChangeEstimateStatusController::class);
+                Route::post('/estimates/{estimate}/status', ChangeEstimateStatusController::class);
 
-            Route::post('/estimates/{estimate}/convert-to-invoice', ConvertEstimateController::class);
+                Route::post('/estimates/{estimate}/convert-to-invoice', ConvertEstimateController::class);
 
-            Route::get('/estimates/templates', EstimateTemplatesController::class);
+                Route::get('/estimates/templates', EstimateTemplatesController::class);
 
-            Route::post('/estimates/delete', [EstimatesController::class, 'delete'])->middleware('throttle:strict');
+                Route::post('/estimates/delete', [EstimatesController::class, 'delete'])->middleware('throttle:strict');
 
-            Route::apiResource('estimates', EstimatesController::class);
+                Route::apiResource('estimates', EstimatesController::class);
+            });
 
-            // Expenses
+            // Expenses (Standard+ tier)
             // ----------------------------------
 
-            Route::get('/expenses/{expense}/show/receipt', ShowReceiptController::class);
+            Route::middleware('tier:standard')->group(function () {
+                Route::get('/expenses/{expense}/show/receipt', ShowReceiptController::class);
 
-            Route::post('/expenses/{expense}/upload/receipts', UploadReceiptController::class);
+                Route::post('/expenses/{expense}/upload/receipts', UploadReceiptController::class);
 
-            Route::post('/expenses/delete', [ExpensesController::class, 'delete'])->middleware('throttle:strict');
+                Route::post('/expenses/delete', [ExpensesController::class, 'delete'])->middleware('throttle:strict');
 
-            Route::apiResource('expenses', ExpensesController::class);
+                Route::apiResource('expenses', ExpensesController::class);
 
-            Route::apiResource('categories', ExpenseCategoriesController::class);
+                Route::apiResource('categories', ExpenseCategoriesController::class);
+            });
 
             // Projects
             // ----------------------------------
@@ -434,10 +440,11 @@ Route::prefix('/v1')->group(function () {
 
             Route::apiResource('payment-methods', PaymentMethodsController::class);
 
-            // Custom fields
+            // Custom fields (Business+ tier)
             // ----------------------------------
 
-            Route::resource('custom-fields', CustomFieldsController::class);
+            Route::resource('custom-fields', CustomFieldsController::class)
+                ->middleware('tier:business');
 
             // Backup & Disk
             // ----------------------------------
@@ -450,18 +457,21 @@ Route::prefix('/v1')->group(function () {
 
             Route::get('/disk/drivers', [DiskController::class, 'getDiskDrivers']);
 
-            // Exchange Rate
+            // Exchange Rate (Business+ tier for multi-currency)
             // ----------------------------------
 
-            Route::get('/currencies/{currency}/exchange-rate', GetExchangeRateController::class);
+            Route::middleware('tier:business')->group(function () {
+                Route::get('/currencies/{currency}/exchange-rate', GetExchangeRateController::class);
 
-            Route::get('/currencies/{currency}/active-provider', GetActiveProviderController::class);
+                Route::get('/currencies/{currency}/active-provider', GetActiveProviderController::class);
 
+                Route::apiResource('exchange-rate-providers', ExchangeRateProviderController::class);
+            });
+
+            // Currency lists (available to all tiers for display purposes)
             Route::get('/used-currencies', GetUsedCurrenciesController::class);
 
             Route::get('/supported-currencies', GetSupportedCurrenciesController::class);
-
-            Route::apiResource('exchange-rate-providers', ExchangeRateProviderController::class);
 
             // Settings
             // ----------------------------------
@@ -673,21 +683,21 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{import}/logs', [MigrationController::class, 'logs']);
             });
 
-            // Accounting Reports (IFRS)
+            // Accounting Reports (IFRS) - Standard+ tier
             // Feature flag: FEATURE_ACCOUNTING_BACKBONE
             // ----------------------------------
 
-            Route::prefix('accounting')->group(function () {
+            Route::prefix('accounting')->middleware('tier:standard')->group(function () {
                 Route::get('/trial-balance', [AccountingReportsController::class, 'trialBalance']);
                 Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
                 Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
             });
 
-            // Project Reports
+            // Project Reports (Standard+ tier)
             // Phase 1.1 - Project Dimension reporting
             // ----------------------------------
 
-            Route::prefix('reports')->group(function () {
+            Route::prefix('reports')->middleware('tier:standard')->group(function () {
                 Route::get('/projects', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'index']);
                 Route::get('/projects/{id}', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'show']);
             });
