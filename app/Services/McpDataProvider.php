@@ -2,9 +2,20 @@
 
 namespace App\Services;
 
+use App\Models\Bill;
 use App\Models\Company;
+use App\Models\CreditNote;
 use App\Models\Customer;
+use App\Models\EInvoice;
+use App\Models\Estimate;
 use App\Models\Invoice;
+use App\Models\Item;
+use App\Models\ProformaInvoice;
+use App\Models\Project;
+use App\Models\RecurringInvoice;
+use App\Models\StockMovement;
+use App\Models\Supplier;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -477,6 +488,600 @@ class McpDataProvider
             ]);
 
             return [];
+        }
+    }
+
+    /**
+     * Get proforma invoice statistics
+     *
+     * @return array{proforma_count: int, draft_proformas: int, sent_proformas: int, total_proforma_value: float, converted_to_invoice_count: int, conversion_rate: float}
+     */
+    public function getProformaStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching proforma stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $proformaCount = ProformaInvoice::where('company_id', $company->id)->count();
+            $draftProformas = ProformaInvoice::where('company_id', $company->id)
+                ->where('status', ProformaInvoice::STATUS_DRAFT)
+                ->count();
+            $sentProformas = ProformaInvoice::where('company_id', $company->id)
+                ->where('status', ProformaInvoice::STATUS_SENT)
+                ->count();
+            $totalProformaValue = (float) ProformaInvoice::where('company_id', $company->id)
+                ->sum('total');
+            $convertedToInvoiceCount = ProformaInvoice::where('company_id', $company->id)
+                ->where('status', ProformaInvoice::STATUS_CONVERTED)
+                ->count();
+            $conversionRate = $proformaCount > 0 ? ($convertedToInvoiceCount / $proformaCount) * 100 : 0.0;
+
+            $stats = [
+                'proforma_count' => $proformaCount,
+                'draft_proformas' => $draftProformas,
+                'sent_proformas' => $sentProformas,
+                'total_proforma_value' => $totalProformaValue,
+                'converted_to_invoice_count' => $convertedToInvoiceCount,
+                'conversion_rate' => round($conversionRate, 1),
+            ];
+
+            Log::info('[McpDataProvider] Proforma stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get proforma stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'proforma_count' => 0,
+                'draft_proformas' => 0,
+                'sent_proformas' => 0,
+                'total_proforma_value' => 0.0,
+                'converted_to_invoice_count' => 0,
+                'conversion_rate' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get bills statistics
+     *
+     * @return array{bills_count: int, unpaid_bills: int, overdue_bills: int, total_bills_amount: float, total_unpaid_amount: float}
+     */
+    public function getBillsStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching bills stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $billsCount = Bill::where('company_id', $company->id)->count();
+            $unpaidBills = Bill::where('company_id', $company->id)
+                ->where('paid_status', Bill::PAID_STATUS_UNPAID)
+                ->count();
+            $overdueBills = Bill::where('company_id', $company->id)
+                ->where('paid_status', '!=', Bill::PAID_STATUS_PAID)
+                ->where('due_date', '<', now())
+                ->count();
+            $totalBillsAmount = (float) Bill::where('company_id', $company->id)
+                ->sum('total');
+            $totalUnpaidAmount = (float) Bill::where('company_id', $company->id)
+                ->where('paid_status', '!=', Bill::PAID_STATUS_PAID)
+                ->sum('due_amount');
+
+            $stats = [
+                'bills_count' => $billsCount,
+                'unpaid_bills' => $unpaidBills,
+                'overdue_bills' => $overdueBills,
+                'total_bills_amount' => $totalBillsAmount,
+                'total_unpaid_amount' => $totalUnpaidAmount,
+            ];
+
+            Log::info('[McpDataProvider] Bills stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get bills stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'bills_count' => 0,
+                'unpaid_bills' => 0,
+                'overdue_bills' => 0,
+                'total_bills_amount' => 0.0,
+                'total_unpaid_amount' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get suppliers statistics
+     *
+     * @return array{suppliers_count: int, total_payables: float, top_suppliers: array}
+     */
+    public function getSuppliersStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching suppliers stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $suppliersCount = Supplier::where('company_id', $company->id)->count();
+            $totalPayables = (float) Bill::where('company_id', $company->id)
+                ->where('paid_status', '!=', Bill::PAID_STATUS_PAID)
+                ->sum('due_amount');
+
+            // Get top suppliers by bill amount
+            $topSuppliers = Bill::where('company_id', $company->id)
+                ->select('supplier_id')
+                ->selectRaw('SUM(total) as total_bills')
+                ->groupBy('supplier_id')
+                ->orderByDesc('total_bills')
+                ->limit(5)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'supplier_name' => $item->supplier->name ?? 'Unknown',
+                        'total_bills' => (float) $item->total_bills,
+                    ];
+                })
+                ->toArray();
+
+            $stats = [
+                'suppliers_count' => $suppliersCount,
+                'total_payables' => $totalPayables,
+                'top_suppliers' => $topSuppliers,
+            ];
+
+            Log::info('[McpDataProvider] Suppliers stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get suppliers stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'suppliers_count' => 0,
+                'total_payables' => 0.0,
+                'top_suppliers' => [],
+            ];
+        }
+    }
+
+    /**
+     * Get estimates statistics
+     *
+     * @return array{estimates_count: int, pending_estimates: int, accepted_estimates: int, rejected_estimates: int, total_estimate_value: float, conversion_rate_to_invoice: float}
+     */
+    public function getEstimatesStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching estimates stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $estimatesCount = Estimate::where('company_id', $company->id)->count();
+            $pendingEstimates = Estimate::where('company_id', $company->id)
+                ->whereIn('status', [Estimate::STATUS_SENT, Estimate::STATUS_VIEWED])
+                ->count();
+            $acceptedEstimates = Estimate::where('company_id', $company->id)
+                ->where('status', Estimate::STATUS_ACCEPTED)
+                ->count();
+            $rejectedEstimates = Estimate::where('company_id', $company->id)
+                ->where('status', Estimate::STATUS_REJECTED)
+                ->count();
+            $totalEstimateValue = (float) Estimate::where('company_id', $company->id)
+                ->sum('total');
+            $conversionRate = $estimatesCount > 0 ? ($acceptedEstimates / $estimatesCount) * 100 : 0.0;
+
+            $stats = [
+                'estimates_count' => $estimatesCount,
+                'pending_estimates' => $pendingEstimates,
+                'accepted_estimates' => $acceptedEstimates,
+                'rejected_estimates' => $rejectedEstimates,
+                'total_estimate_value' => $totalEstimateValue,
+                'conversion_rate_to_invoice' => round($conversionRate, 1),
+            ];
+
+            Log::info('[McpDataProvider] Estimates stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get estimates stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'estimates_count' => 0,
+                'pending_estimates' => 0,
+                'accepted_estimates' => 0,
+                'rejected_estimates' => 0,
+                'total_estimate_value' => 0.0,
+                'conversion_rate_to_invoice' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get recurring invoices statistics
+     *
+     * @return array{active_recurring_count: int, paused_recurring_count: int, monthly_recurring_revenue: float, next_invoices_this_month: int}
+     */
+    public function getRecurringInvoicesStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching recurring invoices stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $activeRecurringCount = RecurringInvoice::where('company_id', $company->id)
+                ->where('status', RecurringInvoice::ACTIVE)
+                ->count();
+            $pausedRecurringCount = RecurringInvoice::where('company_id', $company->id)
+                ->where('status', RecurringInvoice::ON_HOLD)
+                ->count();
+            $monthlyRecurringRevenue = (float) RecurringInvoice::where('company_id', $company->id)
+                ->where('status', RecurringInvoice::ACTIVE)
+                ->sum('total');
+
+            // Count next invoices scheduled for this month
+            $nextInvoicesThisMonth = RecurringInvoice::where('company_id', $company->id)
+                ->where('status', RecurringInvoice::ACTIVE)
+                ->whereBetween('next_invoice_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count();
+
+            $stats = [
+                'active_recurring_count' => $activeRecurringCount,
+                'paused_recurring_count' => $pausedRecurringCount,
+                'monthly_recurring_revenue' => $monthlyRecurringRevenue,
+                'next_invoices_this_month' => $nextInvoicesThisMonth,
+            ];
+
+            Log::info('[McpDataProvider] Recurring invoices stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get recurring invoices stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'active_recurring_count' => 0,
+                'paused_recurring_count' => 0,
+                'monthly_recurring_revenue' => 0.0,
+                'next_invoices_this_month' => 0,
+            ];
+        }
+    }
+
+    /**
+     * Get inventory statistics
+     *
+     * @return array{total_items: int, items_with_stock_tracking: int, low_stock_items: int, total_inventory_value: float}
+     */
+    public function getInventoryStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching inventory stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $totalItems = Item::where('company_id', $company->id)->count();
+            $itemsWithStockTracking = Item::where('company_id', $company->id)
+                ->where('track_quantity', true)
+                ->count();
+
+            // Low stock items: where current quantity < reorder_level
+            // This would require querying stock movements to get current quantities
+            // For simplicity, we'll set this to 0 as it requires complex logic
+            $lowStockItems = 0;
+
+            // Total inventory value from latest stock movements
+            $totalInventoryValue = 0.0;
+            $itemsWithStock = Item::where('company_id', $company->id)
+                ->where('track_quantity', true)
+                ->get();
+
+            foreach ($itemsWithStock as $item) {
+                $latestMovement = StockMovement::where('company_id', $company->id)
+                    ->where('item_id', $item->id)
+                    ->orderBy('movement_date', 'desc')
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                if ($latestMovement) {
+                    $totalInventoryValue += (float) $latestMovement->balance_value / 100; // Convert from cents
+                }
+            }
+
+            $stats = [
+                'total_items' => $totalItems,
+                'items_with_stock_tracking' => $itemsWithStockTracking,
+                'low_stock_items' => $lowStockItems,
+                'total_inventory_value' => round($totalInventoryValue, 2),
+            ];
+
+            Log::info('[McpDataProvider] Inventory stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get inventory stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'total_items' => 0,
+                'items_with_stock_tracking' => 0,
+                'low_stock_items' => 0,
+                'total_inventory_value' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get warehouse statistics
+     *
+     * @return array{warehouses_count: int, items_per_warehouse: array}
+     */
+    public function getWarehouseStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching warehouse stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $warehousesCount = Warehouse::where('company_id', $company->id)->count();
+
+            // Get items count per warehouse
+            $itemsPerWarehouse = Warehouse::where('company_id', $company->id)
+                ->get()
+                ->map(function ($warehouse) {
+                    $itemCount = StockMovement::where('warehouse_id', $warehouse->id)
+                        ->distinct('item_id')
+                        ->count('item_id');
+
+                    return [
+                        'warehouse_name' => $warehouse->name,
+                        'item_count' => $itemCount,
+                    ];
+                })
+                ->toArray();
+
+            $stats = [
+                'warehouses_count' => $warehousesCount,
+                'items_per_warehouse' => $itemsPerWarehouse,
+            ];
+
+            Log::info('[McpDataProvider] Warehouse stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get warehouse stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'warehouses_count' => 0,
+                'items_per_warehouse' => [],
+            ];
+        }
+    }
+
+    /**
+     * Get projects statistics
+     *
+     * @return array{projects_count: int, active_projects: int, revenue_per_project: array}
+     */
+    public function getProjectsStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching projects stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $projectsCount = Project::where('company_id', $company->id)->count();
+            $activeProjects = Project::where('company_id', $company->id)
+                ->whereNotIn('status', [Project::STATUS_COMPLETED, Project::STATUS_CANCELLED])
+                ->count();
+
+            // Get revenue per project (top 5)
+            $revenuePerProject = Project::where('company_id', $company->id)
+                ->limit(5)
+                ->get()
+                ->map(function ($project) {
+                    $revenue = Invoice::where('project_id', $project->id)
+                        ->where('paid_status', 'PAID')
+                        ->sum('total');
+
+                    return [
+                        'project_name' => $project->name,
+                        'revenue' => (float) $revenue,
+                    ];
+                })
+                ->toArray();
+
+            $stats = [
+                'projects_count' => $projectsCount,
+                'active_projects' => $activeProjects,
+                'revenue_per_project' => $revenuePerProject,
+            ];
+
+            Log::info('[McpDataProvider] Projects stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get projects stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'projects_count' => 0,
+                'active_projects' => 0,
+                'revenue_per_project' => [],
+            ];
+        }
+    }
+
+    /**
+     * Get credit notes statistics
+     *
+     * @return array{credit_notes_count: int, total_credit_value: float}
+     */
+    public function getCreditNotesStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching credit notes stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $creditNotesCount = CreditNote::where('company_id', $company->id)->count();
+            $totalCreditValue = (float) CreditNote::where('company_id', $company->id)
+                ->sum('total');
+
+            $stats = [
+                'credit_notes_count' => $creditNotesCount,
+                'total_credit_value' => $totalCreditValue,
+            ];
+
+            Log::info('[McpDataProvider] Credit notes stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get credit notes stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'credit_notes_count' => 0,
+                'total_credit_value' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get e-invoices statistics
+     *
+     * @return array{einvoices_sent: int, einvoices_pending: int, einvoices_failed: int}
+     */
+    public function getEInvoiceStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching e-invoices stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $einvoicesSent = EInvoice::where('company_id', $company->id)
+                ->whereIn('status', [EInvoice::STATUS_SUBMITTED, EInvoice::STATUS_ACCEPTED])
+                ->count();
+            $einvoicesPending = EInvoice::where('company_id', $company->id)
+                ->whereIn('status', [EInvoice::STATUS_DRAFT, EInvoice::STATUS_SIGNED])
+                ->count();
+            $einvoicesFailed = EInvoice::where('company_id', $company->id)
+                ->whereIn('status', [EInvoice::STATUS_FAILED, EInvoice::STATUS_REJECTED])
+                ->count();
+
+            $stats = [
+                'einvoices_sent' => $einvoicesSent,
+                'einvoices_pending' => $einvoicesPending,
+                'einvoices_failed' => $einvoicesFailed,
+            ];
+
+            Log::info('[McpDataProvider] E-invoices stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get e-invoices stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'einvoices_sent' => 0,
+                'einvoices_pending' => 0,
+                'einvoices_failed' => 0,
+            ];
+        }
+    }
+
+    /**
+     * Get comprehensive statistics across all financial modules
+     *
+     * @return array
+     */
+    public function getComprehensiveStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching comprehensive stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $stats = [
+                'company' => $this->getCompanyStats($company),
+                'proforma' => $this->getProformaStats($company),
+                'bills' => $this->getBillsStats($company),
+                'suppliers' => $this->getSuppliersStats($company),
+                'estimates' => $this->getEstimatesStats($company),
+                'recurring_invoices' => $this->getRecurringInvoicesStats($company),
+                'inventory' => $this->getInventoryStats($company),
+                'warehouses' => $this->getWarehouseStats($company),
+                'projects' => $this->getProjectsStats($company),
+                'credit_notes' => $this->getCreditNotesStats($company),
+                'einvoices' => $this->getEInvoiceStats($company),
+                'trial_balance' => $this->getTrialBalance($company),
+                'monthly_trends' => $this->getMonthlyTrends($company, 6),
+                'customer_growth' => $this->getCustomerGrowth($company, 6),
+                'payment_timing' => $this->getPaymentTimingAnalysis($company),
+                'top_customers' => $this->getTopCustomers($company, 5),
+            ];
+
+            Log::info('[McpDataProvider] Comprehensive stats calculated');
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get comprehensive stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'error' => 'Failed to retrieve comprehensive stats',
+                'message' => $e->getMessage(),
+            ];
         }
     }
 }

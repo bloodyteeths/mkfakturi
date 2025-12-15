@@ -170,17 +170,19 @@ class AiInsightsService
      *
      * @param  Company  $company  The company context
      * @param  string  $question  The user's question
+     * @param  array<int, array{role: string, content: string, timestamp: string}>  $conversationHistory  Previous conversation messages
      * @return string The AI's answer
      *
      * @throws \Exception If chat fails
      */
-    public function answerQuestion(Company $company, string $question): string
+    public function answerQuestion(Company $company, string $question, array $conversationHistory = []): string
     {
         try {
             Log::info('[AiInsightsService] Chat question received', [
                 'company_id' => $company->id,
                 'company_name' => $company->name,
                 'question' => $question,
+                'history_messages_count' => count($conversationHistory),
             ]);
 
             // Detect query context and determine required data
@@ -215,8 +217,8 @@ class AiInsightsService
                 'data_keys' => array_keys($contextualData),
             ]);
 
-            // Build contextualized prompt with smart data inclusion
-            $prompt = $this->buildChatPrompt($company, $contextualData, $question);
+            // Build contextualized prompt with smart data inclusion and conversation history
+            $prompt = $this->buildChatPrompt($company, $contextualData, $question, $conversationHistory);
 
             Log::info('[AiInsightsService] Chat prompt built', [
                 'company_id' => $company->id,
@@ -773,14 +775,30 @@ PROMPT;
      * Build chat prompt in Macedonian with company context
      *
      * @param  array<string, mixed>  $contextualData  Data with 'company_stats' and optional contextual data
+     * @param  array<int, array{role: string, content: string, timestamp: string}>  $conversationHistory  Previous conversation messages
      */
-    private function buildChatPrompt(Company $company, array $contextualData, string $question): string
+    private function buildChatPrompt(Company $company, array $contextualData, string $question, array $conversationHistory = []): string
     {
         $companyName = $company->name;
         $currency = $company->currency ?? 'MKD';
 
+        // Detect if this is a complex analytical query
+        $isComplexQuery = $this->detectComplexAnalyticalQuery($question);
+
+        // Fetch comprehensive stats for complex queries
+        if ($isComplexQuery) {
+            try {
+                $comprehensiveStats = $this->dataProvider->getComprehensiveStats($company);
+                $contextualData['comprehensive_stats'] = $comprehensiveStats;
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch comprehensive stats', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         // Extract company stats
-        $stats = $contextualData['company_stats'] ?? [];
+        $stats = $contextualData['comprehensive_stats'] ?? $contextualData['company_stats'] ?? [];
         $revenue = number_format($stats['revenue'] ?? 0, 2);
         $expenses = number_format($stats['expenses'] ?? 0, 2);
         $outstanding = number_format($stats['outstanding'] ?? 0, 2);
@@ -795,10 +813,30 @@ PROMPT;
         $paymentVariance = $stats['payment_variance'] ?? 0;
         $profit = ($stats['revenue'] ?? 0) - ($stats['expenses'] ?? 0);
         $profitFormatted = number_format($profit, 2);
+        $profitMargin = $revenue > 0 ? number_format(($profit / ($stats['revenue'] ?? 1)) * 100, 1) : '0.0';
 
-        // Build base prompt
+        // Additional comprehensive stats if available
+        $suppliers = $stats['suppliers'] ?? 0;
+        $items = $stats['items'] ?? 0;
+        $estimates = $stats['estimates_count'] ?? 0;
+        $bills = $stats['bills_count'] ?? 0;
+        $projects = $stats['projects_count'] ?? 0;
+        $avgInvoiceValue = $stats['avg_invoice_value'] ?? 0;
+        $avgInvoiceValueFormatted = number_format($avgInvoiceValue, 2);
+
+        // Detect if user is asking "how to" questions
+        $isHowToQuery = $this->detectHowToQuery($question);
+
+        // Build base prompt with enhanced system instructions
         $prompt = <<<BASETEXT
-Ти си македонски финансиски советник кој помага на корисниците со нивните финансиски прашања.
+Ти си македонски финансиски советник кој работи со Facturino - систем за фактурирање и финансиско управување.
+
+Твоја улога:
+- Знаеш ГИ СЈ работи во Facturino апликацијата
+- Помагаш на корисниците со финансиски прашања, анализа и совети
+- Одговараш на македонски јазик
+- Даваш конкретни, акционабилни совети
+- Може да им помогнеш да ја користат апликацијата
 
 Контекст на компанијата:
 - Име: {$companyName}
@@ -808,10 +846,16 @@ PROMPT;
 - Задоцнети фактури: {$overdueInvoices}
 - Приходи: {$revenue} {$currency}
 - Трошоци: {$expenses} {$currency}
-- Профит: {$profitFormatted} {$currency}
+- Профит: {$profitFormatted} {$currency} (маржа: {$profitMargin}%)
 - Наплатени плаќања: {$paymentsReceived} {$currency}
 - Неплатени фактури (износ): {$outstanding} {$currency}
+- Просечна вредност на фактура: {$avgInvoiceValueFormatted} {$currency}
 - Број на клиенти: {$customers}
+- Број на добавувачи: {$suppliers}
+- Број на артикли: {$items}
+- Понуди: {$estimates}
+- Сметки од добавувачи: {$bills}
+- Проекти: {$projects}
 
 BASETEXT;
 
@@ -851,16 +895,76 @@ BASETEXT;
             $prompt .= "\nТоп клиенти:\n{$topCustomersText}\n";
         }
 
-        // Add question and instructions
+        // Add app documentation for "how to" queries
+        if ($isHowToQuery) {
+            $appDocs = $this->getAppDocumentation();
+            $prompt .= "\n{$appDocs}\n";
+        }
+
+        // Add conversation history if available (last 10 messages)
+        if (! empty($conversationHistory)) {
+            $prompt .= "\nПретходна конверзација:\n";
+
+            // Limit to last 10 messages to avoid token overflow
+            $recentHistory = array_slice($conversationHistory, -10);
+
+            foreach ($recentHistory as $message) {
+                $role = $message['role'] === 'user' ? 'Корисник' : 'Асистент';
+                $content = $message['content'];
+                $prompt .= "{$role}: {$content}\n";
+            }
+
+            $prompt .= "\n";
+        }
+
+        // Add question and enhanced instructions
         $prompt .= <<<INSTRUCTIONS
 
 Прашање од корисникот:
 {$question}
 
-Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот. Користи ги детаљните податоци погоре за да дадеш прецизен и релевантен одговор.
 INSTRUCTIONS;
 
+        // Add special instructions for complex analytical queries
+        if ($isComplexQuery) {
+            $prompt .= <<<COMPLEX_INSTRUCTIONS
+
+Кога корисникот бара комплексна анализа (пр. "колку да ги зголемам цените за да имам X приход"):
+1. Покажи ги тековните бројки (приходи, трошоци, профит, маржа)
+2. Направи математичка калкулација чекор по чекор
+3. Дај конкретна препорака со проценти/бројки
+4. Објасни ги претпоставките (пр. "претпоставувам дека трошоците остануваат исти")
+5. Покажи пример: "Ако просечната вредност на фактура е X, а треба Y приход, тогаш треба Z фактури"
+
+COMPLEX_INSTRUCTIONS;
+        }
+
+        $prompt .= <<<FINAL_INSTRUCTIONS
+
+Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот. Користи ги детаљните податоци погоре за да дадеш прецизен и релевантен одговор.
+
+Ако корисникот се повикува на претходната конверзација (на пример, "што рековте порано", "за тоа што го споменавме", "продолжи", "дај ми повеќе детали"), користи го контекстот од претходната конверзација за да дадеш релевантен одговор.
+FINAL_INSTRUCTIONS;
+
         return $prompt;
+    }
+
+    /**
+     * Clear conversation history for a specific conversation
+     *
+     * @param  Company  $company  The company
+     * @param  string  $conversationId  The conversation ID to clear
+     * @return void
+     */
+    public function clearConversation(Company $company, string $conversationId): void
+    {
+        $cacheKey = "ai_chat:{$company->id}:{$conversationId}";
+        Cache::forget($cacheKey);
+
+        Log::info('AI conversation cleared', [
+            'company_id' => $company->id,
+            'conversation_id' => $conversationId,
+        ]);
     }
 
     /**
@@ -1569,6 +1673,178 @@ PROMPT;
         ];
 
         return $types[$extension] ?? 'image/png';
+    }
+
+    /**
+     * Detect if query is asking for complex analytical calculations
+     *
+     * @param  string  $question  The user's question
+     * @return bool True if complex analytical query detected
+     */
+    private function detectComplexAnalyticalQuery(string $question): bool
+    {
+        $questionLower = mb_strtolower($question, 'UTF-8');
+
+        $complexPatterns = [
+            // Macedonian patterns
+            '/колку\s+(проценти|%|пати)\s+(да|треба)/iu',
+            '/како\s+да\s+(постигнам|имам|добијам)\s+\d+/iu',
+            '/што\s+треба\s+да\s+направам\s+за/iu',
+            '/анализа\s+(на|за)/iu',
+            '/колку\s+(фактури|приход|профит)\s+ми\s+треба/iu',
+            '/да\s+ги\s+(зголемам|намалам|промен[аие]м)\s+(цените|цена|трошоците)/iu',
+            '/ако\s+.*\s+колку/iu',
+            '/пресметај/iu',
+            '/калкулација/iu',
+            // English patterns
+            '/how\s+many\s+percent/iu',
+            '/what\s+(percentage|percent)/iu',
+            '/how\s+to\s+(achieve|reach|get)\s+\d+/iu',
+            '/analysis\s+of/iu',
+            '/calculate/iu',
+            '/if\s+.*\s+how\s+much/iu',
+            '/(increase|decrease|change)\s+(price|cost|revenue)/iu',
+        ];
+
+        foreach ($complexPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                Log::info('[AiInsightsService] Complex analytical query detected', [
+                    'pattern' => $pattern,
+                    'question' => $question,
+                ]);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Detect if query is asking "how to" questions about the app
+     *
+     * @param  string  $question  The user's question
+     * @return bool True if "how to" query detected
+     */
+    private function detectHowToQuery(string $question): bool
+    {
+        $questionLower = mb_strtolower($question, 'UTF-8');
+
+        $howToPatterns = [
+            // Macedonian patterns
+            '/како\s+(да|можам|се)\s+(креирам|направам|додадам|пратам|внесам)/iu',
+            '/каде\s+(можам|е|се наоѓа)/iu',
+            '/кои\s+се\s+чекорите/iu',
+            '/објасни\s+како/iu',
+            '/упатство\s+за/iu',
+            '/помош\s+за/iu',
+            // English patterns
+            '/how\s+(do|can|to)\s+(i|create|add|send|make)/iu',
+            '/where\s+(can|is|do)/iu',
+            '/steps\s+to/iu',
+            '/explain\s+how/iu',
+            '/guide\s+(for|to)/iu',
+            '/help\s+with/iu',
+        ];
+
+        foreach ($howToPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                Log::info('[AiInsightsService] How-to query detected', [
+                    'pattern' => $pattern,
+                    'question' => $question,
+                ]);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get app documentation about Facturino features
+     *
+     * @return string Documentation text in Macedonian
+     */
+    private function getAppDocumentation(): string
+    {
+        return <<<'DOCUMENTATION'
+Упатство за Facturino апликација:
+
+Како да креирате фактура:
+1. Одете на "Фактури" → "Нова фактура"
+2. Изберете клиент (или креирајте нов)
+3. Додајте артикли со количина и цена
+4. Проверете датум и рок за плаќање
+5. Кликнете "Зачувај и испрати" или само "Зачувај"
+
+Како да креирате профактура:
+1. Одете на "Профактури" → "Нова профактура"
+2. Процесот е ист како за фактура
+3. Профактурата може подоцна да се конвертира во фактура
+
+Како да управувате со клиенти:
+1. Одете на "Клиенти"
+2. Кликнете "Нов клиент" за да додадете
+3. Внесете: име, адреса, даночен број, email
+4. Можете да видите историја на фактури по клиент
+
+Како да управувате со добавувачи:
+1. Одете на "Добавувачи"
+2. Кликнете "Нов добавувач"
+3. Внесете детали на добавувачот
+4. Користете за евидентирање на сметки
+
+Како да евидентирате трошоци:
+1. Одете на "Трошоци"
+2. Кликнете "Нов трошок"
+3. Внесете опис, износ, категорија
+4. Прикачете документ ако имате
+
+Како да управувате со артикли:
+1. Одете на "Артикли"
+2. Кликнете "Нов артикл"
+3. Внесете: име, опис, цена, единица мерка
+4. Овие артикли се користат при креирање фактури
+
+Како да креирате понуда:
+1. Одете на "Понуди" → "Нова понуда"
+2. Изберете клиент и додајте артикли
+3. Понудата може да се конвертира во фактура
+
+Како да поставите повторувачки фактури:
+1. Одете на "Повторувачки фактури"
+2. Креирајте нова повторувачка фактура
+3. Изберете фреквенција (месечно, квартално, итн.)
+4. Системот автоматски ќе ги креира фактурите
+
+Како да евидентирате сметки од добавувачи:
+1. Одете на "Сметки"
+2. Кликнете "Нова сметка"
+3. Изберете добавувач и внесете детали
+4. Следете кога треба да платите
+
+Како да пратите е-фактура:
+1. Креирајте фактура
+2. Во детали на фактура, кликнете "Прати е-фактура"
+3. Системот ќе ја испрати преку официјалниот систем
+
+Како да управувате со проекти:
+1. Одете на "Проекти"
+2. Креирајте нов проект
+3. Поврзете фактури и трошоци со проектот
+4. Следете профитабилност по проект
+
+Како да видите извештаи:
+1. Одете на "Извештаи"
+2. Изберете тип на извештај:
+   - Извештај за приходи (Sales Report)
+   - Извештај за трошоци (Expenses Report)
+   - Извештај по клиент (Customer Report)
+   - Профит и загуба (Profit & Loss)
+   - Даночен извештај (Tax Report)
+
+DOCUMENTATION;
     }
 }
 

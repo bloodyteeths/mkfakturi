@@ -209,6 +209,7 @@ class AiInsightsController extends Controller
 
         $validated = $request->validate([
             'message' => 'required|string|max:'.config('ai.chat.max_message_length', 1000),
+            'conversation_id' => 'nullable|string|uuid',
         ]);
 
         // Check usage limit for AI queries
@@ -221,17 +222,54 @@ class AiInsightsController extends Controller
         }
 
         try {
+            // Generate conversation ID if not provided
+            $conversationId = $validated['conversation_id'] ?? \Illuminate\Support\Str::uuid()->toString();
+            $cacheKey = "ai_chat:{$company->id}:{$conversationId}";
+            $cacheTtl = 3600; // 1 hour
+
+            // Retrieve conversation history from cache
+            $conversation = Cache::get($cacheKey, [
+                'messages' => [],
+                'created_at' => now()->toDateTimeString(),
+                'last_activity' => now()->toDateTimeString(),
+            ]);
+
+            // Extract conversation history (last 10 messages max)
+            $conversationHistory = array_slice($conversation['messages'], -10);
+
+            // Get AI response with conversation context
             $response = $this->aiService->answerQuestion(
                 $company,
-                $validated['message']
+                $validated['message'],
+                $conversationHistory
             );
 
             // Increment usage after successful AI call
             $usageService->incrementUsage($company, 'ai_queries_per_month');
 
+            // Update conversation history
+            $conversation['messages'][] = [
+                'role' => 'user',
+                'content' => $validated['message'],
+                'timestamp' => now()->toDateTimeString(),
+            ];
+
+            $conversation['messages'][] = [
+                'role' => 'assistant',
+                'content' => $response,
+                'timestamp' => now()->toDateTimeString(),
+            ];
+
+            $conversation['last_activity'] = now()->toDateTimeString();
+
+            // Store updated conversation in cache
+            Cache::put($cacheKey, $conversation, $cacheTtl);
+
             return response()->json([
                 'response' => $response,
+                'conversation_id' => $conversationId,
                 'timestamp' => now()->toDateTimeString(),
+                'message_count' => count($conversation['messages']),
             ]);
 
         } catch (\Exception $e) {
@@ -243,6 +281,45 @@ class AiInsightsController extends Controller
 
             return response()->json([
                 'error' => 'Failed to process chat message',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Clear conversation history
+     *
+     * DELETE /api/v1/ai/insights/chat/{conversationId}
+     */
+    public function clearConversation(Request $request, string $conversationId): JsonResponse
+    {
+        $company = Company::find($request->header('company'));
+
+        if (! $company) {
+            return response()->json([
+                'error' => 'Company not found',
+            ], 404);
+        }
+
+        $this->authorize('view dashboard', $company);
+
+        try {
+            $this->aiService->clearConversation($company, $conversationId);
+
+            return response()->json([
+                'message' => 'Conversation cleared successfully',
+                'conversation_id' => $conversationId,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to clear conversation', [
+                'company_id' => $company->id,
+                'conversation_id' => $conversationId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to clear conversation',
                 'message' => $e->getMessage(),
             ], 500);
         }
