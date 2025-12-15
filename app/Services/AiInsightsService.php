@@ -797,8 +797,29 @@ PROMPT;
             }
         }
 
-        // Extract company stats
-        $stats = $contextualData['comprehensive_stats'] ?? $contextualData['company_stats'] ?? [];
+        // Extract company stats - handle both flat and nested comprehensive_stats structure
+        $comprehensiveStats = $contextualData['comprehensive_stats'] ?? null;
+
+        // If we have comprehensive stats (nested structure), extract the company stats from it
+        if ($comprehensiveStats !== null && isset($comprehensiveStats['company'])) {
+            $stats = $comprehensiveStats['company'];
+
+            // Extract additional counts from nested structures
+            $suppliersCount = $comprehensiveStats['suppliers']['suppliers_count'] ?? 0;
+            $itemsCount = $comprehensiveStats['inventory']['total_items'] ?? 0;
+            $estimatesCount = $comprehensiveStats['estimates']['estimates_count'] ?? 0;
+            $billsCount = $comprehensiveStats['bills']['bills_count'] ?? 0;
+            $projectsCount = $comprehensiveStats['projects']['projects_count'] ?? 0;
+        } else {
+            // Fallback to flat company_stats
+            $stats = $contextualData['company_stats'] ?? [];
+            $suppliersCount = $stats['suppliers'] ?? 0;
+            $itemsCount = $stats['items'] ?? 0;
+            $estimatesCount = $stats['estimates_count'] ?? 0;
+            $billsCount = $stats['bills_count'] ?? 0;
+            $projectsCount = $stats['projects_count'] ?? 0;
+        }
+
         $revenue = number_format($stats['revenue'] ?? 0, 2);
         $expenses = number_format($stats['expenses'] ?? 0, 2);
         $outstanding = number_format($stats['outstanding'] ?? 0, 2);
@@ -815,12 +836,12 @@ PROMPT;
         $profitFormatted = number_format($profit, 2);
         $profitMargin = $revenue > 0 ? number_format(($profit / ($stats['revenue'] ?? 1)) * 100, 1) : '0.0';
 
-        // Additional comprehensive stats if available
-        $suppliers = $stats['suppliers'] ?? 0;
-        $items = $stats['items'] ?? 0;
-        $estimates = $stats['estimates_count'] ?? 0;
-        $bills = $stats['bills_count'] ?? 0;
-        $projects = $stats['projects_count'] ?? 0;
+        // Use the counts we extracted above
+        $suppliers = $suppliersCount;
+        $items = $itemsCount;
+        $estimates = $estimatesCount;
+        $bills = $billsCount;
+        $projects = $projectsCount;
         $avgInvoiceValue = $stats['avg_invoice_value'] ?? 0;
         $avgInvoiceValueFormatted = number_format($avgInvoiceValue, 2);
 
@@ -1017,6 +1038,55 @@ INSTRUCTIONS;
                 }
             } catch (\Exception $e) {
                 Log::warning('[AiInsightsService] Failed to fetch item sales for complex query', ['error' => $e->getMessage()]);
+            }
+
+            // Add customer dependency analysis for risk-related questions
+            try {
+                $customerDependency = $comprehensiveStats['customer_dependency'] ?? $this->dataProvider->getCustomerDependencyAnalysis($company);
+                if (!empty($customerDependency['customers'])) {
+                    $prompt .= "\n**АНАЛИЗА НА ЗАВИСНОСТ ОД КЛИЕНТИ:**\n";
+                    $prompt .= "Ризик скор: " . ($customerDependency['risk_score'] ?? 0) . "/100\n";
+                    $prompt .= "Ниво на ризик: " . ($customerDependency['risk_level'] ?? 'unknown') . "\n";
+                    $prompt .= "Топ 1 клиент: " . ($customerDependency['concentration']['top_1_percent'] ?? 0) . "% од приходот\n";
+                    $prompt .= "Топ 3 клиенти: " . ($customerDependency['concentration']['top_3_percent'] ?? 0) . "% од приходот\n";
+                    $prompt .= "Топ 5 клиенти: " . ($customerDependency['concentration']['top_5_percent'] ?? 0) . "% од приходот\n\n";
+
+                    if (!empty($customerDependency['customers'])) {
+                        $prompt .= "Детали по клиент:\n";
+                        foreach (array_slice($customerDependency['customers'], 0, 10) as $customer) {
+                            $customerName = is_array($customer['customer_name'] ?? null) ? json_encode($customer['customer_name']) : ($customer['customer_name'] ?? 'Unknown');
+                            $prompt .= "- {$customerName}: " . number_format($customer['total_revenue'] ?? 0, 2) . " {$currency} (" . ($customer['revenue_percent'] ?? 0) . "% од вкупно)\n";
+                        }
+                        $prompt .= "\n";
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch customer dependency for complex query', ['error' => $e->getMessage()]);
+            }
+
+            // Add financial projections for forecasting questions
+            try {
+                $projections = $comprehensiveStats['projections'] ?? $this->dataProvider->getFinancialProjections($company, 6);
+                if (!empty($projections['forecast'])) {
+                    $prompt .= "\n**ФИНАНСИСКИ ПРОЕКЦИИ (6 месеци напред):**\n";
+                    $prompt .= "Месечна стапка на раст: " . number_format($projections['growth_rates']['monthly_growth_percent'] ?? 0, 1) . "%\n";
+                    $prompt .= "Годишна стапка на раст: " . number_format($projections['growth_rates']['annual_growth_percent'] ?? 0, 1) . "%\n";
+                    $prompt .= "Просечен месечен приход: " . number_format($projections['averages']['avg_monthly_revenue'] ?? 0, 2) . " {$currency}\n\n";
+
+                    $prompt .= "Проекција по месец:\n";
+                    foreach ($projections['forecast'] as $month) {
+                        $prompt .= "- {$month['month']}: " . number_format($month['projected_revenue'] ?? 0, 2) . " {$currency}\n";
+                    }
+
+                    if (!empty($projections['break_even'])) {
+                        $prompt .= "\nБрејк-ивен анализа:\n";
+                        $prompt .= "- Месечни фиксни трошоци: " . number_format($projections['break_even']['monthly_fixed_costs'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "- Потребен приход за брејк-ивен: " . number_format($projections['break_even']['required_revenue'] ?? 0, 2) . " {$currency}\n";
+                    }
+                    $prompt .= "\n";
+                }
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch projections for complex query', ['error' => $e->getMessage()]);
             }
 
             $prompt .= <<<COMPLEX_INSTRUCTIONS
