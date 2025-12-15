@@ -1045,23 +1045,70 @@ INSTRUCTIONS;
                 $customerDependency = $comprehensiveStats['customer_dependency'] ?? $this->dataProvider->getCustomerDependencyAnalysis($company);
                 Log::info('[AiInsightsService] Customer dependency data for complex query', [
                     'has_data' => !empty($customerDependency),
-                    'has_customers' => !empty($customerDependency['customers']),
+                    'has_top_customers' => !empty($customerDependency['top_customers']),
                     'risk_score' => $customerDependency['risk_score'] ?? null,
-                    'top_1_percent' => $customerDependency['concentration']['top_1_percent'] ?? null,
+                    'top1_percent' => $customerDependency['concentration']['top1_percent'] ?? null,
                 ]);
-                if (!empty($customerDependency['customers'])) {
-                    $prompt .= "\n**АНАЛИЗА НА ЗАВИСНОСТ ОД КЛИЕНТИ:**\n";
-                    $prompt .= "Ризик скор: " . ($customerDependency['risk_score'] ?? 0) . "/100\n";
-                    $prompt .= "Ниво на ризик: " . ($customerDependency['risk_level'] ?? 'unknown') . "\n";
-                    $prompt .= "Топ 1 клиент: " . ($customerDependency['concentration']['top_1_percent'] ?? 0) . "% од приходот\n";
-                    $prompt .= "Топ 3 клиенти: " . ($customerDependency['concentration']['top_3_percent'] ?? 0) . "% од приходот\n";
-                    $prompt .= "Топ 5 клиенти: " . ($customerDependency['concentration']['top_5_percent'] ?? 0) . "% од приходот\n\n";
 
-                    if (!empty($customerDependency['customers'])) {
+                // Check for top_customers (correct key from McpDataProvider)
+                $hasCustomerData = !empty($customerDependency['top_customers']) || !empty($customerDependency['concentration']);
+
+                if ($hasCustomerData) {
+                    $concentration = $customerDependency['concentration'] ?? [];
+                    $top1Percent = $concentration['top1_percent'] ?? 0;
+                    $top3Percent = $concentration['top3_percent'] ?? 0;
+                    $top5Percent = $concentration['top5_percent'] ?? 0;
+                    $riskScore = $customerDependency['risk_score'] ?? 0;
+
+                    // Determine risk level from score
+                    $riskLevel = match(true) {
+                        $riskScore >= 80 => 'КРИТИЧНО ВИСОК',
+                        $riskScore >= 60 => 'Висок',
+                        $riskScore >= 40 => 'Среден',
+                        $riskScore >= 20 => 'Низок',
+                        default => 'Многу низок',
+                    };
+
+                    $prompt .= "\n**АНАЛИЗА НА ЗАВИСНОСТ ОД КЛИЕНТИ:**\n";
+                    $prompt .= "Ризик скор: {$riskScore}/100 ({$riskLevel})\n";
+                    $prompt .= "Топ 1 клиент: {$top1Percent}% од приходот\n";
+                    $prompt .= "Топ 3 клиенти: {$top3Percent}% од приходот\n";
+                    $prompt .= "Топ 5 клиенти: {$top5Percent}% од приходот\n\n";
+
+                    // Add top customers details
+                    $topCustomers = $customerDependency['top_customers'] ?? [];
+                    if (!empty($topCustomers)) {
                         $prompt .= "Детали по клиент:\n";
-                        foreach (array_slice($customerDependency['customers'], 0, 10) as $customer) {
+                        foreach (array_slice($topCustomers, 0, 10) as $customer) {
                             $customerName = is_array($customer['customer_name'] ?? null) ? json_encode($customer['customer_name']) : ($customer['customer_name'] ?? 'Unknown');
-                            $prompt .= "- {$customerName}: " . number_format($customer['total_revenue'] ?? 0, 2) . " {$currency} (" . ($customer['revenue_percent'] ?? 0) . "% од вкупно)\n";
+                            $revenuePercent = $customer['revenue_share_percent'] ?? 0;
+                            $prompt .= "- {$customerName}: " . number_format($customer['total_revenue'] ?? 0, 2) . " {$currency} ({$revenuePercent}% од вкупно)\n";
+                        }
+                        $prompt .= "\n";
+                    }
+
+                    // Add what-if scenarios
+                    $scenarios = $customerDependency['scenarios'] ?? [];
+                    if (!empty($scenarios)) {
+                        $prompt .= "**Сценарија ШТО-АКО:**\n";
+                        if (!empty($scenarios['if_lose_top1'])) {
+                            $prompt .= "- Ако го изгубите ТОП 1 клиент: Загуба од " . number_format($scenarios['if_lose_top1']['revenue_loss'] ?? 0, 2) . " {$currency} приход, " . number_format($scenarios['if_lose_top1']['profit_impact'] ?? 0, 2) . " {$currency} профит\n";
+                        }
+                        if (!empty($scenarios['if_lose_top3'])) {
+                            $prompt .= "- Ако ги изгубите ТОП 3 клиенти: Загуба од " . number_format($scenarios['if_lose_top3']['revenue_loss'] ?? 0, 2) . " {$currency} приход, " . number_format($scenarios['if_lose_top3']['profit_impact'] ?? 0, 2) . " {$currency} профит\n";
+                        }
+                        $prompt .= "\n";
+                    }
+
+                    // Add risk flags
+                    $riskFlags = $customerDependency['risk_flags'] ?? [];
+                    if (!empty($riskFlags['single_customer_dominance']) || !empty($riskFlags['top3_concentration'])) {
+                        $prompt .= "**ПРЕДУПРЕДУВАЊА:**\n";
+                        if (!empty($riskFlags['single_customer_dominance'])) {
+                            $prompt .= "- КРИТИЧНО: Еден клиент има над 20% од приходот!\n";
+                        }
+                        if (!empty($riskFlags['top3_concentration'])) {
+                            $prompt .= "- ВНИМАНИЕ: Топ 3 клиенти имаат над 50% од приходот!\n";
                         }
                         $prompt .= "\n";
                     }
