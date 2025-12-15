@@ -1184,6 +1184,576 @@ class McpDataProvider
     }
 
     /**
+     * Get customer dependency analysis for risk assessment
+     *
+     * Analyzes revenue concentration across top customers to identify business risks
+     * from customer dependency. Includes concentration metrics, risk flags,
+     * customer profiles, and what-if scenarios.
+     *
+     * @return array{concentration: array, risk_flags: array, top_customers: array, scenarios: array, risk_score: int}
+     */
+    public function getCustomerDependencyAnalysis(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching customer dependency analysis', [
+                'company_id' => $company->id,
+            ]);
+
+            // Get total revenue from paid invoices
+            $totalRevenue = (float) Invoice::where('company_id', $company->id)
+                ->where('paid_status', 'PAID')
+                ->sum('total');
+
+            // Convert from cents to standard currency
+            $totalRevenue = $totalRevenue / 100;
+
+            // Get expenses for profit calculations
+            $totalExpenses = (float) \App\Models\Expense::where('company_id', $company->id)
+                ->sum('amount');
+
+            // Get top customers by revenue with detailed metrics
+            $topCustomersData = Invoice::where('company_id', $company->id)
+                ->where('paid_status', 'PAID')
+                ->select('customer_id')
+                ->selectRaw('SUM(total) as total_revenue')
+                ->selectRaw('COUNT(*) as invoice_count')
+                ->selectRaw('AVG(total) as avg_invoice_value')
+                ->selectRaw('MAX(invoice_date) as last_invoice_date')
+                ->groupBy('customer_id')
+                ->orderByDesc('total_revenue')
+                ->limit(10)
+                ->get();
+
+            // Calculate payment reliability for each customer
+            $topCustomers = $topCustomersData->map(function ($item) use ($totalRevenue) {
+                $customer = Customer::find($item->customer_id);
+                $customerRevenue = $item->total_revenue / 100; // Convert from cents
+
+                // Calculate payment reliability (% paid on time)
+                $totalInvoices = Invoice::where('customer_id', $item->customer_id)
+                    ->whereIn('status', ['SENT', 'COMPLETED'])
+                    ->where('paid_status', 'PAID')
+                    ->count();
+
+                $onTimePayments = Invoice::where('customer_id', $item->customer_id)
+                    ->where('paid_status', 'PAID')
+                    ->whereHas('payments', function ($query) use ($item) {
+                        $query->whereRaw('payment_date <= (SELECT due_date FROM invoices WHERE id = invoice_id)');
+                    })
+                    ->count();
+
+                $paymentReliability = $totalInvoices > 0 ? ($onTimePayments / $totalInvoices) * 100 : 0;
+
+                return [
+                    'customer_id' => $item->customer_id,
+                    'customer_name' => $customer ? $customer->name : 'Unknown Customer',
+                    'total_revenue' => round($customerRevenue, 2),
+                    'revenue_share_percent' => $totalRevenue > 0 ? round(($customerRevenue / $totalRevenue) * 100, 2) : 0,
+                    'invoice_count' => (int) $item->invoice_count,
+                    'avg_invoice_value' => round($item->avg_invoice_value / 100, 2),
+                    'last_invoice_date' => $item->last_invoice_date,
+                    'payment_reliability' => round($paymentReliability, 1),
+                ];
+            })->toArray();
+
+            // Calculate concentration metrics
+            $concentration = [
+                'top1_percent' => isset($topCustomers[0]) ? $topCustomers[0]['revenue_share_percent'] : 0,
+                'top3_percent' => array_sum(array_slice(array_column($topCustomers, 'revenue_share_percent'), 0, 3)),
+                'top5_percent' => array_sum(array_slice(array_column($topCustomers, 'revenue_share_percent'), 0, 5)),
+                'top10_percent' => array_sum(array_slice(array_column($topCustomers, 'revenue_share_percent'), 0, 10)),
+            ];
+
+            // Round concentration percentages
+            $concentration = array_map(fn($v) => round($v, 2), $concentration);
+
+            // Identify risk flags
+            $riskFlags = [
+                'single_customer_dominance' => $concentration['top1_percent'] > 20,
+                'top3_concentration' => $concentration['top3_percent'] > 50,
+            ];
+
+            // Calculate profit margin
+            $currentProfit = $totalRevenue - $totalExpenses;
+            $profitMargin = $totalRevenue > 0 ? $currentProfit / $totalRevenue : 0;
+
+            // Build what-if scenarios
+            $scenarios = [];
+
+            // Scenario 1: Lose top customer
+            if (isset($topCustomers[0])) {
+                $top1Revenue = $topCustomers[0]['total_revenue'];
+                $scenarios['if_lose_top1'] = [
+                    'revenue_loss' => round($top1Revenue, 2),
+                    'profit_impact' => round($top1Revenue * $profitMargin, 2),
+                ];
+            }
+
+            // Scenario 2: Lose top 3 customers
+            $top3Revenue = array_sum(array_slice(array_column($topCustomers, 'total_revenue'), 0, 3));
+            $scenarios['if_lose_top3'] = [
+                'revenue_loss' => round($top3Revenue, 2),
+                'profit_impact' => round($top3Revenue * $profitMargin, 2),
+            ];
+
+            // Scenario 3: Lose top 5 customers
+            $top5Revenue = array_sum(array_slice(array_column($topCustomers, 'total_revenue'), 0, 5));
+            $scenarios['if_lose_top5'] = [
+                'revenue_loss' => round($top5Revenue, 2),
+                'profit_impact' => round($top5Revenue * $profitMargin, 2),
+            ];
+
+            // Calculate risk score (0-100)
+            $riskScore = $this->calculateCustomerDependencyRiskScore(
+                $concentration,
+                $riskFlags,
+                $topCustomers
+            );
+
+            $analysis = [
+                'concentration' => $concentration,
+                'risk_flags' => $riskFlags,
+                'top_customers' => $topCustomers,
+                'scenarios' => $scenarios,
+                'risk_score' => $riskScore,
+            ];
+
+            Log::info('[McpDataProvider] Customer dependency analysis calculated', [
+                'risk_score' => $riskScore,
+                'top1_percent' => $concentration['top1_percent'],
+            ]);
+
+            return $analysis;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get customer dependency analysis', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'concentration' => [
+                    'top1_percent' => 0,
+                    'top3_percent' => 0,
+                    'top5_percent' => 0,
+                    'top10_percent' => 0,
+                ],
+                'risk_flags' => [
+                    'single_customer_dominance' => false,
+                    'top3_concentration' => false,
+                ],
+                'top_customers' => [],
+                'scenarios' => [],
+                'risk_score' => 0,
+            ];
+        }
+    }
+
+    /**
+     * Calculate customer dependency risk score (0-100)
+     *
+     * Higher score = higher risk
+     *
+     * @param array $concentration Concentration percentages
+     * @param array $riskFlags Risk flags
+     * @param array $topCustomers Top customers data
+     * @return int Risk score from 0 to 100
+     */
+    private function calculateCustomerDependencyRiskScore(array $concentration, array $riskFlags, array $topCustomers): int
+    {
+        $score = 0;
+
+        // Factor 1: Single customer dominance (0-40 points)
+        // >50% = 40, >30% = 30, >20% = 20, >10% = 10
+        $top1Percent = $concentration['top1_percent'];
+        if ($top1Percent > 50) {
+            $score += 40;
+        } elseif ($top1Percent > 30) {
+            $score += 30;
+        } elseif ($top1Percent > 20) {
+            $score += 20;
+        } elseif ($top1Percent > 10) {
+            $score += 10;
+        }
+
+        // Factor 2: Top 3 concentration (0-30 points)
+        // >80% = 30, >60% = 20, >50% = 15, >40% = 10
+        $top3Percent = $concentration['top3_percent'];
+        if ($top3Percent > 80) {
+            $score += 30;
+        } elseif ($top3Percent > 60) {
+            $score += 20;
+        } elseif ($top3Percent > 50) {
+            $score += 15;
+        } elseif ($top3Percent > 40) {
+            $score += 10;
+        }
+
+        // Factor 3: Recent activity check (0-20 points)
+        // Inactive top customers reduce real risk
+        $inactiveTopCustomers = 0;
+        $threeMonthsAgo = now()->subMonths(3);
+
+        foreach (array_slice($topCustomers, 0, 3) as $customer) {
+            if ($customer['last_invoice_date'] && \Carbon\Carbon::parse($customer['last_invoice_date'])->lt($threeMonthsAgo)) {
+                $inactiveTopCustomers++;
+            }
+        }
+
+        // Reduce score if top customers are inactive (they're already lost)
+        if ($inactiveTopCustomers > 0) {
+            $score -= (10 * $inactiveTopCustomers);
+        } else {
+            // Add risk if all top customers are active (high dependency)
+            $score += 20;
+        }
+
+        // Factor 4: Payment reliability (0-10 points)
+        // Poor payment reliability = higher risk
+        $avgReliability = 0;
+        $topCustomersCount = min(3, count($topCustomers));
+
+        if ($topCustomersCount > 0) {
+            $totalReliability = array_sum(array_slice(array_column($topCustomers, 'payment_reliability'), 0, 3));
+            $avgReliability = $totalReliability / $topCustomersCount;
+        }
+
+        if ($avgReliability < 50) {
+            $score += 10;
+        } elseif ($avgReliability < 70) {
+            $score += 5;
+        }
+
+        // Ensure score is between 0 and 100
+        $score = max(0, min(100, $score));
+
+        return $score;
+    }
+
+    /**
+     * Get financial projections and forecasting
+     *
+     * Analyzes historical data to project future financial performance
+     *
+     * @param int $forecastMonths Number of months to forecast (default: 6)
+     * @return array{growth_rates: array, projections: array, targets: array, break_even: array, confidence_level: string, data_months_used: int}
+     */
+    public function getFinancialProjections(Company $company, int $forecastMonths = 6): array
+    {
+        try {
+            Log::info('[McpDataProvider] Generating financial projections', [
+                'company_id' => $company->id,
+                'forecast_months' => $forecastMonths,
+            ]);
+
+            // Step 1: Get historical data (last 12 months for better analysis)
+            $historicalMonths = 12;
+            $trends = $this->getMonthlyTrends($company, $historicalMonths);
+
+            // Filter out months with no data
+            $trendsWithData = array_filter($trends, function($month) {
+                return $month['revenue'] > 0 || $month['expenses'] > 0;
+            });
+
+            $dataMonthsUsed = count($trendsWithData);
+
+            // If insufficient data, return empty projections
+            if ($dataMonthsUsed < 3) {
+                return [
+                    'growth_rates' => [
+                        'revenue_monthly_percent' => 0,
+                        'expense_monthly_percent' => 0,
+                        'customer_growth_percent' => 0,
+                    ],
+                    'projections' => [],
+                    'targets' => [
+                        '1m_mkd' => ['achievable' => false, 'estimated_date' => 'insufficient_data'],
+                        '5m_mkd' => ['achievable' => false, 'estimated_date' => 'insufficient_data'],
+                        '10m_mkd' => ['achievable' => false, 'estimated_date' => 'insufficient_data'],
+                    ],
+                    'break_even' => [
+                        'monthly_fixed_costs' => 0,
+                        'profit_margin_percent' => 0,
+                        'break_even_revenue' => 0,
+                        'currently_above_break_even' => false,
+                    ],
+                    'seasonality' => [],
+                    'confidence_level' => 'insufficient_data',
+                    'data_months_used' => $dataMonthsUsed,
+                ];
+            }
+
+            // Step 2: Calculate growth rates using linear regression
+            $revenueGrowth = $this->calculateGrowthRate($trendsWithData, 'revenue');
+            $expenseGrowth = $this->calculateGrowthRate($trendsWithData, 'expenses');
+
+            // Customer growth
+            $customerGrowth = $this->getCustomerGrowth($company, $historicalMonths);
+            $customerGrowthRate = $this->calculateGrowthRate(
+                array_filter($customerGrowth, fn($m) => $m['new_customers'] > 0),
+                'new_customers'
+            );
+
+            // Average invoice value trend
+            $avgInvoiceValues = array_map(function($month) {
+                return $month['invoice_count'] > 0 ? $month['revenue'] / $month['invoice_count'] : 0;
+            }, $trendsWithData);
+            $avgInvoiceValue = array_sum($avgInvoiceValues) / count($avgInvoiceValues);
+
+            // Step 3: Generate projections
+            $projections = [];
+            $lastMonth = end($trendsWithData);
+            $lastRevenue = $lastMonth['revenue'];
+            $lastExpenses = $lastMonth['expenses'];
+
+            for ($i = 1; $i <= $forecastMonths; $i++) {
+                $projectedRevenue = $lastRevenue * pow(1 + ($revenueGrowth / 100), $i);
+                $projectedExpenses = $lastExpenses * pow(1 + ($expenseGrowth / 100), $i);
+
+                $forecastMonth = now()->addMonths($i)->format('Y-m');
+
+                $projections[] = [
+                    'month' => $forecastMonth,
+                    'revenue' => round($projectedRevenue, 2),
+                    'expenses' => round($projectedExpenses, 2),
+                    'profit' => round($projectedRevenue - $projectedExpenses, 2),
+                ];
+            }
+
+            // Step 4: Target achievement projection
+            $targets = [
+                '1m_mkd' => $this->estimateTargetDate($projections, $lastRevenue, $revenueGrowth, 1000000),
+                '5m_mkd' => $this->estimateTargetDate($projections, $lastRevenue, $revenueGrowth, 5000000),
+                '10m_mkd' => $this->estimateTargetDate($projections, $lastRevenue, $revenueGrowth, 10000000),
+            ];
+
+            // Step 5: Break-even analysis
+            $avgExpenses = array_sum(array_column($trendsWithData, 'expenses')) / $dataMonthsUsed;
+            $avgRevenue = array_sum(array_column($trendsWithData, 'revenue')) / $dataMonthsUsed;
+            $avgProfit = $avgRevenue - $avgExpenses;
+            $profitMargin = $avgRevenue > 0 ? ($avgProfit / $avgRevenue) * 100 : 0;
+
+            // Estimate fixed costs (average of lowest 3 months expenses)
+            $expenseValues = array_column($trendsWithData, 'expenses');
+            sort($expenseValues);
+            $fixedCosts = array_sum(array_slice($expenseValues, 0, min(3, count($expenseValues)))) / min(3, count($expenseValues));
+
+            $breakEvenRevenue = $profitMargin > 0 ? $fixedCosts / ($profitMargin / 100) : 0;
+
+            $breakEven = [
+                'monthly_fixed_costs' => round($fixedCosts, 2),
+                'profit_margin_percent' => round($profitMargin, 2),
+                'break_even_revenue' => round($breakEvenRevenue, 2),
+                'currently_above_break_even' => $avgRevenue >= $breakEvenRevenue,
+            ];
+
+            // Step 6: Seasonality detection
+            $seasonality = $this->detectSeasonality($trendsWithData);
+
+            // Step 7: Confidence level
+            $confidenceLevel = $this->calculateConfidenceLevel($dataMonthsUsed, $trendsWithData);
+
+            $result = [
+                'growth_rates' => [
+                    'revenue_monthly_percent' => round($revenueGrowth, 2),
+                    'expense_monthly_percent' => round($expenseGrowth, 2),
+                    'customer_growth_percent' => round($customerGrowthRate, 2),
+                    'avg_invoice_value' => round($avgInvoiceValue, 2),
+                ],
+                'projections' => $projections,
+                'targets' => $targets,
+                'break_even' => $breakEven,
+                'seasonality' => $seasonality,
+                'confidence_level' => $confidenceLevel,
+                'data_months_used' => $dataMonthsUsed,
+            ];
+
+            Log::info('[McpDataProvider] Financial projections calculated', [
+                'confidence' => $confidenceLevel,
+                'data_months' => $dataMonthsUsed,
+            ]);
+
+            return $result;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to generate financial projections', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'growth_rates' => [
+                    'revenue_monthly_percent' => 0,
+                    'expense_monthly_percent' => 0,
+                    'customer_growth_percent' => 0,
+                ],
+                'projections' => [],
+                'targets' => [],
+                'break_even' => [],
+                'seasonality' => [],
+                'confidence_level' => 'error',
+                'data_months_used' => 0,
+            ];
+        }
+    }
+
+    /**
+     * Calculate growth rate using simple linear regression
+     *
+     * @param array $data Historical data
+     * @param string $field Field to analyze
+     * @return float Monthly growth rate as percentage
+     */
+    private function calculateGrowthRate(array $data, string $field): float
+    {
+        if (count($data) < 2) {
+            return 0;
+        }
+
+        $values = array_values(array_column($data, $field));
+        $n = count($values);
+
+        // Simple month-over-month average growth
+        $growthRates = [];
+        for ($i = 1; $i < $n; $i++) {
+            if ($values[$i - 1] > 0) {
+                $growthRates[] = (($values[$i] - $values[$i - 1]) / $values[$i - 1]) * 100;
+            }
+        }
+
+        return count($growthRates) > 0 ? array_sum($growthRates) / count($growthRates) : 0;
+    }
+
+    /**
+     * Estimate when a revenue target will be reached
+     *
+     * @param array $projections Projected months
+     * @param float $currentRevenue Current monthly revenue
+     * @param float $growthRate Monthly growth rate (%)
+     * @param float $target Target revenue
+     * @return array
+     */
+    private function estimateTargetDate(array $projections, float $currentRevenue, float $growthRate, float $target): array
+    {
+        // Check if target is already achieved
+        if ($currentRevenue >= $target) {
+            return [
+                'achievable' => true,
+                'estimated_date' => 'already_achieved',
+            ];
+        }
+
+        // Check if we're growing (or shrinking)
+        if ($growthRate <= 0) {
+            return [
+                'achievable' => false,
+                'estimated_date' => 'negative_growth',
+            ];
+        }
+
+        // Check in projections first
+        foreach ($projections as $projection) {
+            if ($projection['revenue'] >= $target) {
+                return [
+                    'achievable' => true,
+                    'estimated_date' => $projection['month'],
+                ];
+            }
+        }
+
+        // Calculate months needed beyond projections
+        // Formula: target = current * (1 + growth)^months
+        // months = log(target/current) / log(1 + growth)
+        $monthsNeeded = log($target / $currentRevenue) / log(1 + ($growthRate / 100));
+
+        if ($monthsNeeded > 24) {
+            return [
+                'achievable' => true,
+                'estimated_date' => 'more_than_2_years',
+            ];
+        }
+
+        $estimatedDate = now()->addMonths(ceil($monthsNeeded))->format('Y-m');
+
+        return [
+            'achievable' => true,
+            'estimated_date' => $estimatedDate,
+        ];
+    }
+
+    /**
+     * Detect seasonality patterns in revenue
+     *
+     * @param array $data Historical monthly data
+     * @return array Seasonality factors by month (1-12)
+     */
+    private function detectSeasonality(array $data): array
+    {
+        if (count($data) < 12) {
+            return [];
+        }
+
+        // Group by month (1-12)
+        $monthlyData = array_fill(1, 12, []);
+        foreach ($data as $entry) {
+            $monthNum = (int) date('n', strtotime($entry['month'] . '-01'));
+            $monthlyData[$monthNum][] = $entry['revenue'];
+        }
+
+        // Calculate average for each month
+        $overallAvg = array_sum(array_column($data, 'revenue')) / count($data);
+        $seasonalityFactors = [];
+
+        foreach ($monthlyData as $month => $revenues) {
+            if (count($revenues) > 0) {
+                $monthAvg = array_sum($revenues) / count($revenues);
+                $factor = $overallAvg > 0 ? ($monthAvg / $overallAvg) : 1;
+
+                // Only include if significantly different (>10% variance)
+                if (abs($factor - 1) > 0.1) {
+                    $seasonalityFactors[$month] = round($factor, 2);
+                }
+            }
+        }
+
+        return $seasonalityFactors;
+    }
+
+    /**
+     * Calculate confidence level based on data quality
+     *
+     * @param int $monthsUsed Number of months with data
+     * @param array $data Historical data
+     * @return string 'low', 'medium', or 'high'
+     */
+    private function calculateConfidenceLevel(int $monthsUsed, array $data): string
+    {
+        // Calculate variance in revenue
+        $revenues = array_column($data, 'revenue');
+        $avgRevenue = array_sum($revenues) / count($revenues);
+
+        $variance = 0;
+        foreach ($revenues as $revenue) {
+            $variance += pow($revenue - $avgRevenue, 2);
+        }
+        $variance = $variance / count($revenues);
+        $stdDev = sqrt($variance);
+
+        $coefficientOfVariation = $avgRevenue > 0 ? ($stdDev / $avgRevenue) : 1;
+
+        // Confidence based on data months and consistency
+        if ($monthsUsed >= 10 && $coefficientOfVariation < 0.3) {
+            return 'high';
+        } elseif ($monthsUsed >= 6 && $coefficientOfVariation < 0.5) {
+            return 'medium';
+        } else {
+            return 'low';
+        }
+    }
+
+    /**
      * Get comprehensive statistics across all financial modules
      *
      * @return array
@@ -1213,6 +1783,8 @@ class McpDataProvider
                 'payment_timing' => $this->getPaymentTimingAnalysis($company),
                 'top_customers' => $this->getTopCustomers($company, 5),
                 'item_sales' => $this->getItemSalesAnalysis($company, 3),
+                'customer_dependency' => $this->getCustomerDependencyAnalysis($company),
+                'projections' => $this->getFinancialProjections($company, 6),
             ];
 
             Log::info('[McpDataProvider] Comprehensive stats calculated');

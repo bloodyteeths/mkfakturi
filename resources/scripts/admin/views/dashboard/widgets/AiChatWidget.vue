@@ -8,17 +8,39 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-900">{{ $t('ai.chat.title') }}</h3>
-          <p class="text-sm text-gray-500">{{ $t('ai.chat.subtitle') }}</p>
+          <div class="flex items-center space-x-2">
+            <p class="text-sm text-gray-500">{{ $t('ai.chat.subtitle') }}</p>
+            <!-- Conversation indicator -->
+            <span
+              v-if="conversationId"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+              :title="`Conversation ID: ${conversationId}`"
+            >
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+              Continuing ({{ messages.length }} msgs)
+            </span>
+          </div>
         </div>
       </div>
-      <button
-        v-if="messages.length > 0"
-        @click="clearChat"
-        class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-        :title="$t('ai.chat.clear')"
-      >
-        <TrashIcon class="w-5 h-5" />
-      </button>
+      <div class="flex items-center space-x-2">
+        <button
+          v-if="conversationId"
+          @click="startNewConversation"
+          class="px-3 py-1.5 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors flex items-center space-x-1"
+          :title="$t('ai.chat.new_conversation')"
+        >
+          <PlusCircleIcon class="w-4 h-4" />
+          <span class="hidden sm:inline">{{ $t('ai.chat.new_conversation') }}</span>
+        </button>
+        <button
+          v-if="messages.length > 0"
+          @click="clearChat"
+          class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          :title="$t('ai.chat.clear')"
+        >
+          <TrashIcon class="w-5 h-5" />
+        </button>
+      </div>
     </div>
 
     <!-- Chat Messages -->
@@ -111,7 +133,8 @@ import axios from 'axios'
 import {
   ChatBubbleLeftRightIcon,
   PaperAirplaneIcon,
-  TrashIcon
+  TrashIcon,
+  PlusCircleIcon
 } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
@@ -121,6 +144,7 @@ const messages = ref([])
 const currentMessage = ref('')
 const isLoading = ref(false)
 const chatContainer = ref(null)
+const conversationId = ref(null)
 
 // Methods
 async function sendMessage() {
@@ -144,10 +168,25 @@ async function sendMessage() {
   isLoading.value = true
   try {
     console.log('[AI Chat] Sending message:', messageToSend)
-    const response = await axios.post('/ai/insights/chat', {
+    console.log('[AI Chat] Conversation ID:', conversationId.value)
+
+    const requestData = {
       message: messageToSend
-    })
+    }
+
+    // Include conversation_id if exists
+    if (conversationId.value) {
+      requestData.conversation_id = conversationId.value
+    }
+
+    const response = await axios.post('/ai/insights/chat', requestData)
     console.log('[AI Chat] Chat response:', response.data)
+
+    // Store conversation_id from response
+    if (response.data.conversation_id) {
+      conversationId.value = response.data.conversation_id
+      saveConversationId()
+    }
 
     const assistantMessage = {
       role: 'assistant',
@@ -175,9 +214,48 @@ async function sendMessage() {
   }
 }
 
-function clearChat() {
+async function clearChat() {
+  // Optionally call backend to clear server-side cache
+  if (conversationId.value) {
+    try {
+      await axios.delete(`/ai/insights/chat/${conversationId.value}`)
+      console.log('[AI Chat] Conversation cleared on server')
+    } catch (err) {
+      console.error('Failed to clear conversation on server:', err)
+    }
+  }
+
   messages.value = []
   currentMessage.value = ''
+  conversationId.value = null
+  saveConversationId()
+  saveChatHistory()
+}
+
+function startNewConversation() {
+  messages.value = []
+  currentMessage.value = ''
+  conversationId.value = null
+  saveConversationId()
+  saveChatHistory()
+
+  // Show notification
+  showNotification('New conversation started')
+}
+
+function showNotification(message) {
+  // Simple toast notification - you can enhance this with a proper toast library
+  const toast = document.createElement('div')
+  toast.className = 'fixed bottom-4 right-4 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300'
+  toast.textContent = message
+  document.body.appendChild(toast)
+
+  setTimeout(() => {
+    toast.style.opacity = '0'
+    setTimeout(() => {
+      document.body.removeChild(toast)
+    }, 300)
+  }, 2000)
 }
 
 function scrollToBottom() {
@@ -224,6 +302,32 @@ function saveChatHistory() {
   }
 }
 
+// Load conversation ID from localStorage
+function loadConversationId() {
+  try {
+    const saved = localStorage.getItem('ai_conversation_id')
+    if (saved) {
+      conversationId.value = saved
+      console.log('[AI Chat] Loaded conversation ID:', conversationId.value)
+    }
+  } catch (err) {
+    console.error('Failed to load conversation ID:', err)
+  }
+}
+
+// Save conversation ID to localStorage
+function saveConversationId() {
+  try {
+    if (conversationId.value) {
+      localStorage.setItem('ai_conversation_id', conversationId.value)
+    } else {
+      localStorage.removeItem('ai_conversation_id')
+    }
+  } catch (err) {
+    console.error('Failed to save conversation ID:', err)
+  }
+}
+
 // Watch messages and save to localStorage
 import { watch } from 'vue'
 watch(messages, () => {
@@ -232,6 +336,7 @@ watch(messages, () => {
 
 // Lifecycle
 onMounted(() => {
+  loadConversationId()
   loadChatHistory()
 })
 </script>
@@ -257,4 +362,6 @@ onMounted(() => {
 }
 </style>
 
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT - Added conversation memory support with conversation_id tracking,
+// localStorage persistence, new conversation button, conversation indicator badge,
+// and server-side cache clearing on chat clear

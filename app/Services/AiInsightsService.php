@@ -901,8 +901,29 @@ BASETEXT;
             $prompt .= "\n{$appDocs}\n";
         }
 
+        // Detect conversation references and extract entities
+        $conversationReferences = [];
+        $entities = [];
+        $conversationSummary = '';
+
+        if (! empty($conversationHistory)) {
+            // Detect if user is referring to previous conversation
+            $conversationReferences = $this->detectConversationReferences($question);
+
+            // Extract entities from conversation history
+            $entities = $this->extractEntitiesFromConversation($conversationHistory);
+
+            // Create summary for long conversations
+            $conversationSummary = $this->summarizeConversationContext($conversationHistory);
+        }
+
         // Add conversation history if available (last 10 messages)
         if (! empty($conversationHistory)) {
+            // If conversation is long, show summary first
+            if (! empty($conversationSummary)) {
+                $prompt .= "\n{$conversationSummary}\n";
+            }
+
             $prompt .= "\nПретходна конверзација:\n";
 
             // Limit to last 10 messages to avoid token overflow
@@ -915,6 +936,55 @@ BASETEXT;
             }
 
             $prompt .= "\n";
+
+            // Add entity summary if entities were found
+            if (! empty(array_filter($entities))) {
+                $prompt .= "Клучни ентитети споменати во конверзацијата:\n";
+
+                if (! empty($entities['invoice_numbers'])) {
+                    $prompt .= '- Фактури: '.implode(', ', $entities['invoice_numbers'])."\n";
+                }
+                if (! empty($entities['customer_names'])) {
+                    $prompt .= '- Клиенти: '.implode(', ', $entities['customer_names'])."\n";
+                }
+                if (! empty($entities['amounts'])) {
+                    $amountTexts = array_map(fn ($a) => $a['full'], array_slice($entities['amounts'], 0, 5));
+                    $prompt .= '- Износи: '.implode(', ', $amountTexts)."\n";
+                }
+                if (! empty($entities['dates'])) {
+                    $prompt .= '- Датуми: '.implode(', ', array_slice($entities['dates'], 0, 5))."\n";
+                }
+                if (! empty($entities['item_names'])) {
+                    $prompt .= '- Артикли: '.implode(', ', $entities['item_names'])."\n";
+                }
+
+                $prompt .= "\n";
+            }
+
+            // Add explicit context instruction if references detected
+            if (! empty($conversationReferences)) {
+                $prompt .= "ВАЖНО: Корисникот се повикува на претходен контекст во конверзацијата.\n";
+                $prompt .= "Детектирани референци: ".implode(', ', $conversationReferences)."\n";
+
+                if (! empty($entities['invoice_numbers']) || ! empty($entities['customer_names']) || ! empty($entities['amounts'])) {
+                    $entityList = [];
+                    if (! empty($entities['invoice_numbers'])) {
+                        $entityList[] = 'фактури ('.implode(', ', array_slice($entities['invoice_numbers'], 0, 3)).')';
+                    }
+                    if (! empty($entities['customer_names'])) {
+                        $entityList[] = 'клиенти ('.implode(', ', array_slice($entities['customer_names'], 0, 3)).')';
+                    }
+                    if (! empty($entities['amounts'])) {
+                        $amounts = array_slice($entities['amounts'], 0, 3);
+                        $amountTexts = array_map(fn ($a) => $a['full'], $amounts);
+                        $entityList[] = 'износи ('.implode(', ', $amountTexts).')';
+                    }
+
+                    $prompt .= 'Претходно дискутиравме за: '.implode(', ', $entityList).".\n";
+                }
+
+                $prompt .= "Кога корисникот каже 'тоа', 'ова', 'истото', 'претходното', се однесува на горенаведените теми и ентитети.\n\n";
+            }
         }
 
         // Add question and enhanced instructions
@@ -1971,6 +2041,283 @@ PROMPT;
    - Даночен извештај (Tax Report)
 
 DOCUMENTATION;
+    }
+
+    /**
+     * Extract entities from conversation history
+     *
+     * Detects and extracts mentioned entities like customer names, invoice numbers,
+     * amounts, dates, and item names from the conversation.
+     *
+     * @param  array<int, array{role: string, content: string}>  $conversationHistory  Previous conversation messages
+     * @return array<string, array> Array of entities grouped by type
+     */
+    private function extractEntitiesFromConversation(array $conversationHistory): array
+    {
+        $entities = [
+            'invoice_numbers' => [],
+            'amounts' => [],
+            'dates' => [],
+            'customer_names' => [],
+            'item_names' => [],
+        ];
+
+        foreach ($conversationHistory as $message) {
+            $content = $message['content'] ?? '';
+
+            // Extract invoice numbers (Macedonian and English formats)
+            // Matches: ф-123, фак-456, FA-789, inv-101, invoice-202
+            if (preg_match_all('/\b(ф[ак]?-?\d+|fa-?\d+|inv-?\d+|invoice-?\d+)\b/iu', $content, $matches)) {
+                foreach ($matches[0] as $invoiceNum) {
+                    $entities['invoice_numbers'][] = $invoiceNum;
+                }
+            }
+
+            // Extract amounts with currency
+            // Matches: 5000 MKD, 1,234.56 денари, 100 EUR, 2.500 денари
+            if (preg_match_all('/\b(\d{1,3}(?:[,\.]\d{3})*(?:[,\.]\d{1,2})?)\s*(MKD|денари|денар|€|EUR|евра)\b/iu', $content, $matches)) {
+                for ($i = 0; $i < count($matches[0]); $i++) {
+                    $entities['amounts'][] = [
+                        'value' => $matches[1][$i],
+                        'currency' => $matches[2][$i],
+                        'full' => $matches[0][$i],
+                    ];
+                }
+            }
+
+            // Extract dates
+            // Matches: 15.12.2025, 15/12/25, 15.12, 15/12
+            if (preg_match_all('/\b(\d{1,2}[\/.]\d{1,2}(?:[\/.]\d{2,4})?)\b/', $content, $matches)) {
+                foreach ($matches[0] as $date) {
+                    $entities['dates'][] = $date;
+                }
+            }
+
+            // Extract customer names (heuristic: capitalized words after customer/client keywords)
+            $customerPatterns = [
+                '/\b(?:клиент|купувач|customer|client)\s+([А-ЏŠŽČĆ][а-џšžčć]+(?:\s+[А-ЏŠŽČĆ][а-џšžčć]+)*)/u',
+                '/\b([А-ЏŠŽČĆ][а-џšžčć]+(?:\s+[А-ЏŠŽČĆ][а-џšžčć]+)*)\s+(?:должи|плаќа|има|owes|pays|has)/u',
+            ];
+            foreach ($customerPatterns as $pattern) {
+                if (preg_match_all($pattern, $content, $matches)) {
+                    foreach ($matches[1] as $name) {
+                        $entities['customer_names'][] = trim($name);
+                    }
+                }
+            }
+
+            // Extract item names (heuristic: items mentioned in context of products/items)
+            $itemPatterns = [
+                '/\b(?:артикл|производ|продукт|item|product)\s+"([^"]+)"/iu',
+                '/\b(?:артикл|производ|продукт|item|product)\s+([А-ЏŠŽČĆA-Z][а-џšžčća-z]+(?:\s+[А-ЏŠŽČĆA-Z][а-џšžčća-z]+)*)/u',
+            ];
+            foreach ($itemPatterns as $pattern) {
+                if (preg_match_all($pattern, $content, $matches)) {
+                    foreach ($matches[1] as $itemName) {
+                        $entities['item_names'][] = trim($itemName);
+                    }
+                }
+            }
+        }
+
+        // Deduplicate entities
+        foreach ($entities as $key => $values) {
+            if ($key === 'amounts') {
+                // For amounts, deduplicate by full text
+                $unique = [];
+                $seen = [];
+                foreach ($values as $amount) {
+                    $fullText = $amount['full'];
+                    if (! in_array($fullText, $seen)) {
+                        $unique[] = $amount;
+                        $seen[] = $fullText;
+                    }
+                }
+                $entities[$key] = $unique;
+            } else {
+                $entities[$key] = array_values(array_unique($values));
+            }
+        }
+
+        Log::info('[AiInsightsService] Entities extracted from conversation', [
+            'invoice_numbers_count' => count($entities['invoice_numbers']),
+            'amounts_count' => count($entities['amounts']),
+            'dates_count' => count($entities['dates']),
+            'customer_names_count' => count($entities['customer_names']),
+            'item_names_count' => count($entities['item_names']),
+        ]);
+
+        return $entities;
+    }
+
+    /**
+     * Detect conversation references in user's question
+     *
+     * Identifies when the user is referring to previous conversation context
+     * using pronouns, continuation words, or follow-up questions.
+     *
+     * @param  string  $question  The user's question
+     * @return array<string> Array of detected reference types
+     */
+    private function detectConversationReferences(string $question): array
+    {
+        $references = [];
+        $questionLower = mb_strtolower($question, 'UTF-8');
+
+        // Demonstrative pronouns - "that", "this", "those", "these"
+        $demonstrativePatterns = [
+            '/\b(тоа|ова|овие|тие|истото|истиот|истата|оној|онаа|оние)\b/u',
+            '/\b(that|this|those|these|it|them|the same)\b/iu',
+        ];
+        foreach ($demonstrativePatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $references[] = 'demonstrative';
+                break;
+            }
+        }
+
+        // Previous context references - "earlier", "previously mentioned", "before"
+        $previousContextPatterns = [
+            '/\b(претходн[оаие]|порано|што споменавме|погоре|претходно споменато|порано споменато)\b/u',
+            '/\b(previous|earlier|mentioned before|above|previously mentioned)\b/iu',
+        ];
+        foreach ($previousContextPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $references[] = 'previous_context';
+                break;
+            }
+        }
+
+        // Continuation markers - "continue", "more details", "explain more"
+        $continuationPatterns = [
+            '/\b(продолжи|повеќе детали|објасни подетално|кажи повеќе|покажи повеќе|дополнително|уште)\b/u',
+            '/\b(continue|more details|explain more|tell me more|show more|additional|also)\b/iu',
+        ];
+        foreach ($continuationPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $references[] = 'continuation';
+                break;
+            }
+        }
+
+        // Follow-up questions - "why", "how so", "from where"
+        $followUpPatterns = [
+            '/^(зошто|како така|од каде|од кој|како|защо)\b/u',
+            '/^(why|how so|from where|which one|how)\b/iu',
+            '/\b(зошто (тоа|ова)|како така|објасни (го|ја))\b/u',
+        ];
+        foreach ($followUpPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $references[] = 'follow_up';
+                break;
+            }
+        }
+
+        // Same entity references - "the same customer", "that client"
+        $sameEntityPatterns = [
+            '/\b(истиот клиент|истата фактура|истиот артикл|тој клиент|таа фактура)\b/u',
+            '/\b(the same customer|that client|that invoice|the same item)\b/iu',
+        ];
+        foreach ($sameEntityPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $references[] = 'same_entity';
+                break;
+            }
+        }
+
+        // Clarification requests - "what did you mean", "which one"
+        $clarificationPatterns = [
+            '/\b(што мислеше|што рече|кое|која|кој од|што значи)\b/u',
+            '/\b(what did you mean|which one|what do you mean|clarify)\b/iu',
+        ];
+        foreach ($clarificationPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $references[] = 'clarification';
+                break;
+            }
+        }
+
+        Log::info('[AiInsightsService] Conversation references detected', [
+            'question' => $question,
+            'references' => $references,
+        ]);
+
+        return array_unique($references);
+    }
+
+    /**
+     * Summarize conversation context for long conversations
+     *
+     * Creates a concise summary of key points, numbers, and decisions
+     * when the conversation exceeds 6 messages to prevent context loss.
+     *
+     * @param  array<int, array{role: string, content: string}>  $conversationHistory  Previous conversation messages
+     * @return string Summary of conversation context
+     */
+    private function summarizeConversationContext(array $conversationHistory): string
+    {
+        if (count($conversationHistory) <= 6) {
+            return '';
+        }
+
+        // Extract entities from entire conversation
+        $entities = $this->extractEntitiesFromConversation($conversationHistory);
+
+        // Build summary text
+        $summary = "Краток преглед на дискусијата:\n";
+
+        // Main topics (extract from user questions)
+        $userMessages = array_filter($conversationHistory, fn ($msg) => ($msg['role'] ?? '') === 'user');
+        if (! empty($userMessages)) {
+            $firstUserMsg = reset($userMessages);
+            $summary .= "- Почетна тема: ".mb_substr($firstUserMsg['content'] ?? '', 0, 100)."...\n";
+        }
+
+        // Key numbers mentioned
+        if (! empty($entities['amounts'])) {
+            $summary .= "- Споменати износи: ";
+            $amounts = array_slice($entities['amounts'], 0, 3);
+            $amountTexts = array_map(fn ($a) => $a['full'], $amounts);
+            $summary .= implode(', ', $amountTexts);
+            if (count($entities['amounts']) > 3) {
+                $summary .= ' и други';
+            }
+            $summary .= "\n";
+        }
+
+        // Invoice numbers mentioned
+        if (! empty($entities['invoice_numbers'])) {
+            $summary .= '- Фактури: '.implode(', ', array_slice($entities['invoice_numbers'], 0, 3));
+            if (count($entities['invoice_numbers']) > 3) {
+                $summary .= ' и други';
+            }
+            $summary .= "\n";
+        }
+
+        // Customer names mentioned
+        if (! empty($entities['customer_names'])) {
+            $summary .= '- Клиенти: '.implode(', ', array_slice($entities['customer_names'], 0, 3));
+            if (count($entities['customer_names']) > 3) {
+                $summary .= ' и други';
+            }
+            $summary .= "\n";
+        }
+
+        // Dates mentioned
+        if (! empty($entities['dates'])) {
+            $summary .= '- Датуми: '.implode(', ', array_slice($entities['dates'], 0, 3));
+            if (count($entities['dates']) > 3) {
+                $summary .= ' и други';
+            }
+            $summary .= "\n";
+        }
+
+        Log::info('[AiInsightsService] Conversation summary created', [
+            'messages_count' => count($conversationHistory),
+            'summary_length' => strlen($summary),
+        ]);
+
+        return $summary;
     }
 }
 
