@@ -1037,6 +1037,153 @@ class McpDataProvider
     }
 
     /**
+     * Get detailed item sales analysis for profit optimization
+     *
+     * Returns per-item revenue, quantities, and contribution analysis
+     * Essential for questions like "which items to increase to reach X profit"
+     *
+     * @param int $months Number of months to analyze (default: 3)
+     * @return array{items: array, totals: array, analysis: array}
+     */
+    public function getItemSalesAnalysis(Company $company, int $months = 3): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching item sales analysis', [
+                'company_id' => $company->id,
+                'months' => $months,
+            ]);
+
+            $startDate = now()->subMonths($months)->startOfMonth();
+
+            // Get item-level sales from paid invoices
+            $itemSales = \App\Models\InvoiceItem::whereHas('invoice', function ($query) use ($company, $startDate) {
+                $query->where('company_id', $company->id)
+                    ->where('paid_status', 'PAID')
+                    ->where('invoice_date', '>=', $startDate);
+            })
+                ->select(
+                    'item_id',
+                    'name',
+                    \DB::raw('SUM(quantity) as total_quantity'),
+                    \DB::raw('SUM(total) as total_revenue'),
+                    \DB::raw('AVG(price) as avg_price'),
+                    \DB::raw('COUNT(DISTINCT invoice_id) as invoice_count')
+                )
+                ->groupBy('item_id', 'name')
+                ->orderByDesc('total_revenue')
+                ->limit(50)
+                ->get();
+
+            // Calculate totals
+            $totalRevenue = $itemSales->sum('total_revenue') / 100; // Convert from cents
+            $totalQuantity = $itemSales->sum('total_quantity');
+
+            // Get expenses for profit calculation
+            $totalExpenses = (float) \App\Models\Expense::where('company_id', $company->id)
+                ->where('expense_date', '>=', $startDate)
+                ->sum('amount');
+
+            $currentProfit = $totalRevenue - $totalExpenses;
+            $profitMargin = $totalRevenue > 0 ? ($currentProfit / $totalRevenue) * 100 : 0;
+
+            // Build item analysis with contribution percentages
+            $items = $itemSales->map(function ($item) use ($totalRevenue) {
+                $itemRevenue = $item->total_revenue / 100; // Convert from cents
+                $avgPrice = $item->avg_price / 100; // Convert from cents
+                $contribution = $totalRevenue > 0 ? ($itemRevenue / $totalRevenue) * 100 : 0;
+
+                return [
+                    'item_id' => $item->item_id,
+                    'name' => $item->name,
+                    'total_quantity' => round($item->total_quantity, 2),
+                    'total_revenue' => round($itemRevenue, 2),
+                    'avg_price' => round($avgPrice, 2),
+                    'invoice_count' => $item->invoice_count,
+                    'revenue_contribution_percent' => round($contribution, 2),
+                ];
+            })->toArray();
+
+            // Get monthly revenue trend
+            $monthlyRevenue = Invoice::where('company_id', $company->id)
+                ->where('paid_status', 'PAID')
+                ->where('invoice_date', '>=', $startDate)
+                ->selectRaw('DATE_FORMAT(invoice_date, "%Y-%m") as month')
+                ->selectRaw('SUM(total) as revenue')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->pluck('revenue', 'month')
+                ->map(fn($v) => round($v / 100, 2))
+                ->toArray();
+
+            $avgMonthlyRevenue = count($monthlyRevenue) > 0 ? array_sum($monthlyRevenue) / count($monthlyRevenue) : 0;
+            $avgMonthlyExpenses = $totalExpenses / max($months, 1);
+            $avgMonthlyProfit = $avgMonthlyRevenue - $avgMonthlyExpenses;
+
+            $analysis = [
+                'period_months' => $months,
+                'total_revenue' => round($totalRevenue, 2),
+                'total_expenses' => round($totalExpenses, 2),
+                'current_profit' => round($currentProfit, 2),
+                'profit_margin_percent' => round($profitMargin, 2),
+                'avg_monthly_revenue' => round($avgMonthlyRevenue, 2),
+                'avg_monthly_expenses' => round($avgMonthlyExpenses, 2),
+                'avg_monthly_profit' => round($avgMonthlyProfit, 2),
+                'monthly_revenue_trend' => $monthlyRevenue,
+                'top_items_count' => count($items),
+                'items_contributing_50_percent' => $this->countItemsForRevenueThreshold($items, 50),
+                'items_contributing_80_percent' => $this->countItemsForRevenueThreshold($items, 80),
+            ];
+
+            Log::info('[McpDataProvider] Item sales analysis calculated', [
+                'items_count' => count($items),
+                'total_revenue' => $totalRevenue,
+            ]);
+
+            return [
+                'items' => $items,
+                'totals' => [
+                    'revenue' => round($totalRevenue, 2),
+                    'quantity' => round($totalQuantity, 2),
+                    'expenses' => round($totalExpenses, 2),
+                    'profit' => round($currentProfit, 2),
+                ],
+                'analysis' => $analysis,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get item sales analysis', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'items' => [],
+                'totals' => ['revenue' => 0, 'quantity' => 0, 'expenses' => 0, 'profit' => 0],
+                'analysis' => [],
+            ];
+        }
+    }
+
+    /**
+     * Helper: Count items needed to reach revenue threshold
+     */
+    private function countItemsForRevenueThreshold(array $items, float $thresholdPercent): int
+    {
+        $cumulative = 0;
+        $count = 0;
+        foreach ($items as $item) {
+            $cumulative += $item['revenue_contribution_percent'];
+            $count++;
+            if ($cumulative >= $thresholdPercent) {
+                break;
+            }
+        }
+        return $count;
+    }
+
+    /**
      * Get comprehensive statistics across all financial modules
      *
      * @return array
@@ -1065,6 +1212,7 @@ class McpDataProvider
                 'customer_growth' => $this->getCustomerGrowth($company, 6),
                 'payment_timing' => $this->getPaymentTimingAnalysis($company),
                 'top_customers' => $this->getTopCustomers($company, 5),
+                'item_sales' => $this->getItemSalesAnalysis($company, 3),
             ];
 
             Log::info('[McpDataProvider] Comprehensive stats calculated');
