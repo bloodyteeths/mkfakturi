@@ -1043,6 +1043,12 @@ INSTRUCTIONS;
             // Add customer dependency analysis for risk-related questions
             try {
                 $customerDependency = $comprehensiveStats['customer_dependency'] ?? $this->dataProvider->getCustomerDependencyAnalysis($company);
+                Log::info('[AiInsightsService] Customer dependency data for complex query', [
+                    'has_data' => !empty($customerDependency),
+                    'has_customers' => !empty($customerDependency['customers']),
+                    'risk_score' => $customerDependency['risk_score'] ?? null,
+                    'top_1_percent' => $customerDependency['concentration']['top_1_percent'] ?? null,
+                ]);
                 if (!empty($customerDependency['customers'])) {
                     $prompt .= "\n**АНАЛИЗА НА ЗАВИСНОСТ ОД КЛИЕНТИ:**\n";
                     $prompt .= "Ризик скор: " . ($customerDependency['risk_score'] ?? 0) . "/100\n";
@@ -1920,11 +1926,12 @@ PROMPT;
 
             // Scenario analysis
             '/што\s+ако/iu',
-            '/ако\s+(ги\s+)?изгубам/iu',
+            '/ако\s+(го|ги|ја|ги)?\s*изгубам/iu',  // го=him/it, ги=them, ја=her
             '/ако\s+.*\s+колку/iu',
             '/ако\s+трошоците\s+(растат|се зголемат)/iu',
             '/симулација/iu',
             '/сценарио/iu',
+            '/би\s+(изгубил|добил|заработил)/iu',  // "колку би изгубил"
 
             // Prediction patterns
             '/кога\s+ќе\s+(достигнам|имам|постигнам)/iu',
@@ -1941,6 +1948,18 @@ PROMPT;
             '/најголем\s+проблем/iu',
             '/break-?even/iu',
             '/точка\s+на\s+рентабилност/iu',
+
+            // Customer-related complex queries
+            '/најголем(иот)?\s+клиент/iu',
+            '/изгуб(ам|и|ив)\s+клиент/iu',
+            '/клиент.*изгуб/iu',
+            '/зависност\s+од\s+клиент/iu',
+            '/концентрација/iu',
+            '/диверзификација/iu',
+            '/топ\s+клиент/iu',
+            '/(biggest|largest|top)\s+customer/iu',
+            '/lose.*customer/iu',
+            '/customer.*dependency/iu',
 
             // Comparison and ranking
             '/најдобар\s+месец/iu',
