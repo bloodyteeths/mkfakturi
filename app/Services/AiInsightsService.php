@@ -2164,9 +2164,10 @@ DOCUMENTATION;
             }
 
             // Extract customer names (heuristic: capitalized words after customer/client keywords)
+            // Use \p{Lu} for uppercase letters and \p{Ll} for lowercase (supports all Unicode)
             $customerPatterns = [
-                '/\b(?:клиент|купувач|customer|client)\s+([А-ЏŠŽČĆ][а-џšžčć]+(?:\s+[А-ЏŠŽČĆ][а-џšžčć]+)*)/u',
-                '/\b([А-ЏŠŽČĆ][а-џšžčć]+(?:\s+[А-ЏŠŽČĆ][а-џšžčć]+)*)\s+(?:должи|плаќа|има|owes|pays|has)/u',
+                '/\b(?:клиент|купувач|customer|client)\s+([\p{Lu}][\p{Ll}]+(?:\s+[\p{Lu}][\p{Ll}]+)*)/u',
+                '/\b([\p{Lu}][\p{Ll}]+(?:\s+[\p{Lu}][\p{Ll}]+)*)\s+(?:должи|плаќа|има|owes|pays|has)/u',
             ];
             foreach ($customerPatterns as $pattern) {
                 if (preg_match_all($pattern, $content, $matches)) {
@@ -2177,9 +2178,10 @@ DOCUMENTATION;
             }
 
             // Extract item names (heuristic: items mentioned in context of products/items)
+            // Use \p{L} for any letter (supports Cyrillic, Latin, etc.)
             $itemPatterns = [
                 '/\b(?:артикл|производ|продукт|item|product)\s+"([^"]+)"/iu',
-                '/\b(?:артикл|производ|продукт|item|product)\s+([А-ЏŠŽČĆA-Z][а-џšžčća-z]+(?:\s+[А-ЏŠŽČĆA-Z][а-џšžčća-z]+)*)/u',
+                '/\b(?:артикл|производ|продукт|item|product)\s+([\p{Lu}][\p{Ll}]+(?:\s+[\p{L}]+)*)/u',
             ];
             foreach ($itemPatterns as $pattern) {
                 if (preg_match_all($pattern, $content, $matches)) {
