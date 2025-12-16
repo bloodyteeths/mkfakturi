@@ -93,10 +93,12 @@
 <script setup>
 import { onMounted, onUnmounted, computed } from 'vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import { useAuthStore } from '@/scripts/admin/stores/auth'
 import { useRouter } from 'vue-router'
 
 // Use the MAIN user store (same one used by main login)
 const userStore = useUserStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 // Create a computed wrapper for abilities check (partners have specific abilities)
@@ -141,8 +143,7 @@ onUnmounted(() => {
 })
 
 const handleLogout = async () => {
-  await userStore.logout()
-  router.push({ name: 'login' })
+  await authStore.logout()
 }
 </script>
 <!-- CLAUDE-CHECKPOINT -->
