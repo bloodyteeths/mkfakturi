@@ -65,7 +65,7 @@
             <div class="relative ml-3">
               <div class="flex items-center space-x-4">
                 <span class="text-sm text-gray-700">
-                  {{ userStore.currentUser.name }}
+                  {{ userStore.currentUser?.name || 'Partner' }}
                 </span>
                 <button
                   @click="handleLogout"
@@ -117,11 +117,20 @@ const hasAbilities = (ability) => {
 
 // Override body overflow on mount (fix scroll issue)
 // The app.blade.php has overflow-hidden class on body that blocks scrolling
-onMounted(() => {
+onMounted(async () => {
   document.body.classList.remove('overflow-hidden', 'h-full')
   document.body.classList.add('overflow-auto', 'h-auto')
   document.documentElement.style.overflow = 'auto'
   document.documentElement.style.height = 'auto'
+
+  // Load user data if not already loaded
+  if (!userStore.currentUser) {
+    try {
+      await userStore.fetchCurrentUser()
+    } catch (e) {
+      console.error('Failed to load user data:', e)
+    }
+  }
 })
 
 onUnmounted(() => {
