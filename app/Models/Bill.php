@@ -21,7 +21,6 @@ class Bill extends Model implements HasMedia
 {
     use CacheableTrait;
     use GeneratesPdfTrait;
-    use GeneratesPdfTrait;
     use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;

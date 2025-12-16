@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\CertUploadController;
+use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\V1\Admin\Accounting\AccountingReportsController;
 use App\Http\Controllers\V1\Admin\AccountsPayable\CloneBillController;
 use App\Http\Controllers\V1\Admin\Auth\ForgotPasswordController;
@@ -141,6 +142,11 @@ Route::get('ping', function () {
         'success' => 'invoiceshelf-self-hosted',
     ]);
 })->name('ping');
+
+// QR Code Generation (Public - no auth required)
+// ----------------------------------
+
+Route::get('/qr', [QrCodeController::class, 'generate'])->middleware('throttle:public');
 
 // Version 1 endpoints
 // --------------------------------------
@@ -787,6 +793,9 @@ Route::prefix('/v1')->group(function () {
 
             // PSD2 Bank connections available in Standard+ tier (matches landing page)
             Route::prefix('banking')->middleware('tier:standard')->group(function () {
+                // Dashboard widget status endpoint
+                Route::get('/status', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'status']);
+
                 // Bank account management
                 Route::get('/accounts', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'accounts']);
                 Route::get('/transactions', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'transactions']);

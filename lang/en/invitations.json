@@ -1,0 +1,47 @@
+{
+  "partner_invitation": {
+    "subject": "Invitation from :company to join as Partner",
+    "greeting": "Hello!",
+    "intro": "You've been invited by :company to join as their accounting partner on Facturino.",
+    "permissions_intro": "You will have access to the following permissions:",
+    "instructions": "Click the button below to accept the invitation and access :company's account.",
+    "accept_button": "Accept Invitation",
+    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
+  },
+  "company_invitation": {
+    "subject": "Invitation to join Facturino from :partner",
+    "greeting": "Hello!",
+    "intro": ":partner has invited you to join Facturino, a comprehensive accounting and invoicing platform.",
+    "benefits": "Facturino helps you manage invoices, customers, expenses, and more - all in one place.",
+    "instructions": "Click the button below to create your account and get started.",
+    "signup_button": "Create Account",
+    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
+  },
+  "company_referral": {
+    "subject": "Join Facturino - Invitation from :company",
+    "greeting": "Hello!",
+    "intro": ":company is using Facturino and thinks you should too!",
+    "benefits": "Facturino is a powerful accounting and invoicing platform designed for Macedonian businesses. Get started today and streamline your accounting workflow.",
+    "instructions": "Click the button below to create your account with this special referral link.",
+    "signup_button": "Create Account",
+    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
+  },
+  "partner_referral": {
+    "subject": "Become a Partner - Invitation from :partner",
+    "greeting": "Hello!",
+    "intro": ":partner has invited you to become a partner on Facturino.",
+    "benefits": "As a partner, you can earn commissions by managing multiple company accounts and helping businesses with their accounting needs.",
+    "instructions": "Click the button below to sign up as a partner and start earning.",
+    "signup_button": "Sign Up as Partner",
+    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
+  },
+  "user_invitation": {
+    "subject": "Invitation to join :company",
+    "greeting": "Hello :name!",
+    "intro": "You have been invited to join :company on Facturino.",
+    "instructions": "To get started, please click the button below to set your password:",
+    "set_password_button": "Set Password",
+    "link_expiry": "This link will expire in 24 hours.",
+    "ignore_notice": "If you did not expect this invitation, you can safely ignore this email."
+  }
+}

@@ -15,8 +15,6 @@ export const usePartnerStore = defineStore('partner', () => {
   const recentActivities = ref([])
   const clients = ref([])
   const isLoading = ref(false)
-  const isMocked = ref(false)
-  const mockWarning = ref('')
 
   // Stripe Connect State
   const stripeConnect = ref({
@@ -39,16 +37,6 @@ export const usePartnerStore = defineStore('partner', () => {
     isLoading.value = true
     try {
       const { data } = await axios.get('/partner/dashboard')
-
-      // Check if data is mocked
-      if (data.mocked) {
-        console.warn('⚠️ Partner portal using mocked data')
-        isMocked.value = true
-        mockWarning.value = data.warning || 'Using mocked data for safety'
-      } else {
-        isMocked.value = false
-        mockWarning.value = ''
-      }
 
       // Update stats - API returns EUR amounts
       dashboardStats.value = {
@@ -74,13 +62,7 @@ export const usePartnerStore = defineStore('partner', () => {
   const loadRecentCommissions = async () => {
     try {
       const { data } = await axios.get('/partner/commissions')
-
-      if (data.mocked) {
-        console.warn('⚠️ Partner commissions using mocked data')
-        recentCommissions.value = data.data || []
-      } else {
-        recentCommissions.value = data.data || []
-      }
+      recentCommissions.value = data.data || []
     } catch (error) {
       console.error('Error loading recent commissions:', error)
       recentCommissions.value = []
@@ -90,13 +72,7 @@ export const usePartnerStore = defineStore('partner', () => {
   const loadClients = async () => {
     try {
       const { data } = await axios.get('/partner/clients')
-
-      if (data.mocked) {
-        console.warn('⚠️ Partner clients using mocked data')
-        clients.value = data.data || []
-      } else {
-        clients.value = data.data || []
-      }
+      clients.value = data.data || []
     } catch (error) {
       console.error('Error loading clients:', error)
       clients.value = []
@@ -105,24 +81,8 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const loadRecentActivities = async () => {
     try {
-      // Mock data - replace with actual API call
-      recentActivities.value = [
-        {
-          id: 1,
-          description: 'Обработена фактура #INV-2025-001 за ТехноСофт ДОО',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          description: 'Додаден нов клиент: МедТрејд ДООЕЛ',
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 3,
-          description: 'Месечен извештај за јануари е генериран',
-          created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
-        }
-      ]
+      // TODO: Implement actual API call when endpoint is available
+      recentActivities.value = []
     } catch (error) {
       console.error('Error loading recent activities:', error)
     }
@@ -218,8 +178,6 @@ export const usePartnerStore = defineStore('partner', () => {
     recentActivities,
     clients,
     isLoading,
-    isMocked,
-    mockWarning,
 
     // Stripe Connect State
     stripeConnect,

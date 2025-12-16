@@ -103,7 +103,7 @@ class BalanceSheetReportController extends Controller
     private function isFeatureEnabled(): bool
     {
         if (function_exists('feature')) {
-            return feature('accounting_backbone');
+            return feature('accounting-backbone');
         }
 
         return config('ifrs.enabled', false) ||

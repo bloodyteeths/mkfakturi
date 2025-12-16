@@ -200,8 +200,8 @@ class BankingOAuthController extends Controller
                 return redirect('/admin/banking')->with('error', 'Bank connected but failed to fetch accounts: '.$e->getMessage());
             }
 
-            // TODO: Dispatch job to sync transactions
-            // \App\Jobs\SyncBankTransactions::dispatch($token);
+            // Dispatch job to sync initial transactions (30 days)
+            \App\Jobs\SyncBankTransactions::dispatch($company, 30)->onQueue('banking');
 
             return redirect('/admin/banking')->with('success', 'Bank connected successfully!');
         } catch (\Exception $e) {

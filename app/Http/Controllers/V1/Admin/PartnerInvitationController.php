@@ -316,8 +316,25 @@ class PartnerInvitationController extends Controller
             'link' => 'required|url',
         ]);
 
-        // TODO: Implement actual email sending
-        // For now, just return success
+        $user = auth()->user();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (! $partner) {
+            return response()->json(['message' => 'Not a partner'], 403);
+        }
+
+        // Get partner name for email
+        $partnerName = $partner->name ?? $partner->email;
+
+        // Send email invitation
+        \Mail::to($validated['email'])->send(
+            new \App\Mail\CompanyInvitationMail(
+                $validated['email'],
+                $partnerName,
+                $validated['link']
+            )
+        );
+
         return response()->json(['message' => 'Email invitation sent']);
     }
 
@@ -331,8 +348,25 @@ class PartnerInvitationController extends Controller
             'link' => 'required|url',
         ]);
 
-        // TODO: Implement actual email sending
-        // For now, just return success
+        $user = auth()->user();
+        $partner = Partner::where('user_id', $user->id)->first();
+
+        if (! $partner) {
+            return response()->json(['message' => 'Not a partner'], 403);
+        }
+
+        // Get partner name for email
+        $inviterPartnerName = $partner->name ?? $partner->email;
+
+        // Send email invitation
+        \Mail::to($validated['email'])->send(
+            new \App\Mail\PartnerReferralMail(
+                $validated['email'],
+                $inviterPartnerName,
+                $validated['link']
+            )
+        );
+
         return response()->json(['message' => 'Email invitation sent']);
     }
 

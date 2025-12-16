@@ -217,7 +217,7 @@ class AppServiceProvider extends ServiceProvider
         // Check database feature flag if available (may not exist during tests/migrations)
         if (! $isEnabled && function_exists('feature')) {
             try {
-                $isEnabled = feature('accounting_backbone');
+                $isEnabled = feature('accounting-backbone');
             } catch (\Exception $e) {
                 // Features table doesn't exist yet (e.g., during migrations or tests)
                 $isEnabled = false;

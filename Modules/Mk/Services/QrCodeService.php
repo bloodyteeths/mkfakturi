@@ -304,14 +304,15 @@ class QrCodeService
             };
 
             // Generate QR code using bacon-qr-code v3
+            // Note: RendererStyle constructor signature: ($size, $margin = 0, ?Module $module = null, ?Eye $eye = null, ?Fill $fill = null, ?ErrorCorrectionLevel $errorCorrectionLevel = null)
             if ($format === 'svg') {
                 $renderer = new ImageRenderer(
-                    new RendererStyle($size, $margin, null, null, $ecLevel),
+                    new RendererStyle($size, $margin, null, null, null, $ecLevel),
                     new SvgImageBackEnd
                 );
             } else { // png (ImagickImageBackEnd requires Imagick extension)
                 $renderer = new ImageRenderer(
-                    new RendererStyle($size, $margin, null, null, $ecLevel),
+                    new RendererStyle($size, $margin, null, null, null, $ecLevel),
                     new ImagickImageBackEnd
                 );
             }

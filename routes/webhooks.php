@@ -59,34 +59,22 @@ Route::get('/cpay/cancel/{invoice}', function ($invoiceId) {
 
 /*
 |--------------------------------------------------------------------------
-| Paddle Payment Gateway Webhook
-|--------------------------------------------------------------------------
-|
-| Handles payment webhooks from Paddle payment gateway.
-| This endpoint receives POST requests for transaction events.
-|
-| Security:
-| - HMAC SHA256 signature verification
-| - Idempotency check (7-day cache)
-| - Feature flag protection (FEATURE_ADVANCED_PAYMENTS)
-|
-*/
-Route::post('/webhooks/paddle', [PaddleWebhookController::class, 'handle'])
-    ->name('paddle.webhook');
-
-/*
-|--------------------------------------------------------------------------
 | Gateway Webhook Event Log Routes
 |--------------------------------------------------------------------------
 |
 | These routes handle webhooks from payment gateways and banks,
 | storing them in gateway_webhook_events table for async processing.
 |
+| Security:
+| - HMAC SHA256 signature verification (Paddle/Stripe)
+| - Idempotency check via gateway_webhook_events table
+| - Feature flag protection where applicable
+|
 */
 
 use App\Http\Controllers\Webhooks\WebhookController;
 
-// Payment Gateway Webhooks (using new unified controller)
+// Payment Gateway Webhooks (unified controller for logging + async processing)
 Route::post('/webhooks/paddle', [WebhookController::class, 'paddle'])
     ->name('webhooks.paddle');
 

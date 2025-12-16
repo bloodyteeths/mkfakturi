@@ -609,7 +609,7 @@ class IfrsAdapter
     {
         // First check global feature flag
         $globalEnabled = config('ifrs.enabled', false) ||
-                        (function_exists('feature') && feature('accounting_backbone'));
+                        (function_exists('feature') && feature('accounting-backbone'));
 
         if (!$globalEnabled) {
             return false;

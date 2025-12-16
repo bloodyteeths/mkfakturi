@@ -33,6 +33,23 @@ export const useStockStore = (useWindow = false) => {
       // Warehouses for filter dropdowns (fetched from warehouse API)
       warehouses: [],
       isLoadingWarehouses: false,
+      // Warehouse Inventory state (for WarehouseInventory.vue)
+      warehouseInventory: {
+        warehouse: null,
+        as_of_date: null,
+        items: [],
+        totals: { quantity: 0, value: 0 }
+      },
+      isLoadingInventory: false,
+      // Inventory Valuation state (for InventoryValuation.vue)
+      inventoryValuation: {
+        as_of_date: null,
+        group_by: 'warehouse',
+        warehouses: [],
+        items: [],
+        grand_total: { quantity: 0, value: 0 }
+      },
+      isLoadingValuation: false,
     }),
 
     getters: {
@@ -78,6 +95,31 @@ export const useStockStore = (useWindow = false) => {
        */
       resetValuationReport() {
         this.valuationReport = null
+      },
+
+      /**
+       * Reset warehouse inventory to default structure
+       */
+      resetWarehouseInventory() {
+        this.warehouseInventory = {
+          warehouse: null,
+          as_of_date: null,
+          items: [],
+          totals: { quantity: 0, value: 0 }
+        }
+      },
+
+      /**
+       * Reset inventory valuation to default structure
+       */
+      resetInventoryValuation() {
+        this.inventoryValuation = {
+          as_of_date: null,
+          group_by: 'warehouse',
+          warehouses: [],
+          items: [],
+          grand_total: { quantity: 0, value: 0 }
+        }
       },
 
       /**
@@ -137,23 +179,68 @@ export const useStockStore = (useWindow = false) => {
        * Fetch warehouse inventory (current stock levels for a specific warehouse)
        *
        * @param {number} warehouseId - The warehouse ID
+       * @param {object} params - Optional params { as_of_date }
        */
-      async fetchWarehouseInventory(warehouseId) {
-        this.isLoading = true
+      async fetchWarehouseInventory(warehouseId, params = {}) {
+        this.isLoadingInventory = true
 
         try {
-          const response = await axios.get(`/stock/warehouse/${warehouseId}/inventory`)
+          const response = await axios.get(`/stock/warehouse/${warehouseId}/inventory`, { params })
 
-          // Store as inventory for the current view
-          this.inventory = response.data.data
-          this.totalInventory = response.data.meta?.total || response.data.data.length
+          // Store in warehouseInventory state for dedicated view
+          this.warehouseInventory = {
+            warehouse: response.data.warehouse || { id: warehouseId },
+            as_of_date: params.as_of_date || new Date().toISOString().split('T')[0],
+            items: response.data.data || response.data.items || [],
+            totals: response.data.totals || {
+              quantity: (response.data.data || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
+              value: (response.data.data || []).reduce((sum, item) => sum + (item.value || 0), 0)
+            }
+          }
+
+          // Also update legacy inventory state for backwards compatibility
+          this.inventory = this.warehouseInventory.items
+          this.totalInventory = response.data.meta?.total || this.warehouseInventory.items.length
 
           return response
         } catch (err) {
           handleError(err)
+          this.resetWarehouseInventory()
           throw err
         } finally {
-          this.isLoading = false
+          this.isLoadingInventory = false
+        }
+      },
+
+      /**
+       * Fetch inventory valuation report (grouped by warehouse or item)
+       *
+       * @param {object} params - { as_of_date, group_by: 'warehouse'|'item' }
+       */
+      async fetchInventoryValuation(params = {}) {
+        this.isLoadingValuation = true
+
+        try {
+          const response = await axios.get('/stock/inventory-valuation', { params })
+
+          this.inventoryValuation = {
+            as_of_date: params.as_of_date || response.data.as_of_date || new Date().toISOString().split('T')[0],
+            group_by: params.group_by || 'warehouse',
+            warehouses: response.data.warehouses || [],
+            items: response.data.items || response.data.data || [],
+            grand_total: response.data.grand_total || response.data.totals || {
+              quantity: 0,
+              value: 0
+            }
+          }
+
+          return response
+        } catch (err) {
+          handleError(err)
+          this.resetInventoryValuation()
+          throw err
+        } finally {
+          this.isLoadingValuation = false
         }
       },
 

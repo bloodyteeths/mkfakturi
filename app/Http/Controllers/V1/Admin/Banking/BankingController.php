@@ -321,8 +321,8 @@ class BankingController extends Controller
                 ], 403);
             }
 
-            // TODO: Dispatch sync job
-            // \App\Jobs\SyncBankTransactions::dispatch($account);
+            // Dispatch sync job to fetch latest transactions
+            \App\Jobs\SyncBankTransactions::dispatch($company, 7);
 
             Log::info('Manual bank sync triggered', [
                 'company_id' => $company->id,
@@ -455,6 +455,106 @@ class BankingController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Get banking status overview for dashboard widget
+     *
+     * Returns aggregated status of all bank connections and sync stats
+     */
+    public function status(Request $request): JsonResponse
+    {
+        try {
+            $company = $this->resolveCompany($request);
+
+            if (! $company) {
+                return response()->json(['data' => []], 200);
+            }
+
+            // Check if tables exist
+            if (! Schema::hasTable('bank_accounts')) {
+                return response()->json(['data' => []], 200);
+            }
+
+            // Get all active bank accounts
+            $accountsQuery = BankAccount::where('company_id', $company->id);
+            if (Schema::hasColumn('bank_accounts', 'is_active')) {
+                $accountsQuery->where('is_active', true);
+            }
+            $accounts = $accountsQuery->get();
+
+            // Group by bank
+            $bankConnections = $accounts->groupBy('bank_code')->map(function ($bankAccounts, $code) {
+                $firstAccount = $bankAccounts->first();
+                $lastSync = $bankAccounts->max('updated_at');
+
+                return [
+                    'code' => $code,
+                    'name' => $this->getBankNameFromCode($code),
+                    'accountCount' => $bankAccounts->count(),
+                    'status' => 'connected',
+                    'lastSync' => $lastSync?->toIso8601String(),
+                    'psd2Status' => 'active',
+                ];
+            })->values();
+
+            // Calculate today's sync stats
+            $syncStats = [
+                'transactionsToday' => 0,
+                'totalAmountToday' => 0,
+                'matchedPayments' => 0,
+                'matchRate' => 0,
+            ];
+
+            if (Schema::hasTable('bank_transactions')) {
+                $today = Carbon::today();
+                $transactions = BankTransaction::where('company_id', $company->id)
+                    ->whereDate('transaction_date', $today)
+                    ->get();
+
+                $matchedCount = $transactions->whereNotNull('matched_payment_id')->count();
+
+                $syncStats = [
+                    'transactionsToday' => $transactions->count(),
+                    'totalAmountToday' => abs($transactions->sum('amount')),
+                    'matchedPayments' => $matchedCount,
+                    'matchRate' => $transactions->count() > 0
+                        ? round(($matchedCount / $transactions->count()) * 100)
+                        : 0,
+                ];
+            }
+
+            return response()->json([
+                'data' => [
+                    'bankConnections' => $bankConnections,
+                    'syncStats' => $syncStats,
+                    'lastFullSync' => $accounts->max('updated_at')?->toIso8601String(),
+                    'nextSync' => now()->addMinutes(15)->toIso8601String(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to fetch banking status', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['data' => []], 200);
+        }
+    }
+
+    /**
+     * Get human-readable bank name from code
+     */
+    private function getBankNameFromCode(?string $code): string
+    {
+        return match ($code) {
+            'stopanska' => 'Стопанска Банка',
+            'nlb' => 'NLB Банка',
+            'komercijalna' => 'Комерцијална Банка',
+            'sparkasse' => 'Шпаркасе Банка',
+            'ohridska' => 'Охридска Банка',
+            'halkbank' => 'Халкбанк',
+            default => $code ?? 'Unknown Bank',
+        };
     }
 
     /**
