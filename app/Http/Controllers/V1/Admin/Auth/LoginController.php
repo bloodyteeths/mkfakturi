@@ -111,10 +111,21 @@ class LoginController extends Controller
         // Get the authenticated user
         $user = $this->guard()->user();
 
-        // Determine role - check if user is a partner (has partner record)
+        // Determine role - only treat as partner if:
+        // 1. User's role is explicitly 'partner', OR
+        // 2. User has a partner record AND is not a privileged user (super admin, admin)
         $role = $user->role;
-        $isPartner = $user->partner()->exists();
-        if ($isPartner) {
+        $isPartner = false;
+
+        // Privileged roles should never be redirected to partner portal
+        $privilegedRoles = ['super admin', 'admin'];
+
+        if ($user->role === 'partner') {
+            // Explicit partner role
+            $isPartner = true;
+        } elseif (!in_array($user->role, $privilegedRoles) && $user->partner()->exists()) {
+            // Has partner record and not a privileged user
+            $isPartner = true;
             $role = 'partner';
         }
 
