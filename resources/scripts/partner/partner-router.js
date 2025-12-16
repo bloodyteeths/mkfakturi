@@ -11,6 +11,10 @@ export default [
     meta: { requiresAuth: true, isPartner: true },
     children: [
       {
+        path: '',
+        redirect: { name: 'partner.dashboard' }
+      },
+      {
         path: 'dashboard',
         name: 'partner.dashboard',
         component: Dashboard,
