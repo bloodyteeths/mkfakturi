@@ -57,33 +57,37 @@ class OpenAiProvider implements AiProviderInterface
         $startTime = microtime(true);
 
         try {
-            $response = Http::withToken($this->apiKey)
-                ->timeout(30)
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'max_tokens' => $maxTokens,
-                    'temperature' => $temperature,
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
+            $text = $this->callWithRetry(function () use ($prompt, $maxTokens, $temperature, $startTime) {
+                $response = Http::withToken($this->apiKey)
+                    ->timeout(30)
+                    ->post($this->apiUrl, [
+                        'model' => $this->model,
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'messages' => [
+                            [
+                                'role' => 'user',
+                                'content' => $prompt,
+                            ],
                         ],
-                    ],
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('generate', $prompt, null, $response->status(), microtime(true) - $startTime);
+                    throw new \Exception('OpenAI API request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['choices'][0]['message']['content'] ?? '';
+
+                $this->logApiCall('generate', $prompt, $text, 200, microtime(true) - $startTime, [
+                    'prompt_tokens' => $data['usage']['prompt_tokens'] ?? 0,
+                    'completion_tokens' => $data['usage']['completion_tokens'] ?? 0,
+                    'total_tokens' => $data['usage']['total_tokens'] ?? 0,
                 ]);
 
-            if ($response->failed()) {
-                $this->logApiCall('generate', $prompt, null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('OpenAI API request failed: '.$response->body());
-            }
-
-            $data = $response->json();
-            $text = $data['choices'][0]['message']['content'] ?? '';
-
-            $this->logApiCall('generate', $prompt, $text, 200, microtime(true) - $startTime, [
-                'prompt_tokens' => $data['usage']['prompt_tokens'] ?? 0,
-                'completion_tokens' => $data['usage']['completion_tokens'] ?? 0,
-                'total_tokens' => $data['usage']['total_tokens'] ?? 0,
-            ]);
+                return $text;
+            });
 
             return $text;
 
@@ -106,28 +110,32 @@ class OpenAiProvider implements AiProviderInterface
         $startTime = microtime(true);
 
         try {
-            $response = Http::withToken($this->apiKey)
-                ->timeout(30)
-                ->post($this->apiUrl, [
-                    'model' => $this->model,
-                    'max_tokens' => $this->maxTokens,
-                    'temperature' => $this->temperature,
-                    'messages' => $messages,
+            $text = $this->callWithRetry(function () use ($messages, $startTime) {
+                $response = Http::withToken($this->apiKey)
+                    ->timeout(30)
+                    ->post($this->apiUrl, [
+                        'model' => $this->model,
+                        'max_tokens' => $this->maxTokens,
+                        'temperature' => $this->temperature,
+                        'messages' => $messages,
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('chat', json_encode($messages), null, $response->status(), microtime(true) - $startTime);
+                    throw new \Exception('OpenAI API chat request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['choices'][0]['message']['content'] ?? '';
+
+                $this->logApiCall('chat', json_encode($messages), $text, 200, microtime(true) - $startTime, [
+                    'prompt_tokens' => $data['usage']['prompt_tokens'] ?? 0,
+                    'completion_tokens' => $data['usage']['completion_tokens'] ?? 0,
+                    'total_tokens' => $data['usage']['total_tokens'] ?? 0,
                 ]);
 
-            if ($response->failed()) {
-                $this->logApiCall('chat', json_encode($messages), null, $response->status(), microtime(true) - $startTime);
-                throw new \Exception('OpenAI API chat request failed: '.$response->body());
-            }
-
-            $data = $response->json();
-            $text = $data['choices'][0]['message']['content'] ?? '';
-
-            $this->logApiCall('chat', json_encode($messages), $text, 200, microtime(true) - $startTime, [
-                'prompt_tokens' => $data['usage']['prompt_tokens'] ?? 0,
-                'completion_tokens' => $data['usage']['completion_tokens'] ?? 0,
-                'total_tokens' => $data['usage']['total_tokens'] ?? 0,
-            ]);
+                return $text;
+            });
 
             return $text;
 
@@ -240,6 +248,119 @@ class OpenAiProvider implements AiProviderInterface
         $response = $this->generate($prompt, $options);
         $onChunk($response);
         return $response;
+    }
+
+    /**
+     * Execute an API call with retry logic and exponential backoff
+     *
+     * @param  callable  $apiCall  The API call to execute
+     * @param  int|null  $maxRetries  Maximum number of retry attempts (null = use config)
+     * @return mixed The result of the API call
+     *
+     * @throws \Exception If all retry attempts fail
+     */
+    private function callWithRetry(callable $apiCall, ?int $maxRetries = null): mixed
+    {
+        $maxAttempts = $maxRetries ?? config('ai.retry.max_attempts', 3);
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                return $apiCall();
+            } catch (\Exception $e) {
+                $lastException = $e;
+
+                // Extract status code if available
+                $statusCode = 0;
+                if (preg_match('/status code (\d+)/i', $e->getMessage(), $matches)) {
+                    $statusCode = (int) $matches[1];
+                }
+
+                // Check if error is retryable
+                if (! $this->isRetryableError($e, $statusCode)) {
+                    throw $e;
+                }
+
+                // Last attempt - throw exception
+                if ($attempt >= $maxAttempts) {
+                    Log::channel(config('ai.log_channel', 'stack'))->warning(
+                        'OpenAI API call failed after max retry attempts',
+                        [
+                            'attempts' => $attempt,
+                            'error' => $e->getMessage(),
+                            'status_code' => $statusCode,
+                        ]
+                    );
+                    throw $e;
+                }
+
+                // Calculate backoff delay with jitter
+                $delay = $this->calculateBackoffDelay($attempt);
+
+                Log::channel(config('ai.log_channel', 'stack'))->info(
+                    'Retrying OpenAI API call after failure',
+                    [
+                        'attempt' => $attempt,
+                        'max_attempts' => $maxAttempts,
+                        'delay_ms' => $delay,
+                        'error' => $e->getMessage(),
+                    ]
+                );
+
+                usleep($delay * 1000);
+            }
+        }
+
+        throw $lastException ?? new \Exception('API call failed without exception');
+    }
+
+    /**
+     * Check if an error is retryable
+     *
+     * @param  \Exception  $e  The exception
+     * @param  int  $statusCode  HTTP status code (0 if not available)
+     * @return bool True if the error should be retried
+     */
+    private function isRetryableError(\Exception $e, int $statusCode = 0): bool
+    {
+        $retryableCodes = [429, 500, 502, 503, 529];
+
+        if ($statusCode > 0 && in_array($statusCode, $retryableCodes)) {
+            return true;
+        }
+
+        $message = strtolower($e->getMessage());
+        if (
+            strpos($message, 'timeout') !== false ||
+            strpos($message, 'connection') !== false ||
+            strpos($message, 'rate limit') !== false
+        ) {
+            return true;
+        }
+
+        // Don't retry client errors (4xx except 429)
+        if ($statusCode >= 400 && $statusCode < 500 && $statusCode !== 429) {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculate exponential backoff delay with jitter
+     *
+     * @param  int  $attempt  The current attempt number (1-based)
+     * @return int Delay in milliseconds
+     */
+    private function calculateBackoffDelay(int $attempt): int
+    {
+        $initialDelay = config('ai.retry.initial_delay_ms', 1000);
+        $multiplier = config('ai.retry.multiplier', 2);
+
+        $baseDelay = $initialDelay * pow($multiplier, $attempt - 1);
+        $jitter = random_int(0, (int) ($baseDelay / 2));
+
+        return (int) ($baseDelay + $jitter);
     }
 }
 

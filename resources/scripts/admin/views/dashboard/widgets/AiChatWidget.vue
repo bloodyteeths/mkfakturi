@@ -75,15 +75,33 @@
               : 'bg-gray-100 text-gray-900'
           ]"
         >
-          <p class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
-          <span
-            :class="[
-              'text-xs mt-1 block',
-              message.role === 'user' ? 'text-indigo-200' : 'text-gray-500'
-            ]"
-          >
-            {{ formatTime(message.timestamp) }}
-          </span>
+          <!-- User messages: plain text -->
+          <p v-if="message.role === 'user'" class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
+          <!-- Assistant messages: render markdown -->
+          <div
+            v-else
+            class="text-sm prose prose-sm prose-indigo max-w-none ai-markdown"
+            v-html="renderMarkdown(message.content)"
+          ></div>
+          <div class="flex items-center justify-between mt-2">
+            <span
+              :class="[
+                'text-xs',
+                message.role === 'user' ? 'text-indigo-200' : 'text-gray-500'
+              ]"
+            >
+              {{ formatTime(message.timestamp) }}
+            </span>
+            <!-- Copy button for assistant messages -->
+            <button
+              v-if="message.role === 'assistant'"
+              @click="copyMessage(message.content)"
+              class="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center space-x-1"
+              :title="$t('ai.chat.copy')"
+            >
+              <ClipboardDocumentIcon class="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -134,7 +152,8 @@ import {
   ChatBubbleLeftRightIcon,
   PaperAirplaneIcon,
   TrashIcon,
-  PlusCircleIcon
+  PlusCircleIcon,
+  ClipboardDocumentIcon
 } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
@@ -276,6 +295,120 @@ function formatTime(timestamp) {
   }
 }
 
+/**
+ * Lightweight markdown renderer for AI responses
+ * Handles: bold, italic, code blocks, inline code, lists, links, headers, tables
+ */
+function renderMarkdown(text) {
+  if (!text) return ''
+
+  // Escape HTML entities first to prevent XSS
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
+  // Code blocks (```...```)
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    return `<pre class="bg-gray-800 text-gray-100 rounded-lg p-3 my-2 overflow-x-auto text-xs"><code>${code.trim()}</code></pre>`
+  })
+
+  // Inline code (`...`)
+  html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-xs">$1</code>')
+
+  // Headers (### Header, ## Header, # Header)
+  html = html.replace(/^### (.+)$/gm, '<h3 class="font-bold text-sm mt-3 mb-1">$1</h3>')
+  html = html.replace(/^## (.+)$/gm, '<h2 class="font-bold text-base mt-3 mb-1">$1</h2>')
+  html = html.replace(/^# (.+)$/gm, '<h1 class="font-bold text-lg mt-3 mb-1">$1</h1>')
+
+  // Bold (**text** or __text__)
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+  html = html.replace(/__(.+?)__/g, '<strong class="font-semibold">$1</strong>')
+
+  // Italic (*text* or _text_)
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+  html = html.replace(/_([^_]+)_/g, '<em>$1</em>')
+
+  // Unordered lists (- item or * item)
+  html = html.replace(/^[\-\*] (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+
+  // Ordered lists (1. item)
+  html = html.replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
+
+  // Wrap consecutive list items in ul/ol
+  html = html.replace(/(<li class="ml-4 list-disc">[\s\S]*?<\/li>)(?!\s*<li)/g, '<ul class="my-2">$1</ul>')
+  html = html.replace(/(<li class="ml-4 list-decimal">[\s\S]*?<\/li>)(?!\s*<li)/g, '<ol class="my-2">$1</ol>')
+
+  // Links [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">$1</a>')
+
+  // Simple table rendering (| col | col |)
+  const tableRegex = /^\|(.+)\|$/gm
+  const tables = html.match(/(\|.+\|\n?)+/g)
+  if (tables) {
+    tables.forEach(table => {
+      const rows = table.trim().split('\n').filter(row => row.trim())
+      if (rows.length >= 2) {
+        let tableHtml = '<table class="min-w-full border-collapse my-2 text-xs">'
+
+        rows.forEach((row, idx) => {
+          // Skip separator row (|---|---|)
+          if (row.match(/^\|[\s\-:]+\|$/)) return
+
+          const cells = row.split('|').filter(cell => cell.trim() !== '')
+          const tag = idx === 0 ? 'th' : 'td'
+          const cellClass = idx === 0
+            ? 'border border-gray-300 px-2 py-1 bg-gray-50 font-semibold text-left'
+            : 'border border-gray-300 px-2 py-1'
+
+          tableHtml += '<tr>'
+          cells.forEach(cell => {
+            tableHtml += `<${tag} class="${cellClass}">${cell.trim()}</${tag}>`
+          })
+          tableHtml += '</tr>'
+        })
+
+        tableHtml += '</table>'
+        html = html.replace(table, tableHtml)
+      }
+    })
+  }
+
+  // Horizontal rules (---, ___, ***)
+  html = html.replace(/^(---|\*\*\*|___)$/gm, '<hr class="my-3 border-gray-300">')
+
+  // Line breaks - preserve paragraph structure
+  html = html.replace(/\n\n/g, '</p><p class="my-2">')
+  html = html.replace(/\n/g, '<br>')
+
+  // Wrap in paragraph if not already wrapped
+  if (!html.startsWith('<')) {
+    html = `<p class="my-1">${html}</p>`
+  }
+
+  return html
+}
+
+/**
+ * Copy message content to clipboard
+ */
+async function copyMessage(content) {
+  try {
+    await navigator.clipboard.writeText(content)
+    showNotification(t('ai.chat.copied') || 'Copied to clipboard')
+  } catch (err) {
+    console.error('Failed to copy:', err)
+    // Fallback for older browsers
+    const textarea = document.createElement('textarea')
+    textarea.value = content
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+    showNotification(t('ai.chat.copied') || 'Copied to clipboard')
+  }
+}
+
 // Load chat history from localStorage
 function loadChatHistory() {
   try {
@@ -359,6 +492,45 @@ onMounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
+}
+
+/* AI Markdown styles */
+.ai-markdown :deep(p) {
+  margin: 0.25rem 0;
+}
+
+.ai-markdown :deep(ul),
+.ai-markdown :deep(ol) {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+}
+
+.ai-markdown :deep(li) {
+  margin: 0.125rem 0;
+}
+
+.ai-markdown :deep(pre) {
+  margin: 0.5rem 0;
+}
+
+.ai-markdown :deep(table) {
+  margin: 0.5rem 0;
+  font-size: 0.75rem;
+}
+
+.ai-markdown :deep(h1),
+.ai-markdown :deep(h2),
+.ai-markdown :deep(h3) {
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.ai-markdown :deep(a) {
+  word-break: break-word;
+}
+
+.ai-markdown :deep(code) {
+  word-break: break-word;
 }
 </style>
 

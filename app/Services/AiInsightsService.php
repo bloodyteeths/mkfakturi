@@ -294,16 +294,16 @@ Question: {$question}
 Response (comma-separated categories only):
 PROMPT;
 
-            $classificationModel = config('ai.model_routing.classification', 'claude-3-haiku-20240307');
+            $classificationModel = config('ai.model_routing.classification', 'gemini-2.0-flash-exp');
 
-            // Use generateWithModel to override model
-            if ($this->aiProvider instanceof \App\Services\AiProvider\ClaudeProvider) {
+            // Use generateWithModel if provider supports it (Claude, Gemini)
+            if (method_exists($this->aiProvider, 'generateWithModel')) {
                 $response = $this->aiProvider->generateWithModel($prompt, $classificationModel, [
                     'max_tokens' => 100,
                     'temperature' => 0.3,
                 ]);
             } else {
-                // Fallback for other providers
+                // Fallback for providers without model routing
                 $response = $this->aiProvider->generate($prompt, [
                     'max_tokens' => 100,
                     'temperature' => 0.3,
@@ -782,8 +782,19 @@ PROMPT;
         $companyName = $company->name;
         $currency = $company->currency ?? 'MKD';
 
-        // Detect if this is a complex analytical query
-        $isComplexQuery = $this->detectComplexAnalyticalQuery($question);
+        // SECURITY: Sanitize user input to prevent prompt injection
+        $sanitizedQuestion = $this->sanitizeUserInput($question);
+
+        // Validate the query is legitimate
+        if (!$this->isValidFinancialQuery($sanitizedQuestion)) {
+            Log::warning('[AiInsightsService] Invalid financial query rejected', [
+                'original_question' => mb_substr($question, 0, 100),
+            ]);
+            $sanitizedQuestion = 'Ве молам поставете валидно прашање.';
+        }
+
+        // Detect if this is a complex analytical query (use sanitized version)
+        $isComplexQuery = $this->detectComplexAnalyticalQuery($sanitizedQuestion);
 
         // Fetch comprehensive stats for complex queries
         if ($isComplexQuery) {
@@ -845,8 +856,8 @@ PROMPT;
         $avgInvoiceValue = $stats['avg_invoice_value'] ?? 0;
         $avgInvoiceValueFormatted = number_format($avgInvoiceValue, 2);
 
-        // Detect if user is asking "how to" questions
-        $isHowToQuery = $this->detectHowToQuery($question);
+        // Detect if user is asking "how to" questions (use sanitized version)
+        $isHowToQuery = $this->detectHowToQuery($sanitizedQuestion);
 
         // Build base prompt with enhanced system instructions
         $prompt = <<<BASETEXT
@@ -928,8 +939,8 @@ BASETEXT;
         $conversationSummary = '';
 
         if (! empty($conversationHistory)) {
-            // Detect if user is referring to previous conversation
-            $conversationReferences = $this->detectConversationReferences($question);
+            // Detect if user is referring to previous conversation (use sanitized version)
+            $conversationReferences = $this->detectConversationReferences($sanitizedQuestion);
 
             // Extract entities from conversation history
             $entities = $this->extractEntitiesFromConversation($conversationHistory);
@@ -952,7 +963,10 @@ BASETEXT;
 
             foreach ($recentHistory as $message) {
                 $role = $message['role'] === 'user' ? 'Корисник' : 'Асистент';
-                $content = $message['content'];
+                // SECURITY: Sanitize historical user messages to prevent stored injection
+                $content = $message['role'] === 'user'
+                    ? $this->sanitizeUserInput($message['content'])
+                    : $message['content'];
                 $prompt .= "{$role}: {$content}\n";
             }
 
@@ -1008,11 +1022,11 @@ BASETEXT;
             }
         }
 
-        // Add question and enhanced instructions
+        // Add question and enhanced instructions (use sanitized version)
         $prompt .= <<<INSTRUCTIONS
 
 Прашање од корисникот:
-{$question}
+{$sanitizedQuestion}
 
 INSTRUCTIONS;
 
@@ -2456,6 +2470,116 @@ DOCUMENTATION;
         ]);
 
         return $summary;
+    }
+
+    /**
+     * Sanitize user input to prevent prompt injection attacks
+     *
+     * This method detects and neutralizes common prompt injection patterns
+     * while preserving legitimate user queries.
+     *
+     * @param  string  $input  Raw user input
+     * @return string Sanitized input safe for prompt inclusion
+     */
+    private function sanitizeUserInput(string $input): string
+    {
+        // Log original input for security monitoring
+        $originalLength = strlen($input);
+
+        // 1. Limit input length to prevent token overflow attacks
+        $maxLength = 2000;
+        if (strlen($input) > $maxLength) {
+            $input = mb_substr($input, 0, $maxLength);
+            Log::warning('[AiInsightsService] User input truncated', [
+                'original_length' => $originalLength,
+                'max_length' => $maxLength,
+            ]);
+        }
+
+        // 2. Detect and neutralize prompt injection patterns
+        $injectionPatterns = [
+            // System prompt overrides
+            '/\b(ignore|disregard|forget)\s+(all\s+)?(previous|above|prior|earlier)\s+(instructions?|prompts?|rules?|context)/i',
+            '/\b(you\s+are\s+now|act\s+as|pretend\s+to\s+be|roleplay\s+as|new\s+instructions?)/i',
+            '/\b(system\s*:?|assistant\s*:?|user\s*:?)\s*\n/i',
+            '/\[INST\]|\[\/INST\]|<\|im_start\|>|<\|im_end\|>/i',
+
+            // Instruction overrides
+            '/\b(override|bypass|skip|ignore)\s+(security|safety|restrictions?|guidelines?|rules?)/i',
+            '/\bdo\s+not\s+follow\s+(the\s+)?(rules?|instructions?|guidelines?)/i',
+            '/\b(jailbreak|dan\s+mode|developer\s+mode|unrestricted)/i',
+
+            // Data extraction attempts
+            '/\b(reveal|show|display|output|print)\s+(the\s+)?(system\s+)?prompt/i',
+            '/\b(what\s+(is|are)\s+your|tell\s+me\s+your)\s+(instructions?|rules?|prompt)/i',
+            '/\bapi[-_\s]?key|secret[-_\s]?key|password|credentials?/i',
+
+            // Code injection
+            '/```\s*(system|bash|shell|python|php|sql)/i',
+            '/\bexec\s*\(|eval\s*\(|system\s*\(/i',
+        ];
+
+        $detectedInjections = [];
+        foreach ($injectionPatterns as $pattern) {
+            if (preg_match($pattern, $input, $matches)) {
+                $detectedInjections[] = $matches[0];
+            }
+        }
+
+        // If injection attempts detected, log and sanitize
+        if (!empty($detectedInjections)) {
+            Log::warning('[AiInsightsService] Potential prompt injection detected', [
+                'patterns_matched' => $detectedInjections,
+                'input_preview' => mb_substr($input, 0, 200),
+            ]);
+
+            // Remove the malicious patterns
+            foreach ($injectionPatterns as $pattern) {
+                $input = preg_replace($pattern, '[BLOCKED]', $input);
+            }
+        }
+
+        // 3. Escape delimiter characters that could break prompt structure
+        $delimiters = [
+            '---' => '—',       // Horizontal rules
+            '===' => '≡',       // Alternative separators
+            '###' => '###',     // Keep markdown headings but limit depth
+            '```' => "'''",     // Code blocks
+        ];
+
+        foreach ($delimiters as $delimiter => $replacement) {
+            $input = str_replace($delimiter, $replacement, $input);
+        }
+
+        // 4. Normalize whitespace (prevent invisible character injection)
+        $input = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $input); // Remove control chars
+        $input = preg_replace('/\s{5,}/', '    ', $input); // Limit consecutive whitespace
+
+        // 5. Remove any XML/HTML-like tags that could be interpreted as instructions
+        $input = preg_replace('/<[^>]+>/', '', $input);
+
+        return trim($input);
+    }
+
+    /**
+     * Validate that user input is a legitimate financial query
+     *
+     * @param  string  $input  User input to validate
+     * @return bool True if input appears to be a legitimate query
+     */
+    private function isValidFinancialQuery(string $input): bool
+    {
+        // Check minimum length
+        if (strlen(trim($input)) < 3) {
+            return false;
+        }
+
+        // Check for at least some alphanumeric content
+        if (!preg_match('/[\p{L}\p{N}]{3,}/u', $input)) {
+            return false;
+        }
+
+        return true;
     }
 }
 

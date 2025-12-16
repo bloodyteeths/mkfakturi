@@ -1754,6 +1754,582 @@ class McpDataProvider
     }
 
     /**
+     * Get cash flow forecast based on receivables, payables, and historical patterns
+     *
+     * @param  Company  $company
+     * @param  int  $forecastDays  Number of days to forecast
+     * @return array
+     */
+    public function getCashFlowForecast(Company $company, int $forecastDays = 90): array
+    {
+        try {
+            Log::info('[McpDataProvider] Generating cash flow forecast', [
+                'company_id' => $company->id,
+                'forecast_days' => $forecastDays,
+            ]);
+
+            $today = now()->startOfDay();
+            $endDate = now()->addDays($forecastDays);
+
+            // Get expected incoming (receivables)
+            $receivables = Invoice::where('company_id', $company->id)
+                ->whereIn('status', [
+                    Invoice::STATUS_SENT,
+                    Invoice::STATUS_VIEWED,
+                    Invoice::STATUS_UNPAID,
+                    Invoice::STATUS_PARTIALLY_PAID,
+                ])
+                ->where('due_date', '>=', $today)
+                ->where('due_date', '<=', $endDate)
+                ->select('due_date', 'total', 'due_amount', 'customer_id', 'status')
+                ->with('customer:id,name')
+                ->get()
+                ->groupBy(function ($invoice) {
+                    return \Carbon\Carbon::parse($invoice->due_date)->format('Y-W'); // Group by week
+                });
+
+            // Get expected outgoing (payables) from bills
+            $payables = Bill::where('company_id', $company->id)
+                ->whereIn('status', ['SENT', 'UNPAID', 'PARTIALLY_PAID'])
+                ->where('due_date', '>=', $today)
+                ->where('due_date', '<=', $endDate)
+                ->select('due_date', 'total', 'due_amount', 'supplier_id', 'status')
+                ->with('supplier:id,name')
+                ->get()
+                ->groupBy(function ($bill) {
+                    return \Carbon\Carbon::parse($bill->due_date)->format('Y-W');
+                });
+
+            // Get recurring invoice patterns
+            $recurringIncome = RecurringInvoice::where('company_id', $company->id)
+                ->where('status', 'ACTIVE')
+                ->where(function ($q) use ($endDate) {
+                    $q->whereNull('ends_at')
+                      ->orWhere('ends_at', '>', now());
+                })
+                ->select('total', 'frequency', 'next_invoice_at')
+                ->get();
+
+            // Build weekly forecast
+            $weeklyForecast = [];
+            $currentWeek = $today->copy();
+            $runningBalance = 0;
+
+            // Get current bank balance (estimated from paid invoices - paid bills)
+            $paidInvoicesTotal = Invoice::where('company_id', $company->id)
+                ->where('status', Invoice::STATUS_PAID)
+                ->whereDate('invoice_date', '>=', now()->subMonths(12))
+                ->sum('total');
+            $paidBillsTotal = Bill::where('company_id', $company->id)
+                ->where('status', 'PAID')
+                ->whereDate('bill_date', '>=', now()->subMonths(12))
+                ->sum('total');
+            $estimatedStartingBalance = ($paidInvoicesTotal - $paidBillsTotal) / 100; // Convert from cents
+
+            $runningBalance = $estimatedStartingBalance;
+
+            while ($currentWeek <= $endDate) {
+                $weekKey = $currentWeek->format('Y-W');
+                $weekStart = $currentWeek->copy()->startOfWeek();
+                $weekEnd = $currentWeek->copy()->endOfWeek();
+
+                // Expected incoming this week
+                $weeklyIncoming = 0;
+                $incomingDetails = [];
+                if (isset($receivables[$weekKey])) {
+                    foreach ($receivables[$weekKey] as $invoice) {
+                        $amount = ($invoice->due_amount ?? $invoice->total) / 100;
+                        $weeklyIncoming += $amount;
+                        $incomingDetails[] = [
+                            'customer' => $invoice->customer->name ?? 'Unknown',
+                            'amount' => $amount,
+                            'status' => $invoice->status,
+                        ];
+                    }
+                }
+
+                // Expected outgoing this week
+                $weeklyOutgoing = 0;
+                $outgoingDetails = [];
+                if (isset($payables[$weekKey])) {
+                    foreach ($payables[$weekKey] as $bill) {
+                        $amount = ($bill->due_amount ?? $bill->total) / 100;
+                        $weeklyOutgoing += $amount;
+                        $outgoingDetails[] = [
+                            'supplier' => $bill->supplier->name ?? 'Unknown',
+                            'amount' => $amount,
+                        ];
+                    }
+                }
+
+                // Add recurring income estimate
+                foreach ($recurringIncome as $recurring) {
+                    $nextDate = \Carbon\Carbon::parse($recurring->next_invoice_at);
+                    if ($nextDate >= $weekStart && $nextDate <= $weekEnd) {
+                        $weeklyIncoming += $recurring->total / 100;
+                        $incomingDetails[] = [
+                            'customer' => 'Recurring Invoice',
+                            'amount' => $recurring->total / 100,
+                            'status' => 'RECURRING',
+                        ];
+                    }
+                }
+
+                $netFlow = $weeklyIncoming - $weeklyOutgoing;
+                $runningBalance += $netFlow;
+
+                $weeklyForecast[] = [
+                    'week' => $weekKey,
+                    'week_start' => $weekStart->format('Y-m-d'),
+                    'week_end' => $weekEnd->format('Y-m-d'),
+                    'expected_incoming' => round($weeklyIncoming, 2),
+                    'expected_outgoing' => round($weeklyOutgoing, 2),
+                    'net_cash_flow' => round($netFlow, 2),
+                    'projected_balance' => round($runningBalance, 2),
+                    'incoming_details' => array_slice($incomingDetails, 0, 5),
+                    'outgoing_details' => array_slice($outgoingDetails, 0, 5),
+                ];
+
+                $currentWeek->addWeek();
+            }
+
+            // Calculate summary metrics
+            $totalIncoming = array_sum(array_column($weeklyForecast, 'expected_incoming'));
+            $totalOutgoing = array_sum(array_column($weeklyForecast, 'expected_outgoing'));
+            $lowestBalance = min(array_column($weeklyForecast, 'projected_balance'));
+            $highestBalance = max(array_column($weeklyForecast, 'projected_balance'));
+
+            // Identify potential cash crunch weeks
+            $cashCrunchWeeks = array_filter($weeklyForecast, function ($week) {
+                return $week['projected_balance'] < 0;
+            });
+
+            return [
+                'forecast_period' => [
+                    'start' => $today->format('Y-m-d'),
+                    'end' => $endDate->format('Y-m-d'),
+                    'days' => $forecastDays,
+                ],
+                'summary' => [
+                    'starting_balance' => round($estimatedStartingBalance, 2),
+                    'total_expected_incoming' => round($totalIncoming, 2),
+                    'total_expected_outgoing' => round($totalOutgoing, 2),
+                    'net_forecast' => round($totalIncoming - $totalOutgoing, 2),
+                    'ending_balance' => round($runningBalance, 2),
+                    'lowest_projected_balance' => round($lowestBalance, 2),
+                    'highest_projected_balance' => round($highestBalance, 2),
+                ],
+                'alerts' => [
+                    'cash_crunch_weeks' => count($cashCrunchWeeks),
+                    'cash_crunch_risk' => $lowestBalance < 0 ? 'HIGH' : ($lowestBalance < $totalOutgoing * 0.1 ? 'MEDIUM' : 'LOW'),
+                ],
+                'weekly_forecast' => $weeklyForecast,
+                'currency' => $company->currency ?? 'MKD',
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to generate cash flow forecast', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'error' => 'Failed to generate cash flow forecast',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get AR (Accounts Receivable) aging report
+     *
+     * @param  Company  $company
+     * @return array
+     */
+    public function getARAgingReport(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Generating AR aging report', [
+                'company_id' => $company->id,
+            ]);
+
+            $today = now()->startOfDay();
+
+            // Get all unpaid/partially paid invoices
+            $invoices = Invoice::where('company_id', $company->id)
+                ->whereIn('status', [
+                    Invoice::STATUS_SENT,
+                    Invoice::STATUS_VIEWED,
+                    Invoice::STATUS_UNPAID,
+                    Invoice::STATUS_PARTIALLY_PAID,
+                ])
+                ->with('customer:id,name,email,phone')
+                ->get();
+
+            // Aging buckets
+            $buckets = [
+                'current' => ['min' => -999, 'max' => 0, 'invoices' => [], 'total' => 0, 'count' => 0],
+                '1_30' => ['min' => 1, 'max' => 30, 'invoices' => [], 'total' => 0, 'count' => 0],
+                '31_60' => ['min' => 31, 'max' => 60, 'invoices' => [], 'total' => 0, 'count' => 0],
+                '61_90' => ['min' => 61, 'max' => 90, 'invoices' => [], 'total' => 0, 'count' => 0],
+                'over_90' => ['min' => 91, 'max' => 9999, 'invoices' => [], 'total' => 0, 'count' => 0],
+            ];
+
+            $customerSummary = [];
+
+            foreach ($invoices as $invoice) {
+                $dueDate = \Carbon\Carbon::parse($invoice->due_date);
+                $daysOverdue = $today->diffInDays($dueDate, false) * -1; // Negative if not yet due
+                $dueAmount = ($invoice->due_amount ?? $invoice->total) / 100;
+
+                // Determine bucket
+                $bucketKey = 'current';
+                if ($daysOverdue > 90) {
+                    $bucketKey = 'over_90';
+                } elseif ($daysOverdue > 60) {
+                    $bucketKey = '61_90';
+                } elseif ($daysOverdue > 30) {
+                    $bucketKey = '31_60';
+                } elseif ($daysOverdue > 0) {
+                    $bucketKey = '1_30';
+                }
+
+                $invoiceData = [
+                    'invoice_number' => $invoice->invoice_number,
+                    'customer_name' => $invoice->customer->name ?? 'Unknown',
+                    'customer_id' => $invoice->customer_id,
+                    'invoice_date' => $invoice->invoice_date,
+                    'due_date' => $invoice->due_date,
+                    'days_overdue' => max(0, $daysOverdue),
+                    'total' => $invoice->total / 100,
+                    'due_amount' => $dueAmount,
+                    'status' => $invoice->status,
+                ];
+
+                $buckets[$bucketKey]['invoices'][] = $invoiceData;
+                $buckets[$bucketKey]['total'] += $dueAmount;
+                $buckets[$bucketKey]['count']++;
+
+                // Customer summary
+                $customerId = $invoice->customer_id;
+                if (!isset($customerSummary[$customerId])) {
+                    $customerSummary[$customerId] = [
+                        'customer_id' => $customerId,
+                        'customer_name' => $invoice->customer->name ?? 'Unknown',
+                        'customer_email' => $invoice->customer->email ?? null,
+                        'customer_phone' => $invoice->customer->phone ?? null,
+                        'total_outstanding' => 0,
+                        'invoice_count' => 0,
+                        'oldest_invoice_days' => 0,
+                        'buckets' => [
+                            'current' => 0,
+                            '1_30' => 0,
+                            '31_60' => 0,
+                            '61_90' => 0,
+                            'over_90' => 0,
+                        ],
+                    ];
+                }
+
+                $customerSummary[$customerId]['total_outstanding'] += $dueAmount;
+                $customerSummary[$customerId]['invoice_count']++;
+                $customerSummary[$customerId]['oldest_invoice_days'] = max(
+                    $customerSummary[$customerId]['oldest_invoice_days'],
+                    max(0, $daysOverdue)
+                );
+                $customerSummary[$customerId]['buckets'][$bucketKey] += $dueAmount;
+            }
+
+            // Sort customers by total outstanding (descending)
+            usort($customerSummary, function ($a, $b) {
+                return $b['total_outstanding'] <=> $a['total_outstanding'];
+            });
+
+            // Round totals and limit invoice lists
+            foreach ($buckets as $key => &$bucket) {
+                $bucket['total'] = round($bucket['total'], 2);
+                // Keep only top 10 invoices per bucket for readability
+                $bucket['invoices'] = array_slice($bucket['invoices'], 0, 10);
+            }
+
+            // Calculate totals
+            $totalOutstanding = array_sum(array_column($buckets, 'total'));
+            $totalCount = array_sum(array_column($buckets, 'count'));
+
+            // Calculate weighted average days outstanding
+            $weightedDays = 0;
+            foreach ($buckets as $key => $bucket) {
+                $avgDays = match($key) {
+                    'current' => 0,
+                    '1_30' => 15,
+                    '31_60' => 45,
+                    '61_90' => 75,
+                    'over_90' => 120,
+                };
+                $weightedDays += $bucket['total'] * $avgDays;
+            }
+            $avgDaysOutstanding = $totalOutstanding > 0 ? round($weightedDays / $totalOutstanding, 1) : 0;
+
+            // Risk score based on aging distribution
+            $riskScore = 0;
+            if ($totalOutstanding > 0) {
+                $riskScore += ($buckets['1_30']['total'] / $totalOutstanding) * 20;
+                $riskScore += ($buckets['31_60']['total'] / $totalOutstanding) * 40;
+                $riskScore += ($buckets['61_90']['total'] / $totalOutstanding) * 60;
+                $riskScore += ($buckets['over_90']['total'] / $totalOutstanding) * 100;
+            }
+
+            return [
+                'summary' => [
+                    'total_outstanding' => round($totalOutstanding, 2),
+                    'total_invoices' => $totalCount,
+                    'total_customers' => count($customerSummary),
+                    'average_days_outstanding' => $avgDaysOutstanding,
+                    'collection_risk_score' => round($riskScore, 0),
+                    'collection_risk_level' => match(true) {
+                        $riskScore >= 50 => 'HIGH',
+                        $riskScore >= 30 => 'MEDIUM',
+                        default => 'LOW',
+                    },
+                ],
+                'aging_buckets' => [
+                    'current' => [
+                        'label' => 'Current (not yet due)',
+                        'total' => $buckets['current']['total'],
+                        'count' => $buckets['current']['count'],
+                        'percent' => $totalOutstanding > 0 ? round($buckets['current']['total'] / $totalOutstanding * 100, 1) : 0,
+                    ],
+                    '1_30' => [
+                        'label' => '1-30 days overdue',
+                        'total' => $buckets['1_30']['total'],
+                        'count' => $buckets['1_30']['count'],
+                        'percent' => $totalOutstanding > 0 ? round($buckets['1_30']['total'] / $totalOutstanding * 100, 1) : 0,
+                    ],
+                    '31_60' => [
+                        'label' => '31-60 days overdue',
+                        'total' => $buckets['31_60']['total'],
+                        'count' => $buckets['31_60']['count'],
+                        'percent' => $totalOutstanding > 0 ? round($buckets['31_60']['total'] / $totalOutstanding * 100, 1) : 0,
+                    ],
+                    '61_90' => [
+                        'label' => '61-90 days overdue',
+                        'total' => $buckets['61_90']['total'],
+                        'count' => $buckets['61_90']['count'],
+                        'percent' => $totalOutstanding > 0 ? round($buckets['61_90']['total'] / $totalOutstanding * 100, 1) : 0,
+                    ],
+                    'over_90' => [
+                        'label' => 'Over 90 days overdue',
+                        'total' => $buckets['over_90']['total'],
+                        'count' => $buckets['over_90']['count'],
+                        'percent' => $totalOutstanding > 0 ? round($buckets['over_90']['total'] / $totalOutstanding * 100, 1) : 0,
+                    ],
+                ],
+                'top_debtors' => array_slice(array_map(function ($c) {
+                    return [
+                        'customer_name' => $c['customer_name'],
+                        'total_outstanding' => round($c['total_outstanding'], 2),
+                        'invoice_count' => $c['invoice_count'],
+                        'oldest_days' => $c['oldest_invoice_days'],
+                    ];
+                }, $customerSummary), 0, 10),
+                'currency' => $company->currency ?? 'MKD',
+                'generated_at' => now()->toDateTimeString(),
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to generate AR aging report', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'error' => 'Failed to generate AR aging report',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get AP (Accounts Payable) aging report
+     *
+     * @param  Company  $company
+     * @return array
+     */
+    public function getAPAgingReport(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Generating AP aging report', [
+                'company_id' => $company->id,
+            ]);
+
+            $today = now()->startOfDay();
+
+            // Get all unpaid/partially paid bills
+            $bills = Bill::where('company_id', $company->id)
+                ->whereIn('status', ['SENT', 'UNPAID', 'PARTIALLY_PAID'])
+                ->with('supplier:id,name,email,phone')
+                ->get();
+
+            // Aging buckets
+            $buckets = [
+                'current' => ['total' => 0, 'count' => 0],
+                '1_30' => ['total' => 0, 'count' => 0],
+                '31_60' => ['total' => 0, 'count' => 0],
+                '61_90' => ['total' => 0, 'count' => 0],
+                'over_90' => ['total' => 0, 'count' => 0],
+            ];
+
+            $supplierSummary = [];
+
+            foreach ($bills as $bill) {
+                $dueDate = \Carbon\Carbon::parse($bill->due_date);
+                $daysOverdue = $today->diffInDays($dueDate, false) * -1;
+                $dueAmount = ($bill->due_amount ?? $bill->total) / 100;
+
+                // Determine bucket
+                $bucketKey = 'current';
+                if ($daysOverdue > 90) {
+                    $bucketKey = 'over_90';
+                } elseif ($daysOverdue > 60) {
+                    $bucketKey = '61_90';
+                } elseif ($daysOverdue > 30) {
+                    $bucketKey = '31_60';
+                } elseif ($daysOverdue > 0) {
+                    $bucketKey = '1_30';
+                }
+
+                $buckets[$bucketKey]['total'] += $dueAmount;
+                $buckets[$bucketKey]['count']++;
+
+                // Supplier summary
+                $supplierId = $bill->supplier_id;
+                if (!isset($supplierSummary[$supplierId])) {
+                    $supplierSummary[$supplierId] = [
+                        'supplier_name' => $bill->supplier->name ?? 'Unknown',
+                        'total_payable' => 0,
+                        'bill_count' => 0,
+                        'oldest_days' => 0,
+                    ];
+                }
+
+                $supplierSummary[$supplierId]['total_payable'] += $dueAmount;
+                $supplierSummary[$supplierId]['bill_count']++;
+                $supplierSummary[$supplierId]['oldest_days'] = max(
+                    $supplierSummary[$supplierId]['oldest_days'],
+                    max(0, $daysOverdue)
+                );
+            }
+
+            // Sort suppliers by total payable
+            usort($supplierSummary, function ($a, $b) {
+                return $b['total_payable'] <=> $a['total_payable'];
+            });
+
+            $totalPayable = array_sum(array_column($buckets, 'total'));
+            $totalCount = array_sum(array_column($buckets, 'count'));
+
+            return [
+                'summary' => [
+                    'total_payable' => round($totalPayable, 2),
+                    'total_bills' => $totalCount,
+                    'total_suppliers' => count($supplierSummary),
+                ],
+                'aging_buckets' => [
+                    'current' => ['label' => 'Current', 'total' => round($buckets['current']['total'], 2), 'count' => $buckets['current']['count']],
+                    '1_30' => ['label' => '1-30 days', 'total' => round($buckets['1_30']['total'], 2), 'count' => $buckets['1_30']['count']],
+                    '31_60' => ['label' => '31-60 days', 'total' => round($buckets['31_60']['total'], 2), 'count' => $buckets['31_60']['count']],
+                    '61_90' => ['label' => '61-90 days', 'total' => round($buckets['61_90']['total'], 2), 'count' => $buckets['61_90']['count']],
+                    'over_90' => ['label' => 'Over 90 days', 'total' => round($buckets['over_90']['total'], 2), 'count' => $buckets['over_90']['count']],
+                ],
+                'top_creditors' => array_slice(array_map(function ($s) {
+                    return [
+                        'supplier_name' => $s['supplier_name'],
+                        'total_payable' => round($s['total_payable'], 2),
+                        'bill_count' => $s['bill_count'],
+                        'oldest_days' => $s['oldest_days'],
+                    ];
+                }, $supplierSummary), 0, 10),
+                'currency' => $company->currency ?? 'MKD',
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to generate AP aging report', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Get working capital analysis
+     *
+     * @param  Company  $company
+     * @return array
+     */
+    public function getWorkingCapitalAnalysis(Company $company): array
+    {
+        try {
+            $arAging = $this->getARAgingReport($company);
+            $apAging = $this->getAPAgingReport($company);
+
+            $totalReceivables = $arAging['summary']['total_outstanding'] ?? 0;
+            $totalPayables = $apAging['summary']['total_payable'] ?? 0;
+
+            // Get inventory value
+            $inventoryValue = Item::where('company_id', $company->id)
+                ->sum(\DB::raw('COALESCE(cost_price, 0) * COALESCE(stock_quantity, 0)')) / 100;
+
+            // Calculate working capital
+            $currentAssets = $totalReceivables + $inventoryValue;
+            $currentLiabilities = $totalPayables;
+            $workingCapital = $currentAssets - $currentLiabilities;
+
+            // Ratios
+            $currentRatio = $currentLiabilities > 0 ? $currentAssets / $currentLiabilities : 0;
+            $quickRatio = $currentLiabilities > 0 ? $totalReceivables / $currentLiabilities : 0;
+
+            // Days metrics
+            $avgDaysReceivable = $arAging['summary']['average_days_outstanding'] ?? 0;
+
+            return [
+                'working_capital' => round($workingCapital, 2),
+                'current_assets' => round($currentAssets, 2),
+                'current_liabilities' => round($currentLiabilities, 2),
+                'components' => [
+                    'accounts_receivable' => round($totalReceivables, 2),
+                    'inventory' => round($inventoryValue, 2),
+                    'accounts_payable' => round($totalPayables, 2),
+                ],
+                'ratios' => [
+                    'current_ratio' => round($currentRatio, 2),
+                    'quick_ratio' => round($quickRatio, 2),
+                ],
+                'health' => [
+                    'status' => match(true) {
+                        $currentRatio >= 2 => 'EXCELLENT',
+                        $currentRatio >= 1.5 => 'GOOD',
+                        $currentRatio >= 1 => 'ADEQUATE',
+                        default => 'CONCERNING',
+                    },
+                    'days_receivable' => $avgDaysReceivable,
+                ],
+                'currency' => $company->currency ?? 'MKD',
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to calculate working capital', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Get comprehensive statistics across all financial modules
      *
      * @return array
@@ -1785,6 +2361,11 @@ class McpDataProvider
                 'item_sales' => $this->getItemSalesAnalysis($company, 3),
                 'customer_dependency' => $this->getCustomerDependencyAnalysis($company),
                 'projections' => $this->getFinancialProjections($company, 6),
+                // CFO-level analytics
+                'cash_flow_forecast' => $this->getCashFlowForecast($company, 90),
+                'ar_aging' => $this->getARAgingReport($company),
+                'ap_aging' => $this->getAPAgingReport($company),
+                'working_capital' => $this->getWorkingCapitalAnalysis($company),
             ];
 
             Log::info('[McpDataProvider] Comprehensive stats calculated');

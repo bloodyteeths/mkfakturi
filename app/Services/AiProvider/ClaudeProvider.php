@@ -317,6 +317,346 @@ class ClaudeProvider implements AiProviderInterface
     }
 
     /**
+     * Generate a response with prompt caching enabled
+     *
+     * This method enables Anthropic's prompt caching feature which can reduce
+     * token costs by up to 90% for repeated system prompts. The system prompt
+     * is cached and reused across requests.
+     *
+     * @param  string  $systemPrompt  The system/context prompt to cache
+     * @param  string  $userMessage  The user's message
+     * @param  array<string, mixed>  $options  Additional options
+     * @return string The AI's response
+     *
+     * @throws \Exception If the API call fails
+     */
+    public function generateWithCache(string $systemPrompt, string $userMessage, array $options = []): string
+    {
+        $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
+        $temperature = $options['temperature'] ?? $this->temperature;
+        $model = $options['model'] ?? $this->model;
+
+        $startTime = microtime(true);
+
+        try {
+            $text = $this->callWithRetry(function () use ($systemPrompt, $userMessage, $model, $maxTokens, $temperature, $startTime) {
+                // Build system prompt with cache_control for static content
+                $systemContent = [
+                    [
+                        'type' => 'text',
+                        'text' => $systemPrompt,
+                        'cache_control' => ['type' => 'ephemeral'], // Cache for 5 minutes
+                    ],
+                ];
+
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'anthropic-beta' => 'prompt-caching-2024-07-31',
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(60)
+                    ->post($this->apiUrl, [
+                        'model' => $model,
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'system' => $systemContent,
+                        'messages' => [
+                            [
+                                'role' => 'user',
+                                'content' => $userMessage,
+                            ],
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('generateWithCache', $userMessage, null, $response->status(), microtime(true) - $startTime, [
+                        'cache_enabled' => true,
+                    ]);
+                    throw new \Exception('Claude API request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                // Log with cache metrics
+                $this->logApiCall('generateWithCache', $userMessage, $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                    'cache_creation_input_tokens' => $data['usage']['cache_creation_input_tokens'] ?? 0,
+                    'cache_read_input_tokens' => $data['usage']['cache_read_input_tokens'] ?? 0,
+                    'cache_enabled' => true,
+                    'system_prompt_length' => strlen($systemPrompt),
+                ]);
+
+                return $text;
+            });
+
+            return $text;
+
+        } catch (\Exception $e) {
+            $this->logApiCall('generateWithCache', $userMessage, null, 0, microtime(true) - $startTime, [
+                'error' => $e->getMessage(),
+                'cache_enabled' => true,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Generate a chat response with system prompt and caching
+     *
+     * @param  string  $systemPrompt  The system/context prompt to cache
+     * @param  array<int, array{role: string, content: string}>  $messages  Array of messages
+     * @param  array<string, mixed>  $options  Additional options
+     * @return string The AI's response
+     *
+     * @throws \Exception If the API call fails
+     */
+    public function chatWithCache(string $systemPrompt, array $messages, array $options = []): string
+    {
+        $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
+        $temperature = $options['temperature'] ?? $this->temperature;
+        $model = $options['model'] ?? $this->model;
+
+        $startTime = microtime(true);
+
+        try {
+            $text = $this->callWithRetry(function () use ($systemPrompt, $messages, $model, $maxTokens, $temperature, $startTime) {
+                // Build system prompt with cache_control
+                $systemContent = [
+                    [
+                        'type' => 'text',
+                        'text' => $systemPrompt,
+                        'cache_control' => ['type' => 'ephemeral'],
+                    ],
+                ];
+
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'anthropic-beta' => 'prompt-caching-2024-07-31',
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(60)
+                    ->post($this->apiUrl, [
+                        'model' => $model,
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'system' => $systemContent,
+                        'messages' => $messages,
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('chatWithCache', json_encode($messages), null, $response->status(), microtime(true) - $startTime, [
+                        'cache_enabled' => true,
+                    ]);
+                    throw new \Exception('Claude API chat request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                $this->logApiCall('chatWithCache', json_encode($messages), $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                    'cache_creation_input_tokens' => $data['usage']['cache_creation_input_tokens'] ?? 0,
+                    'cache_read_input_tokens' => $data['usage']['cache_read_input_tokens'] ?? 0,
+                    'cache_enabled' => true,
+                    'system_prompt_length' => strlen($systemPrompt),
+                ]);
+
+                return $text;
+            });
+
+            return $text;
+
+        } catch (\Exception $e) {
+            $this->logApiCall('chatWithCache', json_encode($messages), null, 0, microtime(true) - $startTime, [
+                'error' => $e->getMessage(),
+                'cache_enabled' => true,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Generate a response with a specific model override
+     *
+     * @param  string  $prompt  The prompt to send to Claude
+     * @param  string  $model  The model to use (e.g., claude-3-haiku-20240307)
+     * @param  array<string, mixed>  $options  Additional options
+     * @return string The AI's response
+     *
+     * @throws \Exception If the API call fails
+     */
+    public function generateWithModel(string $prompt, string $model, array $options = []): string
+    {
+        $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
+        $temperature = $options['temperature'] ?? $this->temperature;
+
+        $startTime = microtime(true);
+
+        try {
+            $text = $this->callWithRetry(function () use ($prompt, $model, $maxTokens, $temperature, $startTime) {
+                $response = Http::withHeaders([
+                    'x-api-key' => $this->apiKey,
+                    'anthropic-version' => $this->apiVersion,
+                    'content-type' => 'application/json',
+                ])
+                    ->timeout(30)
+                    ->post($this->apiUrl, [
+                        'model' => $model, // Use provided model instead of default
+                        'max_tokens' => $maxTokens,
+                        'temperature' => $temperature,
+                        'messages' => [
+                            [
+                                'role' => 'user',
+                                'content' => $prompt,
+                            ],
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    $this->logApiCall('generateWithModel', $prompt, null, $response->status(), microtime(true) - $startTime, [
+                        'model_override' => $model,
+                    ]);
+                    throw new \Exception('Claude API request failed: '.$response->body());
+                }
+
+                $data = $response->json();
+                $text = $data['content'][0]['text'] ?? '';
+
+                $this->logApiCall('generateWithModel', $prompt, $text, 200, microtime(true) - $startTime, [
+                    'input_tokens' => $data['usage']['input_tokens'] ?? 0,
+                    'output_tokens' => $data['usage']['output_tokens'] ?? 0,
+                    'model_override' => $model,
+                ]);
+
+                return $text;
+            });
+
+            return $text;
+
+        } catch (\Exception $e) {
+            $this->logApiCall('generateWithModel', $prompt, null, 0, microtime(true) - $startTime, [
+                'error' => $e->getMessage(),
+                'model_override' => $model,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Generate a streaming response from a single prompt
+     *
+     * @param  string  $prompt  The prompt to send to Claude
+     * @param  callable  $onChunk  Callback function called for each chunk of text
+     * @param  array<string, mixed>  $options  Additional options (max_tokens, temperature, etc.)
+     * @return string The complete AI response (accumulated from all chunks)
+     *
+     * @throws \Exception If the API call fails
+     */
+    public function generateStream(string $prompt, callable $onChunk, array $options = []): string
+    {
+        $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
+        $temperature = $options['temperature'] ?? $this->temperature;
+        $model = $options['model'] ?? $this->model;
+
+        $startTime = microtime(true);
+        $fullResponse = '';
+
+        try {
+            // Use cURL for streaming as Laravel HTTP client doesn't handle SSE well
+            $ch = curl_init($this->apiUrl);
+
+            $payload = json_encode([
+                'model' => $model,
+                'max_tokens' => $maxTokens,
+                'temperature' => $temperature,
+                'stream' => true,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $prompt,
+                    ],
+                ],
+            ]);
+
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $payload,
+                CURLOPT_HTTPHEADER => [
+                    'x-api-key: '.$this->apiKey,
+                    'anthropic-version: '.$this->apiVersion,
+                    'content-type: application/json',
+                    'Accept: text/event-stream',
+                ],
+                CURLOPT_TIMEOUT => 120,
+                CURLOPT_RETURNTRANSFER => false,
+                CURLOPT_WRITEFUNCTION => function ($ch, $data) use (&$fullResponse, $onChunk) {
+                    // Parse SSE data
+                    $lines = explode("\n", $data);
+                    foreach ($lines as $line) {
+                        $line = trim($line);
+                        if (empty($line) || $line === 'event: message_start' || $line === 'event: content_block_start' || $line === 'event: content_block_delta' || $line === 'event: content_block_stop' || $line === 'event: message_delta' || $line === 'event: message_stop' || $line === 'event: ping') {
+                            continue;
+                        }
+
+                        if (strpos($line, 'data: ') === 0) {
+                            $jsonData = substr($line, 6);
+                            if ($jsonData === '[DONE]') {
+                                continue;
+                            }
+
+                            $eventData = json_decode($jsonData, true);
+                            if ($eventData === null) {
+                                continue;
+                            }
+
+                            // Extract text from content_block_delta events
+                            if (isset($eventData['type']) && $eventData['type'] === 'content_block_delta') {
+                                $text = $eventData['delta']['text'] ?? '';
+                                if (!empty($text)) {
+                                    $fullResponse .= $text;
+                                    $onChunk($text);
+                                }
+                            }
+                        }
+                    }
+
+                    return strlen($data);
+                },
+            ]);
+
+            $result = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($result === false || $httpCode >= 400) {
+                $this->logApiCall('generateStream', $prompt, null, $httpCode, microtime(true) - $startTime, [
+                    'error' => $error ?: 'HTTP error',
+                ]);
+                throw new \Exception('Claude streaming API failed: '.$error.' (HTTP '.$httpCode.')');
+            }
+
+            $this->logApiCall('generateStream', $prompt, $fullResponse, 200, microtime(true) - $startTime, [
+                'response_length' => strlen($fullResponse),
+                'streamed' => true,
+            ]);
+
+            return $fullResponse;
+
+        } catch (\Exception $e) {
+            $this->logApiCall('generateStream', $prompt, null, 0, microtime(true) - $startTime, [
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Get the provider name
      */
     public function getProviderName(): string
