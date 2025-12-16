@@ -29,7 +29,7 @@
                 :class="$route.name === 'partner.clients'
                   ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                v-if="userStore.hasAbilities('view-clients')"
+                v-if="hasAbilities('view-clients')"
               >
                 Клиенти
               </router-link>
@@ -91,12 +91,29 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import { useUserStore } from '@/scripts/partner/stores/user'
+import { onMounted, onUnmounted, computed } from 'vue'
+import { useUserStore } from '@/scripts/admin/stores/user'
 import { useRouter } from 'vue-router'
 
+// Use the MAIN user store (same one used by main login)
 const userStore = useUserStore()
 const router = useRouter()
+
+// Create a computed wrapper for abilities check (partners have specific abilities)
+const hasAbilities = (ability) => {
+  const partnerAbilities = [
+    'view-dashboard',
+    'view-commissions',
+    'view-clients',
+    'manage-profile'
+  ]
+
+  if (Array.isArray(ability)) {
+    return ability.every(a => partnerAbilities.includes(a))
+  }
+
+  return partnerAbilities.includes(ability)
+}
 
 // Override body overflow on mount (fix scroll issue)
 // The app.blade.php has overflow-hidden class on body that blocks scrolling
@@ -116,7 +133,7 @@ onUnmounted(() => {
 
 const handleLogout = async () => {
   await userStore.logout()
-  router.push({ name: 'partner.login' })
+  router.push({ name: 'login' })
 }
 </script>
 <!-- CLAUDE-CHECKPOINT -->

@@ -3,29 +3,21 @@ const Dashboard = () => import('@/scripts/partner/views/dashboard/Dashboard.vue'
 const Clients = () => import('@/scripts/partner/views/clients/Clients.vue')
 const Referrals = () => import('@/js/pages/partner/Referrals.vue')
 const Payouts = () => import('@/js/pages/partner/Payouts.vue')
-const PartnerLogin = () => import('@/scripts/partner/views/auth/Login.vue')
-const PartnerForgotPassword = () => import('@/scripts/partner/views/auth/ForgotPassword.vue')
-const PartnerResetPassword = () => import('@/scripts/partner/views/auth/ResetPassword.vue')
 
 export default [
+  // Redirect partner login routes to main login - partners use the same login as everyone else
   {
     path: '/admin/partner/login',
     name: 'partner.login',
-    component: PartnerLogin,
-    meta: { requiresAuth: false, redirectIfAuthenticated: true },
+    redirect: { name: 'login' },
   },
   {
     path: '/admin/partner/forgot-password',
-    name: 'partner.forgot-password',
-    component: PartnerForgotPassword,
-    meta: { requiresAuth: false, redirectIfAuthenticated: true },
+    redirect: { name: 'forgot-password' },
   },
   {
     path: '/admin/partner/reset-password/:token',
-    name: 'partner.reset-password',
-    component: PartnerResetPassword,
-    meta: { requiresAuth: false, redirectIfAuthenticated: true },
-    props: true,
+    redirect: to => ({ name: 'reset-password', params: { token: to.params.token } }),
   },
   {
     path: '/admin/partner',

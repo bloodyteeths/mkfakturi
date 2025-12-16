@@ -526,7 +526,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/scripts/partner/stores/user'
+import { useUserStore } from '@/scripts/admin/stores/user'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
 

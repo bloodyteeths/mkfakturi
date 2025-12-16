@@ -59,7 +59,7 @@ import BaseAlert from '@/scripts/components/base/BaseAlert.vue'
 import DashboardStats from '@/scripts/partner/views/dashboard/DashboardStats.vue'
 import DashboardTable from '@/scripts/partner/views/dashboard/DashboardTable.vue'
 import { usePartnerStore } from '@/scripts/partner/stores/partner'
-import { useUserStore } from '@/scripts/partner/stores/user'
+import { useUserStore } from '@/scripts/admin/stores/user'
 import { onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -150,8 +150,14 @@ const stripeConnectButtonText = computed(() => {
 
 onMounted(() => {
   // Partner-specific authorization logic
-  if (route.meta.isPartner && !userStore.currentUser.is_partner) {
-    router.push({ name: 'partner.login' })
+  const currentUser = userStore.currentUser
+  const isPartner = currentUser?.role === 'partner' ||
+                    currentUser?.is_partner ||
+                    currentUser?.account_type === 'accountant'
+
+  if (route.meta.isPartner && !isPartner) {
+    router.push({ name: 'login' })
+    return
   }
 
   // Load Stripe Connect status
