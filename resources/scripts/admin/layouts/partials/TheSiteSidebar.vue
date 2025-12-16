@@ -114,12 +114,12 @@
   <!-- DESKTOP MENU -->
   <div
     :class="[
-      'hidden h-screen pb-32 overflow-y-auto bg-white border-r border-gray-200 border-solid md:fixed md:flex md:flex-col md:inset-y-0 pt-16 transition-all duration-200 ease-in-out',
+      'hidden h-screen bg-white border-r border-gray-200 border-solid md:fixed md:flex md:flex-col md:inset-y-0 pt-16 transition-all duration-200 ease-in-out',
       globalStore.isSidebarCollapsed ? 'w-16' : 'w-56 xl:w-64'
     ]"
   >
-    <!-- Menu Items -->
-    <div class="flex-1">
+    <!-- Scrollable Menu Items -->
+    <div class="flex-1 overflow-y-auto pb-32">
       <div
         v-for="menu in globalStore.menuGroups"
         :key="menu"
@@ -129,20 +129,22 @@
           v-for="item in menu"
           :key="item.link"
           :to="item.link"
-          class="sidebar-item group relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
+          class="sidebar-item relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
           :class="[
             hasActiveUrl(item.link)
               ? 'text-primary-500 border-primary-500 bg-gray-100'
               : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
             globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
           ]"
+          @mouseenter="showTooltip($event, item)"
+          @mouseleave="hideTooltip"
         >
           <BaseIcon
             :name="item.icon"
             :class="[
               hasActiveUrl(item.link)
                 ? 'text-primary-500'
-                : 'text-gray-400 group-hover:text-gray-600',
+                : 'text-gray-400 hover:text-gray-600',
               'shrink-0 h-5 w-5 transition-colors duration-150',
               globalStore.isSidebarCollapsed ? '' : 'mr-3'
             ]"
@@ -155,29 +157,12 @@
           >
             {{ $t(item.title) }}
           </span>
-
-          <!-- Tooltip - only shown when collapsed -->
-          <div
-            v-if="globalStore.isSidebarCollapsed"
-            class="
-              absolute left-full ml-3 px-3 py-2
-              bg-gray-900 text-white text-sm rounded-md
-              opacity-0 invisible group-hover:opacity-100 group-hover:visible
-              transition-all duration-150 delay-75
-              whitespace-nowrap z-50 pointer-events-none
-              shadow-lg
-            "
-          >
-            {{ $t(item.title) }}
-            <!-- Tooltip arrow -->
-            <div class="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-          </div>
         </router-link>
       </div>
     </div>
 
     <!-- Collapse Toggle Button - at bottom of sidebar -->
-    <div class="border-t border-gray-200 p-3">
+    <div class="border-t border-gray-200 p-3 bg-white">
       <button
         @click="globalStore.toggleSidebarCollapsed()"
         class="
@@ -202,9 +187,33 @@
       </button>
     </div>
   </div>
+
+  <!-- Tooltip Portal - rendered outside sidebar to avoid overflow clipping -->
+  <Teleport to="body">
+    <Transition
+      enter-active-class="transition-opacity duration-150"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="tooltip.visible && globalStore.isSidebarCollapsed"
+        class="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-md shadow-lg whitespace-nowrap pointer-events-none"
+        :style="{ top: tooltip.top + 'px', left: tooltip.left + 'px', zIndex: 9999 }"
+      >
+        {{ tooltip.text }}
+        <!-- Tooltip arrow -->
+        <div class="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
+import { ref, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 import MainLogo from '@/scripts/components/icons/MainLogo.vue'
 
 import {
@@ -219,15 +228,44 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const route = useRoute()
 const globalStore = useGlobalStore()
+const { t } = useI18n()
+
+// Tooltip state
+const tooltip = reactive({
+  visible: false,
+  text: '',
+  top: 0,
+  left: 0
+})
+
+let tooltipTimeout = null
 
 function hasActiveUrl(url) {
   return route.path.indexOf(url) > -1
 }
-</script>
 
-<style scoped>
-/* Ensure tooltips appear above other content */
-.sidebar-item:hover .tooltip {
-  z-index: 9999;
+function showTooltip(event, item) {
+  if (!globalStore.isSidebarCollapsed) return
+
+  // Clear any existing timeout
+  if (tooltipTimeout) {
+    clearTimeout(tooltipTimeout)
+  }
+
+  // Small delay before showing tooltip
+  tooltipTimeout = setTimeout(() => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    tooltip.text = t(item.title)
+    tooltip.top = rect.top + (rect.height / 2) - 16 // Center vertically
+    tooltip.left = rect.right + 12 // Position to the right of sidebar
+    tooltip.visible = true
+  }, 100)
 }
-</style>
+
+function hideTooltip() {
+  if (tooltipTimeout) {
+    clearTimeout(tooltipTimeout)
+  }
+  tooltip.visible = false
+}
+</script>
