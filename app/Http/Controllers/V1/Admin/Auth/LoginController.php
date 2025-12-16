@@ -111,6 +111,21 @@ class LoginController extends Controller
         // Get the authenticated user
         $user = $this->guard()->user();
 
+        // Determine role - check if user is a partner (has partner record)
+        $role = $user->role;
+        $isPartner = $user->partner()->exists();
+        if ($isPartner) {
+            $role = 'partner';
+        }
+
+        Log::info('Login response', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'db_role' => $user->role,
+            'is_partner' => $isPartner,
+            'returned_role' => $role,
+        ]);
+
         // Return user info in the response so frontend can check role
         return response()->json([
             'success' => true,
@@ -118,7 +133,8 @@ class LoginController extends Controller
                 'id' => $user->id,
                 'email' => $user->email,
                 'name' => $user->name,
-                'role' => $user->role,
+                'role' => $role,
+                'is_partner' => $isPartner,
             ],
         ]);
     }
