@@ -817,6 +817,18 @@
     "title": "Proforma Invoices",
     "proforma_invoice": "Proforma Invoice | Proforma Invoices",
     "new_proforma_invoice": "New Proforma Invoice",
+    "add_new_proforma_invoice": "Add New Proforma Invoice",
+    "number": "Number",
+    "date": "Date",
+    "action": "Action",
+    "statuses": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "viewed": "Viewed",
+      "expired": "Expired",
+      "rejected": "Rejected",
+      "converted": "Converted"
+    },
     "edit_proforma_invoice": "Edit Proforma Invoice",
     "save_proforma_invoice": "Save Proforma Invoice",
     "proforma_invoice_date": "Proforma Date",

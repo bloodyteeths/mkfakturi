@@ -1089,6 +1089,18 @@
         "title": "Профактури",
         "proforma_invoice": "Профактура | Профактури",
         "new_proforma_invoice": "Нова профактура",
+        "add_new_proforma_invoice": "Додај нова профактура",
+        "number": "Број",
+        "date": "Датум",
+        "action": "Акција",
+        "statuses": {
+            "draft": "Нацрт",
+            "sent": "Испратена",
+            "viewed": "Прегледана",
+            "expired": "Истечена",
+            "rejected": "Одбиена",
+            "converted": "Конвертирана"
+        },
         "edit_proforma_invoice": "Измени профактура",
         "save_proforma_invoice": "Зачувај профактура",
         "proforma_invoice_date": "Датум на профактура",
