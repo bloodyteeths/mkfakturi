@@ -40,3 +40,17 @@ products_facturino.txt
 # Local test/debug scripts
 create_partner_demo.php
 test_enhanced_field_mapper.php
+
+# Backup files
+*.backup
+*.bak
+*Example.php
+
+# Test databases
+database/database.sqlite_test_*
+
+# Testing artifacts
+storage/framework/testing/
+
+# Documentation drafts
+documentation/
