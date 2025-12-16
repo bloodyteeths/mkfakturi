@@ -954,12 +954,6 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/JournalReview.vue'),
       },
-      {
-        path: 'partner/accounting/export',
-        name: 'partner.accounting.export',
-        meta: { isPartner: true },
-        component: () => import('@/scripts/admin/views/partner/accounting/JournalExport.vue'),
-      },
 
       // Banking
       {
