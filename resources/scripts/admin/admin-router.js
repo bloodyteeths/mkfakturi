@@ -949,18 +949,6 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/ChartOfAccounts.vue'),
       },
       {
-        path: 'partner/accounting/mappings',
-        name: 'partner.accounting.mappings',
-        meta: { isPartner: true },
-        component: () => import('@/scripts/admin/views/partner/accounting/AccountMappings.vue'),
-      },
-      {
-        path: 'partner/accounting/journal-entries',
-        name: 'partner.accounting.journal-entries',
-        meta: { isPartner: true },
-        component: () => import('@/scripts/admin/views/partner/accounting/JournalEntries.vue'),
-      },
-      {
         path: 'partner/accounting/review',
         name: 'partner.accounting.review',
         meta: { isPartner: true },
