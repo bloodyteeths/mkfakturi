@@ -65,11 +65,26 @@ router.beforeEach((to, from, next) => {
   }
 
   // IMPORTANT: Redirect partners AWAY from regular admin routes
-  // Partners should only access partner routes (/admin/partner/*)
+  // UNLESS they have selected a company to manage (via console)
   if (userStore.currentUser?.role === 'partner' && to.path.startsWith('/admin') && !to.path.startsWith('/admin/partner')) {
+    // Always allow console route - that's where partners select companies
+    if (to.path.startsWith('/admin/console')) {
+      next()
+      return
+    }
+
+    // Allow if partner has selected a company to manage
+    const selectedCompany = window.Ls?.get('selectedCompany')
+    if (selectedCompany) {
+      // Partner has a company context, allow access to admin routes
+      next()
+      return
+    }
+
     // Allow some shared routes (settings, logout, etc)
     const allowedAdminRoutes = ['account.settings', 'logout']
     if (!allowedAdminRoutes.includes(to.name)) {
+      // No company selected, redirect to partner dashboard
       next('/admin/partner/dashboard')
       return
     }
