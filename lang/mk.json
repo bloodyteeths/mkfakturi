@@ -1856,16 +1856,36 @@
         "reports": "Извештаи",
         "from_date": "Од датум",
         "to_date": "До датум",
-        "status": "Status",
-        "paid": "Paid",
-        "unpaid": "Unpaid",
+        "status": "Статус",
+        "paid": "Платено",
+        "unpaid": "Неплатено",
         "download_pdf": "Преземи PDF",
-        "view_pdf": "View PDF",
-        "update_report": "Update Report",
+        "view_pdf": "Прегледај PDF",
+        "update_report": "Ажурирај извештај",
         "report": "Извештај | Извештаи",
-        "profit_loss": "Добивка и загуба",
-        "sales": "Продажба",
-        "taxes": "Даноци",
+        "profit_loss": {
+            "profit_loss": "Добивка и загуба",
+            "to_date": "До датум",
+            "from_date": "Од датум",
+            "date_range": "Избери временски период"
+        },
+        "sales": {
+            "sales": "Продажба",
+            "date_range": "Избери временски период",
+            "to_date": "До датум",
+            "from_date": "Од датум",
+            "report_type": "Тип на извештај",
+            "sort": {
+                "by_customer": "По клиент",
+                "by_item": "По ставка"
+            }
+        },
+        "taxes": {
+            "taxes": "Даноци",
+            "to_date": "До датум",
+            "from_date": "Од датум",
+            "date_range": "Избери временски период"
+        },
         "accounting": {
             "accounting": "Сметководство",
             "trial_balance": "Пробен биланс",
@@ -1896,34 +1916,34 @@
             "unbalanced": "Биланс не е во рамнотежа"
         },
         "errors": {
-            "required": "Field is required"
+            "required": "Полето е задолжително"
         },
         "invoices": {
-            "invoice": "Invoice",
-            "invoice_date": "Invoice Date",
-            "due_date": "Due Date",
-            "amount": "Amount",
-            "contact_name": "Contact Name",
-            "status": "Status"
+            "invoice": "Фактура",
+            "invoice_date": "Датум на фактура",
+            "due_date": "Датум на доспевање",
+            "amount": "Износ",
+            "contact_name": "Име на контакт",
+            "status": "Статус"
         },
         "estimates": {
-            "estimate": "Estimate",
-            "estimate_date": "Estimate Date",
-            "due_date": "Due Date",
-            "estimate_number": "Estimate Number",
-            "ref_number": "Ref Number",
-            "amount": "Amount",
-            "contact_name": "Contact Name",
-            "status": "Status"
+            "estimate": "Понуда",
+            "estimate_date": "Датум на понуда",
+            "due_date": "Датум на доспевање",
+            "estimate_number": "Број на понуда",
+            "ref_number": "Референтен број",
+            "amount": "Износ",
+            "contact_name": "Име на контакт",
+            "status": "Статус"
         },
         "expenses": {
-            "expenses": "Expenses",
-            "category": "Category",
-            "date": "Date",
-            "amount": "Amount",
-            "to_date": "To Date",
-            "from_date": "From Date",
-            "date_range": "Select Date Range"
+            "expenses": "Трошоци",
+            "category": "Категорија",
+            "date": "Датум",
+            "amount": "Износ",
+            "to_date": "До датум",
+            "from_date": "Од датум",
+            "date_range": "Избери временски период"
         },
         "projects": {
             "title": "Извештаи за проекти",
