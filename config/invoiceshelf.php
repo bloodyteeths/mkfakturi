@@ -513,16 +513,6 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'navigation.modules',
-            'group' => 3,
-            'link' => '/admin/modules',
-            'icon' => 'PuzzlePieceIcon',
-            'name' => 'Modules',
-            'owner_only' => true,
-            'ability' => '',
-            'model' => '',
-        ],
-        [
             'title' => 'navigation.users',
             'group' => 3,
             'link' => '/admin/users',
