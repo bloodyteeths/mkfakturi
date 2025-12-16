@@ -516,6 +516,23 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
             return true;
         }
 
+        // Partner with full_access to company has all permissions
+        // Partners manage client companies and need access to all features
+        if ($this->role === 'partner') {
+            $companyId = request()->header('company');
+            if ($companyId && $this->hasPartnerAccessToCompany((int) $companyId)) {
+                // Check partner permissions for this company
+                $partner = $this->partner;
+                if ($partner) {
+                    $permissions = $partner->getPermissionsForCompany((int) $companyId);
+                    // full_access grants all menu items
+                    if (in_array('full_access', $permissions)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         if ((! $data->data['owner_only']) && empty($data->data['ability'])) {
             return true;
         }
