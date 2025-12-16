@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use IFRS\Models\Account;
 use IFRS\Models\Entity;
 use IFRS\Models\LineItem;
+use IFRS\Models\ReportingPeriod;
 use IFRS\Models\Transaction;
 use IFRS\Reports\BalanceSheet;
 use IFRS\Reports\IncomeStatement;
@@ -636,6 +637,8 @@ class IfrsAdapter
         if ($company->ifrs_entity_id) {
             $entity = Entity::find($company->ifrs_entity_id);
             if ($entity) {
+                // Ensure ReportingPeriod exists for current year
+                $this->ensureReportingPeriodExists($entity);
                 return $entity;
             }
         }
@@ -652,6 +655,9 @@ class IfrsAdapter
             // Link entity to company
             $company->update(['ifrs_entity_id' => $entity->id]);
 
+            // Create ReportingPeriod for current year
+            $this->ensureReportingPeriodExists($entity);
+
             Log::info('Created IFRS Entity for company', [
                 'company_id' => $company->id,
                 'entity_id' => $entity->id,
@@ -665,6 +671,41 @@ class IfrsAdapter
             ]);
 
             return null;
+        }
+    }
+
+    /**
+     * Ensure a ReportingPeriod exists for the entity for the current year
+     */
+    protected function ensureReportingPeriodExists(Entity $entity): void
+    {
+        $currentYear = Carbon::now()->year;
+
+        // Check if ReportingPeriod exists for current year
+        $existingPeriod = ReportingPeriod::where('entity_id', $entity->id)
+            ->where('calendar_year', $currentYear)
+            ->first();
+
+        if (! $existingPeriod) {
+            try {
+                ReportingPeriod::create([
+                    'entity_id' => $entity->id,
+                    'calendar_year' => $currentYear,
+                    'period_count' => 12,
+                    'status' => ReportingPeriod::OPEN,
+                ]);
+
+                Log::info('Created IFRS ReportingPeriod', [
+                    'entity_id' => $entity->id,
+                    'year' => $currentYear,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to create IFRS ReportingPeriod', [
+                    'entity_id' => $entity->id,
+                    'year' => $currentYear,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
