@@ -33,6 +33,15 @@ class CheckSubscriptionTier
             return $next($request);
         }
 
+        // Partner Bypass - partners managing client companies have full access
+        // Partners pay for their own tier which covers their managed clients
+        if ($user && $user->role === 'partner') {
+            $companyId = $request->header('company');
+            if ($companyId && $user->hasPartnerAccessToCompany((int) $companyId)) {
+                return $next($request);
+            }
+        }
+
         // Get current company from request header (set by CompanyMiddleware)
         $companyId = $request->header('company');
 
