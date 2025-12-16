@@ -1,9 +1,0 @@
-facturino_db  | 
-facturino_db  | PostgreSQL Database directory appears to contain a database; Skipping initialization
-facturino_db  | 
-facturino_db  | 2025-07-26 23:20:05.165 UTC [1] LOG:  starting PostgreSQL 16.9 (Debian 16.9-1.pgdg120+1) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
-facturino_db  | 2025-07-26 23:20:05.165 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
-facturino_db  | 2025-07-26 23:20:05.165 UTC [1] LOG:  listening on IPv6 address "::", port 5432
-facturino_db  | 2025-07-26 23:20:05.167 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
-facturino_db  | 2025-07-26 23:20:05.170 UTC [29] LOG:  database system was shut down at 2025-07-26 23:20:04 UTC
-facturino_db  | 2025-07-26 23:20:05.173 UTC [1] LOG:  database system is ready to accept connections

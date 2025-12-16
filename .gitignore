@@ -54,3 +54,8 @@ storage/framework/testing/
 
 # Documentation drafts
 documentation/
+
+# Log files (all subdirectories)
+logs/
+*.log
+ai-service/*.log
