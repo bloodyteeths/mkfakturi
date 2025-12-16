@@ -11,7 +11,9 @@ import PartnerRoutes from '@/scripts/partner/partner-router'
 //Payment Routes
 
 let routes = []
-routes = routes.concat(AdminRoutes, CustomerRoutes, PartnerRoutes)
+// IMPORTANT: Partner routes MUST come before Admin routes
+// because /admin/partner/* needs to match before /admin/*
+routes = routes.concat(PartnerRoutes, AdminRoutes, CustomerRoutes)
 // CLAUDE-CHECKPOINT
 
 const router = createRouter({
@@ -58,6 +60,17 @@ router.beforeEach((to, from, next) => {
     if (!isPartner) {
       // Redirect non-partner users to admin dashboard
       next({ name: 'dashboard' })
+      return
+    }
+  }
+
+  // IMPORTANT: Redirect partners AWAY from regular admin routes
+  // Partners should only access partner routes (/admin/partner/*)
+  if (userStore.currentUser?.role === 'partner' && to.path.startsWith('/admin') && !to.path.startsWith('/admin/partner')) {
+    // Allow some shared routes (settings, logout, etc)
+    const allowedAdminRoutes = ['account.settings', 'logout']
+    if (!allowedAdminRoutes.includes(to.name)) {
+      next('/admin/partner/dashboard')
       return
     }
   }

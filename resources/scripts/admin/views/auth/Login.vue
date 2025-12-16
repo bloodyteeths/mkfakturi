@@ -64,10 +64,12 @@ import { required, email, helpers } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/scripts/admin/stores/auth'
+import { useUserStore } from '@/scripts/admin/stores/user'
 import { handleError } from '@/scripts/helpers/error-handling'
 
 const notificationStore = useNotificationStore()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const { t } = useI18n()
 const router = useRouter()
 const isLoading = ref(false)
@@ -118,6 +120,11 @@ async function onSubmit() {
     // Get user data from login response to check role
     const userData = loginResponse.data?.user
     const userRole = userData?.role
+
+    // IMPORTANT: Set user in store immediately so navigation guards work
+    if (userData) {
+      userStore.currentUser = userData
+    }
 
     // Show success notification
     notificationStore.showNotification({
