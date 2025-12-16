@@ -371,6 +371,35 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         return $this->companies()->where('companies.id', $company_id)->exists();
     }
 
+    /**
+     * Check if partner user has access to a specific company.
+     *
+     * This is used by policies to authorize partner access to company resources.
+     * A partner has access if they have an active link in partner_company_links table.
+     *
+     * @param int $companyId
+     * @return bool
+     */
+    public function hasPartnerAccessToCompany(int $companyId): bool
+    {
+        // Must have partner role
+        if ($this->role !== 'partner') {
+            return false;
+        }
+
+        // Get associated partner record
+        $partner = $this->partner;
+        if (!$partner) {
+            return false;
+        }
+
+        // Check if partner has active access to this company
+        return $partner->companies()
+            ->where('companies.id', $companyId)
+            ->wherePivot('is_active', true)
+            ->exists();
+    }
+
     public function getAllSettings()
     {
         // Use caching for user settings to avoid repeated DB queries

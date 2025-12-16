@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ReceiptScanRequest;
 use App\Models\Bill;
 use App\Services\InvoiceParsing\InvoiceParserClient;
+use App\Services\PdfImageConverter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,6 +15,7 @@ class ReceiptScannerController extends Controller
     public function scan(
         ReceiptScanRequest $request,
         InvoiceParserClient $parserClient,
+        PdfImageConverter $pdfConverter,
     ): JsonResponse {
         try {
             \Log::info('ReceiptScannerController::scan - Starting', [
@@ -34,12 +36,17 @@ class ReceiptScannerController extends Controller
                 return response()->json(['message' => 'No file uploaded'], 400);
             }
 
+            $mimeType = $file->getMimeType();
+            $originalName = $file->getClientOriginalName();
+            $isPdf = $mimeType === 'application/pdf' || str_ends_with(strtolower($originalName), '.pdf');
+
             \Log::info('ReceiptScannerController::scan - File details', [
-                'original_name' => $file->getClientOriginalName(),
+                'original_name' => $originalName,
                 'size_bytes' => $file->getSize(),
                 'size_kb' => round($file->getSize() / 1024, 2),
                 'size_mb' => round($file->getSize() / 1024 / 1024, 2),
-                'mime_type' => $file->getMimeType(),
+                'mime_type' => $mimeType,
+                'is_pdf' => $isPdf,
             ]);
 
             // Authorize based on Bill creation
@@ -47,18 +54,80 @@ class ReceiptScannerController extends Controller
 
             $disk = config('filesystems.default', 'local');
             $storedPath = $file->store('scanned-receipts/'.$companyId, ['disk' => $disk]);
+            $ocrFilePath = $storedPath;
+            $ocrFileName = $originalName;
+
+            // If PDF, convert first page to image for OCR
+            if ($isPdf) {
+                \Log::info('ReceiptScannerController::scan - PDF detected, converting to image', [
+                    'stored_path' => $storedPath,
+                ]);
+
+                try {
+                    // Check if PDF converter is available
+                    if (!$pdfConverter->isAvailable()) {
+                        \Log::warning('ReceiptScannerController::scan - PDF converter not available', [
+                            'backend' => $pdfConverter->getBackend(),
+                            'status' => $pdfConverter->getStatus(),
+                        ]);
+
+                        return response()->json([
+                            'message' => 'pdf_conversion_unavailable',
+                            'error' => 'PDF conversion is not available. Please upload an image (JPEG/PNG) instead.',
+                        ], 422);
+                    }
+
+                    // Convert PDF to images (first page only for receipts)
+                    $images = $pdfConverter->convertToImages($storedPath, ['dpi' => 200]);
+
+                    if (empty($images)) {
+                        throw new \Exception('PDF conversion returned no images');
+                    }
+
+                    // Take first page and save as PNG
+                    $firstPage = $images[0];
+                    $imageData = base64_decode($firstPage['data']);
+                    $imageName = pathinfo($originalName, PATHINFO_FILENAME) . '_page1.png';
+                    $imagePath = 'scanned-receipts/' . $companyId . '/' . $imageName;
+
+                    Storage::disk($disk)->put($imagePath, $imageData);
+
+                    \Log::info('ReceiptScannerController::scan - PDF converted to image', [
+                        'original_pdf' => $storedPath,
+                        'converted_image' => $imagePath,
+                        'image_size' => strlen($imageData),
+                    ]);
+
+                    // Use the converted image for OCR
+                    $ocrFilePath = $imagePath;
+                    $ocrFileName = $imageName;
+
+                } catch (\Exception $pdfException) {
+                    \Log::error('ReceiptScannerController::scan - PDF conversion failed', [
+                        'error' => $pdfException->getMessage(),
+                        'stored_path' => $storedPath,
+                    ]);
+
+                    return response()->json([
+                        'message' => 'pdf_conversion_failed',
+                        'error' => 'Failed to convert PDF to image: ' . $pdfException->getMessage(),
+                    ], 422);
+                }
+            }
 
             // Call the OCR endpoint to extract text from the image
             try {
                 \Log::info('ReceiptScannerController::scan - Calling OCR endpoint', [
                     'company_id' => $companyId,
-                    'stored_path' => $storedPath,
+                    'ocr_file_path' => $ocrFilePath,
+                    'ocr_file_name' => $ocrFileName,
+                    'was_pdf' => $isPdf,
                 ]);
 
                 $ocrResult = $parserClient->ocr(
                     $companyId,
-                    $storedPath,
-                    $file->getClientOriginalName()
+                    $ocrFilePath,
+                    $ocrFileName
                 );
 
                 \Log::info('ReceiptScannerController::scan - OCR completed', [
@@ -68,11 +137,13 @@ class ReceiptScannerController extends Controller
 
                 // Generate the image URL using our custom route instead of Storage::url()
                 // to avoid dependency on storage:link symlink which doesn't exist in Railway
-                $imageUrl = url('api/v1/receipts/image/'.$storedPath);
+                // For PDFs, use the converted image path so we can display the image preview
+                $imageUrl = url('api/v1/receipts/image/'.$ocrFilePath);
 
                 $responsePayload = [
                     'image_url' => $imageUrl,
-                    'stored_path' => $storedPath,
+                    'stored_path' => $storedPath, // Keep original PDF path for reference
+                    'ocr_file_path' => $ocrFilePath, // Path used for OCR (converted image for PDFs)
                     'ocr_text' => $ocrResult['text'] ?? '',
                     'hocr' => $ocrResult['hocr'] ?? null, // Include hOCR for selectable text overlay
                     'image_width' => $ocrResult['image_width'] ?? null,
