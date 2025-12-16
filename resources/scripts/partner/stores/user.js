@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import axios from 'axios'
 
 export const useUserStore = defineStore('partnerUser', () => {
   // State
@@ -11,7 +12,7 @@ export const useUserStore = defineStore('partnerUser', () => {
     partner_id: null,
     commission_rate: 0
   })
-  
+
   const isAuthenticated = ref(false)
   const isLoading = ref(false)
 
@@ -19,20 +20,32 @@ export const useUserStore = defineStore('partnerUser', () => {
   const login = async (credentials) => {
     isLoading.value = true
     try {
-      // Mock login - replace with actual API call
-      currentUser.value = {
-        id: 1,
-        name: 'Марко Петровски',
-        email: credentials.email,
-        is_partner: true,
-        partner_id: 1,
-        commission_rate: 15.0
+      // Get CSRF cookie first
+      await axios.get('/sanctum/csrf-cookie')
+
+      // Actual login API call
+      const response = await axios.post('/api/v1/auth/login', {
+        username: credentials.email,
+        password: credentials.password,
+        remember: credentials.remember || false
+      })
+
+      if (response.data && response.data.type === 'Success') {
+        // Load the current user data
+        await loadCurrentUser()
+        return { success: true }
+      } else {
+        return {
+          success: false,
+          error: response.data?.message || 'Грешка при најавување'
+        }
       }
-      isAuthenticated.value = true
-      return { success: true }
     } catch (error) {
       console.error('Login error:', error)
-      return { success: false, error: error.message }
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     'Неточни податоци за најава'
+      return { success: false, error: message }
     } finally {
       isLoading.value = false
     }
@@ -40,7 +53,7 @@ export const useUserStore = defineStore('partnerUser', () => {
 
   const logout = async () => {
     try {
-      // Mock logout - replace with actual API call
+      await axios.post('/api/v1/auth/logout')
       currentUser.value = {
         id: null,
         name: '',
@@ -58,21 +71,23 @@ export const useUserStore = defineStore('partnerUser', () => {
   const loadCurrentUser = async () => {
     isLoading.value = true
     try {
-      // Mock current user load - replace with actual API call
-      // This would typically fetch from /api/partner/user or similar
-      if (localStorage.getItem('partner_token')) {
+      const response = await axios.get('/api/v1/bootstrap')
+
+      if (response.data && response.data.current_user) {
+        const user = response.data.current_user
         currentUser.value = {
-          id: 1,
-          name: 'Марко Петровски',
-          email: 'marko.petrovski@email.com',
-          is_partner: true,
-          partner_id: 1,
-          commission_rate: 15.0
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          is_partner: user.role === 'partner',
+          partner_id: user.partner_id || null,
+          commission_rate: user.commission_rate || 0
         }
         isAuthenticated.value = true
       }
     } catch (error) {
       console.error('Error loading current user:', error)
+      isAuthenticated.value = false
     } finally {
       isLoading.value = false
     }
@@ -82,15 +97,15 @@ export const useUserStore = defineStore('partnerUser', () => {
     // For partners, we can define specific abilities
     const partnerAbilities = [
       'view-dashboard',
-      'view-commissions', 
+      'view-commissions',
       'view-clients',
       'manage-profile'
     ]
-    
+
     if (Array.isArray(abilities)) {
       return abilities.every(ability => partnerAbilities.includes(ability))
     }
-    
+
     return partnerAbilities.includes(abilities)
   }
 
@@ -99,7 +114,7 @@ export const useUserStore = defineStore('partnerUser', () => {
     currentUser,
     isAuthenticated,
     isLoading,
-    
+
     // Actions
     login,
     logout,
@@ -107,3 +122,4 @@ export const useUserStore = defineStore('partnerUser', () => {
     hasAbilities
   }
 })
+// CLAUDE-CHECKPOINT
