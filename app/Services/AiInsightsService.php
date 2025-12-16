@@ -1156,6 +1156,125 @@ INSTRUCTIONS;
                 Log::warning('[AiInsightsService] Failed to fetch projections for complex query', ['error' => $e->getMessage()]);
             }
 
+            // Add Cash Flow Forecast for liquidity questions
+            try {
+                $cashFlow = $comprehensiveStats['cash_flow_forecast'] ?? $this->dataProvider->getCashFlowForecast($company, 90);
+                if (!empty($cashFlow['summary'])) {
+                    $prompt .= "\n**ПРОГНОЗА НА ПАРИЧЕН ТЕК (90 дена напред):**\n";
+                    $prompt .= "Почетен биланс: " . number_format($cashFlow['summary']['starting_balance'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Очекувани приливи: " . number_format($cashFlow['summary']['total_expected_incoming'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Очекувани одливи: " . number_format($cashFlow['summary']['total_expected_outgoing'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Нето проекција: " . number_format($cashFlow['summary']['net_forecast'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Проектиран краен биланс: " . number_format($cashFlow['summary']['ending_balance'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Најнизок проектиран биланс: " . number_format($cashFlow['summary']['lowest_projected_balance'] ?? 0, 2) . " {$currency}\n";
+
+                    if (!empty($cashFlow['alerts'])) {
+                        $cashCrunchRisk = $cashFlow['alerts']['cash_crunch_risk'] ?? 'LOW';
+                        $cashCrunchWeeks = $cashFlow['alerts']['cash_crunch_weeks'] ?? 0;
+                        $prompt .= "\nРизик од недостиг на готовина: {$cashCrunchRisk}\n";
+                        if ($cashCrunchWeeks > 0) {
+                            $prompt .= "ПРЕДУПРЕДУВАЊЕ: {$cashCrunchWeeks} недели со потенцијален недостиг на готовина!\n";
+                        }
+                    }
+
+                    // Weekly forecast summary (first 4 weeks)
+                    if (!empty($cashFlow['weekly_forecast'])) {
+                        $prompt .= "\nНеделна прогноза (прв месец):\n";
+                        foreach (array_slice($cashFlow['weekly_forecast'], 0, 4) as $week) {
+                            $prompt .= "- Недела {$week['week']}: прилив " . number_format($week['expected_incoming'] ?? 0, 2) . ", одлив " . number_format($week['expected_outgoing'] ?? 0, 2) . ", биланс " . number_format($week['projected_balance'] ?? 0, 2) . " {$currency}\n";
+                        }
+                    }
+                    $prompt .= "\n";
+                }
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch cash flow forecast', ['error' => $e->getMessage()]);
+            }
+
+            // Add AR Aging Report for receivables questions
+            try {
+                $arAging = $comprehensiveStats['ar_aging'] ?? $this->dataProvider->getARAgingReport($company);
+                if (!empty($arAging['summary'])) {
+                    $prompt .= "\n**АНАЛИЗА НА СТАРОСТ НА ПОБАРУВАЊА (AR AGING):**\n";
+                    $prompt .= "Вкупно побарувања: " . number_format($arAging['summary']['total_outstanding'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Број на неплатени фактури: " . ($arAging['summary']['total_invoices'] ?? 0) . "\n";
+                    $prompt .= "Број на клиенти со долг: " . ($arAging['summary']['total_customers'] ?? 0) . "\n";
+                    $prompt .= "Просечни денови задоцнување: " . ($arAging['summary']['average_days_outstanding'] ?? 0) . "\n";
+                    $prompt .= "Ризик од ненаплата: " . ($arAging['summary']['collection_risk_level'] ?? 'N/A') . " (скор: " . ($arAging['summary']['collection_risk_score'] ?? 0) . "/100)\n\n";
+
+                    // Aging buckets
+                    if (!empty($arAging['aging_buckets'])) {
+                        $prompt .= "Распоред по старост:\n";
+                        foreach ($arAging['aging_buckets'] as $key => $bucket) {
+                            $prompt .= "- " . ($bucket['label'] ?? $key) . ": " . number_format($bucket['total'] ?? 0, 2) . " {$currency} (" . ($bucket['count'] ?? 0) . " фактури, " . ($bucket['percent'] ?? 0) . "%)\n";
+                        }
+                        $prompt .= "\n";
+                    }
+
+                    // Top debtors
+                    if (!empty($arAging['top_debtors'])) {
+                        $prompt .= "Топ должници:\n";
+                        foreach (array_slice($arAging['top_debtors'], 0, 5) as $debtor) {
+                            $prompt .= "- " . ($debtor['customer_name'] ?? 'Unknown') . ": " . number_format($debtor['total_outstanding'] ?? 0, 2) . " {$currency} (" . ($debtor['invoice_count'] ?? 0) . " фактури, " . ($debtor['oldest_days'] ?? 0) . " денови задоцнување)\n";
+                        }
+                        $prompt .= "\n";
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch AR aging report', ['error' => $e->getMessage()]);
+            }
+
+            // Add AP Aging Report for payables questions
+            try {
+                $apAging = $comprehensiveStats['ap_aging'] ?? $this->dataProvider->getAPAgingReport($company);
+                if (!empty($apAging['summary'])) {
+                    $prompt .= "\n**АНАЛИЗА НА ОБВРСКИ КОН ДОБАВУВАЧИ (AP AGING):**\n";
+                    $prompt .= "Вкупни обврски: " . number_format($apAging['summary']['total_payable'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Број на неплатени сметки: " . ($apAging['summary']['total_bills'] ?? 0) . "\n";
+                    $prompt .= "Број на добавувачи: " . ($apAging['summary']['total_suppliers'] ?? 0) . "\n\n";
+
+                    if (!empty($apAging['top_creditors'])) {
+                        $prompt .= "Топ добавувачи (обврски):\n";
+                        foreach (array_slice($apAging['top_creditors'], 0, 5) as $creditor) {
+                            $prompt .= "- " . ($creditor['supplier_name'] ?? 'Unknown') . ": " . number_format($creditor['total_payable'] ?? 0, 2) . " {$currency}\n";
+                        }
+                        $prompt .= "\n";
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch AP aging report', ['error' => $e->getMessage()]);
+            }
+
+            // Add Working Capital Analysis for liquidity questions
+            try {
+                $workingCapital = $comprehensiveStats['working_capital'] ?? $this->dataProvider->getWorkingCapitalAnalysis($company);
+                if (!empty($workingCapital) && !isset($workingCapital['error'])) {
+                    $prompt .= "\n**АНАЛИЗА НА РАБОТЕН КАПИТАЛ:**\n";
+                    $prompt .= "Работен капитал: " . number_format($workingCapital['working_capital'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Тековни средства: " . number_format($workingCapital['current_assets'] ?? 0, 2) . " {$currency}\n";
+                    $prompt .= "Тековни обврски: " . number_format($workingCapital['current_liabilities'] ?? 0, 2) . " {$currency}\n\n";
+
+                    if (!empty($workingCapital['components'])) {
+                        $prompt .= "Компоненти:\n";
+                        $prompt .= "- Побарувања: " . number_format($workingCapital['components']['accounts_receivable'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "- Залихи: " . number_format($workingCapital['components']['inventory'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "- Обврски: " . number_format($workingCapital['components']['accounts_payable'] ?? 0, 2) . " {$currency}\n\n";
+                    }
+
+                    if (!empty($workingCapital['ratios'])) {
+                        $prompt .= "Финансиски показатели:\n";
+                        $prompt .= "- Current Ratio (тековен коефициент): " . number_format($workingCapital['ratios']['current_ratio'] ?? 0, 2) . " (>2 одлично, >1.5 добро, >1 адекватно)\n";
+                        $prompt .= "- Quick Ratio (брз коефициент): " . number_format($workingCapital['ratios']['quick_ratio'] ?? 0, 2) . "\n";
+                    }
+
+                    if (!empty($workingCapital['health'])) {
+                        $prompt .= "\nЗдравје на ликвидност: " . ($workingCapital['health']['status'] ?? 'N/A') . "\n";
+                    }
+                    $prompt .= "\n";
+                }
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsService] Failed to fetch working capital analysis', ['error' => $e->getMessage()]);
+            }
+
             $prompt .= <<<COMPLEX_INSTRUCTIONS
 
 **ИНСТРУКЦИИ ЗА КОМПЛЕКСНИ ПРАШАЊА:**
@@ -1215,6 +1334,15 @@ COMPLEX_INSTRUCTIONS;
         $prompt .= <<<FINAL_INSTRUCTIONS
 
 Обезбеди јасен, конкретен и корисен одговор на македонски јазик. Користи ги податоците од компанијата за да го персонализираш одговорот. Ако прашањето бара конкретни бројки, користи ги достапните податоци. ВАЖНО: Ако има креирани фактури (invoicesCount > 0), секогаш спомени го тој број во одговорот. Користи ги детаљните податоци погоре за да дадеш прецизен и релевантен одговор.
+
+ВАЖНО ЗА ФОРМАТИРАЊЕ:
+- За табели СЕКОГАШ користи markdown формат со | сепаратори:
+  | Колона 1 | Колона 2 | Колона 3 |
+  |----------|----------|----------|
+  | Вредност | Вредност | Вредност |
+- За листи користи - или 1. 2. 3.
+- За нагласување користи **bold** текст
+- За код или бројки користи `inline code`
 
 Ако корисникот се повикува на претходната конверзација (на пример, "што рековте порано", "за тоа што го споменавме", "продолжи", "дај ми повеќе детали"), користи го контекстот од претходната конверзација за да дадеш релевантен одговор.
 FINAL_INSTRUCTIONS;
