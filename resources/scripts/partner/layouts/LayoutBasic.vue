@@ -143,7 +143,17 @@ onUnmounted(() => {
 })
 
 const handleLogout = async () => {
-  await authStore.logout()
+  console.log('Logout button clicked')
+  try {
+    console.log('authStore:', authStore)
+    console.log('authStore.logout:', authStore.logout)
+    await authStore.logout()
+    console.log('Logout completed')
+  } catch (error) {
+    console.error('Logout error:', error)
+    // Fallback: redirect to login anyway
+    window.location.href = '/login'
+  }
 }
 </script>
 <!-- CLAUDE-CHECKPOINT -->
