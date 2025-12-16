@@ -3666,5 +3666,10 @@
     "error_cancel": "Failed to cancel subscription",
     "success_resumed": "Subscription resumed successfully",
     "error_resume": "Failed to resume subscription"
+  },
+  "ai": {
+    "chat": {
+      "new_conversation": "New Conversation"
+    }
   }
 }
