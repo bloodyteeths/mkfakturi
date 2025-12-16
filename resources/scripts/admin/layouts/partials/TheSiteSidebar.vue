@@ -252,9 +252,15 @@ function showTooltip(event, item) {
     clearTimeout(tooltipTimeout)
   }
 
+  // Capture element reference before setTimeout (event.currentTarget becomes null after event processing)
+  const element = event.currentTarget
+
   // Small delay before showing tooltip
   tooltipTimeout = setTimeout(() => {
-    const rect = event.currentTarget.getBoundingClientRect()
+    // Check if element still exists in DOM
+    if (!element || !document.body.contains(element)) return
+
+    const rect = element.getBoundingClientRect()
     tooltip.text = t(item.title)
     tooltip.top = rect.top + (rect.height / 2) - 16 // Center vertically
     tooltip.left = rect.right + 12 // Position to the right of sidebar
