@@ -2096,6 +2096,8 @@
       "invoice_use_time_description": "Enable this if you want to select exact invoice time.",
       "allow_negative_stock": "Allow Negative Stock",
       "allow_negative_stock_description": "Enable this to allow creating invoices even when there is insufficient stock. When disabled, invoices cannot be created if items exceed available stock.",
+      "ifrs_enabled": "Enable IFRS Accounting",
+      "ifrs_enabled_description": "Enable double-entry accounting (IFRS) for this company. When enabled, all invoices, payments, and expenses will be posted to the general ledger. Note: The global accounting backbone feature must also be enabled.",
       "fiscal_years": {
         "january_december": "January - December",
         "february_january": "February - January",

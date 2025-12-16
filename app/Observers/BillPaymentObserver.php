@@ -147,7 +147,7 @@ class BillPaymentObserver
     {
         // Check Laravel Pennant feature flag or config
         if (function_exists('feature')) {
-            return feature('accounting_backbone');
+            return feature('accounting-backbone');
         }
 
         return config('ifrs.enabled', false) ||

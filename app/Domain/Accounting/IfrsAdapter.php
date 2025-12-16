@@ -34,8 +34,8 @@ class IfrsAdapter
      */
     public function postInvoice(Invoice $invoice): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($invoice->company_id)) {
             return;
         }
 
@@ -123,8 +123,8 @@ class IfrsAdapter
      */
     public function postPayment(Payment $payment): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($payment->company_id)) {
             return;
         }
 
@@ -202,8 +202,8 @@ class IfrsAdapter
      */
     public function postFee(Payment $payment, float $fee): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($payment->company_id)) {
             return;
         }
 
@@ -281,8 +281,8 @@ class IfrsAdapter
      */
     public function postCreditNote($creditNote): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($creditNote->company_id)) {
             return;
         }
 
@@ -390,7 +390,7 @@ class IfrsAdapter
      */
     public function getTrialBalance(Company $company, ?string $asOfDate = null): array
     {
-        if (! $this->isEnabled()) {
+        if (! $this->isEnabled($company->id)) {
             return ['error' => 'Accounting backbone feature is disabled'];
         }
 
@@ -464,7 +464,7 @@ class IfrsAdapter
      */
     public function getBalanceSheet(Company $company, ?string $asOfDate = null): array
     {
-        if (! $this->isEnabled()) {
+        if (! $this->isEnabled($company->id)) {
             return ['error' => 'Accounting backbone feature is disabled'];
         }
 
@@ -532,7 +532,7 @@ class IfrsAdapter
      */
     public function getIncomeStatement(Company $company, string $startDate, string $endDate): array
     {
-        if (! $this->isEnabled()) {
+        if (! $this->isEnabled($company->id)) {
             return ['error' => 'Accounting backbone feature is disabled'];
         }
 
@@ -601,11 +601,30 @@ class IfrsAdapter
 
     /**
      * Check if accounting backbone feature is enabled
+     *
+     * @param int|null $companyId Optional company ID to check company-specific setting
+     * @return bool
      */
-    protected function isEnabled(): bool
+    protected function isEnabled(?int $companyId = null): bool
     {
-        return config('ifrs.enabled', false) ||
-               (function_exists('feature') && feature('accounting_backbone'));
+        // First check global feature flag
+        $globalEnabled = config('ifrs.enabled', false) ||
+                        (function_exists('feature') && feature('accounting_backbone'));
+
+        if (!$globalEnabled) {
+            return false;
+        }
+
+        // If no company ID provided, only check global flag
+        if ($companyId === null) {
+            return true;
+        }
+
+        // Check company-specific setting
+        $companyIfrsEnabled = CompanySetting::getSetting('ifrs_enabled', $companyId);
+
+        // Default to false if not set
+        return $companyIfrsEnabled === 'YES' || $companyIfrsEnabled === true || $companyIfrsEnabled === '1';
     }
 
     /**
@@ -650,21 +669,77 @@ class IfrsAdapter
     }
 
     /**
+     * Map user's Chart of Accounts account to IFRS account
+     * Looks up user account by type and transaction context, then creates/updates IFRS account
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int  $entityId  IFRS Entity ID
+     * @param  string  $userAccountType  User account type (asset, liability, equity, revenue, expense)
+     * @param  string  $ifrsAccountType  IFRS account type constant (e.g., Account::RECEIVABLE)
+     * @param  string  $fallbackName  Fallback account name if no user account found
+     * @param  string  $fallbackCode  Fallback account code if no user account found
+     * @param  string|null  $specificName  Look for specific account name (partial match)
+     * @return Account IFRS Account
+     */
+    protected function mapUserAccountToIfrs(
+        int $companyId,
+        int $entityId,
+        string $userAccountType,
+        string $ifrsAccountType,
+        string $fallbackName,
+        string $fallbackCode,
+        ?string $specificName = null
+    ): Account {
+        // Look up user's account in their Chart of Accounts
+        $userAccount = \App\Models\Account::where('company_id', $companyId)
+            ->where('type', $userAccountType)
+            ->where('is_active', true);
+
+        // If specific name provided, try to match it first
+        if ($specificName) {
+            $specificMatch = (clone $userAccount)->where('name', 'like', "%{$specificName}%")->first();
+            if ($specificMatch) {
+                $userAccount = $specificMatch;
+            } else {
+                // Fall back to first account of this type
+                $userAccount = $userAccount->first();
+            }
+        } else {
+            $userAccount = $userAccount->first();
+        }
+
+        // Use user account data if found, otherwise use fallbacks
+        $accountName = $userAccount ? $userAccount->name : $fallbackName;
+        $accountCode = $userAccount ? $userAccount->code : $fallbackCode;
+
+        // Get or create corresponding IFRS account
+        return Account::firstOrCreate(
+            [
+                'account_type' => $ifrsAccountType,
+                'category_id' => null,
+                'name' => $accountName,
+                'entity_id' => $entityId,
+            ],
+            [
+                'code' => $accountCode,
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
+
+    /**
      * Get or create Accounts Receivable account
      */
     protected function getAccountsReceivableAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::RECEIVABLE,
-                'category_id' => null,
-                'name' => 'Accounts Receivable',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '1200',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_ASSET,
+            ifrsAccountType: Account::RECEIVABLE,
+            fallbackName: 'Accounts Receivable',
+            fallbackCode: '1200',
+            specificName: 'Receivable'
         );
     }
 
@@ -673,17 +748,14 @@ class IfrsAdapter
      */
     protected function getRevenueAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::OPERATING_REVENUE,
-                'category_id' => null,
-                'name' => 'Sales Revenue',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '4000',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_REVENUE,
+            ifrsAccountType: Account::OPERATING_REVENUE,
+            fallbackName: 'Sales Revenue',
+            fallbackCode: '4000',
+            specificName: 'Sales'
         );
     }
 
@@ -692,17 +764,14 @@ class IfrsAdapter
      */
     protected function getCashAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::BANK,
-                'category_id' => null,
-                'name' => 'Cash and Bank',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '1000',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_ASSET,
+            ifrsAccountType: Account::BANK,
+            fallbackName: 'Cash and Bank',
+            fallbackCode: '1000',
+            specificName: 'Cash'
         );
     }
 
@@ -711,17 +780,14 @@ class IfrsAdapter
      */
     protected function getTaxPayableAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::CONTROL,
-                'category_id' => null,
-                'name' => 'Tax Payable',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '2100',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_LIABILITY,
+            ifrsAccountType: Account::CONTROL,
+            fallbackName: 'Tax Payable',
+            fallbackCode: '2100',
+            specificName: 'Tax'
         );
     }
 
@@ -730,17 +796,14 @@ class IfrsAdapter
      */
     protected function getFeeExpenseAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::OPERATING_EXPENSE,
-                'category_id' => null,
-                'name' => 'Payment Processing Fees',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '5100',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_EXPENSE,
+            ifrsAccountType: Account::OPERATING_EXPENSE,
+            fallbackName: 'Payment Processing Fees',
+            fallbackCode: '5100',
+            specificName: 'Fee'
         );
     }
 
@@ -754,8 +817,8 @@ class IfrsAdapter
      */
     public function postExpense($expense): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($expense->company_id)) {
             return;
         }
 
@@ -1008,8 +1071,8 @@ class IfrsAdapter
      */
     public function postBill($bill): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($bill->company_id)) {
             return;
         }
 
@@ -1112,8 +1175,8 @@ class IfrsAdapter
      */
     public function postBillPayment($billPayment): void
     {
-        // Skip if feature is disabled
-        if (! $this->isEnabled()) {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($billPayment->company_id)) {
             return;
         }
 
@@ -1202,17 +1265,14 @@ class IfrsAdapter
      */
     protected function getAccountsPayableAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::PAYABLE,
-                'category_id' => null,
-                'name' => 'Accounts Payable',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '2000',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_LIABILITY,
+            ifrsAccountType: Account::PAYABLE,
+            fallbackName: 'Accounts Payable',
+            fallbackCode: '2000',
+            specificName: 'Payable'
         );
     }
 
@@ -1221,19 +1281,16 @@ class IfrsAdapter
      */
     protected function getVatReceivableAccount(int $companyId, int $entityId): Account
     {
-        return Account::firstOrCreate(
-            [
-                'account_type' => Account::CURRENT_ASSET,
-                'category_id' => null,
-                'name' => 'VAT Receivable',
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => '1100',
-                'currency_id' => $this->getCurrencyId($companyId),
-            ]
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_ASSET,
+            ifrsAccountType: Account::CURRENT_ASSET,
+            fallbackName: 'VAT Receivable',
+            fallbackCode: '1100',
+            specificName: 'VAT'
         );
     }
 }
 
-// CLAUDE-CHECKPOINT: Added postBill() and postBillPayment() methods for accounts payable accounting
+// CLAUDE-CHECKPOINT: Updated isEnabled() to check per-company ifrs_enabled setting

@@ -8,7 +8,7 @@ use Laravel\Pennant\Feature;
  * Feature Flag Helper
  *
  * Provides convenient methods for checking feature flags throughout the application.
- * All features default to OFF except partner_mocked_data which defaults to ON for safety.
+ * All features default to OFF for safety until enabled in production.
  */
 class FeatureHelper
 {
@@ -45,22 +45,11 @@ class FeatureHelper
     /**
      * Check if partner portal is enabled.
      *
-     * When enabled, partner APIs are available (respecting mocked data flag).
+     * When enabled, partner APIs are available with real data.
      */
     public static function partnerPortalEnabled(): bool
     {
         return Feature::active('partner-portal');
-    }
-
-    /**
-     * Check if partner mocked data flag is ON.
-     *
-     * SAFETY: This defaults to TRUE. Only flip to false after staging validation.
-     * When ON, partner APIs return mocked data instead of real database queries.
-     */
-    public static function partnerMockedData(): bool
-    {
-        return Feature::active('partner-mocked-data');
     }
 
     /**
@@ -115,7 +104,6 @@ class FeatureHelper
             'migration-wizard' => self::migrationWizardEnabled(),
             'psd2-banking' => self::psd2BankingEnabled(),
             'partner-portal' => self::partnerPortalEnabled(),
-            'partner-mocked-data' => self::partnerMockedData(),
             'advanced-payments' => self::advancedPaymentsEnabled(),
             'mcp-ai-tools' => self::mcpAiToolsEnabled(),
             'monitoring' => self::monitoringEnabled(),

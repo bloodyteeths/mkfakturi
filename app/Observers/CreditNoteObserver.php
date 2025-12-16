@@ -59,6 +59,21 @@ class CreditNoteObserver
     }
 
     /**
+     * Handle the CreditNote "updating" event.
+     *
+     * Prevent updates if the credit note falls within a locked tax period.
+     */
+    public function updating(CreditNote $creditNote): ?bool
+    {
+        // Check if credit note date falls within a locked tax period
+        if ($this->isInLockedPeriod($creditNote)) {
+            throw new \Exception('Cannot edit credit note. Tax period is locked.');
+        }
+
+        return true;
+    }
+
+    /**
      * Handle the CreditNote "updated" event.
      *
      * If status changes to COMPLETED, post to ledger.
@@ -91,6 +106,21 @@ class CreditNoteObserver
                 ]);
             }
         }
+    }
+
+    /**
+     * Handle the CreditNote "deleting" event.
+     *
+     * Prevent deletion if the credit note falls within a locked tax period.
+     */
+    public function deleting(CreditNote $creditNote): ?bool
+    {
+        // Check if credit note date falls within a locked tax period
+        if ($this->isInLockedPeriod($creditNote)) {
+            throw new \Exception('Cannot delete credit note. Tax period is locked.');
+        }
+
+        return true;
     }
 
     /**
@@ -128,11 +158,35 @@ class CreditNoteObserver
     {
         // Check Laravel Pennant feature flag or config
         if (function_exists('feature')) {
-            return feature('accounting_backbone');
+            return feature('accounting-backbone');
         }
 
         return config('ifrs.enabled', false) ||
                env('FEATURE_ACCOUNTING_BACKBONE', false);
+    }
+
+    /**
+     * Check if credit note falls within a locked tax period.
+     */
+    protected function isInLockedPeriod(CreditNote $creditNote): bool
+    {
+        // Check if tax period locking is enabled
+        if (! config('tax.period_locking_enabled', true)) {
+            return false;
+        }
+
+        // Find locked periods that contain this credit note date
+        $lockedPeriod = \App\Models\TaxReportPeriod::where('company_id', $creditNote->company_id)
+            ->where('start_date', '<=', $creditNote->credit_note_date)
+            ->where('end_date', '>=', $creditNote->credit_note_date)
+            ->where(function ($query) {
+                $query->where('status', \App\Models\TaxReportPeriod::STATUS_CLOSED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_FILED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_AMENDED);
+            })
+            ->exists();
+
+        return $lockedPeriod;
     }
 }
 

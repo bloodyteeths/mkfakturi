@@ -120,14 +120,8 @@ class BootstrapController extends Controller
             $global_settings['admin_portal_logo'] = logo_asset_url($global_settings['admin_portal_logo'] ?? null);
             $global_settings['login_page_logo'] = logo_asset_url($global_settings['login_page_logo'] ?? null);
 
-            // Get feature flags from config
-            $feature_flags = [];
-            $features_config = config('features', []);
-            foreach ($features_config as $key => $feature) {
-                $feature_flags[$key] = $feature['enabled'] ?? false;
-            }
-            // Stock module is always enabled - no feature flag needed
-            $feature_flags['stock'] = true;
+            // Get feature flags - check database first, then fall back to config
+            $feature_flags = $this->getFeatureFlags();
 
             return response()->json([
                 'current_user' => (new UserResource($current_user->load('currency', 'settings')))->toArray($request),
@@ -219,14 +213,8 @@ class BootstrapController extends Controller
             $global_settings['admin_portal_logo'] = logo_asset_url($global_settings['admin_portal_logo'] ?? null);
             $global_settings['login_page_logo'] = logo_asset_url($global_settings['login_page_logo'] ?? null);
 
-            // Get feature flags from config
-            $feature_flags = [];
-            $features_config = config('features', []);
-            foreach ($features_config as $key => $feature) {
-                $feature_flags[$key] = $feature['enabled'] ?? false;
-            }
-            // Stock module is always enabled - no feature flag needed
-            $feature_flags['stock'] = true;
+            // Get feature flags - check database first, then fall back to config
+            $feature_flags = $this->getFeatureFlags();
 
             $userPayload = (new UserResource($current_user))->toArray(request());
             $companiesPayload = CompanyResource::collection($companies)->toArray(request());
@@ -258,4 +246,34 @@ class BootstrapController extends Controller
 
         return response()->json($payload);
     }
+
+    /**
+     * Get feature flags with database values taking priority over config.
+     *
+     * @return array<string, bool>
+     */
+    private function getFeatureFlags(): array
+    {
+        $feature_flags = [];
+        $features_config = config('features', []);
+
+        foreach ($features_config as $key => $feature) {
+            // Check database value first
+            $dbKey = 'feature_flag.'.$key;
+            $dbValue = Setting::getSetting($dbKey);
+
+            if ($dbValue !== null) {
+                $feature_flags[$key] = filter_var($dbValue, FILTER_VALIDATE_BOOLEAN);
+            } else {
+                $feature_flags[$key] = $feature['enabled'] ?? false;
+            }
+        }
+
+        // Stock module is always enabled - no feature flag needed
+        $feature_flags['stock'] = true;
+
+        return $feature_flags;
+    }
 }
+
+// CLAUDE-CHECKPOINT

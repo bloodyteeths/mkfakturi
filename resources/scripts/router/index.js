@@ -90,6 +90,14 @@ router.beforeEach((to, from, next) => {
     }
   }
 
+  // Check for super admin only routes
+  if (to.meta.requiresSuperAdmin && isAppLoaded && userStore.currentUser) {
+    if (userStore.currentUser.role !== 'super admin') {
+      next({ name: 'dashboard' })
+      return
+    }
+  }
+
   // Don't check abilities until app is fully loaded AND abilities are populated
   if (ability && isAppLoaded && to.meta.requiresAuth && userStore.currentAbilities && userStore.currentAbilities.length > 0) {
     if (userStore.hasAbilities(ability)) {

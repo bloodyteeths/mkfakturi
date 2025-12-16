@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1\Admin\Report;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Project;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,9 +31,14 @@ class ProjectReportController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view report');
-
         $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (!$company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view report', $company);
 
         // Get query params for filtering
         $fromDate = $request->input('from_date');
@@ -122,9 +128,14 @@ class ProjectReportController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $this->authorize('view report');
-
         $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (!$company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view report', $company);
 
         // Fetch the project with all relationships
         $project = Project::whereCompanyId($companyId)

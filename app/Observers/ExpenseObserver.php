@@ -43,6 +43,21 @@ class ExpenseObserver
     }
 
     /**
+     * Handle the Expense "updating" event.
+     *
+     * Prevent updates if the expense falls within a locked tax period.
+     */
+    public function updating(Expense $expense): ?bool
+    {
+        // Check if expense date falls within a locked tax period
+        if ($this->isInLockedPeriod($expense)) {
+            throw new \Exception('Cannot edit expense. Tax period is locked.');
+        }
+
+        return true;
+    }
+
+    /**
      * Handle the Expense "updated" event.
      *
      * Re-post to ledger if not already posted (idempotent).
@@ -63,17 +78,56 @@ class ExpenseObserver
     }
 
     /**
+     * Handle the Expense "deleting" event.
+     *
+     * Prevent deletion if the expense falls within a locked tax period.
+     */
+    public function deleting(Expense $expense): ?bool
+    {
+        // Check if expense date falls within a locked tax period
+        if ($this->isInLockedPeriod($expense)) {
+            throw new \Exception('Cannot delete expense. Tax period is locked.');
+        }
+
+        return true;
+    }
+
+    /**
      * Check if accounting backbone feature is enabled
      */
     protected function isFeatureEnabled(): bool
     {
         // Check Laravel Pennant feature flag or config
         if (function_exists('feature')) {
-            return feature('accounting_backbone');
+            return feature('accounting-backbone');
         }
 
         return config('ifrs.enabled', false) ||
                env('FEATURE_ACCOUNTING_BACKBONE', false);
+    }
+
+    /**
+     * Check if expense falls within a locked tax period.
+     */
+    protected function isInLockedPeriod(Expense $expense): bool
+    {
+        // Check if tax period locking is enabled
+        if (! config('tax.period_locking_enabled', true)) {
+            return false;
+        }
+
+        // Find locked periods that contain this expense date
+        $lockedPeriod = \App\Models\TaxReportPeriod::where('company_id', $expense->company_id)
+            ->where('start_date', '<=', $expense->expense_date)
+            ->where('end_date', '>=', $expense->expense_date)
+            ->where(function ($query) {
+                $query->where('status', \App\Models\TaxReportPeriod::STATUS_CLOSED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_FILED)
+                    ->orWhere('status', \App\Models\TaxReportPeriod::STATUS_AMENDED);
+            })
+            ->exists();
+
+        return $lockedPeriod;
     }
 }
 

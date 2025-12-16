@@ -7,8 +7,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This file manages all Fakturino feature flags using Laravel Pennant.
-    | All features default to OFF except partner_mocked_data which defaults
-    | to ON for safety until staging validation is complete.
+    | All features default to OFF for safety until enabled in production.
     |
     */
 
@@ -30,11 +29,6 @@ return [
     'partner_portal' => [
         'enabled' => env('FEATURE_PARTNER_PORTAL', false),
         'description' => 'Partner referral portal with commission tracking',
-    ],
-
-    'partner_mocked_data' => [
-        'enabled' => env('FEATURE_PARTNER_MOCKED_DATA', true),  // SAFETY: Default ON
-        'description' => 'Return mocked data for partner APIs until staging sign-off',
     ],
 
     'advanced_payments' => [

@@ -47,33 +47,16 @@
           <p class="text-sm text-gray-600">
             {{ flag.description }}
           </p>
-
-          <!-- Warning for partner-mocked-data -->
-          <div
-            v-if="flag.flag === 'partner-mocked-data' && flag.enabled"
-            class="mt-3 flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md"
-          >
-            <BaseIcon
-              name="ExclamationTriangleIcon"
-              class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5"
-            />
-            <p class="text-sm text-yellow-800">
-              {{ $t('settings.feature_flags.partner_mocked_data_warning') }}
-            </p>
-          </div>
         </div>
 
         <!-- Toggle Switch -->
         <div class="flex-shrink-0 ml-6">
           <button
             type="button"
-            :disabled="flag.flag === 'partner-mocked-data' && !confirmCriticalToggle"
             class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             :class="{
               'bg-primary-600': flag.enabled,
               'bg-gray-200': !flag.enabled,
-              'opacity-50 cursor-not-allowed':
-                flag.flag === 'partner-mocked-data' && !confirmCriticalToggle,
             }"
             @click="handleToggle(flag)"
           >
@@ -150,7 +133,6 @@ const isLoading = ref(false)
 const featureFlags = ref([])
 const showConfirmModal = ref(false)
 const selectedFlag = ref(null)
-const confirmCriticalToggle = ref(true)
 
 onMounted(async () => {
   await fetchFeatureFlags()

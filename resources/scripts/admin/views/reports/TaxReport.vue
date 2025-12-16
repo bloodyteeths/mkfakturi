@@ -173,9 +173,9 @@ const dateRangeUrl = computed(() => {
 
 let range = ref(new Date())
 
-watch(range.value, (newRange) => {
-  formData.from_date = moment(newRange).startOf('year').toString()
-  formData.to_date = moment(newRange).endOf('year').toString()
+watch(range, (newRange) => {
+  formData.from_date = moment(newRange).startOf('year').format('YYYY-MM-DD')
+  formData.to_date = moment(newRange).endOf('year').format('YYYY-MM-DD')
 })
 
 function getThisDate(type, time) {

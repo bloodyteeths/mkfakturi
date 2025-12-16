@@ -28,8 +28,7 @@ class FeatureFlagServiceProvider extends ServiceProvider
     /**
      * Define all Fakturino feature flags.
      *
-     * All features default to OFF except partner_mocked_data which
-     * defaults to ON for safety until staging validation complete.
+     * All features default to OFF for safety until enabled in production.
      *
      * Priority order: Database setting > Config file > Default value
      */
@@ -82,18 +81,6 @@ class FeatureFlagServiceProvider extends ServiceProvider
             return $dbValue !== null
                 ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
                 : config('features.partner_portal.enabled', false);
-        });
-
-        Feature::define('partner-mocked-data', function () {
-            if (! InstallUtils::isDbCreated()) {
-                return config('features.partner_mocked_data.enabled', true);  // SAFETY DEFAULT
-            }
-
-            $dbValue = Setting::getSetting('feature_flag.partner_mocked_data');
-
-            return $dbValue !== null
-                ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN)
-                : config('features.partner_mocked_data.enabled', true);  // SAFETY DEFAULT
         });
 
         Feature::define('advanced-payments', function () {

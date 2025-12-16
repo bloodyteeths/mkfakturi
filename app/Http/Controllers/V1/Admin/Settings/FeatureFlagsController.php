@@ -38,12 +38,6 @@ class FeatureFlagsController extends Controller
             'description' => 'Enables accountant/partner console for managing multiple companies',
             'critical' => false,
         ],
-        'partner-mocked-data' => [
-            'key' => 'partner_mocked_data',
-            'name' => 'Partner Mocked Data',
-            'description' => 'Uses mocked data for partner portal (SAFETY FLAG - disable only in production)',
-            'critical' => true,
-        ],
         'advanced-payments' => [
             'key' => 'advanced_payments',
             'name' => 'Advanced Payments',

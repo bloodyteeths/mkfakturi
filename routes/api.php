@@ -491,9 +491,11 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/settings', UpdateSettingsController::class);
 
-            Route::get('/settings/feature-flags', [FeatureFlagsController::class, 'index']);
-
-            Route::post('/settings/feature-flags/{flag}/toggle', [FeatureFlagsController::class, 'toggle']);
+            // Feature flags - super admin only
+            Route::middleware('super-admin')->group(function () {
+                Route::get('/settings/feature-flags', [FeatureFlagsController::class, 'index']);
+                Route::post('/settings/feature-flags/{flag}/toggle', [FeatureFlagsController::class, 'toggle']);
+            });
 
             Route::get('/company/has-transactions', CompanyCurrencyCheckTransactionsController::class);
 

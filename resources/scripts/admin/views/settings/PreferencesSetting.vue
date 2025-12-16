@@ -205,6 +205,15 @@
           :title="$t('settings.preferences.allow_negative_stock')"
           :description="$t('settings.preferences.allow_negative_stock_description')"
         />
+
+        <BaseDivider v-if="accountingBackboneEnabled" class="mt-6 mb-2" />
+
+        <BaseSwitchSection
+          v-if="accountingBackboneEnabled"
+          v-model="ifrsEnabledField"
+          :title="$t('settings.preferences.ifrs_enabled')"
+          :description="$t('settings.preferences.ifrs_enabled_description')"
+        />
       </ul>
     </BaseSettingCard>
   </form>
@@ -226,6 +235,11 @@ const { t, tm } = useI18n()
 
 // Check if stock module is enabled
 const stockEnabled = computed(() => stockStore.stockEnabled)
+
+// Check if accounting backbone feature is enabled globally
+const accountingBackboneEnabled = computed(() => {
+  return globalStore.featureFlags?.['accounting_backbone'] === true
+})
 
 let isSaving = ref(false)
 let isDataSaving = ref(false)
@@ -324,6 +338,28 @@ const allowNegativeStockField = computed({
     }
 
     settingsForm.allow_negative_stock = value
+
+    await companyStore.updateCompanySettings({
+      data,
+      message: 'general.setting_updated',
+    })
+  },
+})
+
+const ifrsEnabledField = computed({
+  get: () => {
+    return settingsForm.ifrs_enabled === 'YES'
+  },
+  set: async (newValue) => {
+    const value = newValue ? 'YES' : 'NO'
+
+    let data = {
+      settings: {
+        ifrs_enabled: value,
+      },
+    }
+
+    settingsForm.ifrs_enabled = value
 
     await companyStore.updateCompanySettings({
       data,

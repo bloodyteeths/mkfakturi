@@ -643,7 +643,7 @@ export default [
           {
             path: 'feature-flags',
             name: 'settings.feature-flags',
-            meta: { isOwner: true },
+            meta: { requiresSuperAdmin: true },
             component: FeatureFlagsSettings,
           },
           // Certificates route removed - no UI component available

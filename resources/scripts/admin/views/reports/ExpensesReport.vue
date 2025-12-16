@@ -2,7 +2,7 @@
   <div class="grid gap-8 md:grid-cols-12 pt-10">
     <div class="col-span-8 md:col-span-4">
       <BaseInputGroup
-        :label="$t('reports.sales.date_range')"
+        :label="$t('reports.expenses.date_range')"
         class="col-span-12 md:col-span-8"
       >
         <BaseMultiselect
@@ -149,8 +149,8 @@ let url = ref(null)
 let siteURL = ref(null)
 
 const formData = reactive({
-  from_date: moment().startOf('month').toString(),
-  to_date: moment().endOf('month').toString(),
+  from_date: moment().startOf('month').format('YYYY-MM-DD'),
+  to_date: moment().endOf('month').format('YYYY-MM-DD'),
 })
 
 const getReportUrl = computed(() => {
@@ -172,13 +172,10 @@ onMounted(() => {
   url.value = dateRangeUrl.value
 })
 
-watch(
-  () => range,
-  (newRange) => {
-    formData.from_date = moment(newRange).startOf('year').toString()
-    formData.to_date = moment(newRange).endOf('year').toString()
-  }
-)
+watch(range, (newRange) => {
+  formData.from_date = moment(newRange).startOf('year').format('YYYY-MM-DD')
+  formData.to_date = moment(newRange).endOf('year').format('YYYY-MM-DD')
+})
 
 function getThisDate(type, time) {
   return moment()[type](time).format('YYYY-MM-DD')
