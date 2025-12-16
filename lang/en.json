@@ -155,7 +155,11 @@
     "loading": "Loading...",
     "export_to_csv": "Export to CSV",
     "export": "Export",
-    "select_customer": "Select Customer"
+    "select_customer": "Select Customer",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "collapse_sidebar": "Collapse sidebar",
+    "expand_sidebar": "Expand sidebar"
   },
   "dashboard": {
     "select_year": "Select year",

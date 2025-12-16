@@ -114,75 +114,97 @@
   <!-- DESKTOP MENU -->
   <div
     :class="[
-      'hidden h-screen pb-32 overflow-y-auto bg-white border-r border-gray-200 border-solid md:fixed md:flex md:flex-col md:inset-y-0 pt-16 transition-all duration-300 ease-in-out',
+      'hidden h-screen pb-32 overflow-y-auto bg-white border-r border-gray-200 border-solid md:fixed md:flex md:flex-col md:inset-y-0 pt-16 transition-all duration-200 ease-in-out',
       globalStore.isSidebarCollapsed ? 'w-16' : 'w-56 xl:w-64'
     ]"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
   >
-    <!-- Collapse Toggle Button -->
-    <button
-      @click="globalStore.toggleSidebarCollapsed()"
-      class="absolute top-20 -right-3 z-50 flex items-center justify-center w-6 h-6 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
-      :title="globalStore.isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <BaseIcon
-        :name="globalStore.isSidebarCollapsed ? 'ChevronRightIcon' : 'ChevronLeftIcon'"
-        class="w-4 h-4 text-gray-500"
-      />
-    </button>
-
-    <div
-      v-for="menu in globalStore.menuGroups"
-      :key="menu"
-      class="p-0 m-0 mt-6 list-none"
-    >
-      <router-link
-        v-for="item in menu"
-        :key="item"
-        :to="item.link"
-        :class="[
-          hasActiveUrl(item.link)
-            ? 'text-primary-500 border-primary-500 bg-gray-100 '
-            : 'text-black',
-          'cursor-pointer hover:bg-gray-50 py-3 group flex items-center border-l-4 border-solid text-sm not-italic font-medium relative',
-          globalStore.isSidebarCollapsed ? 'px-0 justify-center' : 'px-0 pl-6'
-        ]"
-        :title="globalStore.isSidebarCollapsed && !isHovering ? $t(item.title) : ''"
+    <!-- Menu Items -->
+    <div class="flex-1">
+      <div
+        v-for="menu in globalStore.menuGroups"
+        :key="menu"
+        class="p-0 m-0 mt-6 list-none"
       >
-        <BaseIcon
-          :name="item.icon"
+        <router-link
+          v-for="item in menu"
+          :key="item.link"
+          :to="item.link"
+          class="sidebar-item group relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
           :class="[
             hasActiveUrl(item.link)
-              ? 'text-primary-500 group-hover:text-primary-500 '
-              : 'text-gray-400 group-hover:text-black',
-            'shrink-0 h-5 w-5',
-            globalStore.isSidebarCollapsed && !isHovering ? '' : 'mr-4'
+              ? 'text-primary-500 border-primary-500 bg-gray-100'
+              : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
+            globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
           ]"
+        >
+          <BaseIcon
+            :name="item.icon"
+            :class="[
+              hasActiveUrl(item.link)
+                ? 'text-primary-500'
+                : 'text-gray-400 group-hover:text-gray-600',
+              'shrink-0 h-5 w-5 transition-colors duration-150',
+              globalStore.isSidebarCollapsed ? '' : 'mr-3'
+            ]"
+          />
+
+          <!-- Menu text - only shown when expanded -->
+          <span
+            v-if="!globalStore.isSidebarCollapsed"
+            class="truncate"
+          >
+            {{ $t(item.title) }}
+          </span>
+
+          <!-- Tooltip - only shown when collapsed -->
+          <div
+            v-if="globalStore.isSidebarCollapsed"
+            class="
+              absolute left-full ml-3 px-3 py-2
+              bg-gray-900 text-white text-sm rounded-md
+              opacity-0 invisible group-hover:opacity-100 group-hover:visible
+              transition-all duration-150 delay-75
+              whitespace-nowrap z-50 pointer-events-none
+              shadow-lg
+            "
+          >
+            {{ $t(item.title) }}
+            <!-- Tooltip arrow -->
+            <div class="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+          </div>
+        </router-link>
+      </div>
+    </div>
+
+    <!-- Collapse Toggle Button - at bottom of sidebar -->
+    <div class="border-t border-gray-200 p-3">
+      <button
+        @click="globalStore.toggleSidebarCollapsed()"
+        class="
+          w-full flex items-center justify-center
+          py-2 px-3 rounded-md
+          text-gray-500 hover:text-gray-700 hover:bg-gray-100
+          transition-colors duration-150
+          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+        "
+        :title="globalStore.isSidebarCollapsed ? $t('general.expand_sidebar') : $t('general.collapse_sidebar')"
+      >
+        <BaseIcon
+          :name="globalStore.isSidebarCollapsed ? 'ChevronDoubleRightIcon' : 'ChevronDoubleLeftIcon'"
+          class="h-5 w-5"
         />
-
-        <!-- Menu text - hidden when collapsed, shown on hover -->
         <span
-          v-if="!globalStore.isSidebarCollapsed || isHovering"
-          class="whitespace-nowrap"
+          v-if="!globalStore.isSidebarCollapsed"
+          class="ml-2 text-sm"
         >
-          {{ $t(item.title) }}
+          {{ $t('general.collapse') }}
         </span>
-
-        <!-- Tooltip for collapsed state -->
-        <div
-          v-if="globalStore.isSidebarCollapsed && !isHovering"
-          class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none"
-        >
-          {{ $t(item.title) }}
-        </div>
-      </router-link>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import MainLogo from '@/scripts/components/icons/MainLogo.vue'
 
 import {
@@ -198,26 +220,14 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 const route = useRoute()
 const globalStore = useGlobalStore()
 
-const isHovering = ref(false)
-let hoverTimeout = null
-
 function hasActiveUrl(url) {
   return route.path.indexOf(url) > -1
 }
-
-function handleMouseEnter() {
-  if (globalStore.isSidebarCollapsed) {
-    // Small delay before expanding on hover
-    hoverTimeout = setTimeout(() => {
-      isHovering.value = true
-    }, 200)
-  }
-}
-
-function handleMouseLeave() {
-  if (hoverTimeout) {
-    clearTimeout(hoverTimeout)
-  }
-  isHovering.value = false
-}
 </script>
+
+<style scoped>
+/* Ensure tooltips appear above other content */
+.sidebar-item:hover .tooltip {
+  z-index: 9999;
+}
+</style>

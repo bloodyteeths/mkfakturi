@@ -215,7 +215,11 @@
         "something_went_wrong": "Нешто тргна наопаку",
         "try_again": "Обидете се повторно",
         "required": "Задолжително",
-        "optional": "Опционално"
+        "optional": "Опционално",
+        "collapse": "Собери",
+        "expand": "Прошири",
+        "collapse_sidebar": "Собери странична лента",
+        "expand_sidebar": "Прошири странична лента"
     },
     "dashboard": {
         "select_year": "Избери година",
