@@ -644,24 +644,51 @@ class IfrsAdapter
             $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), $entity);
             $sections = $incomeStatement->getSections();
 
-            Log::debug('IncomeStatement: Sections returned', [
-                'has_revenues' => ! empty($sections['accounts']['OPERATING_REVENUES'] ?? []),
-                'has_expenses' => ! empty($sections['accounts']['OPERATING_EXPENSES'] ?? []),
-                'totals' => $sections['totals'] ?? 'none',
+            // Merge revenues and expenses from sections
+            $revenues = array_merge(
+                $sections['accounts']['OPERATING_REVENUES'] ?? [],
+                $sections['accounts']['NON_OPERATING_REVENUES'] ?? []
+            );
+            $expenses = array_merge(
+                $sections['accounts']['OPERATING_EXPENSES'] ?? [],
+                $sections['accounts']['NON_OPERATING_EXPENSES'] ?? []
+            );
+
+            // Calculate totals (flip sign for revenues - credits are negative in ledger)
+            $totalRevenue = abs(($sections['totals']['OPERATING_REVENUES'] ?? 0) +
+                               ($sections['totals']['NON_OPERATING_REVENUES'] ?? 0));
+            $totalExpenses = abs(($sections['totals']['OPERATING_EXPENSES'] ?? 0) +
+                                ($sections['totals']['NON_OPERATING_EXPENSES'] ?? 0));
+
+            // Flip sign on revenue account balances (credits stored as negative)
+            $revenues = array_map(function ($account) {
+                $account['balance'] = abs($account['balance'] ?? 0);
+                return $account;
+            }, $revenues);
+
+            Log::debug('IncomeStatement: Final data', [
+                'revenue_count' => count($revenues),
+                'expense_count' => count($expenses),
+                'total_revenue' => $totalRevenue,
+                'total_expenses' => $totalExpenses,
             ]);
 
+            // Return in structure expected by blade template
             return [
                 'start_date' => $start->toDateString(),
                 'end_date' => $end->toDateString(),
                 'sections' => $sections,
-                'revenues' => array_merge(
-                    $sections['accounts']['OPERATING_REVENUES'] ?? [],
-                    $sections['accounts']['NON_OPERATING_REVENUES'] ?? []
-                ),
-                'expenses' => array_merge(
-                    $sections['accounts']['OPERATING_EXPENSES'] ?? [],
-                    $sections['accounts']['NON_OPERATING_EXPENSES'] ?? []
-                ),
+                'income_statement' => [
+                    'revenues' => $revenues,
+                    'expenses' => $expenses,
+                    'totals' => [
+                        'revenue' => $totalRevenue,
+                        'expenses' => $totalExpenses,
+                    ],
+                ],
+                // Also keep flat structure for backwards compatibility
+                'revenues' => $revenues,
+                'expenses' => $expenses,
                 'results' => $sections['results'] ?? [],
                 'totals' => $sections['totals'] ?? [],
             ];
