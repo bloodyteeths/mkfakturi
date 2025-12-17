@@ -11,12 +11,12 @@ export default function Benefits({ t }: { t: Dictionary }) {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
           {t.benefits.cards.map((card, i) => (
-            <div key={i} className="relative group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div key={i} className="relative group bg-white p-4 md:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-              <div className="w-12 h-12 mb-6 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="hidden md:flex w-12 h-12 mb-6 rounded-xl bg-indigo-50 text-indigo-600 items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 {i === 0 ? (
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -32,10 +32,10 @@ export default function Benefits({ t }: { t: Dictionary }) {
                 )}
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
+              <h3 className="text-base md:text-xl font-bold text-gray-900 mb-2 md:mb-3">
                 {card.title}
               </h3>
-              <p className="text-gray-600 font-medium leading-relaxed">
+              <p className="text-gray-600 font-medium leading-relaxed text-sm">
                 {card.body}
               </p>
             </div>

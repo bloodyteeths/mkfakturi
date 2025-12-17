@@ -14,11 +14,11 @@ export default function PricingPreview({ t, locale }: { t: Dictionary; locale: L
           </h2>
           <Link href={`/${locale}/pricing`} className="btn-primary">{p.cta}</Link>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {p.plans.map((plan, i) => (
-            <div className="card" key={i}>
-              <h3 className="mb-2 text-lg font-semibold">{plan.name}</h3>
-              <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
+            <div className="card p-4 md:p-6" key={i}>
+              <h3 className="mb-2 text-base md:text-lg font-semibold">{plan.name}</h3>
+              <ul className="list-disc space-y-1 pl-4 md:pl-5 text-sm text-gray-700">
                 {plan.bullets.map((b, j) => (
                   <li key={j}>{b}</li>
                 ))}
