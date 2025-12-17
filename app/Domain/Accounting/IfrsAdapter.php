@@ -37,21 +37,11 @@ class IfrsAdapter
     {
         // Skip if feature is disabled (global or company-level)
         if (! $this->isEnabled($invoice->company_id)) {
-            Log::debug('IfrsAdapter::postInvoice skipped - feature disabled', [
-                'invoice_id' => $invoice->id,
-                'company_id' => $invoice->company_id,
-            ]);
-
             return;
         }
 
         // Idempotency check: don't re-post if already posted
         if ($invoice->ifrs_transaction_id) {
-            Log::debug('IfrsAdapter::postInvoice skipped - already posted', [
-                'invoice_id' => $invoice->id,
-                'ifrs_transaction_id' => $invoice->ifrs_transaction_id,
-            ]);
-
             return;
         }
 
@@ -118,26 +108,8 @@ class IfrsAdapter
                 ]);
             }
 
-            // Verify LineItems were created
-            $lineItemCount = DB::table('ifrs_line_items')
-                ->where('transaction_id', $transaction->id)
-                ->count();
-
-            Log::debug('IFRS LineItems created for invoice', [
-                'invoice_id' => $invoice->id,
-                'transaction_id' => $transaction->id,
-                'entity_id' => $entity->id,
-                'line_item_count' => $lineItemCount,
-            ]);
-
             // Reload the transaction with lineItems to ensure they're visible
             $transaction->load('lineItems');
-
-            Log::debug('Transaction lineItems after reload', [
-                'transaction_id' => $transaction->id,
-                'lineItems_count' => $transaction->lineItems->count(),
-                'user_entity_id' => auth()->user()?->entity?->id,
-            ]);
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -520,13 +492,6 @@ class IfrsAdapter
                 }
             }
 
-            Log::debug('TrialBalance: Final data', [
-                'account_count' => count($accounts),
-                'total_debits' => $totalDebits,
-                'total_credits' => $totalCredits,
-                'is_balanced' => abs($totalDebits - $totalCredits) < 0.01,
-            ]);
-
             // Return in structure expected by blade template
             return [
                 'date' => $date->toDateString(),
@@ -621,15 +586,6 @@ class IfrsAdapter
             $totalLiabilities = abs($sections['totals']['LIABILITIES'] ?? 0);
             $totalEquity = abs($sections['results']['TOTAL_EQUITY'] ?? $sections['totals']['EQUITY'] ?? 0);
 
-            Log::debug('BalanceSheet: Final data', [
-                'asset_count' => count($assets),
-                'liability_count' => count($liabilities),
-                'equity_count' => count($equity),
-                'total_assets' => $totalAssets,
-                'total_liabilities' => $totalLiabilities,
-                'total_equity' => $totalEquity,
-            ]);
-
             // Return in structure expected by blade template
             return [
                 'date' => $date->toDateString(),
@@ -710,22 +666,6 @@ class IfrsAdapter
                 ];
             }
 
-            // Debug: Check ledger entries
-            $ledgerCount = DB::table('ifrs_ledgers')
-                ->where('entity_id', $entity->id)
-                ->count();
-            $transactionCount = DB::table('ifrs_transactions')
-                ->where('entity_id', $entity->id)
-                ->count();
-
-            Log::debug('IncomeStatement: Checking IFRS data', [
-                'entity_id' => $entity->id,
-                'account_count' => $accountCount,
-                'ledger_count' => $ledgerCount,
-                'transaction_count' => $transactionCount,
-                'date_range' => [$start->toDateString(), $end->toDateString()],
-            ]);
-
             // IncomeStatement expects startDate, endDate, and entity
             $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), $entity);
             $sections = $incomeStatement->getSections();
@@ -747,13 +687,6 @@ class IfrsAdapter
                                ($sections['totals']['NON_OPERATING_REVENUES'] ?? 0));
             $totalExpenses = abs(($sections['totals']['OPERATING_EXPENSES'] ?? 0) +
                                 ($sections['totals']['NON_OPERATING_EXPENSES'] ?? 0));
-
-            Log::debug('IncomeStatement: Final data', [
-                'revenue_count' => count($revenues),
-                'expense_count' => count($expenses),
-                'total_revenue' => $totalRevenue,
-                'total_expenses' => $totalExpenses,
-            ]);
 
             // Return in structure expected by blade template
             return [
@@ -852,8 +785,6 @@ class IfrsAdapter
                         (function_exists('feature') && feature('accounting-backbone'));
 
         if (! $globalEnabled) {
-            Log::debug('IfrsAdapter::isEnabled - global feature disabled');
-
             return false;
         }
 
@@ -865,16 +796,7 @@ class IfrsAdapter
         // Check company-specific setting
         $companyIfrsEnabled = CompanySetting::getSetting('ifrs_enabled', $companyId);
 
-        $enabled = $companyIfrsEnabled === 'YES' || $companyIfrsEnabled === true || $companyIfrsEnabled === '1';
-
-        if (! $enabled) {
-            Log::debug('IfrsAdapter::isEnabled - company feature disabled', [
-                'company_id' => $companyId,
-                'ifrs_enabled_value' => $companyIfrsEnabled,
-            ]);
-        }
-
-        return $enabled;
+        return $companyIfrsEnabled === 'YES' || $companyIfrsEnabled === true || $companyIfrsEnabled === '1';
     }
 
     /**
@@ -984,12 +906,6 @@ class IfrsAdapter
                 // NOW we can safely load currency relationship (EntityScope will work)
                 $entity->load('currency');
 
-                Log::debug('Using existing IFRS Entity', [
-                    'company_id' => $company->id,
-                    'entity_id' => $entity->id,
-                    'currency_loaded' => $entity->relationLoaded('currency'),
-                ]);
-
                 // Ensure ReportingPeriod exists for current year
                 $this->ensureReportingPeriodExists($entity);
                 // Ensure exchange rate exists for the entity's currency
@@ -1087,12 +1003,6 @@ class IfrsAdapter
                     'error' => $e->getMessage(),
                 ]);
             }
-        } else {
-            Log::debug('IFRS ReportingPeriod already exists', [
-                'entity_id' => $entity->id,
-                'year' => $currentYear,
-                'period_id' => $existingPeriod->id,
-            ]);
         }
 
         // Verify it exists
