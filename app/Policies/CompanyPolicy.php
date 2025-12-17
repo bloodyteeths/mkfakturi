@@ -81,4 +81,13 @@ class CompanyPolicy
 
         return false;
     }
+
+    /**
+     * Determine if the user can view reports for the company.
+     * Same logic as viewing company - owners and company members can view reports.
+     */
+    public function viewReport(User $user, Company $company): bool
+    {
+        return $this->view($user, $company);
+    }
 }
