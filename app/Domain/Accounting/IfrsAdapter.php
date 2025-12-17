@@ -480,18 +480,50 @@ class IfrsAdapter
             $sections = $trialBalance->getSections();
 
             // TrialBalance accumulates debits/credits in $balances property, not via methods
-            $totalDebits = $trialBalance->balances['debit'] ?? 0;
-            $totalCredits = $trialBalance->balances['credit'] ?? 0;
+            $totalDebits = abs($trialBalance->balances['debit'] ?? 0);
+            $totalCredits = abs($trialBalance->balances['credit'] ?? 0);
 
+            // Format accounts from sections for template
+            $accounts = [];
+            if (isset($sections['accounts'])) {
+                foreach ($sections['accounts'] as $accountType => $typeAccounts) {
+                    foreach ($typeAccounts as $account) {
+                        $balance = $account['balance'] ?? 0;
+                        $accounts[] = [
+                            'name' => $account['name'] ?? $account['account_name'] ?? 'Unknown',
+                            'code' => $account['code'] ?? '',
+                            'debit' => $balance > 0 ? $balance : 0,
+                            'credit' => $balance < 0 ? abs($balance) : 0,
+                            'balance' => $balance,
+                        ];
+                    }
+                }
+            }
+
+            Log::debug('TrialBalance: Final data', [
+                'account_count' => count($accounts),
+                'total_debits' => $totalDebits,
+                'total_credits' => $totalCredits,
+                'is_balanced' => abs($totalDebits - $totalCredits) < 0.01,
+            ]);
+
+            // Return in structure expected by blade template
             return [
                 'date' => $date->toDateString(),
                 'year' => $date->year,
                 'sections' => $sections,
-                'accounts' => $sections['accounts'] ?? [],
+                'trial_balance' => [
+                    'accounts' => $accounts,
+                    'total_debits' => $totalDebits,
+                    'total_credits' => $totalCredits,
+                    'is_balanced' => abs($totalDebits - $totalCredits) < 0.01,
+                ],
+                // Also keep flat structure for backwards compatibility
+                'accounts' => $accounts,
                 'balances' => $sections['results'] ?? [],
                 'total_debits' => $totalDebits,
                 'total_credits' => $totalCredits,
-                'is_balanced' => $totalDebits === $totalCredits,
+                'is_balanced' => abs($totalDebits - $totalCredits) < 0.01,
             ];
         } catch (\Exception $e) {
             Log::error('Failed to generate trial balance', [
@@ -513,7 +545,7 @@ class IfrsAdapter
         }
     }
 
-    // CLAUDE-CHECKPOINT: Fixed TrialBalance to use $balances property instead of non-existent methods
+    // CLAUDE-CHECKPOINT: Fixed all reports return structure to match blade template expectations
 
     /**
      * Get Balance Sheet for a company as of a specific date
@@ -556,12 +588,54 @@ class IfrsAdapter
             $balanceSheet = new BalanceSheet($date->toDateString(), $entity);
             $sections = $balanceSheet->getSections();
 
+            // Get account arrays
+            $assets = $sections['accounts']['ASSETS'] ?? [];
+            $liabilities = $sections['accounts']['LIABILITIES'] ?? [];
+            $equity = $sections['accounts']['EQUITY'] ?? [];
+
+            // Assets are debits (positive), liabilities/equity are credits (negative in ledger)
+            // Flip sign on liabilities and equity for display
+            $liabilities = array_map(function ($account) {
+                $account['balance'] = abs($account['balance'] ?? 0);
+                return $account;
+            }, $liabilities);
+            $equity = array_map(function ($account) {
+                $account['balance'] = abs($account['balance'] ?? 0);
+                return $account;
+            }, $equity);
+
+            // Calculate totals with proper signs
+            $totalAssets = $sections['totals']['ASSETS'] ?? 0;
+            $totalLiabilities = abs($sections['totals']['LIABILITIES'] ?? 0);
+            $totalEquity = abs($sections['totals']['EQUITY'] ?? 0);
+
+            Log::debug('BalanceSheet: Final data', [
+                'asset_count' => count($assets),
+                'liability_count' => count($liabilities),
+                'equity_count' => count($equity),
+                'total_assets' => $totalAssets,
+                'total_liabilities' => $totalLiabilities,
+                'total_equity' => $totalEquity,
+            ]);
+
+            // Return in structure expected by blade template
             return [
                 'date' => $date->toDateString(),
                 'sections' => $sections,
-                'assets' => $sections['accounts']['ASSETS'] ?? [],
-                'liabilities' => $sections['accounts']['LIABILITIES'] ?? [],
-                'equity' => $sections['accounts']['EQUITY'] ?? [],
+                'balance_sheet' => [
+                    'assets' => $assets,
+                    'liabilities' => $liabilities,
+                    'equity' => $equity,
+                    'totals' => [
+                        'assets' => $totalAssets,
+                        'liabilities' => $totalLiabilities,
+                        'equity' => $totalEquity,
+                    ],
+                ],
+                // Also keep flat structure for backwards compatibility
+                'assets' => $assets,
+                'liabilities' => $liabilities,
+                'equity' => $equity,
                 'totals' => $sections['totals'] ?? [],
                 'results' => $sections['results'] ?? [],
             ];
