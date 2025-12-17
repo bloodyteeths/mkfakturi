@@ -666,6 +666,8 @@ class IfrsAdapter
         if ($company->ifrs_entity_id) {
             $entity = Entity::find($company->ifrs_entity_id);
             if ($entity) {
+                // Set user context BEFORE any IFRS queries to avoid EntityScope errors
+                $this->setUserEntityContext($entity);
                 // Ensure ReportingPeriod exists for current year
                 $this->ensureReportingPeriodExists($entity);
                 return $entity;
@@ -683,6 +685,9 @@ class IfrsAdapter
 
             // Link entity to company
             $company->update(['ifrs_entity_id' => $entity->id]);
+
+            // Set user context BEFORE any IFRS queries
+            $this->setUserEntityContext($entity);
 
             // Create ReportingPeriod for current year
             $this->ensureReportingPeriodExists($entity);
@@ -710,13 +715,18 @@ class IfrsAdapter
     {
         $currentYear = Carbon::now()->year;
 
-        // Check if ReportingPeriod exists for current year
-        $existingPeriod = ReportingPeriod::where('entity_id', $entity->id)
+        // Use withoutGlobalScope to bypass EntityScope since we're explicitly filtering by entity_id
+        // This avoids the Auth::user()->entity->id null error in multi-tenant setup
+        $existingPeriod = ReportingPeriod::withoutGlobalScope(\IFRS\Scopes\EntityScope::class)
+            ->where('entity_id', $entity->id)
             ->where('calendar_year', $currentYear)
             ->first();
 
         if (! $existingPeriod) {
             try {
+                // Set user context before creating (for any observers/events)
+                $this->setUserEntityContext($entity);
+
                 ReportingPeriod::create([
                     'entity_id' => $entity->id,
                     'calendar_year' => $currentYear,
