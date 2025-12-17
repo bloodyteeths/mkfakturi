@@ -29,6 +29,12 @@ class InvoiceObserver
      */
     public function created(Invoice $invoice): void
     {
+        Log::debug('InvoiceObserver::created', [
+            'invoice_id' => $invoice->id,
+            'status' => $invoice->status,
+            'should_post' => $this->shouldPostToLedger($invoice),
+        ]);
+
         // Only post to ledger if not in draft status and feature is enabled
         if ($this->shouldPostToLedger($invoice)) {
             try {
@@ -66,9 +72,20 @@ class InvoiceObserver
      */
     public function updated(Invoice $invoice): void
     {
+        $statusChanged = $invoice->wasChanged('status');
+        $wasFromDraft = $invoice->getOriginal('status') === Invoice::STATUS_DRAFT;
+
+        Log::debug('InvoiceObserver::updated', [
+            'invoice_id' => $invoice->id,
+            'status' => $invoice->status,
+            'original_status' => $invoice->getOriginal('status'),
+            'status_changed' => $statusChanged,
+            'was_from_draft' => $wasFromDraft,
+            'ifrs_transaction_id' => $invoice->ifrs_transaction_id,
+        ]);
+
         // Check if status changed from DRAFT to a posted status
-        if ($invoice->wasChanged('status') &&
-            $invoice->getOriginal('status') === Invoice::STATUS_DRAFT &&
+        if ($statusChanged && $wasFromDraft &&
             $this->shouldPostToLedger($invoice) &&
             ! $invoice->ifrs_transaction_id) {
 
@@ -123,14 +140,14 @@ class InvoiceObserver
 
     /**
      * Check if accounting backbone feature is enabled
+     *
+     * Note: We only check config/env here, NOT Pennant.
+     * Pennant requires user context which may not be reliable in observers.
+     * Per-company feature check is done in IfrsAdapter::isEnabled().
      */
     protected function isFeatureEnabled(): bool
     {
-        // Check Laravel Pennant feature flag or config
-        if (function_exists('feature')) {
-            return feature('accounting-backbone');
-        }
-
+        // Only check global config/env - Pennant check is done in IfrsAdapter
         return config('ifrs.enabled', false) ||
                env('FEATURE_ACCOUNTING_BACKBONE', false);
     }
