@@ -232,17 +232,9 @@ export const useExchangeRateStore = (useWindow = false) => {
             })
         })
       },
+      // Frankfurter API is always available - no provider config needed
       checkForActiveProvider(currency_id) {
-        return new Promise((resolve, reject) => {
-          axios
-            .get(`/currencies/${currency_id}/active-provider`)
-            .then((response) => {
-              resolve(response)
-            })
-            .catch((err) => {
-              reject(err)
-            })
-        })
+        return Promise.resolve({ data: { success: true } })
       },
     },
   })()

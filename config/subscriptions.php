@@ -89,6 +89,7 @@ return [
                 'custom_fields' => 5,
                 'recurring_invoices_active' => 5,
                 'estimates_per_month' => 20,
+                'ai_queries_per_month' => 10,  // Basic AI - 10 queries/month
             ],
         ],
 
@@ -124,6 +125,7 @@ return [
                 'recurring_invoices_active' => 20,
                 'estimates_per_month' => null,
                 'bank_accounts' => 2,         // Limit bank connections in Standard
+                'ai_queries_per_month' => 25, // Standard AI - 25 queries/month
             ],
         ],
 
@@ -158,6 +160,7 @@ return [
                 'estimates_per_month' => null,
                 'bank_accounts' => 5,
                 'api_requests_per_day' => 1000,
+                'ai_queries_per_month' => 50, // Advanced AI - 50 queries/month
             ],
         ],
 
@@ -189,12 +192,12 @@ return [
                 'ifrs_reports' => true,
             ],
             'limits' => [
-                // All unlimited
+                // All unlimited except AI (token costs)
                 'expenses_per_month' => null,
                 'custom_fields' => null,
                 'recurring_invoices_active' => null,
                 'estimates_per_month' => null,
-                'ai_queries_per_month' => null,
+                'ai_queries_per_month' => 100, // Max AI - 100 queries/month (not unlimited due to token costs)
                 'bank_accounts' => null,
                 'api_requests_per_day' => null,
             ],
@@ -378,6 +381,13 @@ return [
             'starter' => 'You\'ve reached your user limit (1 user). Upgrade to Standard for 3 users.',
             'standard' => 'You\'ve reached your user limit (3 users). Upgrade to Business for 5 users.',
             'business' => 'You\'ve reached your user limit (5 users). Upgrade to Max for unlimited users.',
+        ],
+        'ai_suggestions' => [
+            'free' => 'You\'ve reached your AI query limit (3/month). Upgrade to Starter for 10 AI queries per month.',
+            'starter' => 'You\'ve reached your AI query limit (10/month). Upgrade to Standard for 25 AI queries per month.',
+            'standard' => 'You\'ve reached your AI query limit (25/month). Upgrade to Business for 50 AI queries per month.',
+            'business' => 'You\'ve reached your AI query limit (50/month). Upgrade to Max for 100 AI queries per month.',
+            'max' => 'You\'ve reached your AI query limit (100/month). Contact support for higher limits.',
         ],
     ],
 ];

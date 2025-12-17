@@ -25,11 +25,7 @@ use App\Http\Controllers\V1\Admin\Estimate\EstimatesController;
 use App\Http\Controllers\V1\Admin\Estimate\EstimateTemplatesController;
 use App\Http\Controllers\V1\Admin\Estimate\SendEstimateController;
 use App\Http\Controllers\V1\Admin\Estimate\SendEstimatePreviewController;
-use App\Http\Controllers\V1\Admin\ExchangeRate\ExchangeRateProviderController;
-use App\Http\Controllers\V1\Admin\ExchangeRate\GetActiveProviderController;
 use App\Http\Controllers\V1\Admin\ExchangeRate\GetExchangeRateController;
-use App\Http\Controllers\V1\Admin\ExchangeRate\GetSupportedCurrenciesController;
-use App\Http\Controllers\V1\Admin\ExchangeRate\GetUsedCurrenciesController;
 use App\Http\Controllers\V1\Admin\Expense\ExpenseCategoriesController;
 use App\Http\Controllers\V1\Admin\Expense\ExpensesController;
 use App\Http\Controllers\V1\Admin\Expense\ShowReceiptController;
@@ -460,17 +456,8 @@ Route::prefix('/v1')->group(function () {
             // Multi-currency transactions require Business+ tier
             // ----------------------------------
 
+            // Exchange rates now use free Frankfurter API (no provider config needed)
             Route::get('/currencies/{currency}/exchange-rate', GetExchangeRateController::class);
-
-            Route::get('/currencies/{currency}/active-provider', GetActiveProviderController::class);
-
-            Route::get('/used-currencies', GetUsedCurrenciesController::class);
-
-            Route::get('/supported-currencies', GetSupportedCurrenciesController::class);
-
-            // Exchange rate providers (Business+ for multi-currency management)
-            Route::apiResource('exchange-rate-providers', ExchangeRateProviderController::class)
-                ->middleware('tier:business');
 
             // Settings
             // ----------------------------------

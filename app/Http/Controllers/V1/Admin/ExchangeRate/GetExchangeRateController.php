@@ -5,52 +5,50 @@ namespace App\Http\Controllers\V1\Admin\ExchangeRate;
 use App\Http\Controllers\Controller;
 use App\Models\CompanySetting;
 use App\Models\Currency;
-use App\Models\ExchangeRateLog;
-use App\Models\ExchangeRateProvider;
-use App\Traits\ExchangeRateProvidersTrait;
+use App\Services\FrankfurterExchangeRateService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 class GetExchangeRateController extends Controller
 {
-    use ExchangeRateProvidersTrait;
+    protected FrankfurterExchangeRateService $exchangeRateService;
+
+    public function __construct(FrankfurterExchangeRateService $exchangeRateService)
+    {
+        $this->exchangeRateService = $exchangeRateService;
+    }
 
     /**
-     * Handle the incoming request.
+     * Get exchange rate for a currency relative to company's base currency
      *
-     * @return \Illuminate\Http\Response
+     * Uses free Frankfurter API (European Central Bank data)
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(Request $request, Currency $currency)
     {
-        $settings = CompanySetting::getSettings(['currency'], $request->header('company'));
+        $companyId = $request->header('company');
+        $settings = CompanySetting::getSettings(['currency'], $companyId);
         $baseCurrency = Currency::findOrFail($settings['currency']);
 
-        $query = ExchangeRateProvider::whereJsonContains('currencies', $currency->code)
-            ->where('active', true)
-            ->get()
-            ->toArray();
+        // Get rate from Frankfurter (free, no API key needed)
+        $rate = $this->exchangeRateService->getAndLogRate(
+            $companyId,
+            $currency,      // from
+            $baseCurrency   // to
+        );
 
-        $exchange_rate = ExchangeRateLog::where('base_currency_id', $currency->id)
-            ->where('currency_id', $baseCurrency->id)
-            ->orderBy('created_at', 'desc')
-            ->value('exchange_rate');
-
-        if ($query) {
-            $filter = Arr::only($query[0], ['key', 'driver', 'driver_config']);
-            $exchange_rate_value = $this->getExchangeRate($filter, $currency->code, $baseCurrency->code);
-
-            if ($exchange_rate_value->status() == 200) {
-                return $exchange_rate_value;
-            }
-        }
-        if ($exchange_rate) {
+        if ($rate !== null) {
             return response()->json([
-                'exchangeRate' => [$exchange_rate],
+                'exchangeRate' => [$rate],
+                'source' => 'frankfurter',
             ], 200);
         }
 
         return response()->json([
             'error' => 'no_exchange_rate_available',
+            'message' => 'Could not fetch exchange rate. Please try again later.',
         ], 200);
     }
 }
+
+// CLAUDE-CHECKPOINT

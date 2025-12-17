@@ -73,7 +73,7 @@ class IfrsAdapter
                 'account_id' => $arAccount->id,
                 'transaction_date' => $invoice->invoice_date ?? Carbon::now(),
                 'narration' => "Invoice #{$invoice->invoice_number} - {$invoice->customer->name}",
-                'transaction_type' => Transaction::CS, // Client Invoice
+                'transaction_type' => Transaction::IN, // Client Invoice (not CS which is Cash Sale)
                 'currency_id' => $this->getCurrencyId($invoice->company_id),
                 'entity_id' => $entity->id,
             ]);
@@ -84,7 +84,7 @@ class IfrsAdapter
                 'account_id' => $arAccount->id,
                 'amount' => $invoice->total / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // Line Item: Credit Revenue
@@ -93,7 +93,7 @@ class IfrsAdapter
                 'account_id' => $revenueAccount->id,
                 'amount' => $invoice->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // If there's tax, create a line for tax payable
@@ -104,7 +104,7 @@ class IfrsAdapter
                     'account_id' => $taxPayableAccount->id,
                     'amount' => $invoice->tax / 100,
                     'quantity' => 1,
-                    'entry_type' => LineItem::CREDIT,
+                    'credited' => true, // Credit entry
                 ]);
             }
 
@@ -173,7 +173,7 @@ class IfrsAdapter
                 'account_id' => $cashAccount->id,
                 'amount' => $payment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // Line Item: Credit Accounts Receivable
@@ -182,7 +182,7 @@ class IfrsAdapter
                 'account_id' => $arAccount->id,
                 'amount' => $payment->amount / 100,
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // Post the transaction to the ledger
@@ -252,7 +252,7 @@ class IfrsAdapter
                 'account_id' => $feeExpenseAccount->id,
                 'amount' => $fee / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // Line Item: Credit Cash
@@ -261,7 +261,7 @@ class IfrsAdapter
                 'account_id' => $cashAccount->id,
                 'amount' => $fee / 100,
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // Post the transaction to the ledger
@@ -350,7 +350,7 @@ class IfrsAdapter
                 'account_id' => $arAccount->id,
                 'amount' => $creditNote->total / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // Line Item: Debit Revenue (reduce revenue)
@@ -359,7 +359,7 @@ class IfrsAdapter
                 'account_id' => $revenueAccount->id,
                 'amount' => $creditNote->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // If there's tax, create a line to reduce tax payable
@@ -370,7 +370,7 @@ class IfrsAdapter
                     'account_id' => $taxPayableAccount->id,
                     'amount' => $creditNote->tax / 100,
                     'quantity' => 1,
-                    'entry_type' => LineItem::DEBIT, // Debit to reduce liability
+                    'credited' => false, // Debit entry // Debit to reduce liability
                 ]);
             }
 
@@ -760,16 +760,19 @@ class IfrsAdapter
 
         // If company already has an IFRS entity, return it
         if ($company->ifrs_entity_id) {
-            $entity = Entity::find($company->ifrs_entity_id);
+            $entity = Entity::with('currency')->find($company->ifrs_entity_id);
             if ($entity) {
                 Log::debug('Using existing IFRS Entity', [
                     'company_id' => $company->id,
                     'entity_id' => $entity->id,
+                    'currency_loaded' => $entity->relationLoaded('currency'),
                 ]);
                 // Set user context BEFORE any IFRS queries to avoid EntityScope errors
                 $this->setUserEntityContext($entity);
                 // Ensure ReportingPeriod exists for current year
                 $this->ensureReportingPeriodExists($entity);
+                // Ensure exchange rate exists for the entity's currency
+                $this->ensureExchangeRateExists($entity, $entity->currency_id);
 
                 return $entity;
             }
@@ -786,6 +789,9 @@ class IfrsAdapter
                 'multi_currency' => false,
             ]);
 
+            // CRITICAL: Load currency relationship for reportingCurrency accessor
+            $entity->load('currency');
+
             // Link entity to company - use DB::table to ensure it saves
             DB::table('companies')
                 ->where('id', $company->id)
@@ -794,7 +800,11 @@ class IfrsAdapter
             Log::info('Created IFRS Entity for company', [
                 'company_id' => $company->id,
                 'entity_id' => $entity->id,
+                'currency_id' => $currencyId,
             ]);
+
+            // Create exchange rate for the entity's currency (required by IFRS package)
+            $this->ensureExchangeRateExists($entity, $currencyId);
 
             // Set user context BEFORE any IFRS queries
             $this->setUserEntityContext($entity);
@@ -875,6 +885,49 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
                 'year' => $currentYear,
             ]);
+        }
+    }
+
+    /**
+     * Ensure an ExchangeRate exists for the entity's currency
+     *
+     * The IFRS package requires exchange rates for transactions.
+     * For the reporting currency, rate is always 1.
+     */
+    protected function ensureExchangeRateExists(Entity $entity, int $currencyId): void
+    {
+        // Check if exchange rate exists for this entity's currency
+        $existingRate = DB::table('ifrs_exchange_rates')
+            ->where('entity_id', $entity->id)
+            ->where('currency_id', $currencyId)
+            ->whereDate('valid_from', '<=', Carbon::now()->toDateString())
+            ->first();
+
+        if (! $existingRate) {
+            try {
+                // Create exchange rate = 1 for the reporting currency
+                DB::table('ifrs_exchange_rates')->insert([
+                    'entity_id' => $entity->id,
+                    'currency_id' => $currencyId,
+                    'rate' => 1.0,
+                    'valid_from' => Carbon::now()->startOfYear()->toDateString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                Log::info('Created IFRS ExchangeRate for entity currency', [
+                    'entity_id' => $entity->id,
+                    'currency_id' => $currencyId,
+                    'rate' => 1.0,
+                ]);
+            } catch (\Exception $e) {
+                // Might already exist due to race condition
+                Log::warning('Failed to create IFRS ExchangeRate (might already exist)', [
+                    'entity_id' => $entity->id,
+                    'currency_id' => $currencyId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -1081,7 +1134,7 @@ class IfrsAdapter
                 'account_id' => $expenseAccount->id,
                 'amount' => $expense->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // Line Item: Credit Cash/Bank
@@ -1090,7 +1143,7 @@ class IfrsAdapter
                 'account_id' => $cashAccount->id,
                 'amount' => $expense->amount / 100,
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // Post the transaction to the ledger
@@ -1328,7 +1381,7 @@ class IfrsAdapter
                 'account_id' => $expenseAccount->id,
                 'amount' => $bill->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // If there's input VAT, debit VAT Receivable (input VAT is an asset)
@@ -1339,7 +1392,7 @@ class IfrsAdapter
                     'account_id' => $vatReceivableAccount->id,
                     'amount' => $bill->tax / 100,
                     'quantity' => 1,
-                    'entry_type' => LineItem::DEBIT,
+                    'credited' => false, // Debit entry
                 ]);
             }
 
@@ -1349,7 +1402,7 @@ class IfrsAdapter
                 'account_id' => $apAccount->id,
                 'amount' => $bill->total / 100, // Total includes tax
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // Post the transaction to the ledger
@@ -1435,7 +1488,7 @@ class IfrsAdapter
                 'account_id' => $apAccount->id,
                 'amount' => $billPayment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
-                'entry_type' => LineItem::DEBIT,
+                'credited' => false, // Debit entry
             ]);
 
             // Line Item: Credit Cash and Bank (reduce asset)
@@ -1444,7 +1497,7 @@ class IfrsAdapter
                 'account_id' => $cashAccount->id,
                 'amount' => $billPayment->amount / 100,
                 'quantity' => 1,
-                'entry_type' => LineItem::CREDIT,
+                'credited' => true, // Credit entry
             ]);
 
             // Post the transaction to the ledger
@@ -1503,4 +1556,8 @@ class IfrsAdapter
     }
 }
 
-// CLAUDE-CHECKPOINT: Updated isEnabled() to check per-company ifrs_enabled setting
+// CLAUDE-CHECKPOINT: Fixed IFRS integration:
+// 1. Entity currency relationship loading with eager load
+// 2. LineItem field 'entry_type' -> 'credited' (boolean)
+// 3. Transaction type CS -> IN for client invoices
+// 4. ExchangeRate creation for entity currency

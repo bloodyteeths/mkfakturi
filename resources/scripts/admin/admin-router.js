@@ -49,8 +49,7 @@ const NotesSetting = () =>
   import('@/scripts/admin/views/settings/NotesSetting.vue')
 const ExpenseCategory = () =>
   import('@/scripts/admin/views/settings/ExpenseCategorySetting.vue')
-const ExchangeRateSetting = () =>
-  import('@/scripts/admin/views/settings/ExchangeRateProviderSetting.vue')
+// ExchangeRateSetting removed - using free Frankfurter API (no config needed)
 // MailConfig removed - using centralized Postmark setup
 const FileDisk = () =>
   import('@/scripts/admin/views/settings/FileDiskSetting.vue')
@@ -565,12 +564,7 @@ export default [
             meta: { isOwner: true },
             component: RolesSettings,
           },
-          {
-            path: 'exchange-rate-provider',
-            name: 'exchange.rate.provider',
-            meta: { ability: abilities.VIEW_EXCHANGE_RATE },
-            component: ExchangeRateSetting,
-          },
+          // Exchange rate provider settings removed - using free Frankfurter API
           {
             path: 'tax-types',
             name: 'tax.types',

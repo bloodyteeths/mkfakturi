@@ -4,7 +4,6 @@ use App\Models\Bill;
 use App\Models\Customer;
 use App\Models\CustomField;
 use App\Models\Estimate;
-use App\Models\ExchangeRateProvider;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Item;
@@ -191,16 +190,7 @@ return [
             'ability' => '',
             'model' => '',
         ],
-        [
-            'title' => 'settings.menu_title.exchange_rate',
-            'group' => '',
-            'name' => 'Exchange Rate Provider',
-            'link' => '/admin/settings/exchange-rate-provider',
-            'icon' => 'BanknotesIcon',
-            'owner_only' => true,
-            'ability' => 'view-exchange-rate-provider',
-            'model' => ExchangeRateProvider::class,
-        ],
+        // Exchange Rate Provider removed - using free Frankfurter API (no config needed)
         [
             'title' => 'settings.menu_title.notifications',
             'group' => '',
