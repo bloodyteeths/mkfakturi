@@ -2178,6 +2178,39 @@ PROMPT;
             '/projection/iu',
             '/scenario/iu',
             '/optimize/iu',
+
+            // Cash flow and liquidity patterns (Macedonian)
+            '/паричен\s+тек/iu',
+            '/готовин(а|ски)/iu',
+            '/cash\s*flow/iu',
+            '/ликвидност/iu',
+            '/ликвиден/iu',
+            '/liquidity/iu',
+
+            // Working capital and ratios
+            '/работен\s+капитал/iu',
+            '/working\s+capital/iu',
+            '/current\s+ratio/iu',
+            '/quick\s+ratio/iu',
+            '/тековен\s+коефициент/iu',
+            '/брз\s+коефициент/iu',
+
+            // AR/AP aging patterns
+            '/старост\s+(на\s+)?(побарувањ|долгов)/iu',
+            '/aging/iu',
+            '/ar\s+aging/iu',
+            '/ap\s+aging/iu',
+            '/должни(ци|к)/iu',
+            '/задоцне(ти|ње)/iu',
+            '/overdue/iu',
+            '/receivable/iu',
+            '/payable/iu',
+
+            // Weekly/monthly forecast patterns
+            '/недел(на|ен|и)/iu',
+            '/месечн(а|и|о)/iu',
+            '/weekly/iu',
+            '/monthly/iu',
         ];
 
         foreach ($complexPatterns as $pattern) {
