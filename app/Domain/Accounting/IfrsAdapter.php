@@ -616,9 +616,10 @@ class IfrsAdapter
             $equity = $this->flattenIfrsAccounts($sections['accounts']['EQUITY'] ?? [], true);
 
             // Calculate totals with proper signs
+            // Note: IFRS puts calculated TOTAL_EQUITY (including net profit) in results, not totals
             $totalAssets = $sections['totals']['ASSETS'] ?? 0;
             $totalLiabilities = abs($sections['totals']['LIABILITIES'] ?? 0);
-            $totalEquity = abs($sections['totals']['EQUITY'] ?? 0);
+            $totalEquity = abs($sections['results']['TOTAL_EQUITY'] ?? $sections['totals']['EQUITY'] ?? 0);
 
             Log::debug('BalanceSheet: Final data', [
                 'asset_count' => count($assets),
