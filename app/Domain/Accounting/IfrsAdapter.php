@@ -85,6 +85,7 @@ class IfrsAdapter
                 'amount' => $invoice->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id, // Required by Segregating trait
             ]);
 
             // Line Item: Credit Revenue
@@ -94,6 +95,7 @@ class IfrsAdapter
                 'amount' => $invoice->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // If there's tax, create a line for tax payable
@@ -105,6 +107,7 @@ class IfrsAdapter
                     'amount' => $invoice->tax / 100,
                     'quantity' => 1,
                     'credited' => true, // Credit entry
+                    'entity_id' => $entity->id,
                 ]);
             }
 
@@ -174,6 +177,7 @@ class IfrsAdapter
                 'amount' => $payment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Credit Accounts Receivable
@@ -183,6 +187,7 @@ class IfrsAdapter
                 'amount' => $payment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Post the transaction to the ledger
@@ -253,6 +258,7 @@ class IfrsAdapter
                 'amount' => $fee / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Credit Cash
@@ -262,6 +268,7 @@ class IfrsAdapter
                 'amount' => $fee / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Post the transaction to the ledger
@@ -351,6 +358,7 @@ class IfrsAdapter
                 'amount' => $creditNote->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Debit Revenue (reduce revenue)
@@ -360,6 +368,7 @@ class IfrsAdapter
                 'amount' => $creditNote->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id,
             ]);
 
             // If there's tax, create a line to reduce tax payable
@@ -370,7 +379,8 @@ class IfrsAdapter
                     'account_id' => $taxPayableAccount->id,
                     'amount' => $creditNote->tax / 100,
                     'quantity' => 1,
-                    'credited' => false, // Debit entry // Debit to reduce liability
+                    'credited' => false, // Debit to reduce liability
+                    'entity_id' => $entity->id,
                 ]);
             }
 
@@ -1141,6 +1151,7 @@ class IfrsAdapter
                 'amount' => $expense->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Credit Cash/Bank
@@ -1150,6 +1161,7 @@ class IfrsAdapter
                 'amount' => $expense->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Post the transaction to the ledger
@@ -1388,6 +1400,7 @@ class IfrsAdapter
                 'amount' => $bill->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id,
             ]);
 
             // If there's input VAT, debit VAT Receivable (input VAT is an asset)
@@ -1399,6 +1412,7 @@ class IfrsAdapter
                     'amount' => $bill->tax / 100,
                     'quantity' => 1,
                     'credited' => false, // Debit entry
+                    'entity_id' => $entity->id,
                 ]);
             }
 
@@ -1409,6 +1423,7 @@ class IfrsAdapter
                 'amount' => $bill->total / 100, // Total includes tax
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Post the transaction to the ledger
@@ -1495,6 +1510,7 @@ class IfrsAdapter
                 'amount' => $billPayment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Line Item: Credit Cash and Bank (reduce asset)
@@ -1504,6 +1520,7 @@ class IfrsAdapter
                 'amount' => $billPayment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'entity_id' => $entity->id,
             ]);
 
             // Post the transaction to the ledger
