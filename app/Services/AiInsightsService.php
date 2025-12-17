@@ -859,62 +859,66 @@ PROMPT;
         // Detect if user is asking "how to" questions (use sanitized version)
         $isHowToQuery = $this->detectHowToQuery($sanitizedQuestion);
 
-        // Build base prompt with enhanced system instructions
-        $prompt = <<<BASETEXT
-Ти си македонски финансиски советник кој работи со Facturino - систем за фактурирање и финансиско управување.
+        // Detect user's language and get appropriate prompts
+        $detectedLang = $this->detectLanguage($sanitizedQuestion);
+        $langPrompt = $this->getMultilingualPrompt($detectedLang);
+        $l = $langPrompt['labels'];
 
-Твоја улога:
-- Знаеш ГИ СЈ работи во Facturino апликацијата
-- Помагаш на корисниците со финансиски прашања, анализа и совети
-- Одговараш на македонски јазик
-- Даваш конкретни, акционабилни совети
-- Може да им помогнеш да ја користат апликацијата
+        // Build base prompt dynamically based on detected language
+        $prompt = "{$langPrompt['intro']}\n\n";
+        $prompt .= "Role:\n{$langPrompt['role_items']}\n{$langPrompt['response_language']}\n\n";
+        $prompt .= "{$langPrompt['context_label']}:\n";
+        $prompt .= "- {$l['name']}: {$companyName}\n";
+        $prompt .= "- {$l['total_invoices']}: {$invoicesCount}\n";
+        $prompt .= "- {$l['draft_invoices']}: {$draftInvoices}\n";
+        $prompt .= "- {$l['pending_invoices']}: {$pendingInvoices}\n";
+        $prompt .= "- {$l['overdue_invoices']}: {$overdueInvoices}\n";
+        $prompt .= "- {$l['revenue']}: {$revenue} {$currency}\n";
+        $prompt .= "- {$l['expenses']}: {$expenses} {$currency}\n";
+        $prompt .= "- {$l['profit']}: {$profitFormatted} {$currency} ({$l['margin']}: {$profitMargin}%)\n";
+        $prompt .= "- {$l['payments_received']}: {$paymentsReceived} {$currency}\n";
+        $prompt .= "- {$l['outstanding']}: {$outstanding} {$currency}\n";
+        $prompt .= "- {$l['avg_invoice']}: {$avgInvoiceValueFormatted} {$currency}\n";
+        $prompt .= "- {$l['customers']}: {$customers}\n";
+        $prompt .= "- {$l['suppliers']}: {$suppliers}\n";
+        $prompt .= "- {$l['items']}: {$items}\n";
+        $prompt .= "- {$l['estimates']}: {$estimates}\n";
+        $prompt .= "- {$l['bills']}: {$bills}\n";
+        $prompt .= "- {$l['projects']}: {$projects}\n";
 
-Контекст на компанијата:
-- Име: {$companyName}
-- Вкупно фактури: {$invoicesCount}
-- Фактури во изработка: {$draftInvoices}
-- Чекај на наплата: {$pendingInvoices}
-- Задоцнети фактури: {$overdueInvoices}
-- Приходи: {$revenue} {$currency}
-- Трошоци: {$expenses} {$currency}
-- Профит: {$profitFormatted} {$currency} (маржа: {$profitMargin}%)
-- Наплатени плаќања: {$paymentsReceived} {$currency}
-- Неплатени фактури (износ): {$outstanding} {$currency}
-- Просечна вредност на фактура: {$avgInvoiceValueFormatted} {$currency}
-- Број на клиенти: {$customers}
-- Број на добавувачи: {$suppliers}
-- Број на артикли: {$items}
-- Понуди: {$estimates}
-- Сметки од добавувачи: {$bills}
-- Проекти: {$projects}
-
-BASETEXT;
+        // Multilingual section labels
+        $sectionLabels = [
+            'mk' => ['recent' => 'Последни фактури (последни 3 месеци)', 'overdue' => 'Задоцнети фактури', 'by_customer' => 'Фактури по клиент (неплатени)', 'trends' => 'Месечни трендови', 'growth' => 'Раст на клиенти'],
+            'sq' => ['recent' => 'Faturat e fundit (3 muajt e fundit)', 'overdue' => 'Fatura të vonuara', 'by_customer' => 'Fatura sipas klientit (të papaguara)', 'trends' => 'Trendet mujore', 'growth' => 'Rritja e klientëve'],
+            'tr' => ['recent' => 'Son faturalar (son 3 ay)', 'overdue' => 'Gecikmiş faturalar', 'by_customer' => 'Müşteriye göre faturalar (ödenmemiş)', 'trends' => 'Aylık trendler', 'growth' => 'Müşteri büyümesi'],
+            'en' => ['recent' => 'Recent invoices (last 3 months)', 'overdue' => 'Overdue invoices', 'by_customer' => 'Invoices by customer (unpaid)', 'trends' => 'Monthly trends', 'growth' => 'Customer growth'],
+        ];
+        $secLabel = $sectionLabels[$detectedLang] ?? $sectionLabels['mk'];
 
         // Add contextual data sections based on what's available
         if (! empty($contextualData['recent_invoices'])) {
             $invoicesText = $this->formatInvoicesForPrompt($contextualData['recent_invoices'], $currency);
-            $prompt .= "\nПоследни фактури (последни 3 месеци):\n{$invoicesText}\n";
+            $prompt .= "\n{$secLabel['recent']}:\n{$invoicesText}\n";
         }
 
         if (! empty($contextualData['overdue_invoices'])) {
             $overdueText = $this->formatInvoicesForPrompt($contextualData['overdue_invoices'], $currency, true);
-            $prompt .= "\nЗадоцнети фактури:\n{$overdueText}\n";
+            $prompt .= "\n{$secLabel['overdue']}:\n{$overdueText}\n";
         }
 
         if (! empty($contextualData['customer_invoices'])) {
             $customerInvoicesText = $this->formatCustomerInvoicesForPrompt($contextualData['customer_invoices'], $currency);
-            $prompt .= "\nФактури по клиент (неплатени):\n{$customerInvoicesText}\n";
+            $prompt .= "\n{$secLabel['by_customer']}:\n{$customerInvoicesText}\n";
         }
 
         if (! empty($contextualData['monthly_trends'])) {
             $trendsText = $this->formatMonthlyTrends($contextualData['monthly_trends'], $currency);
-            $prompt .= "\nМесечни трендови:\n{$trendsText}\n";
+            $prompt .= "\n{$secLabel['trends']}:\n{$trendsText}\n";
         }
 
         if (! empty($contextualData['customer_growth'])) {
             $growthText = $this->formatCustomerGrowth($contextualData['customer_growth']);
-            $prompt .= "\nРаст на клиенти:\n{$growthText}\n";
+            $prompt .= "\n{$secLabel['growth']}:\n{$growthText}\n";
         }
 
         if (! empty($contextualData['payment_timing'])) {
@@ -2831,6 +2835,156 @@ DOCUMENTATION;
         }
 
         return true;
+    }
+
+    /**
+     * Detect the language of user input
+     *
+     * Supports: Macedonian (mk), Albanian (sq), Turkish (tr), English (en)
+     * Returns 'mk' as default if detection is uncertain.
+     *
+     * @param  string  $text  The text to analyze
+     * @return string Language code ('mk', 'sq', 'tr', 'en')
+     */
+    private function detectLanguage(string $text): string
+    {
+        $text = mb_strtolower(trim($text));
+
+        // Albanian indicators (check first - has unique characters like ë, ç)
+        $albanianPatterns = [
+            '/[ëç]/u',  // Unique Albanian characters
+            '/\b(kush|sa|si|pse|ku|cili|cila|kam|ke|ka|jemi|jeni|jan[eë])\b/u',
+            '/\b(fatur[aë]|klient|pag[eu]|borxh|fitim|humbje|shpenzim)\b/u',
+            '/\b(mir[eë]dita|faleminderit|po|jo|n[eë]se|mund)\b/u',
+        ];
+        foreach ($albanianPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return 'sq';
+            }
+        }
+
+        // Turkish indicators (has unique characters like ı, ş, ğ)
+        $turkishPatterns = [
+            '/[ışğ]/u',  // Unique Turkish characters
+            '/\b(kim|nas[ıi]l|nerede|neden|hangi|var|yok)\b/u',
+            '/\b(fatura|m[uü][sş]teri|[oö]deme|bor[cç]|gider)\b/u',
+            '/\b(merhaba|te[sş]ekk[uü]r|evet|hay[ıi]r|l[uü]tfen)\b/u',
+        ];
+        foreach ($turkishPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return 'tr';
+            }
+        }
+
+        // Macedonian/Cyrillic indicators
+        if (preg_match('/[\p{Cyrillic}]/u', $text)) {
+            return 'mk';
+        }
+
+        // Macedonian Latin transliteration patterns
+        $macedonianLatinPatterns = [
+            '/\b(koj|shto|kade|zoshto|kolku|dali|ima|nema|faktura)\b/u',
+            '/\b(klient|plakanje|dolg|profit|zaguba|trosok)\b/u',
+            '/\b(zdravo|blagodaram|molam)\b/u',
+        ];
+        foreach ($macedonianLatinPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return 'mk';
+            }
+        }
+
+        // English indicators
+        $englishPatterns = [
+            '/\b(who|what|where|why|when|how|which)\b/u',
+            '/\b(invoice|customer|payment|debt|profit|loss|expense|revenue)\b/u',
+            '/\b(hello|thanks|please|the|and|but)\b/u',
+        ];
+        $englishScore = 0;
+        foreach ($englishPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                $englishScore++;
+            }
+        }
+        if ($englishScore >= 2) {
+            return 'en';
+        }
+
+        // Default to Macedonian (primary market)
+        return 'mk';
+    }
+
+    /**
+     * Get multilingual prompt templates
+     *
+     * @param  string  $lang  Language code ('mk', 'sq', 'tr', 'en')
+     * @return array Prompt template with intro, role, language instruction and labels
+     */
+    private function getMultilingualPrompt(string $lang): array
+    {
+        $prompts = [
+            'mk' => [
+                'intro' => 'Ти си финансиски советник кој работи со Facturino - систем за фактурирање и финансиско управување.',
+                'role_items' => "- Знаеш ГИ СЈ работи во Facturino апликацијата\n- Помагаш на корисниците со финансиски прашања, анализа и совети\n- Даваш конкретни, акционабилни совети\n- Може да им помогнеш да ја користат апликацијата",
+                'response_language' => '- Одговараш на македонски јазик',
+                'context_label' => 'Контекст на компанијата',
+                'labels' => [
+                    'name' => 'Име', 'total_invoices' => 'Вкупно фактури', 'draft_invoices' => 'Фактури во изработка',
+                    'pending_invoices' => 'Чекај на наплата', 'overdue_invoices' => 'Задоцнети фактури',
+                    'revenue' => 'Приходи', 'expenses' => 'Трошоци', 'profit' => 'Профит', 'margin' => 'маржа',
+                    'payments_received' => 'Наплатени плаќања', 'outstanding' => 'Неплатени фактури (износ)',
+                    'avg_invoice' => 'Просечна вредност на фактура', 'customers' => 'Број на клиенти',
+                    'suppliers' => 'Број на добавувачи', 'items' => 'Број на артикли',
+                    'estimates' => 'Понуди', 'bills' => 'Сметки од добавувачи', 'projects' => 'Проекти',
+                ],
+            ],
+            'sq' => [
+                'intro' => 'Ti je një këshilltar financiar që punon me Facturino - sistem për faturim dhe menaxhim financiar.',
+                'role_items' => "- Njeh të gjitha funksionet e aplikacionit Facturino\n- Ndihmon përdoruesit me pyetje financiare, analiza dhe këshilla\n- Jep këshilla konkrete dhe të zbatueshme\n- Mund t'i ndihmosh të përdorin aplikacionin",
+                'response_language' => '- Përgjigju në gjuhën shqipe',
+                'context_label' => 'Konteksti i kompanisë',
+                'labels' => [
+                    'name' => 'Emri', 'total_invoices' => 'Fatura gjithsej', 'draft_invoices' => 'Fatura në përgatitje',
+                    'pending_invoices' => 'Në pritje të pagesës', 'overdue_invoices' => 'Fatura të vonuara',
+                    'revenue' => 'Të ardhura', 'expenses' => 'Shpenzime', 'profit' => 'Fitim', 'margin' => 'marzha',
+                    'payments_received' => 'Pagesa të marra', 'outstanding' => 'Fatura të papaguara (shuma)',
+                    'avg_invoice' => 'Vlera mesatare e faturës', 'customers' => 'Numri i klientëve',
+                    'suppliers' => 'Numri i furnitorëve', 'items' => 'Numri i artikujve',
+                    'estimates' => 'Oferta', 'bills' => 'Fatura nga furnitorët', 'projects' => 'Projekte',
+                ],
+            ],
+            'tr' => [
+                'intro' => 'Sen Facturino ile çalışan bir mali danışmansın - faturalama ve mali yönetim sistemi.',
+                'role_items' => "- Facturino uygulamasındaki tüm işlevleri biliyorsun\n- Kullanıcılara mali sorular, analiz ve tavsiyeler konusunda yardım ediyorsun\n- Somut ve uygulanabilir tavsiyeler veriyorsun\n- Uygulamayı kullanmalarına yardım edebilirsin",
+                'response_language' => '- Türkçe olarak cevap ver',
+                'context_label' => 'Şirket bağlamı',
+                'labels' => [
+                    'name' => 'İsim', 'total_invoices' => 'Toplam fatura', 'draft_invoices' => 'Taslak faturalar',
+                    'pending_invoices' => 'Ödeme bekleyen', 'overdue_invoices' => 'Gecikmiş faturalar',
+                    'revenue' => 'Gelir', 'expenses' => 'Giderler', 'profit' => 'Kâr', 'margin' => 'marj',
+                    'payments_received' => 'Alınan ödemeler', 'outstanding' => 'Ödenmemiş faturalar (tutar)',
+                    'avg_invoice' => 'Ortalama fatura değeri', 'customers' => 'Müşteri sayısı',
+                    'suppliers' => 'Tedarikçi sayısı', 'items' => 'Ürün sayısı',
+                    'estimates' => 'Teklifler', 'bills' => 'Tedarikçi faturaları', 'projects' => 'Projeler',
+                ],
+            ],
+            'en' => [
+                'intro' => 'You are a financial advisor working with Facturino - an invoicing and financial management system.',
+                'role_items' => "- You know all features of the Facturino application\n- You help users with financial questions, analysis and advice\n- You give concrete, actionable advice\n- You can help them use the application",
+                'response_language' => '- Respond in English',
+                'context_label' => 'Company context',
+                'labels' => [
+                    'name' => 'Name', 'total_invoices' => 'Total invoices', 'draft_invoices' => 'Draft invoices',
+                    'pending_invoices' => 'Awaiting payment', 'overdue_invoices' => 'Overdue invoices',
+                    'revenue' => 'Revenue', 'expenses' => 'Expenses', 'profit' => 'Profit', 'margin' => 'margin',
+                    'payments_received' => 'Payments received', 'outstanding' => 'Outstanding invoices (amount)',
+                    'avg_invoice' => 'Average invoice value', 'customers' => 'Number of customers',
+                    'suppliers' => 'Number of suppliers', 'items' => 'Number of items',
+                    'estimates' => 'Estimates', 'bills' => 'Bills from suppliers', 'projects' => 'Projects',
+                ],
+            ],
+        ];
+
+        return $prompts[$lang] ?? $prompts['mk'];
     }
 }
 
