@@ -31,26 +31,24 @@ export default function AIShowcase({ t }: { t: Dictionary }) {
                         </div>
                     </div>
 
-                    <div className="space-y-8 order-1 lg:order-2">
+                    <div className="grid grid-cols-2 gap-4 md:gap-6 order-1 lg:order-2">
                         {ai.features.map((feature, index) => (
-                            <div key={index} className="flex gap-4 group">
-                                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                            <div key={index} className="group p-3 md:p-4 rounded-xl bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all">
+                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                     <Image
                                         src="/assets/images/icon_ai_automation_1763567058570.png"
                                         alt="AI Icon"
-                                        width={32}
-                                        height={32}
-                                        className="w-8 h-8"
+                                        width={28}
+                                        height={28}
+                                        className="w-6 h-6 md:w-7 md:h-7"
                                     />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                                        {feature.title}
-                                    </h3>
-                                    <p className="text-gray-600 leading-relaxed">
-                                        {feature.desc}
-                                    </p>
-                                </div>
+                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    {feature.desc}
+                                </p>
                             </div>
                         ))}
                     </div>
