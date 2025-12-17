@@ -208,21 +208,18 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Register model observers for accounting backbone
+     *
+     * IMPORTANT: We always register observers if the env var is set.
+     * The Pennant feature check is done at runtime in the observers/adapter
+     * because at boot time there's no authenticated user for Pennant to check.
      */
     public function bootObservers(): void
     {
-        // Only register observers if accounting backbone feature is enabled
+        // Register IFRS observers if global feature flag is enabled via config or env
+        // Note: We only check config/env here, NOT Pennant, because Pennant needs
+        // an authenticated user which doesn't exist at boot time.
+        // The IfrsAdapter will do the per-company feature check at runtime.
         $isEnabled = config('ifrs.enabled', false) || env('FEATURE_ACCOUNTING_BACKBONE', false);
-
-        // Check database feature flag if available (may not exist during tests/migrations)
-        if (! $isEnabled && function_exists('feature')) {
-            try {
-                $isEnabled = feature('accounting-backbone');
-            } catch (\Exception $e) {
-                // Features table doesn't exist yet (e.g., during migrations or tests)
-                $isEnabled = false;
-            }
-        }
 
         if ($isEnabled) {
             \App\Models\Invoice::observe(\App\Observers\InvoiceObserver::class);
@@ -236,6 +233,8 @@ class AppServiceProvider extends ServiceProvider
 
             // Phase 2: Proforma Invoice observer
             \App\Models\ProformaInvoice::observe(\App\Observers\ProformaInvoiceObserver::class);
+
+            \Illuminate\Support\Facades\Log::debug('IFRS observers registered');
         }
 
         // Audit trail observers (always enabled)
