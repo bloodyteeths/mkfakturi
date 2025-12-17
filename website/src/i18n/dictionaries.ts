@@ -563,7 +563,7 @@ const tr: Dictionary = {
   faq: {
     title: 'SSS',
     items: [
-      { q: 'e‑Fatura'ya hazır mısınız?', a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
+      { q: "e‑Fatura'ya hazır mısınız?", a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
       { q: 'AI nasıl çalışır?', a: 'Her satır için KDV/hesap önerir — onay sizde.' },
       { q: 'PSD2 destekliyor musunuz?', a: 'Evet, ekstre içe aktarma ve yarı otomatik mutabakat.' },
       { q: 'AI danışmana ne sorabilirim?', a: 'İşinizle ilgili her şey! "Kim borçlu?", "Kârlı mıyım?", "En büyük müşteriyi kaybedersem ne olur?", "Kârı nasıl artırabilirim?" — AI verilerinizi analiz eder ve somut cevaplar verir.' }
