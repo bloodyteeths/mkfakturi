@@ -745,6 +745,8 @@ class IfrsAdapter
         if ($user) {
             // Temporarily set entity_id on user for IFRS EntityScope
             $user->entity_id = $entity->id;
+            // Also set the entity relationship directly
+            $user->setRelation('entity', $entity);
         }
     }
 
@@ -753,10 +755,17 @@ class IfrsAdapter
      */
     protected function getOrCreateEntityForCompany(Company $company): ?Entity
     {
+        // Refresh company to get latest ifrs_entity_id
+        $company->refresh();
+
         // If company already has an IFRS entity, return it
         if ($company->ifrs_entity_id) {
             $entity = Entity::find($company->ifrs_entity_id);
             if ($entity) {
+                Log::debug('Using existing IFRS Entity', [
+                    'company_id' => $company->id,
+                    'entity_id' => $entity->id,
+                ]);
                 // Set user context BEFORE any IFRS queries to avoid EntityScope errors
                 $this->setUserEntityContext($entity);
                 // Ensure ReportingPeriod exists for current year
@@ -768,15 +777,24 @@ class IfrsAdapter
 
         // Create new IFRS Entity for this company
         try {
+            $currencyId = $this->getCurrencyId($company->id);
+
             $entity = Entity::create([
                 'name' => $company->name,
-                'currency_id' => $this->getCurrencyId($company->id),
+                'currency_id' => $currencyId,
                 'year_start' => 1, // January
                 'multi_currency' => false,
             ]);
 
-            // Link entity to company
-            $company->update(['ifrs_entity_id' => $entity->id]);
+            // Link entity to company - use DB::table to ensure it saves
+            DB::table('companies')
+                ->where('id', $company->id)
+                ->update(['ifrs_entity_id' => $entity->id]);
+
+            Log::info('Created IFRS Entity for company', [
+                'company_id' => $company->id,
+                'entity_id' => $entity->id,
+            ]);
 
             // Set user context BEFORE any IFRS queries
             $this->setUserEntityContext($entity);
@@ -784,16 +802,12 @@ class IfrsAdapter
             // Create ReportingPeriod for current year
             $this->ensureReportingPeriodExists($entity);
 
-            Log::info('Created IFRS Entity for company', [
-                'company_id' => $company->id,
-                'entity_id' => $entity->id,
-            ]);
-
             return $entity;
         } catch (\Exception $e) {
             Log::error('Failed to create IFRS Entity for company', [
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return null;
@@ -819,24 +833,48 @@ class IfrsAdapter
                 // Set user context before creating (for any observers/events)
                 $this->setUserEntityContext($entity);
 
-                ReportingPeriod::create([
+                // Create the ReportingPeriod directly via DB to bypass any scope issues
+                $periodId = DB::table('ifrs_reporting_periods')->insertGetId([
                     'entity_id' => $entity->id,
                     'calendar_year' => $currentYear,
                     'period_count' => 12,
-                    'status' => ReportingPeriod::OPEN,
+                    'status' => 'OPEN',
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
                 Log::info('Created IFRS ReportingPeriod', [
                     'entity_id' => $entity->id,
                     'year' => $currentYear,
+                    'period_id' => $periodId,
                 ]);
             } catch (\Exception $e) {
-                Log::error('Failed to create IFRS ReportingPeriod', [
+                // Might already exist due to race condition
+                Log::warning('Failed to create IFRS ReportingPeriod (might already exist)', [
                     'entity_id' => $entity->id,
                     'year' => $currentYear,
                     'error' => $e->getMessage(),
                 ]);
             }
+        } else {
+            Log::debug('IFRS ReportingPeriod already exists', [
+                'entity_id' => $entity->id,
+                'year' => $currentYear,
+                'period_id' => $existingPeriod->id,
+            ]);
+        }
+
+        // Verify it exists
+        $verifyPeriod = DB::table('ifrs_reporting_periods')
+            ->where('entity_id', $entity->id)
+            ->where('calendar_year', $currentYear)
+            ->first();
+
+        if (! $verifyPeriod) {
+            Log::error('IFRS ReportingPeriod verification FAILED - period not found after creation', [
+                'entity_id' => $entity->id,
+                'year' => $currentYear,
+            ]);
         }
     }
 
