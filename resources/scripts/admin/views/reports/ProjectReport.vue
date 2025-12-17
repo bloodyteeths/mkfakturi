@@ -43,36 +43,6 @@
             </BaseInputGroup>
           </div>
 
-          <BaseInputGroup
-            :label="$t('customers.customer')"
-            class="mb-4"
-          >
-            <BaseMultiselect
-              v-model="filters.customer_id"
-              :options="customers"
-              value-prop="id"
-              track-by="name"
-              label="name"
-              :placeholder="$t('general.select_customer')"
-              :can-deselect="true"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup
-            :label="$t('projects.status')"
-            class="mb-4"
-          >
-            <BaseMultiselect
-              v-model="filters.status"
-              :options="statusOptions"
-              value-prop="value"
-              track-by="label"
-              label="label"
-              :placeholder="$t('general.all')"
-              :can-deselect="true"
-            />
-          </BaseInputGroup>
-
           <BaseButton
             variant="primary"
             class="w-full"
@@ -353,7 +323,6 @@ const notificationStore = useNotificationStore()
 
 const isLoading = ref(false)
 const reportData = ref(null)
-const customers = ref([])
 const showDetailModal = ref(false)
 const projectDetail = ref(null)
 const selectedProject = ref(null)
@@ -371,21 +340,11 @@ const dateRange = reactive([
   { label: t('dateRange.custom'), key: 'Custom' },
 ])
 
-const statusOptions = ref([
-  { label: t('projects.status_open'), value: 'open' },
-  { label: t('projects.status_in_progress'), value: 'in_progress' },
-  { label: t('projects.status_completed'), value: 'completed' },
-  { label: t('projects.status_on_hold'), value: 'on_hold' },
-  { label: t('projects.status_cancelled'), value: 'cancelled' },
-])
-
 const selectedRange = ref(dateRange[2]) // Default to "This Month"
 
 const filters = reactive({
   from_date: moment().startOf('month').format('YYYY-MM-DD'),
   to_date: moment().endOf('month').format('YYYY-MM-DD'),
-  customer_id: null,
-  status: null,
 })
 
 const formatMoney = (amount, currencyCode = null) => {
@@ -447,14 +406,6 @@ async function loadReports() {
       to_date: filters.to_date,
     }
 
-    if (filters.customer_id) {
-      params.customer_id = filters.customer_id
-    }
-
-    if (filters.status) {
-      params.status = filters.status
-    }
-
     const response = await axios.get('/reports/projects', { params })
     reportData.value = response.data
   } catch (error) {
@@ -464,17 +415,6 @@ async function loadReports() {
     })
   } finally {
     isLoading.value = false
-  }
-}
-
-async function loadCustomers() {
-  try {
-    const response = await axios.get('/customers', {
-      params: { limit: 'all' },
-    })
-    customers.value = response.data.data || []
-  } catch (error) {
-    console.error('Error loading customers:', error)
   }
 }
 
@@ -491,7 +431,9 @@ async function viewProjectDetail(projectId) {
     console.log('API response:', response.data)
     projectDetail.value = response.data
     selectedProject.value = response.data.project
+    console.log('Setting showDetailModal to true, current value:', showDetailModal.value)
     showDetailModal.value = true
+    console.log('showDetailModal after set:', showDetailModal.value)
   } catch (error) {
     console.error('viewProjectDetail error:', error)
     notificationStore.showNotification({
@@ -546,7 +488,6 @@ function exportToCSV() {
 }
 
 onMounted(async () => {
-  await loadCustomers()
   await loadReports()
 })
 </script>
