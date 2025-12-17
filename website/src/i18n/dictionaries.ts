@@ -89,13 +89,14 @@ const mk: Dictionary = {
   },
   heroTagline: 'Сметководствениот софтвер што го очекувавте – конечно е тука.',
   aiSection: {
-    badge: 'Моќ на AI',
-    title: 'Сметководство на автопилот',
-    subtitle: 'Нашиот напреден AI се грижи за досадното внесување податоци додека вие се фокусирате на раст на вашиот бизнис.',
+    badge: 'AI Финансиски Советник',
+    title: 'Прашај ме било што за твојот бизнис',
+    subtitle: 'Не само автоматизација — добиваш личен финансиски советник кој ги анализира твоите податоци и дава конкретни совети на македонски.',
     features: [
-      { title: 'Паметна категоризација', desc: 'AI автоматски препознава типови на трансакции и предлага соодветни ДДВ ставки и сметки.' },
-      { title: 'Препознавање образци', desc: 'Системот учи од вашите претходни внесувања и станува се попрецизен со текот на времето.' },
-      { title: 'Автоматизирани работни процеси', desc: 'Автоматско порамнување на фактури со банкарски изводи и интелигентни потсетници.' }
+      { title: '💬 Разговарај со AI', desc: 'Прашај "Кој клиент ми должи најмногу?" или "Дали сум профитабилен?" — добиј одговор веднаш.' },
+      { title: '⚠️ Рано предупредување за ризици', desc: 'AI те известува кога еден клиент станува преголем ризик или кога имаш задоцнети фактури.' },
+      { title: '📊 Прогноза на готовина', desc: 'Гледај 90 дена напред — дали ќе имаш доволно пари на сметка следниот месец?' },
+      { title: '🎯 Совети за профит', desc: '"Колку да ги зголемам цените за да имам 500.000 профит?" — добиј конкретен план по артикли.' }
     ]
   },
   featureGrid: {
@@ -156,7 +157,7 @@ const mk: Dictionary = {
       { quote: 'Месечното затворање ни падна од 3 дена на неколку часа.', author: 'Ана, сметководител' },
       { quote: 'Изводите влегуваат директно и порамнувањето е лесно.', author: 'Игор, сопственик на фирма' },
       { quote: 'е‑Фактура интеграцијата е совршена. Заштедивме многу време.', author: 'Марија, финансиски директор' },
-      { quote: 'AI предлозите се точни и ни помагаат да избегнеме грешки.', author: 'Петар, раководител на сметководство' }
+      { quote: 'AI ми кажа дека 85% од приходот ми доаѓа од еден клиент. Веднаш почнав да барам нови.', author: 'Стефан, сопственик на мала фирма' }
     ]
   },
   faq: {
@@ -164,7 +165,8 @@ const mk: Dictionary = {
     items: [
       { q: 'Дали сте подготвени за е‑Фактура?', a: 'Да, моделот е изграден околу е‑фактури и се поврзуваме штом UJP отвори продукциски API + QES.' },
       { q: 'Како функционира AI?', a: 'Предлага ДДВ/конта по ставка — човек секогаш потврдува/уредува.' },
-      { q: 'Поддржувате ли PSD2?', a: 'Да, вклучително увоз на изводи и полуавтоматско порамнување.' }
+      { q: 'Поддржувате ли PSD2?', a: 'Да, вклучително увоз на изводи и полуавтоматско порамнување.' },
+      { q: 'Што може да го прашам AI советникот?', a: 'Било што за твојот бизнис! "Кој ми должи?", "Дали сум профитабилен?", "Што ако го изгубам најголемиот клиент?", "Како да го зголемам профитот?" — AI ги анализира твоите податоци и дава конкретни одговори на македонски.' }
     ]
   },
   cta: { title: 'Подготвени сте? Започнете бесплатно денес.', sub: 'Без кредитна картичка • 14-дневен бесплатен пробен период • Откажете во секое време', button: 'Започни бесплатно' },
@@ -173,11 +175,14 @@ const mk: Dictionary = {
     heroTitle: 'Функции што не можете да ги промашите',
     groups: [
       {
-        title: 'AI и автоматизација',
+        title: 'AI Финансиски Советник',
         items: [
-          'AI предлози за ДДВ категории и сметки по ставка',
-          'Повторна употреба на шеми за побрзо месечно работење',
-          'Рекурентни фактури, потсетници и едноставни работни текови'
+          '💬 Прашај било што: "Кој ми должи?", "Дали сум профитабилен?", "Како да го зголемам профитот?"',
+          '⚠️ Рано предупредување: AI те известува за ризици од зависност од клиенти',
+          '📊 90-дневна прогноза на паричен тек',
+          '🎯 Совети за оптимизација на цени и профит',
+          'Анализа на старост на побарувања (AR Aging) со топ должници',
+          'Што-ако сценарија: "Што ако го изгубам најголемиот клиент?"'
         ]
       },
       {
@@ -284,13 +289,14 @@ const sq: Dictionary = {
   },
   heroTagline: 'Softueri i kontabilitetit që keni pritur – më në fund është këtu.',
   aiSection: {
-    badge: 'Fuqia e AI',
-    title: 'Kontabilitet në autopilot',
-    subtitle: 'AI-ja jonë e avancuar merret me futjen e lodhshme të të dhënave ndërsa ju fokusoheni në rritjen e biznesit tuaj.',
+    badge: 'Këshilltar Financiar AI',
+    title: 'Pyetni çdo gjë për biznesin tuaj',
+    subtitle: 'Jo vetëm automatizim — merrni një këshilltar financiar personal që analizon të dhënat tuaja dhe jep këshilla konkrete.',
     features: [
-      { title: 'Kategorizim i mençur', desc: 'AI automatikisht njeh llojet e transaksioneve dhe propozon TVSH dhe llogari përkatëse.' },
-      { title: 'Njohja e modeleve', desc: 'Sistemi mëson nga hyrjet tuaja të mëparshme dhe bëhet gjithnjë e më i saktë me kalimin e kohës.' },
-      { title: 'Rrjedha pune të automatizuara', desc: 'Pajtim automatik i faturave me ekstrakte bankare dhe kujtues inteligjentë.' }
+      { title: '💬 Bisedoni me AI', desc: 'Pyesni "Cili klient më detyron më shumë?" ose "A jam profitabil?" — merrni përgjigje menjëherë.' },
+      { title: '⚠️ Paralajmërim i hershëm për rreziqet', desc: 'AI ju njofton kur një klient bëhet rrezik i madh ose keni fatura të vonuara.' },
+      { title: '📊 Parashikim i parasë', desc: 'Shikoni 90 ditë përpara — a do të keni mjaft para në llogari muajin e ardhshëm?' },
+      { title: '🎯 Këshilla për profit', desc: '"Sa duhet t\'i rris çmimet për të pasur 500.000 profit?" — merrni plan konkret për çdo produkt.' }
     ]
   },
   featureGrid: {
@@ -351,7 +357,7 @@ const sq: Dictionary = {
       { quote: 'Mbyllja e fund‑muajit ra nga 3 ditë në disa orë.', author: 'Arta, kontabiliste' },
       { quote: 'Ekstraktet hyjnë direkt dhe përputhja është e lehtë.', author: 'Blerim, pronar biznesi' },
       { quote: 'Integrimi i e‑Faturës është i përkryer. Kemi kursyer shumë kohë.', author: 'Maria, drejtoreshë financiare' },
-      { quote: 'Sugjerimet e AI janë të sakta dhe na ndihmojnë të shmangim gabime.', author: 'Petrit, menaxher kontabiliteti' }
+      { quote: 'AI më tha se 85% e të ardhurave vijnë nga një klient. Fillova menjëherë të kërkoj të rinj.', author: 'Stefan, pronar i biznesit të vogël' }
     ]
   },
   faq: {
@@ -359,20 +365,24 @@ const sq: Dictionary = {
     items: [
       { q: 'A jeni gati për e‑Faturë?', a: 'Po, modeli është ndërtuar mbi e‑faturë dhe lidhemi sapo UJP hap API + QES.' },
       { q: 'Si punon AI?', a: 'Sugjeron TVSH/llogari për çdo rresht — njeriu gjithmonë konfirmon.' },
-      { q: 'A mbështesni PSD2?', a: 'Po, import ekstraktesh dhe pajtim gjysmë‑automatik.' }
+      { q: 'A mbështesni PSD2?', a: 'Po, import ekstraktesh dhe pajtim gjysmë‑automatik.' },
+      { q: 'Çfarë mund të pyes këshilltarin AI?', a: 'Çdo gjë për biznesin tuaj! "Kush më detyron?", "A jam profitabil?", "Çfarë nëse humb klientin më të madh?", "Si ta rris profitin?" — AI analizon të dhënat tuaja dhe jep përgjigje konkrete.' }
     ]
   },
   cta: { title: 'Gati? Fillo falas sot.', sub: 'Pa kartë krediti • Provë falas 14 ditë • Anulo në çdo kohë', button: 'Fillo falas' },
   footer: { rights: '© Facturino. Të gjitha të drejtat e rezervuara.' },
   featuresPage: {
-    heroTitle: 'Veçori që nuk mund t’i anashkaloni',
+    heroTitle: 'Veçori që nuk mund t'i anashkaloni',
     groups: [
       {
-        title: 'AI & Automatizim',
+        title: 'Këshilltar Financiar AI',
         items: [
-          'Sugjerime AI për kategori TVSH dhe llogari për çdo rresht',
-          'Rishfrytëzim i modeleve për punë më të shpejtë çdo muaj',
-          'Fatura periodike, rikujtues dhe rrjedha pune bazike'
+          '💬 Pyesni çdo gjë: "Kush më detyron?", "A jam profitabil?", "Si ta rris profitin?"',
+          '⚠️ Paralajmërim i hershëm: AI ju njofton për rreziqet e varësisë nga klientët',
+          '📊 Parashikim 90-ditor i fluksit të parasë',
+          '🎯 Këshilla për optimizim të çmimeve dhe profitit',
+          'Analizë e moshës së borxheve (AR Aging) me debitorët kryesorë',
+          'Skenarë çfarë-nëse: "Çfarë nëse humb klientin më të madh?"'
         ]
       },
       {
@@ -479,13 +489,14 @@ const tr: Dictionary = {
   },
   heroTagline: 'Beklediğiniz muhasebe yazılımı – nihayet burada.',
   aiSection: {
-    badge: 'AI Gücü',
-    title: 'Otopilotta muhasebe',
-    subtitle: 'Gelişmiş AI muhasebe görevi sıkıcı veri girişiyle ilgilenirken siz işinizi büyütmeye odaklanın.',
+    badge: 'AI Mali Danışman',
+    title: 'İşiniz hakkında her şeyi sorun',
+    subtitle: 'Sadece otomasyon değil — verilerinizi analiz eden ve somut tavsiyeler veren kişisel bir mali danışman alırsınız.',
     features: [
-      { title: 'Akıllı kategorizasyon', desc: 'AI otomatik olarak işlem türlerini tanır ve uygun KDV ve hesapları önerir.' },
-      { title: 'Desen tanıma', desc: 'Sistem önceki girişlerinizden öğrenir ve zaman içinde daha da doğru hale gelir.' },
-      { title: 'Otomatik iş akışları', desc: 'Faturaların banka ekstreleriyle otomatik eşleştirilmesi ve akıllı hatırlatmalar.' }
+      { title: '💬 AI ile Sohbet', desc: '"En çok borcu olan müşteri kim?" veya "Kârlı mıyım?" diye sorun — anında cevap alın.' },
+      { title: '⚠️ Erken Risk Uyarısı', desc: 'AI, bir müşteri çok büyük risk haline geldiğinde veya gecikmiş faturalarınız olduğunda sizi bilgilendirir.' },
+      { title: '📊 Nakit Tahmin', desc: '90 gün ileriye bakın — gelecek ay hesabınızda yeterli paranız olacak mı?' },
+      { title: '🎯 Kâr Tavsiyeleri', desc: '"500.000 kâr için fiyatları ne kadar artırmalıyım?" — ürün bazında somut plan alın.' }
     ]
   },
   featureGrid: {
@@ -546,15 +557,16 @@ const tr: Dictionary = {
       { quote: 'Ay sonu kapanışı 3 günden birkaç saate düştü.', author: 'Selin, muhasebeci' },
       { quote: 'Ekstreler doğrudan iniyor ve uzlaştırma kolay.', author: 'Emir, işletme sahibi' },
       { quote: 'e‑Fatura entegrasyonu mükemmel. Çok zaman kazandık.', author: 'Maria, mali müdür' },
-      { quote: 'AI önerileri doğru ve hataları önlememize yardımcı oluyor.', author: 'Petrit, muhasebe müdürü' }
+      { quote: 'AI gelirimin %85\'inin tek müşteriden geldiğini söyledi. Hemen yeni müşteri aramaya başladım.', author: 'Stefan, küçük işletme sahibi' }
     ]
   },
   faq: {
     title: 'SSS',
     items: [
-      { q: 'e‑Fatura’ya hazır mısınız?', a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
+      { q: 'e‑Fatura'ya hazır mısınız?', a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
       { q: 'AI nasıl çalışır?', a: 'Her satır için KDV/hesap önerir — onay sizde.' },
-      { q: 'PSD2 destekliyor musunuz?', a: 'Evet, ekstre içe aktarma ve yarı otomatik mutabakat.' }
+      { q: 'PSD2 destekliyor musunuz?', a: 'Evet, ekstre içe aktarma ve yarı otomatik mutabakat.' },
+      { q: 'AI danışmana ne sorabilirim?', a: 'İşinizle ilgili her şey! "Kim borçlu?", "Kârlı mıyım?", "En büyük müşteriyi kaybedersem ne olur?", "Kârı nasıl artırabilirim?" — AI verilerinizi analiz eder ve somut cevaplar verir.' }
     ]
   },
   cta: { title: 'Hazır mısınız? Bugün ücretsiz başlayın.', sub: 'Kredi kartı gerekmez • 14 gün ücretsiz deneme • İstediğiniz zaman iptal edin', button: 'Ücretsiz başla' },
@@ -563,11 +575,14 @@ const tr: Dictionary = {
     heroTitle: 'Gözden kaçırılmayacak özellikler',
     groups: [
       {
-        title: 'Yapay zekâ ve otomasyon',
+        title: 'AI Mali Danışman',
         items: [
-          'Her satır için KDV ve hesap önerileri',
-          'Tekrarlayan desenlerin yeniden kullanımı ile hız',
-          'Tekrarlayan faturalar, hatırlatıcılar ve basit iş akışları'
+          '💬 Her şeyi sorun: "Kim borçlu?", "Kârlı mıyım?", "Kârı nasıl artırabilirim?"',
+          '⚠️ Erken uyarı: AI müşteri bağımlılığı risklerini bildirir',
+          '📊 90 günlük nakit akışı tahmini',
+          '🎯 Fiyat ve kâr optimizasyonu tavsiyeleri',
+          'Alacak yaşlandırma analizi (AR Aging) ile en büyük borçlular',
+          'Ya olursa senaryoları: "En büyük müşteriyi kaybedersem ne olur?"'
         ]
       },
       {
