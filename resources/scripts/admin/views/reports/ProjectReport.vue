@@ -71,9 +71,9 @@
               </p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">{{ $t('reports.projects.total_expenses') }}</p>
-              <p class="text-xl font-semibold text-red-600">
-                {{ formatMoney(reportData.grand_total?.total_expenses || 0) }}
+              <p class="text-sm text-gray-500">{{ $t('reports.projects.total_costs') }}</p>
+              <p class="text-xl font-semibold text-orange-600">
+                {{ formatMoney(Number(reportData.grand_total?.total_expenses || 0) + Number(reportData.grand_total?.total_bills || 0)) }}
               </p>
             </div>
             <div>
@@ -102,7 +102,7 @@
                     {{ $t('reports.projects.total_invoiced') }}
                   </th>
                   <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {{ $t('reports.projects.total_expenses') }}
+                    {{ $t('reports.projects.total_costs') }}
                   </th>
                   <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {{ $t('reports.projects.net_profit') }}
@@ -133,8 +133,8 @@
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
                     {{ formatMoney(project.total_invoiced) }}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-red-600">
-                    {{ formatMoney(project.total_expenses) }}
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-orange-600">
+                    {{ formatMoney(Number(project.total_expenses || 0) + Number(project.total_bills || 0)) }}
                   </td>
                   <td
                     class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"

@@ -75,6 +75,7 @@ class ProjectReportController extends Controller
                     'total_invoiced' => $summary['total_invoiced'],
                     'total_paid' => $summary['total_payments'],
                     'total_expenses' => $summary['total_expenses'],
+                    'total_bills' => $summary['total_bills'],
                     'net_profit' => $summary['net_result'],
                     'from_date' => $fromDate,
                     'to_date' => $toDate,
@@ -82,6 +83,8 @@ class ProjectReportController extends Controller
             }
 
             // Without date filter, use model accessors
+            $summary = $project->getSummary();
+
             return [
                 'id' => $project->id,
                 'name' => $project->name,
@@ -92,6 +95,7 @@ class ProjectReportController extends Controller
                 'total_invoiced' => $project->totalInvoiced,
                 'total_paid' => $project->totalPayments,
                 'total_expenses' => $project->totalExpenses,
+                'total_bills' => $summary['total_bills'],
                 'net_profit' => $project->netResult,
                 'from_date' => null,
                 'to_date' => null,
@@ -103,6 +107,7 @@ class ProjectReportController extends Controller
             'total_invoiced' => $projectReports->sum('total_invoiced'),
             'total_paid' => $projectReports->sum('total_paid'),
             'total_expenses' => $projectReports->sum('total_expenses'),
+            'total_bills' => $projectReports->sum('total_bills'),
             'net_profit' => $projectReports->sum('net_profit'),
         ];
 
