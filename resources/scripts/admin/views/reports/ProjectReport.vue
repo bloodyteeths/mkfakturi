@@ -209,7 +209,7 @@
           <div class="bg-orange-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600">{{ $t('reports.projects.total_costs') }}</p>
             <p class="text-xl font-semibold text-orange-600">
-              {{ formatMoney((projectDetail.summary?.total_expenses || 0) + (projectDetail.summary?.total_bills || 0)) }}
+              {{ formatMoney(Number(projectDetail.summary?.total_expenses || 0) + Number(projectDetail.summary?.total_bills || 0)) }}
             </p>
             <p class="text-xs text-gray-500 mt-1">
               {{ $t('expenses.expenses') }}: {{ formatMoney(projectDetail.summary?.total_expenses || 0) }}
@@ -254,7 +254,7 @@
                   <td class="px-4 py-2">{{ month.month_name }}</td>
                   <td class="px-4 py-2 text-right">{{ formatMoney(month.total_invoiced) }}</td>
                   <td class="px-4 py-2 text-right text-orange-600">
-                    {{ formatMoney((month.total_expenses || 0) + (month.total_bills || 0)) }}
+                    {{ formatMoney(Number(month.total_expenses || 0) + Number(month.total_bills || 0)) }}
                   </td>
                   <td
                     class="px-4 py-2 text-right font-medium"
