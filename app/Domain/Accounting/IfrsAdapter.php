@@ -484,18 +484,33 @@ class IfrsAdapter
             $totalCredits = abs($trialBalance->balances['credit'] ?? 0);
 
             // Format accounts from sections for template
+            // Trial balance has nested structure: $sections['accounts'][$section][$accountType][$categoryName]
             $accounts = [];
             if (isset($sections['accounts'])) {
-                foreach ($sections['accounts'] as $accountType => $typeAccounts) {
-                    foreach ($typeAccounts as $account) {
-                        $balance = $account['balance'] ?? 0;
-                        $accounts[] = [
-                            'name' => $account['name'] ?? $account['account_name'] ?? 'Unknown',
-                            'code' => $account['code'] ?? '',
-                            'debit' => $balance > 0 ? $balance : 0,
-                            'credit' => $balance < 0 ? abs($balance) : 0,
-                            'balance' => $balance,
-                        ];
+                foreach ($sections['accounts'] as $section => $sectionAccounts) {
+                    if (! is_array($sectionAccounts)) {
+                        continue;
+                    }
+                    foreach ($sectionAccounts as $accountType => $categories) {
+                        if (! is_array($categories)) {
+                            continue;
+                        }
+                        foreach ($categories as $categoryName => $categoryData) {
+                            if (! is_array($categoryData)) {
+                                continue;
+                            }
+                            $balance = $categoryData['total'] ?? 0;
+                            if ($balance == 0) {
+                                continue;
+                            }
+                            $accounts[] = [
+                                'name' => $categoryName,
+                                'code' => '',
+                                'debit' => $balance > 0 ? $balance : 0,
+                                'credit' => $balance < 0 ? abs($balance) : 0,
+                                'balance' => $balance,
+                            ];
+                        }
                     }
                 }
             }
@@ -588,21 +603,12 @@ class IfrsAdapter
             $balanceSheet = new BalanceSheet($date->toDateString(), $entity);
             $sections = $balanceSheet->getSections();
 
-            // Get account arrays
-            $assets = $sections['accounts']['ASSETS'] ?? [];
-            $liabilities = $sections['accounts']['LIABILITIES'] ?? [];
-            $equity = $sections['accounts']['EQUITY'] ?? [];
-
-            // Assets are debits (positive), liabilities/equity are credits (negative in ledger)
-            // Flip sign on liabilities and equity for display
-            $liabilities = array_map(function ($account) {
-                $account['balance'] = abs($account['balance'] ?? 0);
-                return $account;
-            }, $liabilities);
-            $equity = array_map(function ($account) {
-                $account['balance'] = abs($account['balance'] ?? 0);
-                return $account;
-            }, $equity);
+            // Flatten nested IFRS structure to get accounts with names
+            // Assets are debits (positive), keep as-is
+            $assets = $this->flattenIfrsAccounts($sections['accounts']['ASSETS'] ?? [], false);
+            // Liabilities and equity are credits (negative in ledger), flip sign for display
+            $liabilities = $this->flattenIfrsAccounts($sections['accounts']['LIABILITIES'] ?? [], true);
+            $equity = $this->flattenIfrsAccounts($sections['accounts']['EQUITY'] ?? [], true);
 
             // Calculate totals with proper signs
             $totalAssets = $sections['totals']['ASSETS'] ?? 0;
@@ -718,14 +724,16 @@ class IfrsAdapter
             $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), $entity);
             $sections = $incomeStatement->getSections();
 
-            // Merge revenues and expenses from sections
+            // Flatten nested IFRS structure to get accounts with names
+            // Revenues are credits (negative in ledger), flip sign for display
             $revenues = array_merge(
-                $sections['accounts']['OPERATING_REVENUES'] ?? [],
-                $sections['accounts']['NON_OPERATING_REVENUES'] ?? []
+                $this->flattenIfrsAccounts($sections['accounts']['OPERATING_REVENUES'] ?? [], true),
+                $this->flattenIfrsAccounts($sections['accounts']['NON_OPERATING_REVENUES'] ?? [], true)
             );
+            // Expenses are debits (positive in ledger), keep as-is
             $expenses = array_merge(
-                $sections['accounts']['OPERATING_EXPENSES'] ?? [],
-                $sections['accounts']['NON_OPERATING_EXPENSES'] ?? []
+                $this->flattenIfrsAccounts($sections['accounts']['OPERATING_EXPENSES'] ?? [], false),
+                $this->flattenIfrsAccounts($sections['accounts']['NON_OPERATING_EXPENSES'] ?? [], false)
             );
 
             // Calculate totals (flip sign for revenues - credits are negative in ledger)
@@ -733,12 +741,6 @@ class IfrsAdapter
                                ($sections['totals']['NON_OPERATING_REVENUES'] ?? 0));
             $totalExpenses = abs(($sections['totals']['OPERATING_EXPENSES'] ?? 0) +
                                 ($sections['totals']['NON_OPERATING_EXPENSES'] ?? 0));
-
-            // Flip sign on revenue account balances (credits stored as negative)
-            $revenues = array_map(function ($account) {
-                $account['balance'] = abs($account['balance'] ?? 0);
-                return $account;
-            }, $revenues);
 
             Log::debug('IncomeStatement: Final data', [
                 'revenue_count' => count($revenues),
@@ -784,6 +786,52 @@ class IfrsAdapter
 
             return ['error' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Flatten IFRS nested account structure into simple array of accounts with names
+     *
+     * IFRS returns: $sections['accounts']['ASSETS'][$accountType][$categoryName] = [
+     *   'accounts' => Collection([account objects]),
+     *   'total' => X,
+     *   'id' => Y
+     * ]
+     *
+     * We flatten to: [['name' => 'Category Name', 'balance' => X], ...]
+     */
+    protected function flattenIfrsAccounts(array $sectionAccounts, bool $absBalance = false): array
+    {
+        $flattened = [];
+
+        foreach ($sectionAccounts as $accountType => $categories) {
+            if (! is_array($categories)) {
+                continue;
+            }
+
+            foreach ($categories as $categoryName => $categoryData) {
+                if (! is_array($categoryData)) {
+                    continue;
+                }
+
+                $balance = $categoryData['total'] ?? 0;
+                if ($absBalance) {
+                    $balance = abs($balance);
+                }
+
+                // Skip zero balances
+                if ($balance == 0) {
+                    continue;
+                }
+
+                $flattened[] = [
+                    'name' => $categoryName,
+                    'balance' => $balance,
+                    'id' => $categoryData['id'] ?? 0,
+                ];
+            }
+        }
+
+        return $flattened;
     }
 
     /**
