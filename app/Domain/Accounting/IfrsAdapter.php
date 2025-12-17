@@ -400,6 +400,7 @@ class IfrsAdapter
 
             // Get or create IFRS entity for company
             $entity = $this->getOrCreateEntityForCompany($company);
+
             if (! $entity) {
                 return [
                     'error' => 'IFRS Entity not available',
@@ -407,6 +408,9 @@ class IfrsAdapter
                     'status' => 'entity_error',
                 ];
             }
+
+            // Set user's entity context for IFRS EntityScope (multi-tenant support)
+            $this->setUserEntityContext($entity);
 
             // Check if any accounts exist - if not, accounting system not initialized
             $accountCount = Account::where('entity_id', $entity->id)->count();
@@ -482,6 +486,9 @@ class IfrsAdapter
                 ];
             }
 
+            // Set user's entity context for IFRS EntityScope (multi-tenant support)
+            $this->setUserEntityContext($entity);
+
             // Check if any accounts exist - if not, accounting system not initialized
             $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
@@ -550,6 +557,9 @@ class IfrsAdapter
                     'status' => 'entity_error',
                 ];
             }
+
+            // Set user's entity context for IFRS EntityScope (multi-tenant support)
+            $this->setUserEntityContext($entity);
 
             // Check if any accounts exist - if not, accounting system not initialized
             $accountCount = Account::where('entity_id', $entity->id)->count();
@@ -626,6 +636,25 @@ class IfrsAdapter
 
         // Default to false if not set
         return $companyIfrsEnabled === 'YES' || $companyIfrsEnabled === true || $companyIfrsEnabled === '1';
+    }
+
+    /**
+     * Set the user's entity context for IFRS EntityScope
+     *
+     * The IFRS package's EntityScope expects Auth::user()->entity->id to exist.
+     * In multi-tenant SaaS, we need to set this dynamically based on the company.
+     */
+    protected function setUserEntityContext(?Entity $entity): void
+    {
+        if (! $entity) {
+            return;
+        }
+
+        $user = auth()->user();
+        if ($user) {
+            // Temporarily set entity_id on user for IFRS EntityScope
+            $user->entity_id = $entity->id;
+        }
     }
 
     /**
