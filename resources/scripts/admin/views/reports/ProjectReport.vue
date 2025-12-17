@@ -171,11 +171,13 @@
 
     <!-- Project Detail Modal -->
     <BaseModal
-      v-model="showDetailModal"
-      :title="selectedProject?.name || $t('reports.projects.detail')"
-      size="xl"
+      :show="showDetailModal"
+      @close="showDetailModal = false"
     >
-      <div v-if="projectDetail" class="space-y-6">
+      <template #header>
+        {{ selectedProject?.name || $t('reports.projects.detail') }}
+      </template>
+      <div v-if="projectDetail" class="p-6 space-y-6">
         <!-- Project Info -->
         <div class="bg-gray-50 p-4 rounded-lg">
           <div class="grid grid-cols-2 gap-4">
@@ -305,6 +307,13 @@
           </div>
         </div>
       </div>
+      <template #footer>
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+          <BaseButton variant="primary-outline" @click="showDetailModal = false">
+            {{ $t('general.close') }}
+          </BaseButton>
+        </div>
+      </template>
     </BaseModal>
   </BasePage>
 </template>
@@ -316,10 +325,12 @@ import moment from 'moment'
 import axios from 'axios'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useModalStore } from '@/scripts/stores/modal'
 
 const { t } = useI18n()
 const companyStore = useCompanyStore()
 const notificationStore = useNotificationStore()
+const modalStore = useModalStore()
 
 const isLoading = ref(false)
 const reportData = ref(null)
@@ -419,23 +430,18 @@ async function loadReports() {
 }
 
 async function viewProjectDetail(projectId) {
-  console.log('viewProjectDetail called with projectId:', projectId)
   try {
     const params = {
       from_date: filters.from_date,
       to_date: filters.to_date,
     }
 
-    console.log('Making API call to /reports/projects/' + projectId)
     const response = await axios.get(`/reports/projects/${projectId}`, { params })
-    console.log('API response:', response.data)
     projectDetail.value = response.data
     selectedProject.value = response.data.project
-    console.log('Setting showDetailModal to true, current value:', showDetailModal.value)
+    modalStore.size = 'lg'
     showDetailModal.value = true
-    console.log('showDetailModal after set:', showDetailModal.value)
   } catch (error) {
-    console.error('viewProjectDetail error:', error)
     notificationStore.showNotification({
       type: 'error',
       message: t('reports.projects.error_loading_detail'),
