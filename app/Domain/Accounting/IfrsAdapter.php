@@ -624,9 +624,31 @@ class IfrsAdapter
                 ];
             }
 
+            // Debug: Check ledger entries
+            $ledgerCount = DB::table('ifrs_ledgers')
+                ->where('entity_id', $entity->id)
+                ->count();
+            $transactionCount = DB::table('ifrs_transactions')
+                ->where('entity_id', $entity->id)
+                ->count();
+
+            Log::debug('IncomeStatement: Checking IFRS data', [
+                'entity_id' => $entity->id,
+                'account_count' => $accountCount,
+                'ledger_count' => $ledgerCount,
+                'transaction_count' => $transactionCount,
+                'date_range' => [$start->toDateString(), $end->toDateString()],
+            ]);
+
             // IncomeStatement expects startDate, endDate, and entity
             $incomeStatement = new IncomeStatement($start->toDateString(), $end->toDateString(), $entity);
             $sections = $incomeStatement->getSections();
+
+            Log::debug('IncomeStatement: Sections returned', [
+                'has_revenues' => ! empty($sections['accounts']['OPERATING_REVENUES'] ?? []),
+                'has_expenses' => ! empty($sections['accounts']['OPERATING_EXPENSES'] ?? []),
+                'totals' => $sections['totals'] ?? 'none',
+            ]);
 
             return [
                 'start_date' => $start->toDateString(),
