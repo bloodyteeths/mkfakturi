@@ -193,7 +193,7 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div class="bg-blue-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600">{{ $t('reports.projects.total_invoiced') }}</p>
             <p class="text-xl font-semibold text-blue-600">
@@ -206,12 +206,19 @@
               {{ formatMoney(projectDetail.summary?.total_payments || 0) }}
             </p>
           </div>
-          <div class="bg-red-50 p-4 rounded-lg">
-            <p class="text-sm text-gray-600">{{ $t('reports.projects.total_expenses') }}</p>
-            <p class="text-xl font-semibold text-red-600">
-              {{ formatMoney(projectDetail.summary?.total_expenses || 0) }}
+          <div class="bg-orange-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">{{ $t('reports.projects.total_costs') }}</p>
+            <p class="text-xl font-semibold text-orange-600">
+              {{ formatMoney((projectDetail.summary?.total_expenses || 0) + (projectDetail.summary?.total_bills || 0)) }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ $t('expenses.expenses') }}: {{ formatMoney(projectDetail.summary?.total_expenses || 0) }}
+              <br>
+              {{ $t('bills.bills') }}: {{ formatMoney(projectDetail.summary?.total_bills || 0) }}
             </p>
           </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 mt-4">
           <div
             class="p-4 rounded-lg"
             :class="(projectDetail.summary?.net_result || 0) >= 0 ? 'bg-green-50' : 'bg-red-50'"
@@ -222,6 +229,9 @@
               :class="(projectDetail.summary?.net_result || 0) >= 0 ? 'text-green-600' : 'text-red-600'"
             >
               {{ formatMoney(projectDetail.summary?.net_result || 0) }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ $t('reports.projects.total_invoiced') }} - {{ $t('reports.projects.total_costs') }}
             </p>
           </div>
         </div>
@@ -235,7 +245,7 @@
                 <tr>
                   <th class="px-4 py-2 text-left">{{ $t('general.month') }}</th>
                   <th class="px-4 py-2 text-right">{{ $t('reports.projects.total_invoiced') }}</th>
-                  <th class="px-4 py-2 text-right">{{ $t('reports.projects.total_expenses') }}</th>
+                  <th class="px-4 py-2 text-right">{{ $t('reports.projects.total_costs') }}</th>
                   <th class="px-4 py-2 text-right">{{ $t('reports.projects.net_profit') }}</th>
                 </tr>
               </thead>
@@ -243,7 +253,9 @@
                 <tr v-for="month in projectDetail.monthly_breakdown" :key="month.month">
                   <td class="px-4 py-2">{{ month.month_name }}</td>
                   <td class="px-4 py-2 text-right">{{ formatMoney(month.total_invoiced) }}</td>
-                  <td class="px-4 py-2 text-right text-red-600">{{ formatMoney(month.total_expenses) }}</td>
+                  <td class="px-4 py-2 text-right text-orange-600">
+                    {{ formatMoney((month.total_expenses || 0) + (month.total_bills || 0)) }}
+                  </td>
                   <td
                     class="px-4 py-2 text-right font-medium"
                     :class="month.net_result >= 0 ? 'text-green-600' : 'text-red-600'"
@@ -256,8 +268,8 @@
           </div>
         </div>
 
-        <!-- Invoices, Expenses, Payments Lists -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Invoices, Expenses, Bills, Payments Lists -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <h5 class="font-medium mb-2">{{ $t('invoices.invoices') }} ({{ projectDetail.invoices?.length || 0 }})</h5>
             <div class="space-y-1 max-h-40 overflow-y-auto">
@@ -270,6 +282,9 @@
                   <span>{{ invoice.invoice_number }}</span>
                   <span class="font-medium">{{ formatMoney(invoice.total) }}</span>
                 </div>
+              </div>
+              <div v-if="!projectDetail.invoices?.length" class="text-sm text-gray-400 italic">
+                {{ $t('general.no_data_found') }}
               </div>
             </div>
           </div>
@@ -287,6 +302,29 @@
                   <span class="font-medium text-red-600">{{ formatMoney(expense.amount) }}</span>
                 </div>
               </div>
+              <div v-if="!projectDetail.expenses?.length" class="text-sm text-gray-400 italic">
+                {{ $t('general.no_data_found') }}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 class="font-medium mb-2">{{ $t('bills.bills') }} ({{ projectDetail.bills?.length || 0 }})</h5>
+            <div class="space-y-1 max-h-40 overflow-y-auto">
+              <div
+                v-for="bill in projectDetail.bills"
+                :key="bill.id"
+                class="text-sm p-2 bg-gray-50 rounded"
+              >
+                <div class="flex justify-between">
+                  <span>{{ bill.bill_number }}</span>
+                  <span class="font-medium text-orange-600">{{ formatMoney(bill.total) }}</span>
+                </div>
+                <div v-if="bill.supplier" class="text-xs text-gray-500">{{ bill.supplier }}</div>
+              </div>
+              <div v-if="!projectDetail.bills?.length" class="text-sm text-gray-400 italic">
+                {{ $t('general.no_data_found') }}
+              </div>
             </div>
           </div>
 
@@ -302,6 +340,9 @@
                   <span>{{ payment.payment_number }}</span>
                   <span class="font-medium text-green-600">{{ formatMoney(payment.amount) }}</span>
                 </div>
+              </div>
+              <div v-if="!projectDetail.payments?.length" class="text-sm text-gray-400 italic">
+                {{ $t('general.no_data_found') }}
               </div>
             </div>
           </div>

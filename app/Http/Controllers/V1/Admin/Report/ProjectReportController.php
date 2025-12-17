@@ -169,6 +169,15 @@ class ProjectReportController extends Controller
                     }
                     $query->orderBy('payment_date', 'desc');
                 },
+                'bills' => function ($query) use ($request) {
+                    if ($request->has('from_date') && $request->has('to_date')) {
+                        $query->whereBetween('bill_date', [
+                            $request->input('from_date'),
+                            $request->input('to_date'),
+                        ]);
+                    }
+                    $query->orderBy('bill_date', 'desc');
+                },
             ])
             ->findOrFail($id);
 
@@ -231,6 +240,18 @@ class ProjectReportController extends Controller
                     'payment_method' => $payment->payment_method?->name ?? $payment->paymentMethod?->name,
                 ];
             }),
+            'bills' => $project->bills->map(function ($bill) {
+                return [
+                    'id' => $bill->id,
+                    'bill_number' => $bill->bill_number,
+                    'bill_date' => $bill->bill_date instanceof \Carbon\Carbon
+                        ? $bill->bill_date->format('Y-m-d')
+                        : $bill->bill_date,
+                    'total' => $bill->total * ($bill->exchange_rate ?? 1),
+                    'supplier' => $bill->supplier?->name ?? $bill->vendor?->name,
+                    'status' => $bill->status,
+                ];
+            }),
             'from_date' => $fromDate,
             'to_date' => $toDate,
         ]);
@@ -269,13 +290,19 @@ class ProjectReportController extends Controller
                 ->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')
                 ->value('total') ?? 0;
 
+            $bills = $project->bills()
+                ->whereBetween('bill_date', [$monthStart, $monthEnd])
+                ->selectRaw('COALESCE(SUM(total * COALESCE(exchange_rate, 1)), 0) as total')
+                ->value('total') ?? 0;
+
             $months[] = [
                 'month' => $current->format('Y-m'),
                 'month_name' => $current->format('F Y'),
                 'total_invoiced' => $invoiced,
                 'total_expenses' => $expenses,
+                'total_bills' => $bills,
                 'total_payments' => $payments,
-                'net_result' => $invoiced - $expenses,
+                'net_result' => $invoiced - $expenses - $bills,
             ];
 
             $current->addMonth();

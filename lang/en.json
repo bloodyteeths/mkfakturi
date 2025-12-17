@@ -1487,6 +1487,7 @@
       "total_invoiced": "Total Invoiced",
       "total_paid": "Total Paid",
       "total_expenses": "Total Expenses",
+      "total_costs": "Total Costs",
       "net_profit": "Net Profit",
       "no_projects": "No projects found for the selected period",
       "error_loading": "Error loading project reports",
