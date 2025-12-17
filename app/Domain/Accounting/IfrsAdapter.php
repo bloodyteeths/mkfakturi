@@ -79,37 +79,65 @@ class IfrsAdapter
             ]);
 
             // Line Item: Debit Accounts Receivable
-            LineItem::create([
+            // Use DB::table to bypass Eloquent global scopes that may interfere
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $arAccount->id,
                 'amount' => $invoice->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
-                'entity_id' => $entity->id, // Required by Segregating trait
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Line Item: Credit Revenue
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $revenueAccount->id,
                 'amount' => $invoice->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // If there's tax, create a line for tax payable
             if ($invoice->tax > 0) {
                 $taxPayableAccount = $this->getTaxPayableAccount($invoice->company_id, $entity->id);
-                LineItem::create([
+                DB::table('ifrs_line_items')->insert([
                     'transaction_id' => $transaction->id,
                     'account_id' => $taxPayableAccount->id,
                     'amount' => $invoice->tax / 100,
                     'quantity' => 1,
                     'credited' => true, // Credit entry
                     'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
+
+            // Verify LineItems were created
+            $lineItemCount = DB::table('ifrs_line_items')
+                ->where('transaction_id', $transaction->id)
+                ->count();
+
+            Log::debug('IFRS LineItems created for invoice', [
+                'invoice_id' => $invoice->id,
+                'transaction_id' => $transaction->id,
+                'entity_id' => $entity->id,
+                'line_item_count' => $lineItemCount,
+            ]);
+
+            // Reload the transaction with lineItems to ensure they're visible
+            $transaction->load('lineItems');
+
+            Log::debug('Transaction lineItems after reload', [
+                'transaction_id' => $transaction->id,
+                'lineItems_count' => $transaction->lineItems->count(),
+                'user_entity_id' => auth()->user()?->entity?->id,
+            ]);
 
             // Post the transaction to the ledger
             $transaction->post();
