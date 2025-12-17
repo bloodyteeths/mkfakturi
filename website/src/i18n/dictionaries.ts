@@ -377,10 +377,10 @@ const sq: Dictionary = {
       {
         title: 'Këshilltar Financiar AI',
         items: [
-          '💬 Pyesni çdo gjë: "Kush më detyron?", "A jam profitabil?", "Si ta rris profitin?"',
-          '⚠️ Paralajmërim i hershëm: AI ju njofton për rreziqet e varësisë nga klientët',
-          '📊 Parashikim 90-ditor i fluksit të parasë',
-          '🎯 Këshilla për optimizim të çmimeve dhe profitit',
+          'Pyesni çdo gjë: "Kush më detyron?", "A jam profitabil?", "Si ta rris profitin?"',
+          'Paralajmërim i hershëm: AI ju njofton për rreziqet e varësisë nga klientët',
+          'Parashikim 90-ditor i fluksit të parasë',
+          'Këshilla për optimizim të çmimeve dhe profitit',
           'Analizë e moshës së borxheve (AR Aging) me debitorët kryesorë',
           'Skenarë çfarë-nëse: "Çfarë nëse humb klientin më të madh?"'
         ]
@@ -493,10 +493,10 @@ const tr: Dictionary = {
     title: 'İşiniz hakkında her şeyi sorun',
     subtitle: 'Sadece otomasyon değil — verilerinizi analiz eden ve somut tavsiyeler veren kişisel bir mali danışman alırsınız.',
     features: [
-      { title: '💬 AI ile Sohbet', desc: '"En çok borcu olan müşteri kim?" veya "Kârlı mıyım?" diye sorun — anında cevap alın.' },
-      { title: '⚠️ Erken Risk Uyarısı', desc: 'AI, bir müşteri çok büyük risk haline geldiğinde veya gecikmiş faturalarınız olduğunda sizi bilgilendirir.' },
-      { title: '📊 Nakit Tahmin', desc: '90 gün ileriye bakın — gelecek ay hesabınızda yeterli paranız olacak mı?' },
-      { title: '🎯 Kâr Tavsiyeleri', desc: '"500.000 kâr için fiyatları ne kadar artırmalıyım?" — ürün bazında somut plan alın.' }
+      { title: 'AI ile Sohbet', desc: '"En çok borcu olan müşteri kim?" veya "Kârlı mıyım?" diye sorun — anında cevap alın.' },
+      { title: 'Erken Risk Uyarısı', desc: 'AI, bir müşteri çok büyük risk haline geldiğinde veya gecikmiş faturalarınız olduğunda sizi bilgilendirir.' },
+      { title: 'Nakit Tahmin', desc: '90 gün ileriye bakın — gelecek ay hesabınızda yeterli paranız olacak mı?' },
+      { title: 'Kâr Tavsiyeleri', desc: '"500.000 kâr için fiyatları ne kadar artırmalıyım?" — ürün bazında somut plan alın.' }
     ]
   },
   featureGrid: {
@@ -577,10 +577,10 @@ const tr: Dictionary = {
       {
         title: 'AI Mali Danışman',
         items: [
-          '💬 Her şeyi sorun: "Kim borçlu?", "Kârlı mıyım?", "Kârı nasıl artırabilirim?"',
-          '⚠️ Erken uyarı: AI müşteri bağımlılığı risklerini bildirir',
-          '📊 90 günlük nakit akışı tahmini',
-          '🎯 Fiyat ve kâr optimizasyonu tavsiyeleri',
+          'Her şeyi sorun: "Kim borçlu?", "Kârlı mıyım?", "Kârı nasıl artırabilirim?"',
+          'Erken uyarı: AI müşteri bağımlılığı risklerini bildirir',
+          '90 günlük nakit akışı tahmini',
+          'Fiyat ve kâr optimizasyonu tavsiyeleri',
           'Alacak yaşlandırma analizi (AR Aging) ile en büyük borçlular',
           'Ya olursa senaryoları: "En büyük müşteriyi kaybedersem ne olur?"'
         ]
