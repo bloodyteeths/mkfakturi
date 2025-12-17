@@ -484,33 +484,38 @@ class IfrsAdapter
             $totalCredits = abs($trialBalance->balances['credit'] ?? 0);
 
             // Format accounts from sections for template
-            // Trial balance has nested structure: $sections['accounts'][$section][$accountType][$categoryName]
+            // Trial Balance structure: $sections['accounts']['INCOME_STATEMENT'|'BALANCE_SHEET'][$accountType] = [
+            //   'accounts' => Collection([account attributes with 'name']),
+            //   'balance' => X (total for this account type)
+            // ]
             $accounts = [];
+            $accountTypeNames = config('ifrs.accounts', []);
+
             if (isset($sections['accounts'])) {
                 foreach ($sections['accounts'] as $section => $sectionAccounts) {
                     if (! is_array($sectionAccounts)) {
                         continue;
                     }
-                    foreach ($sectionAccounts as $accountType => $categories) {
-                        if (! is_array($categories)) {
+                    foreach ($sectionAccounts as $accountType => $accountTypeData) {
+                        if (! is_array($accountTypeData)) {
                             continue;
                         }
-                        foreach ($categories as $categoryName => $categoryData) {
-                            if (! is_array($categoryData)) {
-                                continue;
-                            }
-                            $balance = $categoryData['total'] ?? 0;
-                            if ($balance == 0) {
-                                continue;
-                            }
-                            $accounts[] = [
-                                'name' => $categoryName,
-                                'code' => '',
-                                'debit' => $balance > 0 ? $balance : 0,
-                                'credit' => $balance < 0 ? abs($balance) : 0,
-                                'balance' => $balance,
-                            ];
+
+                        $balance = $accountTypeData['balance'] ?? 0;
+                        if ($balance == 0) {
+                            continue;
                         }
+
+                        // Get friendly name from IFRS config or use account type
+                        $friendlyName = $accountTypeNames[$accountType] ?? str_replace('_', ' ', ucwords(strtolower($accountType), '_'));
+
+                        $accounts[] = [
+                            'name' => $friendlyName,
+                            'code' => $accountType,
+                            'debit' => $balance > 0 ? $balance : 0,
+                            'credit' => $balance < 0 ? abs($balance) : 0,
+                            'balance' => $balance,
+                        ];
                     }
                 }
             }
