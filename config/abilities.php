@@ -11,7 +11,6 @@ use App\Models\Customer;
 use App\Models\CustomField;
 use App\Models\EInvoice;
 use App\Models\Estimate;
-use App\Models\ExchangeRateProvider;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\ImportJob;
@@ -427,40 +426,7 @@ return [
             'model' => null,
         ],
 
-        // Exchange Rate Provider
-        [
-            'name' => 'view exchange rate provider',
-            'ability' => 'view-exchange-rate-provider',
-            'model' => ExchangeRateProvider::class,
-            'owner_only' => false,
-        ],
-        [
-            'name' => 'create exchange rate provider',
-            'ability' => 'create-exchange-rate-provider',
-            'model' => ExchangeRateProvider::class,
-            'owner_only' => false,
-            'depends_on' => [
-                'view-exchange-rate-provider',
-            ],
-        ],
-        [
-            'name' => 'edit exchange rate provider',
-            'ability' => 'edit-exchange-rate-provider',
-            'model' => ExchangeRateProvider::class,
-            'owner_only' => false,
-            'depends_on' => [
-                'view-exchange-rate-provider',
-            ],
-        ],
-        [
-            'name' => 'delete exchange rate provider',
-            'ability' => 'delete-exchange-rate-provider',
-            'model' => ExchangeRateProvider::class,
-            'owner_only' => false,
-            'depends_on' => [
-                'view-exchange-rate-provider',
-            ],
-        ],
+        // Exchange Rate Provider abilities removed - using free Frankfurter API
 
         // Settings
         [
