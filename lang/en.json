@@ -299,7 +299,10 @@
     "view_all_invoices": "View All Invoices",
     "view_all_expenses": "View All Expenses",
     "view_all_payments": "View All Payments",
-    "showing_data_for": "Showing data for"
+    "showing_data_for": "Showing data for",
+    "status_in_progress": "In Progress",
+    "status_completed": "Completed",
+    "status_cancelled": "Cancelled"
   },
   "customers": {
     "title": "Customers",

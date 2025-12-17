@@ -373,8 +373,10 @@ const dateRange = reactive([
 
 const statusOptions = ref([
   { label: t('projects.status_open'), value: 'open' },
-  { label: t('projects.status_closed'), value: 'closed' },
+  { label: t('projects.status_in_progress'), value: 'in_progress' },
+  { label: t('projects.status_completed'), value: 'completed' },
   { label: t('projects.status_on_hold'), value: 'on_hold' },
+  { label: t('projects.status_cancelled'), value: 'cancelled' },
 ])
 
 const selectedRange = ref(dateRange[2]) // Default to "This Month"

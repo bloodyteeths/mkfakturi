@@ -253,6 +253,59 @@ class AccountingReportsController extends Controller
     }
 
     /**
+     * Backfill existing invoices to the ledger
+     *
+     * POST /api/v1/accounting/backfill-invoices?dry_run=1
+     */
+    public function backfillInvoices(Request $request): JsonResponse
+    {
+        // Check feature flag
+        if (! $this->isFeatureEnabled()) {
+            return response()->json([
+                'error' => 'Accounting backbone feature is disabled',
+                'message' => 'Please enable FEATURE_ACCOUNTING_BACKBONE to backfill invoices',
+            ], 403);
+        }
+
+        // Get company from header
+        $companyId = $request->header('company');
+
+        if (! $companyId) {
+            return response()->json([
+                'error' => 'Missing company header',
+                'message' => 'The company header is required',
+            ], 400);
+        }
+
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json([
+                'error' => 'Company not found',
+            ], 404);
+        }
+
+        // Authorize user can manage this company
+        $this->authorize('manage', $company);
+
+        $dryRun = $request->boolean('dry_run', false);
+        $stats = $this->ifrsAdapter->backfillInvoices($company, $dryRun);
+
+        if (isset($stats['error'])) {
+            return response()->json($stats, 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'dry_run' => $dryRun,
+            'message' => $dryRun
+                ? "Found {$stats['posted']} invoices to post"
+                : "Posted {$stats['posted']} invoices, {$stats['failed']} failed",
+            'stats' => $stats,
+        ]);
+    }
+
+    /**
      * Check if accounting backbone feature is enabled
      */
     protected function isFeatureEnabled(): bool

@@ -234,26 +234,35 @@ class Project extends Model
 
     /**
      * Get total invoiced amount for the project.
+     * Uses COALESCE to handle NULL base_total (falls back to total * exchange_rate).
      */
     public function getTotalInvoicedAttribute(): int
     {
-        return $this->invoices()->sum('base_total') ?? 0;
+        return (int) $this->invoices()
+            ->selectRaw('COALESCE(SUM(COALESCE(base_total, total * COALESCE(exchange_rate, 1))), 0) as total')
+            ->value('total');
     }
 
     /**
      * Get total expenses for the project.
+     * Uses COALESCE to handle NULL base_amount (falls back to amount * exchange_rate).
      */
     public function getTotalExpensesAttribute(): int
     {
-        return $this->expenses()->sum('base_amount') ?? 0;
+        return (int) $this->expenses()
+            ->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')
+            ->value('total');
     }
 
     /**
      * Get total payments received for the project.
+     * Uses COALESCE to handle NULL base_amount (falls back to amount * exchange_rate).
      */
     public function getTotalPaymentsAttribute(): int
     {
-        return $this->payments()->sum('base_amount') ?? 0;
+        return (int) $this->payments()
+            ->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')
+            ->value('total');
     }
 
     /**
@@ -578,7 +587,8 @@ class Project extends Model
         if ($fromDate && $toDate) {
             $invoiceQuery->whereBetween('invoice_date', [$fromDate, $toDate]);
         }
-        $totalInvoiced = $invoiceQuery->sum('base_total') ?? 0;
+        // Use COALESCE to handle NULL base_total - fall back to total * exchange_rate
+        $totalInvoiced = (clone $invoiceQuery)->selectRaw('COALESCE(SUM(COALESCE(base_total, total * COALESCE(exchange_rate, 1))), 0) as total')->value('total') ?? 0;
         $invoiceCount = $invoiceQuery->count();
 
         // Build expense query with optional date filter
@@ -595,7 +605,8 @@ class Project extends Model
         if ($fromDate && $toDate) {
             $paymentQuery->whereBetween('payment_date', [$fromDate, $toDate]);
         }
-        $totalPayments = $paymentQuery->sum('base_amount') ?? 0;
+        // Use COALESCE to handle NULL base_amount - fall back to amount * exchange_rate
+        $totalPayments = (clone $paymentQuery)->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')->value('total') ?? 0;
         $paymentCount = $paymentQuery->count();
 
         // Build bill query with optional date filter

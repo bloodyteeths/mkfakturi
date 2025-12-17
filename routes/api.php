@@ -694,6 +694,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/trial-balance', [AccountingReportsController::class, 'trialBalance']);
                 Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
                 Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
+                Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
             });
 
             // Project Reports - available to all tiers

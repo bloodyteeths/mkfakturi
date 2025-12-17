@@ -37,6 +37,21 @@ class IfrsAdapter
     {
         // Skip if feature is disabled (global or company-level)
         if (! $this->isEnabled($invoice->company_id)) {
+            Log::debug('IfrsAdapter::postInvoice skipped - feature disabled', [
+                'invoice_id' => $invoice->id,
+                'company_id' => $invoice->company_id,
+            ]);
+
+            return;
+        }
+
+        // Idempotency check: don't re-post if already posted
+        if ($invoice->ifrs_transaction_id) {
+            Log::debug('IfrsAdapter::postInvoice skipped - already posted', [
+                'invoice_id' => $invoice->id,
+                'ifrs_transaction_id' => $invoice->ifrs_transaction_id,
+            ]);
+
             return;
         }
 
@@ -613,8 +628,7 @@ class IfrsAdapter
     /**
      * Check if accounting backbone feature is enabled
      *
-     * @param int|null $companyId Optional company ID to check company-specific setting
-     * @return bool
+     * @param  int|null  $companyId  Optional company ID to check company-specific setting
      */
     protected function isEnabled(?int $companyId = null): bool
     {
@@ -622,7 +636,9 @@ class IfrsAdapter
         $globalEnabled = config('ifrs.enabled', false) ||
                         (function_exists('feature') && feature('accounting-backbone'));
 
-        if (!$globalEnabled) {
+        if (! $globalEnabled) {
+            Log::debug('IfrsAdapter::isEnabled - global feature disabled');
+
             return false;
         }
 
@@ -634,8 +650,83 @@ class IfrsAdapter
         // Check company-specific setting
         $companyIfrsEnabled = CompanySetting::getSetting('ifrs_enabled', $companyId);
 
-        // Default to false if not set
-        return $companyIfrsEnabled === 'YES' || $companyIfrsEnabled === true || $companyIfrsEnabled === '1';
+        $enabled = $companyIfrsEnabled === 'YES' || $companyIfrsEnabled === true || $companyIfrsEnabled === '1';
+
+        if (! $enabled) {
+            Log::debug('IfrsAdapter::isEnabled - company feature disabled', [
+                'company_id' => $companyId,
+                'ifrs_enabled_value' => $companyIfrsEnabled,
+            ]);
+        }
+
+        return $enabled;
+    }
+
+    /**
+     * Backfill existing invoices to the ledger
+     * Use this to post invoices that were created before IFRS was enabled
+     *
+     * @param  Company  $company  The company to backfill
+     * @param  bool  $dryRun  If true, only counts invoices without posting
+     * @return array Stats about the backfill operation
+     */
+    public function backfillInvoices(Company $company, bool $dryRun = false): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return [
+                'error' => 'IFRS feature is disabled for this company',
+                'posted' => 0,
+                'skipped' => 0,
+                'failed' => 0,
+            ];
+        }
+
+        $stats = ['posted' => 0, 'skipped' => 0, 'failed' => 0, 'invoices' => []];
+
+        // Get all non-draft invoices that haven't been posted to IFRS yet
+        $invoices = Invoice::where('company_id', $company->id)
+            ->whereNull('ifrs_transaction_id')
+            ->whereNotIn('status', [Invoice::STATUS_DRAFT])
+            ->orderBy('invoice_date')
+            ->get();
+
+        foreach ($invoices as $invoice) {
+            if ($dryRun) {
+                $stats['invoices'][] = [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'total' => $invoice->total,
+                    'status' => $invoice->status,
+                ];
+                $stats['posted']++;
+
+                continue;
+            }
+
+            try {
+                $this->postInvoice($invoice);
+                $stats['posted']++;
+                $stats['invoices'][] = [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'status' => 'posted',
+                ];
+            } catch (\Exception $e) {
+                $stats['failed']++;
+                $stats['invoices'][] = [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'status' => 'failed',
+                    'error' => $e->getMessage(),
+                ];
+                Log::error('Failed to backfill invoice to IFRS', [
+                    'invoice_id' => $invoice->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $stats;
     }
 
     /**
@@ -670,6 +761,7 @@ class IfrsAdapter
                 $this->setUserEntityContext($entity);
                 // Ensure ReportingPeriod exists for current year
                 $this->ensureReportingPeriodExists($entity);
+
                 return $entity;
             }
         }

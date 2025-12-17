@@ -346,8 +346,10 @@
         "customer": "Клиент",
         "status": "Статус",
         "status_open": "Отворен",
-        "status_closed": "Затворен",
+        "status_in_progress": "Во тек",
+        "status_completed": "Завршен",
         "status_on_hold": "На чекање",
+        "status_cancelled": "Откажан",
         "statuses": {
             "open": "Отворен",
             "in_progress": "Во тек",

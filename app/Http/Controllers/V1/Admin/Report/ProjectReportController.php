@@ -34,7 +34,7 @@ class ProjectReportController extends Controller
         $companyId = $request->header('company');
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json(['error' => 'Company not found'], 404);
         }
 
@@ -131,7 +131,7 @@ class ProjectReportController extends Controller
         $companyId = $request->header('company');
         $company = Company::find($companyId);
 
-        if (!$company) {
+        if (! $company) {
             return response()->json(['error' => 'Company not found'], 404);
         }
 
@@ -201,7 +201,9 @@ class ProjectReportController extends Controller
                 return [
                     'id' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,
-                    'invoice_date' => $invoice->invoice_date?->format('Y-m-d'),
+                    'invoice_date' => $invoice->invoice_date instanceof \Carbon\Carbon
+                        ? $invoice->invoice_date->format('Y-m-d')
+                        : $invoice->invoice_date,
                     'total' => $invoice->base_total,
                     'status' => $invoice->status,
                     'paid_status' => $invoice->paid_status,
@@ -210,9 +212,11 @@ class ProjectReportController extends Controller
             'expenses' => $project->expenses->map(function ($expense) {
                 return [
                     'id' => $expense->id,
-                    'expense_date' => $expense->expense_date?->format('Y-m-d'),
-                    'amount' => $expense->base_amount,
-                    'category' => $expense->expense_category?->name,
+                    'expense_date' => $expense->expense_date instanceof \Carbon\Carbon
+                        ? $expense->expense_date->format('Y-m-d')
+                        : $expense->expense_date,
+                    'amount' => $expense->base_amount ?? $expense->amount,
+                    'category' => $expense->expense_category?->name ?? $expense->expenseCategory?->name,
                     'notes' => $expense->notes,
                 ];
             }),
@@ -220,9 +224,11 @@ class ProjectReportController extends Controller
                 return [
                     'id' => $payment->id,
                     'payment_number' => $payment->payment_number,
-                    'payment_date' => $payment->payment_date?->format('Y-m-d'),
-                    'amount' => $payment->base_amount,
-                    'payment_method' => $payment->payment_method?->name,
+                    'payment_date' => $payment->payment_date instanceof \Carbon\Carbon
+                        ? $payment->payment_date->format('Y-m-d')
+                        : $payment->payment_date,
+                    'amount' => $payment->base_amount ?? $payment->amount,
+                    'payment_method' => $payment->payment_method?->name ?? $payment->paymentMethod?->name,
                 ];
             }),
             'from_date' => $fromDate,
@@ -247,18 +253,21 @@ class ProjectReportController extends Controller
             $monthStart = $current->format('Y-m-d');
             $monthEnd = $current->copy()->endOfMonth()->format('Y-m-d');
 
-            // Calculate totals for this month
+            // Calculate totals for this month using COALESCE to handle NULL base values
             $invoiced = $project->invoices()
                 ->whereBetween('invoice_date', [$monthStart, $monthEnd])
-                ->sum('base_total') ?? 0;
+                ->selectRaw('COALESCE(SUM(COALESCE(base_total, total * COALESCE(exchange_rate, 1))), 0) as total')
+                ->value('total') ?? 0;
 
             $expenses = $project->expenses()
                 ->whereBetween('expense_date', [$monthStart, $monthEnd])
-                ->sum('base_amount') ?? 0;
+                ->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')
+                ->value('total') ?? 0;
 
             $payments = $project->payments()
                 ->whereBetween('payment_date', [$monthStart, $monthEnd])
-                ->sum('base_amount') ?? 0;
+                ->selectRaw('COALESCE(SUM(COALESCE(base_amount, amount * COALESCE(exchange_rate, 1))), 0) as total')
+                ->value('total') ?? 0;
 
             $months[] = [
                 'month' => $current->format('Y-m'),
