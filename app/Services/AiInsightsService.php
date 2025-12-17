@@ -1159,14 +1159,26 @@ INSTRUCTIONS;
             // Add Cash Flow Forecast for liquidity questions
             try {
                 $cashFlow = $comprehensiveStats['cash_flow_forecast'] ?? $this->dataProvider->getCashFlowForecast($company, 90);
-                if (!empty($cashFlow['summary'])) {
+                if (!empty($cashFlow) && !isset($cashFlow['error'])) {
                     $prompt .= "\n**ПРОГНОЗА НА ПАРИЧЕН ТЕК (90 дена напред):**\n";
-                    $prompt .= "Почетен биланс: " . number_format($cashFlow['summary']['starting_balance'] ?? 0, 2) . " {$currency}\n";
-                    $prompt .= "Очекувани приливи: " . number_format($cashFlow['summary']['total_expected_incoming'] ?? 0, 2) . " {$currency}\n";
-                    $prompt .= "Очекувани одливи: " . number_format($cashFlow['summary']['total_expected_outgoing'] ?? 0, 2) . " {$currency}\n";
-                    $prompt .= "Нето проекција: " . number_format($cashFlow['summary']['net_forecast'] ?? 0, 2) . " {$currency}\n";
-                    $prompt .= "Проектиран краен биланс: " . number_format($cashFlow['summary']['ending_balance'] ?? 0, 2) . " {$currency}\n";
-                    $prompt .= "Најнизок проектиран биланс: " . number_format($cashFlow['summary']['lowest_projected_balance'] ?? 0, 2) . " {$currency}\n";
+
+                    // Include status and interpretation for AI context
+                    $forecastStatus = $cashFlow['status'] ?? 'UNKNOWN';
+                    if ($forecastStatus === 'NO_SCHEDULED_TRANSACTIONS') {
+                        $prompt .= "Статус: Нема закажани трансакции со датум на достасување во следните 90 дена.\n";
+                        if (!empty($cashFlow['interpretation'])) {
+                            $prompt .= "Забелешка: " . $cashFlow['interpretation'] . "\n";
+                        }
+                    }
+
+                    if (!empty($cashFlow['summary'])) {
+                        $prompt .= "Почетен биланс (проценет): " . number_format($cashFlow['summary']['starting_balance'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "Очекувани приливи: " . number_format($cashFlow['summary']['total_expected_incoming'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "Очекувани одливи: " . number_format($cashFlow['summary']['total_expected_outgoing'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "Нето проекција: " . number_format($cashFlow['summary']['net_forecast'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "Проектиран краен биланс: " . number_format($cashFlow['summary']['ending_balance'] ?? 0, 2) . " {$currency}\n";
+                        $prompt .= "Најнизок проектиран биланс: " . number_format($cashFlow['summary']['lowest_projected_balance'] ?? 0, 2) . " {$currency}\n";
+                    }
 
                     if (!empty($cashFlow['alerts'])) {
                         $cashCrunchRisk = $cashFlow['alerts']['cash_crunch_risk'] ?? 'LOW';
@@ -1177,8 +1189,8 @@ INSTRUCTIONS;
                         }
                     }
 
-                    // Weekly forecast summary (first 4 weeks)
-                    if (!empty($cashFlow['weekly_forecast'])) {
+                    // Weekly forecast summary (first 4 weeks) - only if data available
+                    if (!empty($cashFlow['weekly_forecast']) && $forecastStatus === 'DATA_AVAILABLE') {
                         $prompt .= "\nНеделна прогноза (прв месец):\n";
                         foreach (array_slice($cashFlow['weekly_forecast'], 0, 4) as $week) {
                             $prompt .= "- Недела {$week['week']}: прилив " . number_format($week['expected_incoming'] ?? 0, 2) . ", одлив " . number_format($week['expected_outgoing'] ?? 0, 2) . ", биланс " . number_format($week['projected_balance'] ?? 0, 2) . " {$currency}\n";
@@ -1262,12 +1274,23 @@ INSTRUCTIONS;
 
                     if (!empty($workingCapital['ratios'])) {
                         $prompt .= "Финансиски показатели:\n";
-                        $prompt .= "- Current Ratio (тековен коефициент): " . number_format($workingCapital['ratios']['current_ratio'] ?? 0, 2) . " (>2 одлично, >1.5 добро, >1 адекватно)\n";
-                        $prompt .= "- Quick Ratio (брз коефициент): " . number_format($workingCapital['ratios']['quick_ratio'] ?? 0, 2) . "\n";
+                        $ratiosCalculable = $workingCapital['ratios']['ratios_calculable'] ?? true;
+                        if ($ratiosCalculable) {
+                            $prompt .= "- Current Ratio (тековен коефициент): " . number_format($workingCapital['ratios']['current_ratio'] ?? 0, 2) . " (>2 одлично, >1.5 добро, >1 адекватно)\n";
+                            $prompt .= "- Quick Ratio (брз коефициент): " . number_format($workingCapital['ratios']['quick_ratio'] ?? 0, 2) . "\n";
+                        } else {
+                            $prompt .= "- Current Ratio: N/A (обврските се 0, коефициентот би бил бесконечен - одлична позиција)\n";
+                            $prompt .= "- Quick Ratio: N/A (обврските се 0, коефициентот би бил бесконечен - одлична позиција)\n";
+                        }
                     }
 
                     if (!empty($workingCapital['health'])) {
                         $prompt .= "\nЗдравје на ликвидност: " . ($workingCapital['health']['status'] ?? 'N/A') . "\n";
+                    }
+
+                    // Add interpretation for AI context
+                    if (!empty($workingCapital['interpretation'])) {
+                        $prompt .= "Интерпретација: " . $workingCapital['interpretation'] . "\n";
                     }
                     $prompt .= "\n";
                 }

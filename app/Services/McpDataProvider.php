@@ -1893,16 +1893,23 @@ class McpDataProvider
                 $currentWeek->addWeek();
             }
 
-            // Calculate summary metrics
+            // Calculate summary metrics (with guards for empty arrays)
             $totalIncoming = array_sum(array_column($weeklyForecast, 'expected_incoming'));
             $totalOutgoing = array_sum(array_column($weeklyForecast, 'expected_outgoing'));
-            $lowestBalance = min(array_column($weeklyForecast, 'projected_balance'));
-            $highestBalance = max(array_column($weeklyForecast, 'projected_balance'));
+
+            // Guard against empty weeklyForecast array
+            $projectedBalances = array_column($weeklyForecast, 'projected_balance');
+            $lowestBalance = !empty($projectedBalances) ? min($projectedBalances) : $estimatedStartingBalance;
+            $highestBalance = !empty($projectedBalances) ? max($projectedBalances) : $estimatedStartingBalance;
 
             // Identify potential cash crunch weeks
             $cashCrunchWeeks = array_filter($weeklyForecast, function ($week) {
                 return $week['projected_balance'] < 0;
             });
+
+            // Determine forecast status for AI interpretation
+            $hasData = $totalIncoming > 0 || $totalOutgoing > 0;
+            $forecastStatus = $hasData ? 'DATA_AVAILABLE' : 'NO_SCHEDULED_TRANSACTIONS';
 
             return [
                 'forecast_period' => [
@@ -1910,6 +1917,7 @@ class McpDataProvider
                     'end' => $endDate->format('Y-m-d'),
                     'days' => $forecastDays,
                 ],
+                'status' => $forecastStatus,
                 'summary' => [
                     'starting_balance' => round($estimatedStartingBalance, 2),
                     'total_expected_incoming' => round($totalIncoming, 2),
@@ -1924,6 +1932,9 @@ class McpDataProvider
                     'cash_crunch_risk' => $lowestBalance < 0 ? 'HIGH' : ($lowestBalance < $totalOutgoing * 0.1 ? 'MEDIUM' : 'LOW'),
                 ],
                 'weekly_forecast' => $weeklyForecast,
+                'interpretation' => $hasData
+                    ? 'Forecast data is available based on scheduled receivables and payables.'
+                    : 'No scheduled transactions found. The forecast shows only the estimated starting balance based on historical paid invoices minus paid bills. Add invoices with due dates and bills to see weekly projections.',
                 'currency' => $company->currency ?? 'MKD',
             ];
 
@@ -2288,12 +2299,36 @@ class McpDataProvider
             $currentLiabilities = $totalPayables;
             $workingCapital = $currentAssets - $currentLiabilities;
 
-            // Ratios
-            $currentRatio = $currentLiabilities > 0 ? $currentAssets / $currentLiabilities : 0;
-            $quickRatio = $currentLiabilities > 0 ? $totalReceivables / $currentLiabilities : 0;
+            // Ratios - handle zero liabilities gracefully
+            // When liabilities are 0, ratios are mathematically undefined (infinite)
+            $hasLiabilities = $currentLiabilities > 0;
+            $currentRatio = $hasLiabilities ? round($currentAssets / $currentLiabilities, 2) : null;
+            $quickRatio = $hasLiabilities ? round($totalReceivables / $currentLiabilities, 2) : null;
 
             // Days metrics
             $avgDaysReceivable = $arAging['summary']['average_days_outstanding'] ?? 0;
+
+            // Determine health status and interpretation
+            $healthStatus = 'EXCELLENT';
+            $interpretation = '';
+
+            if (!$hasLiabilities) {
+                // No liabilities is actually very good - pure working capital
+                $healthStatus = 'EXCELLENT';
+                $interpretation = 'Немате тековни обврски кон добавувачи. Current ratio и quick ratio не можат да се пресметаат кога обврските се нула (математички би биле бесконечни), но ова е одлична позиција - имате ' . number_format($currentAssets, 2) . ' ' . ($company->currency ?? 'MKD') . ' тековни средства без обврски.';
+            } elseif ($currentRatio >= 2) {
+                $healthStatus = 'EXCELLENT';
+                $interpretation = 'Одличен коефициент на тековна ликвидност. Вашите тековни средства се двојно поголеми од обврските.';
+            } elseif ($currentRatio >= 1.5) {
+                $healthStatus = 'GOOD';
+                $interpretation = 'Добар коефициент на ликвидност. Можете удобно да ги покриете обврските.';
+            } elseif ($currentRatio >= 1) {
+                $healthStatus = 'ADEQUATE';
+                $interpretation = 'Адекватна ликвидност, но без голема резерва. Средствата едвај ги покриваат обврските.';
+            } else {
+                $healthStatus = 'CONCERNING';
+                $interpretation = 'Загрижувачка ликвидност - обврските се поголеми од тековните средства.';
+            }
 
             return [
                 'working_capital' => round($workingCapital, 2),
@@ -2305,18 +2340,18 @@ class McpDataProvider
                     'accounts_payable' => round($totalPayables, 2),
                 ],
                 'ratios' => [
-                    'current_ratio' => round($currentRatio, 2),
-                    'quick_ratio' => round($quickRatio, 2),
+                    'current_ratio' => $currentRatio,
+                    'quick_ratio' => $quickRatio,
+                    'ratios_calculable' => $hasLiabilities,
+                    'ratios_note' => $hasLiabilities
+                        ? null
+                        : 'Ratios are undefined when liabilities are zero (mathematically infinite, which is excellent).',
                 ],
                 'health' => [
-                    'status' => match(true) {
-                        $currentRatio >= 2 => 'EXCELLENT',
-                        $currentRatio >= 1.5 => 'GOOD',
-                        $currentRatio >= 1 => 'ADEQUATE',
-                        default => 'CONCERNING',
-                    },
+                    'status' => $healthStatus,
                     'days_receivable' => $avgDaysReceivable,
                 ],
+                'interpretation' => $interpretation,
                 'currency' => $company->currency ?? 'MKD',
             ];
 
