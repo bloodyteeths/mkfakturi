@@ -760,15 +760,21 @@ class IfrsAdapter
 
         // If company already has an IFRS entity, return it
         if ($company->ifrs_entity_id) {
-            $entity = Entity::with('currency')->find($company->ifrs_entity_id);
+            // Find entity WITHOUT eager loading - Currency has EntityScope that needs user context
+            $entity = Entity::find($company->ifrs_entity_id);
             if ($entity) {
+                // Set user context FIRST - required for EntityScope on related models
+                $this->setUserEntityContext($entity);
+
+                // NOW we can safely load currency relationship (EntityScope will work)
+                $entity->load('currency');
+
                 Log::debug('Using existing IFRS Entity', [
                     'company_id' => $company->id,
                     'entity_id' => $entity->id,
                     'currency_loaded' => $entity->relationLoaded('currency'),
                 ]);
-                // Set user context BEFORE any IFRS queries to avoid EntityScope errors
-                $this->setUserEntityContext($entity);
+
                 // Ensure ReportingPeriod exists for current year
                 $this->ensureReportingPeriodExists($entity);
                 // Ensure exchange rate exists for the entity's currency
