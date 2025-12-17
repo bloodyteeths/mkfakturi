@@ -479,17 +479,21 @@ async function loadCustomers() {
 }
 
 async function viewProjectDetail(projectId) {
+  console.log('viewProjectDetail called with projectId:', projectId)
   try {
     const params = {
       from_date: filters.from_date,
       to_date: filters.to_date,
     }
 
+    console.log('Making API call to /reports/projects/' + projectId)
     const response = await axios.get(`/reports/projects/${projectId}`, { params })
+    console.log('API response:', response.data)
     projectDetail.value = response.data
     selectedProject.value = response.data.project
     showDetailModal.value = true
   } catch (error) {
+    console.error('viewProjectDetail error:', error)
     notificationStore.showNotification({
       type: 'error',
       message: t('reports.projects.error_loading_detail'),
