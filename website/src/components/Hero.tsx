@@ -5,7 +5,7 @@ import { Locale } from '@/i18n/locales'
 
 export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
-    <section className="section relative overflow-hidden pt-24 md:pt-32 pb-16 md:pb-20 lg:pt-40 lg:pb-32">
+    <section className="section relative overflow-hidden overflow-x-hidden pt-24 md:pt-32 pb-16 md:pb-20 lg:pt-40 lg:pb-32">
       {/* Background Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -13,8 +13,8 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="container relative z-10 grid items-center gap-12 lg:grid-cols-2">
-        <div className="space-y-8 text-center animate-[fadeIn_0.8s_ease-out] px-4 md:px-0">
+      <div className="container relative z-10 grid items-center gap-12 lg:grid-cols-2 px-4 sm:px-6">
+        <div className="space-y-8 text-center lg:text-left animate-[fadeIn_0.8s_ease-out]">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-indigo-100 px-4 py-1.5 text-sm font-semibold text-indigo-600 shadow-sm hover:shadow-md transition-all cursor-default">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -23,7 +23,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             {t.hero.claim}
           </div>
 
-          <h1 className="text-5xl font-extrabold tracking-tight leading-[1.1] md:text-6xl lg:text-7xl text-gray-900">
+          <h1 className="text-3xl font-extrabold tracking-tight leading-[1.1] sm:text-4xl md:text-5xl lg:text-6xl text-gray-900">
             {t.hero.h1.split('AI')[0]}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">AI</span>
             {t.hero.h1.split('AI')[1]}
@@ -70,8 +70,8 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             />
           </div>
 
-          {/* Floating elements */}
-          <div className="absolute bottom-6 left-6 bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-4 max-w-xs animate-float">
+          {/* Floating elements - hidden on mobile */}
+          <div className="hidden md:block absolute bottom-6 left-6 bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-4 max-w-xs animate-float">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                 <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -85,7 +85,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             </div>
           </div>
 
-          <div className="absolute top-6 right-6 bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-4 animate-float animation-delay-2000">
+          <div className="hidden md:block absolute top-6 right-6 bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-4 animate-float animation-delay-2000">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
                 <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
