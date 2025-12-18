@@ -19,12 +19,19 @@ class AffiliateLink extends Model
         'is_active',
         'clicks',
         'conversions',
+        'expires_at',
+        'last_clicked_at',
+        'deactivation_reason',
+        'deactivated_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'clicks' => 'integer',
         'conversions' => 'integer',
+        'expires_at' => 'datetime',
+        'last_clicked_at' => 'datetime',
+        'deactivated_at' => 'datetime',
     ];
 
     /**

@@ -37,6 +37,7 @@ class Partner extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'commission_rate' => 'decimal:2',
+        'stripe_payouts_enabled_at' => 'datetime',
     ];
 
     /**
