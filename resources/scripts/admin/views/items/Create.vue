@@ -107,6 +107,11 @@
             v-if="isTaxPerItem"
             :label="$t('items.taxes')"
             :content-loading="isFetchingInitialData"
+            required
+            :error="
+              v$.currentItem.taxes.$error &&
+              v$.currentItem.taxes.$errors[0].$message
+            "
           >
             <BaseMultiselect
               v-model="taxes"
@@ -121,7 +126,12 @@
               searchable
               track-by="tax_name"
               object
+              :invalid="v$.currentItem.taxes.$error"
+              @update:modelValue="v$.currentItem.taxes.$touch()"
             />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.taxes_hint') }}
+            </p>
           </BaseInputGroup>
 
           <BaseInputGroup
@@ -430,6 +440,17 @@ const getTaxTypes = computed(() => {
 
 const isTaxPerItem = computed(() => taxPerItem.value === 'YES')
 
+// Custom validator for requiring at least one tax when tax_per_item is enabled
+const requiresTax = helpers.withMessage(
+  () => t('validation.tax_required'),
+  (value) => {
+    // Only validate if tax_per_item is enabled
+    if (!isTaxPerItem.value) return true
+    // Check if at least one tax is selected
+    return value && Array.isArray(value) && value.length > 0
+  }
+)
+
 const rules = computed(() => {
   return {
     currentItem: {
@@ -460,6 +481,10 @@ const rules = computed(() => {
           t('validation.description_maxlength'),
           maxLength(65000)
         ),
+      },
+
+      taxes: {
+        requiresTax,
       },
     },
   }
