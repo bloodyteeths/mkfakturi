@@ -31,7 +31,7 @@ class PartnerPayoutService
         $cutoffDate = Carbon::now()->subDays(30);
 
         $partners = Partner::whereHas('affiliateEvents', function ($query) use ($cutoffDate) {
-            $query->where('paid_at', '<=', $cutoffDate)
+            $query->where('created_at', '<=', $cutoffDate)
                 ->whereNull('payout_id')
                 ->where('is_clawed_back', false);
         })->get();
@@ -57,8 +57,8 @@ class PartnerPayoutService
 
         try {
             // Get unpaid events older than 30 days
-            $events = AffiliateEvent::where('partner_id', $partner->id)
-                ->where('paid_at', '<=', $cutoffDate)
+            $events = AffiliateEvent::where('affiliate_partner_id', $partner->id)
+                ->where('created_at', '<=', $cutoffDate)
                 ->whereNull('payout_id')
                 ->where('is_clawed_back', false)
                 ->get();
