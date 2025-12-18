@@ -26,9 +26,36 @@ class CompanyMiddleware
         if (Schema::hasTable('user_company')) {
             $user = $request->user();
 
-            // Skip company requirements for partner users entirely
-            // Partners manage multiple companies through partner_company_links
+            // Handle partner users - they access client companies via partner_company_links
             if ($user && $user->role === 'partner') {
+                $companyId = $request->header('company');
+
+                if ($companyId) {
+                    // Verify partner has access to this company
+                    $partner = $user->partner;
+                    if ($partner) {
+                        $hasAccess = \App\Models\PartnerCompanyLink::where('partner_id', $partner->id)
+                            ->where('company_id', $companyId)
+                            ->where('status', 'active')
+                            ->exists();
+
+                        if (!$hasAccess) {
+                            \Log::warning('Partner attempted to access unauthorized company', [
+                                'user_id' => $user->id,
+                                'partner_id' => $partner->id,
+                                'company_id' => $companyId,
+                            ]);
+                            return response()->json(['error' => 'Unauthorized access to company'], 403);
+                        }
+
+                        // Load company with IFRS entity for partner access
+                        $company = Company::with('ifrsEntity')->find($companyId);
+                        if ($company && $company->ifrsEntity) {
+                            $user->setRelation('entity', $company->ifrsEntity);
+                        }
+                    }
+                }
+
                 return $next($request);
             }
 
