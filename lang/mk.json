@@ -901,6 +901,7 @@
         "deleted_message": "Item deleted successfully | Items deleted successfully",
         "sku": "SKU",
         "barcode": "Баркод",
+        "stock": "Залиха",
         "scan_barcode": "Скенирај баркод",
         "barcode_placeholder": "Скенирајте или внесете баркод...",
         "barcode_not_found": "Не е пронајден артикл со баркод: {barcode}",

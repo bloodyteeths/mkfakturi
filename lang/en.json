@@ -689,6 +689,7 @@
     "deleted_message": "Item deleted successfully | Items deleted successfully",
     "sku": "SKU",
     "barcode": "Barcode",
+    "stock": "Stock",
     "scan_barcode": "Scan Barcode",
     "barcode_placeholder": "Scan or type barcode...",
     "barcode_not_found": "Item not found with barcode: {barcode}",

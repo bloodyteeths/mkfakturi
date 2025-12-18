@@ -51,9 +51,19 @@
         </div>
       </template>
       <template #option="{ option }">
-        <div class="flex justify-between items-center">
-          <span>{{ option.name }}</span>
-          <span v-if="option.sku" class="text-gray-500 text-xs ml-2">(SKU: {{ option.sku }})</span>
+        <div class="flex justify-between items-center w-full">
+          <div class="flex items-center">
+            <span>{{ option.name }}</span>
+            <span v-if="option.sku" class="text-gray-500 text-xs ml-2">({{ option.sku }})</span>
+          </div>
+          <div v-if="option.track_quantity" class="flex items-center ml-2">
+            <span
+              class="text-xs font-medium px-2 py-0.5 rounded"
+              :class="getStockClass(option)"
+            >
+              {{ $t('items.stock') }}: {{ option.quantity || 0 }}
+            </span>
+          </div>
         </div>
       </template>
 
@@ -203,5 +213,24 @@ function openItemModal() {
 function deselectItem(index) {
   props.store.deselectItem(index)
 }
-// CLAUDE-CHECKPOINT: Added SKU display in dropdown and selected item
+
+/**
+ * Get CSS class for stock badge based on quantity level
+ */
+function getStockClass(item) {
+  const qty = item.quantity || 0
+  const minQty = item.minimum_quantity || 0
+
+  if (qty <= 0) {
+    // Out of stock - red
+    return 'bg-red-100 text-red-700'
+  } else if (minQty > 0 && qty <= minQty) {
+    // Low stock - yellow/orange
+    return 'bg-yellow-100 text-yellow-700'
+  } else {
+    // In stock - green
+    return 'bg-green-100 text-green-700'
+  }
+}
+// CLAUDE-CHECKPOINT: Added stock quantity display in dropdown
 </script>
