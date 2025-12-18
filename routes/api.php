@@ -1274,6 +1274,33 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
 
     // Batch AI Account Suggestions (QuickBooks-style)
     Route::post('/companies/{company}/journal/suggest', [PartnerAccountMappingController::class, 'batchSuggest']);
+
+    // Partner Stock/Warehouse Management for Client Companies
+    Route::prefix('/companies/{company}/stock')->group(function () {
+        Route::get('/warehouses', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'index']);
+        Route::post('/warehouses', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'store']);
+        Route::get('/warehouses/{warehouse}', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'show']);
+        Route::put('/warehouses/{warehouse}', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'update']);
+        Route::delete('/warehouses/{warehouse}', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'destroy']);
+        Route::post('/warehouses/{warehouse}/set-default', [\App\Http\Controllers\V1\Admin\Stock\WarehouseController::class, 'setDefault']);
+    });
+
+    // Partner Reports for Client Companies
+    Route::prefix('/companies/{company}/reports')->group(function () {
+        Route::get('/sales', [\App\Http\Controllers\V1\Admin\Report\SalesReportController::class, 'index']);
+        Route::get('/profit-loss', [\App\Http\Controllers\V1\Admin\Report\ProfitLossReportController::class, 'index']);
+        Route::get('/expenses', [\App\Http\Controllers\V1\Admin\Report\ExpenseReportController::class, 'index']);
+        Route::get('/tax-summary', [\App\Http\Controllers\V1\Admin\Report\TaxReportController::class, 'index']);
+        Route::get('/customers', [\App\Http\Controllers\V1\Admin\Report\CustomerSalesReportController::class, 'index']);
+        Route::get('/items', [\App\Http\Controllers\V1\Admin\Report\ItemSalesReportController::class, 'index']);
+    });
+
+    // Partner Stock Reports for Client Companies
+    Route::prefix('/companies/{company}/stock-reports')->group(function () {
+        Route::get('/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryList']);
+        Route::get('/valuation', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryValuation']);
+        Route::get('/item-card/{item}', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'itemCard']);
+    });
     // CLAUDE-CHECKPOINT
 });
 

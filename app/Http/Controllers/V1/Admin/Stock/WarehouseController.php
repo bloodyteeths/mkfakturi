@@ -33,6 +33,21 @@ class WarehouseController extends Controller
     }
 
     /**
+     * Get company ID from route parameter (partner access) or header (direct access).
+     */
+    protected function getCompanyId(Request $request): ?int
+    {
+        // First check route parameter (for partner routes like /companies/{company}/stock/...)
+        $companyParam = $request->route('company');
+        if ($companyParam) {
+            return (int) $companyParam;
+        }
+
+        // Fall back to header (for direct admin routes)
+        return $request->header('company') ? (int) $request->header('company') : null;
+    }
+
+    /**
      * Display a listing of warehouses.
      */
     public function index(Request $request): JsonResponse
@@ -40,7 +55,7 @@ class WarehouseController extends Controller
         if ($error = $this->checkStockEnabled()) {
             return $error;
         }
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request);
 
         $query = Warehouse::where('company_id', $companyId)
             ->orderBy('is_default', 'desc')
@@ -88,7 +103,7 @@ class WarehouseController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request);
 
         // Check if code is unique within company
         if (isset($validated['code'])) {
@@ -133,7 +148,7 @@ class WarehouseController extends Controller
             return $error;
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request);
 
         $warehouse = Warehouse::where('company_id', $companyId)
             ->where('id', $id)
@@ -164,7 +179,7 @@ class WarehouseController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request);
 
         $warehouse = Warehouse::where('company_id', $companyId)
             ->where('id', $id)
@@ -207,7 +222,7 @@ class WarehouseController extends Controller
             return $error;
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request);
 
         $warehouse = Warehouse::where('company_id', $companyId)
             ->where('id', $id)
@@ -253,7 +268,7 @@ class WarehouseController extends Controller
             return $error;
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request);
 
         $warehouse = Warehouse::where('company_id', $companyId)
             ->where('id', $id)
