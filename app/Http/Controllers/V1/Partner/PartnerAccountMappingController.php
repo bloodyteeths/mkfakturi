@@ -30,9 +30,23 @@ class PartnerAccountMappingController extends Controller
     }
 
     /**
+     * Get company ID from route parameter or header.
+     */
+    protected function getCompanyId(Request $request, ?int $company = null): ?int
+    {
+        // First check route parameter (for routes like /companies/{company}/...)
+        if ($company) {
+            return $company;
+        }
+
+        // Fall back to header (for direct API calls)
+        return $request->header('company') ? (int) $request->header('company') : null;
+    }
+
+    /**
      * List all account mappings for partner's companies.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, ?int $company = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -43,12 +57,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 
@@ -82,7 +96,7 @@ class PartnerAccountMappingController extends Controller
     /**
      * Get a single account mapping.
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, ?int $company = null, ?int $mapping = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -93,12 +107,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 
@@ -110,20 +124,20 @@ class PartnerAccountMappingController extends Controller
             ], 403);
         }
 
-        $mapping = AccountMapping::where('company_id', $companyId)
+        $accountMapping = AccountMapping::where('company_id', $companyId)
             ->with(['debitAccount', 'creditAccount'])
-            ->findOrFail($id);
+            ->findOrFail($mapping);
 
         return response()->json([
             'success' => true,
-            'data' => $mapping,
+            'data' => $accountMapping,
         ]);
     }
 
     /**
      * Create a new account mapping.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, ?int $company = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -134,12 +148,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 
@@ -203,7 +217,7 @@ class PartnerAccountMappingController extends Controller
     /**
      * Update an account mapping.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, ?int $company = null, ?int $mapping = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -214,12 +228,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 
@@ -231,8 +245,8 @@ class PartnerAccountMappingController extends Controller
             ], 403);
         }
 
-        $mapping = AccountMapping::where('company_id', $companyId)
-            ->findOrFail($id);
+        $accountMapping = AccountMapping::where('company_id', $companyId)
+            ->findOrFail($mapping);
 
         $request->validate([
             'entity_type' => 'sometimes|required|string|max:50',
@@ -266,7 +280,7 @@ class PartnerAccountMappingController extends Controller
             }
         }
 
-        $mapping->update($request->only([
+        $accountMapping->update($request->only([
             'entity_type',
             'entity_id',
             'debit_account_id',
@@ -278,14 +292,14 @@ class PartnerAccountMappingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Account mapping updated successfully.',
-            'data' => $mapping->fresh()->load(['debitAccount', 'creditAccount']),
+            'data' => $accountMapping->fresh()->load(['debitAccount', 'creditAccount']),
         ]);
     }
 
     /**
      * Delete an account mapping.
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, ?int $company = null, ?int $mapping = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -296,12 +310,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 
@@ -313,10 +327,10 @@ class PartnerAccountMappingController extends Controller
             ], 403);
         }
 
-        $mapping = AccountMapping::where('company_id', $companyId)
-            ->findOrFail($id);
+        $accountMapping = AccountMapping::where('company_id', $companyId)
+            ->findOrFail($mapping);
 
-        $mapping->delete();
+        $accountMapping->delete();
 
         return response()->json([
             'success' => true,
@@ -327,7 +341,7 @@ class PartnerAccountMappingController extends Controller
     /**
      * Get AI-powered account suggestions for a transaction.
      */
-    public function suggest(Request $request): JsonResponse
+    public function suggest(Request $request, ?int $company = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -338,12 +352,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 
@@ -439,9 +453,10 @@ class PartnerAccountMappingController extends Controller
      * POST /api/v1/partner/companies/{company}/journal/suggest
      *
      * @param Request $request
+     * @param int|null $company Company ID from route
      * @return JsonResponse
      */
-    public function batchSuggest(Request $request): JsonResponse
+    public function batchSuggest(Request $request, ?int $company = null): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -452,12 +467,12 @@ class PartnerAccountMappingController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
+        $companyId = $this->getCompanyId($request, $company);
 
         if (!$companyId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Company header required',
+                'message' => 'Company ID required',
             ], 400);
         }
 

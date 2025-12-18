@@ -32,6 +32,10 @@ class PartnerCompany extends Pivot
         'override_commission_rate',
         'permissions',
         'is_active',
+        'invitation_status',
+        'created_by',
+        'invited_at',
+        'accepted_at',
     ];
 
     /**
@@ -42,6 +46,8 @@ class PartnerCompany extends Pivot
         'is_active' => 'boolean',
         'override_commission_rate' => 'decimal:2',
         'permissions' => 'array',
+        'invited_at' => 'datetime',
+        'accepted_at' => 'datetime',
     ];
 
     /**
@@ -85,3 +91,4 @@ class PartnerCompany extends Pivot
         return $this->override_commission_rate ?? $this->partner->commission_rate;
     }
 }
+// CLAUDE-CHECKPOINT

@@ -125,7 +125,18 @@ class PartnerScopeMiddleware
      */
     private function getCurrentCompanyId(Request $request): ?int
     {
-        // First, check if company_id is in the request (for API calls)
+        // First, check route parameter (for routes like /companies/{company}/...)
+        $companyParam = $request->route('company');
+        if ($companyParam) {
+            return (int) $companyParam;
+        }
+
+        // Then check the company header (frontend sends company context here)
+        if ($request->header('company')) {
+            return (int) $request->header('company');
+        }
+
+        // Check if company_id is in the request body/query (for API calls)
         if ($request->has('company_id')) {
             return (int) $request->input('company_id');
         }
@@ -144,3 +155,4 @@ class PartnerScopeMiddleware
         return null;
     }
 }
+// CLAUDE-CHECKPOINT
