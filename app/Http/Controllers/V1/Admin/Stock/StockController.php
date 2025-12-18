@@ -196,6 +196,13 @@ class StockController extends Controller
 
         // Format movements for response
         $formattedMovements = $movements->map(function ($movement) {
+            // For Stock OUT, unit_cost is null - calculate from total_cost / quantity
+            // This shows the WAC that was used for the outgoing movement
+            $effectiveUnitCost = $movement->unit_cost;
+            if ($movement->isStockOut() && $movement->unit_cost === null && $movement->total_cost !== null) {
+                $effectiveUnitCost = (int) round(abs($movement->total_cost / $movement->quantity));
+            }
+
             return [
                 'id' => $movement->id,
                 'date' => $movement->movement_date->format('Y-m-d'),
@@ -207,9 +214,9 @@ class StockController extends Controller
                 'warehouse_name' => $movement->warehouse?->name,
                 'quantity' => $movement->quantity,
                 'absolute_quantity' => $movement->absolute_quantity,
-                'unit_cost' => $movement->unit_cost,
+                'unit_cost' => $effectiveUnitCost,
                 'total_cost' => $movement->total_cost,
-                'line_value' => abs($movement->quantity * $movement->unit_cost),
+                'line_value' => abs($movement->total_cost ?? 0),
                 'balance_quantity' => $movement->balance_quantity,
                 'balance_value' => $movement->balance_value,
                 'weighted_average_cost' => $movement->weighted_average_cost,
