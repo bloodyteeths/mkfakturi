@@ -3,9 +3,11 @@
 namespace App\Jobs;
 
 use App\Models\BankTransaction;
+use App\Models\Company;
 use App\Models\GatewayWebhookEvent;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Services\CommissionService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -378,16 +380,108 @@ class ProcessWebhookEvent implements ShouldQueue
 
     /**
      * Handle Stripe invoice.paid event (for subscriptions)
+     * This is the key event for recurring subscription payments - triggers commission calculation
      */
     protected function handleStripeInvoicePaid(array $payload): void
     {
         $invoice = $payload['data']['object'] ?? [];
+        $subscriptionId = $invoice['subscription'] ?? null;
+        $amountPaid = ($invoice['amount_paid'] ?? 0) / 100; // Stripe uses cents, convert to EUR
 
         Log::info('Stripe invoice paid', [
             'invoice_id' => $invoice['id'] ?? null,
-            'subscription_id' => $invoice['subscription'] ?? null,
-            'amount_paid' => $invoice['amount_paid'] ?? 0,
+            'subscription_id' => $subscriptionId,
+            'amount_paid' => $amountPaid,
         ]);
+
+        // Skip if no subscription (one-time payment, not relevant for partner commissions)
+        if (! $subscriptionId) {
+            Log::info('Stripe invoice.paid: No subscription ID, skipping commission calculation');
+            return;
+        }
+
+        // Try to find company from metadata or subscription metadata
+        $companyId = $invoice['subscription_details']['metadata']['company_id']
+            ?? $invoice['metadata']['company_id']
+            ?? $invoice['lines']['data'][0]['metadata']['company_id']
+            ?? null;
+
+        // If company_id not in invoice, try to fetch from subscription
+        if (! $companyId && $subscriptionId) {
+            try {
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                $subscription = \Stripe\Subscription::retrieve($subscriptionId);
+                $companyId = $subscription->metadata['company_id'] ?? null;
+            } catch (\Exception $e) {
+                Log::warning('Could not fetch subscription metadata from Stripe', [
+                    'subscription_id' => $subscriptionId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if (! $companyId) {
+            Log::warning('Stripe invoice.paid: Could not determine company_id, skipping commission', [
+                'invoice_id' => $invoice['id'] ?? null,
+                'subscription_id' => $subscriptionId,
+            ]);
+            return;
+        }
+
+        // Trigger commission calculation for partners
+        $this->triggerCommissionCalculation((int) $companyId, $amountPaid, $subscriptionId);
+    }
+
+    /**
+     * Trigger commission calculation for partners when a subscription payment is received
+     */
+    protected function triggerCommissionCalculation(int $companyId, float $amount, ?string $subscriptionId): void
+    {
+        try {
+            $company = Company::find($companyId);
+
+            if (! $company) {
+                Log::warning('Company not found for commission calculation', ['company_id' => $companyId]);
+                return;
+            }
+
+            // Calculate month reference (YYYY-MM format)
+            $monthRef = now()->format('Y-m');
+
+            // Get the CommissionService
+            $commissionService = app(CommissionService::class);
+
+            // Record recurring commission
+            $result = $commissionService->recordRecurring(
+                $companyId,
+                $amount,
+                $monthRef,
+                $subscriptionId
+            );
+
+            if ($result['success']) {
+                Log::info('Commission recorded for Stripe subscription payment', [
+                    'company_id' => $companyId,
+                    'amount' => $amount,
+                    'event_id' => $result['event_id'],
+                    'direct_commission' => $result['direct_commission'],
+                    'upline_commission' => $result['upline_commission'] ?? null,
+                    'month_ref' => $monthRef,
+                ]);
+            } else {
+                Log::info('Commission not recorded for Stripe payment', [
+                    'company_id' => $companyId,
+                    'reason' => $result['message'] ?? 'Unknown',
+                    'amount' => $amount,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to record commission for Stripe payment', [
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     /**
