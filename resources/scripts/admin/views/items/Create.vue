@@ -191,6 +191,26 @@
             </p>
           </BaseInputGroup>
 
+          <!-- Allow Negative Stock (only shows when track_quantity is enabled) -->
+          <BaseInputGroup
+            v-if="stockEnabled && itemStore.currentItem.track_quantity"
+            :label="$t('items.allow_negative_stock')"
+            :content-loading="isFetchingInitialData"
+          >
+            <div class="flex items-center space-x-3">
+              <BaseSwitch
+                v-model="itemStore.currentItem.allow_negative_stock"
+                :content-loading="isFetchingInitialData"
+              />
+              <span class="text-sm text-gray-500">
+                {{ itemStore.currentItem.allow_negative_stock ? $t('items.allow_negative_stock_enabled') : $t('items.allow_negative_stock_disabled') }}
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.allow_negative_stock_hint') }}
+            </p>
+          </BaseInputGroup>
+
           <!-- Category (optional - for grouping items) -->
           <BaseInputGroup
             v-if="stockEnabled && itemStore.currentItem.track_quantity"

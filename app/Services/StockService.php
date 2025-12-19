@@ -96,6 +96,7 @@ class StockService
      * Record stock OUT movement (e.g., from sale/invoice).
      *
      * @param  float  $quantity  Will be stored as negative
+     * @param  bool  $skipNegativeCheck  Skip the negative stock check (for reversals)
      *
      * @throws Exception
      */
@@ -109,7 +110,8 @@ class StockService
         ?string $movementDate = null,
         ?string $notes = null,
         ?array $meta = null,
-        ?int $createdBy = null
+        ?int $createdBy = null,
+        bool $skipNegativeCheck = false
     ): StockMovement {
         if ($quantity <= 0) {
             throw new Exception('Stock OUT quantity must be positive');
@@ -117,6 +119,22 @@ class StockService
 
         // Get current weighted average cost for the item
         $currentStock = $this->getItemStock($companyId, $itemId, $warehouseId);
+
+        // Check if item allows negative stock
+        if (! $skipNegativeCheck) {
+            $item = Item::find($itemId);
+            if ($item && $item->track_quantity && ! $item->allow_negative_stock) {
+                // Check if this would result in negative stock
+                $newQuantity = $currentStock['quantity'] - $quantity;
+                if ($newQuantity < 0) {
+                    throw new Exception(
+                        "Insufficient stock for item '{$item->name}'. " .
+                        "Available: {$currentStock['quantity']}, Requested: {$quantity}. " .
+                        "Enable 'Allow negative stock' on this item to allow overselling."
+                    );
+                }
+            }
+        }
 
         // Stock OUT movements don't have their own unit cost
         // The cost is calculated from the weighted average
@@ -140,6 +158,7 @@ class StockService
      *
      * @param  float  $quantity  Can be positive (increase) or negative (decrease)
      * @param  int|null  $unitCost  Required for positive adjustments
+     * @param  bool  $skipNegativeCheck  Skip the negative stock check (for admin override)
      */
     public function recordAdjustment(
         int $companyId,
@@ -149,11 +168,28 @@ class StockService
         ?int $unitCost = null,
         ?string $notes = null,
         ?array $meta = null,
-        ?int $createdBy = null
+        ?int $createdBy = null,
+        bool $skipNegativeCheck = false
     ): StockMovement {
         // For positive adjustments, require unit cost
         if ($quantity > 0 && $unitCost === null) {
             throw new Exception('Unit cost is required for positive stock adjustments');
+        }
+
+        // For negative adjustments, check if item allows negative stock
+        if ($quantity < 0 && ! $skipNegativeCheck) {
+            $item = Item::find($itemId);
+            if ($item && $item->track_quantity && ! $item->allow_negative_stock) {
+                $currentStock = $this->getItemStock($companyId, $itemId, $warehouseId);
+                $newQuantity = $currentStock['quantity'] + $quantity; // quantity is negative
+                if ($newQuantity < 0) {
+                    throw new Exception(
+                        "Insufficient stock for item '{$item->name}'. " .
+                        "Available: {$currentStock['quantity']}, Adjustment: {$quantity}. " .
+                        "Enable 'Allow negative stock' on this item to allow negative inventory."
+                    );
+                }
+            }
         }
 
         return $this->recordMovement(
