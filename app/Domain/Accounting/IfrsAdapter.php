@@ -1458,6 +1458,220 @@ class IfrsAdapter
     }
 
     /**
+     * Get General Ledger for a specific account
+     *
+     * @param  Company  $company
+     * @param  int  $accountId  IFRS Account ID
+     * @param  string  $startDate  Date in Y-m-d format
+     * @param  string  $endDate  Date in Y-m-d format
+     * @return array
+     */
+    public function getGeneralLedger(Company $company, int $accountId, string $startDate, string $endDate): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return ['error' => 'Accounting backbone feature is disabled'];
+        }
+
+        try {
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (! $entity) {
+                return [
+                    'error' => 'IFRS Entity not available',
+                    'message' => 'Failed to get or create IFRS Entity for this company.',
+                ];
+            }
+
+            // Set user's entity context for IFRS EntityScope
+            $this->setUserEntityContext($entity);
+
+            // Get the account
+            $account = Account::where('entity_id', $entity->id)->find($accountId);
+            if (! $account) {
+                return ['error' => 'Account not found'];
+            }
+
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+
+            // Calculate opening balance (all ledger entries before start date)
+            $openingBalance = DB::table('ifrs_ledgers')
+                ->where('entity_id', $entity->id)
+                ->where('post_account_id', $accountId)
+                ->where('posting_date', '<', $start->toDateString())
+                ->selectRaw('
+                    SUM(CASE WHEN entry_type = ? THEN amount ELSE 0 END) -
+                    SUM(CASE WHEN entry_type = ? THEN amount ELSE 0 END) as balance
+                ', ['debit', 'credit'])
+                ->value('balance') ?? 0;
+
+            // Get ledger entries for the period with transaction details
+            $entries = DB::table('ifrs_ledgers as l')
+                ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
+                ->where('l.entity_id', $entity->id)
+                ->where('l.post_account_id', $accountId)
+                ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
+                ->select([
+                    'l.posting_date as date',
+                    'l.transaction_id',
+                    't.transaction_type as document_type',
+                    't.transaction_no as document_number',
+                    't.narration',
+                    'l.entry_type',
+                    'l.amount',
+                ])
+                ->orderBy('l.posting_date')
+                ->orderBy('l.id')
+                ->get();
+
+            // Build entries with running balance
+            $ledgerEntries = [];
+            $runningBalance = $openingBalance;
+
+            foreach ($entries as $entry) {
+                $debit = $entry->entry_type === 'debit' ? $entry->amount : 0;
+                $credit = $entry->entry_type === 'credit' ? $entry->amount : 0;
+
+                // Calculate running balance (debits increase, credits decrease)
+                $runningBalance += ($debit - $credit);
+
+                $ledgerEntries[] = [
+                    'date' => $entry->date,
+                    'transaction_id' => $entry->transaction_id,
+                    'document_type' => $this->mapTransactionType($entry->document_type),
+                    'document_number' => $entry->document_number ?? '',
+                    'narration' => $entry->narration ?? '',
+                    'debit' => $debit,
+                    'credit' => $credit,
+                    'balance' => $runningBalance,
+                ];
+            }
+
+            return [
+                'account' => [
+                    'id' => $account->id,
+                    'name' => $account->name,
+                    'code' => $account->code ?? '',
+                ],
+                'opening_balance' => $openingBalance,
+                'entries' => $ledgerEntries,
+                'closing_balance' => $runningBalance,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to generate general ledger', [
+                'company_id' => $company->id,
+                'account_id' => $accountId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Get Journal Entries for a company
+     *
+     * @param  Company  $company
+     * @param  string  $startDate  Date in Y-m-d format
+     * @param  string  $endDate  Date in Y-m-d format
+     * @return array
+     */
+    public function getJournalEntries(Company $company, string $startDate, string $endDate): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return ['error' => 'Accounting backbone feature is disabled'];
+        }
+
+        try {
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (! $entity) {
+                return [
+                    'error' => 'IFRS Entity not available',
+                    'message' => 'Failed to get or create IFRS Entity for this company.',
+                ];
+            }
+
+            // Set user's entity context for IFRS EntityScope
+            $this->setUserEntityContext($entity);
+
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+
+            // Get transactions for the period
+            $transactions = Transaction::where('entity_id', $entity->id)
+                ->whereBetween('transaction_date', [$start->toDateString(), $end->toDateString()])
+                ->with(['lineItems.account'])
+                ->orderBy('transaction_date')
+                ->orderBy('id')
+                ->get();
+
+            $entries = [];
+            foreach ($transactions as $transaction) {
+                $lines = [];
+                foreach ($transaction->lineItems as $lineItem) {
+                    if (! $lineItem->account) {
+                        continue;
+                    }
+
+                    $lines[] = [
+                        'account_name' => $lineItem->account->name,
+                        'account_code' => $lineItem->account->code ?? '',
+                        'debit' => $lineItem->credited ? 0 : $lineItem->amount,
+                        'credit' => $lineItem->credited ? $lineItem->amount : 0,
+                    ];
+                }
+
+                // Only include transactions that have line items
+                if (count($lines) > 0) {
+                    $entries[] = [
+                        'id' => $transaction->id,
+                        'date' => $transaction->transaction_date,
+                        'transaction_type' => $this->mapTransactionType($transaction->transaction_type),
+                        'narration' => $transaction->narration ?? '',
+                        'is_posted' => true, // All transactions in ledger are posted
+                        'lines' => $lines,
+                    ];
+                }
+            }
+
+            return [
+                'entries' => $entries,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to generate journal entries', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Map IFRS transaction type to friendly name
+     *
+     * @param  string  $transactionType
+     * @return string
+     */
+    protected function mapTransactionType(string $transactionType): string
+    {
+        $mapping = [
+            Transaction::IN => 'Invoice',
+            Transaction::BL => 'Bill',
+            Transaction::CN => 'Credit Note',
+            Transaction::RC => 'Receipt',
+            Transaction::PY => 'Payment',
+            Transaction::CP => 'Cash Purchase',
+            Transaction::JN => 'Journal Entry',
+        ];
+
+        return $mapping[$transactionType] ?? $transactionType;
+    }
+
+    /**
      * Post a Bill to the general ledger
      * Creates: DR Expense Account (5XXX based on bill items), CR Accounts Payable, DR VAT Receivable
      *
@@ -1699,3 +1913,4 @@ class IfrsAdapter
 // 2. LineItem field 'entry_type' -> 'credited' (boolean)
 // 3. Transaction type CS -> IN for client invoices
 // 4. ExchangeRate creation for entity currency
+// 5. Added getGeneralLedger() and getJournalEntries() methods for GL and JE reports

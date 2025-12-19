@@ -75,6 +75,18 @@
           >
             <IncomeStatement ref="report" />
           </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.general_ledger')"
+            tab-panel-container="px-0 py-0"
+          >
+            <GeneralLedger ref="report" />
+          </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.journal_entries')"
+            tab-panel-container="px-0 py-0"
+          >
+            <JournalEntries ref="report" />
+          </BaseTab>
         </BaseTabGroup>
       </BaseTab>
     </BaseTabGroup>
@@ -91,6 +103,8 @@ import ProjectReport from '../ProjectReport.vue'
 import TrialBalance from '../TrialBalance.vue'
 import BalanceSheet from '../BalanceSheet.vue'
 import IncomeStatement from '../IncomeStatement.vue'
+import GeneralLedger from '../GeneralLedger.vue'
+import JournalEntries from '../JournalEntries.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const globalStore = useGlobalStore()
@@ -104,4 +118,5 @@ function onDownload() {
 }
 </script>
 
+// CLAUDE-CHECKPOINT: Added GeneralLedger and JournalEntries tabs
 // CLAUDE-CHECKPOINT

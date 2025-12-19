@@ -164,6 +164,10 @@ const ProformaInvoiceView = () =>
 // Reports
 const ReportsIndex = () =>
   import('@/scripts/admin/views/reports/layout/Index.vue')
+const GeneralLedger = () =>
+  import('@/scripts/admin/views/reports/GeneralLedger.vue')
+const JournalEntries = () =>
+  import('@/scripts/admin/views/reports/JournalEntries.vue')
 
 // Installation
 const Installation = () =>
@@ -989,6 +993,18 @@ export default [
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: ReportsIndex,
       },
+      {
+        path: 'reports/general-ledger/:id?',
+        name: 'reports.general-ledger',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: GeneralLedger,
+      },
+      {
+        path: 'reports/journal-entries',
+        name: 'reports.journal-entries',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: JournalEntries,
+      },
 
       // Support Tickets
       {
@@ -1014,5 +1030,6 @@ export default [
   { path: '/:catchAll(.*)', component: NotFoundPage },
 ]
 
+// CLAUDE-CHECKPOINT: Added GeneralLedger and JournalEntries report routes
 // CLAUDE-CHECKPOINT: Removed certificates route - no UI component available
 // CLAUDE-CHECKPOINT

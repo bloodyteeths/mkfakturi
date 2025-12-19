@@ -1921,7 +1921,41 @@
             "total_expenses": "Вкупни расходи",
             "total_liabilities_equity": "Вкупни обврски и капитал",
             "balanced": "Биланс е во рамнотежа",
-            "unbalanced": "Биланс не е во рамнотежа"
+            "unbalanced": "Биланс не е во рамнотежа",
+            "general_ledger": {
+                "title": "Главна книга",
+                "select_account": "Избери сметка",
+                "opening_balance": "Почетно салдо",
+                "closing_balance": "Завршно салдо",
+                "running_balance": "Салдо",
+                "no_entries": "Нема пронајдено ставки за избраниот период",
+                "document": "Документ",
+                "description": "Опис",
+                "debit": "Должи",
+                "credit": "Побарува"
+            },
+            "journal_entries": {
+                "title": "Дневник на книжења",
+                "entry": "Книжење",
+                "entries": "Книжења",
+                "no_entries": "Нема пронајдено книжења за избраниот период",
+                "posted": "Прокнижено",
+                "draft": "Нацрт",
+                "expand": "Прикажи детали",
+                "collapse": "Сокриј детали",
+                "account": "Сметка",
+                "total_debits": "Вкупно должи",
+                "total_credits": "Вкупно побарува"
+            },
+            "accounts": {
+                "title": "Контен план",
+                "accounts_receivable": "Побарувања од купувачи",
+                "accounts_payable": "Обврски кон добавувачи",
+                "cash_and_bank": "Парични средства и банка",
+                "sales_revenue": "Приходи од продажба",
+                "tax_payable": "Обврски за ДДВ",
+                "expenses": "Расходи"
+            }
         },
         "errors": {
             "required": "Полето е задолжително"

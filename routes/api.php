@@ -681,6 +681,8 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/trial-balance', [AccountingReportsController::class, 'trialBalance']);
                 Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
                 Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
+                Route::get('/general-ledger', [AccountingReportsController::class, 'generalLedger']);
+                Route::get('/journal-entries', [AccountingReportsController::class, 'journalEntries']);
                 Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
             });
 

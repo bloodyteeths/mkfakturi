@@ -1452,7 +1452,41 @@
       "total_expenses": "Total Expenses",
       "total_liabilities_equity": "Total Liabilities & Equity",
       "balanced": "Trial Balance is balanced",
-      "unbalanced": "Trial Balance is not balanced"
+      "unbalanced": "Trial Balance is not balanced",
+      "general_ledger": {
+        "title": "General Ledger",
+        "select_account": "Select Account",
+        "opening_balance": "Opening Balance",
+        "closing_balance": "Closing Balance",
+        "running_balance": "Balance",
+        "no_entries": "No ledger entries found for the selected period",
+        "document": "Document",
+        "description": "Description",
+        "debit": "Debit",
+        "credit": "Credit"
+      },
+      "journal_entries": {
+        "title": "Journal Entries",
+        "entry": "Journal Entry",
+        "entries": "Journal Entries",
+        "no_entries": "No journal entries found for the selected period",
+        "posted": "Posted",
+        "draft": "Draft",
+        "expand": "Show details",
+        "collapse": "Hide details",
+        "account": "Account",
+        "total_debits": "Total Debits",
+        "total_credits": "Total Credits"
+      },
+      "accounts": {
+        "title": "Chart of Accounts",
+        "accounts_receivable": "Accounts Receivable",
+        "accounts_payable": "Accounts Payable",
+        "cash_and_bank": "Cash and Bank",
+        "sales_revenue": "Sales Revenue",
+        "tax_payable": "Tax Payable",
+        "expenses": "Expenses"
+      }
     },
     "errors": {
       "required": "Field is required"
