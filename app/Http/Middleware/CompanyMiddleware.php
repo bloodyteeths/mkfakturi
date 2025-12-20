@@ -34,7 +34,7 @@ class CompanyMiddleware
                     // Verify partner has access to this company
                     $partner = $user->partner;
                     if ($partner) {
-                        $hasAccess = \App\Models\PartnerCompanyLink::where('partner_id', $partner->id)
+                        $hasAccess = \App\Models\PartnerCompany::where('partner_id', $partner->id)
                             ->where('company_id', $companyId)
                             ->where('is_active', true)
                             ->exists();
