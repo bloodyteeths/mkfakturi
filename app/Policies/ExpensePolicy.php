@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Expense;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -21,7 +22,12 @@ class ExpensePolicy
             return true;
         }
 
-        if ($user->can('view-expense', Expense::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_EXPENSES);
+        }
+
+        if ($user->can('view-expense', Expense::class)) {
             return true;
         }
 
@@ -40,7 +46,7 @@ class ExpensePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($expense->company_id);
+            return $user->hasPartnerPermission($expense->company_id, PartnerPermission::VIEW_EXPENSES);
         }
 
         if ($user->can('view-expense', $expense) && $user->hasCompany($expense->company_id)) {
@@ -61,7 +67,12 @@ class ExpensePolicy
             return true;
         }
 
-        if ($user->can('create-expense', Expense::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_EXPENSES);
+        }
+
+        if ($user->can('create-expense', Expense::class)) {
             return true;
         }
 
@@ -80,7 +91,7 @@ class ExpensePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($expense->company_id);
+            return $user->hasPartnerPermission($expense->company_id, PartnerPermission::EDIT_EXPENSES);
         }
 
         if ($user->can('edit-expense', $expense) && $user->hasCompany($expense->company_id)) {
@@ -102,7 +113,7 @@ class ExpensePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($expense->company_id);
+            return $user->hasPartnerPermission($expense->company_id, PartnerPermission::DELETE_EXPENSES);
         }
 
         if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
@@ -123,6 +134,10 @@ class ExpensePolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($expense->company_id, PartnerPermission::DELETE_EXPENSES);
+        }
+
         if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
             return true;
         }
@@ -139,6 +154,10 @@ class ExpensePolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($expense->company_id, PartnerPermission::DELETE_EXPENSES);
         }
 
         if ($user->can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
@@ -159,6 +178,11 @@ class ExpensePolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_EXPENSES);
+        }
+
         if ($user->can('delete-expense', Expense::class)) {
             return true;
         }
@@ -166,3 +190,4 @@ class ExpensePolicy
         return false;
     }
 }
+// CLAUDE-CHECKPOINT

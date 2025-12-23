@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Estimate;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -21,7 +22,12 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('view-estimate', Estimate::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_ESTIMATES);
+        }
+
+        if ($user->can('view-estimate', Estimate::class)) {
             return true;
         }
 
@@ -40,7 +46,7 @@ class EstimatePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($estimate->company_id);
+            return $user->hasPartnerPermission($estimate->company_id, PartnerPermission::VIEW_ESTIMATES);
         }
 
         if ($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
@@ -61,7 +67,12 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('create-estimate', Estimate::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_ESTIMATES);
+        }
+
+        if ($user->can('create-estimate', Estimate::class)) {
             return true;
         }
 
@@ -80,7 +91,7 @@ class EstimatePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($estimate->company_id);
+            return $user->hasPartnerPermission($estimate->company_id, PartnerPermission::EDIT_ESTIMATES);
         }
 
         if ($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
@@ -102,7 +113,7 @@ class EstimatePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($estimate->company_id);
+            return $user->hasPartnerPermission($estimate->company_id, PartnerPermission::DELETE_ESTIMATES);
         }
 
         if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
@@ -123,6 +134,10 @@ class EstimatePolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($estimate->company_id, PartnerPermission::DELETE_ESTIMATES);
+        }
+
         if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -141,6 +156,10 @@ class EstimatePolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($estimate->company_id, PartnerPermission::DELETE_ESTIMATES);
+        }
+
         if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
             return true;
         }
@@ -151,7 +170,7 @@ class EstimatePolicy
     /**
      * Determine whether the user can send email of the model.
      *
-     * @param  \App\Models\Estimate  $payment
+     * @param  \App\Models\Estimate  $estimate
      * @return mixed
      */
     public function send(User $user, Estimate $estimate)
@@ -161,7 +180,7 @@ class EstimatePolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($estimate->company_id);
+            return $user->hasPartnerPermission($estimate->company_id, PartnerPermission::SEND_ESTIMATES);
         }
 
         if ($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
@@ -182,10 +201,17 @@ class EstimatePolicy
             return true;
         }
 
-        if ($user->can('delete-estimate', Estimate::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_ESTIMATES);
+        }
+
+        if ($user->can('delete-estimate', Estimate::class)) {
             return true;
         }
 
         return false;
     }
 }
+
+// CLAUDE-CHECKPOINT

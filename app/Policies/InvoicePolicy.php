@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -21,8 +22,10 @@ class InvoicePolicy
             return true;
         }
 
+        // Partners need VIEW_INVOICES permission
         if ($user->role === 'partner') {
-            return true;
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_INVOICES);
         }
 
         return $user->can('view-invoice', Invoice::class);
@@ -36,7 +39,7 @@ class InvoicePolicy
     public function view(User $user, Invoice $invoice)
     {
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($invoice->company_id);
+            return $user->hasPartnerPermission($invoice->company_id, PartnerPermission::VIEW_INVOICES);
         }
 
         return $user->hasCompany($invoice->company_id);
@@ -51,6 +54,12 @@ class InvoicePolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        // Partners need CREATE_INVOICES permission
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_INVOICES);
         }
 
         if ($user->can('create-invoice', Invoice::class)) {
@@ -71,7 +80,15 @@ class InvoicePolicy
             return $invoice->allow_edit;
         }
 
-        if ($user->can('edit-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
+        // Partners need EDIT_INVOICES permission
+        if ($user->role === 'partner') {
+            if ($user->hasPartnerPermission($invoice->company_id, PartnerPermission::EDIT_INVOICES)) {
+                return $invoice->allow_edit;
+            }
+            return false;
+        }
+
+        if ($user->can('edit-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return $invoice->allow_edit;
         }
 
@@ -89,7 +106,12 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
+        // Partners need DELETE_INVOICES permission
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($invoice->company_id, PartnerPermission::DELETE_INVOICES);
+        }
+
+        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -107,7 +129,12 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
+        // Partners need DELETE_INVOICES permission (restore is related to delete)
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($invoice->company_id, PartnerPermission::DELETE_INVOICES);
+        }
+
+        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -125,7 +152,12 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('delete-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
+        // Partners need DELETE_INVOICES permission
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($invoice->company_id, PartnerPermission::DELETE_INVOICES);
+        }
+
+        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -144,7 +176,12 @@ class InvoicePolicy
             return true;
         }
 
-        if ($user->can('send-invoice', $invoice) && ($user->hasCompany($invoice->company_id) || ($user->role === 'partner' && $user->hasPartnerAccessToCompany($invoice->company_id)))) {
+        // Partners need SEND_INVOICES permission
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($invoice->company_id, PartnerPermission::SEND_INVOICES);
+        }
+
+        if ($user->can('send-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -160,6 +197,12 @@ class InvoicePolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        // Partners need DELETE_INVOICES permission
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_INVOICES);
         }
 
         if ($user->can('delete-invoice', Invoice::class)) {

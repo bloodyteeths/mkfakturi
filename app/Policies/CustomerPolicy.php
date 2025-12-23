@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -22,8 +23,14 @@ class CustomerPolicy
             return true;
         }
 
+        // Partners need VIEW_CUSTOMERS permission
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_CUSTOMERS);
+        }
+
         // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-customer', Customer::class) || $user->role === 'partner') {
+        if ($user->can('view-customer', Customer::class)) {
             return true;
         }
 
@@ -42,7 +49,7 @@ class CustomerPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($customer->company_id);
+            return $user->hasPartnerPermission($customer->company_id, PartnerPermission::VIEW_CUSTOMERS);
         }
 
         if ($user->can('view-customer', $customer) && $user->hasCompany($customer->company_id)) {
@@ -63,6 +70,12 @@ class CustomerPolicy
             return true;
         }
 
+        // Partners need CREATE_CUSTOMERS permission
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_CUSTOMERS);
+        }
+
         if ($user->can('create-customer', Customer::class)) {
             return true;
         }
@@ -79,6 +92,11 @@ class CustomerPolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        // Partners need EDIT_CUSTOMERS permission
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($customer->company_id, PartnerPermission::EDIT_CUSTOMERS);
         }
 
         if ($user->can('edit-customer', $customer)) {
@@ -99,6 +117,11 @@ class CustomerPolicy
             return true;
         }
 
+        // Partners need DELETE_CUSTOMERS permission
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($customer->company_id, PartnerPermission::DELETE_CUSTOMERS);
+        }
+
         if ($user->can('delete-customer', $customer)) {
             return true;
         }
@@ -115,6 +138,11 @@ class CustomerPolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        // Partners need DELETE_CUSTOMERS permission (restore is related to delete)
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($customer->company_id, PartnerPermission::DELETE_CUSTOMERS);
         }
 
         if ($user->can('delete-customer', $customer)) {
@@ -135,6 +163,11 @@ class CustomerPolicy
             return true;
         }
 
+        // Partners need DELETE_CUSTOMERS permission
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($customer->company_id, PartnerPermission::DELETE_CUSTOMERS);
+        }
+
         if ($user->can('delete-customer', $customer)) {
             return true;
         }
@@ -153,6 +186,12 @@ class CustomerPolicy
             return true;
         }
 
+        // Partners need DELETE_CUSTOMERS permission
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_CUSTOMERS);
+        }
+
         if ($user->can('delete-customer', Customer::class)) {
             return true;
         }
@@ -160,3 +199,4 @@ class CustomerPolicy
         return false;
     }
 }
+// CLAUDE-CHECKPOINT

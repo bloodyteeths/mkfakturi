@@ -190,6 +190,16 @@ return [
             'ability' => '',
             'model' => '',
         ],
+        [
+            'title' => 'settings.menu_title.invite_company',
+            'group' => '',
+            'name' => 'Invite Company',
+            'link' => '/admin/settings/invite-company',
+            'icon' => 'LinkIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
         // Exchange Rate Provider removed - using free Frankfurter API (no config needed)
         [
             'title' => 'settings.menu_title.notifications',

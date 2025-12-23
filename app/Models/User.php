@@ -400,6 +400,56 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
             ->exists();
     }
 
+    /**
+     * Check if partner has specific permission for a company
+     * This method enforces the granular permissions set in partner_company_links
+     *
+     * @param int $companyId
+     * @param \App\Enums\PartnerPermission|string $permission
+     * @return bool
+     */
+    public function hasPartnerPermission(int $companyId, \App\Enums\PartnerPermission|string $permission): bool
+    {
+        // Must have partner role
+        if ($this->role !== 'partner') {
+            return false;
+        }
+
+        // Get associated partner record
+        $partner = $this->partner;
+        if (!$partner) {
+            return false;
+        }
+
+        // Convert string to enum if needed
+        if (is_string($permission)) {
+            try {
+                $permission = \App\Enums\PartnerPermission::from($permission);
+            } catch (\ValueError $e) {
+                return false;
+            }
+        }
+
+        return $partner->hasPermission($companyId, $permission);
+    }
+
+    /**
+     * Check if partner has any of the specified permissions for a company
+     *
+     * @param int $companyId
+     * @param array<\App\Enums\PartnerPermission|string> $permissions
+     * @return bool
+     */
+    public function hasAnyPartnerPermission(int $companyId, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPartnerPermission($companyId, $permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function getAllSettings()
     {
         // Use caching for user settings to avoid repeated DB queries

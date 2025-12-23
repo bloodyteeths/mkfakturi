@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Bill;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -15,13 +16,16 @@ class BillPolicy
      */
     public function viewAny(User $user): bool
     {
-        // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
             return true;
         }
 
-        // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-bill', Bill::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_BILLS);
+        }
+
+        if ($user->can('view-bill', Bill::class)) {
             return true;
         }
 
@@ -33,13 +37,12 @@ class BillPolicy
      */
     public function view(User $user, Bill $bill): bool
     {
-        // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
             return true;
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($bill->company_id);
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::VIEW_BILLS);
         }
 
         if ($user->can('view-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -58,7 +61,12 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('create-bill', Bill::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_BILLS);
+        }
+
+        if ($user->can('create-bill', Bill::class)) {
             return true;
         }
 
@@ -74,8 +82,11 @@ class BillPolicy
             return $bill->allow_edit;
         }
 
-        if ($user->role === 'partner' && $user->hasPartnerAccessToCompany($bill->company_id)) {
-            return $bill->allow_edit;
+        if ($user->role === 'partner') {
+            if ($user->hasPartnerPermission($bill->company_id, PartnerPermission::EDIT_BILLS)) {
+                return $bill->allow_edit;
+            }
+            return false;
         }
 
         if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -95,7 +106,7 @@ class BillPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($bill->company_id);
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::DELETE_BILLS);
         }
 
         if ($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -114,6 +125,10 @@ class BillPolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::DELETE_BILLS);
+        }
+
         if ($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) {
             return true;
         }
@@ -128,6 +143,10 @@ class BillPolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::DELETE_BILLS);
         }
 
         if ($user->can('delete-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -147,7 +166,7 @@ class BillPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($bill->company_id);
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::EDIT_BILLS);
         }
 
         if ($user->can('send-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -167,7 +186,7 @@ class BillPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($bill->company_id);
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::EDIT_BILLS);
         }
 
         if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -187,7 +206,7 @@ class BillPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($bill->company_id);
+            return $user->hasPartnerPermission($bill->company_id, PartnerPermission::EDIT_BILLS);
         }
 
         if ($user->can('edit-bill', $bill) && $user->hasCompany($bill->company_id)) {
@@ -206,7 +225,12 @@ class BillPolicy
             return true;
         }
 
-        if ($user->can('delete-bill', Bill::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_BILLS);
+        }
+
+        if ($user->can('delete-bill', Bill::class)) {
             return true;
         }
 

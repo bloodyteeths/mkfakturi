@@ -66,6 +66,8 @@ const FeatureFlagsSettings = () =>
   import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
 const PartnerSettings = () =>
   import('@/scripts/admin/views/settings/InvitePartnerSection.vue')
+const InviteCompanySettings = () =>
+  import('@/scripts/admin/views/settings/InviteCompanyToCompanySection.vue')
 const DailyClosingSetting = () =>
   import('@/scripts/admin/views/settings/DailyClosingSetting.vue')
 const PeriodLockSetting = () =>
@@ -638,6 +640,12 @@ export default [
             name: 'partner.settings',
             meta: { isOwner: true },
             component: PartnerSettings,
+          },
+          {
+            path: 'invite-company',
+            name: 'settings.invite-company',
+            meta: { isOwner: true },
+            component: InviteCompanySettings,
           },
           {
             path: 'feature-flags',

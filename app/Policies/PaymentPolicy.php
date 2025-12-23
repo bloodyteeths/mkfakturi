@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -21,7 +22,12 @@ class PaymentPolicy
             return true;
         }
 
-        if ($user->can('view-payment', Payment::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_PAYMENTS);
+        }
+
+        if ($user->can('view-payment', Payment::class)) {
             return true;
         }
 
@@ -40,7 +46,7 @@ class PaymentPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($payment->company_id);
+            return $user->hasPartnerPermission($payment->company_id, PartnerPermission::VIEW_PAYMENTS);
         }
 
         if ($user->can('view-payment', $payment) && $user->hasCompany($payment->company_id)) {
@@ -61,7 +67,12 @@ class PaymentPolicy
             return true;
         }
 
-        if ($user->can('create-payment', Payment::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_PAYMENTS);
+        }
+
+        if ($user->can('create-payment', Payment::class)) {
             return true;
         }
 
@@ -80,7 +91,7 @@ class PaymentPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($payment->company_id);
+            return $user->hasPartnerPermission($payment->company_id, PartnerPermission::EDIT_PAYMENTS);
         }
 
         if ($user->can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) {
@@ -102,7 +113,7 @@ class PaymentPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($payment->company_id);
+            return $user->hasPartnerPermission($payment->company_id, PartnerPermission::DELETE_PAYMENTS);
         }
 
         if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
@@ -123,6 +134,10 @@ class PaymentPolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($payment->company_id, PartnerPermission::DELETE_PAYMENTS);
+        }
+
         if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -139,6 +154,10 @@ class PaymentPolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($payment->company_id, PartnerPermission::DELETE_PAYMENTS);
         }
 
         if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
@@ -159,6 +178,10 @@ class PaymentPolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($payment->company_id, PartnerPermission::EDIT_PAYMENTS);
+        }
+
         if ($user->can('send-payment', $payment) && $user->hasCompany($payment->company_id)) {
             return true;
         }
@@ -177,6 +200,11 @@ class PaymentPolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_PAYMENTS);
+        }
+
         if ($user->can('delete-payment', Payment::class)) {
             return true;
         }
@@ -184,3 +212,5 @@ class PaymentPolicy
         return false;
     }
 }
+
+// CLAUDE-CHECKPOINT

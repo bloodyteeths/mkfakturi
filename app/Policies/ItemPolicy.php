@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -21,7 +22,12 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('view-item', Item::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_ITEMS);
+        }
+
+        if ($user->can('view-item', Item::class)) {
             return true;
         }
 
@@ -40,7 +46,7 @@ class ItemPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($item->company_id);
+            return $user->hasPartnerPermission($item->company_id, PartnerPermission::VIEW_ITEMS);
         }
 
         if ($user->can('view-item', $item) && $user->hasCompany($item->company_id)) {
@@ -61,7 +67,12 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('create-item', Item::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_ITEMS);
+        }
+
+        if ($user->can('create-item', Item::class)) {
             return true;
         }
 
@@ -80,7 +91,7 @@ class ItemPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($item->company_id);
+            return $user->hasPartnerPermission($item->company_id, PartnerPermission::EDIT_ITEMS);
         }
 
         if ($user->can('edit-item', $item) && $user->hasCompany($item->company_id)) {
@@ -102,7 +113,7 @@ class ItemPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($item->company_id);
+            return $user->hasPartnerPermission($item->company_id, PartnerPermission::DELETE_ITEMS);
         }
 
         if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
@@ -123,6 +134,10 @@ class ItemPolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($item->company_id, PartnerPermission::DELETE_ITEMS);
+        }
+
         if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
             return true;
         }
@@ -139,6 +154,10 @@ class ItemPolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($item->company_id, PartnerPermission::DELETE_ITEMS);
         }
 
         if ($user->can('delete-item', $item) && $user->hasCompany($item->company_id)) {
@@ -159,10 +178,17 @@ class ItemPolicy
             return true;
         }
 
-        if ($user->can('delete-item', Item::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_ITEMS);
+        }
+
+        if ($user->can('delete-item', Item::class)) {
             return true;
         }
 
         return false;
     }
 }
+
+// CLAUDE-CHECKPOINT

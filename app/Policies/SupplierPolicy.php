@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartnerPermission;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -15,13 +16,16 @@ class SupplierPolicy
      */
     public function viewAny(User $user): bool
     {
-        // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
             return true;
         }
 
-        // Use the user instance to check abilities (respects Bouncer scope)
-        if ($user->can('view-supplier', Supplier::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::VIEW_SUPPLIERS);
+        }
+
+        if ($user->can('view-supplier', Supplier::class)) {
             return true;
         }
 
@@ -33,13 +37,12 @@ class SupplierPolicy
      */
     public function view(User $user, Supplier $supplier): bool
     {
-        // Check if user is owner - owners have all permissions
         if ($user->isOwner()) {
             return true;
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($supplier->company_id);
+            return $user->hasPartnerPermission($supplier->company_id, PartnerPermission::VIEW_SUPPLIERS);
         }
 
         if ($user->can('view-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
@@ -58,7 +61,12 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('create-supplier', Supplier::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::CREATE_SUPPLIERS);
+        }
+
+        if ($user->can('create-supplier', Supplier::class)) {
             return true;
         }
 
@@ -75,7 +83,7 @@ class SupplierPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($supplier->company_id);
+            return $user->hasPartnerPermission($supplier->company_id, PartnerPermission::EDIT_SUPPLIERS);
         }
 
         if ($user->can('edit-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
@@ -95,7 +103,7 @@ class SupplierPolicy
         }
 
         if ($user->role === 'partner') {
-            return $user->hasPartnerAccessToCompany($supplier->company_id);
+            return $user->hasPartnerPermission($supplier->company_id, PartnerPermission::DELETE_SUPPLIERS);
         }
 
         if ($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
@@ -114,6 +122,10 @@ class SupplierPolicy
             return true;
         }
 
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($supplier->company_id, PartnerPermission::DELETE_SUPPLIERS);
+        }
+
         if ($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
             return true;
         }
@@ -128,6 +140,10 @@ class SupplierPolicy
     {
         if ($user->isOwner()) {
             return true;
+        }
+
+        if ($user->role === 'partner') {
+            return $user->hasPartnerPermission($supplier->company_id, PartnerPermission::DELETE_SUPPLIERS);
         }
 
         if ($user->can('delete-supplier', $supplier) && $user->hasCompany($supplier->company_id)) {
@@ -146,7 +162,12 @@ class SupplierPolicy
             return true;
         }
 
-        if ($user->can('delete-supplier', Supplier::class) || $user->role === 'partner') {
+        if ($user->role === 'partner') {
+            $companyId = (int) request()->header('company');
+            return $user->hasPartnerPermission($companyId, PartnerPermission::DELETE_SUPPLIERS);
+        }
+
+        if ($user->can('delete-supplier', Supplier::class)) {
             return true;
         }
 
