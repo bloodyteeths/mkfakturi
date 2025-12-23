@@ -1289,10 +1289,9 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
 
     // Partner Reports for Client Companies
     Route::prefix('/companies/{company}/reports')->group(function () {
-        Route::get('/sales', [\App\Http\Controllers\V1\Admin\Report\SalesReportController::class, 'index']);
         Route::get('/profit-loss', [\App\Http\Controllers\V1\Admin\Report\ProfitLossReportController::class, 'index']);
-        Route::get('/expenses', [\App\Http\Controllers\V1\Admin\Report\ExpenseReportController::class, 'index']);
-        Route::get('/tax-summary', [\App\Http\Controllers\V1\Admin\Report\TaxReportController::class, 'index']);
+        Route::get('/expenses', [\App\Http\Controllers\V1\Admin\Report\ExpensesReportController::class, 'index']);
+        Route::get('/tax-summary', [\App\Http\Controllers\V1\Admin\Report\TaxSummaryReportController::class, 'index']);
         Route::get('/customers', [\App\Http\Controllers\V1\Admin\Report\CustomerSalesReportController::class, 'index']);
         Route::get('/items', [\App\Http\Controllers\V1\Admin\Report\ItemSalesReportController::class, 'index']);
     });

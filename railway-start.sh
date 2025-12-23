@@ -181,7 +181,27 @@ if [ ! -z "$RAILWAY_PUBLIC_DOMAIN" ]; then
     export SESSION_DOMAIN=".${RAILWAY_PUBLIC_DOMAIN}"
     export SANCTUM_STATEFUL_DOMAINS="${RAILWAY_PUBLIC_DOMAIN},localhost,127.0.0.1"
     export APP_URL="https://${RAILWAY_PUBLIC_DOMAIN}"
+else
+    # Fallback to default Facturino domain if RAILWAY_PUBLIC_DOMAIN is not set
+    echo "WARNING: RAILWAY_PUBLIC_DOMAIN not set, using fallback domain"
+    export RAILWAY_PUBLIC_DOMAIN="app.facturino.mk"
+    export SESSION_DOMAIN=".facturino.mk"
+    export SANCTUM_STATEFUL_DOMAINS="app.facturino.mk,facturino.mk,localhost,127.0.0.1"
+    export APP_URL="https://app.facturino.mk"
+    echo "Using fallback APP_URL: $APP_URL"
 fi
+
+# Ensure APP_URL is always set (double check)
+if [ -z "$APP_URL" ]; then
+    echo "CRITICAL: APP_URL is not set! Setting to default."
+    export APP_URL="https://app.facturino.mk"
+fi
+
+echo "Final APP_URL: $APP_URL"
+echo "Final SESSION_DOMAIN: $SESSION_DOMAIN"
+echo "Final SANCTUM_STATEFUL_DOMAINS: $SANCTUM_STATEFUL_DOMAINS"
+
+# CLAUDE-CHECKPOINT
 
 # Clear any cached config that might have wrong values
 echo "Clearing caches..."
@@ -432,7 +452,7 @@ php artisan db:seed --class=PartnerUserSeeder --force 2>/dev/null || echo "Partn
 
 # Seed Macedonian Chart of Accounts for all companies (Phase 4 Partner Accounting)
 echo "Running MacedonianChartOfAccountsSeeder to ensure standard accounts exist..."
-php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force 2>/dev/null || echo "MacedonianChartOfAccountsSeeder already run or failed"
+php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force || echo "MacedonianChartOfAccountsSeeder completed or skipped"
 
 # Always run IFRS seeder to ensure entities and chart of accounts exist
 if [ "$FEATURE_ACCOUNTING_BACKBONE" = "true" ]; then
