@@ -39,9 +39,17 @@ trait GeneratesMenuTrait
                 // Partner-only menu items (group starts with 'partner.')
                 $group = $data->data['group'] ?? '';
                 if (is_string($group) && str_starts_with($group, 'partner.')) {
-                    // Show partner menu items to partners AND super admins
-                    if (!$isPartner && !$isSuperAdmin) {
-                        continue;
+                    // partner.accounting.* visible to partners AND super admins
+                    // partner.console.* visible to partners only
+                    if ($group === 'partner.accounting') {
+                        if (!$isPartner && !$isSuperAdmin) {
+                            continue;
+                        }
+                    } else {
+                        // Other partner groups (console, etc.) - partners only
+                        if (!$isPartner) {
+                            continue;
+                        }
                     }
                 }
 
