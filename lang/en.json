@@ -29,7 +29,8 @@
     "migration_wizard": "Migration Wizard",
     "tax_tools": "Tax Tools",
     "tax_reports": "Tax Reports",
-    "support_tickets": "Support Tickets"
+    "support_tickets": "Support Tickets",
+    "all_support_tickets": "All Support Tickets"
   },
   "general": {
     "company_name": "Company Name",
@@ -2687,7 +2688,22 @@
     "mark_resolved": "Mark as Resolved",
     "close_ticket": "Close Ticket",
     "ticket_locked": "This ticket is locked and cannot receive new replies",
-    "ticket_not_found": "Ticket not found"
+    "ticket_not_found": "Ticket not found",
+    "all_tickets": "All Support Tickets",
+    "total_tickets": "Total Tickets",
+    "company": "Company",
+    "no_tickets_admin": "No support tickets from any company yet",
+    "mark_in_progress": "Mark as In Progress",
+    "internal_note": "Internal Note",
+    "public_reply": "Public Reply",
+    "type_internal_note": "Type an internal note (visible only to admins)...",
+    "add_note": "Add Note",
+    "internal_note_added": "Internal note added successfully",
+    "reply_sent": "Reply sent successfully",
+    "status_updated": "Ticket status updated successfully",
+    "error_loading": "Error loading ticket data",
+    "error_sending_reply": "Error sending reply",
+    "error_updating_status": "Error updating ticket status"
   },
   "banking": {
     "title": "Banking",

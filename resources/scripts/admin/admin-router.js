@@ -208,6 +208,7 @@ const BillingSuccess = () => import('@/js/pages/billing/Success.vue')
 const TicketIndex = () => import('@/scripts/admin/views/support/Index.vue')
 const TicketCreate = () => import('@/scripts/admin/views/support/Create.vue')
 const TicketView = () => import('@/scripts/admin/views/support/View.vue')
+const TicketAdminIndex = () => import('@/scripts/admin/views/support/AdminIndex.vue')
 
 export default [
   {
@@ -1036,6 +1037,14 @@ export default [
         name: 'support.view',
         meta: { requiresAuth: true },
         component: TicketView,
+      },
+
+      // Super Admin Support Tickets (Cross-Tenant View)
+      {
+        path: 'support-admin',
+        name: 'support.admin',
+        meta: { requiresAuth: true, requiresSuperAdmin: true },
+        component: TicketAdminIndex,
       },
     ],
   },

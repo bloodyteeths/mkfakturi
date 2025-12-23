@@ -515,6 +515,17 @@ return [
             'model' => \Coderflex\LaravelTicket\Models\Ticket::class,
         ],
         [
+            'title' => 'navigation.all_support_tickets',
+            'group' => 3,
+            'link' => '/admin/support-admin',
+            'icon' => 'TicketIcon',
+            'name' => 'All Support Tickets',
+            'owner_only' => false,
+            'super_admin_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'partner.accounting.chart_of_accounts',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/chart-of-accounts',
