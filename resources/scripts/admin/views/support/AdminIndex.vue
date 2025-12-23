@@ -321,6 +321,25 @@
               <span class="text-xs text-gray-500">{{ formatDateTime(message.created_at) }}</span>
             </div>
             <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ message.message }}</p>
+
+            <!-- Message Attachments -->
+            <div v-if="message.attachments && message.attachments.length > 0" class="mt-3 flex flex-wrap gap-2">
+              <a
+                v-for="attachment in message.attachments"
+                :key="attachment.id"
+                :href="attachment.url"
+                target="_blank"
+                class="flex items-center space-x-2 px-3 py-2 bg-white rounded border border-gray-200 hover:border-primary-300 text-sm"
+              >
+                <BaseIcon
+                  :name="attachment.mime_type.startsWith('image/') ? 'PhotoIcon' : 'DocumentIcon'"
+                  class="h-4 w-4 text-gray-500"
+                />
+                <span class="text-gray-700 truncate max-w-[150px]">{{ attachment.name }}</span>
+                <span class="text-gray-400 text-xs">({{ attachment.human_readable_size }})</span>
+              </a>
+            </div>
+
             <span v-if="message.is_internal" class="text-xs text-yellow-600 mt-1 inline-block">
               {{ $t('tickets.internal_note') }}
             </span>
@@ -351,6 +370,49 @@
             :placeholder="replyMode === 'internal' ? $t('tickets.type_internal_note') : $t('tickets.type_your_reply')"
             rows="4"
           />
+
+          <!-- Attachment Input -->
+          <div class="mt-3">
+            <input
+              ref="attachmentInput"
+              type="file"
+              multiple
+              accept="image/*,application/pdf"
+              class="hidden"
+              @change="handleAttachmentSelect"
+            />
+            <BaseButton
+              type="button"
+              variant="primary-outline"
+              size="sm"
+              @click="$refs.attachmentInput.click()"
+            >
+              <BaseIcon name="PaperClipIcon" class="h-4 w-4 mr-1" />
+              {{ $t('tickets.attach_files') }}
+            </BaseButton>
+
+            <!-- Selected Attachments Preview -->
+            <div v-if="replyAttachments.length > 0" class="mt-2 flex flex-wrap gap-2">
+              <div
+                v-for="(file, index) in replyAttachments"
+                :key="index"
+                class="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded text-sm"
+              >
+                <BaseIcon
+                  :name="file.type.startsWith('image/') ? 'PhotoIcon' : 'DocumentIcon'"
+                  class="h-4 w-4 text-gray-500"
+                />
+                <span class="text-gray-700 truncate max-w-[150px]">{{ file.name }}</span>
+                <button
+                  type="button"
+                  class="text-red-500 hover:text-red-700"
+                  @click="removeAttachment(index)"
+                >
+                  <BaseIcon name="XMarkIcon" class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div class="mt-3 flex justify-end space-x-3">
             <BaseButton
@@ -400,6 +462,8 @@ const showViewModal = ref(false)
 const selectedTicket = ref(null)
 const replyContent = ref('')
 const replyMode = ref('public')
+const replyAttachments = ref([])
+const attachmentInput = ref(null)
 const isSubmittingReply = ref(false)
 
 const filters = ref({
@@ -562,6 +626,30 @@ const closeViewModal = () => {
   showViewModal.value = false
   selectedTicket.value = null
   replyContent.value = ''
+  replyAttachments.value = []
+}
+
+const handleAttachmentSelect = (event) => {
+  const files = Array.from(event.target.files)
+  for (const file of files) {
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      notificationStore.showNotification({
+        type: 'error',
+        message: t('tickets.file_too_large', { filename: file.name }),
+      })
+      continue
+    }
+    replyAttachments.value.push(file)
+  }
+  // Reset input
+  if (attachmentInput.value) {
+    attachmentInput.value.value = ''
+  }
+}
+
+const removeAttachment = (index) => {
+  replyAttachments.value.splice(index, 1)
 }
 
 const submitReply = async () => {
@@ -571,14 +659,24 @@ const submitReply = async () => {
 
   try {
     if (replyMode.value === 'internal') {
-      // Add internal note
+      // Add internal note (no attachments for internal notes)
       await axios.post(`/support/admin/tickets/${selectedTicket.value.id}/internal-notes`, {
         message: replyContent.value,
       })
     } else {
-      // Add public reply
-      await axios.post(`/support/tickets/${selectedTicket.value.id}/messages`, {
-        message: replyContent.value,
+      // Add public reply with attachments
+      const formData = new FormData()
+      formData.append('message', replyContent.value)
+
+      // Add attachments
+      replyAttachments.value.forEach((file, index) => {
+        formData.append(`attachments[${index}]`, file)
+      })
+
+      await axios.post(`/support/tickets/${selectedTicket.value.id}/messages`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       })
     }
 
@@ -588,6 +686,9 @@ const submitReply = async () => {
         ? t('tickets.internal_note_added')
         : t('tickets.reply_sent'),
     })
+
+    // Clear attachments
+    replyAttachments.value = []
 
     // Reload ticket to show new message
     await viewTicket(selectedTicket.value)

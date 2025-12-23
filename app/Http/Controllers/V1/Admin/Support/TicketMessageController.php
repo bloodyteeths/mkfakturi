@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Admin\Support;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\ReplyTicketRequest;
 use App\Http\Resources\TicketMessageResource;
+use App\Models\TicketMessage;
 use App\Notifications\TicketRepliedNotification;
 use Coderflex\LaravelTicket\Models\Message;
 use Coderflex\LaravelTicket\Models\Ticket;
@@ -47,11 +48,24 @@ class TicketMessageController extends Controller
 
         $user = $request->user();
 
-        // Create message using the package's method
-        $message = $ticket->messages()->create([
+        // Get the table name for ticket_id column
+        $tableName = config('laravel_ticket.table_names.messages', 'messages');
+        $ticketForeignId = $tableName['columns']['ticket_foreign_id'] ?? 'ticket_id';
+
+        // Create message using our custom model (supports attachments)
+        $message = TicketMessage::create([
+            $ticketForeignId => $ticket->id,
             'user_id' => $user->id,
             'message' => $request->message,
         ]);
+
+        // Handle attachments
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $message->addMedia($file)
+                    ->toMediaCollection('attachments');
+            }
+        }
 
         // Update ticket timestamp
         $ticket->touch();

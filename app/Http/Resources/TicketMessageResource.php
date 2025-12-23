@@ -18,6 +18,7 @@ class TicketMessageResource extends JsonResource
             'ticket_id' => $this->ticket_id,
             'user_id' => $this->user_id,
             'message' => $this->message,
+            'is_internal' => $this->is_internal ?? false,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'formatted_created_at' => $this->created_at ? $this->created_at->diffForHumans() : null,
@@ -29,6 +30,22 @@ class TicketMessageResource extends JsonResource
                     'avatar' => $this->user->avatar ?? null,
                 ];
             }),
+            'attachments' => $this->when(
+                method_exists($this->resource, 'getMedia'),
+                function () {
+                    return $this->getMedia('attachments')->map(function ($media) {
+                        return [
+                            'id' => $media->id,
+                            'name' => $media->file_name,
+                            'url' => $media->getUrl(),
+                            'mime_type' => $media->mime_type,
+                            'size' => $media->size,
+                            'human_readable_size' => $media->human_readable_size,
+                        ];
+                    });
+                },
+                []
+            ),
         ];
     }
 }
