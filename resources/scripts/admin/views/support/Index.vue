@@ -185,49 +185,49 @@
         >
           <template #cell-select="{ row }">
             <BaseCheckbox
-              :id="row.id"
+              :id="row.data.id"
               v-model="selectField"
-              :value="row.id"
+              :value="row.data.id"
             />
           </template>
 
           <template #cell-title="{ row }">
             <router-link
-              :to="`/admin/support/${row.id}`"
+              :to="`/admin/support/${row.data.id}`"
               class="font-medium text-primary-500 hover:text-primary-600"
             >
-              {{ row.title }}
+              {{ row.data.title }}
             </router-link>
           </template>
 
           <template #cell-status="{ row }">
             <span
-              :class="getStatusBadgeClass(row.status)"
+              :class="getStatusBadgeClass(row.data.status)"
               class="px-2 py-1 text-xs font-medium rounded-full"
             >
-              {{ getStatusLabel(row.status) }}
+              {{ getStatusLabel(row.data.status) }}
             </span>
           </template>
 
           <template #cell-priority="{ row }">
             <span
-              :class="getPriorityBadgeClass(row.priority)"
+              :class="getPriorityBadgeClass(row.data.priority)"
               class="px-2 py-1 text-xs font-medium rounded-full"
             >
-              {{ getPriorityLabel(row.priority) }}
+              {{ getPriorityLabel(row.data.priority) }}
             </span>
           </template>
 
           <template #cell-messages_count="{ row }">
             <div class="flex items-center text-gray-600">
               <BaseIcon name="ChatBubbleLeftIcon" class="h-4 w-4 mr-1" />
-              {{ row.messages_count || 0 }}
+              {{ row.data.messages_count || 0 }}
             </div>
           </template>
 
           <template #cell-created_at="{ row }">
             <span class="text-sm text-gray-600">
-              {{ formatDate(row.created_at) }}
+              {{ formatDate(row.data.created_at) }}
             </span>
           </template>
 
@@ -240,12 +240,12 @@
                 />
               </template>
 
-              <BaseDropdownItem @click="$router.push(`/admin/support/${row.id}`)">
+              <BaseDropdownItem @click="$router.push(`/admin/support/${row.data.id}`)">
                 <BaseIcon name="EyeIcon" class="h-5 mr-3 text-gray-600" />
                 {{ $t('general.view') }}
               </BaseDropdownItem>
 
-              <BaseDropdownItem @click="removeTicket(row.id)">
+              <BaseDropdownItem @click="removeTicket(row.data.id)">
                 <BaseIcon name="TrashIcon" class="h-5 mr-3 text-gray-600" />
                 {{ $t('general.delete') }}
               </BaseDropdownItem>
