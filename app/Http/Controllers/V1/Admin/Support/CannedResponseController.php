@@ -23,7 +23,7 @@ class CannedResponseController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can access canned responses
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can access canned responses',
@@ -63,7 +63,7 @@ class CannedResponseController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can create canned responses',
@@ -117,7 +117,7 @@ class CannedResponseController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can update canned responses',
