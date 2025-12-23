@@ -285,46 +285,8 @@ return [
             'ability' => '',
             'model' => '',
         ],
-        [
-            'title' => 'settings.menu_title.daily_closing',
-            'group' => '',
-            'name' => 'Daily Closing',
-            'link' => '/admin/settings/daily-closing',
-            'icon' => 'CalendarDaysIcon',
-            'owner_only' => false,
-            'ability' => 'manage-closings',
-            'model' => '',
-        ],
-        [
-            'title' => 'settings.menu_title.period_lock',
-            'group' => '',
-            'name' => 'Period Lock',
-            'link' => '/admin/settings/period-lock',
-            'icon' => 'LockClosedIcon',
-            'owner_only' => false,
-            'ability' => 'manage-closings',
-            'model' => '',
-        ],
-        [
-            'title' => 'settings.menu_title.chart_of_accounts',
-            'group' => '',
-            'name' => 'Chart of Accounts',
-            'link' => '/admin/settings/chart-of-accounts',
-            'icon' => 'TableCellsIcon',
-            'owner_only' => false,
-            'ability' => 'manage-closings',
-            'model' => '',
-        ],
-        [
-            'title' => 'settings.menu_title.journal_export',
-            'group' => '',
-            'name' => 'Journal Export',
-            'link' => '/admin/settings/journal-export',
-            'icon' => 'ArrowDownTrayIcon',
-            'owner_only' => false,
-            'ability' => 'manage-closings',
-            'model' => '',
-        ],
+        // NOTE: Chart of Accounts, Period Lock, Daily Closing, and Journal Export
+        // have been moved to Partner Accounting section (partner-only features)
     ],
 
     /*
