@@ -172,6 +172,24 @@
                   </div>
 
                   <p class="text-gray-800 whitespace-pre-wrap">{{ message.message }}</p>
+
+                  <!-- Message Attachments -->
+                  <div v-if="message.attachments && message.attachments.length > 0" class="mt-3 flex flex-wrap gap-2">
+                    <a
+                      v-for="attachment in message.attachments"
+                      :key="attachment.id"
+                      :href="attachment.url"
+                      target="_blank"
+                      class="flex items-center space-x-2 px-3 py-2 bg-white rounded border border-gray-200 hover:border-primary-300 text-sm"
+                    >
+                      <BaseIcon
+                        :name="attachment.mime_type && attachment.mime_type.startsWith('image/') ? 'PhotoIcon' : 'DocumentIcon'"
+                        class="h-4 w-4 text-gray-500"
+                      />
+                      <span class="text-gray-700 truncate max-w-[150px]">{{ attachment.name }}</span>
+                      <span class="text-gray-400 text-xs">({{ attachment.human_readable_size }})</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -270,7 +288,8 @@
               {{ $t('tickets.ticket_status') }}
             </h3>
 
-            <BaseInputGroup :label="$t('tickets.status')">
+            <!-- Admin/Owner: Full status dropdown -->
+            <BaseInputGroup v-if="isAdminOrOwner" :label="$t('tickets.status')">
               <BaseMultiselect
                 v-model="selectedStatus"
                 :options="statusOptions"
@@ -278,13 +297,48 @@
               />
             </BaseInputGroup>
 
-            <BaseInputGroup :label="$t('tickets.priority')" class="mt-4">
+            <!-- Regular user: Only show current status and close button -->
+            <div v-else>
+              <div class="mb-3">
+                <span class="text-sm text-gray-600">{{ $t('tickets.status') }}:</span>
+                <span
+                  :class="getStatusBadgeClass(ticket.status)"
+                  class="ml-2 px-2 py-1 text-xs font-medium rounded-full"
+                >
+                  {{ getStatusLabel(ticket.status) }}
+                </span>
+              </div>
+              <BaseButton
+                v-if="ticket.status !== 'closed'"
+                variant="primary-outline"
+                size="sm"
+                class="w-full"
+                @click="closeTicket"
+              >
+                <BaseIcon name="XCircleIcon" class="h-4 w-4 mr-1" />
+                {{ $t('tickets.close_ticket') }}
+              </BaseButton>
+            </div>
+
+            <!-- Admin/Owner: Priority dropdown -->
+            <BaseInputGroup v-if="isAdminOrOwner" :label="$t('tickets.priority')" class="mt-4">
               <BaseMultiselect
                 v-model="selectedPriority"
                 :options="priorityOptions"
                 @update:modelValue="updatePriority"
               />
             </BaseInputGroup>
+
+            <!-- Regular user: Show priority as read-only -->
+            <div v-else class="mt-4">
+              <span class="text-sm text-gray-600">{{ $t('tickets.priority') }}:</span>
+              <span
+                :class="getPriorityBadgeClass(ticket.priority)"
+                class="ml-2 px-2 py-1 text-xs font-medium rounded-full"
+              >
+                {{ getPriorityLabel(ticket.priority) }}
+              </span>
+            </div>
           </BaseCard>
 
           <!-- Ticket Info Card -->
@@ -349,6 +403,14 @@ const dialogStore = useDialogStore()
 const notificationStore = useNotificationStore()
 
 const ticket = computed(() => ticketStore.currentTicket)
+
+// Check if current user is admin or owner (super admin, owner, or support role)
+const isAdminOrOwner = computed(() => {
+  const user = userStore.currentUser
+  if (!user) return false
+  return user.is_owner || user.role === 'super admin' || user.role === 'support'
+})
+
 const replyContent = ref('')
 const replyAttachments = ref([])
 const replyFileInput = ref(null)
@@ -536,6 +598,20 @@ const updateTicketStatus = async (status) => {
     selectedStatus.value = statusOptions.find((s) => s.value === status)
   } catch (error) {
     console.error('Error updating ticket status:', error)
+  }
+}
+
+// Close ticket (for regular users who can only close, not change to other statuses)
+const closeTicket = async () => {
+  try {
+    await ticketStore.updateTicket(ticket.value.id, { status: 'closed' })
+    selectedStatus.value = statusOptions.find((s) => s.value === 'closed')
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('tickets.ticket_closed'),
+    })
+  } catch (error) {
+    console.error('Error closing ticket:', error)
   }
 }
 

@@ -2717,6 +2717,7 @@
     "last_updated": "Last Updated",
     "mark_resolved": "Mark as Resolved",
     "close_ticket": "Close Ticket",
+    "ticket_closed": "Ticket has been closed",
     "ticket_locked": "This ticket is locked and cannot receive new replies",
     "ticket_not_found": "Ticket not found",
     "all_tickets": "All Support Tickets",

@@ -27,6 +27,7 @@ class TicketController extends Controller
         $tickets = Ticket::query()
             ->where('company_id', $companyId)
             ->with(['user', 'categories', 'labels'])
+            ->withCount('messages')
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
             })

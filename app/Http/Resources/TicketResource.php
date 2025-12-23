@@ -44,11 +44,8 @@ class TicketResource extends JsonResource
             'messages' => $this->whenLoaded('messages', function () {
                 return TicketMessageResource::collection($this->messages);
             }),
-            'messages_count' => $this->when(
-                $this->relationLoaded('messages'),
-                fn () => $this->messages->count(),
-                0
-            ),
+            // Use messages_count from withCount() if available, otherwise count loaded relation
+            'messages_count' => $this->messages_count ?? ($this->relationLoaded('messages') ? $this->messages->count() : 0),
             'company' => $this->whenLoaded('company', function () {
                 return [
                     'id' => $this->company->id,

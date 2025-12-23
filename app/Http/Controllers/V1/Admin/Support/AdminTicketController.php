@@ -48,6 +48,7 @@ class AdminTicketController extends Controller
         // Query all tickets (no company_id filter = cross-tenant)
         $tickets = Ticket::query()
             ->with(['user', 'categories', 'labels', 'company'])
+            ->withCount('messages')
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
             })
