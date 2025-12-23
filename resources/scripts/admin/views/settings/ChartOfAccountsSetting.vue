@@ -107,7 +107,6 @@
               <BaseInput
                 v-model="accountForm.code"
                 :placeholder="$t('settings.accounts.code_placeholder')"
-                :disabled="isEdit && accountForm.system_defined"
               />
             </BaseInputGroup>
 
@@ -119,7 +118,6 @@
                 track-by="value"
                 label="label"
                 value-prop="value"
-                :disabled="isEdit && accountForm.system_defined"
               />
             </BaseInputGroup>
           </div>
@@ -140,7 +138,6 @@
               label="display_name"
               value-prop="id"
               :placeholder="$t('settings.accounts.no_parent')"
-              :disabled="isEdit && accountForm.system_defined"
             />
           </BaseInputGroup>
 
