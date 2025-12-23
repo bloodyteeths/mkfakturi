@@ -69,6 +69,36 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     }
 
     /**
+     * Seed chart of accounts for a specific company.
+     * Called by CompanyObserver when a new company is created.
+     *
+     * @param int $companyId
+     * @return void
+     */
+    public function seedForCompany(int $companyId): void
+    {
+        // Skip if company already has accounts (idempotent)
+        if (Account::where('company_id', $companyId)->exists()) {
+            $this->log("Company {$companyId} already has accounts, skipping.");
+            return;
+        }
+
+        // Seed all 10 classes
+        $this->seedClass0NonCurrentAssets($companyId);
+        $this->seedClass1CashAndReceivables($companyId);
+        $this->seedClass2LiabilitiesAndProvisions($companyId);
+        $this->seedClass3RawMaterialsInventory($companyId);
+        $this->seedClass4CostsAndExpenses($companyId);
+        $this->seedClass5Internal($companyId);
+        $this->seedClass6ProductionInventory($companyId);
+        $this->seedClass7Revenue($companyId);
+        $this->seedClass8OperatingResults($companyId);
+        $this->seedClass9CapitalAndReserves($companyId);
+
+        $this->log("Seeded chart of accounts for company {$companyId}");
+    }
+
+    /**
      * Helper method to log messages (handles both CLI and non-CLI contexts)
      */
     private function log(string $message, string $level = 'info'): void
