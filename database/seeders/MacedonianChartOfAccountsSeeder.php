@@ -33,18 +33,22 @@ class MacedonianChartOfAccountsSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('Seeding Macedonian Chart of Accounts...');
+        $this->log('Seeding Macedonian Chart of Accounts...');
 
         // Get all companies to seed accounts for each
         $companies = Company::all();
 
         if ($companies->isEmpty()) {
-            $this->command->warn('No companies found. Skipping chart of accounts seeding.');
+            $this->log('No companies found. Skipping chart of accounts seeding.', 'warn');
             return;
         }
 
         foreach ($companies as $company) {
-            $this->command->info("Seeding chart of accounts for company: {$company->name}");
+            $this->log("Seeding chart of accounts for company: {$company->name}");
+
+            // First, clean up old placeholder 4-digit accounts (e.g., 1000, 2000, 3000, 4000, 5000)
+            // These were from the simplified seeder and should be replaced with official 3-digit codes
+            $this->cleanupOldPlaceholderAccounts($company->id);
 
             // Seed all 10 classes
             $this->seedClass0NonCurrentAssets($company->id);
@@ -58,10 +62,23 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             $this->seedClass8OperatingResults($company->id);
             $this->seedClass9CapitalAndReserves($company->id);
 
-            $this->command->info("  ✓ Seeded chart of accounts for {$company->name}");
+            $this->log("  ✓ Seeded chart of accounts for {$company->name}");
         }
 
-        $this->command->info('Macedonian Chart of Accounts seeded successfully!');
+        $this->log('Macedonian Chart of Accounts seeded successfully!');
+    }
+
+    /**
+     * Helper method to log messages (handles both CLI and non-CLI contexts)
+     */
+    private function log(string $message, string $level = 'info'): void
+    {
+        if ($this->command) {
+            $this->command->{$level}($message);
+        } else {
+            // Fall back to Laravel's logger for Railway/non-CLI contexts
+            \Log::{$level}("[MacedonianChartOfAccountsSeeder] {$message}");
+        }
     }
 
     /**
@@ -562,6 +579,50 @@ class MacedonianChartOfAccountsSeeder extends Seeder
                     'system_defined' => true,
                 ]);
             }
+        }
+    }
+
+    /**
+     * Clean up old placeholder 4-digit accounts that were created by a previous simpler seeder.
+     * These will be replaced by the official 3-digit Macedonian chart of accounts.
+     *
+     * Old placeholder accounts: 1000 (Assets), 2000 (Liabilities), 3000 (Equity), 4000 (Revenue), 5000 (Expenses)
+     */
+    private function cleanupOldPlaceholderAccounts(int $companyId): void
+    {
+        // Known old placeholder 4-digit codes that should be removed
+        $oldPlaceholderCodes = [
+            '1000', '1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008', '1009',
+            '1100', '1101', '1200', '1201', '1202', '1203', '1300', '1400', '1500', '1600',
+            '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
+            '2100', '2200', '2201', '2202', '2203', '2204', '2205', '2300', '2400', '2500',
+            '3000', '3001', '3002', '3003', '3004', '3005', '3006', '3007', '3100', '3200',
+            '4000', '4001', '4002', '4003', '4004', '4005', '4006', '4007', '4008', '4009',
+            '4100', '4200', '4300', '4400', '4500', '4600', '4700', '4800', '4900',
+            '5000', '5001', '5002', '5003', '5004', '5005', '5006', '5007', '5008', '5009',
+            '5100', '5200', '5300', '5400', '5500',
+        ];
+
+        // Delete old placeholder accounts that aren't used in any mappings
+        $deletedCount = 0;
+        foreach ($oldPlaceholderCodes as $code) {
+            $account = Account::where('company_id', $companyId)
+                ->where('code', $code)
+                ->first();
+
+            if ($account && $account->canDelete()) {
+                try {
+                    $account->delete();
+                    $deletedCount++;
+                } catch (\Exception $e) {
+                    // Skip accounts that can't be deleted (may have transactions)
+                    $this->log("  Could not delete account {$code}: {$e->getMessage()}", 'warn');
+                }
+            }
+        }
+
+        if ($deletedCount > 0) {
+            $this->log("  Cleaned up {$deletedCount} old placeholder accounts");
         }
     }
 }

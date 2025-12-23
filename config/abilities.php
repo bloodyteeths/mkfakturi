@@ -933,6 +933,16 @@ return [
             'model' => AuditLog::class,
         ],
 
+        // Accounting / Chart of Accounts Management
+        [
+            'name' => 'manage chart of accounts',
+            'ability' => 'manage-closings',
+            'model' => null,
+            'depends_on' => [
+                'view-financial-reports',
+            ],
+        ],
+
         // Phase 3: Bank Connections
         [
             'name' => 'connect bank',
