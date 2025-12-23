@@ -166,52 +166,52 @@
             <a
               href="#"
               class="font-medium text-primary-500 hover:text-primary-600"
-              @click.prevent="viewTicket(row)"
+              @click.prevent="viewTicket(row.data)"
             >
-              {{ row.title }}
+              {{ row.data.title }}
             </a>
           </template>
 
           <template #cell-company="{ row }">
             <span class="text-sm text-gray-700">
-              {{ row.company?.name || 'N/A' }}
+              {{ row.data.company?.name || 'N/A' }}
             </span>
           </template>
 
           <template #cell-user="{ row }">
             <span class="text-sm text-gray-700">
-              {{ row.user?.name || 'Unknown' }}
+              {{ row.data.user?.name || 'Unknown' }}
             </span>
           </template>
 
           <template #cell-status="{ row }">
             <span
-              :class="getStatusBadgeClass(row.status)"
+              :class="getStatusBadgeClass(row.data.status)"
               class="px-2 py-1 text-xs font-medium rounded-full"
             >
-              {{ getStatusLabel(row.status) }}
+              {{ getStatusLabel(row.data.status) }}
             </span>
           </template>
 
           <template #cell-priority="{ row }">
             <span
-              :class="getPriorityBadgeClass(row.priority)"
+              :class="getPriorityBadgeClass(row.data.priority)"
               class="px-2 py-1 text-xs font-medium rounded-full"
             >
-              {{ getPriorityLabel(row.priority) }}
+              {{ getPriorityLabel(row.data.priority) }}
             </span>
           </template>
 
           <template #cell-messages_count="{ row }">
             <div class="flex items-center text-gray-600">
               <BaseIcon name="ChatBubbleLeftIcon" class="h-4 w-4 mr-1" />
-              {{ row.messages_count || 0 }}
+              {{ row.data.messages_count || 0 }}
             </div>
           </template>
 
           <template #cell-created_at="{ row }">
             <span class="text-sm text-gray-600">
-              {{ formatDate(row.created_at) }}
+              {{ formatDate(row.data.created_at) }}
             </span>
           </template>
 
@@ -224,22 +224,22 @@
                 />
               </template>
 
-              <BaseDropdownItem @click="viewTicket(row)">
+              <BaseDropdownItem @click="viewTicket(row.data)">
                 <BaseIcon name="EyeIcon" class="h-5 mr-3 text-gray-600" />
                 {{ $t('general.view') }}
               </BaseDropdownItem>
 
-              <BaseDropdownItem @click="changeTicketStatus(row, 'in_progress')">
+              <BaseDropdownItem @click="changeTicketStatus(row.data, 'in_progress')">
                 <BaseIcon name="PlayCircleIcon" class="h-5 mr-3 text-yellow-600" />
                 {{ $t('tickets.mark_in_progress') }}
               </BaseDropdownItem>
 
-              <BaseDropdownItem @click="changeTicketStatus(row, 'resolved')">
+              <BaseDropdownItem @click="changeTicketStatus(row.data, 'resolved')">
                 <BaseIcon name="CheckCircleIcon" class="h-5 mr-3 text-green-600" />
                 {{ $t('tickets.mark_resolved') }}
               </BaseDropdownItem>
 
-              <BaseDropdownItem @click="changeTicketStatus(row, 'closed')">
+              <BaseDropdownItem @click="changeTicketStatus(row.data, 'closed')">
                 <BaseIcon name="XCircleIcon" class="h-5 mr-3 text-gray-600" />
                 {{ $t('tickets.close_ticket') }}
               </BaseDropdownItem>
