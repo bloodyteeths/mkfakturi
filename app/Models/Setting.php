@@ -93,4 +93,41 @@ class Setting extends Model
             }
         );
     }
+
+    /**
+     * Get feature flags with database values taking priority over config.
+     *
+     * @return array<string, bool>
+     */
+    public static function getFeatureFlags(): array
+    {
+        $version = self::cacheVersion();
+
+        return Cache::remember(
+            "feature_flags:v{$version}",
+            CacheServiceProvider::CACHE_TTLS['MEDIUM'],
+            function () {
+                $feature_flags = [];
+                $features_config = config('features', []);
+
+                foreach ($features_config as $key => $feature) {
+                    // Check database value first
+                    $dbKey = 'feature_flag.'.$key;
+                    $setting = static::whereOption($dbKey)->first();
+                    $dbValue = $setting?->value;
+
+                    if ($dbValue !== null) {
+                        $feature_flags[$key] = filter_var($dbValue, FILTER_VALIDATE_BOOLEAN);
+                    } else {
+                        $feature_flags[$key] = $feature['enabled'] ?? false;
+                    }
+                }
+
+                // Stock module is always enabled
+                $feature_flags['stock'] = true;
+
+                return $feature_flags;
+            }
+        );
+    }
 }
