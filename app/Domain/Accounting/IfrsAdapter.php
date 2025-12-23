@@ -1132,7 +1132,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::RECEIVABLE,
             fallbackName: 'Accounts Receivable',
-            fallbackCode: '1200',
+            fallbackCode: '120', // Macedonian: Побарувања од купувачи во земјата
             specificName: 'Receivable'
         );
     }
@@ -1148,7 +1148,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_REVENUE,
             ifrsAccountType: Account::OPERATING_REVENUE,
             fallbackName: 'Sales Revenue',
-            fallbackCode: '4000',
+            fallbackCode: '720', // Macedonian: Приходи од продажба на производи во земјата
             specificName: 'Sales'
         );
     }
@@ -1164,7 +1164,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::BANK,
             fallbackName: 'Cash and Bank',
-            fallbackCode: '1000',
+            fallbackCode: '100', // Macedonian: Готовина
             specificName: 'Cash'
         );
     }
@@ -1180,7 +1180,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_LIABILITY,
             ifrsAccountType: Account::CONTROL,
             fallbackName: 'Tax Payable',
-            fallbackCode: '2100',
+            fallbackCode: '231', // Macedonian: Обврски за ДДВ
             specificName: 'Tax'
         );
     }
@@ -1196,7 +1196,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_EXPENSE,
             ifrsAccountType: Account::OPERATING_EXPENSE,
             fallbackName: 'Payment Processing Fees',
-            fallbackCode: '5100',
+            fallbackCode: '445', // Macedonian: Трошоци за провизии и надоместоци
             specificName: 'Fee'
         );
     }
@@ -1886,7 +1886,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_LIABILITY,
             ifrsAccountType: Account::PAYABLE,
             fallbackName: 'Accounts Payable',
-            fallbackCode: '2000',
+            fallbackCode: '220', // Macedonian: Обврски кон добавувачи во земјата
             specificName: 'Payable'
         );
     }
@@ -1902,7 +1902,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::CURRENT_ASSET,
             fallbackName: 'VAT Receivable',
-            fallbackCode: '1100',
+            fallbackCode: '131', // Macedonian: Побарувања за ДДВ
             specificName: 'VAT'
         );
     }
