@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Notifications\TicketClosedNotification;
 use App\Notifications\TicketUpdatedNotification;
 use Coderflex\LaravelTicket\Models\Message;
-use Coderflex\LaravelTicket\Models\Ticket;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 
 /**
