@@ -99,6 +99,11 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Running migrations..."
     php artisan migrate --force || echo "Migrations failed or already applied"
 
+    # Seed Macedonian Chart of Accounts (idempotent - safe to run multiple times)
+    echo "Seeding Macedonian Chart of Accounts..."
+    php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force
+    echo "✅ Macedonian Chart of Accounts seeder completed"
+
     # Check if installation already complete (like commit 09c2afc)
     PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
     echo "Profile status: $PROFILE_STATUS"
