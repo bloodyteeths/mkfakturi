@@ -80,7 +80,11 @@ Resume from the last checkpoint if interrupted.
 ## 6.1 Deployment (Railway)
 * Hosted on **Railway** at `app.facturino.mk`
 * Deployments triggered by push to `main` branch
-* **Migrations run automatically** on deploy via `railway.start` script
+* **IMPORTANT**: The actual entrypoint is `docker-entrypoint.sh` (NOT `railway-start.sh`)
+  - `Dockerfile.mkaccounting` line 199: `COPY docker-entrypoint.sh /entrypoint.sh`
+  - `Dockerfile.mkaccounting` line 210: `ENTRYPOINT ["/entrypoint.sh"]`
+* Migrations and seeders run automatically on deploy via `docker-entrypoint.sh`
+* Macedonian Chart of Accounts seeder runs on every deploy (idempotent)
 * No manual SSH needed—Railway handles it
 * Logs viewable in Railway dashboard or via `logs/` directory
 
