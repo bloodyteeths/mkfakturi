@@ -26,7 +26,7 @@ class TicketMessageController extends Controller
         // Filter out internal notes for non-admin users
         $messages = $ticket->messages()
             ->with('user')
-            ->when(! $user->isOwner() && ! $user->hasRole('support'), function ($query) {
+            ->when(! $user->isOwner() && $user->role !== 'support', function ($query) {
                 // Hide internal notes from regular customers
                 $query->where('is_internal', false);
             })
@@ -76,7 +76,7 @@ class TicketMessageController extends Controller
             }
         } else {
             // Agent/admin replied - notify customer
-            $isAgentReply = $user->isOwner() || $user->hasRole('support');
+            $isAgentReply = $user->isOwner() || $user->role === 'support';
             $ticket->user->notify(new TicketRepliedNotification($ticket, $message, $isAgentReply));
         }
 
