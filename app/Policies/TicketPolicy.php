@@ -30,6 +30,11 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
+        // Super admins can view any ticket (cross-tenant support)
+        if ($user->role === 'super admin') {
+            return true;
+        }
+
         // CRITICAL: Verify ticket belongs to user's current company
         $companyId = request()->header('company');
 
@@ -133,6 +138,12 @@ class TicketPolicy
      */
     public function reply(User $user, Ticket $ticket): bool
     {
+        // Super admins can reply to any ticket (cross-tenant support)
+        // They can even reply to locked tickets for admin purposes
+        if ($user->role === 'super admin') {
+            return true;
+        }
+
         $companyId = request()->header('company');
 
         if (! $companyId) {

@@ -49,6 +49,12 @@ class TicketResource extends JsonResource
                 fn () => $this->messages->count(),
                 0
             ),
+            'company' => $this->whenLoaded('company', function () {
+                return [
+                    'id' => $this->company->id,
+                    'name' => $this->company->name,
+                ];
+            }),
         ];
     }
 }

@@ -532,6 +532,16 @@ const loadStatistics = async () => {
 }
 
 const viewTicket = async (ticket) => {
+  // Safety check - ensure ticket and ticket.id exist
+  if (!ticket || !ticket.id) {
+    console.error('Invalid ticket object:', ticket)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('tickets.error_loading'),
+    })
+    return
+  }
+
   try {
     // Load full ticket with messages
     const response = await axios.get(`/support/tickets/${ticket.id}`)
