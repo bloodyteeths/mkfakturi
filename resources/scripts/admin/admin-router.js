@@ -958,6 +958,18 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/JournalExport.vue'),
       },
+      {
+        path: 'partner/accounting/period-lock',
+        name: 'partner.accounting.period-lock',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/PeriodLock.vue'),
+      },
+      {
+        path: 'partner/accounting/daily-closing',
+        name: 'partner.accounting.daily-closing',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/DailyClosing.vue'),
+      },
 
       // Banking
       {

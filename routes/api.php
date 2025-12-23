@@ -1302,6 +1302,16 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/valuation', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryValuation']);
         Route::get('/item-card/{item}', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'itemCard']);
     });
+
+    // Partner Period Lock Management for Client Companies
+    Route::get('/companies/{company}/period-locks', [\App\Http\Controllers\V1\Partner\PartnerPeriodLockController::class, 'index']);
+    Route::post('/companies/{company}/period-locks', [\App\Http\Controllers\V1\Partner\PartnerPeriodLockController::class, 'store']);
+    Route::delete('/companies/{company}/period-locks/{periodLock}', [\App\Http\Controllers\V1\Partner\PartnerPeriodLockController::class, 'destroy']);
+
+    // Partner Daily Closing Management for Client Companies
+    Route::get('/companies/{company}/daily-closings', [\App\Http\Controllers\V1\Partner\PartnerDailyClosingController::class, 'index']);
+    Route::post('/companies/{company}/daily-closings', [\App\Http\Controllers\V1\Partner\PartnerDailyClosingController::class, 'store']);
+    Route::delete('/companies/{company}/daily-closings/{dailyClosing}', [\App\Http\Controllers\V1\Partner\PartnerDailyClosingController::class, 'destroy']);
     // CLAUDE-CHECKPOINT
 });
 
