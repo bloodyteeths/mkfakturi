@@ -36,7 +36,7 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Check if user is admin or has 'support' role
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can access this endpoint',
@@ -93,7 +93,7 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can assign tickets
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can assign tickets',
@@ -106,7 +106,7 @@ class AdminTicketController extends Controller
 
         // Verify assigned user has support role or is owner
         $assignedUser = User::find($request->assigned_to);
-        if (! $assignedUser->isOwner() && ! $assignedUser->hasRole('support')) {
+        if (! $assignedUser->isOwner() && $assignedUser->role !== 'support') {
             return response()->json([
                 'error' => 'Invalid Assignment',
                 'message' => 'Can only assign tickets to support agents or admins',
@@ -134,7 +134,7 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can change status
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can change ticket status',
@@ -187,7 +187,7 @@ class AdminTicketController extends Controller
         $user = $request->user();
 
         // Only admins and support agents can add internal notes
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can add internal notes',
@@ -235,7 +235,7 @@ class AdminTicketController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isOwner() && ! $user->hasRole('support')) {
+        if (! $user->isOwner() && $user->role !== 'support') {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Only admins and support agents can access statistics',
@@ -252,7 +252,7 @@ class AdminTicketController extends Controller
             'high_priority_tickets' => Ticket::where('priority', 'high')->count(),
 
             // If user is support agent (not admin), filter by assigned_to
-            'my_assigned_tickets' => $user->hasRole('support')
+            'my_assigned_tickets' => $user->role === 'support'
                 ? Ticket::where('assigned_to', $user->id)->count()
                 : 0,
             'unassigned_tickets' => Ticket::whereNull('assigned_to')->count(),
