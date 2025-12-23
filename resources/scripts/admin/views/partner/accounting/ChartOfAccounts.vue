@@ -370,6 +370,7 @@ function openCreateModal() {
 }
 
 function openEditModal(account) {
+  console.log('[ChartOfAccounts] Opening edit modal for account:', account)
   accountForm.id = account.id
   accountForm.code = account.code
   accountForm.name = account.name
@@ -378,6 +379,7 @@ function openEditModal(account) {
   accountForm.description = account.description || ''
   accountForm.is_active = account.is_active
   accountForm.system_defined = account.system_defined
+  console.log('[ChartOfAccounts] Form populated with:', { ...accountForm })
   showAccountModal.value = true
 }
 
@@ -398,19 +400,24 @@ async function submitAccount() {
 
   try {
     if (isEdit.value) {
+      console.log('[ChartOfAccounts] Updating account:', accountForm.id, data)
       await partnerAccountingStore.updateAccount(
         selectedCompanyId.value,
         accountForm.id,
         data
       )
+      console.log('[ChartOfAccounts] Account updated successfully')
     } else {
+      console.log('[ChartOfAccounts] Creating account:', data)
       await partnerAccountingStore.createAccount(selectedCompanyId.value, data)
+      console.log('[ChartOfAccounts] Account created successfully')
     }
 
     closeAccountModal()
     await loadAccounts()
   } catch (error) {
-    console.error('Failed to save account:', error)
+    console.error('[ChartOfAccounts] Failed to save account:', error)
+    console.error('[ChartOfAccounts] Error response:', error.response?.data)
   }
 }
 

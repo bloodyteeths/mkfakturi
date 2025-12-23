@@ -151,14 +151,26 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
+        console.log('[PartnerAccounting] Updating account:', {
+          companyId,
+          accountId,
+          data,
+          url: `/partner/companies/${companyId}/accounts/${accountId}`,
+        })
+
         const response = await axios.put(
           `/partner/companies/${companyId}/accounts/${accountId}`,
           data
         )
 
+        console.log('[PartnerAccounting] Update response:', response.data)
+
         const index = this.accounts.findIndex((a) => a.id === accountId)
         if (index > -1) {
           this.accounts[index] = response.data.data
+          console.log('[PartnerAccounting] Updated account in store at index:', index)
+        } else {
+          console.warn('[PartnerAccounting] Account not found in store:', accountId)
         }
 
         notificationStore.showNotification({
@@ -168,6 +180,8 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         return response.data
       } catch (error) {
+        console.error('[PartnerAccounting] Update error:', error)
+        console.error('[PartnerAccounting] Error response:', error.response?.data)
         this.error = error.response?.data?.message || 'Failed to update account'
         handleError(error)
         throw error

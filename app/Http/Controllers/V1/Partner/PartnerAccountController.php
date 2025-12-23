@@ -74,7 +74,7 @@ class PartnerAccountController extends Controller
     /**
      * Get accounts as tree structure.
      */
-    public function tree(Request $request): JsonResponse
+    public function tree(Request $request, int $company): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -85,14 +85,7 @@ class PartnerAccountController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {
@@ -117,7 +110,7 @@ class PartnerAccountController extends Controller
     /**
      * Get a single account.
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, int $company, int $account): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -128,14 +121,7 @@ class PartnerAccountController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {
@@ -145,20 +131,20 @@ class PartnerAccountController extends Controller
             ], 403);
         }
 
-        $account = Account::where('company_id', $companyId)
+        $accountModel = Account::where('company_id', $companyId)
             ->with(['parent', 'children'])
-            ->findOrFail($id);
+            ->findOrFail($account);
 
         return response()->json([
             'success' => true,
-            'data' => $account,
+            'data' => $accountModel,
         ]);
     }
 
     /**
      * Create a new account.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, int $company): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -169,14 +155,7 @@ class PartnerAccountController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {
@@ -240,36 +219,44 @@ class PartnerAccountController extends Controller
     /**
      * Update an account.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, int $company, int $account): JsonResponse
     {
+        \Log::info('[PartnerAccountController] Update account request', [
+            'company_id' => $company,
+            'account_id' => $account,
+            'data' => $request->all(),
+        ]);
+
         $partner = $this->getPartnerFromRequest($request);
 
         if (!$partner) {
+            \Log::warning('[PartnerAccountController] Partner not found');
             return response()->json([
                 'success' => false,
                 'message' => 'Partner not found',
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {
+            \Log::warning('[PartnerAccountController] Partner does not have access to company', [
+                'partner_id' => $partner->id,
+                'company_id' => $companyId,
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'No access to this company',
             ], 403);
         }
 
-        $account = Account::where('company_id', $companyId)
-            ->findOrFail($id);
+        $accountModel = Account::where('company_id', $companyId)
+            ->findOrFail($account);
+
+        \Log::info('[PartnerAccountController] Found account model', [
+            'account' => $accountModel->toArray(),
+        ]);
 
         $request->validate([
             'code' => 'sometimes|required|string|max:20',
@@ -281,8 +268,30 @@ class PartnerAccountController extends Controller
             'meta' => 'nullable|array',
         ]);
 
+        // Prevent changes to system-defined account structure
+        if ($accountModel->system_defined) {
+            if ($request->has('code') && $request->code !== $accountModel->code) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change code of a system-defined account.',
+                ], 422);
+            }
+            if ($request->has('type') && $request->type !== $accountModel->type) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change type of a system-defined account.',
+                ], 422);
+            }
+            if ($request->has('parent_id') && $request->parent_id != $accountModel->parent_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change parent of a system-defined account.',
+                ], 422);
+            }
+        }
+
         // Check for duplicate code (if changing)
-        if ($request->has('code') && $request->code !== $account->code) {
+        if ($request->has('code') && $request->code !== $accountModel->code) {
             if (Account::where('company_id', $companyId)
                 ->where('code', $request->code)
                 ->exists()) {
@@ -295,7 +304,7 @@ class PartnerAccountController extends Controller
 
         // Validate parent (can't be self or descendant)
         if ($request->has('parent_id') && $request->parent_id) {
-            if ($request->parent_id === $id) {
+            if ($request->parent_id === $account) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Account cannot be its own parent.',
@@ -313,7 +322,7 @@ class PartnerAccountController extends Controller
             }
         }
 
-        $account->update($request->only([
+        $updateData = $request->only([
             'code',
             'name',
             'type',
@@ -321,19 +330,32 @@ class PartnerAccountController extends Controller
             'description',
             'is_active',
             'meta',
-        ]));
+        ]);
+
+        \Log::info('[PartnerAccountController] Updating account with data', [
+            'update_data' => $updateData,
+        ]);
+
+        $accountModel->update($updateData);
+
+        $updatedAccount = $accountModel->fresh()->load('parent');
+
+        \Log::info('[PartnerAccountController] Account updated successfully', [
+            'updated_account' => $updatedAccount->toArray(),
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Account updated successfully.',
-            'data' => $account->fresh()->load('parent'),
+            'data' => $updatedAccount,
         ]);
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Delete an account.
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, int $company, int $account): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -344,14 +366,7 @@ class PartnerAccountController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {
@@ -361,17 +376,17 @@ class PartnerAccountController extends Controller
             ], 403);
         }
 
-        $account = Account::where('company_id', $companyId)
-            ->findOrFail($id);
+        $accountModel = Account::where('company_id', $companyId)
+            ->findOrFail($account);
 
-        if (!$account->canDelete()) {
+        if (!$accountModel->canDelete()) {
             return response()->json([
                 'success' => false,
                 'message' => 'This account cannot be deleted. It may be system-defined, have child accounts, or be used in mappings.',
             ], 422);
         }
 
-        $account->delete();
+        $accountModel->delete();
 
         return response()->json([
             'success' => true,
@@ -382,7 +397,7 @@ class PartnerAccountController extends Controller
     /**
      * Import accounts from CSV.
      */
-    public function import(Request $request): JsonResponse
+    public function import(Request $request, int $company): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
@@ -393,14 +408,7 @@ class PartnerAccountController extends Controller
             ], 404);
         }
 
-        $companyId = $request->header('company');
-
-        if (!$companyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Company header required',
-            ], 400);
-        }
+        $companyId = $company;
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $companyId)) {

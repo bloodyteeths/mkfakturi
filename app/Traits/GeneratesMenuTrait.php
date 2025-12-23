@@ -27,6 +27,15 @@ trait GeneratesMenuTrait
                     continue;
                 }
 
+                // Feature flag check - skip menu items if feature is disabled
+                $featureFlag = $data->data['feature_flag'] ?? null;
+                if ($featureFlag) {
+                    $featureFlags = \App\Models\Setting::getFeatureFlags();
+                    if (!($featureFlags[$featureFlag] ?? false)) {
+                        continue;
+                    }
+                }
+
                 // Partner-only menu items (group starts with 'partner.')
                 $group = $data->data['group'] ?? '';
                 if (is_string($group) && str_starts_with($group, 'partner.')) {
