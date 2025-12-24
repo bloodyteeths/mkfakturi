@@ -275,7 +275,7 @@ onMounted(async () => {
 
 async function loadDashboardData() {
   try {
-    const response = await axios.get('admin/payroll-reports/statistics')
+    const response = await axios.get('payroll-reports/statistics')
     if (response.data) {
       dashboardStats.value = response.data.data || dashboardStats.value
       recentRuns.value = response.data.recent_runs || []

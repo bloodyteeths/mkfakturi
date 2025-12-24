@@ -212,7 +212,7 @@ async function submitForm() {
   isSaving.value = true
 
   try {
-    const response = await axios.post('admin/payroll-runs', currentRun)
+    const response = await axios.post('payroll-runs', currentRun)
 
     if (response.data && response.data.data) {
       notificationStore.showNotification({

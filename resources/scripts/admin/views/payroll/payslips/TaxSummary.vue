@@ -333,7 +333,7 @@ async function loadSummary() {
       end_date: filters.end_date,
     }
 
-    const response = await axios.get('admin/payroll-reports/tax-summary', { params })
+    const response = await axios.get('payroll-reports/tax-summary', { params })
 
     if (response.data && response.data.data) {
       summary.value = response.data.data
@@ -357,7 +357,7 @@ async function exportToExcel() {
       format: 'excel',
     }
 
-    const response = await axios.get('admin/payroll-reports/tax-summary', {
+    const response = await axios.get('payroll-reports/tax-summary', {
       params,
       responseType: 'blob',
     })
@@ -399,7 +399,7 @@ async function downloadMpinXml() {
     }
 
     const response = await axios.get(
-      'admin/payroll-reports/download-mpin-xml',
+      'payroll-reports/download-mpin-xml',
       { params, responseType: 'blob' }
     )
 
@@ -431,7 +431,7 @@ async function downloadDdv04Xml() {
     }
 
     const response = await axios.get(
-      'admin/payroll-reports/download-ddv04-xml',
+      'payroll-reports/download-ddv04-xml',
       { params, responseType: 'blob' }
     )
 

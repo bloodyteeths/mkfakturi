@@ -294,7 +294,7 @@ async function fetchData({ page, filter, sort }) {
   isFetchingInitialData.value = true
 
   try {
-    const response = await axios.get('admin/payroll-runs', { params: data })
+    const response = await axios.get('payroll-runs', { params: data })
     totalRuns.value = response.data.meta.total || 0
     isFetchingInitialData.value = false
 
@@ -365,7 +365,7 @@ function viewRun(id) {
 
 async function calculateRun(id) {
   try {
-    await axios.post(`admin/payroll-runs/${id}/calculate`)
+    await axios.post(`payroll-runs/${id}/calculate`)
     notificationStore.showNotification({
       type: 'success',
       message: t('payroll.run_calculated'),
@@ -393,7 +393,7 @@ async function approveRun(id) {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`admin/payroll-runs/${id}/approve`)
+          await axios.post(`payroll-runs/${id}/approve`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_approved'),
@@ -423,7 +423,7 @@ async function postRun(id) {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`admin/payroll-runs/${id}/post`)
+          await axios.post(`payroll-runs/${id}/post`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_posted'),
@@ -453,7 +453,7 @@ async function markAsPaid(id) {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`admin/payroll-runs/${id}/mark-paid`)
+          await axios.post(`payroll-runs/${id}/mark-paid`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_marked_as_paid'),
@@ -473,7 +473,7 @@ async function markAsPaid(id) {
 async function generateBankFile(id) {
   try {
     const response = await axios.get(
-      `admin/payroll-runs/${id}/bank-file`,
+      `payroll-runs/${id}/bank-file`,
       { responseType: 'blob' }
     )
 
@@ -512,7 +512,7 @@ function deleteRun(id) {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.delete(`admin/payroll-runs/${id}`)
+          await axios.delete(`payroll-runs/${id}`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_deleted'),

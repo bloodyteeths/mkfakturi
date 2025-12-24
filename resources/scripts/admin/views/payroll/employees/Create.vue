@@ -365,7 +365,7 @@ if (isEdit.value) {
 async function loadEmployee() {
   isFetchingInitialData.value = true
   try {
-    const response = await axios.get(`admin/payroll-employees/${route.params.id}`)
+    const response = await axios.get(`payroll-employees/${route.params.id}`)
     if (response.data && response.data.data) {
       Object.assign(currentEmployee, response.data.data)
     }
@@ -393,11 +393,11 @@ async function submitForm() {
     let response
     if (isEdit.value) {
       response = await axios.put(
-        `admin/payroll-employees/${route.params.id}`,
+        `payroll-employees/${route.params.id}`,
         currentEmployee
       )
     } else {
-      response = await axios.post('admin/payroll-employees', currentEmployee)
+      response = await axios.post('payroll-employees', currentEmployee)
     }
 
     if (response.data) {
