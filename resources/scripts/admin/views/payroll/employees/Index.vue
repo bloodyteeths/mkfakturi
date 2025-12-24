@@ -285,12 +285,17 @@ async function loadDepartments() {
 }
 
 async function fetchData({ page, filter, sort }) {
+  // Only include non-empty filter values
   let data = {
-    ...filters,
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
   }
+
+  // Add filters only if they have values
+  if (filters.department) data.department = filters.department
+  if (filters.employment_type) data.employment_type = filters.employment_type
+  if (filters.is_active !== '') data.status = filters.is_active === '1' ? 'active' : 'inactive'
 
   isFetchingInitialData.value = true
 
