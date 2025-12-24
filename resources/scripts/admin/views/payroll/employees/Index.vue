@@ -265,13 +265,19 @@ debouncedWatch(
 
 onMounted(async () => {
   await loadDepartments()
+  // Force refresh table to ensure data is fetched
+  setTimeout(() => {
+    if (tableComponent.value) {
+      tableComponent.value.refresh()
+    }
+  }, 100)
 })
 
 async function loadDepartments() {
   try {
     const response = await axios.get('payroll-employees/departments')
-    if (response.data) {
-      departments.value = response.data.departments || []
+    if (response.data && response.data.data) {
+      departments.value = response.data.data || []
     }
   } catch (error) {
     console.error('Error loading departments:', error)
