@@ -5,10 +5,10 @@ namespace App\Http\Controllers\V1\Admin\Support;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\ReplyTicketRequest;
 use App\Http\Resources\TicketMessageResource;
+use App\Models\Ticket;
 use App\Models\TicketMessage;
 use App\Notifications\TicketRepliedNotification;
 use Coderflex\LaravelTicket\Models\Message;
-use Coderflex\LaravelTicket\Models\Ticket;
 use Illuminate\Http\Request;
 
 class TicketMessageController extends Controller

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\V1\Admin\Support;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\CreateTicketRequest;
 use App\Http\Resources\TicketResource;
+use App\Models\Ticket;
 use App\Notifications\TicketCreatedNotification;
-use Coderflex\LaravelTicket\Models\Ticket;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
