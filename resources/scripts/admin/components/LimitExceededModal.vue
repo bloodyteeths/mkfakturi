@@ -152,6 +152,7 @@ const tiers = {
     features: [
       '1,000 invoices/month',
       'Unlimited everything',
+      'Payroll management (50 employees)',
       'Multi-currency',
       'API access',
       'Advanced AI',
@@ -165,6 +166,7 @@ const tiers = {
     features: [
       'Unlimited invoices',
       'Unlimited users',
+      'Unlimited payroll employees',
       'Priority support',
       'Multi-location',
       'IFRS reports',
@@ -180,6 +182,8 @@ const featureIcons = {
   custom_fields: 'AdjustmentsHorizontalIcon',
   recurring_invoices_active: 'ArrowPathIcon',
   ai_queries_per_month: 'SparklesIcon',
+  payroll: 'BriefcaseIcon',
+  payroll_employees: 'UsersIcon',
 }
 
 const featureIcon = computed(() => {

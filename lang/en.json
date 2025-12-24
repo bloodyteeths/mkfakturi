@@ -3781,6 +3781,7 @@
     }
   },
   "payroll": {
+    "payroll_management": "Payroll Management",
     "navigation": {
       "payroll": "Payroll",
       "employees": "Employees",

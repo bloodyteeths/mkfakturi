@@ -34,11 +34,12 @@ class PayrollEmployeeController extends Controller
 
         if (!$this->usageLimitService->hasPayrollAccess($company)) {
             return response()->json([
-                'error' => 'feature_locked',
+                'error' => 'limit_exceeded',
+                'feature' => 'payroll',
+                'feature_name' => __('payroll.payroll_management'),
                 'message' => config('subscriptions.upgrade_messages.payroll'),
                 'required_tier' => 'business',
                 'current_tier' => $this->usageLimitService->getCompanyTier($company),
-                'upgrade_url' => '/admin/billing',
             ], 403);
         }
 
@@ -101,11 +102,12 @@ class PayrollEmployeeController extends Controller
 
         if (!$this->usageLimitService->hasPayrollAccess($company)) {
             return response()->json([
-                'error' => 'feature_locked',
+                'error' => 'limit_exceeded',
+                'feature' => 'payroll',
+                'feature_name' => __('payroll.payroll_management'),
                 'message' => config('subscriptions.upgrade_messages.payroll'),
                 'required_tier' => 'business',
                 'current_tier' => $this->usageLimitService->getCompanyTier($company),
-                'upgrade_url' => '/admin/billing',
             ], 403);
         }
 
