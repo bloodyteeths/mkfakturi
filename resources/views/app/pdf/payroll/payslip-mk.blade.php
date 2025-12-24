@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ __('payroll.payslip') }} - {{ $employee->full_name }} - {{ $periodName }}</title>
+    <title>Платен лист - {{ $employee->full_name }} - {{ $periodName }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style type="text/css">
         body {
@@ -113,7 +113,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ __('payroll.payslip_title') }}</h1>
+            <h1>ПЛАТЕН ЛИСТ</h1>
             <div class="period">{{ $periodName }}</div>
         </div>
 
@@ -121,7 +121,7 @@
         <div class="info-section">
             <div class="info-row">
                 <div class="info-col">
-                    <div class="info-label">{{ __('payroll.company') }}:</div>
+                    <div class="info-label">Компанија:</div>
                     <div class="info-value">{{ $company->name }}</div>
                     @if($company->address_street_1)
                         <div class="info-value">{{ $company->address_street_1 }}</div>
@@ -131,13 +131,13 @@
                     @endif
                 </div>
                 <div class="info-col">
-                    <div class="info-label">{{ __('payroll.employee') }}:</div>
+                    <div class="info-label">Вработен:</div>
                     <div class="info-value">{{ $employee->full_name }}</div>
-                    <div class="info-value">{{ __('payroll.employee_number') }}: {{ $employee->employee_number }}</div>
-                    <div class="info-value">{{ __('payroll.embg') }}: {{ $employee->embg }}</div>
-                    <div class="info-value">{{ __('payroll.position') }}: {{ $employee->position }}</div>
+                    <div class="info-value">Број на вработен: {{ $employee->employee_number }}</div>
+                    <div class="info-value">ЕМБГ: {{ $employee->embg }}</div>
+                    <div class="info-value">Позиција: {{ $employee->position }}</div>
                     @if($employee->department)
-                        <div class="info-value">{{ __('payroll.department') }}: {{ $employee->department }}</div>
+                        <div class="info-value">Оддел: {{ $employee->department }}</div>
                     @endif
                 </div>
             </div>
@@ -147,11 +147,11 @@
         <div class="info-section">
             <div class="info-row">
                 <div class="info-col">
-                    <div class="info-label">{{ __('payroll.pay_period') }}:</div>
+                    <div class="info-label">Период на исплата:</div>
                     <div class="info-value">{{ $payrollRun->period_start->format('d.m.Y') }} - {{ $payrollRun->period_end->format('d.m.Y') }}</div>
                 </div>
                 <div class="info-col">
-                    <div class="info-label">{{ __('payroll.working_days') }}:</div>
+                    <div class="info-label">Работни денови:</div>
                     <div class="info-value">{{ $payrollRunLine->worked_days }} / {{ $payrollRunLine->working_days }}</div>
                 </div>
             </div>
@@ -161,35 +161,35 @@
         <table class="breakdown-table">
             <thead>
                 <tr>
-                    <th>{{ __('payroll.description') }}</th>
-                    <th class="amount">{{ __('payroll.amount') }} ({{ $employee->currency->code }})</th>
+                    <th>Опис</th>
+                    <th class="amount">Износ ({{ $employee->currency->code }})</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Earnings Section -->
                 <tr class="section-header">
-                    <td colspan="2">{{ __('payroll.earnings') }}</td>
+                    <td colspan="2">ПРИМАЊА</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.base_salary_gross') }}</td>
+                    <td>Основна плата (Бруто)</td>
                     <td class="amount money-format">{{ number_format($payrollRunLine->gross_salary / 100, 2, '.', ',') }}</td>
                 </tr>
                 @if($payrollRunLine->transport_allowance > 0)
                 <tr>
-                    <td>{{ __('payroll.transport_allowance') }}</td>
+                    <td>Надомест за превоз</td>
                     <td class="amount money-format">{{ number_format($payrollRunLine->transport_allowance / 100, 2, '.', ',') }}</td>
                 </tr>
                 @endif
                 @if($payrollRunLine->meal_allowance > 0)
                 <tr>
-                    <td>{{ __('payroll.meal_allowance') }}</td>
+                    <td>Надомест за храна</td>
                     <td class="amount money-format">{{ number_format($payrollRunLine->meal_allowance / 100, 2, '.', ',') }}</td>
                 </tr>
                 @endif
                 @if($payrollRunLine->other_additions && count($payrollRunLine->other_additions) > 0)
                     @foreach($payrollRunLine->other_additions as $addition)
                     <tr>
-                        <td>{{ $addition['name'] ?? __('payroll.other_addition') }}</td>
+                        <td>{{ $addition['name'] ?? 'Друг додаток' }}</td>
                         <td class="amount money-format">{{ number_format(($addition['amount'] ?? 0) / 100, 2, '.', ',') }}</td>
                     </tr>
                     @endforeach
@@ -197,42 +197,42 @@
 
                 <!-- Employee Contributions Section -->
                 <tr class="section-header">
-                    <td colspan="2">{{ __('payroll.employee_contributions') }}</td>
+                    <td colspan="2">ПРИДОНЕСИ НА ВРАБОТЕН</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.pension_pio') }} - 9%</td>
+                    <td>Пензиски фонд (ПИО) - 9%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->pension_contribution_employee / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.health_zo') }} - 3.75%</td>
+                    <td>Здравствено осигурување (ЗО) - 3.75%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->health_contribution_employee / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.unemployment') }} - 1.2%</td>
+                    <td>Осигурување од невработеност - 1.2%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->unemployment_contribution / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.additional_contribution') }} - 0.5%</td>
+                    <td>Дополнителен придонес - 0.5%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->additional_contribution / 100, 2, '.', ',') }}</td>
                 </tr>
 
                 <!-- Tax Section -->
                 <tr class="section-header">
-                    <td colspan="2">{{ __('payroll.taxes') }}</td>
+                    <td colspan="2">ДАНОЦИ</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.income_tax') }} - 10%</td>
+                    <td>Данок на доход - 10%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->income_tax_amount / 100, 2, '.', ',') }}</td>
                 </tr>
 
                 @if($payrollRunLine->deductions && count($payrollRunLine->deductions) > 0)
                 <!-- Other Deductions Section -->
                 <tr class="section-header">
-                    <td colspan="2">{{ __('payroll.other_deductions') }}</td>
+                    <td colspan="2">ДРУГИ ОДБИТОЦИ</td>
                 </tr>
                     @foreach($payrollRunLine->deductions as $deduction)
                     <tr>
-                        <td>{{ $deduction['name'] ?? __('payroll.deduction') }}</td>
+                        <td>{{ $deduction['name'] ?? 'Одбиток' }}</td>
                         <td class="amount money-format">-{{ number_format(($deduction['amount'] ?? 0) / 100, 2, '.', ',') }}</td>
                     </tr>
                     @endforeach
@@ -244,7 +244,7 @@
         <div class="summary-box">
             <table style="width: 100%;">
                 <tr>
-                    <td class="label">{{ __('payroll.net_pay_to_be_paid') }}:</td>
+                    <td class="label">НЕТО ПЛАТА (ЗА ИСПЛАТА):</td>
                     <td class="amount">{{ number_format($payrollRunLine->net_salary / 100, 2, '.', ',') }} {{ $employee->currency->code }}</td>
                 </tr>
             </table>
@@ -252,24 +252,24 @@
 
         <!-- Additional Information -->
         <div class="info-section" style="margin-top: 20px;">
-            <div class="info-label">{{ __('payroll.payment_details') }}:</div>
-            <div class="info-value">{{ __('payroll.bank') }}: {{ $employee->bank_name }}</div>
-            <div class="info-value">{{ __('payroll.iban') }}: {{ $employee->bank_account_iban }}</div>
+            <div class="info-label">Податоци за исплата:</div>
+            <div class="info-value">Банка: {{ $employee->bank_name }}</div>
+            <div class="info-value">IBAN: {{ $employee->bank_account_iban }}</div>
         </div>
 
         <!-- Employer Contributions (Information Only) -->
         <div class="info-section" style="margin-top: 20px; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #3498db;">
-            <div class="info-label" style="color: #3498db;">{{ __('payroll.employer_contributions_info') }}:</div>
-            <div class="info-value">{{ __('payroll.pension_pio') }} - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
-            <div class="info-value">{{ __('payroll.health_zo') }} - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
-            <div class="info-value" style="margin-top: 5px; font-weight: bold;">{{ __('payroll.total_employer_cost') }}: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
+            <div class="info-label" style="color: #3498db;">Придонеси на работодавач (Информативно):</div>
+            <div class="info-value">Пензиски фонд (ПИО) - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
+            <div class="info-value">Здравствено осигурување (ЗО) - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
+            <div class="info-value" style="margin-top: 5px; font-weight: bold;">Вкупен трошок на работодавач: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>{{ __('payroll.payslip_footer_generated') }}</p>
-            <p>{{ __('payroll.payslip_footer_date', ['date' => $generatedAt, 'company' => $company->name]) }}</p>
-            <p>{{ __('payroll.payslip_footer_contact') }}</p>
+            <p>Ова е компјутерски генериран документ. Не е потребен потпис.</p>
+            <p>Генерирано на {{ $generatedAt }} од {{ $company->name }}</p>
+            <p>За прашања во врска со овој платен лист, контактирајте го одделот за човечки ресурси.</p>
         </div>
     </div>
 </body>

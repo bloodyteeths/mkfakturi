@@ -37,8 +37,8 @@ class PayslipController extends Controller
             'generatedAt' => now()->format('d.m.Y H:i'),
         ];
 
-        // Generate PDF
-        $pdf = Pdf::loadView('app.pdf.payroll.payslip', $data);
+        // Generate PDF using Macedonian template (default for Facturino)
+        $pdf = Pdf::loadView('app.pdf.payroll.payslip-mk', $data);
 
         // Set paper size and orientation
         $pdf->setPaper('A4', 'portrait');
@@ -83,8 +83,8 @@ class PayslipController extends Controller
             'generatedAt' => now()->format('d.m.Y H:i'),
         ];
 
-        // Generate PDF
-        $pdf = Pdf::loadView('app.pdf.payroll.payslip', $data);
+        // Generate PDF using Macedonian template (default for Facturino)
+        $pdf = Pdf::loadView('app.pdf.payroll.payslip-mk', $data);
 
         // Set paper size and orientation
         $pdf->setPaper('A4', 'portrait');
@@ -133,7 +133,7 @@ class PayslipController extends Controller
                     'generatedAt' => now()->format('d.m.Y H:i'),
                 ];
 
-                $pdf = Pdf::loadView('app.pdf.payroll.payslip', $data);
+                $pdf = Pdf::loadView('app.pdf.payroll.payslip-mk', $data);
                 $pdf->setPaper('A4', 'portrait');
 
                 $filename = sprintf(
