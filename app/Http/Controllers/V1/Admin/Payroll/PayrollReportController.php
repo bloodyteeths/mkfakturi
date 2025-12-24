@@ -136,11 +136,23 @@ class PayrollReportController extends Controller
             ->count();
 
         // Pending payroll runs
-        $pendingRuns = PayrollRun::forCompany($companyId)
+        $pendingRunsCount = PayrollRun::forCompany($companyId)
             ->whereIn('status', [PayrollRun::STATUS_DRAFT, PayrollRun::STATUS_CALCULATED])
             ->count();
 
+        // Recent payroll runs for dashboard table
+        $recentRuns = PayrollRun::forCompany($companyId)
+            ->with(['creator'])
+            ->orderBy('period_start', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Return data in the format Vue expects
         $statistics = [
+            'active_employees' => $activeEmployeesCount,
+            'current_month_gross' => $currentMonthRun ? $currentMonthRun->total_gross : 0,
+            'current_month_net' => $currentMonthRun ? $currentMonthRun->total_net : 0,
+            'pending_runs' => $pendingRunsCount,
             'current_month' => [
                 'status' => $currentMonthRun ? $currentMonthRun->status : 'not_created',
                 'total_gross' => $currentMonthRun ? $currentMonthRun->total_gross : 0,
@@ -156,12 +168,11 @@ class PayrollReportController extends Controller
                 'total_employer_cost' => $ytdGross + $ytdEmployerTax,
                 'payroll_runs_count' => $ytdRuns->count(),
             ],
-            'active_employees_count' => $activeEmployeesCount,
-            'pending_runs_count' => $pendingRuns,
         ];
 
         return response()->json([
             'data' => $statistics,
+            'recent_runs' => $recentRuns,
         ]);
     }
 

@@ -52,7 +52,7 @@ class PayrollRunController extends Controller
         }
 
         $runs = $query
-            ->orderBy($request->get('orderBy', 'period_start'), $request->get('orderByType', 'desc'))
+            ->orderBy($request->get('orderByField', 'period_start'), $request->get('orderBy', 'desc'))
             ->paginate($limit);
 
         return response()->json([
