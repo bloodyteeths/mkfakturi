@@ -1032,6 +1032,37 @@ return [
                 'view-recurring-expense',
             ],
         ],
+
+        // Payroll Module (Business+ tier)
+        [
+            'name' => 'view payroll employee',
+            'ability' => 'view-payroll-employee',
+            'model' => \App\Models\PayrollEmployee::class,
+        ],
+        [
+            'name' => 'create payroll employee',
+            'ability' => 'create-payroll-employee',
+            'model' => \App\Models\PayrollEmployee::class,
+            'depends_on' => [
+                'view-payroll-employee',
+            ],
+        ],
+        [
+            'name' => 'edit payroll employee',
+            'ability' => 'edit-payroll-employee',
+            'model' => \App\Models\PayrollEmployee::class,
+            'depends_on' => [
+                'view-payroll-employee',
+            ],
+        ],
+        [
+            'name' => 'delete payroll employee',
+            'ability' => 'delete-payroll-employee',
+            'model' => \App\Models\PayrollEmployee::class,
+            'depends_on' => [
+                'view-payroll-employee',
+            ],
+        ],
     ],
 ];
 // CLAUDE-CHECKPOINT

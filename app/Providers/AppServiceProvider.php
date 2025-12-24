@@ -90,6 +90,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Support Ticketing Policy (PHASE 2 - TRACK 3: MILESTONE 3.1)
         Gate::policy(\Coderflex\LaravelTicket\Models\Ticket::class, \App\Policies\TicketPolicy::class);
+
+        // Payroll Module Policies
+        Gate::policy(\App\Models\PayrollEmployee::class, \App\Policies\PayrollEmployeePolicy::class);
+        Gate::policy(\App\Models\PayrollRun::class, \App\Policies\PayrollRunPolicy::class);
+        Gate::policy(\App\Models\PayrollRunLine::class, \App\Policies\PayrollRunLinePolicy::class);
         // CLAUDE-CHECKPOINT
 
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
