@@ -109,8 +109,8 @@ class TicketController extends Controller
     {
         $this->authorize('view', $ticket);
 
-        // Eager load relationships
-        $ticket->load(['user', 'categories', 'labels', 'messages.user']);
+        // Eager load relationships including media for message attachments
+        $ticket->load(['user', 'categories', 'labels', 'messages.user', 'messages.media']);
 
         return new TicketResource($ticket);
     }

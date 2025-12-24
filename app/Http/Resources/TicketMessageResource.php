@@ -30,22 +30,46 @@ class TicketMessageResource extends JsonResource
                     'avatar' => $this->user->avatar ?? null,
                 ];
             }),
-            'attachments' => $this->when(
-                method_exists($this->resource, 'getMedia'),
-                function () {
-                    return $this->getMedia('attachments')->map(function ($media) {
-                        return [
-                            'id' => $media->id,
-                            'name' => $media->file_name,
-                            'url' => $media->getUrl(),
-                            'mime_type' => $media->mime_type,
-                            'size' => $media->size,
-                            'human_readable_size' => $media->human_readable_size,
-                        ];
-                    });
-                },
-                []
-            ),
+            'attachments' => $this->getAttachments(),
+        ];
+    }
+
+    /**
+     * Get attachments from media relation (eager loaded or via getMedia).
+     */
+    protected function getAttachments(): array
+    {
+        // If media relation is eager loaded, use it
+        if ($this->relationLoaded('media')) {
+            return $this->media
+                ->filter(fn ($media) => $media->collection_name === 'attachments')
+                ->map(fn ($media) => $this->formatMedia($media))
+                ->values()
+                ->toArray();
+        }
+
+        // Fallback to getMedia if model supports it
+        if (method_exists($this->resource, 'getMedia')) {
+            return $this->getMedia('attachments')
+                ->map(fn ($media) => $this->formatMedia($media))
+                ->toArray();
+        }
+
+        return [];
+    }
+
+    /**
+     * Format a single media item for the response.
+     */
+    protected function formatMedia($media): array
+    {
+        return [
+            'id' => $media->id,
+            'name' => $media->file_name,
+            'url' => $media->getUrl(),
+            'mime_type' => $media->mime_type,
+            'size' => $media->size,
+            'human_readable_size' => $media->human_readable_size,
         ];
     }
 }
