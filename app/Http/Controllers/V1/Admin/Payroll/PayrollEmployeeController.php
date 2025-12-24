@@ -70,7 +70,7 @@ class PayrollEmployeeController extends Controller
             ->when($request->has('department'), function ($query) use ($request) {
                 $query->where('department', $request->department);
             })
-            ->orderBy($request->get('orderBy', 'created_at'), $request->get('orderByType', 'desc'))
+            ->orderBy($request->get('orderByField', 'created_at'), $request->get('orderBy', 'desc'))
             ->paginate($limit);
 
         return response()->json([
