@@ -263,7 +263,7 @@ onMounted(async () => {
 async function loadPayslip() {
   isLoading.value = true
   try {
-    const response = await axios.get(`/api/v1/admin/payroll/payslips/${route.params.id}`)
+    const response = await axios.get(`admin/payslips/${route.params.id}/preview`)
     if (response.data && response.data.data) {
       payslip.value = response.data.data
     }
@@ -288,7 +288,7 @@ function formatPeriod(year, month) {
 async function downloadPayslip() {
   try {
     const response = await axios.get(
-      `/api/v1/admin/payroll/payslips/${route.params.id}/pdf`,
+      `admin/payslips/${route.params.id}/download`,
       { responseType: 'blob' }
     )
 

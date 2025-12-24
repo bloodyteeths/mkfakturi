@@ -269,7 +269,7 @@ onMounted(async () => {
 
 async function loadDepartments() {
   try {
-    const response = await axios.get('/api/v1/admin/payroll/employees/departments')
+    const response = await axios.get('admin/payroll-employees/departments')
     if (response.data) {
       departments.value = response.data.departments || []
     }
@@ -289,7 +289,7 @@ async function fetchData({ page, filter, sort }) {
   isFetchingInitialData.value = true
 
   try {
-    const response = await axios.get('/api/v1/admin/payroll/employees', { params: data })
+    const response = await axios.get('admin/payroll-employees', { params: data })
     totalEmployees.value = response.data.meta.total || 0
     isFetchingInitialData.value = false
 
@@ -356,7 +356,7 @@ function terminateEmployee(id) {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`/api/v1/admin/payroll/employees/${id}/terminate`)
+          await axios.post(`admin/payroll-employees/${id}/terminate`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.employee_terminated'),
@@ -388,7 +388,7 @@ function reactivateEmployee(id) {
       if (res) {
         try {
           // Reactivate by updating is_active and clearing termination_date
-          await axios.put(`/api/v1/admin/payroll/employees/${id}`, {
+          await axios.put(`admin/payroll-employees/${id}`, {
             is_active: true,
             termination_date: null,
           })
@@ -422,7 +422,7 @@ function deleteEmployee(id) {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.delete(`/api/v1/admin/payroll/employees/${id}`)
+          await axios.delete(`admin/payroll-employees/${id}`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.employee_deleted'),

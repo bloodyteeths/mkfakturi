@@ -292,7 +292,7 @@ onMounted(async () => {
 async function loadRun() {
   isLoading.value = true
   try {
-    const response = await axios.get(`/api/v1/admin/payroll/runs/${route.params.id}`)
+    const response = await axios.get(`admin/payroll-runs/${route.params.id}`)
     if (response.data && response.data.data) {
       run.value = response.data.data
     }
@@ -334,7 +334,7 @@ function calculateEmployeeDeductions(line) {
 
 async function calculateRun() {
   try {
-    await axios.post(`/api/v1/admin/payroll/runs/${run.value.id}/calculate`)
+    await axios.post(`admin/payroll-runs/${run.value.id}/calculate`)
     notificationStore.showNotification({
       type: 'success',
       message: t('payroll.run_calculated'),
@@ -362,7 +362,7 @@ async function approveRun() {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`/api/v1/admin/payroll/runs/${run.value.id}/approve`)
+          await axios.post(`admin/payroll-runs/${run.value.id}/approve`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_approved'),
@@ -392,7 +392,7 @@ async function postRun() {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`/api/v1/admin/payroll/runs/${run.value.id}/post`)
+          await axios.post(`admin/payroll-runs/${run.value.id}/post`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_posted'),
@@ -422,7 +422,7 @@ async function markAsPaid() {
     .then(async (res) => {
       if (res) {
         try {
-          await axios.post(`/api/v1/admin/payroll/runs/${run.value.id}/mark-as-paid`)
+          await axios.post(`admin/payroll-runs/${run.value.id}/mark-paid`)
           notificationStore.showNotification({
             type: 'success',
             message: t('payroll.run_marked_as_paid'),
@@ -441,9 +441,8 @@ async function markAsPaid() {
 
 async function generateBankFile() {
   try {
-    const response = await axios.post(
-      `/api/v1/admin/payroll/runs/${run.value.id}/generate-bank-file`,
-      {},
+    const response = await axios.get(
+      `admin/payroll-runs/${run.value.id}/bank-file`,
       { responseType: 'blob' }
     )
 
@@ -475,7 +474,7 @@ function viewPayslip(lineId) {
 async function downloadPayslip(lineId) {
   try {
     const response = await axios.get(
-      `/api/v1/admin/payroll/payslips/${lineId}/pdf`,
+      `admin/payslips/${lineId}/download`,
       { responseType: 'blob' }
     )
 
