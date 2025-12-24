@@ -404,11 +404,12 @@ const notificationStore = useNotificationStore()
 
 const ticket = computed(() => ticketStore.currentTicket)
 
-// Check if current user is admin or owner (super admin, owner, or support role)
+// Check if current user is platform admin (super admin or support role only)
+// Regular company owners should NOT have status/priority edit access
 const isAdminOrOwner = computed(() => {
   const user = userStore.currentUser
   if (!user) return false
-  return user.is_owner || user.role === 'super admin' || user.role === 'support'
+  return user.role === 'super admin' || user.role === 'support'
 })
 
 const replyContent = ref('')
