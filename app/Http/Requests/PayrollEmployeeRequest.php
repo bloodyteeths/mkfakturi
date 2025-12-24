@@ -43,7 +43,7 @@ class PayrollEmployeeRequest extends FormRequest
                 'max:100',
             ],
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 'max:150',
             ],
@@ -67,7 +67,7 @@ class PayrollEmployeeRequest extends FormRequest
                 'max:34',
             ],
             'bank_name' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
             ],
@@ -91,7 +91,7 @@ class PayrollEmployeeRequest extends FormRequest
                 'max:100',
             ],
             'position' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
             ],
