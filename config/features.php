@@ -55,6 +55,12 @@ return [
         'enabled' => true, // Stock module is always enabled
         'description' => 'Inventory/stock tracking with warehouses, movements, and WAC valuation',
     ],
+
+    'payroll' => [
+        'enabled' => env('FEATURE_PAYROLL', false),
+        'description' => 'MK payroll management with tax compliance, GL integration, and UJP e-filing',
+        'minimum_tier' => 'business', // Requires Business tier or higher
+    ],
 ];
 
-// CLAUDE-CHECKPOINT
+// LLM-CHECKPOINT

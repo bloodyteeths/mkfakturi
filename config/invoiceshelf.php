@@ -465,6 +465,17 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'navigation.payroll',
+            'group' => 2,
+            'link' => '/admin/payroll',
+            'icon' => 'BriefcaseIcon',
+            'name' => 'Payroll',
+            'owner_only' => false,
+            'ability' => 'view-payroll-employee',
+            'model' => \App\Models\PayrollEmployee::class,
+            'feature_flag' => 'payroll',
+        ],
+        [
             'title' => 'navigation.billing',
             'group' => 3,
             'link' => '/admin/billing',

@@ -212,6 +212,16 @@ const TicketCreate = () => import('@/scripts/admin/views/support/Create.vue')
 const TicketView = () => import('@/scripts/admin/views/support/View.vue')
 const TicketAdminIndex = () => import('@/scripts/admin/views/support/AdminIndex.vue')
 
+// Payroll Module
+const PayrollIndex = () => import('@/scripts/admin/views/payroll/Index.vue')
+const PayrollEmployeesIndex = () => import('@/scripts/admin/views/payroll/employees/Index.vue')
+const PayrollEmployeeCreate = () => import('@/scripts/admin/views/payroll/employees/Create.vue')
+const PayrollRunsIndex = () => import('@/scripts/admin/views/payroll/runs/Index.vue')
+const PayrollRunCreate = () => import('@/scripts/admin/views/payroll/runs/Create.vue')
+const PayrollRunShow = () => import('@/scripts/admin/views/payroll/runs/Show.vue')
+const PayslipView = () => import('@/scripts/admin/views/payroll/payslips/View.vue')
+const TaxSummary = () => import('@/scripts/admin/views/payroll/payslips/TaxSummary.vue')
+
 export default [
   {
     path: '/installation',
@@ -1054,6 +1064,62 @@ export default [
         meta: { requiresAuth: true, requiresSuperAdmin: true },
         component: TicketAdminIndex,
       },
+
+      // Payroll Module (Business+ tier)
+      {
+        path: 'payroll',
+        name: 'payroll.index',
+        meta: { requiresAuth: true },
+        component: PayrollIndex,
+      },
+      {
+        path: 'payroll/employees',
+        name: 'payroll.employees.index',
+        meta: { requiresAuth: true },
+        component: PayrollEmployeesIndex,
+      },
+      {
+        path: 'payroll/employees/create',
+        name: 'payroll.employees.create',
+        meta: { requiresAuth: true },
+        component: PayrollEmployeeCreate,
+      },
+      {
+        path: 'payroll/employees/:id/edit',
+        name: 'payroll.employees.edit',
+        meta: { requiresAuth: true },
+        component: PayrollEmployeeCreate,
+      },
+      {
+        path: 'payroll/runs',
+        name: 'payroll.runs.index',
+        meta: { requiresAuth: true },
+        component: PayrollRunsIndex,
+      },
+      {
+        path: 'payroll/runs/create',
+        name: 'payroll.runs.create',
+        meta: { requiresAuth: true },
+        component: PayrollRunCreate,
+      },
+      {
+        path: 'payroll/runs/:id',
+        name: 'payroll.runs.show',
+        meta: { requiresAuth: true },
+        component: PayrollRunShow,
+      },
+      {
+        path: 'payroll/payslips/:id',
+        name: 'payroll.payslips.view',
+        meta: { requiresAuth: true },
+        component: PayslipView,
+      },
+      {
+        path: 'payroll/reports/tax-summary',
+        name: 'payroll.reports.tax-summary',
+        meta: { requiresAuth: true },
+        component: TaxSummary,
+      },
     ],
   },
   { path: '/:catchAll(.*)', component: NotFoundPage },
@@ -1061,4 +1127,4 @@ export default [
 
 // CLAUDE-CHECKPOINT: Added GeneralLedger and JournalEntries report routes
 // CLAUDE-CHECKPOINT: Removed certificates route - no UI component available
-// CLAUDE-CHECKPOINT
+// LLM-CHECKPOINT

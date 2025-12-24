@@ -192,6 +192,14 @@ class UsageLimitService
                     ->where('status', 'ACTIVE')
                     ->count();
 
+            case 'payroll_employees':
+                // Count active payroll employees
+                return DB::table('payroll_employees')
+                    ->where('company_id', $company->id)
+                    ->where('is_active', true)
+                    ->whereNull('deleted_at')
+                    ->count();
+
             default:
                 // Fallback to usage_tracking table with 'total' period
                 $record = DB::table('usage_tracking')
@@ -219,6 +227,28 @@ class UsageLimitService
         ];
 
         return in_array($feature, $monthlyFeatures);
+    }
+
+    /**
+     * Check if company has access to payroll feature
+     *
+     * @param  Company  $company
+     * @return bool
+     */
+    public function hasPayrollAccess(Company $company): bool
+    {
+        $tier = $this->getCompanyTier($company);
+        $requiredTier = config('subscriptions.feature_requirements.payroll');
+
+        if (!$requiredTier) {
+            return true; // No tier requirement, available to all
+        }
+
+        $hierarchy = config('subscriptions.plan_hierarchy', []);
+        $currentLevel = $hierarchy[$tier] ?? 0;
+        $requiredLevel = $hierarchy[$requiredTier] ?? 0;
+
+        return $currentLevel >= $requiredLevel;
     }
 
     /**
@@ -290,6 +320,7 @@ class UsageLimitService
             'recurring_invoices_active',
             'estimates_per_month',
             'ai_queries_per_month',
+            'payroll_employees',
         ];
 
         $usage = [];
@@ -348,6 +379,7 @@ class UsageLimitService
             'custom_fields' => 'Custom Fields',
             'recurring_invoices_active' => 'Recurring Invoices',
             'ai_queries_per_month' => 'AI Insights',
+            'payroll_employees' => 'Payroll Employees',
         ];
 
         // Map feature keys to config upgrade message keys
@@ -357,6 +389,7 @@ class UsageLimitService
             'custom_fields' => 'custom_fields',
             'recurring_invoices_active' => 'recurring_invoices',
             'ai_queries_per_month' => 'ai_suggestions',
+            'payroll_employees' => 'payroll_employees',
         ];
 
         $featureName = $featureNames[$feature] ?? $feature;
@@ -385,4 +418,4 @@ class UsageLimitService
         ];
     }
 }
-// CLAUDE-CHECKPOINT
+// LLM-CHECKPOINT

@@ -55,6 +55,7 @@ return [
                 'recurring_invoices_active' => 1,
                 'estimates_per_month' => 3,
                 'ai_queries_per_month' => 3,  // AI preview limit
+                'payroll_employees' => 0,  // Payroll not available on free tier
             ],
         ],
 
@@ -90,6 +91,7 @@ return [
                 'recurring_invoices_active' => 5,
                 'estimates_per_month' => 20,
                 'ai_queries_per_month' => 10,  // Basic AI - 10 queries/month
+                'payroll_employees' => 0,  // Payroll not available on starter tier
             ],
         ],
 
@@ -126,6 +128,7 @@ return [
                 'estimates_per_month' => null,
                 'bank_accounts' => 2,         // Limit bank connections in Standard
                 'ai_queries_per_month' => 25, // Standard AI - 25 queries/month
+                'payroll_employees' => 0,     // Payroll not available on standard tier
             ],
         ],
 
@@ -161,6 +164,7 @@ return [
                 'bank_accounts' => 5,
                 'api_requests_per_day' => 1000,
                 'ai_queries_per_month' => 50, // Advanced AI - 50 queries/month
+                'payroll_employees' => 50,    // Business tier: 50 employees max
             ],
         ],
 
@@ -200,6 +204,7 @@ return [
                 'ai_queries_per_month' => 100, // Max AI - 100 queries/month (not unlimited due to token costs)
                 'bank_accounts' => null,
                 'api_requests_per_day' => null,
+                'payroll_employees' => null,  // Max tier: unlimited employees
             ],
         ],
     ],
@@ -265,6 +270,9 @@ return [
         // AI tiers (special handling - level based with usage limits)
         'ai_suggestions' => 'free',           // Preview AI for all (limited on free)
         'ai_advanced' => 'business',          // Advanced AI at Business+
+
+        // Payroll module (Business+ only)
+        'payroll' => 'business',              // Payroll management at Business+
     ],
 
     /*
@@ -389,6 +397,13 @@ return [
             'business' => 'You\'ve reached your AI query limit (50/month). Upgrade to Max for 100 AI queries per month.',
             'max' => 'You\'ve reached your AI query limit (100/month). Contact support for higher limits.',
         ],
+        'payroll' => 'Payroll management requires a Business plan or higher. Upgrade now to manage employee payroll with Macedonian tax compliance.',
+        'payroll_employees' => [
+            'free' => 'Payroll is not available on the Free plan. Upgrade to Business for payroll management with 50 employees.',
+            'starter' => 'Payroll is not available on the Starter plan. Upgrade to Business for payroll management with 50 employees.',
+            'standard' => 'Payroll is not available on the Standard plan. Upgrade to Business for payroll management with 50 employees.',
+            'business' => 'You\'ve reached your employee limit (50 employees). Upgrade to Max for unlimited employees.',
+        ],
     ],
 ];
-// CLAUDE-CHECKPOINT
+// LLM-CHECKPOINT

@@ -34,6 +34,29 @@ trait GeneratesMenuTrait
                     if (!($featureFlags[$featureFlag] ?? false)) {
                         continue;
                     }
+
+                    // Tier requirement check for features with minimum_tier
+                    $featureConfig = config("features.{$featureFlag}");
+                    $minimumTier = $featureConfig['minimum_tier'] ?? null;
+
+                    if ($minimumTier) {
+                        $companyId = request()->header('company');
+                        $company = \App\Models\Company::find($companyId);
+
+                        if ($company) {
+                            $usageLimitService = app(\App\Services\UsageLimitService::class);
+                            $currentTier = $usageLimitService->getCompanyTier($company);
+                            $hierarchy = config('subscriptions.plan_hierarchy', []);
+
+                            $currentLevel = $hierarchy[$currentTier] ?? 0;
+                            $requiredLevel = $hierarchy[$minimumTier] ?? 0;
+
+                            // Skip menu if current tier is below minimum required tier
+                            if ($currentLevel < $requiredLevel) {
+                                continue;
+                            }
+                        }
+                    }
                 }
 
                 // Partner-only menu items (group starts with 'partner.')
@@ -68,4 +91,4 @@ trait GeneratesMenuTrait
         });
     }
 }
-// CLAUDE-CHECKPOINT
+// LLM-CHECKPOINT

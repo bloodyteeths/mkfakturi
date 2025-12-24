@@ -98,6 +98,11 @@ use App\Http\Controllers\V1\Customer\Auth\ForgotPasswordController as AuthForgot
 use App\Http\Controllers\V1\Partner\PartnerAccountController;
 use App\Http\Controllers\V1\Partner\PartnerAccountMappingController;
 use App\Http\Controllers\V1\Partner\PartnerJournalExportController;
+use App\Http\Controllers\V1\Admin\Payroll\PayrollEmployeeController;
+use App\Http\Controllers\V1\Admin\Payroll\PayrollReportController;
+use App\Http\Controllers\V1\Admin\Payroll\PayrollRunController;
+use App\Http\Controllers\V1\Admin\Payroll\PayslipController;
+use App\Http\Controllers\V1\Admin\Payroll\SalaryStructureController;
 use App\Http\Controllers\V1\Customer\Auth\ResetPasswordController as AuthResetPasswordController;
 use App\Http\Controllers\V1\Customer\Estimate\AcceptEstimateController as CustomerAcceptEstimateController;
 use App\Http\Controllers\V1\Customer\Estimate\EstimatesController as CustomerEstimatesController;
@@ -410,6 +415,42 @@ Route::prefix('/v1')->group(function () {
             Route::post('/recurring-expenses/{recurringExpense}/process-now', [\App\Http\Controllers\V1\Admin\RecurringExpenseController::class, 'processNow']);
 
             Route::apiResource('recurring-expenses', \App\Http\Controllers\V1\Admin\RecurringExpenseController::class);
+
+            // Payroll Module (MK Tax Compliance)
+            // ----------------------------------
+
+            // Payroll Employees
+            Route::get('/payroll-employees/departments', [PayrollEmployeeController::class, 'departments']);
+            Route::post('/payroll-employees/{payrollEmployee}/terminate', [PayrollEmployeeController::class, 'terminate']);
+            Route::post('/payroll-employees/{id}/restore', [PayrollEmployeeController::class, 'restore']);
+            Route::apiResource('payroll-employees', PayrollEmployeeController::class);
+
+            // Salary Structures
+            Route::get('/salary-structures/history/{employeeId}', [SalaryStructureController::class, 'history']);
+            Route::post('/salary-structures/{salaryStructure}/set-current', [SalaryStructureController::class, 'setCurrent']);
+            Route::apiResource('salary-structures', SalaryStructureController::class);
+
+            // Payroll Runs
+            Route::post('/payroll-runs/{payrollRun}/calculate', [PayrollRunController::class, 'calculate']);
+            Route::post('/payroll-runs/{payrollRun}/approve', [PayrollRunController::class, 'approve']);
+            Route::post('/payroll-runs/{payrollRun}/post', [PayrollRunController::class, 'post']);
+            Route::post('/payroll-runs/{payrollRun}/mark-paid', [PayrollRunController::class, 'markPaid']);
+            Route::get('/payroll-runs/{payrollRun}/bank-file', [PayrollRunController::class, 'downloadBankFile']);
+            Route::apiResource('payroll-runs', PayrollRunController::class);
+
+            // Payslips
+            Route::get('/payslips/{payrollRunLine}/download', [PayslipController::class, 'download']);
+            Route::get('/payslips/{payrollRunLine}/preview', [PayslipController::class, 'preview']);
+            Route::get('/payslips/bulk/{payrollRunId}', [PayslipController::class, 'bulkDownload']);
+
+            // Payroll Reports
+            Route::get('/payroll-reports/tax-summary', [PayrollReportController::class, 'taxSummary']);
+            Route::get('/payroll-reports/statistics', [PayrollReportController::class, 'statistics']);
+            Route::get('/payroll-reports/employee-history/{employeeId}', [PayrollReportController::class, 'employeeHistory']);
+            Route::get('/payroll-reports/monthly-comparison', [PayrollReportController::class, 'monthlyComparison']);
+            Route::get('/payroll-reports/export-tax-summary', [PayrollReportController::class, 'exportTaxSummary']);
+            Route::get('/payroll-reports/download-mpin-xml', [PayrollReportController::class, 'downloadMpinXml']);
+            Route::get('/payroll-reports/download-ddv04-xml', [PayrollReportController::class, 'downloadDdv04Xml']);
 
             // Exports (Phase 4)
             // ----------------------------------

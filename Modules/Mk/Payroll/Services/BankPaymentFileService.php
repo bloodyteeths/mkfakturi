@@ -1,0 +1,365 @@
+<?php
+
+namespace Modules\Mk\Payroll\Services;
+
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Bank Payment File Service
+ *
+ * Generates SEPA Credit Transfer (pain.001.001.03) XML files for bulk salary payments.
+ * Also provides CSV export as a fallback format.
+ *
+ * SEPA XML structure:
+ * - GrpHdr: Message ID, creation datetime, number of transactions, control sum
+ * - PmtInf: Payment info with company IBAN as debtor
+ * - CdtTrfTxInf: One per employee with their IBAN and net salary amount
+ *
+ * Note: This service expects the PayrollRun model to exist.
+ * The model will be created in the PAY-MODEL-01 ticket.
+ */
+class BankPaymentFileService
+{
+    /**
+     * Generate SEPA Credit Transfer XML (pain.001.001.03)
+     *
+     * @param mixed $run PayrollRun model instance
+     * @return string SEPA XML content
+     */
+    public function generateSepaXml($run): string
+    {
+        // Load relationships
+        $run->load(['lines.employee', 'company']);
+
+        // Validate IBANs
+        $invalidEmployees = $this->validateIbans($run);
+        if (! empty($invalidEmployees)) {
+            throw new \Exception('Cannot generate SEPA XML: Some employees have invalid or missing IBANs');
+        }
+
+        $company = $run->company;
+        $messageId = $this->generateMessageId($run);
+        $paymentDate = Carbon::parse($run->payment_date)->format('Y-m-d');
+        $creationDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
+
+        // Calculate totals
+        $numberOfTransactions = $run->lines->count();
+        $controlSum = $run->total_net / 100; // Convert cents to decimal
+
+        // Start building XML
+        $xml = new \DOMDocument('1.0', 'UTF-8');
+        $xml->formatOutput = true;
+
+        // Root element: Document
+        $document = $xml->createElement('Document');
+        $document->setAttribute('xmlns', 'urn:iso:std:iso:20022:tech:xsd:pain.001.001.03');
+        $document->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        $xml->appendChild($document);
+
+        // CstmrCdtTrfInitn (Customer Credit Transfer Initiation)
+        $cstmrCdtTrfInitn = $xml->createElement('CstmrCdtTrfInitn');
+        $document->appendChild($cstmrCdtTrfInitn);
+
+        // Group Header
+        $grpHdr = $xml->createElement('GrpHdr');
+        $cstmrCdtTrfInitn->appendChild($grpHdr);
+
+        $grpHdr->appendChild($xml->createElement('MsgId', $messageId));
+        $grpHdr->appendChild($xml->createElement('CreDtTm', $creationDateTime));
+        $grpHdr->appendChild($xml->createElement('NbOfTxs', $numberOfTransactions));
+        $grpHdr->appendChild($xml->createElement('CtrlSum', number_format($controlSum, 2, '.', '')));
+
+        // Initiating Party (Company)
+        $initgPty = $xml->createElement('InitgPty');
+        $grpHdr->appendChild($initgPty);
+        $initgPty->appendChild($xml->createElement('Nm', $this->sanitizeForXml($company->name)));
+
+        // Payment Information
+        $pmtInf = $xml->createElement('PmtInf');
+        $cstmrCdtTrfInitn->appendChild($pmtInf);
+
+        $pmtInfId = "PAYROLL-{$run->id}";
+        $pmtInf->appendChild($xml->createElement('PmtInfId', $pmtInfId));
+        $pmtInf->appendChild($xml->createElement('PmtMtd', 'TRF')); // Transfer
+        $pmtInf->appendChild($xml->createElement('BtchBookg', 'true'));
+        $pmtInf->appendChild($xml->createElement('NbOfTxs', $numberOfTransactions));
+        $pmtInf->appendChild($xml->createElement('CtrlSum', number_format($controlSum, 2, '.', '')));
+
+        // Payment Type Information
+        $pmtTpInf = $xml->createElement('PmtTpInf');
+        $pmtInf->appendChild($pmtTpInf);
+
+        $svcLvl = $xml->createElement('SvcLvl');
+        $pmtTpInf->appendChild($svcLvl);
+        $svcLvl->appendChild($xml->createElement('Cd', 'SEPA'));
+
+        // Requested Execution Date
+        $pmtInf->appendChild($xml->createElement('ReqdExctnDt', $paymentDate));
+
+        // Debtor (Company)
+        $dbtr = $xml->createElement('Dbtr');
+        $pmtInf->appendChild($dbtr);
+        $dbtr->appendChild($xml->createElement('Nm', $this->sanitizeForXml($company->name)));
+
+        // Debtor Account
+        $dbtrAcct = $xml->createElement('DbtrAcct');
+        $pmtInf->appendChild($dbtrAcct);
+
+        $dbtrId = $xml->createElement('Id');
+        $dbtrAcct->appendChild($dbtrId);
+        $dbtrId->appendChild($xml->createElement('IBAN', $this->formatIban($company->iban ?? '')));
+
+        // Debtor Agent (Bank)
+        $dbtrAgt = $xml->createElement('DbtrAgt');
+        $pmtInf->appendChild($dbtrAgt);
+
+        $finInstnId = $xml->createElement('FinInstnId');
+        $dbtrAgt->appendChild($finInstnId);
+        $finInstnId->appendChild($xml->createElement('BIC', $company->bic ?? 'NOTPROVIDED'));
+
+        // Charge Bearer
+        $pmtInf->appendChild($xml->createElement('ChrgBr', 'SLEV')); // Service Level
+
+        // Credit Transfer Transaction Information (one per employee)
+        foreach ($run->lines as $line) {
+            $employee = $line->employee;
+            $amount = $line->net_salary / 100; // Convert cents to decimal
+
+            $cdtTrfTxInf = $xml->createElement('CdtTrfTxInf');
+            $pmtInf->appendChild($cdtTrfTxInf);
+
+            // Payment ID
+            $pmtId = $xml->createElement('PmtId');
+            $cdtTrfTxInf->appendChild($pmtId);
+            $pmtId->appendChild($xml->createElement('EndToEndId', "PAYROLL-{$run->id}-EMP-{$employee->id}"));
+
+            // Amount
+            $amt = $xml->createElement('Amt');
+            $cdtTrfTxInf->appendChild($amt);
+
+            $instdAmt = $xml->createElement('InstdAmt', number_format($amount, 2, '.', ''));
+            $instdAmt->setAttribute('Ccy', $company->currency_code ?? 'MKD');
+            $amt->appendChild($instdAmt);
+
+            // Creditor Agent (Employee's Bank)
+            $cdtrAgt = $xml->createElement('CdtrAgt');
+            $cdtTrfTxInf->appendChild($cdtrAgt);
+
+            $cdtrFinInstnId = $xml->createElement('FinInstnId');
+            $cdtrAgt->appendChild($cdtrFinInstnId);
+            $cdtrFinInstnId->appendChild($xml->createElement('BIC', $employee->bic ?? 'NOTPROVIDED'));
+
+            // Creditor (Employee)
+            $cdtr = $xml->createElement('Cdtr');
+            $cdtTrfTxInf->appendChild($cdtr);
+            $employeeName = $this->sanitizeForXml("{$employee->first_name} {$employee->last_name}");
+            $cdtr->appendChild($xml->createElement('Nm', $employeeName));
+
+            // Creditor Account
+            $cdtrAcct = $xml->createElement('CdtrAcct');
+            $cdtTrfTxInf->appendChild($cdtrAcct);
+
+            $cdtrId = $xml->createElement('Id');
+            $cdtrAcct->appendChild($cdtrId);
+            $cdtrId->appendChild($xml->createElement('IBAN', $this->formatIban($employee->iban)));
+
+            // Remittance Information
+            $rmtInf = $xml->createElement('RmtInf');
+            $cdtTrfTxInf->appendChild($rmtInf);
+
+            $periodStart = Carbon::parse($run->period_start)->format('Y-m-d');
+            $periodEnd = Carbon::parse($run->period_end)->format('Y-m-d');
+            $ustrd = $xml->createElement('Ustrd', "Salary {$periodStart} to {$periodEnd}");
+            $rmtInf->appendChild($ustrd);
+        }
+
+        $xmlContent = $xml->saveXML();
+
+        Log::info('Generated SEPA XML for payroll run', [
+            'payroll_run_id' => $run->id,
+            'message_id' => $messageId,
+            'transactions' => $numberOfTransactions,
+            'total_amount' => $controlSum,
+        ]);
+
+        return $xmlContent;
+    }
+
+    /**
+     * Generate CSV export (fallback format)
+     *
+     * @param mixed $run PayrollRun model instance
+     * @return string CSV content
+     */
+    public function generateCsv($run): string
+    {
+        $run->load(['lines.employee', 'company']);
+
+        $csv = [];
+        $csv[] = [
+            'Employee ID',
+            'Employee Name',
+            'EMBG',
+            'IBAN',
+            'Gross Salary',
+            'Net Salary',
+            'Income Tax',
+            'Pension Employee',
+            'Health Employee',
+            'Unemployment',
+            'Additional Contribution',
+            'Total Deductions',
+        ];
+
+        foreach ($run->lines as $line) {
+            $employee = $line->employee;
+            $csv[] = [
+                $employee->id,
+                "{$employee->first_name} {$employee->last_name}",
+                $employee->embg,
+                $employee->iban,
+                number_format($line->gross_salary / 100, 2, '.', ''),
+                number_format($line->net_salary / 100, 2, '.', ''),
+                number_format($line->income_tax / 100, 2, '.', ''),
+                number_format($line->pension_employee / 100, 2, '.', ''),
+                number_format($line->health_employee / 100, 2, '.', ''),
+                number_format($line->unemployment / 100, 2, '.', ''),
+                number_format($line->additional_contribution / 100, 2, '.', ''),
+                number_format($line->total_employee_deductions / 100, 2, '.', ''),
+            ];
+        }
+
+        // Convert to CSV string
+        $output = fopen('php://temp', 'r+');
+        foreach ($csv as $row) {
+            fputcsv($output, $row);
+        }
+        rewind($output);
+        $csvContent = stream_get_contents($output);
+        fclose($output);
+
+        Log::info('Generated CSV for payroll run', [
+            'payroll_run_id' => $run->id,
+            'employee_count' => $run->lines->count(),
+        ]);
+
+        return $csvContent;
+    }
+
+    /**
+     * Validate IBANs for all employees in the payroll run
+     *
+     * @param mixed $run PayrollRun model instance
+     * @return array Array of employees with invalid IBANs (empty if all valid)
+     */
+    public function validateIbans($run): array
+    {
+        $run->load('lines.employee');
+        $invalidEmployees = [];
+
+        foreach ($run->lines as $line) {
+            $employee = $line->employee;
+            if (! $this->isValidIban($employee->iban ?? '')) {
+                $invalidEmployees[] = [
+                    'id' => $employee->id,
+                    'name' => "{$employee->first_name} {$employee->last_name}",
+                    'iban' => $employee->iban ?? 'MISSING',
+                ];
+            }
+        }
+
+        return $invalidEmployees;
+    }
+
+    /**
+     * Get payment summary for a payroll run
+     *
+     * @param mixed $run PayrollRun model instance
+     * @return array Payment summary
+     */
+    public function getPaymentSummary($run): array
+    {
+        $run->load(['lines.employee', 'company']);
+
+        return [
+            'payroll_run_id' => $run->id,
+            'payment_date' => $run->payment_date,
+            'company' => [
+                'name' => $run->company->name,
+                'iban' => $run->company->iban,
+            ],
+            'totals' => [
+                'employee_count' => $run->employee_count,
+                'total_gross' => $run->total_gross / 100,
+                'total_net' => $run->total_net / 100,
+                'total_employer_cost' => $run->total_employer_cost / 100,
+            ],
+            'employees' => $run->lines->map(function ($line) {
+                return [
+                    'id' => $line->employee->id,
+                    'name' => "{$line->employee->first_name} {$line->employee->last_name}",
+                    'iban' => $line->employee->iban,
+                    'net_salary' => $line->net_salary / 100,
+                ];
+            })->toArray(),
+        ];
+    }
+
+    /**
+     * Generate unique message ID for SEPA XML
+     */
+    private function generateMessageId($run): string
+    {
+        $timestamp = Carbon::now()->format('YmdHis');
+
+        return "PAYROLL-{$run->company_id}-{$run->id}-{$timestamp}";
+    }
+
+    /**
+     * Validate IBAN format
+     *
+     * Basic validation - checks if IBAN has correct format.
+     * Macedonian IBANs: MK07 followed by 15 digits
+     */
+    private function isValidIban(string $iban): bool
+    {
+        // Remove spaces and convert to uppercase
+        $iban = strtoupper(str_replace(' ', '', $iban));
+
+        // Must start with 2 letters (country code)
+        if (! preg_match('/^[A-Z]{2}/', $iban)) {
+            return false;
+        }
+
+        // For Macedonian IBANs, must be MK followed by 17 characters total
+        if (str_starts_with($iban, 'MK')) {
+            return strlen($iban) === 19;
+        }
+
+        // For other countries, basic length check (15-34 characters)
+        return strlen($iban) >= 15 && strlen($iban) <= 34;
+    }
+
+    /**
+     * Format IBAN (remove spaces, uppercase)
+     */
+    private function formatIban(string $iban): string
+    {
+        return strtoupper(str_replace(' ', '', $iban));
+    }
+
+    /**
+     * Sanitize text for XML output
+     */
+    private function sanitizeForXml(string $text): string
+    {
+        // Remove invalid XML characters
+        $text = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $text);
+
+        // Trim to max 70 characters (SEPA limit)
+        return substr($text, 0, 70);
+    }
+}
+
+// LLM-CHECKPOINT

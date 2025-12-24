@@ -13,8 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         if (Schema::hasTable('company_subscriptions')) {
-            // MySQL requires ALTER to modify enum
-            DB::statement("ALTER TABLE `company_subscriptions` MODIFY COLUMN `provider` ENUM('paddle', 'cpay', 'stripe') NULL");
+            // SQLite doesn't support MODIFY COLUMN or ENUM - skip for SQLite (used in tests)
+            if (DB::connection()->getDriverName() === 'mysql') {
+                DB::statement("ALTER TABLE `company_subscriptions` MODIFY COLUMN `provider` ENUM('paddle', 'cpay', 'stripe') NULL");
+            }
+            // SQLite already treats text columns flexibly, no change needed
         }
     }
 
@@ -24,8 +27,12 @@ return new class extends Migration
     public function down(): void
     {
         if (Schema::hasTable('company_subscriptions')) {
-            // Revert to original enum (only if no stripe records exist)
-            DB::statement("ALTER TABLE `company_subscriptions` MODIFY COLUMN `provider` ENUM('paddle', 'cpay') NULL");
+            // SQLite doesn't support MODIFY COLUMN or ENUM
+            if (DB::connection()->getDriverName() === 'mysql') {
+                DB::statement("ALTER TABLE `company_subscriptions` MODIFY COLUMN `provider` ENUM('paddle', 'cpay') NULL");
+            }
         }
     }
 };
+
+// LLM-CHECKPOINT
