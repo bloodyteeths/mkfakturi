@@ -68,6 +68,30 @@
           </template>
           {{ $t('payroll.generate_bank_file') }}
         </BaseButton>
+
+        <BaseButton
+          v-if="run.lines && run.lines.length > 0"
+          variant="primary-outline"
+          class="ml-2"
+          @click="downloadAllPayslips"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('payroll.download_all_payslips') }}
+        </BaseButton>
+
+        <BaseButton
+          v-if="run.status === 'draft' || run.status === 'calculated'"
+          variant="danger-outline"
+          class="ml-2"
+          @click="deleteRun"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="TrashIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('general.delete') }}
+        </BaseButton>
       </template>
     </BasePageHeader>
 
@@ -497,6 +521,64 @@ async function downloadPayslip(lineId) {
       message: error.response?.data?.message || t('general.something_went_wrong'),
     })
   }
+}
+
+async function downloadAllPayslips() {
+  try {
+    const response = await axios.get(
+      `payslips/bulk/${run.value.id}`,
+      { responseType: 'blob' }
+    )
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `payslips_${run.value.period_year}_${run.value.period_month}.zip`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('payroll.payslips_downloaded'),
+    })
+  } catch (error) {
+    console.error('Error downloading payslips:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('general.something_went_wrong'),
+    })
+  }
+}
+
+function deleteRun() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('payroll.confirm_delete_run'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await axios.delete(`payroll-runs/${run.value.id}`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('payroll.run_deleted'),
+          })
+          router.push('/admin/payroll/runs')
+        } catch (error) {
+          console.error('Error deleting run:', error)
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.message || t('general.something_went_wrong'),
+          })
+        }
+      }
+    })
 }
 </script>
 
