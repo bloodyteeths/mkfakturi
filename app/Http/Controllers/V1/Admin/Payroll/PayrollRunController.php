@@ -396,16 +396,18 @@ class PayrollRunController extends Controller
     }
 
     /**
-     * Delete payroll run (only drafts).
+     * Delete payroll run (only draft or calculated).
      */
     public function destroy(PayrollRun $payrollRun): JsonResponse
     {
         $this->authorize('delete', $payrollRun);
 
-        if ($payrollRun->status !== PayrollRun::STATUS_DRAFT) {
+        $deletableStatuses = [PayrollRun::STATUS_DRAFT, PayrollRun::STATUS_CALCULATED];
+
+        if (!in_array($payrollRun->status, $deletableStatuses)) {
             return response()->json([
                 'error' => 'cannot_delete',
-                'message' => 'Only draft payroll runs can be deleted.',
+                'message' => 'Only draft or calculated payroll runs can be deleted.',
             ], 422);
         }
 

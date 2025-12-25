@@ -178,7 +178,7 @@
             </BaseDropdownItem>
 
             <BaseDropdownItem
-              v-if="row.data.status === 'draft'"
+              v-if="row.data.status === 'draft' || row.data.status === 'calculated'"
               @click="deleteRun(row.data.id)"
             >
               <BaseIcon name="TrashIcon" class="h-5 mr-3 text-gray-600" />
@@ -192,7 +192,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
@@ -283,13 +283,27 @@ debouncedWatch(
   { debounce: 500 }
 )
 
+onMounted(() => {
+  // Force refresh table to ensure data is fetched
+  setTimeout(() => {
+    if (tableComponent.value) {
+      tableComponent.value.refresh()
+    }
+  }, 100)
+})
+
 async function fetchData({ page, filter, sort }) {
+  // Only include non-empty filter values
   let data = {
-    ...filters,
-    orderByField: sort.fieldName || 'created_at',
+    orderByField: sort.fieldName || 'period_start',
     orderBy: sort.order || 'desc',
     page,
   }
+
+  // Add filters only if they have values
+  if (filters.period_year) data.year = filters.period_year
+  if (filters.period_month) data.month = filters.period_month
+  if (filters.status) data.status = filters.status
 
   isFetchingInitialData.value = true
 
