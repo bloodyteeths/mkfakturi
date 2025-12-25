@@ -36,7 +36,7 @@
     <div v-if="selectedCompanyId" class="p-6 bg-white rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Account selector -->
-        <BaseInputGroup :label="$t('reports.accounting.general_ledger.select_account')">
+        <BaseInputGroup :label="$t('reports.accounting.general_ledger.select_account')" required>
           <BaseMultiselect
             v-model="filters.account_id"
             :options="accounts"
@@ -72,6 +72,7 @@
             variant="primary"
             class="w-full"
             :loading="isLoading"
+            :disabled="!filters.account_id"
             @click="loadLedger"
           >
             <template #left="slotProps">
@@ -95,7 +96,7 @@
         <div class="flex justify-between items-center">
           <div>
             <h3 class="text-lg font-medium text-gray-900">
-              {{ selectedAccountName || $t('reports.accounting.general_ledger.all_accounts') }}
+              {{ selectedAccountName }}
             </h3>
             <p v-if="selectedAccountCode" class="text-sm text-gray-500">{{ selectedAccountCode }}</p>
           </div>
@@ -297,7 +298,7 @@ function onCompanyChange() {
 }
 
 async function loadLedger() {
-  if (!selectedCompanyId.value) return
+  if (!selectedCompanyId.value || !filters.value.account_id) return
 
   isLoading.value = true
   hasSearched.value = true

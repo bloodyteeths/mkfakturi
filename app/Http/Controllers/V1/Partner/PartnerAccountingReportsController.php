@@ -47,7 +47,14 @@ class PartnerAccountingReportsController extends Controller
         $toDate = $request->query('to_date', now()->toDateString());
         $accountId = $request->query('account_id');
 
-        $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, $fromDate, $toDate, $accountId);
+        if (!$accountId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account ID is required',
+            ], 400);
+        }
+
+        $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, (int) $accountId, $fromDate, $toDate);
 
         return response()->json([
             'success' => true,
