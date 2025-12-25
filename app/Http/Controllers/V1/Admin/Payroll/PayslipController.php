@@ -221,7 +221,8 @@ class PayslipController extends Controller
                 throw new \Exception('ZIP file was not created or is empty');
             }
 
-            // Clean up individual PDFs
+            // Clean up individual PDFs AFTER we're done with them
+            // (ZipArchive has already copied their content during close())
             foreach ($files as $file) {
                 if (file_exists($file)) {
                     @unlink($file);
@@ -229,25 +230,54 @@ class PayslipController extends Controller
             }
             @rmdir($tempDir);
 
-            // Use BinaryFileResponse for proper binary file streaming
-            // This handles large files correctly without truncation
-            $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse(
-                $zipPath,
-                200,
-                [
-                    'Content-Type' => 'application/zip',
-                    'Content-Disposition' => 'attachment; filename="'.$zipFilename.'"',
-                ],
-                true, // public
-                null, // content disposition
-                false, // auto etag
-                false  // auto last modified
-            );
+            // Get the actual file size for Content-Length header
+            clearstatcache(true, $zipPath);
+            $zipSize = filesize($zipPath);
 
-            // Delete file after sending (Symfony handles this correctly)
-            $response->deleteFileAfterSend(true);
+            \Log::info('Bulk payslip ZIP ready for download', [
+                'payroll_run_id' => $payrollRunId,
+                'zip_path' => $zipPath,
+                'zip_size' => $zipSize,
+                'file_count' => count($files),
+            ]);
 
-            return $response;
+            // Store in public storage for reliable download
+            $storagePath = 'payslips/' . $zipFilename;
+            \Storage::disk('local')->put($storagePath, file_get_contents($zipPath));
+            @unlink($zipPath);
+
+            // Get the stored file path
+            $storedFilePath = storage_path('app/' . $storagePath);
+
+            // Use StreamedResponse with explicit chunked reading
+            // This avoids buffer issues with large files
+            return response()->streamDownload(function () use ($storedFilePath) {
+                // Disable output buffering for clean streaming
+                if (ob_get_level()) {
+                    ob_end_clean();
+                }
+
+                $handle = fopen($storedFilePath, 'rb');
+                if ($handle === false) {
+                    return;
+                }
+
+                // Read and output in 8KB chunks
+                while (!feof($handle)) {
+                    echo fread($handle, 8192);
+                    flush();
+                }
+
+                fclose($handle);
+
+                // Clean up stored file after sending
+                @unlink($storedFilePath);
+            }, $zipFilename, [
+                'Content-Type' => 'application/zip',
+                'Content-Length' => \Storage::disk('local')->size($storagePath),
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+            ]);
 
         } catch (\Exception $e) {
             // Clean up on error
