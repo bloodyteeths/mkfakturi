@@ -40,7 +40,8 @@ class BankPaymentFileService
 
         $company = $run->company;
         $messageId = $this->generateMessageId($run);
-        $paymentDate = Carbon::parse($run->payment_date)->format('Y-m-d');
+        // Use period_end as payment date since PayrollRun doesn't have payment_date field
+        $paymentDate = Carbon::parse($run->period_end)->format('Y-m-d');
         $creationDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
 
         // Calculate totals
@@ -148,7 +149,9 @@ class BankPaymentFileService
 
             $cdtrFinInstnId = $xml->createElement('FinInstnId');
             $cdtrAgt->appendChild($cdtrFinInstnId);
-            $cdtrFinInstnId->appendChild($xml->createElement('BIC', $employee->bic ?? 'NOTPROVIDED'));
+            // Extract BIC from IBAN if not provided (Macedonian banks)
+            $employeeBic = $this->extractBicFromIban($employee->bank_account_iban ?? '');
+            $cdtrFinInstnId->appendChild($xml->createElement('BIC', $employeeBic));
 
             // Creditor (Employee)
             $cdtr = $xml->createElement('Cdtr');
@@ -162,7 +165,7 @@ class BankPaymentFileService
 
             $cdtrId = $xml->createElement('Id');
             $cdtrAcct->appendChild($cdtrId);
-            $cdtrId->appendChild($xml->createElement('IBAN', $this->formatIban($employee->iban)));
+            $cdtrId->appendChild($xml->createElement('IBAN', $this->formatIban($employee->bank_account_iban ?? '')));
 
             // Remittance Information
             $rmtInf = $xml->createElement('RmtInf');
@@ -184,6 +187,37 @@ class BankPaymentFileService
         ]);
 
         return $xmlContent;
+    }
+
+    /**
+     * Generate and save payment file to storage
+     *
+     * @param mixed $run PayrollRun model instance
+     * @return string Path to generated file
+     */
+    public function generatePaymentFile($run): string
+    {
+        // Generate SEPA XML
+        $xmlContent = $this->generateSepaXml($run);
+
+        // Create filename
+        $filename = sprintf(
+            'payroll_%s_%s_%s_bank_payment.xml',
+            $run->company_id,
+            $run->period_year,
+            str_pad($run->period_month, 2, '0', STR_PAD_LEFT)
+        );
+
+        // Save to storage
+        $path = 'payroll/bank-files/' . $filename;
+        \Storage::disk('local')->put($path, $xmlContent);
+
+        Log::info('Generated bank payment file', [
+            'payroll_run_id' => $run->id,
+            'path' => $path,
+        ]);
+
+        return $path;
     }
 
     /**
@@ -218,15 +252,15 @@ class BankPaymentFileService
                 $employee->id,
                 "{$employee->first_name} {$employee->last_name}",
                 $employee->embg,
-                $employee->iban,
+                $employee->bank_account_iban,
                 number_format($line->gross_salary / 100, 2, '.', ''),
                 number_format($line->net_salary / 100, 2, '.', ''),
-                number_format($line->income_tax / 100, 2, '.', ''),
-                number_format($line->pension_employee / 100, 2, '.', ''),
-                number_format($line->health_employee / 100, 2, '.', ''),
-                number_format($line->unemployment / 100, 2, '.', ''),
+                number_format($line->income_tax_amount / 100, 2, '.', ''),
+                number_format($line->pension_contribution_employee / 100, 2, '.', ''),
+                number_format($line->health_contribution_employee / 100, 2, '.', ''),
+                number_format($line->unemployment_contribution / 100, 2, '.', ''),
                 number_format($line->additional_contribution / 100, 2, '.', ''),
-                number_format($line->total_employee_deductions / 100, 2, '.', ''),
+                number_format($line->total_deductions / 100, 2, '.', ''),
             ];
         }
 
@@ -260,11 +294,11 @@ class BankPaymentFileService
 
         foreach ($run->lines as $line) {
             $employee = $line->employee;
-            if (! $this->isValidIban($employee->iban ?? '')) {
+            if (! $this->isValidIban($employee->bank_account_iban ?? '')) {
                 $invalidEmployees[] = [
                     'id' => $employee->id,
                     'name' => "{$employee->first_name} {$employee->last_name}",
-                    'iban' => $employee->iban ?? 'MISSING',
+                    'iban' => $employee->bank_account_iban ?? 'MISSING',
                 ];
             }
         }
@@ -284,22 +318,22 @@ class BankPaymentFileService
 
         return [
             'payroll_run_id' => $run->id,
-            'payment_date' => $run->payment_date,
+            'payment_date' => $run->period_end,
             'company' => [
                 'name' => $run->company->name,
-                'iban' => $run->company->iban,
+                'iban' => $run->company->iban ?? '',
             ],
             'totals' => [
-                'employee_count' => $run->employee_count,
+                'employee_count' => $run->lines->count(),
                 'total_gross' => $run->total_gross / 100,
                 'total_net' => $run->total_net / 100,
-                'total_employer_cost' => $run->total_employer_cost / 100,
+                'total_employer_tax' => $run->total_employer_tax / 100,
             ],
             'employees' => $run->lines->map(function ($line) {
                 return [
                     'id' => $line->employee->id,
                     'name' => "{$line->employee->first_name} {$line->employee->last_name}",
-                    'iban' => $line->employee->iban,
+                    'iban' => $line->employee->bank_account_iban ?? '',
                     'net_salary' => $line->net_salary / 100,
                 ];
             })->toArray(),
@@ -347,6 +381,47 @@ class BankPaymentFileService
     private function formatIban(string $iban): string
     {
         return strtoupper(str_replace(' ', '', $iban));
+    }
+
+    /**
+     * Extract BIC from Macedonian IBAN
+     *
+     * Macedonian IBANs: MK07 + 3-digit bank code + 10-digit account + 2 check digits
+     * Common Macedonian bank BICs:
+     * - 210 = Komercijalna Banka (KOBSMK2X)
+     * - 250 = NLB Banka (TUTBMK22)
+     * - 270 = Halk Banka (HABORSMK)
+     * - 300 = Stopanska Banka (STOBMK2X)
+     * - 380 = UniBank (UNIBMK22)
+     * - 500 = Sparkasse Bank (OABORSMK)
+     * - 530 = ProCredit Bank (PCBCMK22)
+     */
+    private function extractBicFromIban(string $iban): string
+    {
+        $iban = strtoupper(str_replace(' ', '', $iban));
+
+        // Check if it's a Macedonian IBAN
+        if (! str_starts_with($iban, 'MK') || strlen($iban) < 7) {
+            return 'NOTPROVIDED';
+        }
+
+        // Extract bank code (positions 5-7 after MK + 2 check digits)
+        $bankCode = substr($iban, 4, 3);
+
+        // Map bank codes to BICs
+        $bankBics = [
+            '210' => 'KOBSMK2X',  // Komercijalna Banka
+            '250' => 'TUTBMK22',  // NLB Banka
+            '270' => 'HABORSMK',  // Halk Banka
+            '300' => 'STOBMK2X',  // Stopanska Banka
+            '380' => 'UNIBMK22',  // UniBank
+            '500' => 'OABORSMK',  // Sparkasse Bank
+            '530' => 'PCBCMK22',  // ProCredit Bank
+            '290' => 'STMKMK22',  // Silk Road Bank
+            '320' => 'TTBBMK2X',  // TTK Banka
+        ];
+
+        return $bankBics[$bankCode] ?? 'NOTPROVIDED';
     }
 
     /**
