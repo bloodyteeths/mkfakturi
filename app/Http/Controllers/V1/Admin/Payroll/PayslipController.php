@@ -166,26 +166,45 @@ class PayslipController extends Controller
         header('Content-Disposition: attachment; filename="' . $downloadInfo['filename'] . '"');
         header('Content-Transfer-Encoding: binary');
         header('Content-Length: ' . $fileSize);
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
         header('Expires: 0');
 
-        // Flush headers
+        // Disable proxy buffering (nginx, Railway, etc.)
+        header('X-Accel-Buffering: no');
+        header('X-Content-Type-Options: nosniff');
+
+        // Flush headers immediately
         flush();
+
+        // Enable implicit flushing
+        ob_implicit_flush(true);
 
         // Read file and output directly using chunked reading
         $handle = fopen($filePath, 'rb');
         if ($handle) {
-            while (!feof($handle)) {
-                echo fread($handle, 65536); // 64KB chunks
+            $bytesSent = 0;
+            while (!feof($handle) && connection_status() === CONNECTION_NORMAL) {
+                $chunk = fread($handle, 8192); // 8KB chunks (smaller for better streaming)
+                if ($chunk === false) break;
+                echo $chunk;
+                $bytesSent += strlen($chunk);
                 flush();
             }
             fclose($handle);
+
+            \Log::info('ZIP download completed', [
+                'token' => $token,
+                'bytes_sent' => $bytesSent,
+                'expected_size' => $fileSize,
+                'connection_status' => connection_status(),
+            ]);
         }
 
-        // DO NOT delete file here - it may cause truncation
-        // Files will be cleaned up by scheduled job or manually
-        // @unlink($filePath);
+        // Clean up file after successful send
+        if ($bytesSent >= $fileSize) {
+            @unlink($filePath);
+        }
 
         exit;
     }
