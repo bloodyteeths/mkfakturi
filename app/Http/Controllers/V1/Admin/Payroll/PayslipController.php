@@ -141,15 +141,53 @@ class PayslipController extends Controller
         // Delete cache entry (one-time download)
         \Cache::forget('payslip_download_' . $token);
 
-        // Use Laravel's download response - most reliable for binary files
-        return response()->download(
-            $filePath,
-            $downloadInfo['filename'],
-            [
-                'Content-Type' => 'application/zip',
-                'Content-Length' => filesize($filePath),
-            ]
-        )->deleteFileAfterSend(true);
+        // Get file size before anything else
+        clearstatcache(true, $filePath);
+        $fileSize = filesize($filePath);
+
+        \Log::info('Serving ZIP download', [
+            'token' => $token,
+            'path' => $filePath,
+            'size' => $fileSize,
+        ]);
+
+        // Prevent timeout and ensure complete transfer
+        set_time_limit(0);
+        ignore_user_abort(false);
+
+        // Disable all output buffering
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // Set headers manually for maximum control
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $downloadInfo['filename'] . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Length: ' . $fileSize);
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Expires: 0');
+
+        // Flush headers
+        flush();
+
+        // Read file and output directly using chunked reading
+        $handle = fopen($filePath, 'rb');
+        if ($handle) {
+            while (!feof($handle)) {
+                echo fread($handle, 65536); // 64KB chunks
+                flush();
+            }
+            fclose($handle);
+        }
+
+        // DO NOT delete file here - it may cause truncation
+        // Files will be cleaned up by scheduled job or manually
+        // @unlink($filePath);
+
+        exit;
     }
 
     /**
