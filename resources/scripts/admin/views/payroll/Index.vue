@@ -257,7 +257,7 @@ const runsColumns = computed(() => {
   ]
 })
 
-const recentRunsData = computed(() => {
+function recentRunsData() {
   return {
     data: recentRuns.value,
     pagination: {
@@ -267,7 +267,7 @@ const recentRunsData = computed(() => {
       limit: 5,
     },
   }
-})
+}
 
 onMounted(async () => {
   await loadDashboardData()
