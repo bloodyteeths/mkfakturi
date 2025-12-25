@@ -150,6 +150,9 @@ class PayrollGLService
                 'entity_id' => $entity->id,
             ]);
 
+            // Reload line items before posting (required by IFRS package)
+            $transaction->load('lineItems');
+
             // Post the transaction to the ledger
             $transaction->post();
 
