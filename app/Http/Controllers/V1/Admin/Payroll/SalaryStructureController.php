@@ -40,7 +40,7 @@ class SalaryStructureController extends Controller
         }
 
         $structures = $query
-            ->orderBy($request->get('orderBy', 'effective_from'), $request->get('orderByType', 'desc'))
+            ->orderBy($request->get('orderByField', 'effective_from'), $request->get('orderBy', 'desc'))
             ->paginate($limit);
 
         return response()->json([

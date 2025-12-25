@@ -56,9 +56,28 @@ class PayslipController extends Controller
     }
 
     /**
-     * Preview payslip PDF in browser.
+     * Get payslip data as JSON for Vue display.
      */
     public function preview(Request $request, PayrollRunLine $payrollRunLine)
+    {
+        $this->authorize('view', $payrollRunLine);
+
+        // Load required relationships
+        $payrollRunLine->load([
+            'employee.currency',
+            'employee.company',
+            'payrollRun',
+        ]);
+
+        return response()->json([
+            'data' => $payrollRunLine,
+        ]);
+    }
+
+    /**
+     * Preview payslip PDF in browser.
+     */
+    public function previewPdf(Request $request, PayrollRunLine $payrollRunLine)
     {
         $this->authorize('view', $payrollRunLine);
 
