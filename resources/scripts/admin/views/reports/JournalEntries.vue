@@ -28,7 +28,7 @@
             class="w-full"
             :loading="isLoading"
             :disabled="!canLoadEntries"
-            @click="loadEntries"
+            @click="loadEntries(1)"
           >
             <template #left="slotProps">
               <BaseIcon :class="slotProps.class" name="MagnifyingGlassIcon" />
@@ -279,7 +279,7 @@ async function loadEntries(page = 1) {
   hasSearched.value = true
 
   try {
-    const response = await window.axios.get('/api/v1/accounting/journal-entries', {
+    const response = await window.axios.get('/accounting/journal-entries', {
       params: {
         start_date: filters.value.start_date,
         end_date: filters.value.end_date,
@@ -316,7 +316,7 @@ async function exportToCsv() {
   isExporting.value = true
 
   try {
-    const response = await window.axios.get('/api/v1/accounting/journal-entries/export', {
+    const response = await window.axios.get('/accounting/journal-entries/export', {
       params: {
         start_date: filters.value.start_date,
         end_date: filters.value.end_date,

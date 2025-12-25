@@ -58,7 +58,7 @@
       >
         <BaseTabGroup class="p-2">
           <BaseTab
-            :title="$t('reports.accounting.trial_balance')"
+            :title="$t('reports.accounting.trial_balance.title')"
             tab-panel-container="px-0 py-0"
           >
             <TrialBalance ref="report" />
@@ -76,13 +76,13 @@
             <IncomeStatement ref="report" />
           </BaseTab>
           <BaseTab
-            :title="$t('reports.accounting.general_ledger')"
+            :title="$t('reports.accounting.general_ledger.title')"
             tab-panel-container="px-0 py-0"
           >
             <GeneralLedger ref="report" />
           </BaseTab>
           <BaseTab
-            :title="$t('reports.accounting.journal_entries')"
+            :title="$t('reports.accounting.journal_entries.title')"
             tab-panel-container="px-0 py-0"
           >
             <JournalEntries ref="report" />

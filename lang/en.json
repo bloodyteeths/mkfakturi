@@ -47,6 +47,7 @@
     "update": "Update",
     "deselect": "Deselect",
     "download": "Download",
+    "load": "Load",
     "from_date": "From Date",
     "to_date": "To Date",
     "from": "From",
@@ -158,6 +159,9 @@
     "loading": "Loading...",
     "export_to_csv": "Export to CSV",
     "export": "Export",
+    "reference": "Reference",
+    "description": "Description",
+    "page": "Page",
     "export_csv": "CSV",
     "export_excel": "Excel (XLSX)",
     "export_pdf": "PDF",
@@ -170,6 +174,27 @@
     "expand": "Expand",
     "collapse_sidebar": "Collapse sidebar",
     "expand_sidebar": "Expand sidebar"
+  },
+  "accounting": {
+    "journal_entries": {
+      "title": "Journal Entries",
+      "entry": "Journal Entry",
+      "entries": "Journal Entries",
+      "no_entries": "No journal entries found for the selected period",
+      "no_entries_description": "There are no transactions in the selected date range.",
+      "posted": "Posted",
+      "draft": "Draft",
+      "expand": "Show details",
+      "collapse": "Hide details",
+      "account": "Account",
+      "debit": "Debit",
+      "credit": "Credit",
+      "lines": "lines",
+      "totals": "Totals",
+      "total_debits": "Total Debits",
+      "total_credits": "Total Credits",
+      "view_source_document": "View Source Document"
+    }
   },
   "dashboard": {
     "select_year": "Select year",

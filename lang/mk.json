@@ -47,6 +47,7 @@
     "update": "Ажурирај",
     "deselect": "Одселектирај",
     "download": "Преземи",
+    "load": "Вчитај",
     "from_date": "Од датум",
     "to_date": "До датум",
     "from": "Од",
@@ -164,6 +165,9 @@
     "loading": "Вчитување...",
     "export_to_csv": "Извези во CSV",
     "export": "Извези",
+    "reference": "Референца",
+    "description": "Опис",
+    "page": "Страница",
     "select_customer": "Избери клиент",
     "saving": "Зачувување...",
     "deleting": "Бришење...",
@@ -223,6 +227,27 @@
     "expand": "Прошири",
     "collapse_sidebar": "Собери странична лента",
     "expand_sidebar": "Прошири странична лента"
+  },
+  "accounting": {
+    "journal_entries": {
+      "title": "Дневник на книжења",
+      "entry": "Книжење",
+      "entries": "Книжења",
+      "no_entries": "Нема пронајдено книжења за избраниот период",
+      "no_entries_description": "Нема трансакции во избраниот период.",
+      "posted": "Прокнижено",
+      "draft": "Нацрт",
+      "expand": "Прикажи детали",
+      "collapse": "Сокриј детали",
+      "account": "Сметка",
+      "debit": "Должи",
+      "credit": "Побарува",
+      "lines": "ставки",
+      "totals": "Вкупно",
+      "total_debits": "Вкупно должи",
+      "total_credits": "Вкупно побарува",
+      "view_source_document": "Прегледај изворен документ"
+    }
   },
   "dashboard": {
     "select_year": "Избери година",

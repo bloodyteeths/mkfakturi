@@ -244,7 +244,7 @@ async function loadLedger() {
   ledgerData.value = null
 
   try {
-    const response = await window.axios.get('/api/v1/accounting/general-ledger', {
+    const response = await window.axios.get('/accounting/general-ledger', {
       params: {
         account_id: filters.value.account_id,
         start_date: filters.value.start_date,
@@ -267,7 +267,7 @@ async function exportToCsv() {
   isExporting.value = true
 
   try {
-    const response = await window.axios.get('/api/v1/accounting/general-ledger/export', {
+    const response = await window.axios.get('/accounting/general-ledger/export', {
       params: {
         account_id: filters.value.account_id,
         start_date: filters.value.start_date,
