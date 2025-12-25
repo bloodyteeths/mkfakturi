@@ -243,7 +243,7 @@ const runsColumns = computed(() => {
     },
     {
       key: 'status',
-      label: t('payroll.status'),
+      label: t('payroll.status_label'),
       thClass: 'extra',
     },
     {

@@ -57,7 +57,7 @@
         />
       </BaseInputGroup>
 
-      <BaseInputGroup :label="$t('payroll.status')">
+      <BaseInputGroup :label="$t('payroll.status_label')">
         <BaseMultiselect
           v-model="filters.status"
           :options="statusOptions"
@@ -255,7 +255,7 @@ const runsColumns = computed(() => {
     },
     {
       key: 'status',
-      label: t('payroll.status'),
+      label: t('payroll.status_label'),
       thClass: 'extra',
     },
     {

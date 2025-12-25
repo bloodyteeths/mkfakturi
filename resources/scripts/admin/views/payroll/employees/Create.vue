@@ -240,7 +240,7 @@
           <!-- Active Status (only show in edit mode) -->
           <BaseInputGroup
             v-if="isEdit"
-            :label="$t('payroll.status')"
+            :label="$t('payroll.status_label')"
             :content-loading="isFetchingInitialData"
             class="col-span-2"
           >

@@ -98,7 +98,7 @@
     <!-- Run Summary -->
     <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-4">
       <BaseCard class="p-6">
-        <p class="text-sm font-medium text-gray-600">{{ $t('payroll.status') }}</p>
+        <p class="text-sm font-medium text-gray-600">{{ $t('payroll.status_label') }}</p>
         <p class="mt-2">
           <span
             :class="statusClass(run.status)"
