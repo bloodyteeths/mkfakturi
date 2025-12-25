@@ -1291,6 +1291,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     // Chart of Accounts
     Route::get('/companies/{company}/accounts', [PartnerAccountController::class, 'index']);
     Route::get('/companies/{company}/accounts/tree', [PartnerAccountController::class, 'tree']);
+    Route::get('/companies/{company}/accounts/export', [PartnerAccountController::class, 'export']);
     Route::get('/companies/{company}/accounts/{account}', [PartnerAccountController::class, 'show']);
     Route::post('/companies/{company}/accounts', [PartnerAccountController::class, 'store']);
     Route::put('/companies/{company}/accounts/{account}', [PartnerAccountController::class, 'update']);
@@ -1353,6 +1354,15 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     Route::get('/companies/{company}/daily-closings', [\App\Http\Controllers\V1\Partner\PartnerDailyClosingController::class, 'index']);
     Route::post('/companies/{company}/daily-closings', [\App\Http\Controllers\V1\Partner\PartnerDailyClosingController::class, 'store']);
     Route::delete('/companies/{company}/daily-closings/{dailyClosing}', [\App\Http\Controllers\V1\Partner\PartnerDailyClosingController::class, 'destroy']);
+
+    // Partner IFRS Accounting Reports for Client Companies
+    Route::prefix('/companies/{company}/accounting')->group(function () {
+        Route::get('/general-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'generalLedger']);
+        Route::get('/journal-entries', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'journalEntries']);
+        Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
+        Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);
+        Route::get('/income-statement', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'incomeStatement']);
+    });
     // CLAUDE-CHECKPOINT
 });
 

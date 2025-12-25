@@ -989,6 +989,18 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/DailyClosing.vue'),
       },
+      {
+        path: 'partner/accounting/general-ledger',
+        name: 'partner.accounting.general-ledger',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/GeneralLedger.vue'),
+      },
+      {
+        path: 'partner/accounting/trial-balance',
+        name: 'partner.accounting.trial-balance',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/TrialBalance.vue'),
+      },
 
       // Banking
       {

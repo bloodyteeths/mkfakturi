@@ -1926,14 +1926,27 @@
       "general_ledger": {
         "title": "Главна книга",
         "select_account": "Избери сметка",
+        "select_account_placeholder": "Изберете сметка за преглед...",
         "opening_balance": "Почетно салдо",
         "closing_balance": "Завршно салдо",
         "running_balance": "Салдо",
+        "balance": "Салдо",
         "no_entries": "Нема пронајдено ставки за избраниот период",
+        "no_data": "Нема податоци",
+        "no_data_description": "Нема пронајдено записи за избраниот период и сметка",
+        "all_accounts": "Сите сметки",
         "document": "Документ",
         "description": "Опис",
         "debit": "Должи",
         "credit": "Побарува"
+      },
+      "trial_balance": {
+        "title": "Пробен биланс",
+        "balanced": "Билансот е во рамнотежа",
+        "not_balanced": "Билансот не е во рамнотежа",
+        "difference": "Разлика",
+        "no_data": "Нема податоци",
+        "no_data_description": "Нема пронајдено сметки за избраниот датум"
       },
       "journal_entries": {
         "title": "Дневник на книжења",
@@ -4641,6 +4654,8 @@
       "journal_review": "Преглед на книжења",
       "period_lock": "Заклучување на период",
       "daily_closing": "Дневно затворање",
+      "general_ledger": "Главна книга",
+      "trial_balance": "Пробен биланс",
       "select_company_to_view": "Ве молиме изберете компанија за да ги видите книжењата",
       "select_export_scope": "Избери опсег за извоз",
       "review_entries": "Прегледај книжења",

@@ -1457,14 +1457,27 @@
       "general_ledger": {
         "title": "General Ledger",
         "select_account": "Select Account",
+        "select_account_placeholder": "Select an account to view...",
         "opening_balance": "Opening Balance",
         "closing_balance": "Closing Balance",
         "running_balance": "Balance",
+        "balance": "Balance",
         "no_entries": "No ledger entries found for the selected period",
+        "no_data": "No data",
+        "no_data_description": "No records found for the selected period and account",
+        "all_accounts": "All accounts",
         "document": "Document",
         "description": "Description",
         "debit": "Debit",
         "credit": "Credit"
+      },
+      "trial_balance": {
+        "title": "Trial Balance",
+        "balanced": "Trial Balance is balanced",
+        "not_balanced": "Trial Balance is not balanced",
+        "difference": "Difference",
+        "no_data": "No data",
+        "no_data_description": "No accounts found for the selected date"
       },
       "journal_entries": {
         "title": "Journal Entries",
@@ -3617,6 +3630,8 @@
       "journal_review": "Journal Review",
       "period_lock": "Period Lock",
       "daily_closing": "Daily Closing",
+      "general_ledger": "General Ledger",
+      "trial_balance": "Trial Balance",
       "select_company_to_view": "Please select a company to view journal entries",
       "select_export_scope": "Select Export Scope",
       "review_entries": "Review Entries",
