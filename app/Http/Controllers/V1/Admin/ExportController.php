@@ -19,7 +19,7 @@ class ExportController extends Controller
         $this->authorize('view', $company);
 
         $validated = $request->validate([
-            'type' => 'required|in:invoices,bills,customers,suppliers,transactions,expenses,payments',
+            'type' => 'required|in:invoices,bills,customers,suppliers,transactions,expenses,payments,items',
             'format' => 'required|in:csv,xlsx,pdf',
             'params' => 'nullable|array',
             'params.start_date' => 'nullable|date',
@@ -118,4 +118,4 @@ class ExportController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: Added 'items' type support to export validation

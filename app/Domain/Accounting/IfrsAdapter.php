@@ -1539,11 +1539,11 @@ class IfrsAdapter
                     'date' => $entry->date,
                     'transaction_id' => $entry->transaction_id,
                     'document_type' => $this->mapTransactionType($entry->document_type),
-                    'document_number' => $entry->document_number ?? '',
-                    'narration' => $entry->narration ?? '',
+                    'reference' => $entry->document_number ?? '',
+                    'description' => $entry->narration ?? '',
                     'debit' => $debit,
                     'credit' => $credit,
-                    'balance' => $runningBalance,
+                    'running_balance' => $runningBalance,
                 ];
             }
 
@@ -1625,13 +1625,24 @@ class IfrsAdapter
 
                 // Only include transactions that have line items
                 if (count($lines) > 0) {
+                    // Calculate totals from lines
+                    $totalDebit = array_sum(array_column($lines, 'debit'));
+                    $totalCredit = array_sum(array_column($lines, 'credit'));
+
                     $entries[] = [
                         'id' => $transaction->id,
                         'date' => $transaction->transaction_date,
                         'transaction_type' => $this->mapTransactionType($transaction->transaction_type),
                         'narration' => $transaction->narration ?? '',
+                        'reference' => $transaction->transaction_no ?? null,
                         'is_posted' => true, // All transactions in ledger are posted
                         'lines' => $lines,
+                        'lines_count' => count($lines),
+                        'total_debit' => $totalDebit * 100, // Convert to cents for frontend
+                        'total_credit' => $totalCredit * 100,
+                        'total_amount' => max($totalDebit, $totalCredit) * 100,
+                        'source_type' => null, // TODO: Add if tracking source models
+                        'source_link' => null, // TODO: Add if tracking source models
                     ];
                 }
             }

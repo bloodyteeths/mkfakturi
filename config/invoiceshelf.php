@@ -130,6 +130,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'settings.menu_title.privacy_data',
+            'group' => '',
+            'name' => 'Privacy & Data',
+            'link' => '/admin/settings/privacy-data',
+            'icon' => 'ShieldCheckIcon',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'settings.menu_title.company_information',
             'group' => '',
             'name' => 'Company information',

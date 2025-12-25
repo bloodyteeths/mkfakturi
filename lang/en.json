@@ -1493,13 +1493,19 @@
         "entry": "Journal Entry",
         "entries": "Journal Entries",
         "no_entries": "No journal entries found for the selected period",
+        "no_entries_description": "There are no transactions in the selected date range.",
         "posted": "Posted",
         "draft": "Draft",
         "expand": "Show details",
         "collapse": "Hide details",
         "account": "Account",
+        "debit": "Debit",
+        "credit": "Credit",
+        "lines": "lines",
+        "totals": "Totals",
         "total_debits": "Total Debits",
-        "total_credits": "Total Credits"
+        "total_credits": "Total Credits",
+        "view_source_document": "View Source Document"
       },
       "accounts": {
         "title": "Chart of Accounts",

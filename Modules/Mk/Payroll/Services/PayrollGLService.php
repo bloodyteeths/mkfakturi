@@ -85,6 +85,9 @@ class PayrollGLService
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
+            // Set user entity context for IFRS EntityScope (required by eloquent-ifrs)
+            $this->setUserEntityContext($entity);
+
             // Get GL accounts
             $salaryExpenseAccount = $this->getSalaryExpenseAccount($run->company_id, $entity->id);
             $employerContributionAccount = $this->getEmployerContributionAccount($run->company_id, $entity->id);
@@ -204,6 +207,9 @@ class PayrollGLService
             }
 
             $entity = $this->getOrCreateEntity($run->company);
+
+            // Set user entity context for IFRS EntityScope (required by eloquent-ifrs)
+            $this->setUserEntityContext($entity);
 
             // Create reversing entry
             $reversingTransaction = Transaction::create([
@@ -452,6 +458,27 @@ class PayrollGLService
                 'currency_id' => $this->getCurrencyId($companyId),
             ]
         );
+    }
+
+    /**
+     * Set user entity context for IFRS EntityScope
+     *
+     * The eloquent-ifrs package's Segregating trait relies on Auth::user()->entity
+     * when creating models. This method sets the entity context on the current user.
+     */
+    private function setUserEntityContext(?Entity $entity): void
+    {
+        if (! $entity) {
+            return;
+        }
+
+        $user = auth()->user();
+        if ($user) {
+            // Set entity_id on user for IFRS EntityScope
+            $user->entity_id = $entity->id;
+            // Also set the entity relationship directly
+            $user->setRelation('entity', $entity);
+        }
     }
 }
 

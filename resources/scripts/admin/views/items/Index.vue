@@ -24,6 +24,12 @@
             </template>
           </BaseButton>
 
+          <ExportButton
+            v-show="itemStore.totalItems"
+            type="items"
+            :filters="filters"
+          />
+
           <BaseButton
             v-if="userStore.hasAbilities(abilities.CREATE_ITEM)"
             @click="$router.push('/admin/items/create')"
@@ -216,6 +222,7 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import ItemDropdown from '@/scripts/admin/components/dropdowns/ItemIndexDropdown.vue'
 import SatelliteIcon from '@/scripts/components/icons/empty/SatelliteIcon.vue'
 import abilities from '@/scripts/admin/stub/abilities'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 
 const utils = inject('utils')
 
@@ -376,3 +383,4 @@ function removeMultipleItems() {
     })
 }
 </script>
+// CLAUDE-CHECKPOINT: Added export button to items index view

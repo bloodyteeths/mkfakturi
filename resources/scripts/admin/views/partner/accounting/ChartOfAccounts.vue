@@ -3,6 +3,18 @@
     <BasePageHeader :title="$t('partner.accounting.chart_of_accounts')">
       <template #actions>
         <div class="flex items-center space-x-3">
+          <!-- Export CSV button -->
+          <BaseButton
+            variant="gray"
+            @click="exportAccounts"
+            :loading="partnerAccountingStore.isExporting"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+            </template>
+            {{ $t('partner.accounting.export_csv') }}
+          </BaseButton>
+
           <!-- Import CSV button -->
           <BaseButton
             variant="gray"
@@ -479,6 +491,24 @@ async function submitImport() {
     await loadAccounts()
   } catch (error) {
     console.error('Failed to import accounts:', error)
+  }
+}
+
+async function exportAccounts() {
+  if (!selectedCompanyId.value) {
+    dialogStore.openDialog({
+      title: t('general.error'),
+      message: t('partner.accounting.select_company_first'),
+      variant: 'danger',
+      hideNoButton: true,
+    })
+    return
+  }
+
+  try {
+    await partnerAccountingStore.exportAccounts(selectedCompanyId.value)
+  } catch (error) {
+    console.error('Failed to export accounts:', error)
   }
 }
 </script>

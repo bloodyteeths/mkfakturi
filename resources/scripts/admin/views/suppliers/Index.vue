@@ -23,6 +23,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="suppliersStore.supplierTotalCount"
+          type="suppliers"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)"
           variant="primary"
@@ -113,6 +120,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import SupplierDropdown from '@/scripts/admin/components/dropdowns/SupplierIndexDropdown.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 
 const { t } = useI18n()
 const suppliersStore = useSuppliersStore()
@@ -192,4 +200,4 @@ onMounted(() => {
   fetchData()
 })
 </script>
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: Added export button to suppliers index view

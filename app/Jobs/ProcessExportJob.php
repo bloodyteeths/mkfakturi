@@ -85,6 +85,7 @@ class ProcessExportJob implements ShouldQueue
             'expenses' => Expense::where('company_id', $this->exportJob->company_id),
             'payments' => Payment::where('company_id', $this->exportJob->company_id),
             'transactions' => \App\Models\Transaction::where('company_id', $this->exportJob->company_id),
+            'items' => \App\Models\Item::where('company_id', $this->exportJob->company_id),
             default => throw new \Exception("Unknown export type: {$this->exportJob->type}"),
         };
 
@@ -200,4 +201,4 @@ class ExportCollection implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwe
         return array_keys($this->data[0]);
     }
 }
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: Added 'items' type support to export job processing

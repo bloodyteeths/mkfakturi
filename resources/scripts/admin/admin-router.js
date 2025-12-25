@@ -27,6 +27,8 @@ const SettingsIndex = () =>
   import('@/scripts/admin/views/settings/SettingsIndex.vue')
 const AccountSetting = () =>
   import('@/scripts/admin/views/settings/AccountSetting.vue')
+const PrivacyDataSetting = () =>
+  import('@/scripts/admin/views/settings/PrivacyDataSetting.vue')
 const CompanyInfo = () =>
   import('@/scripts/admin/views/settings/CompanyInfoSettings.vue')
 const Preferences = () =>
@@ -544,6 +546,11 @@ export default [
             path: 'account-settings',
             name: 'account.settings',
             component: AccountSetting,
+          },
+          {
+            path: 'privacy-data',
+            name: 'privacy.data',
+            component: PrivacyDataSetting,
           },
           {
             path: 'company-info',

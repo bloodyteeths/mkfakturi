@@ -25,6 +25,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="invoiceStore.invoiceTotalCount"
+          type="invoices"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
           to="invoices/create"
@@ -295,6 +302,7 @@ import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendIn
 import ExportXmlModal from '@/scripts/admin/components/modal-components/ExportXmlModal.vue'
 import BaseInvoiceStatusLabel from "@/scripts/components/base/BaseInvoiceStatusLabel.vue"
 import InvoiceCard from '@/scripts/admin/components/InvoiceCard.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 // Stores
 const invoiceStore = useInvoiceStore()
 const dialogStore = useDialogStore()
@@ -593,3 +601,4 @@ function setActiveTab(val) {
   }
 }
 </script>
+// CLAUDE-CHECKPOINT: Added export button to invoices index view

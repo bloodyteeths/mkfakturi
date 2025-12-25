@@ -257,6 +257,60 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
     },
 
     /**
+     * Export accounts to CSV file
+     */
+    async exportAccounts(companyId) {
+      const notificationStore = useNotificationStore()
+      this.isExporting = true
+      this.error = null
+
+      try {
+        const response = await axios.get(
+          `/partner/companies/${companyId}/accounts/export`,
+          {
+            responseType: 'blob',
+          }
+        )
+
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+
+        // Get filename from Content-Disposition header or generate one
+        const contentDisposition = response.headers['content-disposition']
+        let filename = `chart-of-accounts-${new Date().toISOString().split('T')[0]}.csv`
+
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="([^"]+)"/) ||
+                                contentDisposition.match(/filename=([^;\s]+)/)
+          if (filenameMatch) {
+            filename = filenameMatch[1].replace(/["']/g, '')
+          }
+        }
+
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        notificationStore.showNotification({
+          type: 'success',
+          message: 'Chart of accounts exported successfully',
+        })
+
+        return response
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to export accounts'
+        handleError(error)
+        throw error
+      } finally {
+        this.isExporting = false
+      }
+    },
+
+    /**
      * Fetch account mappings for a company
      */
     async fetchMappings(companyId, type = null) {

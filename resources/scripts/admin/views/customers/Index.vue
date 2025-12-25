@@ -29,6 +29,12 @@
             </template>
           </BaseButton>
 
+          <ExportButton
+            v-show="customerStore.totalCustomers"
+            type="customers"
+            :filters="filters"
+          />
+
           <BaseButton
             v-if="userStore.hasAbilities(abilities.CREATE_CUSTOMER)"
             @click="$router.push('customers/create')"
@@ -206,6 +212,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 
 import CustomerDropdown from '@/scripts/admin/components/dropdowns/CustomerIndexDropdown.vue'
 import AstronautIcon from '@/scripts/components/icons/empty/AstronautIcon.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 
 const companyStore = useCompanyStore()
 const dialogStore = useDialogStore()
@@ -364,3 +371,4 @@ function removeMultipleCustomers() {
     })
 }
 </script>
+// CLAUDE-CHECKPOINT: Added export button to customers index view

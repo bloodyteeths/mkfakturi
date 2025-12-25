@@ -24,6 +24,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="expenseStore.totalExpenses"
+          type="expenses"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_EXPENSE)"
           class="ml-4"
@@ -229,6 +236,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 
 import UFOIcon from '@/scripts/components/icons/empty/UFOIcon.vue'
 import ExpenseDropdown from '@/scripts/admin/components/dropdowns/ExpenseIndexDropdown.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 
 const companyStore = useCompanyStore()
 const expenseStore = useExpenseStore()
@@ -412,3 +420,4 @@ function removeMultipleExpenses() {
     })
 }
 </script>
+// CLAUDE-CHECKPOINT: Added export button to expenses index view

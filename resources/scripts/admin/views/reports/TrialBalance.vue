@@ -19,6 +19,40 @@
     </div>
 
     <div class="col-span-8">
+      <!-- Export Dropdown (Desktop) -->
+      <div class="hidden md:flex justify-end mb-4">
+        <BaseDropdown width-class="w-48">
+          <template #activator>
+            <BaseButton
+              variant="primary-outline"
+              :loading="isExporting"
+            >
+              <template #left="slotProps">
+                <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+              </template>
+              {{ $t('general.export') }}
+              <template #right="slotProps">
+                <BaseIcon :class="slotProps.class" name="ChevronDownIcon" />
+              </template>
+            </BaseButton>
+          </template>
+
+          <BaseDropdownItem>
+            <div class="flex items-center" @click="exportReport('csv')">
+              <BaseIcon name="DocumentTextIcon" class="h-5 w-5 mr-3 text-gray-400" />
+              <span>{{ $t('general.export_csv') }}</span>
+            </div>
+          </BaseDropdownItem>
+
+          <BaseDropdownItem>
+            <div class="flex items-center" @click="exportReport('pdf')">
+              <BaseIcon name="DocumentArrowDownIcon" class="h-5 w-5 mr-3 text-gray-400" />
+              <span>{{ $t('general.export_pdf') }}</span>
+            </div>
+          </BaseDropdownItem>
+        </BaseDropdown>
+      </div>
+
       <iframe
         :src="getReportUrl"
         class="
@@ -69,6 +103,7 @@ globalStore.downloadReport = downloadReport
 
 let url = ref(null)
 let siteURL = ref(null)
+const isExporting = ref(false)
 
 const formData = reactive({
   as_of_date: moment().format('YYYY-MM-DD'),
@@ -113,6 +148,41 @@ function downloadReport() {
   setTimeout(() => {
     url.value = dateUrl.value
   }, 200)
+}
+
+async function exportReport(format) {
+  isExporting.value = true
+
+  try {
+    const response = await window.axios.get(
+      `/api/v1/reports/export/trial-balance/${getSelectedCompany.value.unique_hash}`,
+      {
+        params: {
+          as_of_date: moment(formData.as_of_date).format('YYYY-MM-DD'),
+          format: format,
+        },
+        responseType: 'blob',
+      }
+    )
+
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+
+    const asOfDate = moment(formData.as_of_date).format('YYYY-MM-DD')
+    const extension = format === 'csv' ? 'csv' : 'pdf'
+    const filename = `trial_balance_${asOfDate}.${extension}`
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Failed to export report:', error)
+  } finally {
+    isExporting.value = false
+  }
 }
 </script>
 

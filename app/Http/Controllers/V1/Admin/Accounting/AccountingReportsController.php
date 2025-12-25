@@ -398,7 +398,7 @@ class AccountingReportsController extends Controller
 
         return response()->json([
             'success' => true,
-            ...$generalLedger,
+            'data' => $generalLedger,
         ]);
     }
 
@@ -511,8 +511,8 @@ class AccountingReportsController extends Controller
 
         return response()->json([
             'success' => true,
-            'entries' => $paginatedEntries,
-            'pagination' => [
+            'data' => $paginatedEntries,
+            'meta' => [
                 'current_page' => $page,
                 'per_page' => $perPage,
                 'total' => $total,

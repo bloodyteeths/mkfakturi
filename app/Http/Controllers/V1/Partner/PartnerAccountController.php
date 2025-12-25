@@ -513,6 +513,74 @@ class PartnerAccountController extends Controller
     }
 
     /**
+     * Export accounts to CSV.
+     */
+    public function export(Request $request, int $company)
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
+        }
+
+        $companyId = $company;
+
+        // Verify partner has access to this company
+        if (!$this->hasCompanyAccess($partner, $companyId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
+        }
+
+        // Fetch all accounts for the company
+        $accounts = Account::where('company_id', $companyId)
+            ->with('parent:id,code')
+            ->orderBy('code')
+            ->get();
+
+        // Generate CSV
+        $csv = \League\Csv\Writer::createFromString('');
+
+        // Add UTF-8 BOM for proper Excel compatibility
+        $csv->setOutputBOM(\League\Csv\ByteSequence::BOM_UTF8);
+
+        // Add header row
+        $csv->insertOne([
+            'code',
+            'name',
+            'type',
+            'parent_code',
+            'description',
+            'is_active',
+        ]);
+
+        // Add data rows
+        foreach ($accounts as $account) {
+            $csv->insertOne([
+                $account->code,
+                $account->name,
+                $account->type,
+                $account->parent ? $account->parent->code : '',
+                $account->description ?? '',
+                $account->is_active ? '1' : '0',
+            ]);
+        }
+
+        $csvContent = $csv->toString();
+        $filename = 'chart-of-accounts-' . date('Y-m-d') . '.csv';
+
+        return response($csvContent, 200)
+            ->header('Content-Type', 'text/csv; charset=UTF-8')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
+            ->header('Content-Length', strlen($csvContent));
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
      * Get partner from authenticated request.
      */
     protected function getPartnerFromRequest(Request $request): ?Partner
