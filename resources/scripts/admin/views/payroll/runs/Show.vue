@@ -493,16 +493,32 @@ async function generateBankFile() {
   try {
     const response = await axios.get(
       `payroll-runs/${run.value.id}/bank-file`,
-      { responseType: 'blob' }
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          'Accept': 'application/xml'
+        }
+      }
     )
 
-    const url = window.URL.createObjectURL(new Blob([response.data]))
+    // Check if response is an error (JSON)
+    const contentType = response.headers['content-type']
+    if (contentType && contentType.includes('application/json')) {
+      const decoder = new TextDecoder('utf-8')
+      const text = decoder.decode(response.data)
+      const json = JSON.parse(text)
+      throw { response: { data: json } }
+    }
+
+    const blob = new Blob([response.data], { type: 'application/xml' })
+    const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', `payroll_payment_${run.value.id}.xml`)
     document.body.appendChild(link)
     link.click()
     link.remove()
+    window.URL.revokeObjectURL(url)
 
     notificationStore.showNotification({
       type: 'success',
@@ -510,9 +526,25 @@ async function generateBankFile() {
     })
   } catch (error) {
     console.error('Error generating bank file:', error)
+    // Try to extract error message from arraybuffer response
+    let errorMessage = t('general.something_went_wrong')
+    if (error.response?.data) {
+      if (typeof error.response.data === 'object' && error.response.data.message) {
+        errorMessage = error.response.data.message
+      } else if (error.response.data instanceof ArrayBuffer) {
+        try {
+          const decoder = new TextDecoder('utf-8')
+          const text = decoder.decode(error.response.data)
+          const json = JSON.parse(text)
+          errorMessage = json.message || errorMessage
+        } catch (e) {
+          // Not JSON
+        }
+      }
+    }
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('general.something_went_wrong'),
+      message: errorMessage,
     })
   }
 }
@@ -553,10 +585,17 @@ async function downloadAllPayslips() {
   try {
     const response = await axios.get(
       `payslips/bulk/${run.value.id}`,
-      { responseType: 'blob' }
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          'Accept': 'application/zip'
+        }
+      }
     )
 
-    const url = window.URL.createObjectURL(new Blob([response.data]))
+    // Create blob with explicit MIME type
+    const blob = new Blob([response.data], { type: 'application/zip' })
+    const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', `payslips_${run.value.period_year}_${run.value.period_month}.zip`)
@@ -564,15 +603,30 @@ async function downloadAllPayslips() {
     link.click()
     link.remove()
 
+    // Cleanup object URL
+    window.URL.revokeObjectURL(url)
+
     notificationStore.showNotification({
       type: 'success',
       message: t('payroll.payslips_downloaded'),
     })
   } catch (error) {
     console.error('Error downloading payslips:', error)
+    // Try to extract error message from arraybuffer response
+    let errorMessage = t('general.something_went_wrong')
+    if (error.response?.data) {
+      try {
+        const decoder = new TextDecoder('utf-8')
+        const text = decoder.decode(error.response.data)
+        const json = JSON.parse(text)
+        errorMessage = json.message || errorMessage
+      } catch (e) {
+        // Not JSON, use default message
+      }
+    }
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('general.something_went_wrong'),
+      message: errorMessage,
     })
   }
 }

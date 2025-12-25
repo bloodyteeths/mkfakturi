@@ -396,6 +396,17 @@ class PayrollRunController extends Controller
             ], 422);
         }
 
+        // First validate IBANs and return helpful error if missing
+        $invalidEmployees = $this->bankFileService->validateIbans($payrollRun);
+        if (!empty($invalidEmployees)) {
+            $names = array_map(fn($e) => $e['name'], $invalidEmployees);
+            return response()->json([
+                'error' => 'missing_ibans',
+                'message' => 'Cannot generate bank file: The following employees are missing valid IBANs: ' . implode(', ', $names),
+                'employees' => $invalidEmployees,
+            ], 422);
+        }
+
         try {
             // Generate SEPA XML on-the-fly
             $xmlContent = $this->bankFileService->generateSepaXml($payrollRun);
