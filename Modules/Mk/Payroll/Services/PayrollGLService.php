@@ -110,7 +110,7 @@ class PayrollGLService
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $salaryExpenseAccount->id,
-                'amount' => $run->total_gross / 100, // Convert cents to dollars
+                'amount' => $run->total_gross, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
@@ -122,7 +122,7 @@ class PayrollGLService
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $employerContributionAccount->id,
-                'amount' => $employerContributions / 100,
+                'amount' => $employerContributions,
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
@@ -132,7 +132,7 @@ class PayrollGLService
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $netSalaryPayableAccount->id,
-                'amount' => $run->total_net / 100,
+                'amount' => $run->total_net,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
@@ -144,7 +144,7 @@ class PayrollGLService
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $taxLiabilityAccount->id,
-                'amount' => $totalLiabilities / 100,
+                'amount' => $totalLiabilities,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
@@ -268,31 +268,31 @@ class PayrollGLService
                 [
                     'account_code' => '420',
                     'account_name' => 'Плати на вработени (Salary Expense)',
-                    'debit' => $run->total_gross / 100,
+                    'debit' => $run->total_gross,
                     'credit' => 0,
                 ],
                 [
                     'account_code' => '421',
                     'account_name' => 'Придонеси на товар на работодавач (Employer Contributions)',
-                    'debit' => $employerContributions / 100,
+                    'debit' => $employerContributions,
                     'credit' => 0,
                 ],
                 [
                     'account_code' => '240',
                     'account_name' => 'Обврски за нето плати (Net Salary Payable)',
                     'debit' => 0,
-                    'credit' => $run->total_net / 100,
+                    'credit' => $run->total_net,
                 ],
                 [
                     'account_code' => '241',
                     'account_name' => 'Обврски за придонеси (Tax & Contribution Liabilities)',
                     'debit' => 0,
-                    'credit' => $totalLiabilities / 100,
+                    'credit' => $totalLiabilities,
                 ],
             ],
             'totals' => [
-                'debit' => ($run->total_gross + $employerContributions) / 100,
-                'credit' => ($run->total_net + $totalLiabilities) / 100,
+                'debit' => ($run->total_gross + $employerContributions),
+                'credit' => ($run->total_net + $totalLiabilities),
             ],
         ];
     }

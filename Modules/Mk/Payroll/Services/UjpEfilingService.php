@@ -518,11 +518,11 @@ class UjpEfilingService
     }
 
     /**
-     * Helper: Append a monetary amount element (converts from cents to decimal)
+     * Helper: Append a monetary amount element (values are in MKD, not cents)
      */
-    private function appendMonetaryElement(DOMDocument $dom, \DOMElement $parent, string $name, int $cents): void
+    private function appendMonetaryElement(DOMDocument $dom, \DOMElement $parent, string $name, int|float $amount): void
     {
-        $value = number_format($cents / 100, 2, '.', '');
+        $value = number_format($amount, 2, '.', '');
         $element = $dom->createElement($name, $value);
         $parent->appendChild($element);
     }
