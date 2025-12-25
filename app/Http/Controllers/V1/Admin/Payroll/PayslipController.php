@@ -229,22 +229,25 @@ class PayslipController extends Controller
             }
             @rmdir($tempDir);
 
-            // Use file() to return the file as a response
-            // This streams the file correctly and allows proper cleanup
-            $fileContent = file_get_contents($zipPath);
-            $fileSize = strlen($fileContent);
+            // Use BinaryFileResponse for proper binary file streaming
+            // This handles large files correctly without truncation
+            $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse(
+                $zipPath,
+                200,
+                [
+                    'Content-Type' => 'application/zip',
+                    'Content-Disposition' => 'attachment; filename="'.$zipFilename.'"',
+                ],
+                true, // public
+                null, // content disposition
+                false, // auto etag
+                false  // auto last modified
+            );
 
-            // Delete the temp file now that we have its contents
-            @unlink($zipPath);
+            // Delete file after sending (Symfony handles this correctly)
+            $response->deleteFileAfterSend(true);
 
-            return response($fileContent, 200, [
-                'Content-Type' => 'application/zip',
-                'Content-Length' => $fileSize,
-                'Content-Disposition' => 'attachment; filename="'.$zipFilename.'"',
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
-                'Expires' => '0',
-            ]);
+            return $response;
 
         } catch (\Exception $e) {
             // Clean up on error
