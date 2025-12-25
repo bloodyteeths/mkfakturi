@@ -273,7 +273,7 @@ const linesColumns = computed(() => {
   ]
 })
 
-const linesData = computed(() => {
+function linesData() {
   return {
     data: run.value.lines || [],
     pagination: {
@@ -283,7 +283,7 @@ const linesData = computed(() => {
       limit: 100,
     },
   }
-})
+}
 
 onMounted(async () => {
   await loadRun()

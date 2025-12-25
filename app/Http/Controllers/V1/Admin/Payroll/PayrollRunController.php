@@ -313,7 +313,7 @@ class PayrollRunController extends Controller
 
         try {
             // Post to IFRS
-            $transactionId = $this->glService->postPayrollToGL($payrollRun);
+            $transactionId = $this->glService->postPayrollRun($payrollRun);
 
             $payrollRun->update([
                 'status' => PayrollRun::STATUS_POSTED,
