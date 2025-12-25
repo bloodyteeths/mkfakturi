@@ -229,12 +229,21 @@ class PayslipController extends Controller
             }
             @rmdir($tempDir);
 
-            // Return download response with proper headers
-            // Note: Don't use deleteFileAfterSend as it can delete before download completes
-            // Files in temp directory should be cleaned up by a scheduled task
-            return response()->download($zipPath, $zipFilename, [
+            // Use file() to return the file as a response
+            // This streams the file correctly and allows proper cleanup
+            $fileContent = file_get_contents($zipPath);
+            $fileSize = strlen($fileContent);
+
+            // Delete the temp file now that we have its contents
+            @unlink($zipPath);
+
+            return response($fileContent, 200, [
                 'Content-Type' => 'application/zip',
-                'Content-Length' => filesize($zipPath),
+                'Content-Length' => $fileSize,
+                'Content-Disposition' => 'attachment; filename="'.$zipFilename.'"',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
             ]);
 
         } catch (\Exception $e) {

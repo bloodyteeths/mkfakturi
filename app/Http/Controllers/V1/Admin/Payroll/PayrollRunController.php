@@ -382,23 +382,40 @@ class PayrollRunController extends Controller
     }
 
     /**
-     * Download bank payment file.
+     * Download bank payment file (generates on-the-fly if not stored).
      */
     public function downloadBankFile(PayrollRun $payrollRun)
     {
         $this->authorize('view', $payrollRun);
 
-        if (!$payrollRun->bank_file_path || !file_exists(storage_path($payrollRun->bank_file_path))) {
+        // Must be at least posted status
+        if (!in_array($payrollRun->status, [PayrollRun::STATUS_POSTED, PayrollRun::STATUS_PAID])) {
             return response()->json([
-                'error' => 'file_not_found',
-                'message' => 'Bank payment file not found.',
-            ], 404);
+                'error' => 'invalid_status',
+                'message' => 'Bank file can only be generated for posted or paid payroll runs.',
+            ], 422);
         }
 
-        return response()->download(
-            storage_path($payrollRun->bank_file_path),
-            'payroll_'.$payrollRun->period_name.'_bank_payment.xml'
-        );
+        try {
+            // Generate SEPA XML on-the-fly
+            $xmlContent = $this->bankFileService->generateSepaXml($payrollRun);
+
+            $filename = sprintf(
+                'payroll_%s_%s_bank_payment.xml',
+                $payrollRun->period_year,
+                str_pad($payrollRun->period_month, 2, '0', STR_PAD_LEFT)
+            );
+
+            return response($xmlContent)
+                ->header('Content-Type', 'application/xml')
+                ->header('Content-Disposition', 'attachment; filename="'.$filename.'"')
+                ->header('Content-Length', strlen($xmlContent));
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'generation_failed',
+                'message' => 'Failed to generate bank file: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

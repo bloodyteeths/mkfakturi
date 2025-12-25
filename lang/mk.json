@@ -30,7 +30,8 @@
     "tax_tools": "Даночни алатки",
     "tax_reports": "Даночни извештаи",
     "support_tickets": "Поддршка",
-    "all_support_tickets": "Сите тикети за поддршка"
+    "all_support_tickets": "Сите тикети за поддршка",
+    "payroll": "Плати"
   },
   "general": {
     "company_name": "Име на компанија",
@@ -76,6 +77,7 @@
     "showing": "Прикажување",
     "of": "од",
     "actions": "Акции",
+    "something_went_wrong": "Нешто тргна наопаку",
     "subtotal": "Меѓузбир",
     "discount": "Попуст",
     "fixed": "Фиксен",

@@ -30,7 +30,8 @@
     "tax_tools": "Tax Tools",
     "tax_reports": "Tax Reports",
     "support_tickets": "Support Tickets",
-    "all_support_tickets": "All Support Tickets"
+    "all_support_tickets": "All Support Tickets",
+    "payroll": "Payroll"
   },
   "general": {
     "company_name": "Company Name",
@@ -75,6 +76,7 @@
     "showing": "Showing",
     "of": "of",
     "actions": "Actions",
+    "something_went_wrong": "Something went wrong",
     "subtotal": "SUBTOTAL",
     "discount": "DISCOUNT",
     "fixed": "Fixed",
