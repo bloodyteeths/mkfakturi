@@ -132,39 +132,65 @@ class PayslipController extends Controller
             ], 404);
         }
 
+        // Ensure temp directory exists
+        $tempBase = storage_path('app/temp');
+        if (!file_exists($tempBase)) {
+            mkdir($tempBase, 0755, true);
+        }
+
         // Create temporary directory for PDFs
-        $tempDir = storage_path('app/temp/payslips_'.time());
+        $tempDir = $tempBase.'/payslips_'.time().'_'.uniqid();
         if (!file_exists($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
         $files = [];
+        $errors = [];
 
         try {
             // Generate all payslips
             foreach ($lines as $line) {
-                $data = [
-                    'payrollRunLine' => $line,
-                    'payrollRun' => $payrollRun,
-                    'employee' => $line->employee,
-                    'company' => $line->employee->company,
-                    'periodName' => $payrollRun->period_name,
-                    'generatedAt' => now()->format('d.m.Y H:i'),
-                ];
+                try {
+                    // Skip employees without required data
+                    if (!$line->employee) {
+                        $errors[] = "Line {$line->id}: No employee data";
+                        continue;
+                    }
 
-                $pdf = Pdf::loadView('app.pdf.payroll.payslip-mk', $data);
-                $pdf->setPaper('A4', 'portrait');
+                    $data = [
+                        'payrollRunLine' => $line,
+                        'payrollRun' => $payrollRun,
+                        'employee' => $line->employee,
+                        'company' => $line->employee->company ?? $payrollRun->company,
+                        'periodName' => $payrollRun->period_name ?? "{$payrollRun->period_month}/{$payrollRun->period_year}",
+                        'generatedAt' => now()->format('d.m.Y H:i'),
+                    ];
 
-                $filename = sprintf(
-                    'payslip_%s_%s_%s.pdf',
-                    $line->employee->employee_number,
-                    $payrollRun->period_year,
-                    str_pad($payrollRun->period_month, 2, '0', STR_PAD_LEFT)
-                );
+                    $pdf = Pdf::loadView('app.pdf.payroll.payslip-mk', $data);
+                    $pdf->setPaper('A4', 'portrait');
 
-                $filepath = $tempDir.'/'.$filename;
-                $pdf->save($filepath);
-                $files[] = $filepath;
+                    $employeeNumber = $line->employee->employee_number ?? $line->employee->id;
+                    $filename = sprintf(
+                        'payslip_%s_%s_%s.pdf',
+                        $employeeNumber,
+                        $payrollRun->period_year,
+                        str_pad($payrollRun->period_month, 2, '0', STR_PAD_LEFT)
+                    );
+
+                    $filepath = $tempDir.'/'.$filename;
+                    $pdf->save($filepath);
+                    $files[] = $filepath;
+                } catch (\Exception $pdfError) {
+                    $errors[] = "Employee {$line->employee_id}: ".$pdfError->getMessage();
+                    \Log::error('Payslip PDF generation failed', [
+                        'employee_id' => $line->employee_id,
+                        'error' => $pdfError->getMessage(),
+                    ]);
+                }
+            }
+
+            if (empty($files)) {
+                throw new \Exception('No payslips could be generated. Errors: '.implode('; ', $errors));
             }
 
             // Create ZIP archive
@@ -174,36 +200,57 @@ class PayslipController extends Controller
                 str_pad($payrollRun->period_month, 2, '0', STR_PAD_LEFT)
             );
 
-            $zipPath = storage_path('app/temp/'.$zipFilename);
+            $zipPath = $tempBase.'/'.$zipFilename;
 
             $zip = new \ZipArchive();
-            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
-                foreach ($files as $file) {
+            $zipResult = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+            if ($zipResult !== true) {
+                throw new \Exception("Failed to create ZIP archive. Error code: {$zipResult}");
+            }
+
+            foreach ($files as $file) {
+                if (file_exists($file)) {
                     $zip->addFile($file, basename($file));
                 }
-                $zip->close();
+            }
+            $zip->close();
+
+            // Verify ZIP was created
+            if (!file_exists($zipPath) || filesize($zipPath) === 0) {
+                throw new \Exception('ZIP file was not created or is empty');
             }
 
             // Clean up individual PDFs
             foreach ($files as $file) {
                 if (file_exists($file)) {
-                    unlink($file);
+                    @unlink($file);
                 }
             }
-            rmdir($tempDir);
+            @rmdir($tempDir);
 
-            // Download and delete ZIP
-            return response()->download($zipPath, $zipFilename)->deleteFileAfterSend(true);
+            // Return download response with proper headers
+            return response()->download($zipPath, $zipFilename, [
+                'Content-Type' => 'application/zip',
+                'Content-Disposition' => 'attachment; filename="'.$zipFilename.'"',
+            ])->deleteFileAfterSend(true);
+
         } catch (\Exception $e) {
             // Clean up on error
             foreach ($files as $file) {
                 if (file_exists($file)) {
-                    unlink($file);
+                    @unlink($file);
                 }
             }
             if (file_exists($tempDir)) {
-                rmdir($tempDir);
+                @rmdir($tempDir);
             }
+
+            \Log::error('Bulk payslip download failed', [
+                'payroll_run_id' => $payrollRunId,
+                'error' => $e->getMessage(),
+                'errors' => $errors,
+            ]);
 
             return response()->json([
                 'error' => 'bulk_download_failed',

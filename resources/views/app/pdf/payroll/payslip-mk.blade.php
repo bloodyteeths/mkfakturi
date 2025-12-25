@@ -162,7 +162,7 @@
             <thead>
                 <tr>
                     <th>Опис</th>
-                    <th class="amount">Износ ({{ $employee->currency->code }})</th>
+                    <th class="amount">Износ ({{ $employee->currency->code ?? 'MKD' }})</th>
                 </tr>
             </thead>
             <tbody>
@@ -245,24 +245,30 @@
             <table style="width: 100%;">
                 <tr>
                     <td class="label">НЕТО ПЛАТА (ЗА ИСПЛАТА):</td>
-                    <td class="amount">{{ number_format($payrollRunLine->net_salary / 100, 2, '.', ',') }} {{ $employee->currency->code }}</td>
+                    <td class="amount">{{ number_format($payrollRunLine->net_salary / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</td>
                 </tr>
             </table>
         </div>
 
         <!-- Additional Information -->
+        @if($employee->bank_name || $employee->bank_account_iban)
         <div class="info-section" style="margin-top: 20px;">
             <div class="info-label">Податоци за исплата:</div>
+            @if($employee->bank_name)
             <div class="info-value">Банка: {{ $employee->bank_name }}</div>
+            @endif
+            @if($employee->bank_account_iban)
             <div class="info-value">IBAN: {{ $employee->bank_account_iban }}</div>
+            @endif
         </div>
+        @endif
 
         <!-- Employer Contributions (Information Only) -->
         <div class="info-section" style="margin-top: 20px; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #3498db;">
             <div class="info-label" style="color: #3498db;">Придонеси на работодавач (Информативно):</div>
-            <div class="info-value">Пензиски фонд (ПИО) - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
-            <div class="info-value">Здравствено осигурување (ЗО) - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
-            <div class="info-value" style="margin-top: 5px; font-weight: bold;">Вкупен трошок на работодавач: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
+            <div class="info-value">Пензиски фонд (ПИО) - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+            <div class="info-value">Здравствено осигурување (ЗО) - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+            <div class="info-value" style="margin-top: 5px; font-weight: bold;">Вкупен трошок на работодавач: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
         </div>
 
         <!-- Footer -->

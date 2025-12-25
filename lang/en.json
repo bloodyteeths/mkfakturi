@@ -3905,6 +3905,7 @@
     "no_lines": "No Payroll Lines",
     "no_lines_description": "Calculate the payroll run to generate payroll lines",
     "calculate": "Calculate",
+    "recalculate": "Recalculate",
     "approve": "Approve",
     "post_to_gl": "Post to GL",
     "post_to_gl_confirm": "Are you sure you want to post this payroll run to the general ledger?",

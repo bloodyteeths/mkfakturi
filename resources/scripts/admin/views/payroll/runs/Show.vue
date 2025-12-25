@@ -82,7 +82,19 @@
         </BaseButton>
 
         <BaseButton
-          v-if="run.status === 'draft' || run.status === 'calculated'"
+          v-if="canRecalculate"
+          variant="warning-outline"
+          class="ml-2"
+          @click="calculatePayroll"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="CalculatorIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('payroll.recalculate') }}
+        </BaseButton>
+
+        <BaseButton
+          v-if="canDelete"
           variant="danger-outline"
           class="ml-2"
           @click="deleteRun"
@@ -259,6 +271,20 @@ const pageTitle = computed(() => {
     return formatPeriod(run.value.period_year, run.value.period_month)
   }
   return t('payroll.payroll_run')
+})
+
+// Can recalculate if draft, calculated, or approved (not posted to GL)
+const canRecalculate = computed(() => {
+  const status = run.value.status
+  const isPosted = run.value.ifrs_transaction_id
+  return status === 'draft' || status === 'calculated' || (status === 'approved' && !isPosted)
+})
+
+// Can delete if not posted to GL and not paid
+const canDelete = computed(() => {
+  const status = run.value.status
+  const isPosted = run.value.ifrs_transaction_id
+  return !isPosted && status !== 'paid' && status !== 'posted'
 })
 
 const linesColumns = computed(() => {

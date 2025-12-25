@@ -161,16 +161,22 @@ class PayrollRunController extends Controller
     }
 
     /**
-     * Calculate payroll run (draft → calculated).
+     * Calculate payroll run (draft/approved → calculated).
+     * Approved runs can be recalculated if not yet posted to GL.
      */
     public function calculate(PayrollRun $payrollRun): JsonResponse
     {
         $this->authorize('update', $payrollRun);
 
-        if (!$payrollRun->canCalculate()) {
+        // Allow draft or approved (if not posted) to be (re)calculated
+        $canRecalculate = $payrollRun->status === PayrollRun::STATUS_DRAFT
+            || $payrollRun->status === PayrollRun::STATUS_CALCULATED
+            || ($payrollRun->status === PayrollRun::STATUS_APPROVED && !$payrollRun->ifrs_transaction_id);
+
+        if (!$canRecalculate) {
             return response()->json([
                 'error' => 'cannot_calculate',
-                'message' => 'Only draft payroll runs can be calculated.',
+                'message' => 'Cannot recalculate: run is posted to GL or already paid.',
             ], 422);
         }
 
@@ -396,18 +402,24 @@ class PayrollRunController extends Controller
     }
 
     /**
-     * Delete payroll run (only draft or calculated).
+     * Delete payroll run (draft, calculated, or approved if not posted to GL).
      */
     public function destroy(PayrollRun $payrollRun): JsonResponse
     {
         $this->authorize('delete', $payrollRun);
 
-        $deletableStatuses = [PayrollRun::STATUS_DRAFT, PayrollRun::STATUS_CALCULATED];
-
-        if (!in_array($payrollRun->status, $deletableStatuses)) {
+        // Cannot delete if posted to GL or marked as paid
+        if ($payrollRun->ifrs_transaction_id) {
             return response()->json([
                 'error' => 'cannot_delete',
-                'message' => 'Only draft or calculated payroll runs can be deleted.',
+                'message' => 'Cannot delete a payroll run that has been posted to the General Ledger.',
+            ], 422);
+        }
+
+        if ($payrollRun->status === PayrollRun::STATUS_PAID) {
+            return response()->json([
+                'error' => 'cannot_delete',
+                'message' => 'Cannot delete a payroll run that has been marked as paid.',
             ], 422);
         }
 
