@@ -207,18 +207,22 @@ class PayrollRunController extends Controller
             // Calculate for each employee
             foreach ($employees as $employee) {
                 // Get gross salary from salary structure or base_salary_amount
+                // Note: base_salary_amount is stored in MKD, needs to be converted to cents
                 $salaryStructure = $employee->currentSalaryStructure;
-                $grossSalary = $salaryStructure
+                $grossSalaryMkd = $salaryStructure
                     ? $salaryStructure->base_salary
                     : $employee->base_salary_amount;
 
-                if (!$grossSalary || $grossSalary <= 0) {
+                if (!$grossSalaryMkd || $grossSalaryMkd <= 0) {
                     continue; // Skip employees without salary
                 }
 
-                // Use the Macedonian tax service to calculate
+                // Convert MKD to cents (multiply by 100)
+                $grossSalaryCents = $grossSalaryMkd * 100;
+
+                // Use the Macedonian tax service to calculate (expects cents)
                 $taxService = app(\Modules\Mk\Payroll\Services\MacedonianPayrollTaxService::class);
-                $calculation = $taxService->calculateFromGross($grossSalary);
+                $calculation = $taxService->calculateFromGross($grossSalaryCents);
 
                 // Calculate working days (simplified: assume full month)
                 $workingDays = 22; // Standard working days per month
