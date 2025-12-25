@@ -6,12 +6,12 @@
         <!-- Account selector -->
         <BaseInputGroup :label="$t('accounting.general_ledger.select_account')" required>
           <BaseMultiselect
-            v-model="filters.account_id"
+            v-model="filters.account_code"
             :options="accounts"
             :searchable="true"
-            track-by="id"
+            track-by="code"
             label="display_name"
-            value-prop="id"
+            value-prop="code"
             :placeholder="$t('accounting.general_ledger.select_account_placeholder')"
           />
         </BaseInputGroup>
@@ -202,25 +202,23 @@ const isExporting = ref(false)
 const hasSearched = ref(false)
 
 const filters = ref({
-  account_id: null,
+  account_code: null,
   start_date: moment().startOf('month').format('YYYY-MM-DD'),
   end_date: moment().endOf('month').format('YYYY-MM-DD'),
 })
 
 const canLoadLedger = computed(() => {
-  return filters.value.account_id && filters.value.start_date && filters.value.end_date
+  return filters.value.account_code && filters.value.start_date && filters.value.end_date
 })
 
 const selectedAccountName = computed(() => {
-  if (!filters.value.account_id) return ''
-  const account = accounts.value.find(a => a.id === filters.value.account_id)
+  if (!filters.value.account_code) return ''
+  const account = accounts.value.find(a => a.code === filters.value.account_code)
   return account ? account.name : ''
 })
 
 const selectedAccountCode = computed(() => {
-  if (!filters.value.account_id) return ''
-  const account = accounts.value.find(a => a.id === filters.value.account_id)
-  return account ? account.code : ''
+  return filters.value.account_code || ''
 })
 
 onMounted(async () => {
@@ -246,7 +244,7 @@ async function loadLedger() {
   try {
     const response = await window.axios.get('/accounting/general-ledger', {
       params: {
-        account_id: filters.value.account_id,
+        account_code: filters.value.account_code,
         start_date: filters.value.start_date,
         end_date: filters.value.end_date,
       },
@@ -269,7 +267,7 @@ async function exportToCsv() {
   try {
     const response = await window.axios.get('/accounting/general-ledger/export', {
       params: {
-        account_id: filters.value.account_id,
+        account_code: filters.value.account_code,
         start_date: filters.value.start_date,
         end_date: filters.value.end_date,
       },

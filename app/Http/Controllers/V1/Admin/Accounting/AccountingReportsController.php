@@ -378,18 +378,20 @@ class AccountingReportsController extends Controller
         // Authorize user can access this company
         $this->authorize('view', $company);
 
-        // Validate parameters
+        // Validate parameters - accept either account_id (IFRS ID) or account_code
         $validated = $request->validate([
-            'account_id' => 'required|integer',
+            'account_id' => 'required_without:account_code|integer',
+            'account_code' => 'required_without:account_id|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         $generalLedger = $this->ifrsAdapter->getGeneralLedger(
             $company,
-            $validated['account_id'],
+            $validated['account_id'] ?? null,
             $validated['start_date'],
-            $validated['end_date']
+            $validated['end_date'],
+            $validated['account_code'] ?? null
         );
 
         if (isset($generalLedger['error'])) {

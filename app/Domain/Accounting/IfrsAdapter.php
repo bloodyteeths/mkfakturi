@@ -1461,12 +1461,13 @@ class IfrsAdapter
      * Get General Ledger for a specific account
      *
      * @param  Company  $company
-     * @param  int  $accountId  IFRS Account ID
+     * @param  int|null  $accountId  IFRS Account ID (optional if accountCode provided)
      * @param  string  $startDate  Date in Y-m-d format
      * @param  string  $endDate  Date in Y-m-d format
+     * @param  string|null  $accountCode  Account code to lookup (optional if accountId provided)
      * @return array
      */
-    public function getGeneralLedger(Company $company, int $accountId, string $startDate, string $endDate): array
+    public function getGeneralLedger(Company $company, ?int $accountId, string $startDate, string $endDate, ?string $accountCode = null): array
     {
         if (! $this->isEnabled($company->id)) {
             return ['error' => 'Accounting backbone feature is disabled'];
@@ -1485,11 +1486,21 @@ class IfrsAdapter
             // Set user's entity context for IFRS EntityScope
             $this->setUserEntityContext($entity);
 
-            // Get the account
-            $account = Account::where('entity_id', $entity->id)->find($accountId);
-            if (! $account) {
-                return ['error' => 'Account not found'];
+            // Get the account by ID or code
+            if ($accountId) {
+                $account = Account::where('entity_id', $entity->id)->find($accountId);
+            } elseif ($accountCode) {
+                $account = Account::where('entity_id', $entity->id)->where('code', $accountCode)->first();
+            } else {
+                return ['error' => 'Account ID or code is required'];
             }
+
+            if (! $account) {
+                return ['error' => 'Account not found in IFRS ledger. This account may not have any transactions yet.'];
+            }
+
+            // Use the found account's ID for subsequent queries
+            $accountId = $account->id;
 
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
@@ -1639,9 +1650,9 @@ class IfrsAdapter
                         'is_posted' => true, // All transactions in ledger are posted
                         'lines' => $lines,
                         'lines_count' => count($lines),
-                        'total_debit' => $totalDebit * 100, // Convert to cents for frontend
-                        'total_credit' => $totalCredit * 100,
-                        'total_amount' => max($totalDebit, $totalCredit) * 100,
+                        'total_debit' => $totalDebit, // Lines already in cents
+                        'total_credit' => $totalCredit,
+                        'total_amount' => max($totalDebit, $totalCredit),
                         'source_type' => null, // TODO: Add if tracking source models
                         'source_link' => null, // TODO: Add if tracking source models
                     ];
