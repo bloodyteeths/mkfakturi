@@ -247,6 +247,19 @@
       "total_debits": "Вкупно должи",
       "total_credits": "Вкупно побарува",
       "view_source_document": "Прегледај изворен документ"
+    },
+    "general_ledger": {
+      "title": "Главна книга",
+      "select_account": "Избери сметка",
+      "select_account_placeholder": "Изберете сметка за преглед...",
+      "opening_balance": "Почетно салдо",
+      "closing_balance": "Завршно салдо",
+      "balance": "Салдо",
+      "document": "Документ",
+      "debit": "Должи",
+      "credit": "Побарува",
+      "no_data": "Нема податоци",
+      "no_data_description": "Нема пронајдено записи за избраната сметка и датумски период."
     }
   },
   "dashboard": {
@@ -824,6 +837,16 @@
     "reorder": "Нарачај",
     "reorder_feature_coming_soon": "Наскоро",
     "reorder_feature_coming_soon_message": "Функцијата за нарачка за {item} ќе биде достапна наскоро. Засега, можете рачно да креирате фактура за набавка.",
+    "scanner_mode": "Режим за баркод скенер",
+    "scanner_listening": "Чекам внос од скенер...",
+    "scanner_mode_hint": "Поврзете баркод скенер и вклучете го овој режим за брзо додавање артикли",
+    "scanner_mode_enabled": "Режимот за баркод скенер е вклучен. Скенирајте артикли за да ги додадете.",
+    "scanner_mode_disabled": "Режимот за баркод скенер е исклучен.",
+    "items_scanned": "скенирани артикли",
+    "last_scanned": "Последен скениран",
+    "barcode_item_found": "Артикл пронајден: {name}",
+    "barcode_not_found": "Баркод не е пронајден: {barcode}",
+    "barcode_lookup_error": "Грешка при пребарување на баркод. Обидете се повторно.",
     "warehouses": "Магацини",
     "new_warehouse": "Нов магацин",
     "edit_warehouse": "Уреди магацин",

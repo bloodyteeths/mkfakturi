@@ -1618,8 +1618,9 @@ class IfrsAdapter
                     $lines[] = [
                         'account_name' => $lineItem->account->name,
                         'account_code' => $lineItem->account->code ?? '',
-                        'debit' => $lineItem->credited ? 0 : $lineItem->amount,
-                        'credit' => $lineItem->credited ? $lineItem->amount : 0,
+                        'debit' => $lineItem->credited ? 0 : (int) ($lineItem->amount * 100),
+                        'credit' => $lineItem->credited ? (int) ($lineItem->amount * 100) : 0,
+                        'description' => $lineItem->narration ?? '',
                     ];
                 }
 

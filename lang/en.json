@@ -194,6 +194,19 @@
       "total_debits": "Total Debits",
       "total_credits": "Total Credits",
       "view_source_document": "View Source Document"
+    },
+    "general_ledger": {
+      "title": "General Ledger",
+      "select_account": "Select Account",
+      "select_account_placeholder": "Choose an account to view",
+      "opening_balance": "Opening Balance",
+      "closing_balance": "Closing Balance",
+      "balance": "Balance",
+      "document": "Document",
+      "debit": "Debit",
+      "credit": "Credit",
+      "no_data": "No Data",
+      "no_data_description": "No ledger entries found for the selected account and date range."
     }
   },
   "dashboard": {
@@ -636,7 +649,17 @@
     "view_item_card": "View Stock Card",
     "reorder": "Create Reorder",
     "reorder_feature_coming_soon": "Coming Soon",
-    "reorder_feature_coming_soon_message": "The reorder feature for {item} will be available soon. For now, you can manually create a bill to replenish stock."
+    "reorder_feature_coming_soon_message": "The reorder feature for {item} will be available soon. For now, you can manually create a bill to replenish stock.",
+    "scanner_mode": "Barcode Scanner Mode",
+    "scanner_listening": "Listening for scanner input...",
+    "scanner_mode_hint": "Connect a barcode scanner and enable this mode to quickly add items",
+    "scanner_mode_enabled": "Barcode scanner mode enabled. Scan items to add them.",
+    "scanner_mode_disabled": "Barcode scanner mode disabled.",
+    "items_scanned": "items scanned",
+    "last_scanned": "Last scanned",
+    "barcode_item_found": "Item found: {name}",
+    "barcode_not_found": "Barcode not found: {barcode}",
+    "barcode_lookup_error": "Error looking up barcode. Please try again."
   },
   "warehouses": {
     "title": "Warehouses",
