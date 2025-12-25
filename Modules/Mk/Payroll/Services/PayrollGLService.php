@@ -67,6 +67,15 @@ class PayrollGLService
             throw new \Exception('Cannot post payroll run to GL: Only approved payroll runs can be posted');
         }
 
+        // Validate payroll run has actual values to post
+        if (!$run->total_gross || $run->total_gross <= 0) {
+            throw new \Exception('Cannot post payroll run to GL: Total gross salary is zero. Please recalculate the payroll run first.');
+        }
+
+        if (!$run->total_net || $run->total_net <= 0) {
+            throw new \Exception('Cannot post payroll run to GL: Total net salary is zero. Please recalculate the payroll run first.');
+        }
+
         try {
             DB::beginTransaction();
 
