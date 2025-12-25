@@ -70,6 +70,18 @@
         </div>
 
         <div class="mt-6">
+          <!-- Barcode Scanner Mode Toggle -->
+          <div class="mb-4">
+            <ScannerModeToggle
+              :is-enabled="scannerEnabled"
+              :is-processing="scannerProcessing"
+              :last-scanned-item="lastScannedItem"
+              :error="scannerError"
+              :scan-count="scanCount"
+              @toggle="toggleScanner"
+            />
+          </div>
+
           <h3 class="text-sm font-medium text-gray-900">
             {{ $t('bills.items') }}
           </h3>
@@ -242,6 +254,8 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
+import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
+import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 
 const route = useRoute()
 const router = useRouter()
@@ -256,6 +270,33 @@ const itemStore = useItemStore()
 const stockEnabled = computed(() => {
   const featureFlags = globalStore.featureFlags || {}
   return featureFlags?.stock?.enabled || featureFlags?.stock || false
+})
+
+// Barcode Scanner Integration
+function handleScannedItem(item) {
+  // Find an empty row or add a new one
+  let targetIndex = items.findIndex(line => !line.item_id && !line.name)
+
+  if (targetIndex === -1) {
+    // No empty row, add a new one
+    addItemRow()
+    targetIndex = items.length - 1
+  }
+
+  // Populate the item row
+  selectItem(targetIndex, item)
+}
+
+const {
+  isEnabled: scannerEnabled,
+  isProcessing: scannerProcessing,
+  lastScannedItem,
+  error: scannerError,
+  scanCount,
+  toggleScanner
+} = useBarcodeScanner({
+  onItemFound: handleScannedItem,
+  playSound: true
 })
 
 const currencies = ref([])

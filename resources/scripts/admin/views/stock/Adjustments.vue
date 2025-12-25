@@ -33,6 +33,18 @@
     <!-- Stock Sub-Navigation Tabs -->
     <StockTabNavigation />
 
+    <!-- Barcode Scanner Mode Toggle -->
+    <div class="mb-4">
+      <ScannerModeToggle
+        :is-enabled="scannerEnabled"
+        :is-processing="scannerProcessing"
+        :last-scanned-item="lastScannedItem"
+        :error="scannerError"
+        :scan-count="scanCount"
+        @toggle="toggleScanner"
+      />
+    </div>
+
       <!-- Tabs for Adjustments / Transfers -->
       <div class="mb-6">
         <nav class="flex space-x-4" aria-label="Tabs">
@@ -412,11 +424,33 @@ import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
+import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
+import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 
 const { t } = useI18n()
 const stockStore = useStockStore()
 const itemStore = useItemStore()
 const dialogStore = useDialogStore()
+
+// Barcode Scanner Integration
+function handleScannedItem(item) {
+  // Pre-fill the adjustment form with the scanned item
+  adjustmentForm.item = item
+  // Open the adjustment modal
+  showAdjustmentModal.value = true
+}
+
+const {
+  isEnabled: scannerEnabled,
+  isProcessing: scannerProcessing,
+  lastScannedItem,
+  error: scannerError,
+  scanCount,
+  toggleScanner
+} = useBarcodeScanner({
+  onItemFound: handleScannedItem,
+  playSound: true
+})
 
 const activeTab = ref('adjustments')
 const adjustments = ref([])

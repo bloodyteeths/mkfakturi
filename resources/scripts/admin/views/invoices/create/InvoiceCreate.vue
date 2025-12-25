@@ -75,6 +75,18 @@
       />
 
       <BaseScrollPane>
+        <!-- Barcode Scanner Mode Toggle -->
+        <div class="px-6 mb-4">
+          <ScannerModeToggle
+            :is-enabled="scannerEnabled"
+            :is-processing="scannerProcessing"
+            :last-scanned-item="lastScannedItem"
+            :error="scannerError"
+            :scan-count="scanCount"
+            @toggle="toggleScanner"
+          />
+        </div>
+
         <!-- Invoice Items -->
         <InvoiceItems
           :currency="invoiceStore.newInvoice.selectedCurrency"
@@ -165,6 +177,10 @@ import SelectTemplateModal from '@/scripts/admin/components/modal-components/Sel
 import TaxTypeModal from '@/scripts/admin/components/modal-components/TaxTypeModal.vue'
 import ItemModal from '@/scripts/admin/components/modal-components/ItemModal.vue'
 import SalesTax from '@/scripts/admin/components/estimate-invoice-common/SalesTax.vue'
+import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
+import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
+import Guid from 'guid'
+import TaxStub from '@/scripts/admin/stub/tax'
 
 const invoiceStore = useInvoiceStore()
 const companyStore = useCompanyStore()
@@ -179,6 +195,68 @@ let router = useRouter()
 const invoiceValidationScope = 'newInvoice'
 let isSaving = ref(false)
 const isMarkAsDefault = ref(false)
+
+// Barcode Scanner Integration
+function handleScannedItem(item) {
+  // Add scanned item to invoice
+  const newItem = {
+    id: Guid.raw(),
+    item_id: item.id,
+    name: item.name,
+    description: item.description || '',
+    quantity: 1,
+    price: item.price,
+    discount_type: 'fixed',
+    discount_val: 0,
+    discount: 0,
+    total: item.price,
+    totalTax: 0,
+    totalSimpleTax: 0,
+    totalCompoundTax: 0,
+    tax: 0,
+    taxes: item.taxes?.length > 0
+      ? item.taxes.map(tax => ({ ...tax, id: Guid.raw() }))
+      : [{ ...TaxStub, id: Guid.raw() }],
+    sku: item.sku || '',
+    barcode: item.barcode || '',
+    track_quantity: item.track_quantity || false,
+    unit_name: item.unit?.name || '',
+    warehouse_id: null
+  }
+
+  invoiceStore.$patch((state) => {
+    // Check if an empty item row exists at the end
+    const items = state.newInvoice.items
+    const lastItem = items[items.length - 1]
+
+    if (lastItem && !lastItem.item_id && !lastItem.name) {
+      // Replace empty item
+      items[items.length - 1] = newItem
+    } else {
+      // Add new item
+      items.push(newItem)
+    }
+  })
+
+  // Refresh totals
+  invoiceStore.updateItem({
+    ...newItem,
+    index: invoiceStore.newInvoice.items.length - 1,
+    sub_total: newItem.price * newItem.quantity
+  })
+}
+
+const {
+  isEnabled: scannerEnabled,
+  isProcessing: scannerProcessing,
+  lastScannedItem,
+  error: scannerError,
+  scanCount,
+  toggleScanner
+} = useBarcodeScanner({
+  onItemFound: handleScannedItem,
+  playSound: true
+})
 
 const invoiceNoteFieldList = ref([
   'customer',
