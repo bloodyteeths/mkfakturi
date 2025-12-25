@@ -200,47 +200,52 @@ class PayrollRunController extends Controller
 
             // Calculate for each employee
             foreach ($employees as $employee) {
+                // Get gross salary from salary structure or base_salary_amount
                 $salaryStructure = $employee->currentSalaryStructure;
+                $grossSalary = $salaryStructure
+                    ? $salaryStructure->base_salary
+                    : $employee->base_salary_amount;
 
-                if (!$salaryStructure) {
-                    continue; // Skip employees without salary structure
+                if (!$grossSalary || $grossSalary <= 0) {
+                    continue; // Skip employees without salary
                 }
 
-                // Use the service to calculate
-                $calculation = $this->calculationService->calculateEmployeePayroll(
-                    $salaryStructure,
-                    $payrollRun->period_start,
-                    $payrollRun->period_end
-                );
+                // Use the Macedonian tax service to calculate
+                $taxService = app(\Modules\Mk\Payroll\Services\MacedonianPayrollTaxService::class);
+                $calculation = $taxService->calculateFromGross($grossSalary);
+
+                // Calculate working days (simplified: assume full month)
+                $workingDays = 22; // Standard working days per month
+                $workedDays = 22;
 
                 // Create payroll line
                 PayrollRunLine::create([
                     'payroll_run_id' => $payrollRun->id,
                     'employee_id' => $employee->id,
-                    'working_days' => $calculation['working_days'],
-                    'worked_days' => $calculation['worked_days'],
-                    'gross_salary' => $calculation['gross_salary'],
-                    'net_salary' => $calculation['net_salary'],
-                    'income_tax_amount' => $calculation['income_tax'],
-                    'pension_contribution_employee' => $calculation['pension_employee'],
-                    'pension_contribution_employer' => $calculation['pension_employer'],
-                    'health_contribution_employee' => $calculation['health_employee'],
-                    'health_contribution_employer' => $calculation['health_employer'],
-                    'unemployment_contribution' => $calculation['unemployment'],
-                    'additional_contribution' => $calculation['additional_contribution'],
-                    'transport_allowance' => $calculation['transport_allowance'],
-                    'meal_allowance' => $calculation['meal_allowance'],
-                    'other_additions' => $calculation['other_additions'] ?? [],
-                    'deductions' => $calculation['deductions'] ?? [],
+                    'working_days' => $workingDays,
+                    'worked_days' => $workedDays,
+                    'gross_salary' => $calculation->grossSalary,
+                    'net_salary' => $calculation->netSalary,
+                    'income_tax_amount' => $calculation->incomeTax,
+                    'pension_contribution_employee' => $calculation->pensionEmployee,
+                    'pension_contribution_employer' => $calculation->pensionEmployer,
+                    'health_contribution_employee' => $calculation->healthEmployee,
+                    'health_contribution_employer' => $calculation->healthEmployer,
+                    'unemployment_contribution' => $calculation->unemployment,
+                    'additional_contribution' => $calculation->additionalContribution,
+                    'transport_allowance' => 0,
+                    'meal_allowance' => 0,
+                    'other_additions' => [],
+                    'deductions' => [],
                     'status' => 'included',
                 ]);
 
-                $totalGross += $calculation['gross_salary'];
-                $totalNet += $calculation['net_salary'];
-                $totalEmployerTax += $calculation['pension_employer'] + $calculation['health_employer'];
-                $totalEmployeeTax += $calculation['pension_employee'] + $calculation['health_employee']
-                    + $calculation['unemployment'] + $calculation['additional_contribution']
-                    + $calculation['income_tax'];
+                $totalGross += $calculation->grossSalary;
+                $totalNet += $calculation->netSalary;
+                $totalEmployerTax += $calculation->pensionEmployer + $calculation->healthEmployer;
+                $totalEmployeeTax += $calculation->pensionEmployee + $calculation->healthEmployee
+                    + $calculation->unemployment + $calculation->additionalContribution
+                    + $calculation->incomeTax;
             }
 
             // Update totals and status
