@@ -163,14 +163,22 @@ export function useBarcodeScanner(options = {}) {
   function enableScanner() {
     if (isEnabled.value) return
 
-    initAudio()
-    barcodeDetector.listen(handleBarcodeScan)
-    isEnabled.value = true
+    try {
+      initAudio()
+      barcodeDetector.listen(handleBarcodeScan)
+      isEnabled.value = true
 
-    notificationStore.showNotification({
-      type: 'info',
-      message: t('stock.scanner_mode_enabled')
-    })
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('stock.scanner_mode_enabled')
+      })
+    } catch (err) {
+      console.error('Failed to enable barcode scanner:', err)
+      notificationStore.showNotification({
+        type: 'error',
+        message: 'Failed to enable scanner: ' + (err.message || 'Unknown error')
+      })
+    }
   }
 
   // Disable scanner mode
@@ -188,11 +196,15 @@ export function useBarcodeScanner(options = {}) {
 
   // Toggle scanner mode
   function toggleScanner() {
+    console.log('[BarcodeScanner] Toggle called, isEnabled:', isEnabled.value)
     if (isEnabled.value) {
+      console.log('[BarcodeScanner] Disabling scanner...')
       disableScanner()
     } else {
+      console.log('[BarcodeScanner] Enabling scanner...')
       enableScanner()
     }
+    console.log('[BarcodeScanner] After toggle, isEnabled:', isEnabled.value)
   }
 
   // Reset state
