@@ -113,6 +113,46 @@ class PayslipController extends Controller
     }
 
     /**
+     * Download a generated ZIP file using token.
+     * This endpoint serves the file directly to the browser.
+     */
+    public function downloadZip(Request $request, string $token)
+    {
+        // Validate token from cache
+        $downloadInfo = \Cache::get('payslip_download_' . $token);
+
+        if (!$downloadInfo) {
+            return response()->json([
+                'error' => 'expired',
+                'message' => 'Download link has expired. Please generate a new one.',
+            ], 404);
+        }
+
+        $filePath = storage_path('app/' . $downloadInfo['path']);
+
+        if (!file_exists($filePath)) {
+            \Cache::forget('payslip_download_' . $token);
+            return response()->json([
+                'error' => 'not_found',
+                'message' => 'File not found. Please generate a new download.',
+            ], 404);
+        }
+
+        // Delete cache entry (one-time download)
+        \Cache::forget('payslip_download_' . $token);
+
+        // Use Laravel's download response - most reliable for binary files
+        return response()->download(
+            $filePath,
+            $downloadInfo['filename'],
+            [
+                'Content-Type' => 'application/zip',
+                'Content-Length' => filesize($filePath),
+            ]
+        )->deleteFileAfterSend(true);
+    }
+
+    /**
      * Bulk download payslips for a payroll run (ZIP).
      */
     public function bulkDownload(Request $request, int $payrollRunId)
@@ -230,7 +270,7 @@ class PayslipController extends Controller
             }
             @rmdir($tempDir);
 
-            // Get the actual file size for Content-Length header
+            // Get the actual file size
             clearstatcache(true, $zipPath);
             $zipSize = filesize($zipPath);
 
@@ -241,42 +281,25 @@ class PayslipController extends Controller
                 'file_count' => count($files),
             ]);
 
-            // Store in public storage for reliable download
-            $storagePath = 'payslips/' . $zipFilename;
+            // Store in local storage with unique token for secure download
+            $token = bin2hex(random_bytes(16));
+            $storagePath = 'payslips/' . $token . '_' . $zipFilename;
             \Storage::disk('local')->put($storagePath, file_get_contents($zipPath));
             @unlink($zipPath);
 
-            // Get the stored file path
-            $storedFilePath = storage_path('app/' . $storagePath);
+            // Store token in cache for validation (expires in 5 minutes)
+            \Cache::put('payslip_download_' . $token, [
+                'path' => $storagePath,
+                'filename' => $zipFilename,
+                'size' => $zipSize,
+            ], now()->addMinutes(5));
 
-            // Use StreamedResponse with explicit chunked reading
-            // This avoids buffer issues with large files
-            return response()->streamDownload(function () use ($storedFilePath) {
-                // Disable output buffering for clean streaming
-                if (ob_get_level()) {
-                    ob_end_clean();
-                }
-
-                $handle = fopen($storedFilePath, 'rb');
-                if ($handle === false) {
-                    return;
-                }
-
-                // Read and output in 8KB chunks
-                while (!feof($handle)) {
-                    echo fread($handle, 8192);
-                    flush();
-                }
-
-                fclose($handle);
-
-                // Clean up stored file after sending
-                @unlink($storedFilePath);
-            }, $zipFilename, [
-                'Content-Type' => 'application/zip',
-                'Content-Length' => \Storage::disk('local')->size($storagePath),
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
+            // Return JSON with download token - frontend will call download endpoint
+            return response()->json([
+                'success' => true,
+                'download_token' => $token,
+                'filename' => $zipFilename,
+                'size' => $zipSize,
             ]);
 
         } catch (\Exception $e) {

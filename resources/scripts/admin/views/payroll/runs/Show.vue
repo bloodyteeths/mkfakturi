@@ -583,50 +583,26 @@ async function downloadPayslip(lineId) {
 
 async function downloadAllPayslips() {
   try {
-    const response = await axios.get(
-      `payslips/bulk/${run.value.id}`,
-      {
-        responseType: 'arraybuffer',
-        headers: {
-          'Accept': 'application/zip'
-        }
-      }
-    )
+    // Step 1: Generate ZIP and get download token
+    const response = await axios.get(`payslips/bulk/${run.value.id}`)
 
-    // Create blob with explicit MIME type
-    const blob = new Blob([response.data], { type: 'application/zip' })
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `payslips_${run.value.period_year}_${run.value.period_month}.zip`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
+    if (response.data.success && response.data.download_token) {
+      // Step 2: Redirect to download endpoint - browser handles file download directly
+      // This bypasses Axios completely for the actual file transfer
+      window.location.href = `/api/v1/payslips/download-zip/${response.data.download_token}`
 
-    // Cleanup object URL
-    window.URL.revokeObjectURL(url)
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('payroll.payslips_downloaded'),
-    })
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('payroll.payslips_downloaded'),
+      })
+    } else {
+      throw new Error(response.data.message || 'Failed to generate download')
+    }
   } catch (error) {
     console.error('Error downloading payslips:', error)
-    // Try to extract error message from arraybuffer response
-    let errorMessage = t('general.something_went_wrong')
-    if (error.response?.data) {
-      try {
-        const decoder = new TextDecoder('utf-8')
-        const text = decoder.decode(error.response.data)
-        const json = JSON.parse(text)
-        errorMessage = json.message || errorMessage
-      } catch (e) {
-        // Not JSON, use default message
-      }
-    }
     notificationStore.showNotification({
       type: 'error',
-      message: errorMessage,
+      message: error.response?.data?.message || t('general.something_went_wrong'),
     })
   }
 }

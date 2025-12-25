@@ -442,6 +442,7 @@ Route::prefix('/v1')->group(function () {
             Route::get('/payslips/{payrollRunLine}/download', [PayslipController::class, 'download']);
             Route::get('/payslips/{payrollRunLine}/preview', [PayslipController::class, 'preview']);
             Route::get('/payslips/bulk/{payrollRunId}', [PayslipController::class, 'bulkDownload']);
+            Route::get('/payslips/download-zip/{token}', [PayslipController::class, 'downloadZip']);
 
             // Payroll Reports
             Route::get('/payroll-reports/tax-summary', [PayrollReportController::class, 'taxSummary']);
@@ -463,6 +464,20 @@ Route::prefix('/v1')->group(function () {
                 ->name('exports.download');
 
             Route::delete('/exports/{exportJob}', [\App\Http\Controllers\V1\Admin\ExportController::class, 'destroy']);
+
+            // User Data Exports (GDPR Compliance)
+            // ----------------------------------
+
+            Route::get('/user-data-exports', [\App\Http\Controllers\V1\Admin\Settings\DataExportController::class, 'index']);
+
+            Route::get('/user-data-exports/latest', [\App\Http\Controllers\V1\Admin\Settings\DataExportController::class, 'latest']);
+
+            Route::post('/user-data-exports', [\App\Http\Controllers\V1\Admin\Settings\DataExportController::class, 'store']);
+
+            Route::get('/user-data-exports/{export}/download', [\App\Http\Controllers\V1\Admin\Settings\DataExportController::class, 'download'])
+                ->name('user-data-export.download');
+
+            Route::delete('/user-data-exports/{export}', [\App\Http\Controllers\V1\Admin\Settings\DataExportController::class, 'destroy']);
 
             // Payments
             // ----------------------------------
@@ -733,6 +748,13 @@ Route::prefix('/v1')->group(function () {
 
             Route::prefix('reports')->group(function () {
                 Route::get('/projects', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'index']);
+
+                // Financial Report Exports (CSV/PDF)
+                Route::get('/export/balance-sheet/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'balanceSheet']);
+                Route::get('/export/income-statement/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'incomeStatement']);
+                Route::get('/export/trial-balance/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'trialBalance']);
+                Route::get('/export/tax-summary/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'taxSummary']);
+                Route::get('/export/expenses/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'expenses']);
                 Route::get('/projects/{id}', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'show']);
             });
 
