@@ -172,25 +172,25 @@
                 </tr>
                 <tr>
                     <td>Основна плата (Бруто)</td>
-                    <td class="amount money-format">{{ number_format($payrollRunLine->gross_salary / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">{{ number_format($payrollRunLine->gross_salary, 2, '.', ',') }}</td>
                 </tr>
                 @if($payrollRunLine->transport_allowance > 0)
                 <tr>
                     <td>Надомест за превоз</td>
-                    <td class="amount money-format">{{ number_format($payrollRunLine->transport_allowance / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">{{ number_format($payrollRunLine->transport_allowance, 2, '.', ',') }}</td>
                 </tr>
                 @endif
                 @if($payrollRunLine->meal_allowance > 0)
                 <tr>
                     <td>Надомест за храна</td>
-                    <td class="amount money-format">{{ number_format($payrollRunLine->meal_allowance / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">{{ number_format($payrollRunLine->meal_allowance, 2, '.', ',') }}</td>
                 </tr>
                 @endif
                 @if($payrollRunLine->other_additions && count($payrollRunLine->other_additions) > 0)
                     @foreach($payrollRunLine->other_additions as $addition)
                     <tr>
                         <td>{{ $addition['name'] ?? 'Друг додаток' }}</td>
-                        <td class="amount money-format">{{ number_format(($addition['amount'] ?? 0) / 100, 2, '.', ',') }}</td>
+                        <td class="amount money-format">{{ number_format($addition['amount'] ?? 0, 2, '.', ',') }}</td>
                     </tr>
                     @endforeach
                 @endif
@@ -201,19 +201,19 @@
                 </tr>
                 <tr>
                     <td>Пензиски фонд (ПИО) - 9%</td>
-                    <td class="amount money-format">-{{ number_format($payrollRunLine->pension_contribution_employee / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">-{{ number_format($payrollRunLine->pension_contribution_employee, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
                     <td>Здравствено осигурување (ЗО) - 3.75%</td>
-                    <td class="amount money-format">-{{ number_format($payrollRunLine->health_contribution_employee / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">-{{ number_format($payrollRunLine->health_contribution_employee, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
                     <td>Осигурување од невработеност - 1.2%</td>
-                    <td class="amount money-format">-{{ number_format($payrollRunLine->unemployment_contribution / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">-{{ number_format($payrollRunLine->unemployment_contribution, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
                     <td>Дополнителен придонес - 0.5%</td>
-                    <td class="amount money-format">-{{ number_format($payrollRunLine->additional_contribution / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">-{{ number_format($payrollRunLine->additional_contribution, 2, '.', ',') }}</td>
                 </tr>
 
                 <!-- Tax Section -->
@@ -222,7 +222,7 @@
                 </tr>
                 <tr>
                     <td>Данок на доход - 10%</td>
-                    <td class="amount money-format">-{{ number_format($payrollRunLine->income_tax_amount / 100, 2, '.', ',') }}</td>
+                    <td class="amount money-format">-{{ number_format($payrollRunLine->income_tax_amount, 2, '.', ',') }}</td>
                 </tr>
 
                 @if($payrollRunLine->deductions && count($payrollRunLine->deductions) > 0)
@@ -233,7 +233,7 @@
                     @foreach($payrollRunLine->deductions as $deduction)
                     <tr>
                         <td>{{ $deduction['name'] ?? 'Одбиток' }}</td>
-                        <td class="amount money-format">-{{ number_format(($deduction['amount'] ?? 0) / 100, 2, '.', ',') }}</td>
+                        <td class="amount money-format">-{{ number_format($deduction['amount'] ?? 0, 2, '.', ',') }}</td>
                     </tr>
                     @endforeach
                 @endif
@@ -245,7 +245,7 @@
             <table style="width: 100%;">
                 <tr>
                     <td class="label">НЕТО ПЛАТА (ЗА ИСПЛАТА):</td>
-                    <td class="amount">{{ number_format($payrollRunLine->net_salary / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</td>
+                    <td class="amount">{{ number_format($payrollRunLine->net_salary, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</td>
                 </tr>
             </table>
         </div>
@@ -266,9 +266,9 @@
         <!-- Employer Contributions (Information Only) -->
         <div class="info-section" style="margin-top: 20px; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #3498db;">
             <div class="info-label" style="color: #3498db;">Придонеси на работодавач (Информативно):</div>
-            <div class="info-value">Пензиски фонд (ПИО) - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
-            <div class="info-value">Здравствено осигурување (ЗО) - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
-            <div class="info-value" style="margin-top: 5px; font-weight: bold;">Вкупен трошок на работодавач: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+            <div class="info-value">Пензиски фонд (ПИО) - 9%: {{ number_format($payrollRunLine->pension_contribution_employer, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+            <div class="info-value">Здравствено осигурување (ЗО) - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+            <div class="info-value" style="margin-top: 5px; font-weight: bold;">Вкупен трошок на работодавач: {{ number_format($payrollRunLine->total_employer_cost, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
         </div>
 
         <!-- Footer -->

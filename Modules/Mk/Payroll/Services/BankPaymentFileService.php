@@ -46,7 +46,7 @@ class BankPaymentFileService
 
         // Calculate totals
         $numberOfTransactions = $run->lines->count();
-        $controlSum = $run->total_net / 100; // Convert cents to decimal
+        $controlSum = $run->total_net;
 
         // Start building XML
         $xml = new \DOMDocument('1.0', 'UTF-8');
@@ -125,7 +125,7 @@ class BankPaymentFileService
         // Credit Transfer Transaction Information (one per employee)
         foreach ($run->lines as $line) {
             $employee = $line->employee;
-            $amount = $line->net_salary / 100; // Convert cents to decimal
+            $amount = $line->net_salary;
 
             $cdtTrfTxInf = $xml->createElement('CdtTrfTxInf');
             $pmtInf->appendChild($cdtTrfTxInf);
@@ -253,14 +253,14 @@ class BankPaymentFileService
                 "{$employee->first_name} {$employee->last_name}",
                 $employee->embg,
                 $employee->bank_account_iban,
-                number_format($line->gross_salary / 100, 2, '.', ''),
-                number_format($line->net_salary / 100, 2, '.', ''),
-                number_format($line->income_tax_amount / 100, 2, '.', ''),
-                number_format($line->pension_contribution_employee / 100, 2, '.', ''),
-                number_format($line->health_contribution_employee / 100, 2, '.', ''),
-                number_format($line->unemployment_contribution / 100, 2, '.', ''),
-                number_format($line->additional_contribution / 100, 2, '.', ''),
-                number_format($line->total_deductions / 100, 2, '.', ''),
+                number_format($line->gross_salary, 2, '.', ''),
+                number_format($line->net_salary, 2, '.', ''),
+                number_format($line->income_tax_amount, 2, '.', ''),
+                number_format($line->pension_contribution_employee, 2, '.', ''),
+                number_format($line->health_contribution_employee, 2, '.', ''),
+                number_format($line->unemployment_contribution, 2, '.', ''),
+                number_format($line->additional_contribution, 2, '.', ''),
+                number_format($line->total_deductions, 2, '.', ''),
             ];
         }
 
@@ -325,16 +325,16 @@ class BankPaymentFileService
             ],
             'totals' => [
                 'employee_count' => $run->lines->count(),
-                'total_gross' => $run->total_gross / 100,
-                'total_net' => $run->total_net / 100,
-                'total_employer_tax' => $run->total_employer_tax / 100,
+                'total_gross' => $run->total_gross,
+                'total_net' => $run->total_net,
+                'total_employer_tax' => $run->total_employer_tax,
             ],
             'employees' => $run->lines->map(function ($line) {
                 return [
                     'id' => $line->employee->id,
                     'name' => "{$line->employee->first_name} {$line->employee->last_name}",
                     'iban' => $line->employee->bank_account_iban ?? '',
-                    'net_salary' => $line->net_salary / 100,
+                    'net_salary' => $line->net_salary,
                 ];
             })->toArray(),
         ];
