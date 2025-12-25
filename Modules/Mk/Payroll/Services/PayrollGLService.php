@@ -108,7 +108,8 @@ class PayrollGLService
             ]);
 
             // DEBIT: Employer Contributions (pension + health)
-            $employerContributions = $run->total_employer_cost - $run->total_gross;
+            // Use total_employer_tax which is set by the controller
+            $employerContributions = $run->total_employer_tax ?? 0;
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $employerContributionAccount->id,
@@ -129,7 +130,8 @@ class PayrollGLService
             ]);
 
             // CREDIT: Tax & Contribution Liabilities (employee deductions + employer contributions)
-            $totalLiabilities = ($run->total_gross - $run->total_net) + $employerContributions;
+            $employeeDeductions = $run->total_employee_tax ?? 0;
+            $totalLiabilities = $employeeDeductions + $employerContributions;
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $taxLiabilityAccount->id,
@@ -243,8 +245,9 @@ class PayrollGLService
      */
     public function getJournalPreview($run): array
     {
-        $employerContributions = $run->total_employer_cost - $run->total_gross;
-        $totalLiabilities = ($run->total_gross - $run->total_net) + $employerContributions;
+        $employerContributions = $run->total_employer_tax ?? 0;
+        $employeeDeductions = $run->total_employee_tax ?? 0;
+        $totalLiabilities = $employeeDeductions + $employerContributions;
 
         return [
             'narration' => "Payroll Run #{$run->id}",
