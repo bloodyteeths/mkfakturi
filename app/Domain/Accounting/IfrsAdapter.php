@@ -1508,7 +1508,7 @@ class IfrsAdapter
             // Calculate opening balance (all ledger entries before start date)
             $openingBalance = DB::table('ifrs_ledgers')
                 ->where('entity_id', $entity->id)
-                ->where('post_account_id', $accountId)
+                ->where('post_account', $accountId)
                 ->where('posting_date', '<', $start->toDateString())
                 ->selectRaw('
                     SUM(CASE WHEN entry_type = ? THEN amount ELSE 0 END) -
@@ -1520,7 +1520,7 @@ class IfrsAdapter
             $entries = DB::table('ifrs_ledgers as l')
                 ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
                 ->where('l.entity_id', $entity->id)
-                ->where('l.post_account_id', $accountId)
+                ->where('l.post_account', $accountId)
                 ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
                 ->select([
                     'l.posting_date as date',
