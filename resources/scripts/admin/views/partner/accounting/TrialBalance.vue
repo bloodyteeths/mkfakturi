@@ -3,10 +3,11 @@
     <BasePageHeader :title="$t('partner.accounting.trial_balance')">
       <template #actions>
         <BaseButton
-          v-if="trialBalanceData"
+          v-if="trialBalanceData && trialBalanceData.accounts && trialBalanceData.accounts.length > 0"
           variant="primary-outline"
           :loading="isExporting"
           @click="exportToCsv"
+          :aria-label="$t('general.export')"
         >
           <template #left="slotProps">
             <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
@@ -28,6 +29,7 @@
           value-prop="id"
           :placeholder="$t('partner.select_company_placeholder')"
           @update:model-value="onCompanyChange"
+          aria-label="Select company"
         />
       </BaseInputGroup>
     </div>
@@ -41,6 +43,7 @@
             v-model="filters.as_of_date"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
+            aria-label="As of date"
           />
         </BaseInputGroup>
 
@@ -61,9 +64,20 @@
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <BaseSpinner />
+    <!-- Loading state with skeleton -->
+    <div v-if="isLoading" class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 animate-pulse">
+        <div class="h-6 bg-gray-200 rounded w-48"></div>
+        <div class="h-4 bg-gray-200 rounded w-32 mt-2"></div>
+      </div>
+      <div class="p-6 space-y-4">
+        <div v-for="i in 8" :key="i" class="flex space-x-4 animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-20"></div>
+          <div class="h-4 bg-gray-200 rounded flex-1"></div>
+          <div class="h-4 bg-gray-200 rounded w-24"></div>
+          <div class="h-4 bg-gray-200 rounded w-24"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Trial Balance Table -->
@@ -84,19 +98,19 @@
 
       <!-- Trial Balance table -->
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="min-w-full divide-y divide-gray-200" role="table" aria-label="Trial Balance">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('settings.accounts.code') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('settings.accounts.name') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('reports.accounting.general_ledger.debit') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('reports.accounting.general_ledger.credit') }}
               </th>
             </tr>
@@ -104,10 +118,10 @@
           <tbody class="divide-y divide-gray-200 bg-white">
             <tr v-for="(account, index) in trialBalanceData.accounts" :key="index">
               <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                {{ account.code }}
+                {{ account.code || '-' }}
               </td>
               <td class="px-6 py-4 text-sm text-gray-900">
-                {{ account.name }}
+                {{ account.name || '-' }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-right text-gray-900">
                 {{ account.debit > 0 ? formatMoney(account.debit) : '' }}
@@ -147,15 +161,15 @@
             </span>
           </div>
           <div v-if="!isBalanced" class="text-sm text-red-600">
-            {{ $t('reports.accounting.trial_balance.difference') }}: {{ formatMoney(Math.abs(trialBalanceData.total_debit - trialBalanceData.total_credit)) }}
+            {{ $t('reports.accounting.trial_balance.difference') }}: {{ formatMoney(balanceDifference) }}
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Empty State - No Data -->
+    <!-- Empty State - No Data after search -->
     <div
-      v-else-if="hasSearched && !trialBalanceData"
+      v-else-if="hasSearched && (!trialBalanceData || !trialBalanceData.accounts || trialBalanceData.accounts.length === 0)"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
       <BaseIcon name="DocumentTextIcon" class="mx-auto h-12 w-12 text-gray-400" />
@@ -164,6 +178,20 @@
       </h3>
       <p class="mt-1 text-sm text-gray-500">
         {{ $t('reports.accounting.trial_balance.no_data_description') }}
+      </p>
+    </div>
+
+    <!-- Initial State - Has company but no search yet -->
+    <div
+      v-else-if="selectedCompanyId && !hasSearched"
+      class="bg-white rounded-lg shadow p-12 text-center"
+    >
+      <BaseIcon name="MagnifyingGlassIcon" class="mx-auto h-12 w-12 text-gray-400" />
+      <h3 class="mt-2 text-sm font-medium text-gray-900">
+        {{ $t('reports.accounting.trial_balance.select_and_load') }}
+      </h3>
+      <p class="mt-1 text-sm text-gray-500">
+        {{ $t('reports.accounting.trial_balance.select_and_load_description') }}
       </p>
     </div>
 
@@ -181,11 +209,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
-import moment from 'moment'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import { debounce } from 'lodash'
 
+const { t } = useI18n()
 const consoleStore = useConsoleStore()
+const notificationStore = useNotificationStore()
 
 // State
 const selectedCompanyId = ref(null)
@@ -194,8 +226,19 @@ const isLoading = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
 
+// AbortController for cancelling requests
+let abortController = null
+
+// Get current date in local timezone as YYYY-MM-DD
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const filters = ref({
-  as_of_date: moment().format('YYYY-MM-DD'),
+  as_of_date: getLocalDateString(),
 })
 
 // Computed
@@ -211,24 +254,50 @@ const selectedCompanyCurrency = computed(() => {
 
 const isBalanced = computed(() => {
   if (!trialBalanceData.value) return true
-  return trialBalanceData.value.total_debit === trialBalanceData.value.total_credit
+  const debit = trialBalanceData.value.total_debit || 0
+  const credit = trialBalanceData.value.total_credit || 0
+  return debit === credit
+})
+
+const balanceDifference = computed(() => {
+  if (!trialBalanceData.value) return 0
+  const debit = trialBalanceData.value.total_debit || 0
+  const credit = trialBalanceData.value.total_credit || 0
+  return Math.abs(debit - credit)
 })
 
 // Lifecycle
 onMounted(async () => {
-  await consoleStore.fetchCompanies()
+  try {
+    await consoleStore.fetchCompanies()
 
-  // Auto-select first company if available
-  if (companies.value.length > 0) {
-    selectedCompanyId.value = companies.value[0].id
+    // Auto-select first company if available
+    if (companies.value.length > 0) {
+      selectedCompanyId.value = companies.value[0].id
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_companies'),
+    })
   }
 })
 
-// Watch for company changes
-watch(selectedCompanyId, () => {
-  // Reset data when company changes
+onUnmounted(() => {
+  // Cancel any pending requests on unmount
+  if (abortController) {
+    abortController.abort()
+  }
+})
+
+// Watch for company changes - debounced
+const debouncedReset = debounce(() => {
   trialBalanceData.value = null
   hasSearched.value = false
+}, 300)
+
+watch(selectedCompanyId, () => {
+  debouncedReset()
 })
 
 // Methods
@@ -240,6 +309,12 @@ function onCompanyChange() {
 async function loadTrialBalance() {
   if (!selectedCompanyId.value) return
 
+  // Cancel previous request if still pending
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
   isLoading.value = true
   hasSearched.value = true
   trialBalanceData.value = null
@@ -249,11 +324,21 @@ async function loadTrialBalance() {
       params: {
         as_of_date: filters.value.as_of_date,
       },
+      signal: abortController.signal,
     })
 
-    trialBalanceData.value = response.data.trial_balance
+    trialBalanceData.value = response.data?.trial_balance || null
   } catch (error) {
-    console.error('Failed to load trial balance:', error)
+    // Don't show error for cancelled requests
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      return
+    }
+
+    const errorMessage = error.response?.data?.message || t('errors.failed_to_load_data')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
     trialBalanceData.value = null
   } finally {
     isLoading.value = false
@@ -261,30 +346,35 @@ async function loadTrialBalance() {
 }
 
 async function exportToCsv() {
-  if (!trialBalanceData.value || !selectedCompanyId.value) return
+  if (!trialBalanceData.value?.accounts || !selectedCompanyId.value) return
 
   isExporting.value = true
 
   try {
-    // Create CSV content
-    const headers = ['Code', 'Account Name', 'Debit', 'Credit']
+    // Create CSV content with localized headers
+    const headers = [
+      t('settings.accounts.code'),
+      t('settings.accounts.name'),
+      t('reports.accounting.general_ledger.debit'),
+      t('reports.accounting.general_ledger.credit'),
+    ]
     const rows = trialBalanceData.value.accounts.map(account => [
-      account.code,
-      account.name,
+      account.code || '',
+      account.name || '',
       account.debit || 0,
       account.credit || 0,
     ])
 
     // Add totals row
-    rows.push(['', 'TOTAL', trialBalanceData.value.total_debit, trialBalanceData.value.total_credit])
+    rows.push(['', t('general.total'), trialBalanceData.value.total_debit || 0, trialBalanceData.value.total_credit || 0])
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
     ].join('\n')
 
-    // Create download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    // Create download with BOM for Excel compatibility
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -295,8 +385,16 @@ async function exportToCsv() {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('general.export_success'),
+    })
   } catch (error) {
-    console.error('Failed to export trial balance:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.export_failed'),
+    })
   } finally {
     isExporting.value = false
   }
@@ -304,20 +402,35 @@ async function exportToCsv() {
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
-  return moment(dateStr).format('DD MMM YYYY')
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+  } catch {
+    return '-'
+  }
 }
 
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
 
-  const absAmount = Math.abs(amount)
-  const formatted = new Intl.NumberFormat('mk-MK', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(absAmount / 100)
+  try {
+    const absAmount = Math.abs(amount)
+    const formatted = new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(absAmount / 100)
 
-  const sign = amount < 0 ? '-' : ''
-  return `${sign}${formatted} ${selectedCompanyCurrency.value}`
+    const sign = amount < 0 ? '-' : ''
+    return `${sign}${formatted} ${selectedCompanyCurrency.value}`
+  } catch {
+    return '-'
+  }
 }
 </script>
 

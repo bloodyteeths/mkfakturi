@@ -1,13 +1,24 @@
 <template>
-  <div class="flex items-center p-4 bg-white rounded-lg shadow-xs">
-    <div class="p-3 mr-4 rounded-full" :class="colorClasses">
+  <div
+    class="flex items-center p-4 bg-white rounded-lg shadow-xs"
+    role="listitem"
+    :aria-label="ariaLabel"
+  >
+    <div
+      class="p-3 mr-4 rounded-full"
+      :class="colorClasses"
+      aria-hidden="true"
+    >
       <component :is="iconComponent" class="w-5 h-5" />
     </div>
     <div>
-      <p class="mb-2 text-sm font-medium text-gray-600">
+      <p class="mb-2 text-sm font-medium text-gray-600" :id="titleId">
         {{ title }}
       </p>
-      <p class="text-lg font-semibold text-gray-700">
+      <p
+        class="text-lg font-semibold text-gray-700"
+        :aria-labelledby="titleId"
+      >
         {{ value }}
       </p>
     </div>
@@ -40,6 +51,15 @@ const props = defineProps({
   }
 })
 
+// Generate unique ID for accessibility
+const titleId = computed(() => {
+  return 'stat-title-' + props.title.toLowerCase().replace(/\s+/g, '-')
+})
+
+const ariaLabel = computed(() => {
+  return `${props.title}: ${props.value}`
+})
+
 const iconComponent = computed(() => {
   const components = {
     CustomerIcon,
@@ -60,3 +80,5 @@ const colorClasses = computed(() => {
   return colorMap[props.color] || 'text-blue-500 bg-blue-100'
 })
 </script>
+
+// CLAUDE-CHECKPOINT

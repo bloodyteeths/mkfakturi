@@ -6,6 +6,7 @@
           variant="primary-outline"
           @click="showCloseForm = !showCloseForm"
           :disabled="!selectedCompanyId"
+          :aria-label="$t('settings.period_lock.close_day')"
         >
           <template #left="slotProps">
             <BaseIcon :class="slotProps.class" name="LockClosedIcon" />
@@ -27,6 +28,7 @@
           value-prop="id"
           :placeholder="$t('partner.select_company_placeholder')"
           @update:model-value="onCompanyChange"
+          aria-label="Select company"
         />
       </BaseInputGroup>
     </div>
@@ -46,6 +48,7 @@
             v-model="closeForm.date"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
+            aria-label="Select closing date"
           />
         </BaseInputGroup>
 
@@ -57,6 +60,7 @@
             track-by="value"
             label="label"
             value-prop="value"
+            aria-label="Select closing type"
           />
         </BaseInputGroup>
 
@@ -64,6 +68,7 @@
           <BaseInput
             v-model="closeForm.notes"
             :placeholder="$t('settings.period_lock.notes_placeholder')"
+            aria-label="Closing notes"
           />
         </BaseInputGroup>
       </div>
@@ -82,50 +87,67 @@
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <BaseSpinner />
-    </div>
-
     <!-- Daily Closings Table -->
     <BaseTable
-      v-else-if="selectedCompanyId"
+      v-if="selectedCompanyId"
       ref="table"
       class="mt-6"
       :show-filter="false"
       :data="fetchData"
       :columns="closingColumns"
     >
+      <!-- Empty state slot -->
+      <template #empty>
+        <div class="flex flex-col items-center justify-center py-12">
+          <BaseIcon name="LockClosedIcon" class="h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">
+            {{ $t('settings.period_lock.no_closings') }}
+          </h3>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ $t('settings.period_lock.no_closings_description') }}
+          </p>
+        </div>
+      </template>
+
       <template #cell-date="{ row }">
         <span class="font-medium text-gray-900">
-          {{ formatDate(row.data.date) }}
+          {{ formatDate(row.data?.date) }}
         </span>
       </template>
 
       <template #cell-type="{ row }">
         <BaseBadge
+          v-if="row.data?.type"
           :bg-color="getTypeBadgeColor(row.data.type)"
           :text-color="getTypeTextColor(row.data.type)"
         >
           {{ $t(`settings.period_lock.type_${row.data.type}`) }}
         </BaseBadge>
+        <span v-else class="text-gray-400">-</span>
       </template>
 
       <template #cell-closed_by="{ row }">
-        <span v-if="row.data.closed_by">
+        <span v-if="row.data?.closed_by?.name">
           {{ row.data.closed_by.name }}
         </span>
         <span v-else class="text-gray-400">-</span>
       </template>
 
       <template #cell-closed_at="{ row }">
-        {{ formatDateTime(row.data.closed_at) }}
+        {{ formatDateTime(row.data?.closed_at) }}
+      </template>
+
+      <template #cell-notes="{ row }">
+        <span v-if="row.data?.notes" class="text-gray-500">
+          {{ row.data.notes }}
+        </span>
+        <span v-else class="text-gray-400">-</span>
       </template>
 
       <template #cell-actions="{ row }">
         <BaseDropdown>
           <template #activator>
-            <div class="inline-block cursor-pointer">
+            <div class="inline-block cursor-pointer" aria-label="Actions menu">
               <BaseIcon name="EllipsisHorizontalIcon" class="text-gray-500" />
             </div>
           </template>
@@ -152,22 +174,27 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
+import { debounce } from 'lodash'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
 const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 
 // State
 const selectedCompanyId = ref(null)
 const table = ref(null)
 const showCloseForm = ref(false)
 const isSubmitting = ref(false)
-const isLoading = ref(false)
+
+// AbortController for cancelling requests
+let abortController = null
 
 const closeForm = reactive({
   date: new Date().toISOString().split('T')[0],
@@ -223,42 +250,73 @@ const closingColumns = computed(() => [
 
 // Lifecycle
 onMounted(async () => {
-  await consoleStore.fetchCompanies()
+  try {
+    await consoleStore.fetchCompanies()
 
-  // Auto-select first company if available
-  if (companies.value.length > 0) {
-    selectedCompanyId.value = companies.value[0].id
+    // Auto-select first company if available
+    if (companies.value.length > 0) {
+      selectedCompanyId.value = companies.value[0].id
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_companies'),
+    })
   }
 })
 
-// Watch for company changes
-watch(selectedCompanyId, async (newCompanyId) => {
-  if (newCompanyId && table.value) {
+onUnmounted(() => {
+  // Cancel any pending requests on unmount
+  if (abortController) {
+    abortController.abort()
+  }
+})
+
+// Watch for company changes - debounced refresh
+const debouncedRefresh = debounce(() => {
+  if (table.value) {
     table.value.refresh()
+  }
+}, 300)
+
+watch(selectedCompanyId, (newCompanyId) => {
+  if (newCompanyId && table.value) {
+    debouncedRefresh()
   }
 })
 
 // Methods
 function formatDate(dateStr) {
   if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('mk-MK', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+  } catch {
+    return '-'
+  }
 }
 
 function formatDateTime(dateTimeStr) {
   if (!dateTimeStr) return '-'
-  const date = new Date(dateTimeStr)
-  return date.toLocaleString('mk-MK', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  try {
+    const date = new Date(dateTimeStr)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return '-'
+  }
 }
 
 function getTypeBadgeColor(type) {
@@ -287,39 +345,53 @@ function getTypeTextColor(type) {
   }
 }
 
+// CRITICAL FIX: Do NOT set isLoading inside fetchData - this causes infinite loop
+// BaseTable handles its own loading state internally
 async function fetchData({ page, filter, sort }) {
   if (!selectedCompanyId.value) {
     return { data: [], pagination: { totalPages: 1, currentPage: 1 } }
   }
 
-  isLoading.value = true
+  // Cancel previous request if still pending
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
   try {
     const response = await axios.get(`/partner/companies/${selectedCompanyId.value}/daily-closings`, {
       params: {
-        orderByField: sort.fieldName || 'date',
-        orderBy: sort.order || 'desc',
+        orderByField: sort?.fieldName || 'date',
+        orderBy: sort?.order || 'desc',
         page,
       },
+      signal: abortController.signal,
     })
 
     return {
-      data: response.data.data || [],
+      data: response.data?.data || [],
       pagination: {
-        totalPages: 1,
-        currentPage: 1,
+        totalPages: response.data?.meta?.last_page || 1,
+        currentPage: response.data?.meta?.current_page || 1,
       },
     }
   } catch (error) {
-    console.error('Failed to fetch daily closings:', error)
+    // Don't show error for cancelled requests
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      return { data: [], pagination: { totalPages: 1, currentPage: 1 } }
+    }
+
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_data'),
+    })
     return { data: [], pagination: { totalPages: 1, currentPage: 1 } }
-  } finally {
-    isLoading.value = false
   }
 }
 
 function onCompanyChange() {
   if (table.value) {
-    table.value.refresh()
+    debouncedRefresh()
   }
 }
 
@@ -333,6 +405,21 @@ function cancelCloseForm() {
 async function submitCloseDay() {
   if (!selectedCompanyId.value) return
 
+  // Show confirmation dialog
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('settings.period_lock.close_day_confirm', {
+      date: formatDate(closeForm.date),
+    }),
+    yesLabel: t('general.ok'),
+    noLabel: t('general.cancel'),
+    variant: 'primary',
+    hideNoButton: false,
+    size: 'lg',
+  })
+
+  if (!confirmed) return
+
   isSubmitting.value = true
 
   try {
@@ -342,16 +429,29 @@ async function submitCloseDay() {
       notes: closeForm.notes,
     })
 
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('settings.period_lock.close_day_success'),
+    })
+
     cancelCloseForm()
-    table.value && table.value.refresh()
+    if (table.value) {
+      table.value.refresh()
+    }
   } catch (error) {
-    console.error('Failed to create daily closing:', error)
+    const errorMessage = error.response?.data?.message || t('errors.something_went_wrong')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
 }
 
 function onUnlockDay(closing) {
+  if (!closing?.id) return
+
   dialogStore
     .openDialog({
       title: t('general.are_you_sure'),
@@ -368,9 +468,21 @@ function onUnlockDay(closing) {
       if (res) {
         try {
           await axios.delete(`/partner/companies/${selectedCompanyId.value}/daily-closings/${closing.id}`)
-          table.value && table.value.refresh()
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('settings.period_lock.unlock_day_success'),
+          })
+
+          if (table.value) {
+            table.value.refresh()
+          }
         } catch (error) {
-          console.error('Failed to delete daily closing:', error)
+          const errorMessage = error.response?.data?.message || t('errors.something_went_wrong')
+          notificationStore.showNotification({
+            type: 'error',
+            message: errorMessage,
+          })
         }
       }
     })

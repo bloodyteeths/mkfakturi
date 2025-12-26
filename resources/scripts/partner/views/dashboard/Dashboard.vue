@@ -3,10 +3,10 @@
     <BaseAlert
       v-if="partnerStore.isMocked"
       type="warning"
-      :title="'⚠️ Внимание'"
+      :title="$t('partner_dashboard.warning')"
       class="mb-6"
     >
-      {{ partnerStore.mockWarning || 'Гледате симулирани податоци. Обработката на провизии е оневозможена за безбедност.' }}
+      {{ partnerStore.mockWarning || $t('partner_dashboard.mock_data_warning') }}
     </BaseAlert>
 
     <!-- Stripe Connect Status Banner -->
@@ -14,9 +14,11 @@
       v-if="showStripeConnectBanner"
       class="mb-6 rounded-lg p-4 flex items-center justify-between"
       :class="stripeConnectBannerClass"
+      role="alert"
+      :aria-label="stripeConnectMessage"
     >
       <div class="flex items-center gap-3">
-        <div class="flex-shrink-0">
+        <div class="flex-shrink-0" aria-hidden="true">
           <!-- Not connected icon -->
           <svg v-if="!partnerStore.stripeConnect.connected" class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
             <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305z"/>
@@ -44,9 +46,23 @@
         to="/admin/partner/payouts"
         class="px-4 py-2 rounded-lg text-sm font-medium transition"
         :class="stripeConnectButtonClass"
+        :aria-label="stripeConnectButtonText"
       >
         {{ stripeConnectButtonText }}
       </router-link>
+    </div>
+
+    <!-- Loading state for Stripe Connect -->
+    <div
+      v-else-if="partnerStore.stripeConnectLoading"
+      class="mb-6 rounded-lg p-4 bg-gray-50 animate-pulse"
+      role="status"
+      :aria-label="$t('partner_dashboard.loading')"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-6 h-6 bg-gray-200 rounded"></div>
+        <div class="h-5 bg-gray-200 rounded w-64"></div>
+      </div>
     </div>
 
     <DashboardStats />
@@ -55,17 +71,21 @@
 </template>
 
 <script setup>
+import { onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseAlert from '@/scripts/components/base/BaseAlert.vue'
 import DashboardStats from '@/scripts/partner/views/dashboard/DashboardStats.vue'
 import DashboardTable from '@/scripts/partner/views/dashboard/DashboardTable.vue'
 import { usePartnerStore } from '@/scripts/partner/stores/partner'
 import { useUserStore } from '@/scripts/admin/stores/user'
-import { onMounted, computed } from 'vue'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import { useRoute, useRouter } from 'vue-router'
 
+const { t } = useI18n()
 const route = useRoute()
 const partnerStore = usePartnerStore()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
 const router = useRouter()
 
 // Stripe Connect computed properties
@@ -121,34 +141,45 @@ const stripeConnectButtonClass = computed(() => {
 
 const stripeConnectMessage = computed(() => {
   if (!partnerStore.stripeConnect.connected) {
-    return 'Поврзете се со Stripe за да примате автоматски исплати на провизии'
+    return t('partner_dashboard.stripe_connect_not_connected')
   }
   if (partnerStore.stripeConnect.status === 'pending') {
-    return 'Завршете ја Stripe регистрацијата за да почнете да примате исплати'
+    return t('partner_dashboard.stripe_connect_pending')
   }
   if (partnerStore.stripeConnect.status === 'restricted') {
-    return 'Вашата Stripe сметка има ограничувања - потребна е акција'
+    return t('partner_dashboard.stripe_connect_restricted')
   }
   if (partnerStore.stripeConnect.status === 'disabled') {
-    return 'Вашата Stripe сметка е деактивирана - потребна е акција'
+    return t('partner_dashboard.stripe_connect_disabled')
   }
-  return 'Stripe е поврзан и исплатите се активни'
+  return t('partner_dashboard.stripe_connect_active')
 })
 
 const stripeConnectButtonText = computed(() => {
   if (!partnerStore.stripeConnect.connected) {
-    return 'Поврзи се'
+    return t('partner_dashboard.stripe_connect_btn')
   }
   if (partnerStore.stripeConnect.status === 'pending') {
-    return 'Продолжи'
+    return t('partner_dashboard.stripe_continue_btn')
   }
   if (partnerStore.stripeConnect.status === 'restricted' || partnerStore.stripeConnect.status === 'disabled') {
-    return 'Активирај'
+    return t('partner_dashboard.stripe_activate_btn')
   }
-  return 'Прегледај'
+  return t('partner_dashboard.stripe_view_btn')
 })
 
-onMounted(() => {
+const loadStripeStatus = async () => {
+  try {
+    await partnerStore.loadStripeConnectStatus()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner_dashboard.error_loading_stripe_status')
+    })
+  }
+}
+
+onMounted(async () => {
   // Partner-specific authorization logic
   const currentUser = userStore.currentUser
   const isPartner = currentUser?.role === 'partner' ||
@@ -160,9 +191,9 @@ onMounted(() => {
     return
   }
 
-  // Load Stripe Connect status
-  partnerStore.loadStripeConnectStatus()
+  // Load Stripe Connect status with error handling
+  await loadStripeStatus()
 })
 </script>
 
-<!-- CLAUDE-CHECKPOINT -->
+// CLAUDE-CHECKPOINT

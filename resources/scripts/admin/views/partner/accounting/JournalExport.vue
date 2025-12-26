@@ -6,6 +6,7 @@
           v-if="currentStep > 1"
           variant="gray"
           @click="previousStep"
+          :aria-label="$t('general.back')"
         >
           <template #left="slotProps">
             <BaseIcon :class="slotProps.class" name="ChevronLeftIcon" />
@@ -42,8 +43,8 @@
             </div>
 
             <!-- Step Circle -->
-            <a
-              href="#"
+            <button
+              type="button"
               class="relative flex h-8 w-8 items-center justify-center rounded-full"
               :class="[
                 currentStep > index + 1
@@ -52,7 +53,9 @@
                   ? 'border-2 border-primary-600 bg-white'
                   : 'border-2 border-gray-300 bg-white hover:border-gray-400',
               ]"
-              @click.prevent="goToStep(index + 1)"
+              :disabled="!canGoToStep(index + 1)"
+              :aria-label="step.name"
+              @click="goToStep(index + 1)"
             >
               <span
                 v-if="currentStep > index + 1"
@@ -71,7 +74,7 @@
               >
                 {{ index + 1 }}
               </span>
-            </a>
+            </button>
             <span
               class="absolute mt-10 w-max text-xs font-medium"
               :class="[
@@ -104,6 +107,7 @@
               value-prop="id"
               :placeholder="$t('partner.select_company_placeholder')"
               @update:model-value="onCompanyChange"
+              aria-label="Select company"
             />
           </BaseInputGroup>
 
@@ -113,8 +117,9 @@
               <BaseDatePicker
                 v-model="exportForm.start_date"
                 :calendar-button="true"
-                calendar-button-icon="calendar"
+                calendar-button-icon="CalendarDaysIcon"
                 @update:model-value="onDateChange"
+                aria-label="Start date"
               />
             </BaseInputGroup>
 
@@ -122,15 +127,28 @@
               <BaseDatePicker
                 v-model="exportForm.end_date"
                 :calendar-button="true"
-                calendar-button-icon="calendar"
+                calendar-button-icon="CalendarDaysIcon"
                 @update:model-value="onDateChange"
+                aria-label="End date"
               />
             </BaseInputGroup>
           </div>
 
+          <!-- Loading indicator for entries count -->
+          <div v-if="isLoadingEntries" class="rounded-md bg-gray-50 p-4 animate-pulse">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <div class="h-5 w-5 bg-gray-200 rounded"></div>
+              </div>
+              <div class="ml-3 flex-1">
+                <div class="h-4 bg-gray-200 rounded w-48"></div>
+              </div>
+            </div>
+          </div>
+
           <!-- Entry Count -->
           <div
-            v-if="entriesCount !== null"
+            v-else-if="entriesCount !== null"
             class="rounded-md bg-blue-50 p-4"
           >
             <div class="flex">
@@ -191,6 +209,7 @@
                   <BaseButton
                     variant="primary"
                     size="sm"
+                    :loading="isConfirmingAll"
                     @click="confirmAllInRange"
                   >
                     {{ $t('partner.accounting.confirm_all_in_range') }}
@@ -253,7 +272,7 @@
           {{ $t('partner.accounting.choose_export_format') }}
         </h3>
 
-        <div class="space-y-4">
+        <div class="space-y-4" role="radiogroup" aria-label="Export format">
           <!-- Pantheon XML -->
           <label
             class="relative flex cursor-pointer rounded-lg border p-4 hover:bg-gray-50"
@@ -268,6 +287,7 @@
               type="radio"
               value="pantheon"
               class="sr-only"
+              aria-label="Pantheon XML format"
             />
             <span class="flex flex-1">
               <span class="flex flex-col">
@@ -300,6 +320,7 @@
               type="radio"
               value="zonel"
               class="sr-only"
+              aria-label="Zonel CSV format"
             />
             <span class="flex flex-1">
               <span class="flex flex-col">
@@ -332,6 +353,7 @@
               type="radio"
               value="csv"
               class="sr-only"
+              aria-label="Generic CSV format"
             />
             <span class="flex flex-1">
               <span class="flex flex-col">
@@ -397,7 +419,7 @@
             </div>
             <div class="flex justify-between">
               <dt class="font-medium text-gray-700">{{ $t('partner.accounting.entries_count') }}:</dt>
-              <dd class="text-gray-900">{{ entriesCount }}</dd>
+              <dd class="text-gray-900">{{ entriesCount ?? 0 }}</dd>
             </div>
             <div class="flex justify-between">
               <dt class="font-medium text-gray-700">{{ $t('partner.accounting.export_format') }}:</dt>
@@ -426,6 +448,26 @@
           </div>
         </div>
 
+        <!-- Export Error Message -->
+        <div
+          v-if="exportError"
+          class="mb-6 rounded-md bg-red-50 p-4"
+        >
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <BaseIcon name="ExclamationCircleIcon" class="h-5 w-5 text-red-400" />
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">
+                {{ $t('partner.accounting.export_failed') }}
+              </h3>
+              <div class="mt-2 text-sm text-red-700">
+                <p>{{ exportError }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="mt-6 flex justify-between">
           <BaseButton
             v-if="!exportSuccess"
@@ -449,7 +491,7 @@
             <BaseButton
               v-else
               variant="primary"
-              :loading="partnerAccountingStore.isExporting"
+              :loading="isExporting"
               @click="performExport"
             >
               <template #left="slotProps">
@@ -465,12 +507,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import { debounce } from 'lodash'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -478,13 +522,29 @@ const router = useRouter()
 const consoleStore = useConsoleStore()
 const partnerAccountingStore = usePartnerAccountingStore()
 const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 
 // State
 const currentStep = ref(1)
 const entriesCount = ref(null)
 const unconfirmedCount = ref(0)
 const exportSuccess = ref(false)
+const exportError = ref(null)
 const exportedFileName = ref('')
+const isLoadingEntries = ref(false)
+const isConfirmingAll = ref(false)
+const isExporting = ref(false)
+
+// AbortController for cancelling requests
+let abortController = null
+
+// Get current date in local timezone as YYYY-MM-DD
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const exportForm = reactive({
   company_id: null,
@@ -506,8 +566,9 @@ const companies = computed(() => {
 })
 
 const selectedCompanyName = computed(() => {
+  if (!exportForm.company_id) return '-'
   const company = companies.value.find((c) => c.id === exportForm.company_id)
-  return company ? company.name : ''
+  return company?.name || '-'
 })
 
 const canProceedFromStep1 = computed(() => {
@@ -515,7 +576,8 @@ const canProceedFromStep1 = computed(() => {
     exportForm.company_id &&
     exportForm.start_date &&
     exportForm.end_date &&
-    entriesCount.value !== null
+    entriesCount.value !== null &&
+    !isLoadingEntries.value
   )
 })
 
@@ -524,29 +586,43 @@ const fromReview = ref(false)
 
 // Lifecycle
 onMounted(async () => {
-  await consoleStore.fetchCompanies()
+  try {
+    await consoleStore.fetchCompanies()
 
-  // Check if coming from Journal Review page with pre-filled data
-  const query = route.query
-  if (query.from_review === 'true' && query.company_id && query.start_date && query.end_date) {
-    // Pre-fill form from Review page
-    fromReview.value = true
-    exportForm.company_id = parseInt(query.company_id)
-    exportForm.start_date = query.start_date
-    exportForm.end_date = query.end_date
+    // Check if coming from Journal Review page with pre-filled data
+    const query = route.query
+    if (query.from_review === 'true' && query.company_id && query.start_date && query.end_date) {
+      // Pre-fill form from Review page
+      fromReview.value = true
+      exportForm.company_id = parseInt(query.company_id)
+      exportForm.start_date = query.start_date
+      exportForm.end_date = query.end_date
 
-    // Fetch entries count to validate
-    await fetchEntriesCount()
+      // Fetch entries count to validate
+      await fetchEntriesCount()
 
-    // Skip directly to format selection (step 3)
-    // Steps 1 (scope) and 2 (review) already done on Review page
-    currentStep.value = 3
-  } else {
-    // Normal flow - auto-select first company if available
-    if (companies.value.length > 0) {
-      exportForm.company_id = companies.value[0].id
-      await onCompanyChange()
+      // Skip directly to format selection (step 3)
+      // Steps 1 (scope) and 2 (review) already done on Review page
+      currentStep.value = 3
+    } else {
+      // Normal flow - auto-select first company if available
+      if (companies.value.length > 0) {
+        exportForm.company_id = companies.value[0].id
+        await onCompanyChange()
+      }
     }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_companies'),
+    })
+  }
+})
+
+onUnmounted(() => {
+  // Cancel any pending requests on unmount
+  if (abortController) {
+    abortController.abort()
   }
 })
 
@@ -560,15 +636,30 @@ async function onCompanyChange() {
   }
 }
 
-async function onDateChange() {
+// Debounced date change handler
+const debouncedFetchEntries = debounce(async () => {
   if (exportForm.company_id && exportForm.start_date && exportForm.end_date) {
     await fetchEntriesCount()
   }
+}, 300)
+
+async function onDateChange() {
+  debouncedFetchEntries()
 }
 
 async function fetchEntriesCount() {
+  if (!exportForm.company_id || !exportForm.start_date || !exportForm.end_date) return
+
+  // Cancel previous request if still pending
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
+  isLoadingEntries.value = true
+
   try {
-    const response = await partnerAccountingStore.fetchJournalEntries(
+    await partnerAccountingStore.fetchJournalEntries(
       exportForm.company_id,
       {
         start_date: exportForm.start_date,
@@ -576,13 +667,38 @@ async function fetchEntriesCount() {
       }
     )
 
-    entriesCount.value = partnerAccountingStore.journalEntries.length
-    unconfirmedCount.value = partnerAccountingStore.journalEntries.filter(
-      (e) => e.status === 'pending'
+    const entries = partnerAccountingStore.journalEntries || []
+    entriesCount.value = entries.length
+    unconfirmedCount.value = entries.filter(
+      (e) => e?.status === 'pending'
     ).length
   } catch (error) {
-    console.error('Failed to fetch entries count:', error)
+    // Don't show error for cancelled requests
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      return
+    }
+
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_data'),
+    })
+    entriesCount.value = 0
+    unconfirmedCount.value = 0
+  } finally {
+    isLoadingEntries.value = false
   }
+}
+
+function canGoToStep(stepNumber) {
+  // Can always go back
+  if (stepNumber < currentStep.value) {
+    // If coming from review page, don't allow going back to steps 1-2
+    if (fromReview.value && stepNumber < 3) {
+      return false
+    }
+    return true
+  }
+  return false
 }
 
 function nextStep() {
@@ -607,11 +723,7 @@ function previousStep() {
 
 function goToStep(stepNumber) {
   // Only allow going back, not forward
-  if (stepNumber < currentStep.value) {
-    // If coming from review page, don't allow going back to steps 1-2
-    if (fromReview.value && stepNumber < 3) {
-      return
-    }
+  if (canGoToStep(stepNumber)) {
     currentStep.value = stepNumber
   }
 }
@@ -621,28 +733,53 @@ function skipReview() {
 }
 
 async function confirmAllInRange() {
-  dialogStore
-    .openDialog({
-      title: t('general.are_you_sure'),
-      message: t('partner.accounting.confirm_all_in_range_message', {
-        count: unconfirmedCount.value,
-      }),
-      yesLabel: t('general.ok'),
-      noLabel: t('general.cancel'),
-      variant: 'primary',
-      hideNoButton: false,
-      size: 'lg',
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('partner.accounting.confirm_all_in_range_message', {
+      count: unconfirmedCount.value,
+    }),
+    yesLabel: t('general.ok'),
+    noLabel: t('general.cancel'),
+    variant: 'primary',
+    hideNoButton: false,
+    size: 'lg',
+  })
+
+  if (!confirmed) return
+
+  isConfirmingAll.value = true
+
+  try {
+    // In a real implementation, this would call an API to confirm all entries
+    // await partnerAccountingStore.confirmAllEntries(exportForm.company_id, { ... })
+    unconfirmedCount.value = 0
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('partner.accounting.entries_confirmed_success'),
     })
-    .then(async (confirmed) => {
-      if (confirmed) {
-        // In a real implementation, this would call an API to confirm all entries
-        console.log('Confirm all entries in range')
-        unconfirmedCount.value = 0
-      }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.something_went_wrong'),
     })
+  } finally {
+    isConfirmingAll.value = false
+  }
 }
 
 async function performExport() {
+  if (!exportForm.company_id || !exportForm.start_date || !exportForm.end_date || !exportForm.format) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.missing_required_fields'),
+    })
+    return
+  }
+
+  isExporting.value = true
+  exportError.value = null
+
   try {
     const params = {
       start_date: exportForm.start_date,
@@ -654,9 +791,22 @@ async function performExport() {
 
     // Set success state
     exportSuccess.value = true
-    exportedFileName.value = `journal_export_${exportForm.format}.${exportForm.format.includes('xml') ? 'xml' : 'csv'}`
+    const extension = exportForm.format === 'pantheon' ? 'xml' : 'csv'
+    exportedFileName.value = `journal_export_${exportForm.format}_${exportForm.start_date}_${exportForm.end_date}.${extension}`
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('partner.accounting.export_success'),
+    })
   } catch (error) {
-    console.error('Failed to export journal:', error)
+    const errorMessage = error.response?.data?.message || t('errors.export_failed')
+    exportError.value = errorMessage
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
+  } finally {
+    isExporting.value = false
   }
 }
 
@@ -668,12 +818,25 @@ function resetWizard() {
   entriesCount.value = null
   unconfirmedCount.value = 0
   exportSuccess.value = false
+  exportError.value = null
   exportedFileName.value = ''
+  fromReview.value = false
 }
 
-function formatDate(date) {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString()
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+  } catch {
+    return '-'
+  }
 }
 
 function getFormatLabel(format) {
@@ -685,7 +848,7 @@ function getFormatLabel(format) {
     case 'csv':
       return t('partner.accounting.format_generic_csv')
     default:
-      return format
+      return format || '-'
   }
 }
 </script>

@@ -3,10 +3,11 @@
     <BasePageHeader :title="$t('partner.accounting.general_ledger')">
       <template #actions>
         <BaseButton
-          v-if="ledgerData"
+          v-if="ledgerData && ledgerData.entries && ledgerData.entries.length > 0"
           variant="primary-outline"
           :loading="isExporting"
           @click="exportToCsv"
+          :aria-label="$t('general.export')"
         >
           <template #left="slotProps">
             <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
@@ -28,6 +29,7 @@
           value-prop="id"
           :placeholder="$t('partner.select_company_placeholder')"
           @update:model-value="onCompanyChange"
+          aria-label="Select company"
         />
       </BaseInputGroup>
     </div>
@@ -45,6 +47,8 @@
             label="display_name"
             value-prop="id"
             :placeholder="$t('reports.accounting.general_ledger.select_account_placeholder')"
+            :loading="isLoadingAccounts"
+            aria-label="Select account"
           />
         </BaseInputGroup>
 
@@ -54,6 +58,7 @@
             v-model="filters.start_date"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
+            aria-label="Start date"
           />
         </BaseInputGroup>
 
@@ -63,6 +68,7 @@
             v-model="filters.end_date"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
+            aria-label="End date"
           />
         </BaseInputGroup>
 
@@ -84,9 +90,22 @@
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <BaseSpinner />
+    <!-- Loading state with skeleton -->
+    <div v-if="isLoading" class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 animate-pulse">
+        <div class="h-6 bg-gray-200 rounded w-48"></div>
+        <div class="h-4 bg-gray-200 rounded w-24 mt-2"></div>
+      </div>
+      <div class="p-6 space-y-4">
+        <div v-for="i in 5" :key="i" class="flex space-x-4 animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-24"></div>
+          <div class="h-4 bg-gray-200 rounded w-32"></div>
+          <div class="h-4 bg-gray-200 rounded flex-1"></div>
+          <div class="h-4 bg-gray-200 rounded w-20"></div>
+          <div class="h-4 bg-gray-200 rounded w-20"></div>
+          <div class="h-4 bg-gray-200 rounded w-24"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Ledger Table -->
@@ -113,25 +132,25 @@
 
       <!-- Ledger entries table -->
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="min-w-full divide-y divide-gray-200" role="table" aria-label="General Ledger Entries">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('general.date') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('reports.accounting.general_ledger.document') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('general.description') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('reports.accounting.general_ledger.debit') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('reports.accounting.general_ledger.credit') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('reports.accounting.general_ledger.balance') }}
               </th>
             </tr>
@@ -142,10 +161,10 @@
                 {{ formatDate(entry.date) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm">
-                <span class="font-medium text-primary-500">{{ entry.reference }}</span>
+                <span class="font-medium text-primary-500">{{ entry.reference || '-' }}</span>
               </td>
               <td class="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
-                {{ entry.description }}
+                {{ entry.description || '-' }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-right text-gray-900">
                 {{ entry.debit > 0 ? formatMoney(entry.debit) : '' }}
@@ -181,9 +200,9 @@
       </div>
     </div>
 
-    <!-- Empty State - No Ledger Data -->
+    <!-- Empty State - No Ledger Data after search -->
     <div
-      v-else-if="hasSearched && !ledgerData"
+      v-else-if="hasSearched && (!ledgerData || !ledgerData.entries || ledgerData.entries.length === 0)"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
       <BaseIcon name="DocumentTextIcon" class="mx-auto h-12 w-12 text-gray-400" />
@@ -192,6 +211,20 @@
       </h3>
       <p class="mt-1 text-sm text-gray-500">
         {{ $t('reports.accounting.general_ledger.no_data_description') }}
+      </p>
+    </div>
+
+    <!-- Initial State - Has company but no search yet -->
+    <div
+      v-else-if="selectedCompanyId && !hasSearched"
+      class="bg-white rounded-lg shadow p-12 text-center"
+    >
+      <BaseIcon name="MagnifyingGlassIcon" class="mx-auto h-12 w-12 text-gray-400" />
+      <h3 class="mt-2 text-sm font-medium text-gray-900">
+        {{ $t('reports.accounting.general_ledger.select_and_load') }}
+      </h3>
+      <p class="mt-1 text-sm text-gray-500">
+        {{ $t('reports.accounting.general_ledger.select_and_load_description') }}
       </p>
     </div>
 
@@ -209,26 +242,48 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
-import moment from 'moment'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import { debounce } from 'lodash'
 
+const { t } = useI18n()
 const consoleStore = useConsoleStore()
 const partnerAccountingStore = usePartnerAccountingStore()
+const notificationStore = useNotificationStore()
 
 // State
 const selectedCompanyId = ref(null)
 const accounts = ref([])
 const ledgerData = ref(null)
 const isLoading = ref(false)
+const isLoadingAccounts = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
 
+// AbortController for cancelling requests
+let abortController = null
+
+// Get current date in local timezone as YYYY-MM-DD
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Get start of year in local timezone
+function getStartOfYearString() {
+  const now = new Date()
+  return `${now.getFullYear()}-01-01`
+}
+
 const filters = ref({
   account_id: null,
-  start_date: moment().startOf('year').format('YYYY-MM-DD'),
-  end_date: moment().format('YYYY-MM-DD'),
+  start_date: getStartOfYearString(),
+  end_date: getLocalDateString(),
 })
 
 // Computed
@@ -239,13 +294,13 @@ const companies = computed(() => {
 const selectedAccountName = computed(() => {
   if (!filters.value.account_id) return ''
   const account = accounts.value.find(a => a.id === filters.value.account_id)
-  return account ? account.name : ''
+  return account?.name || ''
 })
 
 const selectedAccountCode = computed(() => {
   if (!filters.value.account_id) return ''
   const account = accounts.value.find(a => a.id === filters.value.account_id)
-  return account ? account.code : ''
+  return account?.code || ''
 })
 
 const selectedCompanyCurrency = computed(() => {
@@ -256,19 +311,37 @@ const selectedCompanyCurrency = computed(() => {
 
 // Lifecycle
 onMounted(async () => {
-  await consoleStore.fetchCompanies()
+  try {
+    await consoleStore.fetchCompanies()
 
-  // Auto-select first company if available
-  if (companies.value.length > 0) {
-    selectedCompanyId.value = companies.value[0].id
-    await loadAccounts()
+    // Auto-select first company if available
+    if (companies.value.length > 0) {
+      selectedCompanyId.value = companies.value[0].id
+      await loadAccounts()
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_companies'),
+    })
   }
 })
 
-// Watch for company changes
-watch(selectedCompanyId, async (newCompanyId) => {
+onUnmounted(() => {
+  // Cancel any pending requests on unmount
+  if (abortController) {
+    abortController.abort()
+  }
+})
+
+// Watch for company changes - debounced
+const debouncedLoadAccounts = debounce(async () => {
+  await loadAccounts()
+}, 300)
+
+watch(selectedCompanyId, (newCompanyId) => {
   if (newCompanyId) {
-    await loadAccounts()
+    debouncedLoadAccounts()
     // Reset ledger data when company changes
     ledgerData.value = null
     hasSearched.value = false
@@ -280,14 +353,21 @@ watch(selectedCompanyId, async (newCompanyId) => {
 async function loadAccounts() {
   if (!selectedCompanyId.value) return
 
+  isLoadingAccounts.value = true
   try {
     await partnerAccountingStore.fetchAccounts(selectedCompanyId.value)
-    accounts.value = partnerAccountingStore.accounts.map(account => ({
+    accounts.value = (partnerAccountingStore.accounts || []).map(account => ({
       ...account,
-      display_name: `${account.code} - ${account.name}`,
+      display_name: `${account.code || ''} - ${account.name || ''}`.trim(),
     }))
   } catch (error) {
-    console.error('Failed to load accounts:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_load_accounts'),
+    })
+    accounts.value = []
+  } finally {
+    isLoadingAccounts.value = false
   }
 }
 
@@ -300,6 +380,12 @@ function onCompanyChange() {
 async function loadLedger() {
   if (!selectedCompanyId.value || !filters.value.account_id) return
 
+  // Cancel previous request if still pending
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
   isLoading.value = true
   hasSearched.value = true
   ledgerData.value = null
@@ -311,11 +397,21 @@ async function loadLedger() {
         from_date: filters.value.start_date,
         to_date: filters.value.end_date,
       },
+      signal: abortController.signal,
     })
 
-    ledgerData.value = response.data.data
+    ledgerData.value = response.data?.data || null
   } catch (error) {
-    console.error('Failed to load general ledger:', error)
+    // Don't show error for cancelled requests
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      return
+    }
+
+    const errorMessage = error.response?.data?.message || t('errors.failed_to_load_data')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
     ledgerData.value = null
   } finally {
     isLoading.value = false
@@ -323,15 +419,22 @@ async function loadLedger() {
 }
 
 async function exportToCsv() {
-  if (!ledgerData.value || !selectedCompanyId.value) return
+  if (!ledgerData.value?.entries || !selectedCompanyId.value) return
 
   isExporting.value = true
 
   try {
-    // Create CSV content
-    const headers = ['Date', 'Reference', 'Description', 'Debit', 'Credit', 'Balance']
+    // Create CSV content with localized headers
+    const headers = [
+      t('general.date'),
+      t('reports.accounting.general_ledger.document'),
+      t('general.description'),
+      t('reports.accounting.general_ledger.debit'),
+      t('reports.accounting.general_ledger.credit'),
+      t('reports.accounting.general_ledger.balance'),
+    ]
     const rows = ledgerData.value.entries.map(entry => [
-      entry.date,
+      entry.date || '',
       entry.reference || '',
       entry.description || '',
       entry.debit || 0,
@@ -341,11 +444,11 @@ async function exportToCsv() {
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
     ].join('\n')
 
     // Create download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -356,8 +459,16 @@ async function exportToCsv() {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('general.export_success'),
+    })
   } catch (error) {
-    console.error('Failed to export general ledger:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.export_failed'),
+    })
   } finally {
     isExporting.value = false
   }
@@ -365,20 +476,35 @@ async function exportToCsv() {
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
-  return moment(dateStr).format('DD MMM YYYY')
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+  } catch {
+    return '-'
+  }
 }
 
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
 
-  const absAmount = Math.abs(amount)
-  const formatted = new Intl.NumberFormat('mk-MK', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(absAmount / 100)
+  try {
+    const absAmount = Math.abs(amount)
+    const formatted = new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(absAmount / 100)
 
-  const sign = amount < 0 ? '-' : ''
-  return `${sign}${formatted} ${selectedCompanyCurrency.value}`
+    const sign = amount < 0 ? '-' : ''
+    return `${sign}${formatted} ${selectedCompanyCurrency.value}`
+  } catch {
+    return '-'
+  }
 }
 
 function balanceColorClass(balance) {
