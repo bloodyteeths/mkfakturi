@@ -3,6 +3,8 @@ const Dashboard = () => import('@/scripts/partner/views/dashboard/Dashboard.vue'
 const Clients = () => import('@/scripts/partner/views/clients/Clients.vue')
 const Referrals = () => import('@/js/pages/partner/Referrals.vue')
 const Payouts = () => import('@/js/pages/partner/Payouts.vue')
+const Invitations = () => import('@/js/pages/partner/Invitations.vue')
+const Commissions = () => import('@/js/pages/partner/Commissions.vue')
 
 export default [
   {
@@ -38,8 +40,18 @@ export default [
         component: Payouts,
         meta: { isPartner: true }
       },
-      // Additional partner routes can be added here
-      // Example: commissions, reports, etc.
+      {
+        path: 'invitations',
+        name: 'partner.invitations',
+        component: Invitations,
+        meta: { isPartner: true }
+      },
+      {
+        path: 'commissions',
+        name: 'partner.commissions',
+        component: Commissions,
+        meta: { isPartner: true }
+      },
     ]
   }
 ]

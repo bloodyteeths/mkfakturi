@@ -34,6 +34,15 @@
                 Клиенти
               </router-link>
               <router-link
+                :to="{ name: 'partner.commissions' }"
+                class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
+                :class="$route.name === 'partner.commissions'
+                  ? 'border-blue-500 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              >
+                Провизии
+              </router-link>
+              <router-link
                 :to="{ name: 'partner.referrals' }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.referrals'
@@ -41,6 +50,15 @@
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
                 Препораки
+              </router-link>
+              <router-link
+                :to="{ name: 'partner.invitations' }"
+                class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
+                :class="$route.name === 'partner.invitations'
+                  ? 'border-blue-500 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              >
+                Покани
               </router-link>
               <router-link
                 :to="{ name: 'partner.payouts' }"
@@ -51,12 +69,6 @@
               >
                 Исплати
               </router-link>
-              <a
-                :href="`/admin/console`"
-                class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              >
-                Конзола
-              </a>
             </div>
           </div>
 
