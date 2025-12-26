@@ -71,17 +71,13 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        console.log('[PartnerAccounting] Fetching accounts for company:', companyId)
         const response = await axios.get(`/partner/companies/${companyId}/accounts`, {
           params,
         })
 
-        console.log('[PartnerAccounting] Accounts response:', response.data)
         this.accounts = response.data.data || []
-        console.log('[PartnerAccounting] Stored accounts count:', this.accounts.length)
         return response.data
       } catch (error) {
-        console.error('[PartnerAccounting] Fetch accounts error:', error.response?.status, error.response?.data)
         this.error = error.response?.data?.message || 'Failed to fetch accounts'
         handleError(error)
         throw error
@@ -104,6 +100,29 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
         return response.data
       } catch (error) {
         this.error = error.response?.data?.message || 'Failed to fetch account tree'
+        handleError(error)
+        throw error
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    /**
+     * Fetch a single account by ID
+     */
+    async fetchAccount(companyId, accountId) {
+      this.isLoading = true
+      this.error = null
+
+      try {
+        const response = await axios.get(
+          `/partner/companies/${companyId}/accounts/${accountId}`
+        )
+
+        this.currentAccount = response.data.data || null
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to fetch account'
         handleError(error)
         throw error
       } finally {
@@ -151,26 +170,14 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        console.log('[PartnerAccounting] Updating account:', {
-          companyId,
-          accountId,
-          data,
-          url: `/partner/companies/${companyId}/accounts/${accountId}`,
-        })
-
         const response = await axios.put(
           `/partner/companies/${companyId}/accounts/${accountId}`,
           data
         )
 
-        console.log('[PartnerAccounting] Update response:', response.data)
-
         const index = this.accounts.findIndex((a) => a.id === accountId)
         if (index > -1) {
           this.accounts[index] = response.data.data
-          console.log('[PartnerAccounting] Updated account in store at index:', index)
-        } else {
-          console.warn('[PartnerAccounting] Account not found in store:', accountId)
         }
 
         notificationStore.showNotification({
@@ -180,8 +187,6 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         return response.data
       } catch (error) {
-        console.error('[PartnerAccounting] Update error:', error)
-        console.error('[PartnerAccounting] Error response:', error.response?.data)
         this.error = error.response?.data?.message || 'Failed to update account'
         handleError(error)
         throw error
@@ -195,6 +200,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
      */
     async deleteAccount(companyId, accountId) {
       const notificationStore = useNotificationStore()
+      this.isSaving = true
       this.error = null
 
       try {
@@ -213,6 +219,8 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
         this.error = error.response?.data?.message || 'Failed to delete account'
         handleError(error)
         throw error
+      } finally {
+        this.isSaving = false
       }
     },
 
@@ -405,6 +413,7 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
      */
     async deleteMapping(companyId, mappingId) {
       const notificationStore = useNotificationStore()
+      this.isSaving = true
       this.error = null
 
       try {
@@ -425,6 +434,8 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
         this.error = error.response?.data?.message || 'Failed to delete mapping'
         handleError(error)
         throw error
+      } finally {
+        this.isSaving = false
       }
     },
 
@@ -440,9 +451,9 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
           { entity_type: entityType, entity_id: entityId }
         )
 
-        // Store suggestion for this entity
+        // Store suggestion for this entity with cache size limit
         const key = `${entityType}_${entityId}`
-        this.suggestions[key] = response.data.data
+        this.addSuggestionWithLimit(key, response.data.data)
 
         return response.data.data
       } catch (error) {
@@ -450,6 +461,47 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
         handleError(error)
         throw error
       }
+    },
+
+    /**
+     * Add suggestion to cache with size limit to prevent memory leak
+     * @param {string} key - The suggestion key
+     * @param {Object} value - The suggestion data
+     * @param {number} maxSize - Maximum cache size (default 100)
+     */
+    addSuggestionWithLimit(key, value, maxSize = 100) {
+      const keys = Object.keys(this.suggestions)
+      if (keys.length >= maxSize && !this.suggestions[key]) {
+        // Remove oldest entries (first 10) when limit is reached
+        const keysToRemove = keys.slice(0, 10)
+        keysToRemove.forEach((k) => delete this.suggestions[k])
+      }
+      this.suggestions[key] = value
+    },
+
+    /**
+     * Clear all cached suggestions
+     */
+    clearSuggestions() {
+      this.suggestions = {}
+    },
+
+    /**
+     * Extract pagination data from API response
+     * @param {Object} response - The axios response object
+     * @returns {Object} Normalized pagination object
+     */
+    extractPagination(response) {
+      const paginationData = response.data.meta || response.data.pagination
+      if (paginationData) {
+        return {
+          currentPage: paginationData.current_page || 1,
+          totalPages: paginationData.last_page || 1,
+          perPage: paginationData.per_page || 20,
+          total: paginationData.total || 0,
+        }
+      }
+      return null
     },
 
     /**
@@ -467,15 +519,10 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         this.journalEntries = response.data.data || []
 
-        // API returns pagination in 'meta' object
-        const paginationData = response.data.meta || response.data.pagination
-        if (paginationData) {
-          this.journalPagination = {
-            currentPage: paginationData.current_page || 1,
-            totalPages: paginationData.last_page || 1,
-            perPage: paginationData.per_page || 20,
-            total: paginationData.total || 0,
-          }
+        // Extract pagination using helper
+        const pagination = this.extractPagination(response)
+        if (pagination) {
+          this.journalPagination = pagination
         }
 
         return response.data
@@ -542,15 +589,10 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
         this.journalEntries = response.data.data || []
 
-        // API returns pagination in 'meta' object
-        const paginationData = response.data.meta || response.data.pagination
-        if (paginationData) {
-          this.journalPagination = {
-            currentPage: paginationData.current_page || 1,
-            totalPages: paginationData.last_page || 1,
-            perPage: paginationData.per_page || 20,
-            total: paginationData.total || 0,
-          }
+        // Extract pagination using helper
+        const pagination = this.extractPagination(response)
+        if (pagination) {
+          this.journalPagination = pagination
         }
 
         return response.data
@@ -619,6 +661,11 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
           `/partner/companies/${companyId}/journal/learn`,
           { mappings }
         )
+
+        notificationStore.showNotification({
+          type: 'success',
+          message: 'Mapping learned successfully',
+        })
 
         return response.data
       } catch (error) {
@@ -784,6 +831,22 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.isSaving = false
       this.isExporting = false
       this.error = null
+    },
+
+    /**
+     * Update the account_id for a journal entry in local state
+     * This avoids direct v-model mutation of store state
+     * @param {number} entryId - The entry ID
+     * @param {number|null} accountId - The new account ID
+     */
+    updateEntryAccount(entryId, accountId) {
+      const index = this.journalEntries.findIndex((e) => e.id === entryId)
+      if (index > -1) {
+        this.journalEntries[index] = {
+          ...this.journalEntries[index],
+          account_id: accountId,
+        }
+      }
     },
   },
 })

@@ -288,17 +288,23 @@ class PartnerJournalExportController extends Controller
      * @param int $company Company ID
      * @return Response
      */
-    public function export(Request $request, int $company): Response
+    public function export(Request $request, int $company): Response|JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
 
         if (!$partner) {
-            return response('Partner not found', 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Partner not found',
+            ], 404);
         }
 
         // Verify partner has access to this company
         if (!$this->hasCompanyAccess($partner, $company)) {
-            return response('No access to this company', 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'No access to this company',
+            ], 403);
         }
 
         // Check granular permissions - require EXPORT_REPORTS
@@ -311,7 +317,18 @@ class PartnerJournalExportController extends Controller
 
         $request->validate([
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => [
+                'required',
+                'date',
+                'after_or_equal:start_date',
+                function ($attribute, $value, $fail) use ($request) {
+                    $startDate = Carbon::parse($request->input('start_date'));
+                    $endDate = Carbon::parse($value);
+                    if ($startDate->diffInDays($endDate) > 366) {
+                        $fail('The date range cannot exceed 366 days to prevent memory issues with large exports.');
+                    }
+                },
+            ],
             'format' => 'sometimes|in:csv,pantheon,zonel',
         ]);
 
@@ -492,55 +509,62 @@ class PartnerJournalExportController extends Controller
             'mappings.*.accepted' => 'required|boolean',
         ]);
 
-        $mappings = $request->input('mappings');
-        $learnedCount = 0;
+        try {
+            $mappings = $request->input('mappings');
+            $learnedCount = 0;
 
-        foreach ($mappings as $mappingData) {
-            // Map entity type to model class
-            $entityType = match($mappingData['entity_type']) {
-                'customer' => \App\Models\AccountMapping::ENTITY_CUSTOMER,
-                'supplier' => \App\Models\AccountMapping::ENTITY_SUPPLIER,
-                'expense_category' => \App\Models\AccountMapping::ENTITY_EXPENSE_CATEGORY,
-            };
+            foreach ($mappings as $mappingData) {
+                // Map entity type to model class
+                $entityType = match($mappingData['entity_type']) {
+                    'customer' => \App\Models\AccountMapping::ENTITY_CUSTOMER,
+                    'supplier' => \App\Models\AccountMapping::ENTITY_SUPPLIER,
+                    'expense_category' => \App\Models\AccountMapping::ENTITY_EXPENSE_CATEGORY,
+                };
 
-            // Verify account belongs to this company
-            $account = \App\Models\Account::where('id', $mappingData['account_id'])
-                ->where('company_id', $company)
-                ->first();
+                // Verify account belongs to this company
+                $account = \App\Models\Account::where('id', $mappingData['account_id'])
+                    ->where('company_id', $company)
+                    ->first();
 
-            if (!$account) {
-                continue; // Skip invalid accounts
+                if (!$account) {
+                    continue; // Skip invalid accounts
+                }
+
+                // Update or create the mapping
+                // We store the mapping in the debit_account_id for simplicity
+                // (The service will use the appropriate account based on transaction type)
+                \App\Models\AccountMapping::updateOrCreate(
+                    [
+                        'company_id' => $company,
+                        'entity_type' => $entityType,
+                        'entity_id' => $mappingData['entity_id'],
+                    ],
+                    [
+                        'debit_account_id' => $account->id,
+                        'credit_account_id' => $account->id,
+                        'meta' => [
+                            'learned_at' => now()->toIso8601String(),
+                            'learned_by_partner_id' => $partner->id,
+                            'accepted_suggestion' => $mappingData['accepted'],
+                            'confidence' => $mappingData['accepted'] ? 1.0 : 0.9,
+                        ],
+                    ]
+                );
+
+                $learnedCount++;
             }
 
-            // Update or create the mapping
-            // We store the mapping in the debit_account_id for simplicity
-            // (The service will use the appropriate account based on transaction type)
-            \App\Models\AccountMapping::updateOrCreate(
-                [
-                    'company_id' => $company,
-                    'entity_type' => $entityType,
-                    'entity_id' => $mappingData['entity_id'],
-                ],
-                [
-                    'debit_account_id' => $account->id,
-                    'credit_account_id' => $account->id,
-                    'meta' => [
-                        'learned_at' => now()->toIso8601String(),
-                        'learned_by_partner_id' => $partner->id,
-                        'accepted_suggestion' => $mappingData['accepted'],
-                        'confidence' => $mappingData['accepted'] ? 1.0 : 0.9,
-                    ],
-                ]
-            );
-
-            $learnedCount++;
+            return response()->json([
+                'success' => true,
+                'learned_count' => $learnedCount,
+                'message' => 'Mappings saved successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save account mappings: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'learned_count' => $learnedCount,
-            'message' => 'Mappings saved successfully',
-        ]);
     }
 
     /**
@@ -585,21 +609,28 @@ class PartnerJournalExportController extends Controller
             'date_to' => 'sometimes|date|after_or_equal:date_from',
         ]);
 
-        $minConfidence = $request->input('min_confidence', 0.8);
+        try {
+            $minConfidence = $request->input('min_confidence', 0.8);
 
-        // For now, return a success response indicating this feature would
-        // accept all high-confidence suggestions from the specified date range.
-        // Full implementation would require tracking suggestions with confidence scores.
-        return response()->json([
-            'success' => true,
-            'message' => 'Bulk accept feature - requires AI suggestion tracking to be implemented',
-            'note' => 'This endpoint will accept all suggestions above confidence threshold once AI suggestions are tracked',
-            'parameters' => [
-                'min_confidence' => $minConfidence,
-                'date_from' => $request->input('date_from'),
-                'date_to' => $request->input('date_to'),
-            ],
-        ]);
+            // For now, return a success response indicating this feature would
+            // accept all high-confidence suggestions from the specified date range.
+            // Full implementation would require tracking suggestions with confidence scores.
+            return response()->json([
+                'success' => true,
+                'message' => 'Bulk accept feature - requires AI suggestion tracking to be implemented',
+                'note' => 'This endpoint will accept all suggestions above confidence threshold once AI suggestions are tracked',
+                'parameters' => [
+                    'min_confidence' => $minConfidence,
+                    'date_from' => $request->input('date_from'),
+                    'date_to' => $request->input('date_to'),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process bulk accept: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

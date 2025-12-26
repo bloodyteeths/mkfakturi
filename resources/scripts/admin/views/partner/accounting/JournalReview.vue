@@ -98,7 +98,7 @@
 
     <!-- Entries Table -->
     <div v-else-if="selectedCompanyId && entries.length > 0" class="mt-6">
-      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
+      <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -123,10 +123,22 @@
             <tr
               v-for="entry in entries"
               :key="entry.id"
-              class="hover:bg-gray-50"
+              :class="[
+                'hover:bg-gray-50',
+                entry.confirmed ? 'bg-green-50' : ''
+              ]"
             >
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ formatDate(entry.date) }}
+                <div class="flex items-center gap-2">
+                  {{ formatDate(entry.date) }}
+                  <span
+                    v-if="entry.confirmed"
+                    class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
+                  >
+                    <BaseIcon name="CheckIcon" class="h-3 w-3" />
+                    {{ $t('partner.accounting.confirmed') }}
+                  </span>
+                </div>
               </td>
               <td class="px-6 py-4">
                 <div class="flex flex-col">
@@ -143,11 +155,11 @@
               </td>
               <td class="px-6 py-4">
                 <AccountDropdown
-                  v-model="entry.account_id"
+                  :model-value="entry.account_id"
                   :accounts="accounts"
                   :confidence="entry.confidence"
                   :reason="entry.suggestion_reason"
-                  @change="onAccountChange(entry)"
+                  @update:model-value="(value) => handleAccountUpdate(entry, value)"
                 />
               </td>
               <td class="whitespace-nowrap px-6 py-4">
@@ -159,6 +171,14 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination Loading Overlay -->
+        <div
+          v-if="isPaginating"
+          class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
+        >
+          <BaseSpinner />
+        </div>
 
         <!-- Pagination -->
         <BaseTablePagination
@@ -216,6 +236,7 @@ const dialogStore = useDialogStore()
 const selectedCompanyId = ref(null)
 const isRefreshing = ref(false)
 const currentPage = ref(1)
+const isPaginating = ref(false)
 
 // AbortController for cancelling pending requests
 let abortController = null
@@ -393,8 +414,13 @@ function onFilterChange() {
   }, 300)
 }
 
-function onPageChange(page) {
-  loadEntriesWithSuggestions(page)
+async function onPageChange(page) {
+  isPaginating.value = true
+  try {
+    await loadEntriesWithSuggestions(page)
+  } finally {
+    isPaginating.value = false
+  }
 }
 
 function onAccountChange(entry) {
@@ -514,7 +540,15 @@ function formatDate(date) {
   const d = new Date(date)
   const day = String(d.getDate()).padStart(2, '0')
   const month = String(d.getMonth() + 1).padStart(2, '0')
-  return `${day}.${month}`
+  const year = d.getFullYear()
+  return `${day}.${month}.${year}`
+}
+
+function handleAccountUpdate(entry, newAccountId) {
+  // Update store via action instead of direct mutation
+  partnerAccountingStore.updateEntryAccount(entry.id, newAccountId)
+  // Save the learning
+  onAccountChange({ ...entry, account_id: newAccountId })
 }
 </script>
 

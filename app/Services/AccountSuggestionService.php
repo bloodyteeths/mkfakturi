@@ -45,11 +45,14 @@ class AccountSuggestionService
         );
 
         if ($mapping && $mapping->debit_account_id && $mapping->credit_account_id) {
-            return [
-                'debit_account_id' => $mapping->debit_account_id,
-                'credit_account_id' => $mapping->credit_account_id,
-                'confidence' => 0.95, // High confidence for explicit mapping
-            ];
+            // Check that mapped accounts are still active
+            if ($mapping->debitAccount?->is_active && $mapping->creditAccount?->is_active) {
+                return [
+                    'debit_account_id' => $mapping->debit_account_id,
+                    'credit_account_id' => $mapping->credit_account_id,
+                    'confidence' => 0.95, // High confidence for explicit mapping
+                ];
+            }
         }
 
         // Check for patterns from similar confirmed invoices for this customer
@@ -77,11 +80,14 @@ class AccountSuggestionService
         );
 
         if ($defaultMapping && $defaultMapping->debit_account_id && $defaultMapping->credit_account_id) {
-            return [
-                'debit_account_id' => $defaultMapping->debit_account_id,
-                'credit_account_id' => $defaultMapping->credit_account_id,
-                'confidence' => 0.70,
-            ];
+            // Check that mapped accounts are still active
+            if ($defaultMapping->debitAccount?->is_active && $defaultMapping->creditAccount?->is_active) {
+                return [
+                    'debit_account_id' => $defaultMapping->debit_account_id,
+                    'credit_account_id' => $defaultMapping->credit_account_id,
+                    'confidence' => 0.70,
+                ];
+            }
         }
 
         // Last resort: Find typical asset (receivables) and revenue accounts
@@ -124,11 +130,14 @@ class AccountSuggestionService
             );
 
             if ($mapping && $mapping->debit_account_id && $mapping->credit_account_id) {
-                return [
-                    'debit_account_id' => $mapping->debit_account_id,
-                    'credit_account_id' => $mapping->credit_account_id,
-                    'confidence' => 0.95,
-                ];
+                // Check that mapped accounts are still active
+                if ($mapping->debitAccount?->is_active && $mapping->creditAccount?->is_active) {
+                    return [
+                        'debit_account_id' => $mapping->debit_account_id,
+                        'credit_account_id' => $mapping->credit_account_id,
+                        'confidence' => 0.95,
+                    ];
+                }
             }
         }
 
@@ -142,11 +151,14 @@ class AccountSuggestionService
             );
 
             if ($mapping && $mapping->debit_account_id && $mapping->credit_account_id) {
-                return [
-                    'debit_account_id' => $mapping->debit_account_id,
-                    'credit_account_id' => $mapping->credit_account_id,
-                    'confidence' => 0.90,
-                ];
+                // Check that mapped accounts are still active
+                if ($mapping->debitAccount?->is_active && $mapping->creditAccount?->is_active) {
+                    return [
+                        'debit_account_id' => $mapping->debit_account_id,
+                        'credit_account_id' => $mapping->credit_account_id,
+                        'confidence' => 0.90,
+                    ];
+                }
             }
         }
 
@@ -202,11 +214,14 @@ class AccountSuggestionService
         );
 
         if ($defaultMapping && $defaultMapping->debit_account_id && $defaultMapping->credit_account_id) {
-            return [
-                'debit_account_id' => $defaultMapping->debit_account_id,
-                'credit_account_id' => $defaultMapping->credit_account_id,
-                'confidence' => 0.65,
-            ];
+            // Check that mapped accounts are still active
+            if ($defaultMapping->debitAccount?->is_active && $defaultMapping->creditAccount?->is_active) {
+                return [
+                    'debit_account_id' => $defaultMapping->debit_account_id,
+                    'credit_account_id' => $defaultMapping->credit_account_id,
+                    'confidence' => 0.65,
+                ];
+            }
         }
 
         // Last resort: Generic expense and payables accounts
@@ -258,11 +273,14 @@ class AccountSuggestionService
             );
 
             if ($mapping && $mapping->debit_account_id && $mapping->credit_account_id) {
-                return [
-                    'debit_account_id' => $mapping->debit_account_id,
-                    'credit_account_id' => $mapping->credit_account_id,
-                    'confidence' => 0.95,
-                ];
+                // Check that mapped accounts are still active
+                if ($mapping->debitAccount?->is_active && $mapping->creditAccount?->is_active) {
+                    return [
+                        'debit_account_id' => $mapping->debit_account_id,
+                        'credit_account_id' => $mapping->credit_account_id,
+                        'confidence' => 0.95,
+                    ];
+                }
             }
         }
 
@@ -290,11 +308,14 @@ class AccountSuggestionService
         );
 
         if ($defaultMapping && $defaultMapping->debit_account_id && $defaultMapping->credit_account_id) {
-            return [
-                'debit_account_id' => $defaultMapping->debit_account_id,
-                'credit_account_id' => $defaultMapping->credit_account_id,
-                'confidence' => 0.70,
-            ];
+            // Check that mapped accounts are still active
+            if ($defaultMapping->debitAccount?->is_active && $defaultMapping->creditAccount?->is_active) {
+                return [
+                    'debit_account_id' => $defaultMapping->debit_account_id,
+                    'credit_account_id' => $defaultMapping->credit_account_id,
+                    'confidence' => 0.70,
+                ];
+            }
         }
 
         // Last resort: Find typical cash and receivables accounts
@@ -541,7 +562,7 @@ class AccountSuggestionService
         int $companyId,
         string $entityType
     ): ?array {
-        $searchText = strtolower($entityName . ' ' . ($description ?? ''));
+        $searchText = mb_strtolower($entityName . ' ' . ($description ?? ''), 'UTF-8');
 
         // First check for special account types (VAT, bank, etc.)
         $specialAccount = $this->detectSpecialAccountType($searchText, $companyId, $entityType);
@@ -838,15 +859,43 @@ class AccountSuggestionService
             ['patterns' => ['репрезентација', 'угостителство', 'ресторан', 'кафе', 'entertainment'], 'code' => '440', 'confidence' => 0.85],
         ];
 
+        // Score each category by counting pattern matches
+        $scores = [];
         foreach ($expenseCategories as $category) {
+            $matchCount = 0;
             foreach ($category['patterns'] as $pattern) {
                 if (str_contains($text, $pattern)) {
-                    return ['code' => $category['code'], 'confidence' => $category['confidence']];
+                    $matchCount++;
                 }
+            }
+            if ($matchCount > 0) {
+                $scores[] = [
+                    'code' => $category['code'],
+                    'base_confidence' => $category['confidence'],
+                    'match_count' => $matchCount,
+                    'pattern_count' => count($category['patterns']),
+                ];
             }
         }
 
-        return null;
+        if (empty($scores)) {
+            return null;
+        }
+
+        // Sort by match count (descending), then by base confidence (descending)
+        usort($scores, function ($a, $b) {
+            if ($a['match_count'] !== $b['match_count']) {
+                return $b['match_count'] <=> $a['match_count'];
+            }
+            return $b['base_confidence'] <=> $a['base_confidence'];
+        });
+
+        // Return best match with adjusted confidence based on match ratio
+        $best = $scores[0];
+        $matchRatio = $best['match_count'] / $best['pattern_count'];
+        $confidence = min(0.95, $best['base_confidence'] + ($matchRatio * 0.05));
+
+        return ['code' => $best['code'], 'confidence' => $confidence];
     }
 
     /**
@@ -860,7 +909,7 @@ class AccountSuggestionService
      */
     protected function suggestByCategory(string $categoryName, int $companyId): ?array
     {
-        $categoryLower = strtolower($categoryName);
+        $categoryLower = mb_strtolower($categoryName, 'UTF-8');
 
         // Category to official 3-digit Macedonian account code mapping (Class 4 - Costs)
         $categoryMap = [
@@ -1034,6 +1083,15 @@ class AccountSuggestionService
         int $accountId,
         int $companyId
     ): void {
+        // Validate that the account belongs to the company before saving
+        $account = Account::where('id', $accountId)
+            ->where('company_id', $companyId)
+            ->first();
+
+        if (!$account) {
+            throw new \InvalidArgumentException("Account does not belong to company");
+        }
+
         try {
             // For single-sided mappings, we'll use the account for both debit and credit
             // The caller can specify transaction type if needed

@@ -3852,6 +3852,7 @@
       "account": "Account",
       "select_account": "Select account",
       "mapping_saved": "Mapping saved successfully",
+      "confirmed": "Confirmed",
       "all_accepted": "All suggestions accepted",
       "accept_all_confirm": "This will accept {count} high-confidence suggestions. Are you sure?",
       "suggestions_refreshed": "Suggestions refreshed successfully",

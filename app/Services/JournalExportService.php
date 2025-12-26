@@ -44,6 +44,18 @@ class JournalExportService
     protected Collection $accountsByIdCache;
 
     /**
+     * Cached journal entries to avoid duplicate query execution.
+     * Used by toCSV(), toPantheonXML(), toZonelCSV(), getSummary().
+     */
+    protected ?Collection $entriesCache = null;
+
+    /**
+     * Whether to include tax_id in entity information.
+     * Set to true only for export formats that specifically require it.
+     */
+    protected bool $includeTaxIdInEntity = false;
+
+    /**
      * Export formats supported
      */
     public const FORMAT_CSV = 'csv';
@@ -143,10 +155,43 @@ class JournalExportService
     }
 
     /**
+     * Set whether to include tax_id in entity information.
+     * Should be set to true only for export formats that specifically require it.
+     *
+     * @param bool $include Whether to include tax_id
+     * @return $this
+     */
+    public function setIncludeTaxIdInEntity(bool $include): self
+    {
+        $this->includeTaxIdInEntity = $include;
+
+        return $this;
+    }
+
+    /**
+     * Clear the entries cache.
+     * Call this if you need to force a fresh query.
+     *
+     * @return $this
+     */
+    public function clearEntriesCache(): self
+    {
+        $this->entriesCache = null;
+
+        return $this;
+    }
+
+    /**
      * Get all journal entries for the date range.
+     * Results are cached to avoid duplicate query execution.
      */
     public function getJournalEntries(): Collection
     {
+        // Return cached entries if available
+        if ($this->entriesCache !== null) {
+            return $this->entriesCache;
+        }
+
         $entries = collect();
 
         // Get invoice journal entries
@@ -180,7 +225,10 @@ class JournalExportService
             $entries = $entries->merge($this->expenseToJournalEntries($expense));
         }
 
-        return $entries->sortBy('date');
+        // Cache the entries for subsequent calls
+        $this->entriesCache = $entries->sortBy('date');
+
+        return $this->entriesCache;
     }
 
     /**
@@ -195,12 +243,13 @@ class JournalExportService
 
         // Collect item descriptions for AI suggestions
         $itemDescriptions = $invoice->items->pluck('name')->filter()->implode(', ');
-        $description = "Invoice {$reference} - {$invoice->customer->name}";
+        $customerName = $invoice->customer?->name ?? 'Unknown';
+        $description = "Invoice {$reference} - {$customerName}";
         $itemContext = $itemDescriptions ?: $invoice->notes ?? '';
 
         // Customer details for Pantheon
-        $customerTaxId = $invoice->customer->tax_id ?? $invoice->customer->vat_number ?? '';
-        $customerCode = $customerTaxId ?: 'C' . str_pad($invoice->customer_id, 6, '0', STR_PAD_LEFT);
+        $customerTaxId = $invoice->customer?->tax_id ?? $invoice->customer?->vat_number ?? '';
+        $customerCode = $customerTaxId ?: 'C' . str_pad($invoice->customer_id ?? 0, 6, '0', STR_PAD_LEFT);
 
         // Collect detailed item information
         $itemsDetails = [];
@@ -239,6 +288,14 @@ class JournalExportService
 
         // Debit: Accounts Receivable
         $arAccountData = $this->getAccountCodeWithStatus('accounts_receivable', self::TYPE_INVOICE, 'customer', $invoice->customer_id);
+        $customerEntity = [
+            'type' => 'customer',
+            'id' => $invoice->customer_id,
+            'name' => $customerName,
+        ];
+        if ($this->includeTaxIdInEntity) {
+            $customerEntity['tax_id'] = $customerTaxId;
+        }
         $entries[] = [
             'date' => $date,
             'reference' => $reference,
@@ -250,23 +307,18 @@ class JournalExportService
             'item_context' => $itemContext,
             'debit' => $invoice->total / 100,
             'credit' => 0,
-            'customer_name' => $invoice->customer->name ?? '',
+            'customer_name' => $customerName,
             'customer_code' => $customerCode,
             'customer_tax_id' => $customerTaxId,
-            'currency' => $invoice->currency->code ?? 'MKD',
-            'entity' => [
-                'type' => 'customer',
-                'id' => $invoice->customer_id,
-                'name' => $invoice->customer->name ?? '',
-                'tax_id' => $customerTaxId,
-            ],
+            'currency' => $invoice->currency?->code ?? 'MKD',
+            'entity' => $customerEntity,
             'items' => $itemsDetails,
             'tax_breakdown' => array_values($taxBreakdown),
             'mapping_status' => $arAccountData['status'],
         ];
 
         // Credit: Revenue (subtotal) - Use AI to classify based on invoice items
-        $aiContext = trim(($invoice->customer->name ?? '') . ' ' . $itemContext);
+        $aiContext = trim($customerName . ' ' . $itemContext);
         $revenueAccountData = $this->getRevenueAccountWithAI($aiContext, $invoice->customer_id);
         $subtotal = $invoice->sub_total / 100;
         $entries[] = [
@@ -280,16 +332,11 @@ class JournalExportService
             'item_context' => $itemContext,
             'debit' => 0,
             'credit' => $subtotal,
-            'customer_name' => $invoice->customer->name ?? '',
+            'customer_name' => $customerName,
             'customer_code' => $customerCode,
             'customer_tax_id' => $customerTaxId,
-            'currency' => $invoice->currency->code ?? 'MKD',
-            'entity' => [
-                'type' => 'customer',
-                'id' => $invoice->customer_id,
-                'name' => $invoice->customer->name ?? '',
-                'tax_id' => $customerTaxId,
-            ],
+            'currency' => $invoice->currency?->code ?? 'MKD',
+            'entity' => $customerEntity,
             'items' => $itemsDetails,
             'tax_breakdown' => array_values($taxBreakdown),
             'mapping_status' => $revenueAccountData['status'],
@@ -311,10 +358,10 @@ class JournalExportService
                         'item_context' => "ДДВ {$rate}%",
                         'debit' => 0,
                         'credit' => $taxData['amount'],
-                        'customer_name' => $invoice->customer->name ?? '',
+                        'customer_name' => $customerName,
                         'customer_code' => $customerCode,
                         'customer_tax_id' => $customerTaxId,
-                        'currency' => $invoice->currency->code ?? 'MKD',
+                        'currency' => $invoice->currency?->code ?? 'MKD',
                         'entity' => [
                             'type' => 'tax',
                             'id' => null,
@@ -341,10 +388,10 @@ class JournalExportService
                 'item_context' => 'ДДВ VAT',
                 'debit' => 0,
                 'credit' => $invoice->tax / 100,
-                'customer_name' => $invoice->customer->name ?? '',
+                'customer_name' => $customerName,
                 'customer_code' => $customerCode,
                 'customer_tax_id' => $customerTaxId,
-                'currency' => $invoice->currency->code ?? 'MKD',
+                'currency' => $invoice->currency?->code ?? 'MKD',
                 'entity' => [
                     'type' => 'tax',
                     'id' => null,
@@ -367,15 +414,26 @@ class JournalExportService
         $entries = [];
         $date = \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d');
         $reference = $payment->payment_number;
-        $description = "Payment {$reference} - {$payment->customer->name}";
+        $customerName = $payment->customer?->name ?? 'Unknown';
+        $description = "Payment {$reference} - {$customerName}";
 
         // Customer details
-        $customerTaxId = $payment->customer->tax_id ?? $payment->customer->vat_number ?? '';
-        $customerCode = $customerTaxId ?: 'C' . str_pad($payment->customer_id, 6, '0', STR_PAD_LEFT);
+        $customerTaxId = $payment->customer?->tax_id ?? $payment->customer?->vat_number ?? '';
+        $customerCode = $customerTaxId ?: 'C' . str_pad($payment->customer_id ?? 0, 6, '0', STR_PAD_LEFT);
 
         // Payment method for document type
-        $paymentMethod = $payment->paymentMethod->name ?? 'Cash';
+        $paymentMethod = $payment->paymentMethod?->name ?? 'Cash';
         $docType = 'PL'; // Плаќање (Payment)
+
+        // Build customer entity
+        $customerEntity = [
+            'type' => 'customer',
+            'id' => $payment->customer_id,
+            'name' => $customerName,
+        ];
+        if ($this->includeTaxIdInEntity) {
+            $customerEntity['tax_id'] = $customerTaxId;
+        }
 
         // Debit: Cash/Bank
         $cashAccountData = $this->getAccountCodeWithStatus('cash', self::TYPE_PAYMENT);
@@ -389,17 +447,12 @@ class JournalExportService
             'description' => $description,
             'debit' => $payment->amount / 100,
             'credit' => 0,
-            'customer_name' => $payment->customer->name ?? '',
+            'customer_name' => $customerName,
             'customer_code' => $customerCode,
             'customer_tax_id' => $customerTaxId,
-            'currency' => $payment->currency->code ?? 'MKD',
+            'currency' => $payment->currency?->code ?? 'MKD',
             'payment_method' => $paymentMethod,
-            'entity' => [
-                'type' => 'customer',
-                'id' => $payment->customer_id,
-                'name' => $payment->customer->name ?? '',
-                'tax_id' => $customerTaxId,
-            ],
+            'entity' => $customerEntity,
             'mapping_status' => $cashAccountData['status'],
         ];
 
@@ -415,17 +468,12 @@ class JournalExportService
             'description' => $description,
             'debit' => 0,
             'credit' => $payment->amount / 100,
-            'customer_name' => $payment->customer->name ?? '',
+            'customer_name' => $customerName,
             'customer_code' => $customerCode,
             'customer_tax_id' => $customerTaxId,
-            'currency' => $payment->currency->code ?? 'MKD',
+            'currency' => $payment->currency?->code ?? 'MKD',
             'payment_method' => $paymentMethod,
-            'entity' => [
-                'type' => 'customer',
-                'id' => $payment->customer_id,
-                'name' => $payment->customer->name ?? '',
-                'tax_id' => $customerTaxId,
-            ],
+            'entity' => $customerEntity,
             'mapping_status' => $arAccountData['status'],
         ];
 
@@ -441,7 +489,7 @@ class JournalExportService
         $entries = [];
         $date = \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d');
         $reference = $expense->invoice_number ?? 'EXP-'.$expense->id;
-        $categoryName = $expense->category->name ?? 'Expense';
+        $categoryName = $expense->category?->name ?? 'Expense';
         $description = "{$categoryName} - {$reference}";
         $docType = 'FP'; // Фактура Примена (Invoice Received / Expense)
 
@@ -450,9 +498,22 @@ class JournalExportService
         $supplierCode = '';
         $supplierName = '';
         if ($expense->supplier_id && $expense->supplier) {
-            $supplierTaxId = $expense->supplier->tax_id ?? $expense->supplier->vat_number ?? '';
+            $supplierTaxId = $expense->supplier?->tax_id ?? $expense->supplier?->vat_number ?? '';
             $supplierCode = $supplierTaxId ?: 'S' . str_pad($expense->supplier_id, 6, '0', STR_PAD_LEFT);
-            $supplierName = $expense->supplier->name ?? '';
+            $supplierName = $expense->supplier?->name ?? '';
+        }
+
+        // Build supplier entity (only if supplier exists)
+        $supplierEntity = null;
+        if ($expense->supplier_id) {
+            $supplierEntity = [
+                'type' => 'supplier',
+                'id' => $expense->supplier_id,
+                'name' => $supplierName,
+            ];
+            if ($this->includeTaxIdInEntity) {
+                $supplierEntity['tax_id'] = $supplierTaxId;
+            }
         }
 
         // Debit: Expense account (check for learned category mapping)
@@ -470,7 +531,7 @@ class JournalExportService
             'customer_name' => $supplierName,
             'customer_code' => $supplierCode,
             'customer_tax_id' => $supplierTaxId,
-            'currency' => $expense->currency->code ?? 'MKD',
+            'currency' => $expense->currency?->code ?? 'MKD',
             'entity' => [
                 'type' => 'expense_category',
                 'id' => $expense->expense_category_id,
@@ -497,13 +558,8 @@ class JournalExportService
             'customer_name' => $supplierName,
             'customer_code' => $supplierCode,
             'customer_tax_id' => $supplierTaxId,
-            'currency' => $expense->currency->code ?? 'MKD',
-            'entity' => $expense->supplier_id ? [
-                'type' => 'supplier',
-                'id' => $expense->supplier_id,
-                'name' => $supplierName,
-                'tax_id' => $supplierTaxId,
-            ] : null,
+            'currency' => $expense->currency?->code ?? 'MKD',
+            'entity' => $supplierEntity,
             'mapping_status' => $payableAccountData['status'],
         ];
 
