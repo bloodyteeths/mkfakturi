@@ -303,8 +303,36 @@ const filteredAccounts = computed(() => {
   if (!selectedType.value) {
     return partnerAccountingStore.accounts
   }
-  return partnerAccountingStore.accounts.filter(
-    (a) => a.type === selectedType.value
+
+  const accounts = partnerAccountingStore.accounts
+
+  // First, find all accounts that match the filter
+  const matchingIds = new Set(
+    accounts.filter((a) => a.type === selectedType.value).map((a) => a.id)
+  )
+
+  // Then, find all ancestor accounts that need to be included
+  // to maintain the tree hierarchy
+  const ancestorIds = new Set()
+
+  function addAncestors(account) {
+    if (account.parent_id) {
+      const parent = accounts.find((a) => a.id === account.parent_id)
+      if (parent && !matchingIds.has(parent.id) && !ancestorIds.has(parent.id)) {
+        ancestorIds.add(parent.id)
+        addAncestors(parent)
+      }
+    }
+  }
+
+  // For each matching account, add its ancestors
+  accounts
+    .filter((a) => matchingIds.has(a.id))
+    .forEach((a) => addAncestors(a))
+
+  // Return accounts that either match the filter or are ancestors of matching accounts
+  return accounts.filter(
+    (a) => matchingIds.has(a.id) || ancestorIds.has(a.id)
   )
 })
 
@@ -480,12 +508,15 @@ function closeImportModal() {
 }
 
 async function submitImport() {
-  if (!importFile.value) return
+  if (!importFile.value || !importFile.value.length) return
+
+  // Extract the actual File object from the array returned by BaseFileUploader
+  const file = importFile.value[0].fileObject
 
   try {
     await partnerAccountingStore.importAccounts(
       selectedCompanyId.value,
-      importFile.value
+      file
     )
     closeImportModal()
     await loadAccounts()

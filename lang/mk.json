@@ -4749,6 +4749,13 @@
   "partner": {
     "select_company": "Избери компанија",
     "select_company_placeholder": "Избери компанија",
+    "console": {
+      "home": "Конзола",
+      "commissions": "Провизии",
+      "invite_company": "Покани компанија",
+      "invite_partner": "Покани партнер",
+      "invitations": "Покани"
+    },
     "accounting": {
       "title": "Сметководство",
       "chart_of_accounts": "Контен план",

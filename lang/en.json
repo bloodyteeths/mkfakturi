@@ -3718,6 +3718,13 @@
   "partner": {
     "select_company": "Select Company",
     "select_company_placeholder": "Choose a company",
+    "console": {
+      "home": "Console Home",
+      "commissions": "Commissions",
+      "invite_company": "Invite Company",
+      "invite_partner": "Invite Partner",
+      "invitations": "Invitations"
+    },
     "accounting": {
       "title": "Accounting",
       "chart_of_accounts": "Chart of Accounts",

@@ -79,14 +79,9 @@
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <BaseSpinner />
-    </div>
-
     <!-- Period Locks Table -->
     <BaseTable
-      v-else-if="selectedCompanyId"
+      v-if="selectedCompanyId"
       ref="table"
       class="mt-6"
       :show-filter="false"
@@ -263,7 +258,8 @@ async function fetchData({ page, filter, sort }) {
     return { data: [], pagination: { totalPages: 1, currentPage: 1 } }
   }
 
-  isLoading.value = true
+  // Note: Do NOT set isLoading here - it causes infinite loop by unmounting the table
+  // BaseTable handles its own loading state internally
   try {
     const response = await axios.get(`/partner/companies/${selectedCompanyId.value}/period-locks`, {
       params: {
@@ -283,8 +279,6 @@ async function fetchData({ page, filter, sort }) {
   } catch (error) {
     console.error('Failed to fetch period locks:', error)
     return { data: [], pagination: { totalPages: 1, currentPage: 1 } }
-  } finally {
-    isLoading.value = false
   }
 }
 

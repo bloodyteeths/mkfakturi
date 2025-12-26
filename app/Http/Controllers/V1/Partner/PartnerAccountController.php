@@ -304,7 +304,8 @@ class PartnerAccountController extends Controller
 
         // Validate parent (can't be self or descendant)
         if ($request->has('parent_id') && $request->parent_id) {
-            if ($request->parent_id === $account) {
+            // Check if trying to set self as parent
+            if ($request->parent_id == $accountModel->id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Account cannot be its own parent.',
@@ -318,6 +319,15 @@ class PartnerAccountController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Parent account not found.',
+                ], 422);
+            }
+
+            // Check if the new parent is a descendant of the current account (circular reference)
+            $descendantIds = $this->getAllDescendantIds($accountModel);
+            if (in_array($request->parent_id, $descendantIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot set a descendant account as parent (circular reference).',
                 ], 422);
             }
         }
@@ -604,6 +614,27 @@ class PartnerAccountController extends Controller
             ->where('partner_company_links.is_active', true)
             ->exists();
     }
+
+    /**
+     * Get all descendant IDs for an account (children, grandchildren, etc.).
+     *
+     * @param Account $account The account to get descendants for
+     * @return array Array of descendant account IDs
+     */
+    protected function getAllDescendantIds(Account $account): array
+    {
+        $descendantIds = [];
+        $children = Account::where('parent_id', $account->id)->get();
+
+        foreach ($children as $child) {
+            $descendantIds[] = $child->id;
+            // Recursively get descendants of each child
+            $descendantIds = array_merge($descendantIds, $this->getAllDescendantIds($child));
+        }
+
+        return $descendantIds;
+    }
+    // CLAUDE-CHECKPOINT
 }
 
 // CLAUDE-CHECKPOINT

@@ -311,23 +311,33 @@ class ReportExportController extends Controller
         $csv .= "{$company->name}\n";
         $csv .= "From {$formattedFromDate} to {$formattedToDate}\n\n";
 
+        // Use nested income_statement structure if available
+        $data = $incomeStatement['income_statement'] ?? $incomeStatement;
+        $totals = $data['totals'] ?? [];
+
         // Revenue
         $csv .= "REVENUE\n";
         $csv .= "Account,Amount\n";
-        foreach ($incomeStatement['revenue'] ?? [] as $account) {
+        foreach ($incomeStatement['revenues'] ?? $data['revenues'] ?? [] as $account) {
             $csv .= "\"{$account['name']}\",{$account['balance']}\n";
         }
-        $csv .= "Total Revenue,{$incomeStatement['total_revenue']}\n\n";
+        $totalRevenue = $totals['revenue'] ?? $incomeStatement['total_revenue'] ?? 0;
+        $csv .= "Total Revenue,{$totalRevenue}\n\n";
 
         // Expenses
         $csv .= "EXPENSES\n";
         $csv .= "Account,Amount\n";
-        foreach ($incomeStatement['expenses'] ?? [] as $account) {
+        foreach ($incomeStatement['expenses'] ?? $data['expenses'] ?? [] as $account) {
             $csv .= "\"{$account['name']}\",{$account['balance']}\n";
         }
-        $csv .= "Total Expenses,{$incomeStatement['total_expenses']}\n\n";
+        $totalExpenses = $totals['expenses'] ?? $incomeStatement['total_expenses'] ?? 0;
+        $csv .= "Total Expenses,{$totalExpenses}\n\n";
 
-        $csv .= "Net Income,{$incomeStatement['net_income']}\n";
+        $netIncome = ($totals['revenue'] ?? 0) - ($totals['expenses'] ?? 0);
+        if ($netIncome === 0 && isset($incomeStatement['net_income'])) {
+            $netIncome = $incomeStatement['net_income'];
+        }
+        $csv .= "Net Income,{$netIncome}\n";
 
         $filename = "income_statement_{$fromDate}_{$toDate}.csv";
 
@@ -394,7 +404,9 @@ class ReportExportController extends Controller
             $credit = $account['credit'] > 0 ? $account['credit'] : '';
             $csv .= "\"{$account['name']}\",{$debit},{$credit}\n";
         }
-        $csv .= "Total,{$trialBalance['total_debit']},{$trialBalance['total_credit']}\n";
+        $totalDebit = $trialBalance['trial_balance']['total_debits'] ?? $trialBalance['total_debit'] ?? 0;
+        $totalCredit = $trialBalance['trial_balance']['total_credits'] ?? $trialBalance['total_credit'] ?? 0;
+        $csv .= "Total,{$totalDebit},{$totalCredit}\n";
 
         $filename = "trial_balance_{$asOfDate}.csv";
 
@@ -462,7 +474,8 @@ class ReportExportController extends Controller
             $totalTax = $tax->total_tax_amount / 100;
             $csv .= "\"{$taxName}\",{$taxAmount},{$taxPercent}%,{$totalTax}\n";
         }
-        $csv .= "Total Tax,,,{$totalAmount}\n";
+        $formattedTotalTax = $totalAmount / 100;
+        $csv .= "Total Tax,,,{$formattedTotalTax}\n";
 
         $filename = "tax_summary_{$fromDate}_{$toDate}.csv";
 
@@ -531,7 +544,8 @@ class ReportExportController extends Controller
             $amount = $expense->total_amount / 100;
             $csv .= "\"{$categoryName}\",{$amount}\n";
         }
-        $csv .= "Total Expenses,{$totalAmount}\n";
+        $formattedTotalExpenses = $totalAmount / 100;
+        $csv .= "Total Expenses,{$formattedTotalExpenses}\n";
 
         $filename = "expenses_report_{$fromDate}_{$toDate}.csv";
 

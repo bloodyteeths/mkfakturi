@@ -565,26 +565,36 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
     /**
      * Get AI suggestions for specific entries
+     *
+     * @param {number} companyId - The company ID
+     * @param {Array} entries - Array of entry objects with { type, entity_id, name, description }
+     *                          where type is 'customer', 'supplier', 'category', or 'expense_category'
      */
-    async getSuggestions(companyId, entryIds) {
+    async getSuggestions(companyId, entries) {
       this.error = null
 
       try {
+        // Backend expects: { entries: [{ type, entity_id, name, description }] }
         const response = await axios.post(
           `/partner/companies/${companyId}/journal/suggest`,
-          { entry_ids: entryIds }
+          { entries }
         )
 
-        // Update suggestions in journalEntries
-        const suggestions = response.data.data || []
-        suggestions.forEach((suggestion) => {
-          const index = this.journalEntries.findIndex((e) => e.id === suggestion.entry_id)
+        // Update suggestions in journalEntries based on response
+        const suggestionsData = response.data.data?.suggestions || []
+        suggestionsData.forEach((suggestion) => {
+          // Find matching entry by entity_type and entity_id
+          const index = this.journalEntries.findIndex(
+            (e) =>
+              e.entity_type === suggestion.entity_type &&
+              e.entity_id === suggestion.entity_id
+          )
           if (index > -1) {
             this.journalEntries[index] = {
               ...this.journalEntries[index],
-              account_id: suggestion.account_id,
-              confidence: suggestion.confidence,
-              suggestion_reason: suggestion.reason,
+              account_id: suggestion.suggested_account?.id || null,
+              confidence: suggestion.suggested_account?.confidence || 0,
+              suggestion_reason: suggestion.suggested_account?.reason || 'default',
             }
           }
         })
@@ -620,6 +630,14 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
 
     /**
      * Bulk accept all high-confidence suggestions
+     *
+     * Filters journal entries with confidence >= threshold and saves them as learned mappings.
+     * Uses the /journal/learn endpoint to persist the accepted mappings.
+     *
+     * @param {number} companyId - The company ID
+     * @param {number} minConfidence - Minimum confidence threshold (default 0.8)
+     * @param {string|null} dateFrom - Optional start date filter (not used for local filtering)
+     * @param {string|null} dateTo - Optional end date filter (not used for local filtering)
      */
     async acceptAllSuggestions(companyId, minConfidence = 0.8, dateFrom = null, dateTo = null) {
       const notificationStore = useNotificationStore()
@@ -627,16 +645,59 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
       this.error = null
 
       try {
-        const response = await axios.post(
-          `/partner/companies/${companyId}/journal/accept-all`,
-          {
-            min_confidence: minConfidence,
-            date_from: dateFrom,
-            date_to: dateTo,
-          }
+        // Filter entries with high confidence that have valid entity info and account_id
+        const highConfidenceEntries = this.journalEntries.filter(
+          (entry) =>
+            entry.confidence >= minConfidence &&
+            entry.entity_type &&
+            entry.entity_id &&
+            entry.account_id &&
+            !entry.confirmed
         )
 
-        return response.data
+        if (highConfidenceEntries.length === 0) {
+          notificationStore.showNotification({
+            type: 'warning',
+            message: 'No high-confidence entries to accept',
+          })
+          return { success: true, accepted_count: 0 }
+        }
+
+        // Build mappings array for the learn endpoint
+        const mappings = highConfidenceEntries.map((entry) => ({
+          entity_type: entry.entity_type,
+          entity_id: entry.entity_id,
+          account_id: entry.account_id,
+          accepted: true,
+        }))
+
+        // Use the learn endpoint to save all mappings at once
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/learn`,
+          { mappings }
+        )
+
+        // Mark entries as confirmed in local state
+        highConfidenceEntries.forEach((entry) => {
+          const index = this.journalEntries.findIndex((e) => e.id === entry.id)
+          if (index > -1) {
+            this.journalEntries[index] = {
+              ...this.journalEntries[index],
+              confirmed: true,
+            }
+          }
+        })
+
+        notificationStore.showNotification({
+          type: 'success',
+          message: `${highConfidenceEntries.length} high-confidence entries accepted`,
+        })
+
+        return {
+          success: true,
+          accepted_count: highConfidenceEntries.length,
+          learned_count: response.data.learned_count,
+        }
       } catch (error) {
         this.error = error.response?.data?.message || 'Failed to accept all suggestions'
         handleError(error)

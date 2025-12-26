@@ -323,9 +323,8 @@ async function loadEntriesWithSuggestions(page = 1) {
 
 function onCompanyChange() {
   changedEntries.value.clear()
-  filters.start_date = null
-  filters.end_date = null
-
+  // Preserve user's date selection when company changes
+  // Dates are only set to defaults on initial load (in onMounted)
   loadInitialData()
 }
 
