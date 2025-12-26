@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Partner;
 
+use App\Enums\PartnerPermission;
 use App\Http\Controllers\Controller;
 use App\Models\AccountMapping;
 use App\Models\Partner;
@@ -46,6 +47,17 @@ class PartnerJournalExportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No access to this company',
+            ], 403);
+        }
+
+        // Check granular permissions - require VIEW_REPORTS or EXPORT_REPORTS
+        if (!$partner->hasAnyPermission($company, [
+            PartnerPermission::VIEW_REPORTS,
+            PartnerPermission::EXPORT_REPORTS,
+        ])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient permissions',
             ], 403);
         }
 
@@ -289,6 +301,14 @@ class PartnerJournalExportController extends Controller
             return response('No access to this company', 403);
         }
 
+        // Check granular permissions - require EXPORT_REPORTS
+        if (!$partner->hasPermission($company, PartnerPermission::EXPORT_REPORTS)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient permissions',
+            ], 403);
+        }
+
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -456,6 +476,14 @@ class PartnerJournalExportController extends Controller
             ], 403);
         }
 
+        // Check granular permissions - require MANAGE_COMPANY_SETTINGS
+        if (!$partner->hasPermission($company, PartnerPermission::MANAGE_COMPANY_SETTINGS)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient permissions',
+            ], 403);
+        }
+
         $request->validate([
             'mappings' => 'required|array|min:1',
             'mappings.*.entity_type' => 'required|in:customer,supplier,expense_category',
@@ -540,6 +568,14 @@ class PartnerJournalExportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No access to this company',
+            ], 403);
+        }
+
+        // Check granular permissions - require MANAGE_COMPANY_SETTINGS
+        if (!$partner->hasPermission($company, PartnerPermission::MANAGE_COMPANY_SETTINGS)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient permissions',
             ], 403);
         }
 

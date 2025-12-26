@@ -17,10 +17,32 @@ use League\Csv\Writer;
  *
  * Uses AI-powered account classification for revenue accounts based on
  * invoice item content (goods, services, products, consulting).
+ *
+ * Performance: Pre-loads all AccountMappings and Accounts for the company
+ * during construction to eliminate N+1 query problems when processing
+ * multiple journal entries.
  */
 class JournalExportService
 {
     protected ?AccountSuggestionService $suggestionService = null;
+
+    /**
+     * Pre-loaded account mappings cache keyed by "entity_type:entity_id".
+     * Eliminates N+1 queries when processing multiple journal entries.
+     */
+    protected Collection $accountMappingsCache;
+
+    /**
+     * Pre-loaded accounts cache keyed by account code.
+     * Eliminates repeated Account::where('code', ...) queries.
+     */
+    protected Collection $accountsByCodeCache;
+
+    /**
+     * Pre-loaded accounts cache keyed by account ID.
+     */
+    protected Collection $accountsByIdCache;
+
     /**
      * Export formats supported
      */
@@ -51,6 +73,73 @@ class JournalExportService
         $this->fromDate = Carbon::parse($from)->startOfDay();
         $this->toDate = Carbon::parse($to)->endOfDay();
         $this->suggestionService = new AccountSuggestionService();
+        $this->initializeCaches();
+    }
+
+    /**
+     * Initialize all caches to eliminate N+1 queries.
+     *
+     * Pre-loads:
+     * - All AccountMappings for the company (with debit/credit accounts)
+     * - All active Accounts for the company (keyed by code and ID)
+     */
+    protected function initializeCaches(): void
+    {
+        // Pre-load all account mappings for this company with their related accounts
+        $allMappings = AccountMapping::where('company_id', $this->companyId)
+            ->with(['debitAccount', 'creditAccount'])
+            ->get();
+
+        // Key mappings by "entity_type:entity_id" for O(1) lookup
+        $this->accountMappingsCache = $allMappings->keyBy(function ($mapping) {
+            return $mapping->entity_type . ':' . ($mapping->entity_id ?? 'null');
+        });
+
+        // Pre-load all active accounts for this company
+        $allAccounts = Account::where('company_id', $this->companyId)
+            ->where('is_active', true)
+            ->get();
+
+        // Key accounts by code for O(1) lookup
+        $this->accountsByCodeCache = $allAccounts->keyBy('code');
+
+        // Key accounts by ID for O(1) lookup
+        $this->accountsByIdCache = $allAccounts->keyBy('id');
+    }
+
+    /**
+     * Get a cached account mapping by entity type and ID.
+     *
+     * @param string $entityType Entity type (customer, supplier, expense_category, default)
+     * @param int|null $entityId Entity ID (null for default mappings)
+     * @return AccountMapping|null
+     */
+    protected function getCachedMapping(string $entityType, ?int $entityId): ?AccountMapping
+    {
+        $key = $entityType . ':' . ($entityId ?? 'null');
+        return $this->accountMappingsCache->get($key);
+    }
+
+    /**
+     * Get a cached account by code.
+     *
+     * @param string $code Account code
+     * @return Account|null
+     */
+    protected function getCachedAccountByCode(string $code): ?Account
+    {
+        return $this->accountsByCodeCache->get($code);
+    }
+
+    /**
+     * Get a cached account by ID.
+     *
+     * @param int $id Account ID
+     * @return Account|null
+     */
+    protected function getCachedAccountById(int $id): ?Account
+    {
+        return $this->accountsByIdCache->get($id);
     }
 
     /**
@@ -425,6 +514,7 @@ class JournalExportService
      * Get account code with mapping status information.
      *
      * Returns account code and status showing if it's learned, default, etc.
+     * Uses pre-loaded caches to avoid N+1 query problems.
      *
      * @param string $mapping Account mapping type (accounts_receivable, revenue, etc.)
      * @param string $type Transaction type (invoice, payment, expense)
@@ -455,10 +545,8 @@ class JournalExportService
             };
 
             if ($mappingEntityType) {
-                $accountMapping = AccountMapping::where('company_id', $this->companyId)
-                    ->where('entity_type', $mappingEntityType)
-                    ->where('entity_id', $entityId)
-                    ->first();
+                // Use cached lookup instead of database query
+                $accountMapping = $this->getCachedMapping($mappingEntityType, $entityId);
 
                 if ($accountMapping && $accountMapping->debitAccount) {
                     $accountCode = $accountMapping->debitAccount->code;
@@ -486,6 +574,7 @@ class JournalExportService
 
     /**
      * Get account code from mappings or use default.
+     * Uses pre-loaded caches to avoid N+1 query problems.
      */
     protected function getAccountCode(string $mapping, string $type, ?int $categoryId = null): string
     {
@@ -497,28 +586,13 @@ class JournalExportService
         $accountMapping = null;
 
         if ($mapping === 'expense' && $categoryId) {
-            // For expenses with category, use ENTITY_EXPENSE_CATEGORY
-            $accountMapping = AccountMapping::findForEntity(
-                $this->companyId,
-                AccountMapping::ENTITY_EXPENSE_CATEGORY,
-                $categoryId,
-                AccountMapping::TRANSACTION_EXPENSE
-            );
-        } else {
-            // For other mappings, use default entity with appropriate transaction type
-            $transactionType = match($type) {
-                self::TYPE_INVOICE => AccountMapping::TRANSACTION_INVOICE,
-                self::TYPE_PAYMENT => AccountMapping::TRANSACTION_PAYMENT,
-                self::TYPE_EXPENSE => AccountMapping::TRANSACTION_EXPENSE,
-                default => null,
-            };
+            // For expenses with category, use cached lookup for ENTITY_EXPENSE_CATEGORY
+            $accountMapping = $this->getCachedMapping(AccountMapping::ENTITY_EXPENSE_CATEGORY, $categoryId);
+        }
 
-            $accountMapping = AccountMapping::findForEntity(
-                $this->companyId,
-                AccountMapping::ENTITY_DEFAULT,
-                null,
-                $transactionType
-            );
+        // If no specific mapping found, try default entity mapping
+        if (!$accountMapping) {
+            $accountMapping = $this->getCachedMapping(AccountMapping::ENTITY_DEFAULT, null);
         }
 
         // Use debit account for AR/expense, credit account for revenue/AP/tax
@@ -561,6 +635,7 @@ class JournalExportService
      * Get revenue account using AI classification based on invoice item content.
      *
      * First checks for learned mappings, then falls back to AI classification.
+     * Uses pre-loaded caches to avoid N+1 query problems.
      * Returns classified revenue account:
      * - 4010: Приходи од продажба на стока (Goods/Trade)
      * - 4020: Приходи од услуги (Services)
@@ -573,17 +648,15 @@ class JournalExportService
      */
     protected function getRevenueAccountWithAI(string $aiContext, ?int $customerId): array
     {
-        // First check for learned mapping for this customer
+        // First check for learned mapping for this customer using cached lookup
         if ($customerId) {
-            $learnedMapping = AccountMapping::where('company_id', $this->companyId)
-                ->where('entity_type', AccountMapping::ENTITY_CUSTOMER)
-                ->where('entity_id', $customerId)
-                ->first();
+            $learnedMapping = $this->getCachedMapping(AccountMapping::ENTITY_CUSTOMER, $customerId);
 
-            if ($learnedMapping && $learnedMapping->debitAccount) {
+            // For revenue entries, use credit_account_id (revenue is credited)
+            if ($learnedMapping && $learnedMapping->creditAccount) {
                 return [
-                    'code' => $learnedMapping->debitAccount->code,
-                    'name' => $learnedMapping->debitAccount->name,
+                    'code' => $learnedMapping->creditAccount->code,
+                    'name' => $learnedMapping->creditAccount->name,
                     'status' => [
                         'has_learned_mapping' => true,
                         'confidence' => $learnedMapping->meta['confidence'] ?? 1.0,
@@ -603,18 +676,12 @@ class JournalExportService
             );
 
             if ($suggestion && isset($suggestion['account_id'])) {
-                $account = Account::find($suggestion['account_id']);
+                // Use cached account lookup instead of Account::find()
+                $account = $this->getCachedAccountById($suggestion['account_id']);
                 if ($account) {
-                    // Auto-save this AI suggestion as learned mapping (implicit acceptance during export)
-                    if ($customerId) {
-                        $this->autoSaveMapping(
-                            AccountMapping::ENTITY_CUSTOMER,
-                            $customerId,
-                            $account->id,
-                            $suggestion['confidence'] ?? 0.5,
-                            $suggestion['reason'] ?? 'ai_classification'
-                        );
-                    }
+                    // NOTE: Auto-save removed to prevent polluting learned mappings database.
+                    // Mappings should only be saved via explicit user confirmation through
+                    // the partner review interface (AccountMappingController).
 
                     return [
                         'code' => $account->code,
@@ -624,30 +691,20 @@ class JournalExportService
                             'confidence' => $suggestion['confidence'] ?? 0.5,
                             'is_default' => false,
                             'ai_reason' => $suggestion['reason'] ?? 'pattern',
-                            'auto_saved' => (bool) $customerId,
+                            'auto_saved' => false,
                         ],
                     ];
                 }
             }
         }
 
-        // Fallback to default revenue account
+        // Fallback to default revenue account using cached lookup
         $defaultCode = '4000'; // Приходи од продажба
-        $account = Account::where('company_id', $this->companyId)
-            ->where('code', $defaultCode)
-            ->where('is_active', true)
-            ->first();
+        $account = $this->getCachedAccountByCode($defaultCode);
 
-        // Auto-save default mapping too (so next time it's consistent)
-        if ($customerId && $account) {
-            $this->autoSaveMapping(
-                AccountMapping::ENTITY_CUSTOMER,
-                $customerId,
-                $account->id,
-                0.3,
-                'default_fallback'
-            );
-        }
+        // NOTE: Auto-save removed to prevent polluting learned mappings database.
+        // Mappings should only be saved via explicit user confirmation through
+        // the partner review interface (AccountMappingController).
 
         return [
             'code' => $account ? $account->code : $defaultCode,
@@ -656,20 +713,27 @@ class JournalExportService
                 'has_learned_mapping' => false,
                 'confidence' => 0.3,
                 'is_default' => true,
-                'auto_saved' => (bool) ($customerId && $account),
+                'auto_saved' => false,
             ],
         ];
     }
 
     /**
-     * Auto-save an AI suggestion as a learned mapping.
-     * This happens during export when user implicitly accepts the suggestion.
+     * Save an AI suggestion as a learned mapping.
+     *
+     * DEPRECATED: This method is no longer called automatically during export
+     * to prevent polluting the learned mappings database with unconfirmed suggestions.
+     *
+     * Mappings should ONLY be saved via explicit user confirmation through
+     * the partner review interface (AccountMappingController::confirmMapping).
      *
      * @param string $entityType Entity type (customer, supplier, expense_category)
      * @param int $entityId Entity ID
      * @param int $accountId Account ID to map to
      * @param float $confidence AI confidence score
      * @param string $reason Reason for the suggestion
+     *
+     * @deprecated No longer auto-called. Use AccountMappingController for explicit saves.
      */
     protected function autoSaveMapping(
         string $entityType,

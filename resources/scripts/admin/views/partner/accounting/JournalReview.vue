@@ -60,7 +60,7 @@
           </svg>
         </div>
         <div class="ml-3 text-sm text-blue-700">
-          <p><strong>Како функционира:</strong> Кога ќе изберете сметка од паѓачкото мени, таа веднаш се зачувува. Копчето „Прифати сите" автоматски ги прифаќа само записите со висока сигурност (≥80%).</p>
+          <p><strong>{{ $t('partner.accounting.journal_review_help_title') }}:</strong> {{ $t('partner.accounting.journal_review_help_text') }}</p>
         </div>
       </div>
     </div>
@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
@@ -215,8 +215,12 @@ const dialogStore = useDialogStore()
 // State
 const selectedCompanyId = ref(null)
 const isRefreshing = ref(false)
-const changedEntries = ref(new Map())
 const currentPage = ref(1)
+
+// AbortController for cancelling pending requests
+let abortController = null
+// Debounce timer for filter changes
+let filterDebounceTimer = null
 
 const filters = reactive({
   start_date: null,
@@ -267,11 +271,11 @@ onMounted(async () => {
       filters.end_date = query.end_date
     }
   } else {
-    // Set default date range to last month
+    // Set default date range to last month using local date formatting
     const today = new Date()
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-    filters.start_date = lastMonth.toISOString().split('T')[0]
-    filters.end_date = today.toISOString().split('T')[0]
+    filters.start_date = formatDateToLocal(lastMonth)
+    filters.end_date = formatDateToLocal(today)
   }
 
   await consoleStore.fetchCompanies()
@@ -286,6 +290,26 @@ onMounted(async () => {
   }
 })
 
+// Cleanup on component unmount
+onBeforeUnmount(() => {
+  // Cancel any pending requests
+  if (abortController) {
+    abortController.abort()
+  }
+  // Clear any pending debounce timer
+  if (filterDebounceTimer) {
+    clearTimeout(filterDebounceTimer)
+  }
+})
+
+// Helper function to format date in local timezone (YYYY-MM-DD)
+function formatDateToLocal(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Methods
 async function loadInitialData() {
   if (!selectedCompanyId.value) return
@@ -298,12 +322,22 @@ async function loadInitialData() {
     await loadEntriesWithSuggestions()
   } catch (error) {
     console.error('Failed to load initial data:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner.accounting.errors.load_initial_data') || 'Failed to load initial data',
+    })
   }
 }
 
 async function loadEntriesWithSuggestions(page = 1) {
   if (!selectedCompanyId.value) return
   if (!filters.start_date || !filters.end_date) return
+
+  // Cancel any pending request before starting a new one
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
 
   currentPage.value = page
 
@@ -315,22 +349,48 @@ async function loadEntriesWithSuggestions(page = 1) {
   }
 
   try {
-    await partnerAccountingStore.fetchJournalWithSuggestions(selectedCompanyId.value, params)
+    await partnerAccountingStore.fetchJournalWithSuggestions(
+      selectedCompanyId.value,
+      params,
+      abortController.signal
+    )
   } catch (error) {
+    // Ignore abort errors - they are expected when cancelling requests
+    if (error.name === 'AbortError' || error.message === 'canceled') {
+      return
+    }
     console.error('Failed to load journal entries with suggestions:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner.accounting.errors.load_journal_entries') || 'Failed to load journal entries',
+    })
   }
 }
 
 function onCompanyChange() {
-  changedEntries.value.clear()
+  // Cancel any pending requests when company changes
+  if (abortController) {
+    abortController.abort()
+  }
+  // Clear any pending debounce timer
+  if (filterDebounceTimer) {
+    clearTimeout(filterDebounceTimer)
+    filterDebounceTimer = null
+  }
   // Preserve user's date selection when company changes
   // Dates are only set to defaults on initial load (in onMounted)
   loadInitialData()
 }
 
 function onFilterChange() {
-  currentPage.value = 1
-  loadEntriesWithSuggestions(1)
+  // Debounce filter changes to avoid rapid API calls
+  if (filterDebounceTimer) {
+    clearTimeout(filterDebounceTimer)
+  }
+  filterDebounceTimer = setTimeout(() => {
+    currentPage.value = 1
+    loadEntriesWithSuggestions(1)
+  }, 300)
 }
 
 function onPageChange(page) {
@@ -338,11 +398,6 @@ function onPageChange(page) {
 }
 
 function onAccountChange(entry) {
-  changedEntries.value.set(entry.id, {
-    entry_id: entry.id,
-    account_id: entry.account_id,
-  })
-
   // Save immediately after change
   saveLearning(entry)
 }
@@ -372,6 +427,10 @@ async function saveLearning(entry) {
     })
   } catch (error) {
     console.error('Failed to save mapping:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner.accounting.errors.save_mapping') || 'Failed to save mapping',
+    })
   }
 }
 
@@ -407,6 +466,10 @@ async function acceptAllHighConfidence() {
     await loadEntriesWithSuggestions()
   } catch (error) {
     console.error('Failed to accept all suggestions:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner.accounting.errors.accept_suggestions') || 'Failed to accept suggestions',
+    })
   }
 }
 
@@ -425,6 +488,10 @@ async function refreshSuggestions() {
     })
   } catch (error) {
     console.error('Failed to refresh suggestions:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner.accounting.errors.refresh_suggestions') || 'Failed to refresh suggestions',
+    })
   } finally {
     isRefreshing.value = false
   }

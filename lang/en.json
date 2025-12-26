@@ -3858,7 +3858,16 @@
       "no_entries_found": "No entries found for the selected date range",
       "learned_mapping_help": "This account was learned from your previous selections",
       "pattern_match_help": "This account was matched based on similar entries",
-      "default_account_help": "This is the default account for this type of entry"
+      "default_account_help": "This is the default account for this type of entry",
+      "journal_review_help_title": "How it works",
+      "journal_review_help_text": "When you select an account from the dropdown, it is saved immediately. The \"Accept All\" button automatically accepts only entries with high confidence (>=80%).",
+      "errors": {
+        "load_initial_data": "Failed to load initial data",
+        "load_journal_entries": "Failed to load journal entries",
+        "save_mapping": "Failed to save mapping",
+        "accept_suggestions": "Failed to accept suggestions",
+        "refresh_suggestions": "Failed to refresh suggestions"
+      }
     }
   },
   "mail.reset_password_subject": "Reset Your Password",
