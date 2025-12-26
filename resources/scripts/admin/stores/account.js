@@ -3,14 +3,9 @@ import { defineStore } from 'pinia'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { handleError } from '@/scripts/helpers/error-handling'
 
-export const useAccountStore = (useWindow = false) => {
-  const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
-  const { global } = window.i18n
-
-  return defineStoreFunc({
-    id: 'account',
-
-    state: () => ({
+// Use standard Pinia pattern - single shared store instance
+export const useAccountStore = defineStore('account', {
+  state: () => ({
       accounts: [],
       accountTree: [],
       mappings: [],
@@ -401,6 +396,5 @@ export const useAccountStore = (useWindow = false) => {
         })
       },
     },
-  })()
-}
+})
 // CLAUDE-CHECKPOINT

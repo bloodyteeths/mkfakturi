@@ -311,7 +311,7 @@ function loadPage(page) {
 }
 
 async function exportToCsv() {
-  if (entries.length === 0) return
+  if (entries.value.length === 0) return
 
   isExporting.value = true
 

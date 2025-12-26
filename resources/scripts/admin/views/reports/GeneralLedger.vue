@@ -302,10 +302,11 @@ function formatMoney(amount) {
 
   const currency = companyStore.selectedCompanyCurrency
   const absAmount = Math.abs(amount)
+  // IFRS stores amounts in dollars/denars (not cents), no division needed
   const formatted = new Intl.NumberFormat('mk-MK', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(absAmount / 100)
+  }).format(absAmount)
 
   const sign = amount < 0 ? '-' : ''
   return `${sign}${formatted} ${currency?.code || 'MKD'}`

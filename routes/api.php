@@ -738,7 +738,9 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/balance-sheet', [AccountingReportsController::class, 'balanceSheet']);
                 Route::get('/income-statement', [AccountingReportsController::class, 'incomeStatement']);
                 Route::get('/general-ledger', [AccountingReportsController::class, 'generalLedger']);
+                Route::get('/general-ledger/export', [AccountingReportsController::class, 'generalLedgerExport']);
                 Route::get('/journal-entries', [AccountingReportsController::class, 'journalEntries']);
+                Route::get('/journal-entries/export', [AccountingReportsController::class, 'journalEntriesExport']);
                 Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
             });
 

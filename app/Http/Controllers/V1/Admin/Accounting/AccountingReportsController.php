@@ -526,6 +526,129 @@ class AccountingReportsController extends Controller
     }
 
     /**
+     * Export General Ledger to CSV
+     */
+    public function generalLedgerExport(Request $request)
+    {
+        if (! $this->isFeatureEnabled()) {
+            return response()->json(['error' => 'Accounting backbone feature is disabled'], 403);
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view', $company);
+
+        $validated = $request->validate([
+            'account_id' => 'required_without:account_code|integer',
+            'account_code' => 'required_without:account_id|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $generalLedger = $this->ifrsAdapter->getGeneralLedger(
+            $company,
+            $validated['account_id'] ?? null,
+            $validated['start_date'],
+            $validated['end_date'],
+            $validated['account_code'] ?? null
+        );
+
+        if (isset($generalLedger['error'])) {
+            return response()->json($generalLedger, 400);
+        }
+
+        // Build CSV
+        $csv = "Date,Reference,Description,Debit,Credit,Balance\n";
+
+        $csv .= "Opening Balance,,,,," . number_format($generalLedger['opening_balance'], 2) . "\n";
+
+        foreach ($generalLedger['entries'] as $entry) {
+            $csv .= sprintf(
+                "%s,%s,\"%s\",%s,%s,%s\n",
+                $entry['date'],
+                $entry['reference'],
+                str_replace('"', '""', $entry['description']),
+                $entry['debit'] > 0 ? number_format($entry['debit'], 2) : '',
+                $entry['credit'] > 0 ? number_format($entry['credit'], 2) : '',
+                number_format($entry['running_balance'], 2)
+            );
+        }
+
+        $csv .= "Closing Balance,,,,," . number_format($generalLedger['closing_balance'], 2) . "\n";
+
+        $accountCode = $generalLedger['account']['code'] ?? 'unknown';
+        $filename = "general_ledger_{$accountCode}_{$validated['start_date']}_{$validated['end_date']}.csv";
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+    }
+
+    /**
+     * Export Journal Entries to CSV
+     */
+    public function journalEntriesExport(Request $request)
+    {
+        if (! $this->isFeatureEnabled()) {
+            return response()->json(['error' => 'Accounting backbone feature is disabled'], 403);
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view', $company);
+
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $journalEntries = $this->ifrsAdapter->getJournalEntries(
+            $company,
+            $validated['start_date'],
+            $validated['end_date']
+        );
+
+        if (isset($journalEntries['error'])) {
+            return response()->json($journalEntries, 400);
+        }
+
+        // Build CSV
+        $csv = "Date,Reference,Type,Description,Account Code,Account Name,Debit,Credit\n";
+
+        foreach ($journalEntries['entries'] as $entry) {
+            foreach ($entry['lines'] as $line) {
+                $csv .= sprintf(
+                    "%s,%s,%s,\"%s\",%s,\"%s\",%s,%s\n",
+                    $entry['date'],
+                    $entry['reference'] ?? '',
+                    $entry['transaction_type'],
+                    str_replace('"', '""', $entry['narration']),
+                    $line['account_code'],
+                    str_replace('"', '""', $line['account_name']),
+                    $line['debit'] > 0 ? number_format($line['debit'] / 100, 2) : '',
+                    $line['credit'] > 0 ? number_format($line['credit'] / 100, 2) : ''
+                );
+            }
+        }
+
+        $filename = "journal_entries_{$validated['start_date']}_{$validated['end_date']}.csv";
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+    }
+
+    /**
      * Check if accounting backbone feature is enabled
      */
     protected function isFeatureEnabled(): bool

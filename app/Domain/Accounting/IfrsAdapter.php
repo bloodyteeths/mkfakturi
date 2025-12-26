@@ -1506,6 +1506,7 @@ class IfrsAdapter
             $end = Carbon::parse($endDate);
 
             // Calculate opening balance (all ledger entries before start date)
+            // IFRS uses 'D' for debit and 'C' for credit (Balance::DEBIT, Balance::CREDIT)
             $openingBalance = DB::table('ifrs_ledgers')
                 ->where('entity_id', $entity->id)
                 ->where('post_account', $accountId)
@@ -1513,7 +1514,7 @@ class IfrsAdapter
                 ->selectRaw('
                     SUM(CASE WHEN entry_type = ? THEN amount ELSE 0 END) -
                     SUM(CASE WHEN entry_type = ? THEN amount ELSE 0 END) as balance
-                ', ['debit', 'credit'])
+                ', ['D', 'C'])
                 ->value('balance') ?? 0;
 
             // Get ledger entries for the period with transaction details
@@ -1540,8 +1541,9 @@ class IfrsAdapter
             $runningBalance = $openingBalance;
 
             foreach ($entries as $entry) {
-                $debit = $entry->entry_type === 'debit' ? $entry->amount : 0;
-                $credit = $entry->entry_type === 'credit' ? $entry->amount : 0;
+                // IFRS uses 'D' for debit and 'C' for credit
+                $debit = $entry->entry_type === 'D' ? $entry->amount : 0;
+                $credit = $entry->entry_type === 'C' ? $entry->amount : 0;
 
                 // Calculate running balance (debits increase, credits decrease)
                 $runningBalance += ($debit - $credit);
