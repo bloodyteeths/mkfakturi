@@ -125,6 +125,35 @@ if (InstallUtils::isDbCreated()) {
     })->hourly()
         ->name('health-check-self-test');
 
+    // Outreach email batch send - runs every 15 minutes during business hours
+    // Sends up to 10 emails per batch, respects daily/hourly limits
+    // Only runs on weekdays between 08:00-18:00 Macedonia time
+    Schedule::command('outreach:send-batch --limit=10')
+        ->everyFifteenMinutes()
+        ->between('08:00', '18:00')
+        ->weekdays()
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('outreach-batch-send');
+
+    // Poll HubSpot for deals in "interested" stage and create partner accounts
+    // Runs every 10 minutes to detect stage changes
+    Schedule::command('hubspot:process-stage-changes')
+        ->everyTenMinutes()
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('hubspot-process-stage-changes');
+
+    // Sync partner activity and commission data to HubSpot
+    // Updates deal properties with revenue, commissions, invoice counts, health scores
+    // Runs every 6 hours - frequent enough for wife to see updated data
+    Schedule::command('hubspot:sync-partner-activity')
+        ->everySixHours()
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('hubspot-sync-partner-activity');
+
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
     //     ->dailyAt('02:00')
