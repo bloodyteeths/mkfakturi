@@ -1,0 +1,34 @@
+{
+  "initial": {
+    "subject": "Facturino for :company?",
+    "greeting": "Hello,",
+    "intro": "Facturino is a cloud invoicing and accounting platform designed for Macedonian businesses.",
+    "benefit": "With e-faktura integration and automatic bank feeds, it automates every part of your financial workflow.",
+    "cta": "Watch 2-minute demo",
+    "opt_out": "Reply STOP to opt out."
+  },
+  "followup1": {
+    "subject": "Following up: Facturino",
+    "greeting": "Hello again,",
+    "reference": "I reached out a few days ago about Facturino.",
+    "metric": "Over 200 Macedonian companies already use Facturino to automate their invoicing.",
+    "cta": "Watch demo"
+  },
+  "followup2": {
+    "subject": "Last note: free trial",
+    "greeting": "Hello,",
+    "busy": "I understand you are busy - just a quick note.",
+    "offer": "If you would like to try Facturino, we are offering an extended 30-day free trial.",
+    "cta": "Start free trial",
+    "last_email": "This is the last email from us. We will not contact you again."
+  },
+  "partner_invite": {
+    "subject": "Welcome to Facturino Partner Program",
+    "greeting": "Hello :name,",
+    "congrats": "Congratulations! You have been accepted into the Facturino Partner Program.",
+    "benefits": "As a partner, you can manage clients, track commissions, and use exclusive accounting tools.",
+    "cta": "Set password and complete profile",
+    "contact": "For questions, contact us at partners@facturino.mk"
+  },
+  "unsubscribe": "Unsubscribe"
+}

@@ -13,5 +13,7 @@ return [
     App\Providers\ViewServiceProvider::class,
     // Macedonian module services (barcode, QR codes)
     Modules\Mk\Providers\MkServiceProvider::class,
+    // Bitrix24 CRM integration module
+    Modules\Mk\Bitrix\Providers\BitrixServiceProvider::class,
 ];
 // CLAUDE-CHECKPOINT
