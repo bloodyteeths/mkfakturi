@@ -278,10 +278,11 @@ async function fetchCommissions() {
 }
 
 function formatCurrency(amount) {
+  // Database stores amounts as decimal (e.g., 100.00), not cents
   return new Intl.NumberFormat('mk-MK', {
     style: 'currency',
     currency: currencyCode.value
-  }).format((amount || 0) / 100)
+  }).format(amount || 0)
 }
 
 function getBarWidth(value) {

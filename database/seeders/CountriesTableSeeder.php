@@ -12,7 +12,8 @@ class CountriesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('countries')->delete();
+        // CLAUDE-CHECKPOINT
+        // Use upsert for idempotent seeding - safe to run multiple times without data loss
         $countries = [
             ['id' => 1, 'code' => 'AF', 'name' => 'Afghanistan', 'phonecode' => 93],
             ['id' => 2, 'code' => 'AL', 'name' => 'Albania', 'phonecode' => 355],
@@ -261,6 +262,12 @@ class CountriesTableSeeder extends Seeder
             ['id' => 245, 'code' => 'ZM', 'name' => 'Zambia', 'phonecode' => 260],
             ['id' => 246, 'code' => 'ZW', 'name' => 'Zimbabwe', 'phonecode' => 263],
         ];
-        DB::table('countries')->insert($countries);
+
+        // Upsert: update existing records or insert new ones based on 'id'
+        DB::table('countries')->upsert(
+            $countries,
+            ['id'],           // Unique key to match existing records
+            ['code', 'name', 'phonecode']  // Columns to update if record exists
+        );
     }
 }

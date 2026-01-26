@@ -1,0 +1,104 @@
+{
+  "title": "Partner | Partnere",
+  "name": "Emri i Partnerit",
+  "email": "Email",
+  "phone": "Numri i Telefonit",
+  "company_name": "Emri i Kompanise",
+  "tax_id": "Numri i Tatimit",
+  "registration_number": "Numri i Regjistrimit",
+  "bank_account": "Llogaria Bankare",
+  "bank_name": "Emri i Bankes",
+  "commission_rate": "Norma e Komisionit",
+  "commission_rate_help": "Norma e parazgjedhur e komisionit per kete partner (mund te mbishkruhet per kompani)",
+  "commission_rate_override": "Mbishkrimi i Normes se Komisionit",
+  "commission_rate_override_help": "Lini bosh per te perdorur normen e parazgjedhur te partnerit",
+  "kyc_status": "Statusi KYC",
+  "notes": "Shenimet e Brendshme",
+  "internal_notes": "Shenimet e Brendshme",
+  "notes_placeholder": "Shtoni shenime per kete partner (te dukshme vetem per administratoret)",
+
+  "basic_info": "Informacioni Baze",
+  "banking_info": "Informacioni Bankar",
+  "commission_status": "Komisioni dhe Statusi",
+  "credentials": "Kredencialet e Hyrjes",
+  "password": "Fjalekalimi",
+  "password_confirmation": "Konfirmo Fjalekalimin",
+
+  "new_partner": "Partner i Ri",
+  "add_new_partner": "Shto Partner te Ri",
+  "edit_partner": "Redakto Partnerin",
+  "save_partner": "Ruaj Partnerin",
+  "update_partner": "Perditeso Partnerin",
+  "deactivate_partner": "Caktivizo Partnerin",
+  "confirm_deactivate": "Jeni i sigurt qe doni te caktivizoni kete partner?",
+  "created_successfully": "Partneri u krijua me sukses",
+  "updated_successfully": "Partneri u perditesua me sukses",
+  "deactivated_successfully": "Partneri u caktivizua me sukses",
+  "deactivate_failed": "Deshtoi caktivizimi i partnerit",
+  "fetch_failed": "Deshtoi ngarkimi i partnerit",
+  "save_failed": "Deshtoi ruajtja e partnerit",
+
+  "no_partners": "Ende Nuk Ka Partnere",
+  "list_description": "Krijoni dhe menaxhoni partneret tuaj te kontabilitetit",
+  "search_placeholder": "Kerkoni sipas emrit, email-it ose emrit te kompanise",
+
+  "total_earnings": "Fitimet Totale",
+  "pending_payout": "Pagesa ne Pritje",
+  "companies_managed": "Kompanite e Menaxhuara",
+  "effective_commission_rate": "Norma Efektive e Komisionit",
+
+  "stats": {
+    "total_partners": "Partneret Gjithsej",
+    "active_partners": "Partneret Aktive",
+    "partner_plus": "Partner Plus",
+    "pending_kyc": "KYC ne Pritje"
+  },
+
+  "kyc": {
+    "pending": "Ne Pritje",
+    "under_review": "Ne Shqyrtim",
+    "approved": "E Miratuar",
+    "rejected": "E Refuzuar"
+  },
+
+  "tabs": {
+    "info": "Informacioni",
+    "companies": "Kompanite",
+    "commissions": "Komisionet",
+    "payouts": "Pagesat"
+  },
+
+  "assign_company": "Cakto Kompanine",
+  "edit_company_assignment": "Redakto Caktimin e Kompanise",
+  "unassign": "Hiq Caktimin",
+  "confirm_unassign": "Jeni i sigurt qe doni te hiqni caktimin e kesaj kompanie?",
+  "select_company": "Zgjidhni Kompanine",
+  "search_company": "Kerkoni per nje kompani",
+  "use_default_rate": "Perdorni normen e parazgjedhur",
+  "set_as_primary_company": "Vendosni si Kompani Kryesore",
+  "primary": "Kryesore",
+  "edit_permissions": "Redakto Lejet",
+  "update_assignment": "Perditeso Caktimin",
+  "assignment_failed": "Deshtoi perditesimi i caktimit te kompanise",
+  "no_companies_assigned": "Ende nuk jane caktuar kompani",
+  "permissions_label": "leje",
+
+  "permissions": {
+    "full_access": "Qasje e Plote",
+    "full_access_description": "Jepni qasje te plote ne te gjitha vecorite dhe te dhenat",
+    "selected_permissions": "Lejet e Zgjedhura",
+    "invoices": "Faturat",
+    "customers": "Klientet",
+    "banking": "Banka",
+    "reports": "Raportet",
+    "payroll": "Pagat",
+    "settings": "Cilesimet"
+  },
+
+  "monthly_commissions": "Komisionet Mujore",
+  "no_commissions": "Nuk ka te dhena te komisioneve",
+  "month": "Muaji",
+  "amount": "Shuma",
+  "date": "Data",
+  "no_payouts": "Nuk ka histori pagesash"
+}

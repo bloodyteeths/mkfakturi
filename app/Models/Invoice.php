@@ -845,7 +845,20 @@ class Invoice extends Model implements HasMedia
     public function getInvoiceStatusByAmount($amount)
     {
         if ($amount < 0) {
-            return [];
+            // Overpayment detected - mark as paid and log the overpayment
+            $overpaymentAmount = abs($amount);
+            \Log::info('Invoice overpayment detected', [
+                'invoice_id' => $this->id,
+                'invoice_number' => $this->invoice_number ?? null,
+                'overpayment_amount' => $overpaymentAmount,
+                'currency' => $this->currency_id ?? null,
+            ]);
+
+            return [
+                'status' => Invoice::STATUS_COMPLETED,
+                'paid_status' => Invoice::STATUS_PAID,
+                'overdue' => false,
+            ];
         }
 
         if ($amount == 0) {

@@ -3,10 +3,10 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="text-center">
         <h1 class="text-3xl font-bold text-gray-900">
-          Partner Portal
+          {{ t('partner.portal.title') }}
         </h1>
         <p class="mt-2 text-sm text-gray-600">
-          Портал за сметководствени партнери
+          {{ t('partner.portal.subtitle') }}
         </p>
       </div>
     </div>
@@ -20,13 +20,18 @@
     <!-- Footer -->
     <div class="mt-8 text-center">
       <p class="text-sm text-gray-500">
-        © 2025 Facturino MK. Сите права задржани.
+        © {{ new Date().getFullYear() }} Facturino MK. {{ t('partner.portal.copyright') }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+// i18n
+const { t } = useI18n()
+
 // Login layout for partner authentication pages
 </script>
 

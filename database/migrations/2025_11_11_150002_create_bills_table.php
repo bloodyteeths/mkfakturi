@@ -16,6 +16,10 @@ return new class extends Migration
         }
 
         Schema::create('bills', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
+
             $table->increments('id');
             $table->unsignedBigInteger('ifrs_transaction_id')->nullable();
             $table->date('bill_date');

@@ -1,0 +1,34 @@
+{
+  "initial": {
+    "subject": "Facturino per :company?",
+    "greeting": "Pershendetje,",
+    "intro": "Facturino eshte nje platforme faturimi dhe kontabiliteti ne cloud e projektuar per bizneset maqedonase.",
+    "benefit": "Me integrimin e e-faktures dhe perditesimet automatike bankare, ai automatizon cdo pjese te fluksit tuaj financiar.",
+    "cta": "Shikoni demon 2-minutesh",
+    "opt_out": "Pergjigjuni NDALO per te hequr doreshkrimin."
+  },
+  "followup1": {
+    "subject": "Ndjekje: Facturino",
+    "greeting": "Pershendetje perseri,",
+    "reference": "Ju kontaktova disa dite me pare per Facturino.",
+    "metric": "Mbi 200 kompani maqedonase tashme perdorin Facturino per te automatizuar faturimin e tyre.",
+    "cta": "Shikoni demon"
+  },
+  "followup2": {
+    "subject": "Shenim i fundit: prove falas",
+    "greeting": "Pershendetje,",
+    "busy": "E kuptoj qe jeni te zene - vetem nje shenim i shpejte.",
+    "offer": "Nese doni te provoni Facturino, po ofrojme nje prove falas te zgjatur 30-ditore.",
+    "cta": "Filloni proven falas",
+    "last_email": "Ky eshte email-i i fundit nga ne. Nuk do t'ju kontaktojme perseri."
+  },
+  "partner_invite": {
+    "subject": "Miresevini ne Programin e Partnereve Facturino",
+    "greeting": "Pershendetje :name,",
+    "congrats": "Urime! Jeni pranuar ne Programin e Partnereve Facturino.",
+    "benefits": "Si partner, mund te menaxhoni kliente, te ndiqni komisionet dhe te perdorni mjete ekskluzive kontabiliteti.",
+    "cta": "Vendosni fjalekalimin dhe perfundoni profilin",
+    "contact": "Per pyetje, na kontaktoni ne partners@facturino.mk"
+  },
+  "unsubscribe": "Heq doreshkrimin"
+}

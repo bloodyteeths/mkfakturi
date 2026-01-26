@@ -320,7 +320,7 @@ class Estimate extends Model implements HasMedia
             $estimateItem['exchange_rate'] = $exchange_rate;
             $estimateItem['base_price'] = $estimateItem['price'] * $exchange_rate;
             $estimateItem['base_discount_val'] = $estimateItem['discount_val'] * $exchange_rate;
-            $estimateItem['base_tax'] = $estimate['tax'] * $exchange_rate;
+            $estimateItem['base_tax'] = $estimateItem['tax'] * $exchange_rate;
             $estimateItem['base_total'] = $estimateItem['total'] * $exchange_rate;
 
             $item = $estimate->items()->create($estimateItem);

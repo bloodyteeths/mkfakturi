@@ -1,0 +1,47 @@
+{
+  "partner_invitation": {
+    "subject": "Ftese nga :company per t'u bashkuar si Partner",
+    "greeting": "Pershendetje!",
+    "intro": "Jeni ftuar nga :company per t'u bashkuar si partneri i tyre i kontabilitetit ne Facturino.",
+    "permissions_intro": "Do te keni qasje ne lejet e meposhtme:",
+    "instructions": "Klikoni butonin me poshte per te pranuar ftesen dhe per te qasur ne llogarinee :company.",
+    "accept_button": "Prano Ftesen",
+    "ignore_notice": "Nese nuk e prisnit kete ftese, mund ta injoroni kete email me siguri."
+  },
+  "company_invitation": {
+    "subject": "Ftese per t'u bashkuar me Facturino nga :partner",
+    "greeting": "Pershendetje!",
+    "intro": ":partner ju ka ftuar te bashkoheni me Facturino, nje platforme gjitheperfshirese kontabiliteti dhe faturimi.",
+    "benefits": "Facturino ju ndihmon te menaxhoni faturat, klientet, shpenzimet dhe me shume - te gjitha ne nje vend.",
+    "instructions": "Klikoni butonin me poshte per te krijuar llogarinee tuaj dhe per te filluar.",
+    "signup_button": "Krijoni Llogarine",
+    "ignore_notice": "Nese nuk e prisnit kete ftese, mund ta injoroni kete email me siguri."
+  },
+  "company_referral": {
+    "subject": "Bashkohuni me Facturino - Ftese nga :company",
+    "greeting": "Pershendetje!",
+    "intro": ":company po perdor Facturino dhe mendon se duhet ta perdorni edhe ju!",
+    "benefits": "Facturino eshte nje platforme e fuqishme kontabiliteti dhe faturimi e projektuar per bizneset maqedonase. Filloni sot dhe thjeshtoni fluksin tuaj te kontabilitetit.",
+    "instructions": "Klikoni butonin me poshte per te krijuar llogarinee tuaj me kete lidhje speciale referimi.",
+    "signup_button": "Krijoni Llogarine",
+    "ignore_notice": "Nese nuk e prisnit kete ftese, mund ta injoroni kete email me siguri."
+  },
+  "partner_referral": {
+    "subject": "Behuni Partner - Ftese nga :partner",
+    "greeting": "Pershendetje!",
+    "intro": ":partner ju ka ftuar te beheni partner ne Facturino.",
+    "benefits": "Si partner, mund te fitoni komisione duke menaxhuar llogari te shumta kompanish dhe duke ndihmuar bizneset me nevojat e tyre te kontabilitetit.",
+    "instructions": "Klikoni butonin me poshte per t'u regjistruar si partner dhe per te filluar te fitoni.",
+    "signup_button": "Regjistrohuni si Partner",
+    "ignore_notice": "Nese nuk e prisnit kete ftese, mund ta injoroni kete email me siguri."
+  },
+  "user_invitation": {
+    "subject": "Ftese per t'u bashkuar me :company",
+    "greeting": "Pershendetje :name!",
+    "intro": "Jeni ftuar te bashkoheni me :company ne Facturino.",
+    "instructions": "Per te filluar, ju lutemi klikoni butonin me poshte per te vendosur fjalekalimin tuaj:",
+    "set_password_button": "Vendosni Fjalekalimin",
+    "link_expiry": "Kjo lidhje do te skadoje per 24 ore.",
+    "ignore_notice": "Nese nuk e prisnit kete ftese, mund ta injoroni kete email me siguri."
+  }
+}

@@ -412,6 +412,19 @@ class Bill extends Model implements HasMedia
         if ($dueAmount <= 0) {
             $this->paid_status = self::PAID_STATUS_PAID;
             $this->status = self::STATUS_COMPLETED;
+
+            // Log overpayment for accounting purposes
+            if ($dueAmount < 0) {
+                $overpaymentAmount = abs($dueAmount);
+                \Log::info('Bill overpayment detected', [
+                    'bill_id' => $this->id,
+                    'bill_number' => $this->bill_number ?? null,
+                    'overpayment_amount' => $overpaymentAmount,
+                    'total' => $this->total,
+                    'paid_amount' => $paidAmount,
+                    'vendor_id' => $this->vendor_id ?? null,
+                ]);
+            }
         } elseif ($paidAmount > 0) {
             $this->paid_status = self::PAID_STATUS_PARTIALLY_PAID;
         } else {

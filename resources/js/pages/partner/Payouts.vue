@@ -610,12 +610,11 @@ export default {
     },
 
     formatCurrency(amount) {
-      // Amounts are stored in cents, divide by 100
-      const amountInCurrency = (amount || 0) / 100
+      // Database stores amounts as decimal (e.g., 100.00), not cents
       return new Intl.NumberFormat('mk-MK', {
         style: 'currency',
         currency: this.currencyCode
-      }).format(amountInCurrency)
+      }).format(amount || 0)
     },
 
     formatDate(date) {

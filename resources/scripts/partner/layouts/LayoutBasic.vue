@@ -8,10 +8,10 @@
             <!-- Logo -->
             <div class="flex-shrink-0">
               <h1 class="text-xl font-bold text-gray-900">
-                Partner Portal
+                {{ t('partner.portal.title') }}
               </h1>
             </div>
-            
+
             <!-- Navigation Links -->
             <div class="hidden md:ml-6 md:flex md:space-x-8">
               <router-link
@@ -21,7 +21,7 @@
                   ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
-                Контролна Табла
+                {{ t('partner.navigation.dashboard') }}
               </router-link>
               <router-link
                 :to="{ name: 'partner.clients' }"
@@ -31,7 +31,7 @@
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 v-if="hasAbilities('view-clients')"
               >
-                Клиенти
+                {{ t('partner.navigation.clients') }}
               </router-link>
               <router-link
                 :to="{ name: 'partner.commissions' }"
@@ -40,7 +40,7 @@
                   ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
-                Провизии
+                {{ t('partner.navigation.commissions') }}
               </router-link>
               <router-link
                 :to="{ name: 'partner.referrals' }"
@@ -49,7 +49,7 @@
                   ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
-                Препораки
+                {{ t('partner.navigation.referrals') }}
               </router-link>
               <router-link
                 :to="{ name: 'partner.invitations' }"
@@ -58,7 +58,7 @@
                   ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
-                Покани
+                {{ t('partner.navigation.invitations') }}
               </router-link>
               <router-link
                 :to="{ name: 'partner.payouts' }"
@@ -67,7 +67,7 @@
                   ? 'border-blue-500 text-gray-900'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               >
-                Исплати
+                {{ t('partner.navigation.payouts') }}
               </router-link>
             </div>
           </div>
@@ -83,8 +83,8 @@
                   @click="handleLogout"
                   class="bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <span class="sr-only">Одјави се</span>
-                  Одјави се
+                  <span class="sr-only">{{ t('partner.navigation.logout') }}</span>
+                  {{ t('partner.navigation.logout') }}
                 </button>
               </div>
             </div>
@@ -104,9 +104,13 @@
 
 <script setup>
 import { onMounted, onUnmounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useAuthStore } from '@/scripts/admin/stores/auth'
 import { useRouter } from 'vue-router'
+
+// i18n
+const { t } = useI18n()
 
 // Use the MAIN user store (same one used by main login)
 const userStore = useUserStore()

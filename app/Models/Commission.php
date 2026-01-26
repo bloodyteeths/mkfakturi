@@ -10,6 +10,13 @@ class Commission extends Model
 {
     use HasFactory;
 
+    /**
+     * Relationships to eager load by default to prevent N+1 queries
+     *
+     * @var array<string>
+     */
+    protected $with = ['partner', 'company', 'invoice', 'currency'];
+
     protected $fillable = [
         'partner_id',
         'company_id',
