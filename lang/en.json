@@ -247,7 +247,13 @@
     "recent_bills_card": {
       "amount_due": "Amount Due"
     },
-    "no_overdue_invoices": "No overdue invoices"
+    "no_overdue_invoices": "No overdue invoices",
+    "quick_actions": "Quick Actions",
+    "create_invoice_desc": "Create a new invoice for your customers",
+    "create_customer_desc": "Add a new customer to your list",
+    "import_data_desc": "Import data from CSV or other sources",
+    "view_reports_desc": "View financial reports and analytics",
+    "overdue_invoices": "Overdue Invoices"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Recent Commissions",
@@ -1058,7 +1064,9 @@
     "something_went_wrong": "something went wrong",
     "invalid_due_amount_message": "Total Invoice amount cannot be less than total paid amount for this Invoice. Please update the invoice or delete the associated payments to continue.",
     "mark_as_default_invoice_template_description": "If enabled, the selected template will be automatically selected for new invoices.",
-    "details": "Details"
+    "details": "Details",
+    "export_xml_title": "Export UBL XML Invoice",
+    "export_xml": "Export XML"
   },
   "e_invoice": {
     "title": "E-Invoice",
@@ -1514,7 +1522,14 @@
     },
     "accounting": {
       "accounting": "Accounting",
-      "trial_balance": "Trial Balance",
+      "trial_balance": {
+        "title": "Trial Balance",
+        "balanced": "Trial Balance is balanced",
+        "not_balanced": "Trial Balance is not balanced",
+        "difference": "Difference",
+        "no_data": "No data",
+        "no_data_description": "No accounts found for the selected date"
+      },
       "balance_sheet": "Balance Sheet",
       "income_statement": "Income Statement",
       "as_of_date": "As of Date",
@@ -1556,14 +1571,6 @@
         "description": "Description",
         "debit": "Debit",
         "credit": "Credit"
-      },
-      "trial_balance": {
-        "title": "Trial Balance",
-        "balanced": "Trial Balance is balanced",
-        "not_balanced": "Trial Balance is not balanced",
-        "difference": "Difference",
-        "no_data": "No data",
-        "no_data_description": "No accounts found for the selected date"
       },
       "journal_entries": {
         "title": "Journal Entries",
@@ -1641,7 +1648,8 @@
       "no_data_to_export": "No data to export",
       "detail": "Project Detail",
       "monthly_breakdown": "Monthly Breakdown"
-    }
+    },
+    "reports": "Reports"
   },
   "settings": {
     "menu_title": {
@@ -3504,7 +3512,8 @@
     "field_vat_number": "VAT Number",
     "start_tour": "Start Tour",
     "faq": "Frequently Asked Questions",
-    "contact_support": "Contact Support"
+    "contact_support": "Contact Support",
+    "import_data": "Import Data"
   },
   "tour": {
     "previous": "Previous",
@@ -4171,7 +4180,24 @@
   },
   "ai": {
     "chat": {
-      "new_conversation": "New Conversation"
+      "new_conversation": "New Conversation",
+      "title": "AI Assistant",
+      "subtitle": "Ask questions about your financial data",
+      "empty_state": "No messages yet. Start a conversation!",
+      "example_questions": "Example questions",
+      "placeholder": "Type your question...",
+      "send": "Send",
+      "disclaimer": "AI responses are for informational purposes only",
+      "clear": "Clear",
+      "copy": "Copy"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "subtitle": "Smart financial recommendations",
+      "refresh": "Refresh",
+      "loading": "Loading insights...",
+      "no_insights": "No insights available",
+      "generate": "Generate AI Insights"
     }
   },
   "payroll": {

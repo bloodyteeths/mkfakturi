@@ -12,7 +12,20 @@
     "settings": "Ayarlar",
     "logout": "Çıkış yap",
     "users": "Kullanıcılar",
-    "modules": "Modüller"
+    "modules": "Modüller",
+    "proforma_invoices": "Proforma Faturalar",
+    "suppliers": "Tedarikçiler",
+    "bills": "Faturalar",
+    "projects": "Projeler",
+    "stock": "Stok",
+    "bills_inbox": "Fatura Gelen Kutusu",
+    "receipts_scan": "Fiş Tarama",
+    "banking": "Bankacılık",
+    "payroll": "Bordro",
+    "billing": "Faturalandırma",
+    "migration_wizard": "Geçiş Sihirbazı",
+    "support_tickets": "Destek Talepleri",
+    "all_support_tickets": "Tüm Destek Talepleri"
   },
   "general": {
     "add_company": "Firma ekle",
@@ -119,7 +132,9 @@
       "the_list_is_empty": "The list is empty",
       "no_results_found": "No results found"
     },
-    "copy_to_clipboard": "Copy to Clipboard"
+    "copy_to_clipboard": "Copy to Clipboard",
+    "collapse_sidebar": "Kenar çubuğunu daralt",
+    "collapse": "Daralt"
   },
   "dashboard": {
     "select_year": "Yılı seçin",
@@ -155,7 +170,14 @@
       "amount_due": "Ödenmesi gereken tutar",
       "actions": "Eylemler",
       "view_all": "Hepsini görüntüle"
-    }
+    },
+    "quick_actions": "Hızlı İşlemler",
+    "create_invoice_desc": "Yeni fatura oluşturun",
+    "create_customer_desc": "Yeni müşteri ekleyin",
+    "import_data_desc": "Veri içe aktarın",
+    "view_reports_desc": "Raporları görüntüleyin",
+    "overdue_invoices": "Gecikmiş Faturalar",
+    "no_overdue_invoices": "Gecikmiş fatura yok"
   },
   "tax_types": {
     "name": "İsim",
@@ -470,7 +492,9 @@
     "marked_as_sent_message": "Fatura başarıyla gönderildi olarak işaretlendi",
     "something_went_wrong": "bir şeyler ters gitti",
     "invalid_due_amount_message": "Toplam Fatura bedeli bu fatura için olan toplam ödemeden az olamaz. Lütfen devam etmek için faturayı güncelleyin veya ilişkili ödemeyi silin.",
-    "mark_as_default_invoice_template_description": "Etkinleştirilirse, seçilen şablon yeni faturalar için otomatik olarak seçilecektir."
+    "mark_as_default_invoice_template_description": "Etkinleştirilirse, seçilen şablon yeni faturalar için otomatik olarak seçilecektir.",
+    "export_xml_title": "XML Dışa Aktar",
+    "export_xml": "XML olarak dışa aktar"
   },
   "recurring_invoices": {
     "title": "Tekrarlayan Faturalar",
@@ -834,7 +858,8 @@
       "to_date": "Bitiş tarihi",
       "from_date": "Başlangıç tarihi",
       "date_range": "Tarih aralığı seç"
-    }
+    },
+    "reports": "Raporlar"
   },
   "settings": {
     "menu_title": {
@@ -2262,6 +2287,15 @@
         "export_journal": "Yevmiye Dışa Aktar",
         "review": "İnceleme"
       }
+    },
+    "accounting": {
+      "chart_of_accounts": "Hesap Planı",
+      "journal_review": "Yevmiye İnceleme",
+      "journal_export": "Yevmiye Dışa Aktar",
+      "period_lock": "Dönem Kilidi",
+      "daily_closing": "Günlük Kapanış",
+      "general_ledger": "Defteri Kebir",
+      "trial_balance": "Mizan"
     }
   },
   "imports": {
@@ -2344,7 +2378,27 @@
     "document_analysis": "Belge Analizi",
     "expense_categorization": "Gider Kategorilendirme",
     "invoice_extraction": "Fatura Çıkarma",
-    "receipt_scanning": "Fiş Tarama"
+    "receipt_scanning": "Fiş Tarama",
+    "insights": {
+      "title": "AI Analizleri",
+      "subtitle": "İşletmeniz hakkında akıllı içgörüler",
+      "refresh": "Yenile",
+      "loading": "Yükleniyor...",
+      "no_insights": "Henüz analiz yok",
+      "generate": "Analiz oluştur"
+    },
+    "chat": {
+      "title": "AI Asistan",
+      "subtitle": "Finansal sorularınızı sorun",
+      "empty_state": "Henüz mesaj yok. Bir soru sorun!",
+      "example_questions": "Örnek sorular",
+      "placeholder": "Mesajınızı yazın...",
+      "send": "Gönder",
+      "disclaimer": "AI yanıtları tavsiye niteliğindedir",
+      "clear": "Temizle",
+      "copy": "Kopyala",
+      "new_conversation": "Yeni konuşma"
+    }
   },
   "vat": {
     "title": "KDV",
@@ -2367,7 +2421,17 @@
     "reduced_rate": "İndirimli oran",
     "generate_vat_report": "KDV Raporu Oluştur",
     "download_vat_report": "KDV Raporu İndir",
-    "submit_vat_return": "KDV Beyannamesi Gönder"
+    "submit_vat_return": "KDV Beyannamesi Gönder",
+    "compliance_status": "KDV Uyumluluk Durumu",
+    "widget_description": "KDV beyanname durumunuzu takip edin",
+    "current_status": "Mevcut Durum",
+    "as_of": "Tarih itibariyle",
+    "last_generation": "Son oluşturma",
+    "never_generated": "Hiç oluşturulmadı",
+    "return_period": "Beyanname dönemi",
+    "no_period_set": "Dönem belirlenmedi",
+    "generate_return": "Beyanname oluştur",
+    "view_history": "Geçmişi görüntüle"
   },
   "tour": {
     "welcome": "Hoş Geldiniz!",
