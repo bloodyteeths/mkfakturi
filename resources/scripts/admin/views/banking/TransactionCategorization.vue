@@ -291,7 +291,7 @@ const closeModal = () => {
 
 const formatDate = (date) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('mk-MK', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -301,7 +301,7 @@ const formatDate = (date) => {
 const formatAmount = (amount, currency) => {
   if (amount === null || amount === undefined) return '-'
 
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('mk-MK', {
     style: 'currency',
     currency: currency || 'MKD'
   }).format(amount)

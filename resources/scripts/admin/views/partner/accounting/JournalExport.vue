@@ -669,8 +669,9 @@ async function fetchEntriesCount() {
 
     const entries = partnerAccountingStore.journalEntries || []
     entriesCount.value = entries.length
+    // Count entries that are unconfirmed (not confirmed) or have low confidence (< 0.8)
     unconfirmedCount.value = entries.filter(
-      (e) => e?.status === 'pending'
+      (e) => !e?.confirmed || e?.confidence < 0.8
     ).length
   } catch (error) {
     // Don't show error for cancelled requests
@@ -750,9 +751,16 @@ async function confirmAllInRange() {
   isConfirmingAll.value = true
 
   try {
-    // In a real implementation, this would call an API to confirm all entries
-    // await partnerAccountingStore.confirmAllEntries(exportForm.company_id, { ... })
-    unconfirmedCount.value = 0
+    // Call the store action to confirm all entries above threshold in the date range
+    const result = await partnerAccountingStore.acceptAllSuggestions(
+      exportForm.company_id,
+      0.8, // Minimum confidence threshold
+      exportForm.start_date,
+      exportForm.end_date
+    )
+
+    // Refresh the entries count to reflect the confirmed state
+    await fetchEntriesCount()
 
     notificationStore.showNotification({
       type: 'success',

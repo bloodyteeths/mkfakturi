@@ -454,12 +454,9 @@ async function fetchData({ page, filter, sort }) {
     page,
   }
 
-  console.log(data)
-
   isRequestOngoing.value = true
 
   let response = await invoiceStore.fetchInvoices(data)
-  console.log('API response:', response.data.data)
 
   // Store data for mobile card view
   invoiceListData.value = response.data.data

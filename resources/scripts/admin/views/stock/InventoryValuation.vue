@@ -275,7 +275,7 @@ const hasData = computed(() => {
 
 function formatNumber(num) {
   if (num === null || num === undefined) return '-'
-  return Number(num).toLocaleString('en-US', { maximumFractionDigits: 4 })
+  return Number(num).toLocaleString('mk-MK', { maximumFractionDigits: 4 })
 }
 
 async function loadValuation() {
@@ -295,7 +295,7 @@ function clearFilters() {
 }
 
 function exportWarehouseToCsv(warehouse) {
-  const headers = ['Item Name', 'SKU', 'Quantity', 'Avg Cost', 'Value']
+  const headers = [t('items.name'), t('items.sku'), t('stock.quantity'), t('stock.avg_cost'), t('stock.value')]
 
   const rows = warehouse.items.map((item) => [
     item.name,
@@ -318,7 +318,7 @@ function exportWarehouseToCsv(warehouse) {
 }
 
 function exportAllToCsv() {
-  const headers = ['Item Name', 'SKU', 'Quantity', 'Avg Cost', 'Value']
+  const headers = [t('items.name'), t('items.sku'), t('stock.quantity'), t('stock.avg_cost'), t('stock.value')]
   let rows = []
 
   if (stockStore.inventoryValuation.group_by === 'warehouse') {

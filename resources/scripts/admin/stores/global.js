@@ -38,7 +38,7 @@ export const useGlobalStore = (useWindow = false) => {
       isSidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
       areCurrenciesLoading: false,
 
-      downloadReport: null,
+      downloadReport: () => {},
     }),
 
     getters: {

@@ -146,12 +146,14 @@ import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
 const partnerAccountingStore = usePartnerAccountingStore()
 const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 
 // State
 const selectedCompanyId = ref(null)
@@ -161,14 +163,23 @@ const isSubmitting = ref(false)
 const isLoading = ref(false)
 const periodLocks = ref([])
 
+// Helper function to format date in local timezone (YYYY-MM-DD)
+// Avoids timezone issues with toISOString().split('T')[0] which uses UTC
+function formatDateToLocal(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Default to first and last day of previous month
 const now = new Date()
 const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
 const lockForm = reactive({
-  period_start: firstDayLastMonth.toISOString().split('T')[0],
-  period_end: lastDayLastMonth.toISOString().split('T')[0],
+  period_start: formatDateToLocal(firstDayLastMonth),
+  period_end: formatDateToLocal(lastDayLastMonth),
   notes: '',
 })
 
@@ -277,7 +288,11 @@ async function fetchData({ page, filter, sort }) {
       },
     }
   } catch (error) {
-    console.error('Failed to fetch period locks:', error)
+    const errorMessage = error.response?.data?.message || t('errors.failed_to_load_data')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
     return { data: [], pagination: { totalPages: 1, currentPage: 1 } }
   }
 }
@@ -293,8 +308,8 @@ function cancelLockForm() {
   const now = new Date()
   const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
-  lockForm.period_start = firstDayLastMonth.toISOString().split('T')[0]
-  lockForm.period_end = lastDayLastMonth.toISOString().split('T')[0]
+  lockForm.period_start = formatDateToLocal(firstDayLastMonth)
+  lockForm.period_end = formatDateToLocal(lastDayLastMonth)
   lockForm.notes = ''
 }
 
@@ -310,10 +325,19 @@ async function submitLockPeriod() {
       notes: lockForm.notes,
     })
 
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('settings.period_lock.lock_success'),
+    })
+
     cancelLockForm()
     table.value && table.value.refresh()
   } catch (error) {
-    console.error('Failed to create period lock:', error)
+    const errorMessage = error.response?.data?.message || t('errors.something_went_wrong')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -334,9 +358,19 @@ function onUnlockPeriod(lock) {
       if (res) {
         try {
           await axios.delete(`/partner/companies/${selectedCompanyId.value}/period-locks/${lock.id}`)
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('settings.period_lock.unlock_success'),
+          })
+
           table.value && table.value.refresh()
         } catch (error) {
-          console.error('Failed to delete period lock:', error)
+          const errorMessage = error.response?.data?.message || t('errors.something_went_wrong')
+          notificationStore.showNotification({
+            type: 'error',
+            message: errorMessage,
+          })
         }
       }
     })

@@ -216,6 +216,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
 import axios from 'axios'
 import ConnectBank from './ConnectBank.vue'
 import TransactionsList from './TransactionsList.vue'
@@ -224,6 +225,7 @@ import { BanknotesIcon } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
+const dialogStore = useDialogStore()
 
 // State
 const connectedAccounts = ref([])
@@ -298,7 +300,15 @@ const syncAccount = async (accountId) => {
 }
 
 const disconnectBank = async (accountId) => {
-  if (!confirm(t('banking.confirm_disconnect'))) {
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('banking.confirm_disconnect'),
+    yesLabel: t('general.yes'),
+    noLabel: t('general.no'),
+    variant: 'danger',
+  })
+
+  if (!confirmed) {
     return
   }
 
@@ -355,7 +365,7 @@ const clearFilters = () => {
 
 const formatMoney = (amount, currency) => {
   if (!amount) return '0.00'
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('mk-MK', {
     style: 'currency',
     currency: currency || 'MKD'
   }).format(amount)

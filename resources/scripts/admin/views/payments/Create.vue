@@ -100,7 +100,9 @@
             :help-text="
               selectedInvoice
                 ? `${t('payments.amount_due')}: ${
-                    paymentStore.currentPayment.maxPayableAmount / 100
+                    parseInt(companyStore.selectedCompanyCurrency.precision) === 0
+                      ? paymentStore.currentPayment.maxPayableAmount
+                      : paymentStore.currentPayment.maxPayableAmount / 100
                   }`
                 : ''
             "
@@ -483,7 +485,11 @@ function onCustomerChange(customer_id) {
             paymentStore.currentPayment.amount
 
           if (amount.value === 0) {
-            amount.value = selectedInvoice.value.due_amount / 100
+            // Use the computed setter which handles precision conversion
+            const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
+            amount.value = precision === 0
+              ? selectedInvoice.value.due_amount
+              : selectedInvoice.value.due_amount / 100
           }
         }
 
@@ -500,7 +506,10 @@ function onCustomerChange(customer_id) {
       })
       .catch((error) => {
         isLoadingInvoices.value = false
-        console.error(error, 'error')
+        notificationStore.showNotification({
+          type: 'error',
+          message: t('payments.error_loading_customer_data'),
+        })
       })
   }
 }

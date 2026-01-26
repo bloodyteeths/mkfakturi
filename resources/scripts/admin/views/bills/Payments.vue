@@ -135,22 +135,24 @@
 <script setup>
 import { computed, reactive, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useExpenseStore } from '@/scripts/admin/stores/expense'
 
 const route = useRoute()
+const { t } = useI18n()
 const billsStore = useBillsStore()
 const expenseStore = useExpenseStore()
 
 const billId = computed(() => route.params.id)
 const editingPayment = ref(false)
 
-const columns = [
-  { key: 'payment_date', label: 'Date' },
-  { key: 'amount', label: 'Amount' },
-  { key: 'method', label: 'Method' },
+const columns = computed(() => [
+  { key: 'payment_date', label: t('general.date') },
+  { key: 'amount', label: t('general.amount') },
+  { key: 'method', label: t('payments.payment_mode') },
   { key: 'actions', label: '', sortable: false, tdClass: 'text-right' },
-]
+])
 
 const paymentForm = reactive({
   id: null,

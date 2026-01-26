@@ -266,7 +266,7 @@ const customerColumns = computed(() => {
     { key: 'due_amount', label: t('customers.amount_due') },
     {
       key: 'created_at',
-      label: t('items.added_on'),
+      label: t('customers.added_on'), // Fixed: changed from t('items.added_on') to t('customers.added_on')
     },
     {
       key: 'actions',

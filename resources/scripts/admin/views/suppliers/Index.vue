@@ -101,7 +101,7 @@
           {{ row.data.tax_id || '-' }}
         </template>
 
-        <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
+        <template v-if="hasAtLeastOneAbility()" #cell-actions="{ row }">
           <SupplierDropdown
             :row="row.data"
             :table="tableComponent"
@@ -188,7 +188,7 @@ function refreshTable() {
   fetchData()
 }
 
-function hasAtleastOneAbility() {
+function hasAtLeastOneAbility() {
   return userStore.hasAbilities([
     abilities.DELETE_SUPPLIER,
     abilities.EDIT_SUPPLIER,

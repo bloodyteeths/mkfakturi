@@ -31,7 +31,7 @@ class ImportController extends Controller
      */
     public function store(Request $request)
     {
-        \Log::info('[ImportController] Upload started', [
+        \Log::debug('[ImportController] Upload started', [
             'has_file' => $request->hasFile('file'),
             'type' => $request->input('type'),
             'user_id' => $request->user()?->id,
@@ -54,7 +54,7 @@ class ImportController extends Controller
         $user = $request->user();
         $companyId = $request->header('company');
 
-        \Log::info('[ImportController] User and company loaded', [
+        \Log::debug('[ImportController] User and company loaded', [
             'user_id' => $user->id,
             'company_id' => $companyId,
         ]);
@@ -65,7 +65,7 @@ class ImportController extends Controller
         // Store the uploaded file
         $file = $request->file('file');
         $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
-        \Log::info('[ImportController] Storing file', [
+        \Log::debug('[ImportController] Storing file', [
             'filename' => $filename,
             'original_name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),
@@ -73,7 +73,7 @@ class ImportController extends Controller
 
         try {
             $path = $file->storeAs('imports/'.$companyId, $filename, 'local');
-            \Log::info('[ImportController] File stored successfully', ['path' => $path]);
+            \Log::debug('[ImportController] File stored successfully', ['path' => $path]);
         } catch (\Exception $e) {
             \Log::error('[ImportController] File storage failed', [
                 'error' => $e->getMessage(),
@@ -98,7 +98,7 @@ class ImportController extends Controller
                 ],
                 'status' => 'pending',
             ]);
-            \Log::info('[ImportController] ImportJob created', ['id' => $importJob->id]);
+            \Log::debug('[ImportController] ImportJob created', ['id' => $importJob->id]);
         } catch (\Exception $e) {
             \Log::error('[ImportController] ImportJob creation failed', [
                 'error' => $e->getMessage(),
@@ -109,7 +109,7 @@ class ImportController extends Controller
 
         $responseData = $importJob->fresh();
 
-        \Log::info('[ImportController] Upload completed successfully', [
+        \Log::debug('[ImportController] Upload completed successfully', [
             'import_id' => $importJob->id,
             'response_data' => $responseData->toArray(),
         ]);
@@ -132,7 +132,7 @@ class ImportController extends Controller
         $data = $importJob->toArray();
 
         if (! isset($data['detected_fields']) && $importJob->file_path) {
-            \Log::info('[ImportController] show() - detecting fields', [
+            \Log::debug('[ImportController] show() - detecting fields', [
                 'import_id' => $id,
                 'file_path' => $importJob->file_path,
             ]);
@@ -140,7 +140,7 @@ class ImportController extends Controller
             try {
                 $filePath = storage_path('app/'.$importJob->file_path);
 
-                \Log::info('[ImportController] File path constructed', [
+                \Log::debug('[ImportController] File path constructed', [
                     'file_path' => $filePath,
                     'exists' => file_exists($filePath),
                 ]);
@@ -187,7 +187,7 @@ class ImportController extends Controller
                     $intelligentEnabled = config('import.intelligent_enabled', false);
 
                     if ($intelligentEnabled) {
-                        \Log::info('[ImportController] Using intelligent mapping system', [
+                        \Log::debug('[ImportController] Using intelligent mapping system', [
                             'import_id' => $id,
                             'type' => $importJob->type,
                         ]);
@@ -218,7 +218,7 @@ class ImportController extends Controller
                             // Add to response data
                             $data['intelligent_metadata'] = $intelligentMetadata;
 
-                            \Log::info('[ImportController] Intelligent mapping completed', [
+                            \Log::debug('[ImportController] Intelligent mapping completed', [
                                 'mapped_fields' => count($mappingSuggestions),
                                 'confidence' => $confidence,
                                 'quality_grade' => $intelligentMetadata['quality_grade'],
@@ -234,7 +234,7 @@ class ImportController extends Controller
                             $confidence = count($mappingSuggestions) / max(count($detectedFields), 1);
                         }
                     } else {
-                        \Log::info('[ImportController] Using legacy mapping system', [
+                        \Log::debug('[ImportController] Using legacy mapping system', [
                             'import_id' => $id,
                             'type' => $importJob->type,
                         ]);
@@ -248,7 +248,7 @@ class ImportController extends Controller
                     $data['mapping_suggestions'] = $mappingSuggestions;
                     $data['auto_mapping_confidence'] = round($confidence, 2);
 
-                    \Log::info('[ImportController] Fields detected successfully', [
+                    \Log::debug('[ImportController] Fields detected successfully', [
                         'count' => count($detectedFields),
                         'field_names' => array_column($detectedFields, 'name'),
                         'suggestions_count' => count($mappingSuggestions),
@@ -311,7 +311,7 @@ class ImportController extends Controller
         $importJob = ImportJob::where('company_id', $request->header('company'))
             ->findOrFail($id);
 
-        \Log::info('[ImportController] validateData() called', [
+        \Log::debug('[ImportController] validateData() called', [
             'import_id' => $id,
             'file_path' => $importJob->file_path,
         ]);
@@ -367,7 +367,7 @@ class ImportController extends Controller
                 'preview' => $records,
             ];
 
-            \Log::info('[ImportController] Validation completed', [
+            \Log::debug('[ImportController] Validation completed', [
                 'total_records' => $totalRecords,
                 'valid_records' => $validRecords,
                 'invalid_records' => $invalidRecords,
@@ -776,7 +776,7 @@ class ImportController extends Controller
         $importJob = ImportJob::where('company_id', $request->header('company'))
             ->findOrFail($id);
 
-        \Log::info('[ImportController] commit() started', [
+        \Log::debug('[ImportController] commit() started', [
             'import_id' => $id,
             'type' => $importJob->type,
             'file_path' => $importJob->file_path,
@@ -846,7 +846,7 @@ class ImportController extends Controller
                 'error_details' => $errors,
             ]);
 
-            \Log::info('[ImportController] commit() completed', [
+            \Log::debug('[ImportController] commit() completed', [
                 'import_id' => $id,
                 'successful_records' => $successCount,
                 'failed_records' => $failCount,
@@ -946,7 +946,7 @@ class ImportController extends Controller
             ]);
         }
 
-        \Log::info('[ImportController] Customer imported', [
+        \Log::debug('[ImportController] Customer imported', [
             'customer_id' => $customer->id,
             'name' => $customer->name,
         ]);
@@ -1040,7 +1040,7 @@ class ImportController extends Controller
         $invoice->unique_hash = \Vinkla\Hashids\Facades\Hashids::connection(\App\Models\Invoice::class)->encode($invoice->id);
         $invoice->save();
 
-        \Log::info('[ImportController] Invoice imported', [
+        \Log::debug('[ImportController] Invoice imported', [
             'invoice_id' => $invoice->id,
             'invoice_number' => $invoice->invoice_number,
             'customer_id' => $customer->id,
@@ -1183,7 +1183,7 @@ class ImportController extends Controller
             $item->update(['tax_per_item' => true]);
         }
 
-        \Log::info('[ImportController] Item imported', [
+        \Log::debug('[ImportController] Item imported', [
             'item_id' => $item->id,
             'name' => $item->name,
             'price' => $item->price,
@@ -1303,7 +1303,7 @@ class ImportController extends Controller
             $invoice->subtractInvoicePayment($amount);
         }
 
-        \Log::info('[ImportController] Payment imported', [
+        \Log::debug('[ImportController] Payment imported', [
             'payment_id' => $payment->id,
             'payment_number' => $payment->payment_number,
             'amount' => $amount,
@@ -1364,7 +1364,7 @@ class ImportController extends Controller
                     'description' => 'Auto-created from import',
                 ]);
 
-                \Log::info('[ImportController] Created new expense category', [
+                \Log::debug('[ImportController] Created new expense category', [
                     'category_name' => $data['category'],
                     'category_id' => $expenseCategory->id,
                     'company_id' => $companyId,
@@ -1425,7 +1425,7 @@ class ImportController extends Controller
             'exchange_rate' => 1.0,
         ]);
 
-        \Log::info('[ImportController] Expense imported', [
+        \Log::debug('[ImportController] Expense imported', [
             'expense_id' => $expense->id,
             'amount' => $amount,
             'category' => $expenseCategory->name,

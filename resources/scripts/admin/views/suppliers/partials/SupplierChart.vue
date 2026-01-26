@@ -29,7 +29,7 @@
         </div>
 
         <LineChart
-          v-if="isLoading"
+          v-if="!isLoading"
           :invoices="getChartBills"
           :expenses="getChartExpenses"
           :receipts="getReceiptTotals"
@@ -57,7 +57,7 @@
           </span>
           <br />
           <span
-            v-if="isLoading"
+            v-if="!isLoading"
             class="block mt-1 text-xl font-semibold leading-8"
           >
             <BaseFormatMoney
@@ -74,7 +74,7 @@
           <br />
 
           <span
-            v-if="isLoading"
+            v-if="!isLoading"
             class="block mt-1 text-xl font-semibold leading-8"
             style="color: #00c99c"
           >
@@ -91,7 +91,7 @@
           </span>
           <br />
           <span
-            v-if="isLoading"
+            v-if="!isLoading"
             class="block mt-1 text-xl font-semibold leading-8"
             style="color: #fb7178"
           >
@@ -108,7 +108,7 @@
           </span>
           <br />
           <span
-            v-if="isLoading"
+            v-if="!isLoading"
             class="block mt-1 text-xl font-semibold leading-8"
             style="color: #5851d8"
           >
@@ -195,7 +195,7 @@ watch(
 )
 
 async function loadSupplier() {
-  isLoading.value = false
+  isLoading.value = true
   let response = await suppliersStore.fetchViewSupplier({
     id: route.params.id,
   })
@@ -205,7 +205,7 @@ async function loadSupplier() {
     Object.assign(data, response.data.data)
   }
 
-  isLoading.value = true
+  isLoading.value = false
 }
 
 async function onChangeYear(yearData) {

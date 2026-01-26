@@ -545,6 +545,18 @@ function formatDate(date) {
 }
 
 function handleAccountUpdate(entry, newAccountId) {
+  // Validate that the account exists in the accounts list before updating
+  if (newAccountId !== null && newAccountId !== undefined) {
+    const accountExists = accounts.value.some(acc => acc.id === newAccountId)
+    if (!accountExists) {
+      notificationStore.showNotification({
+        type: 'error',
+        message: t('partner.accounting.errors.invalid_account') || 'Selected account is not valid',
+      })
+      return
+    }
+  }
+
   // Update store via action instead of direct mutation
   partnerAccountingStore.updateEntryAccount(entry.id, newAccountId)
   // Save the learning

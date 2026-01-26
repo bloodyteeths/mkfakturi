@@ -156,7 +156,7 @@ export const useItemStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/items/delete`, id)
+            .post(`/items/delete`, { ids: [id] }) // Fixed: single delete now sends { ids: [id] } instead of raw id
             .then((response) => {
               let index = this.items.findIndex((item) => item.id === id)
               this.items.splice(index, 1)
@@ -182,9 +182,10 @@ export const useItemStore = (useWindow = false) => {
           axios
             .post(`/items/delete`, { ids: this.selectedItems })
             .then((response) => {
+              // Fixed: selectedItems contains IDs, not objects - changed item.id to item
               this.selectedItems.forEach((item) => {
                 let index = this.items.findIndex(
-                  (_item) => _item.id === item.id
+                  (_item) => _item.id === item
                 )
                 this.items.splice(index, 1)
               })

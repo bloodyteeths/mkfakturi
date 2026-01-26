@@ -269,7 +269,7 @@
         </template>
 
         <!-- Actions -->
-        <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
+        <template v-if="hasAtLeastOneAbility()" #cell-actions="{ row }">
           <BillIndexDropdown :row="row.data" :table="table" />
         </template>
       </BaseTable>
@@ -324,7 +324,6 @@ const status = ref([
       {label: t('bills.paid'), value: 'PAID'},
       {label: t('bills.partially_paid'), value: 'PARTIALLY_PAID'}],
   },
-  ,
 ])
 const isRequestOngoing = ref(true)
 const activeTab = ref('general.draft')
@@ -413,7 +412,7 @@ onUnmounted(() => {
   }
 })
 
-function hasAtleastOneAbility() {
+function hasAtLeastOneAbility() {
   return userStore.hasAbilities([
     abilities.DELETE_BILL,
     abilities.EDIT_BILL,
@@ -443,12 +442,9 @@ async function fetchData({ page, filter, sort }) {
     page,
   }
 
-  console.log(data)
-
   isRequestOngoing.value = true
 
   let response = await billsStore.fetchBills(data)
-  console.log('API response:', response.data.data)
 
   // Store data for mobile card view
   billListData.value = response.data.data
@@ -486,7 +482,7 @@ function setStatusFilter(val) {
       break
 
     case t('general.due'):
-      filters.status = 'OVERDUE'
+      filters.status = 'DUE'
       break
 
     case t('general.paid'):

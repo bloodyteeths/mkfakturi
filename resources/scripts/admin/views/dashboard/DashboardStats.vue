@@ -58,13 +58,12 @@ import EstimateIcon from '@/scripts/components/icons/dashboard/EstimateIcon.vue'
 import abilities from '@/scripts/admin/stub/abilities'
 import DashboardStatsItem from './DashboardStatsItem.vue'
 
-import { inject } from 'vue'
+// Fixed: Removed unused inject import
 import { useDashboardStore } from '@/scripts/admin/stores/dashboard'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useUserStore } from '@/scripts/admin/stores/user'
 
-const utils = inject('utils')
-
+// Fixed: Removed unused utils inject
 const dashboardStore = useDashboardStore()
 const companyStore = useCompanyStore()
 const userStore = useUserStore()

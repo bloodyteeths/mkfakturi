@@ -9,6 +9,7 @@ import { useModalStore } from '@/scripts/stores/modal'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
 import ExportXmlModal from '@/scripts/admin/components/modal-components/ExportXmlModal.vue'
@@ -24,6 +25,7 @@ const invoiceStore = useInvoiceStore()
 const userStore = useUserStore()
 const dialogStore = useDialogStore()
 const globalStore = useGlobalStore()
+const notificationStore = useNotificationStore()
 
 const { t } = useI18n()
 const invoiceData = ref(null)
@@ -66,7 +68,7 @@ const shareableLink = computed(() => {
 
 const getCurrentInvoiceId = computed(() => {
   if (invoiceData.value && invoiceData.value.id) {
-    return invoice.value.id
+    return invoiceData.value.id
   }
   return null
 })
@@ -116,7 +118,10 @@ async function onPayWithCpay() {
   try {
     await invoiceStore.initiateCpayCheckout(invoiceData.value.id)
   } catch (error) {
-    console.error('CPAY checkout error:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('payments.cpay.checkout_error'),
+    })
   } finally {
     isCpayProcessing.value = false
   }

@@ -82,7 +82,7 @@ class TaxTypesController extends Controller
         $this->authorize('delete', $taxType);
 
         if ($taxType->taxes() && $taxType->taxes()->count() > 0) {
-            return respondJson('taxes_attached', 'Taxes Attached.');
+            return respondJson('taxes_attached', __('settings.tax_types.taxes_attached'));
         }
 
         $taxType->delete();

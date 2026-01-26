@@ -497,7 +497,7 @@
     "payment_deleted_message": "Payment deleted successfully",
     "default_send_subject": "Bill :number",
     "default_send_body": "Your bill from Facturino.",
-    "sent_message": "Bill marked as sent",
+    "sent_message": "Bill sent successfully",
     "marked_viewed_message": "Bill marked as viewed",
     "marked_completed_message": "Bill marked as completed",
     "payments_title": "Bill Payments",
@@ -1264,7 +1264,9 @@
       "on_the_first_day_of_every_month_at_midnight": "On the first day of every month at 00:00",
       "every_6_month": "Every 6 Month",
       "every_year_on_the_first_day_of_january_at_midnight": "Every year on the first day of january at 00:00",
-      "custom": "Custom"
+      "custom": "Custom",
+      "cron_format_hint": "Format: minute hour day month weekday (e.g., 0 0 * * * for daily at midnight)",
+      "invalid_cron_format": "Invalid cron format. Use 5 space-separated values: minute hour day month weekday"
     },
     "confirm_delete": "You will not be able to recover this Invoice | You will not be able to recover these Invoices",
     "created_message": "Recurring Invoice created successfully",
@@ -1323,7 +1325,8 @@
       "processing": "Processing payment...",
       "success": "Payment successful",
       "failed": "Payment failed"
-    }
+    },
+    "error_loading_customer_data": "Error loading customer data"
   },
   "expenses": {
     "title": "Expenses",
@@ -1373,6 +1376,7 @@
     "duplicate_details": "Existing expense details:",
     "confirm_save_duplicate": "Save Anyway",
     "cancel_duplicate": "Cancel",
+    "error_saving_expense": "Error saving expense",
     "categories": {
       "categories_list": "Categories List",
       "title": "Title",
@@ -1675,6 +1679,7 @@
     "title": "Settings",
     "setting": "Settings | Settings",
     "general": "General",
+    "invite_company_description": "Invite a company to connect with your account.",
     "invite_partner": "Invite Partner to Manage Your Books",
     "invite_partner_description": "Invite an accountant or bookkeeper partner to help manage your company. You can specify exactly what permissions they'll have.",
     "partner_email_placeholder": "partner@example.com",
@@ -1787,7 +1792,8 @@
       "delete_company_description": "Once you delete your company, you will lose all the data and files associated with it permanently.",
       "are_you_absolutely_sure": "Are you absolutely sure?",
       "delete_company_modal_desc": "This action cannot be undone. This will permanently delete {company} and all of its associated data.",
-      "delete_company_modal_label": "Please type {company} to confirm"
+      "delete_company_modal_label": "Please type {company} to confirm",
+      "cannot_update_currency": "Cannot update company currency after transactions are created."
     },
     "custom_fields": {
       "title": "Custom Fields",
@@ -2003,6 +2009,7 @@
       "status_processing": "Processing",
       "status_completed": "Ready",
       "status_failed": "Failed",
+      "status_unknown": "Unknown",
       "your_rights_title": "Your Data Rights (GDPR)",
       "rights_description": "Under the General Data Protection Regulation (GDPR), you have the following rights regarding your personal data:",
       "right_access": "Right to Access - Request copies of your personal data",
@@ -2244,7 +2251,8 @@
       "updated_message": "Tax type updated successfully",
       "deleted_message": "Tax type deleted successfully",
       "confirm_delete": "You will not be able to recover this Tax Type",
-      "already_in_use": "Tax is already in use"
+      "already_in_use": "Tax is already in use",
+      "taxes_attached": "Taxes attached."
     },
     "payment_modes": {
       "title": "Payment Modes",

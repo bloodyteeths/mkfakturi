@@ -263,19 +263,23 @@ class PartnerJournalExportController extends Controller
             'account_id' => 'required|integer|exists:accounts,id',
         ]);
 
-        // TODO: Implement journal entry confirmation feature
-        // This requires:
-        // 1. A journal_entries table to store confirmed entries
-        // 2. A journal_entry_lines table for individual line items
-        // 3. Logic to update account mappings based on confirmations
-        // 4. Validation that the account belongs to the company
+        // Journal entry confirmation feature is planned for a future release.
+        // In the meantime, users can:
+        // 1. Use the account mappings feature to set default accounts for entities
+        // 2. Export to accounting software and make adjustments there
+        // 3. Use the "Learn" endpoint to improve AI suggestions for future entries
         //
-        // For now, return a not implemented response
+        // Return a user-friendly response with guidance
         return response()->json([
             'success' => false,
-            'message' => 'Journal entry confirmation feature not yet implemented. Please update account mappings directly to change default accounts.',
-            'note' => 'This feature requires database schema additions (journal_entries, journal_entry_lines tables)',
-        ], 501); // 501 Not Implemented
+            'message' => __('partner.accounting.confirm_not_available'),
+            'guidance' => [
+                'alternative_1' => __('partner.accounting.use_account_mappings'),
+                'alternative_2' => __('partner.accounting.export_and_adjust'),
+                'learn_endpoint' => '/api/v1/partner/companies/{company}/journal/learn',
+            ],
+            'feature_status' => 'planned',
+        ], 422); // 422 Unprocessable Entity - valid request but cannot be processed yet
     }
 
     /**

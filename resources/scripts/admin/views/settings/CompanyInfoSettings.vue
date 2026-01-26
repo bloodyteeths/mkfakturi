@@ -233,13 +233,7 @@ async function updateCompanyData() {
       let logoData = new FormData()
 
       if (logoFileBlob.value) {
-        logoData.append(
-          'company_logo',
-          JSON.stringify({
-            name: logoFileName.value,
-            data: logoFileBlob.value,
-          }),
-        )
+        logoData.append('company_logo', logoFileBlob.value, logoFileName.value)
       }
       logoData.append('is_company_logo_removed', isCompanyLogoRemoved.value)
 
@@ -249,8 +243,9 @@ async function updateCompanyData() {
     }
 
     isSaving.value = false
+  } else {
+    isSaving.value = false
   }
-  isSaving.value = false
 }
 function removeCompany(id) {
   modalStore.openModal({

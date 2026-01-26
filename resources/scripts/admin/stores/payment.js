@@ -158,7 +158,9 @@ export const usePaymentStore = (useWindow = false) => {
                   (payment) => payment.id === response.data.data.id
                 )
 
-                this.payments[pos] = data.payment
+                if (pos !== -1) {
+                  this.payments[pos] = response.data.data
+                }
 
                 const notificationStore = useNotificationStore()
                 notificationStore.showNotification({
@@ -185,7 +187,9 @@ export const usePaymentStore = (useWindow = false) => {
               let index = this.payments.findIndex(
                 (payment) => payment.id === id
               )
-              this.payments.splice(index, 1)
+              if (index !== -1) {
+                this.payments.splice(index, 1)
+              }
 
               notificationStore.showNotification({
                 type: 'success',
@@ -210,7 +214,9 @@ export const usePaymentStore = (useWindow = false) => {
                 let index = this.payments.findIndex(
                   (_payment) => _payment.id === payment.id
                 )
-                this.payments.splice(index, 1)
+                if (index !== -1) {
+                  this.payments.splice(index, 1)
+                }
               })
               notificationStore.showNotification({
                 type: 'success',
@@ -389,7 +395,9 @@ export const usePaymentStore = (useWindow = false) => {
                 let pos = this.paymentModes.findIndex(
                   (paymentMode) => paymentMode.id === response.data.data.id
                 )
-                this.paymentModes[pos] = data.paymentModes
+                if (pos !== -1) {
+                  this.paymentModes[pos] = response.data.data
+                }
                 notificationStore.showNotification({
                   type: 'success',
                   message: global.t(
@@ -416,7 +424,9 @@ export const usePaymentStore = (useWindow = false) => {
               let index = this.paymentModes.findIndex(
                 (paymentMode) => paymentMode.id === id
               )
-              this.paymentModes.splice(index, 1)
+              if (index !== -1) {
+                this.paymentModes.splice(index, 1)
+              }
               if (response.data.success) {
                 notificationStore.showNotification({
                   type: 'success',

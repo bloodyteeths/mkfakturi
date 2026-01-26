@@ -157,14 +157,16 @@
       :label="$t('recurring_invoices.frequency.title')"
       :content-loading="isLoading"
       required
-      :error="v.frequency.$error && v.frequency.$errors[0].$message"
+      :error="cronValidationError || (v.frequency.$error && v.frequency.$errors[0].$message)"
+      :help-text="$t('recurring_invoices.frequency.cron_format_hint')"
     >
       <BaseInput
         v-model="recurringInvoiceStore.newRecurringInvoice.frequency"
         :content-loading="isLoading"
         :disabled="!isCustomFrequency"
-        :invalid="v.frequency.$error"
+        :invalid="v.frequency.$error || !!cronValidationError"
         :loading="isLoadingNextDate"
+        placeholder="* * * * *"
         @update:modelValue="debounceNextDate"
       />
     </BaseInputGroup>
@@ -211,6 +213,7 @@ const globalStore = useGlobalStore()
 const { t } = useI18n()
 
 const isLoadingNextDate = ref(false)
+const cronValidationError = ref('')
 
 const limits = reactive([
   { label: t('recurring_invoices.limit.none'), value: 'NONE' },
@@ -273,9 +276,18 @@ async function getNextInvoiceDate() {
   const val = recurringInvoiceStore.newRecurringInvoice.frequency
 
   if (!val) {
+    cronValidationError.value = ''
     return
   }
 
+  // Basic cron format validation (5 space-separated parts)
+  const cronParts = val.trim().split(/\s+/)
+  if (cronParts.length !== 5) {
+    cronValidationError.value = t('recurring_invoices.frequency.invalid_cron_format')
+    return
+  }
+
+  cronValidationError.value = ''
   isLoadingNextDate.value = true
 
   let data = {
@@ -285,8 +297,9 @@ async function getNextInvoiceDate() {
 
   try {
     await recurringInvoiceStore.fetchRecurringInvoiceFrequencyDate(data)
+    cronValidationError.value = ''
   } catch (error) {
-    console.error(error)
+    cronValidationError.value = t('recurring_invoices.frequency.invalid_cron_format')
     isLoadingNextDate.value = false
   }
 

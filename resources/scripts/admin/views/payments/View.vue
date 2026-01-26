@@ -322,7 +322,7 @@ loadPayment()
 onSearch = debounce(onSearch, 500)
 
 function hasActiveUrl(id) {
-  return route.params.id == id
+  return route.params.id === String(id)
 }
 
 function hasAbilities() {
@@ -373,11 +373,11 @@ async function loadPayments(pageNumber, fromScrollListener = false) {
   currentPageNumber.value = pageNumber ? pageNumber : 1
   lastPageNumber.value = response.data.meta.last_page
   let paymentFound = paymentList.value.find(
-    (paym) => paym.id == route.params.id
+    (paym) => String(paym.id) === route.params.id
   )
 
   if (
-    fromScrollListener == false &&
+    fromScrollListener === false &&
     !paymentFound &&
     currentPageNumber.value < lastPageNumber.value &&
     Object.keys(params).length === 0
@@ -387,7 +387,7 @@ async function loadPayments(pageNumber, fromScrollListener = false) {
 
   if (paymentFound) {
     setTimeout(() => {
-      if (fromScrollListener == false) {
+      if (fromScrollListener === false) {
         scrollToPayment()
       }
     }, 500)

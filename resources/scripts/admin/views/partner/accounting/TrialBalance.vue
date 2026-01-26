@@ -256,7 +256,8 @@ const isBalanced = computed(() => {
   if (!trialBalanceData.value) return true
   const debit = trialBalanceData.value.total_debit || 0
   const credit = trialBalanceData.value.total_credit || 0
-  return debit === credit
+  // Use epsilon comparison for floating point numbers to avoid precision issues
+  return Math.abs(debit - credit) < 0.01
 })
 
 const balanceDifference = computed(() => {
@@ -327,7 +328,11 @@ async function loadTrialBalance() {
       signal: abortController.signal,
     })
 
-    trialBalanceData.value = response.data?.trial_balance || null
+    // Safely extract trial balance data with null check and fallback
+    const responseTrialBalance = response.data?.trial_balance
+    trialBalanceData.value = responseTrialBalance && typeof responseTrialBalance === 'object'
+      ? responseTrialBalance
+      : { accounts: [], total_debit: 0, total_credit: 0 }
   } catch (error) {
     // Don't show error for cancelled requests
     if (error.name === 'CanceledError' || error.name === 'AbortError') {

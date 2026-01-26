@@ -221,7 +221,7 @@ let isFetchingInitialData = ref(true)
 let tableComponent = ref(null)
 
 const filters = reactive({
-  customer: '',
+  customer_id: '',
   payment_mode: '',
   payment_number: '',
   project_id: '',

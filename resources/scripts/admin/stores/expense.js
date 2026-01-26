@@ -151,10 +151,12 @@ export const useExpenseStore = (useWindow = false) => {
             }
 
             let pos = this.expenses.findIndex(
-              (expense) => expense.id === response.data.id
+              (expense) => expense.id === response.data.data?.id
             )
 
-            this.expenses[pos] = data.expense
+            if (pos !== -1) {
+              this.expenses[pos] = response.data.data
+            }
 
             notificationStore.showNotification({
               type: 'success',
@@ -203,7 +205,9 @@ export const useExpenseStore = (useWindow = false) => {
               let index = this.expenses.findIndex(
                 (expense) => expense.id === id
               )
-              this.expenses.splice(index, 1)
+              if (index !== -1) {
+                this.expenses.splice(index, 1)
+              }
 
               notificationStore.showNotification({
                 type: 'success',
@@ -229,7 +233,9 @@ export const useExpenseStore = (useWindow = false) => {
                 let index = this.expenses.findIndex(
                   (_expense) => _expense.id === expense.id
                 )
-                this.expenses.splice(index, 1)
+                if (index !== -1) {
+                  this.expenses.splice(index, 1)
+                }
               })
               notificationStore.showNotification({
                 type: 'success',

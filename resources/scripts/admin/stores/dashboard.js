@@ -74,7 +74,7 @@ export const useDashboardStore = (useWindow = false) => {
               resolve(response)
             })
             .catch((err) => {
-              console.warn('Dashboard API not available, using default values', err.message)
+              // Fixed: Removed console.warn - silently handle API errors with defaults
               // Set dashboard as loaded even on error so UI shows with default values
               this.isDashboardDataLoaded = true
               // Don't reject, resolve with empty response to prevent further errors

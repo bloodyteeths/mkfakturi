@@ -259,10 +259,12 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
+const { t } = useI18n()
 const stockStore = useStockStore()
 const itemStore = useItemStore()
 const route = useRoute()
@@ -278,7 +280,7 @@ const filters = reactive({
 
 const warehouseOptions = computed(() => {
   return [
-    { id: null, name: '-- All Warehouses --' },
+    { id: null, name: t('stock.all_warehouses') },
     ...stockStore.warehouses,
   ]
 })
@@ -289,7 +291,7 @@ const hasData = computed(() => {
 
 function formatNumber(num) {
   if (num === null || num === undefined) return '-'
-  return Number(num).toLocaleString('en-US', { maximumFractionDigits: 4 })
+  return Number(num).toLocaleString('mk-MK', { maximumFractionDigits: 4 })
 }
 
 function getSourceColor(sourceType) {
@@ -348,16 +350,16 @@ function exportToCsv() {
   if (!stockStore.itemCard.movements.length) return
 
   const headers = [
-    'Date',
-    'Source Type',
-    'Reference',
-    'Description',
-    'Qty In',
-    'Qty Out',
-    'Unit Cost',
-    'Line Value',
-    'Balance Qty',
-    'Balance Value',
+    t('stock.date'),
+    t('stock.source'),
+    t('banking.reference'),
+    t('stock.description'),
+    t('stock.qty_in'),
+    t('stock.qty_out'),
+    t('stock.unit_cost'),
+    t('stock.line_value'),
+    t('stock.balance_qty'),
+    t('stock.balance_value'),
   ]
 
   const rows = stockStore.itemCard.movements.map((m) => [

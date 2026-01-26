@@ -250,6 +250,7 @@ import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
 import { debouncedWatch } from '@vueuse/core'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
@@ -258,6 +259,7 @@ const { t } = useI18n()
 const stockStore = useStockStore()
 const companyStore = useCompanyStore()
 const itemStore = useItemStore()
+const dialogStore = useDialogStore()
 
 const showFilters = ref(false)
 const table = ref(null)
@@ -342,7 +344,7 @@ onMounted(async () => {
 
 function formatNumber(num) {
   if (num === null || num === undefined) return '-'
-  return Number(num).toLocaleString('en-US', { maximumFractionDigits: 4 })
+  return Number(num).toLocaleString('mk-MK', { maximumFractionDigits: 4 })
 }
 
 function getQuantityClass(item) {
@@ -425,18 +427,18 @@ function exportToCsv() {
   if (!inventoryData.value.length) return
 
   const headers = [
-    'Item Name',
-    'SKU',
-    'Warehouse',
-    'Quantity',
-    'Unit Cost',
-    'Total Value'
+    t('items.name'),
+    t('items.sku'),
+    t('stock.warehouse'),
+    t('stock.quantity'),
+    t('stock.unit_cost'),
+    t('stock.total_value')
   ]
 
   const rows = inventoryData.value.map(item => [
     item.name,
     item.sku || '',
-    item.warehouse_name || 'All Warehouses',
+    item.warehouse_name || t('stock.all_warehouses'),
     item.quantity,
     item.unit_cost,
     item.total_value
@@ -473,11 +475,19 @@ function toggleSelectAll() {
 
 
 
-function bulkDelete() {
-  if (!confirm(t('general.are_you_sure'))) return
+async function bulkDelete() {
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('items.confirm_delete'),
+    yesLabel: t('general.yes'),
+    noLabel: t('general.no'),
+    variant: 'danger',
+  })
+
+  if (!confirmed) return
 
   isRequestOngoing.value = true
-  
+
   axios.post('/items/delete', { ids: selectedItems.value })
     .then((response) => {
       if (response.data.success) {

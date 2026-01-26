@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturino - EIC Accelerator Step 1 Application</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .page-break { page-break-before: always; }
+            h1, h2 { page-break-after: avoid; }
+            table, .section-box { page-break-inside: avoid; }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.55;
+            color: #1a1a1a;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 18mm;
+            background: #fff;
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 3px solid #1e40af;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 22pt;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+        .header .subtitle {
+            font-size: 14pt;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .header-meta {
+            margin-top: 15px;
+            font-size: 10pt;
+            color: #64748b;
+        }
+        .header-meta strong { color: #0f172a; }
+
+        /* Section headers */
+        h2.section-title {
+            font-size: 14pt;
+            color: #fff;
+            background: #1e40af;
+            padding: 10px 15px;
+            margin: 30px 0 20px;
+            border-radius: 4px;
+        }
+        h3 {
+            font-size: 11pt;
+            color: #1e40af;
+            margin: 20px 0 10px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+        h4 {
+            font-size: 10pt;
+            color: #334155;
+            margin: 15px 0 8px;
+        }
+        p { margin: 10px 0; }
+        ul, ol { margin: 12px 0; padding-left: 22px; }
+        li { margin: 6px 0; }
+        strong { color: #0f172a; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        th {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        tr:nth-child(even) { background: #fafafa; }
+        .highlight-row { background: #fef3c7 !important; }
+        .live { color: #059669; font-weight: 600; }
+
+        /* Info boxes */
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+        .warning-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+        .success-box {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+
+        /* Code block */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-family: 'Monaco', 'Consolas', monospace;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        /* Two columns */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Summary box */
+        .summary-box {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .summary-box h3 {
+            color: white;
+            border: none;
+            margin: 0 0 15px;
+            font-size: 12pt;
+        }
+        .summary-box p { margin: 8px 0; }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            font-size: 10pt;
+            color: #64748b;
+        }
+        .footer .tagline {
+            color: #1e40af;
+            font-weight: 600;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Funding summary */
+        .funding-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .funding-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .funding-card.grant { border-color: #3b82f6; }
+        .funding-card.equity { border-color: #059669; }
+        .funding-card .amount {
+            font-size: 20pt;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .funding-card .label {
+            font-size: 9pt;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>EIC Accelerator - Step 1 Application</h1>
+        <div class="subtitle">Facturino: Financial Infrastructure for the Western Balkans</div>
+        <div class="header-meta">
+            <strong>Applicant:</strong> Facturino DOOEL (to be registered January 2026)<br>
+            <strong>Location:</strong> Skopje, North Macedonia<br>
+            <strong>Application Type:</strong> EIC Accelerator Open
+        </div>
+    </div>
+
+    <!-- SECTION 1: EXECUTIVE SUMMARY -->
+    <h2 class="section-title">SECTION 1: EXECUTIVE SUMMARY</h2>
+
+    <div class="summary-box">
+        <h3>Facturino: The Plaid and Stripe for the Western Balkans</h3>
+        <p>Facturino is building the financial infrastructure layer for the Western Balkans &mdash; the Plaid and Stripe that 18 million people need but don't have.</p>
+    </div>
+
+    <h4>The Problem</h4>
+    <p>The Western Balkans (North Macedonia, Serbia, Kosovo, Albania, Montenegro, Bosnia) have zero modern fintech infrastructure. There is no open banking aggregator. No developer-friendly payment API. Banks operate in silos. Fintechs cannot build. 710,000 SMEs waste billions of hours annually on manual financial processes.</p>
+
+    <h4>Our Solution</h4>
+    <ol>
+        <li><strong>Open Banking API</strong> &mdash; Unified access to bank accounts across 50+ Balkan banks</li>
+        <li><strong>Payment Infrastructure</strong> &mdash; Developer-friendly payment initiation and processing</li>
+        <li><strong>AI-Powered Automation</strong> &mdash; Intelligent transaction categorization and financial analysis</li>
+    </ol>
+
+    <h4>Current Status</h4>
+    <p>We have live integrations with 3 Macedonian banks (NLB, Stopanska, Komercijalna) via PSD2. Our platform includes 10+ AI-powered financial tools, UBL 2.1 e-invoice support, and a production-ready developer API. <strong>Public launch: Q1 2026.</strong></p>
+
+    <h4>Market Opportunity</h4>
+    <p>EUR 355M total addressable market. All 6 Balkan countries are EU candidates (accession 2028-2035). PSD2 adoption is imminent. No competitor exists &mdash; Plaid and Stripe do not serve this region.</p>
+
+    <h4>Funding Request</h4>
+    <p><strong>EUR 17.5M total</strong> (EUR 2.5M grant + EUR 15M equity) to expand to 4 countries, connect 25+ banks, build full payment infrastructure, and achieve EUR 25M ARR within 3 years.</p>
+
+    <h4>Strategic Impact</h4>
+    <p>Facturino creates EU-controlled financial infrastructure for future EU citizens, prevents US/Chinese fintech dominance in the region, and accelerates digital transformation for EU accession.</p>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 2: COMPANY DESCRIPTION -->
+    <h2 class="section-title">SECTION 2: COMPANY DESCRIPTION</h2>
+
+    <h3>2.1 Founding Story and Mission</h3>
+    <p>Facturino was founded in 2024 in Skopje, North Macedonia to solve a problem the founder experienced firsthand: the complete absence of modern financial infrastructure in the Balkans.</p>
+    <p>While building software for local businesses, it became clear that basic financial operations &mdash; connecting bank accounts, automating payments, issuing invoices &mdash; required manual processes that cost businesses hours every week. The technology that Western companies take for granted (Plaid, Stripe, modern accounting software) simply doesn't exist in this region.</p>
+
+    <div class="info-box">
+        <strong>Mission:</strong> Build the financial infrastructure that enables the Western Balkans to participate in the modern digital economy.<br><br>
+        <strong>Vision:</strong> Become the default financial platform for 18 million people and 710,000 businesses, creating the foundation for the region's fintech ecosystem.
+    </div>
+
+    <h3>2.2 Key Achievements</h3>
+    <table>
+        <tr><th>Achievement</th><th>Status</th></tr>
+        <tr><td>Platform development</td><td>Complete (12 months)</td></tr>
+        <tr><td>NLB Banka integration</td><td class="live">LIVE (PSD2 OAuth + mTLS)</td></tr>
+        <tr><td>Stopanska Banka integration</td><td class="live">LIVE (PSD2 OAuth)</td></tr>
+        <tr><td>Komercijalna Banka integration</td><td class="live">LIVE (PSD2 OAuth)</td></tr>
+        <tr><td>AI financial tools</td><td class="live">LIVE (10+ MCP tools)</td></tr>
+        <tr><td>E-invoice system</td><td class="live">LIVE (UBL 2.1, QES)</td></tr>
+        <tr><td>Developer API</td><td>Ready for launch</td></tr>
+    </table>
+
+    <h3>2.3 Legal Structure</h3>
+    <ul>
+        <li><strong>Current:</strong> US-based development company</li>
+        <li><strong>January 2026:</strong> Macedonian company registration (Facturino DOOEL)</li>
+        <li><strong>Post-funding:</strong> Potential holding structure for regional expansion</li>
+    </ul>
+
+    <!-- SECTION 3: PROBLEM AND MARKET OPPORTUNITY -->
+    <h2 class="section-title">SECTION 3: PROBLEM AND MARKET OPPORTUNITY</h2>
+
+    <h3>3.1 The Problem</h3>
+
+    <h4>For Businesses:</h4>
+    <ul>
+        <li>No way to connect bank accounts to software</li>
+        <li>Manual transaction entry wastes 10+ hours/month per business</li>
+        <li>Cross-border payments cost 3-5% and take 3-5 days</li>
+        <li>No access to modern invoicing or payment collection tools</li>
+    </ul>
+
+    <h4>For Developers/Fintechs:</h4>
+    <ul>
+        <li>Cannot access bank data (no Plaid equivalent)</li>
+        <li>Cannot build payment apps (no Stripe equivalent)</li>
+        <li>Must build everything from scratch for each country</li>
+    </ul>
+
+    <h4>For the Region:</h4>
+    <ul>
+        <li>Financial inclusion lags Western Europe by 15+ years</li>
+        <li>Fintechs cannot emerge without infrastructure</li>
+        <li>SME productivity suffers from manual processes</li>
+    </ul>
+
+    <h3>3.2 Why This Problem Persists</h3>
+    <table>
+        <tr><th>Player</th><th>Why They Won't Solve It</th></tr>
+        <tr><td>Plaid</td><td>Market too small (18M people vs 330M in US)</td></tr>
+        <tr><td>Stripe</td><td>Regulatory complexity across 6 countries</td></tr>
+        <tr><td>Local Banks</td><td>No competitive pressure, no incentive</td></tr>
+        <tr><td>Local Startups</td><td>Need infrastructure to exist first</td></tr>
+    </table>
+
+    <h3>3.3 Market Size</h3>
+    <table>
+        <tr><th>Market</th><th>Calculation</th><th>Value</th></tr>
+        <tr><td>TAM</td><td>710K SMEs &times; EUR 500/year</td><td>EUR 355M</td></tr>
+        <tr><td>SAM</td><td>400K digital-ready SMEs &times; EUR 400/year</td><td>EUR 160M</td></tr>
+        <tr><td>SOM (5-year)</td><td>100K customers &times; EUR 400/year</td><td>EUR 40M</td></tr>
+        <tr><td>API Revenue</td><td>30M monthly calls &times; EUR 0.10</td><td>EUR 36M/year</td></tr>
+    </table>
+
+    <h3>3.4 Market Timing &mdash; Why Now</h3>
+    <ol>
+        <li><strong>EU Accession:</strong> All 6 countries are EU candidates (2028-2035 timeline). They must modernize financial infrastructure.</li>
+        <li><strong>PSD2 Adoption:</strong> EU candidate countries will adopt open banking regulations. Banks will be required to provide APIs.</li>
+        <li><strong>Post-COVID Digitalization:</strong> Accelerated demand for digital financial services.</li>
+        <li><strong>No Competition:</strong> The window is open. First mover will establish permanent dominance.</li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 4: INNOVATION -->
+    <h2 class="section-title">SECTION 4: INNOVATION - SOLUTION/PRODUCT/SERVICES</h2>
+
+    <h3>4.1 Core Innovation</h3>
+    <p>Facturino's innovation is creating a <strong>unified financial data and payment layer</strong> for a fragmented region where none exists.</p>
+
+    <h4>Technical Innovation:</h4>
+    <ol>
+        <li><strong>Universal Bank Adapter:</strong> Single integration point for 50+ banks across 6 countries with different APIs, protocols, and data formats.</li>
+        <li><strong>MCP (Model Context Protocol) Financial AI:</strong> Novel implementation allowing AI agents to interact with financial data through standardized tools &mdash; the first such system for Balkan financial services.</li>
+        <li><strong>Multi-Provider AI Architecture:</strong> Intelligent routing between Claude, Gemini, and OpenAI for optimal cost/performance across different financial tasks.</li>
+    </ol>
+
+    <h3>4.2 Product Components</h3>
+
+    <h4>1. Facturino Connect (Plaid-like)</h4>
+    <pre>POST /connect/v1/link          &rarr; Bank account linking
+GET  /connect/v1/accounts      &rarr; Account aggregation
+GET  /connect/v1/transactions  &rarr; Transaction history
+POST /connect/v1/webhooks      &rarr; Real-time notifications</pre>
+
+    <h4>2. Facturino Pay (Stripe-like)</h4>
+    <pre>POST /pay/v1/intents           &rarr; Payment initiation
+POST /pay/v1/transfers         &rarr; Bank transfers
+POST /pay/v1/invoices          &rarr; Invoice payment links</pre>
+
+    <h4>3. Facturino AI</h4>
+    <ul>
+        <li>Transaction categorization</li>
+        <li>Invoice data extraction (OCR)</li>
+        <li>Cash flow forecasting</li>
+        <li>Anomaly detection</li>
+        <li>Multi-language support (Macedonian, Albanian, Serbian, English)</li>
+    </ul>
+
+    <h3>4.3 Technology Readiness Level</h3>
+    <table>
+        <tr><th>Component</th><th>TRL</th><th>Evidence</th></tr>
+        <tr><td>Bank integrations</td><td>TRL 7</td><td>3 banks live in production</td></tr>
+        <tr><td>AI/MCP system</td><td>TRL 7</td><td>Operational with real data</td></tr>
+        <tr><td>E-invoice system</td><td>TRL 8</td><td>UBL 2.1 compliant, QES signing</td></tr>
+        <tr><td>Developer API</td><td>TRL 6</td><td>Complete, ready for beta</td></tr>
+        <tr><td>Payment initiation</td><td>TRL 4</td><td>Designed, implementation Q2 2026</td></tr>
+    </table>
+
+    <h3>4.4 Intellectual Property</h3>
+    <ul>
+        <li><strong>Trade secrets:</strong> Bank integration protocols, AI prompt engineering</li>
+        <li><strong>Proprietary data:</strong> Macedonian merchant categorization database</li>
+        <li><strong>First-mover advantage:</strong> Bank relationships, regulatory knowledge</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 5: MARKET AND COMPETITION -->
+    <h2 class="section-title">SECTION 5: MARKET AND COMPETITION ANALYSIS</h2>
+
+    <h3>5.1 Target Market Segments</h3>
+
+    <h4>Primary: SMEs (710,000 across 6 countries)</h4>
+    <ul>
+        <li>Need: Automated bookkeeping, bank connectivity, invoicing</li>
+        <li>Willingness to pay: EUR 20-100/month</li>
+    </ul>
+
+    <h4>Secondary: Fintechs/Developers</h4>
+    <ul>
+        <li>Need: Bank data API, payment infrastructure</li>
+        <li>Willingness to pay: EUR 0.10-0.50 per API call</li>
+    </ul>
+
+    <h4>Tertiary: Accountants (serving 10-200 SMEs each)</h4>
+    <ul>
+        <li>Need: Multi-client financial management</li>
+        <li>Willingness to pay: EUR 50-200/month + per-client fees</li>
+    </ul>
+
+    <h3>5.2 Traction</h3>
+    <table>
+        <tr><th>Metric</th><th>Status</th></tr>
+        <tr><td>Banks integrated</td><td>3 (largest in Macedonia)</td></tr>
+        <tr><td>Platform status</td><td>Production-ready</td></tr>
+        <tr><td>AI tools</td><td>10+ operational</td></tr>
+        <tr><td>Launch date</td><td>Q1 2026</td></tr>
+    </table>
+
+    <h3>5.3 Competitor Analysis</h3>
+    <table>
+        <tr><th>Competitor</th><th>Presence in Balkans</th><th>Our Advantage</th></tr>
+        <tr><td>Plaid</td><td>None</td><td>We're here, they're not</td></tr>
+        <tr><td>Stripe</td><td>None</td><td>We're here, they're not</td></tr>
+        <tr><td>Tink</td><td>None</td><td>We're here, they're not</td></tr>
+        <tr><td>QuickBooks</td><td>Minimal</td><td>Local language, local banks</td></tr>
+        <tr><td>Xero</td><td>None</td><td>Local compliance, local banks</td></tr>
+        <tr><td>Local accounting tools</td><td>Yes</td><td>No AI, no APIs, no bank feeds</td></tr>
+    </table>
+
+    <div class="warning-box">
+        <strong>Conclusion:</strong> There is no direct competitor. We are creating the category.
+    </div>
+
+    <h3>5.4 Barriers to Entry</h3>
+    <ol>
+        <li><strong>Bank relationships:</strong> 6-12 months per bank integration</li>
+        <li><strong>Regulatory knowledge:</strong> 6 countries, 6 frameworks, 4 languages</li>
+        <li><strong>Local expertise:</strong> Tax law, business culture, language</li>
+        <li><strong>Network effects:</strong> More businesses &rarr; more developers &rarr; more businesses</li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 6: BROADER IMPACTS -->
+    <h2 class="section-title">SECTION 6: BROADER IMPACTS</h2>
+
+    <h3>6.1 EU Strategic Alignment</h3>
+
+    <h4>European Digital Strategy:</h4>
+    <ul>
+        <li>Creates digital infrastructure for EU candidate countries</li>
+        <li>Enables fintech innovation in underserved region</li>
+        <li>Accelerates digital transformation for EU accession</li>
+    </ul>
+
+    <h4>EU Enlargement Policy:</h4>
+    <ul>
+        <li>Reduces financial infrastructure gap with current EU members</li>
+        <li>Prepares candidate countries for PSD2/PSD3 adoption</li>
+        <li>Creates EU-controlled alternative to US/Chinese fintech platforms</li>
+    </ul>
+
+    <h3>6.2 UN Sustainable Development Goals</h3>
+    <table>
+        <tr><th>SDG</th><th>Contribution</th></tr>
+        <tr><td>SDG 8: Decent Work</td><td>Enables SME productivity, job creation</td></tr>
+        <tr><td>SDG 9: Industry & Innovation</td><td>Creates fintech infrastructure</td></tr>
+        <tr><td>SDG 10: Reduced Inequalities</td><td>Financial inclusion for underserved region</td></tr>
+        <tr><td>SDG 17: Partnerships</td><td>Cross-border financial cooperation</td></tr>
+    </table>
+
+    <h3>6.3 Economic Impact</h3>
+
+    <h4>Job Creation:</h4>
+    <ul>
+        <li>Direct: 50+ jobs by Year 3</li>
+        <li>Indirect: Enables fintech ecosystem (100+ companies building on platform)</li>
+    </ul>
+
+    <h4>SME Productivity:</h4>
+    <ul>
+        <li>Saves 10+ hours/month per business in manual financial work</li>
+        <li>710,000 SMEs &times; 10 hours &times; EUR 15/hour = <strong>EUR 1.3B annual productivity gain potential</strong></li>
+    </ul>
+
+    <!-- SECTION 7: TEAM -->
+    <h2 class="section-title">SECTION 7: TEAM AND MANAGEMENT</h2>
+
+    <h3>7.1 Founder</h3>
+    <div class="info-box">
+        <strong>Technical Founder</strong>
+        <ul>
+            <li>Built entire platform in 12 months as solo developer</li>
+            <li>Full-stack expertise: Laravel, Vue.js, PostgreSQL, AI/ML</li>
+            <li>Deep knowledge of Macedonian business regulations and tax law</li>
+            <li>Integrated 3 banks using PSD2/mTLS authentication</li>
+            <li>Implemented multi-provider AI system (Claude, Gemini, OpenAI)</li>
+        </ul>
+    </div>
+
+    <h3>7.2 Post-Funding Team Plan</h3>
+    <table>
+        <tr><th>Role</th><th>Timeline</th><th>Responsibility</th></tr>
+        <tr><td>CTO</td><td>Month 1-2</td><td>Technical leadership, architecture</td></tr>
+        <tr><td>Head of Compliance</td><td>Month 2-3</td><td>AISP/PISP licensing, regulatory</td></tr>
+        <tr><td>Senior Engineers (4)</td><td>Month 2-6</td><td>Platform development</td></tr>
+        <tr><td>Country Manager Serbia</td><td>Month 6</td><td>Serbian market entry</td></tr>
+        <tr><td>Country Manager Kosovo/Albania</td><td>Month 9</td><td>Regional expansion</td></tr>
+        <tr><td>Sales/BD (2)</td><td>Month 3-6</td><td>Customer acquisition</td></tr>
+    </table>
+
+    <h3>7.3 Advisory Network</h3>
+    <p>To be established post-funding:</p>
+    <ul>
+        <li>Fintech regulatory expert (EU)</li>
+        <li>Banking industry veteran (Balkans)</li>
+        <li>Scaling advisor (former Plaid/Stripe executive)</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 8: FUNDING REQUEST -->
+    <h2 class="section-title">SECTION 8: FUNDING REQUEST</h2>
+
+    <h3>8.1 Total Request</h3>
+
+    <div class="funding-grid">
+        <div class="funding-card grant">
+            <div class="label">EIC Grant</div>
+            <div class="amount">EUR 2.5M</div>
+        </div>
+        <div class="funding-card equity">
+            <div class="label">EIC Equity</div>
+            <div class="amount">EUR 15M</div>
+        </div>
+    </div>
+
+    <h3>8.2 Grant Allocation (EUR 2.5M)</h3>
+    <table>
+        <tr><th>Category</th><th>Amount</th><th>Purpose</th></tr>
+        <tr><td>Bank Integration R&D</td><td>EUR 800K</td><td>25+ banks, universal adapter</td></tr>
+        <tr><td>Security & Compliance</td><td>EUR 500K</td><td>AISP/PISP licensing, SOC2</td></tr>
+        <tr><td>AI/ML Development</td><td>EUR 400K</td><td>Multi-language financial models</td></tr>
+        <tr><td>API Infrastructure</td><td>EUR 400K</td><td>Scale to 1M+ calls/day</td></tr>
+        <tr><td>Developer Tools</td><td>EUR 400K</td><td>SDKs, documentation, sandbox</td></tr>
+    </table>
+
+    <h3>8.3 Equity Allocation (EUR 15M)</h3>
+    <table>
+        <tr><th>Category</th><th>Amount</th><th>Purpose</th></tr>
+        <tr><td>Team Expansion</td><td>EUR 4M</td><td>30+ hires across functions</td></tr>
+        <tr><td>Market Entry</td><td>EUR 4M</td><td>4-country expansion</td></tr>
+        <tr><td>Payment Infrastructure</td><td>EUR 3M</td><td>Full Stripe-like capabilities</td></tr>
+        <tr><td>Bank Partnerships</td><td>EUR 2M</td><td>Integration fees, deals</td></tr>
+        <tr><td>Working Capital</td><td>EUR 2M</td><td>24-month runway buffer</td></tr>
+    </table>
+
+    <h3>8.4 Why EIC Funding?</h3>
+    <ol>
+        <li><strong>Risk Capital:</strong> Banks and traditional VCs don't fund infrastructure in emerging markets</li>
+        <li><strong>Patient Capital:</strong> Infrastructure requires 3-5 years to achieve network effects</li>
+        <li><strong>Strategic Alignment:</strong> EU interest in controlling financial infrastructure for candidate countries</li>
+        <li><strong>Signal Value:</strong> EIC approval validates project for banks, partners, future investors</li>
+    </ol>
+
+    <h3>8.5 Financial Projections</h3>
+    <table>
+        <tr><th>Year</th><th>Businesses</th><th>Banks</th><th>ARR</th><th>Team</th></tr>
+        <tr><td>2026</td><td>5,000</td><td>8</td><td>EUR 500K</td><td>15</td></tr>
+        <tr><td>2027</td><td>30,000</td><td>20</td><td>EUR 8M</td><td>25</td></tr>
+        <tr><td>2028</td><td>100,000</td><td>35</td><td>EUR 25M</td><td>40</td></tr>
+        <tr><td>2029</td><td>200,000</td><td>50</td><td>EUR 50M</td><td>60</td></tr>
+        <tr class="highlight-row"><td>2030</td><td>350,000</td><td>60+</td><td>EUR 100M</td><td>80</td></tr>
+    </table>
+
+    <h3>8.6 Key Risks and Mitigations</h3>
+    <table>
+        <tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+        <tr><td>Bank refuses integration</td><td>Medium</td><td>High</td><td>Multiple bank relationships, screen scraping fallback</td></tr>
+        <tr><td>Regulatory delay</td><td>Medium</td><td>Medium</td><td>Early engagement with regulators, legal counsel</td></tr>
+        <tr><td>Slow SME adoption</td><td>Medium</td><td>Medium</td><td>Accountant channel partnerships, freemium model</td></tr>
+        <tr><td>Competition emerges</td><td>Low</td><td>High</td><td>First-mover advantage, network effects, speed</td></tr>
+        <tr><td>Technical scaling issues</td><td>Low</td><td>Medium</td><td>Cloud infrastructure, proven architecture</td></tr>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 9: MILESTONES -->
+    <h2 class="section-title">SECTION 9: MILESTONES</h2>
+
+    <h3>9.1 Post-Funding Milestones</h3>
+    <table>
+        <tr><th>Month</th><th>Milestone</th><th>Success Metric</th></tr>
+        <tr><td>3</td><td>Team scaled</td><td>15 people</td></tr>
+        <tr><td>3</td><td>API public launch</td><td>100 developers</td></tr>
+        <tr><td>6</td><td>Macedonia dominated</td><td>10,000 businesses, 10 banks</td></tr>
+        <tr><td>9</td><td>Serbia market entry</td><td>5 banks, 5,000 businesses</td></tr>
+        <tr><td>12</td><td>AISP/PISP licenses</td><td>Regulatory approval</td></tr>
+        <tr><td>18</td><td>Payment API launched</td><td>EUR 50M/month processed</td></tr>
+        <tr><td>24</td><td>4 countries operational</td><td>50,000 businesses</td></tr>
+        <tr class="highlight-row"><td>36</td><td>Regional dominance</td><td>EUR 25M ARR</td></tr>
+    </table>
+
+    <!-- SECTION 10: CONCLUSION -->
+    <h2 class="section-title">SECTION 10: CONCLUSION</h2>
+
+    <p>Facturino represents a unique opportunity to create fundamental financial infrastructure for an underserved region of 18 million people.</p>
+
+    <div class="success-box">
+        <strong>What makes this compelling:</strong>
+        <ol>
+            <li><strong>Proven technology:</strong> 3 banks live, AI working, platform ready</li>
+            <li><strong>Zero competition:</strong> No Plaid, no Stripe, no alternatives</li>
+            <li><strong>Perfect timing:</strong> EU accession, PSD2 adoption, market window open</li>
+            <li><strong>Clear path to scale:</strong> Trojan horse strategy, network effects</li>
+            <li><strong>Strategic EU value:</strong> Infrastructure for future EU citizens</li>
+        </ol>
+    </div>
+
+    <p><strong>The ask is clear:</strong> EUR 17.5M to build the financial infrastructure that the Western Balkans desperately needs &mdash; before anyone else does.</p>
+
+    <p><strong>The return is compelling:</strong> First-mover in a winner-take-all market, path to EUR 1B+ valuation, strategic asset for EU.</p>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <strong>Facturino</strong> | Skopje, North Macedonia | facturino.mk
+        <p class="tagline">"The Balkans don't need another app. They need infrastructure. We're building it."</p>
+    </div>
+
+</body>
+</html>

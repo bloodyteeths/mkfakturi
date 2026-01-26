@@ -309,7 +309,7 @@ const matchToInvoice = async (transaction) => {
 
 const formatDate = (date) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('mk-MK', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -322,7 +322,7 @@ const formatAmount = (amount, currency) => {
   const absAmount = Math.abs(amount)
   const sign = amount >= 0 ? '+' : '-'
 
-  return `${sign} ${new Intl.NumberFormat('en-US', {
+  return `${sign} ${new Intl.NumberFormat('mk-MK', {
     style: 'currency',
     currency: currency || 'MKD'
   }).format(absAmount)}`

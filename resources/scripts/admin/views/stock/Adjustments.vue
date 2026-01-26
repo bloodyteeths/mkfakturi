@@ -297,6 +297,8 @@
             <BaseMultiselect
               v-model="adjustmentForm.reason"
               :options="adjustmentReasons"
+              value-prop="value"
+              label="label"
               :placeholder="$t('stock.select_reason')"
             />
           </BaseInputGroup>
@@ -487,16 +489,16 @@ const transferForm = reactive({
 const currentItemStock = ref(null)
 const sourceWarehouseStock = ref(null)
 
-// Adjustment reasons
-const adjustmentReasons = [
-  'Inventory count correction',
-  'Damaged goods',
-  'Expired goods',
-  'Lost/stolen',
-  'Found during audit',
-  'Opening balance',
-  'Other',
-]
+// Adjustment reasons - computed for i18n
+const adjustmentReasons = computed(() => [
+  { label: t('stock.adjustment_reasons.inventory_correction'), value: 'inventory_correction' },
+  { label: t('stock.adjustment_reasons.damaged_goods'), value: 'damaged_goods' },
+  { label: t('stock.adjustment_reasons.expired_goods'), value: 'expired_goods' },
+  { label: t('stock.adjustment_reasons.lost_stolen'), value: 'lost_stolen' },
+  { label: t('stock.adjustment_reasons.found_during_audit'), value: 'found_during_audit' },
+  { label: t('stock.adjustment_reasons.opening_balance'), value: 'opening_balance' },
+  { label: t('stock.adjustment_reasons.other'), value: 'other' },
+])
 
 // Filter destination warehouses to exclude source
 const availableDestinationWarehouses = computed(() => {

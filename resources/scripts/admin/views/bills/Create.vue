@@ -348,9 +348,6 @@ async function searchItems(query) {
 function selectItem(index, item) {
   if (!item) return
 
-  console.log('selectItem called with:', { index, item })
-  console.log('Item taxes:', item.taxes)
-
   items[index].item_id = item.id
   items[index].name = item.name
   items[index].description = item.description || ''
@@ -363,10 +360,7 @@ function selectItem(index, item) {
   // Auto-fill taxes from item (extract tax_type_id for multiselect)
   if (item.taxes && item.taxes.length > 0) {
     const taxIds = item.taxes.map(t => t.tax_type_id)
-    console.log('Setting taxes to:', taxIds)
     items[index].taxes = taxIds
-  } else {
-    console.log('No taxes found on item')
   }
 }
 

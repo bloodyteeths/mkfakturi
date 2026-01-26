@@ -46,6 +46,7 @@ export const useProjectStore = (useWindow = false) => {
         payments: [],
       },
       currentProjectSummary: null,
+      isFetching: false, // Loading state for consistency with other stores
     }),
 
     getters: {
@@ -118,6 +119,7 @@ export const useProjectStore = (useWindow = false) => {
        * Fetch all projects with filters
        */
       async fetchProjects(params = {}) {
+        this.isFetching = true
         try {
           const response = await axios.get('/projects', { params })
 
@@ -130,6 +132,8 @@ export const useProjectStore = (useWindow = false) => {
         } catch (err) {
           handleError(err)
           throw err
+        } finally {
+          this.isFetching = false
         }
       },
 

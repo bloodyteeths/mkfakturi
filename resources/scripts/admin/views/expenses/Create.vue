@@ -317,6 +317,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
 import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import { useModalStore } from '@/scripts/stores/modal'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import ExpenseCustomFields from '@/scripts/admin/components/custom-fields/CreateCustomFields.vue'
 import CategoryModal from '@/scripts/admin/components/modal-components/CategoryModal.vue'
 import ExpenseDuplicateWarningModal from '@/scripts/admin/components/modal-components/ExpenseDuplicateWarningModal.vue'
@@ -542,7 +543,11 @@ async function submitForm(allowDuplicate = false) {
     isAttachmentReceiptRemoved.value = false
     router.push('/admin/expenses')
   } catch (err) {
-    console.error(err)
+    const notificationStore = useNotificationStore()
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('expenses.error_saving_expense'),
+    })
     isSaving.value = false
     return
   }

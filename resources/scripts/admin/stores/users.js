@@ -146,9 +146,10 @@ export const useUsersStore = (useWindow = false) => {
 
         return new Promise((resolve, reject) => {
           axios
-            .post(`/users/delete`, { users: id.ids })
+            .post(`/users/delete`, { users: Array.isArray(id) ? id : [id] })
             .then((response) => {
-              let index = this.users.findIndex((user) => user.id === id)
+              const idToFind = Array.isArray(id) ? id[0] : id
+              let index = this.users.findIndex((user) => user.id === idToFind)
               this.users.splice(index, 1)
               notificationStore.showNotification({
                 type: 'success',

@@ -211,7 +211,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, onMounted, reactive, onUnmounted } from 'vue'
+import { ref, computed, onMounted, reactive, onUnmounted } from 'vue' // Fixed: Removed unused inject import
 import { debouncedWatch } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useItemStore } from '@/scripts/admin/stores/item'
@@ -223,8 +223,6 @@ import ItemDropdown from '@/scripts/admin/components/dropdowns/ItemIndexDropdown
 import SatelliteIcon from '@/scripts/components/icons/empty/SatelliteIcon.vue'
 import abilities from '@/scripts/admin/stub/abilities'
 import ExportButton from '@/scripts/admin/components/ExportButton.vue'
-
-const utils = inject('utils')
 
 const itemStore = useItemStore()
 const companyStore = useCompanyStore()
@@ -375,7 +373,8 @@ function removeMultipleItems() {
     .then((res) => {
       if (res) {
         itemStore.deleteMultipleItems().then((response) => {
-          if (response.data.success) {
+          // Fixed: Added fallback if response.data.success is undefined - still refresh table
+          if (response.data.success || response.data.success === undefined) {
             table.value && table.value.refresh()
           }
         })

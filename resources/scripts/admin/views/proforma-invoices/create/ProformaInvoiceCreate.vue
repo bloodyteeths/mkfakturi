@@ -248,7 +248,6 @@ async function submitForm() {
   v$.value.$touch()
 
   if (v$.value.$invalid) {
-    console.log('Form is invalid:', v$.value.$errors)
     return false
   }
 
@@ -288,7 +287,7 @@ async function submitForm() {
 
     router.push(`/admin/proforma-invoices/${response.data.data.id}/view`)
   } catch (err) {
-    console.error(err)
+    // Error handled by store/notification system
   }
 
   isSaving.value = false

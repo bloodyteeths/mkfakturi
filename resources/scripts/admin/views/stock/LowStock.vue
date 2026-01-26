@@ -274,7 +274,7 @@ onMounted(async () => {
 
 function formatNumber(num) {
   if (num === null || num === undefined) return '-'
-  return Number(num).toLocaleString('en-US', { maximumFractionDigits: 2 })
+  return Number(num).toLocaleString('mk-MK', { maximumFractionDigits: 2 })
 }
 
 function getSeverityVariant(percentage) {
@@ -371,13 +371,13 @@ function exportToCsv() {
   const tableData = table.value?.data || []
 
   const headers = [
-    'Item Name',
-    'SKU',
-    'Warehouse',
-    'Current Qty',
-    'Minimum Qty',
-    'Shortage',
-    'Shortage %',
+    t('items.name'),
+    t('items.sku'),
+    t('stock.warehouse'),
+    t('stock.current_qty'),
+    t('stock.minimum_qty'),
+    t('stock.shortage'),
+    t('stock.shortage') + ' %',
   ]
 
   const rows = tableData.map((item) => [

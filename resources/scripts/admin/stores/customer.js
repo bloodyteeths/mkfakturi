@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { useRoute } from 'vue-router'
 import { handleError } from '@/scripts/helpers/error-handling'
 
-console.log('🔥🔥🔥 CUSTOMER STORE MODULE LOADED - VERSION 2025-11-26-03:11 🔥🔥🔥')
+// Fixed: Removed debug log line with emojis
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
@@ -176,45 +176,27 @@ export const useCustomerStore = (useWindow = false) => {
         })
       },
 
+      // Fixed: Removed all console.log/error statements and replaced hardcoded message with translation
       deleteCustomer(id) {
         const notificationStore = useNotificationStore()
-        console.log('[DELETE CUSTOMER] Starting deletion for ID:', id)
-        console.log('[DELETE CUSTOMER] Sending payload:', { ids: [id] })
 
         return new Promise((resolve, reject) => {
-          console.log('[DELETE CUSTOMER] About to make axios call')
-
           axios
             .post(`/customers/delete`, { ids: [id] })
             .then((response) => {
-              console.log('[DELETE CUSTOMER] THEN BLOCK EXECUTED - Success!')
-              console.log('[DELETE CUSTOMER] Success response:', response)
-              console.log('[DELETE CUSTOMER] Response data:', response.data)
-              console.log('[DELETE CUSTOMER] Response status:', response.status)
-              console.log('[DELETE CUSTOMER] Response headers:', response.headers)
-
               let index = this.customers.findIndex(
                 (customer) => customer.id === id
               )
               this.customers.splice(index, 1)
               notificationStore.showNotification({
                 type: 'success',
-                message: 'Customer deleted successfully',
+                message: global.t('customers.deleted_message'), // Fixed: replaced hardcoded string with translation
               })
               resolve(response)
             })
             .catch((err) => {
-              console.error('[DELETE CUSTOMER] CATCH BLOCK EXECUTED - Error!')
-              console.error('[DELETE CUSTOMER] Error caught:', err)
-              console.error('[DELETE CUSTOMER] Error response:', err.response)
-              console.error('[DELETE CUSTOMER] Error request:', err.request)
-              console.error('[DELETE CUSTOMER] Error message:', err.message)
-              console.error('[DELETE CUSTOMER] Error config:', err.config)
               handleError(err)
               reject(err)
-            })
-            .finally(() => {
-              console.log('[DELETE CUSTOMER] FINALLY BLOCK EXECUTED')
             })
         })
       },

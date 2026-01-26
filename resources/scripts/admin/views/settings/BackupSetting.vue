@@ -83,7 +83,7 @@ const diskStore = useDiskStore()
 const { t } = useI18n()
 
 const filters = reactive({
-  selected_disk: { driver: 'local' },
+  selected_disk: { id: null, name: 'Local', driver: 'local' },
 })
 
 const table = ref('')

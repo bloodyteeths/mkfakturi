@@ -269,7 +269,8 @@ async function loadInitialData() {
         return r
       })
     }
-  } catch {
+  } catch (err) {
+    console.error('Error loading initial data:', err)
     isFetchingInitialData.value = false
   }
 

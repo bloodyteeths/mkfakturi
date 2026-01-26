@@ -107,10 +107,13 @@ import GeneralLedger from '../GeneralLedger.vue'
 import JournalEntries from '../JournalEntries.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
+// Feature flag constant
+const FEATURE_FLAG_ACCOUNTING_BACKBONE = 'accounting_backbone'
+
 const globalStore = useGlobalStore()
 
 const accountingBackboneEnabled = computed(() => {
-  return globalStore.featureFlags?.['accounting_backbone'] === true
+  return globalStore.featureFlags?.[FEATURE_FLAG_ACCOUNTING_BACKBONE] === true
 })
 
 function onDownload() {

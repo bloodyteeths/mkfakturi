@@ -210,8 +210,8 @@
         <p class="text-sm text-gray-700">
           {{ $t('billing.cancel_modal_text') }}
         </p>
-        <p class="text-sm text-gray-500">
-          {{ $t('billing.subscription_active_until', { date: formatDate(subscription?.next_billing_date) }) }}
+        <p v-if="subscription?.next_billing_date" class="text-sm text-gray-500">
+          {{ $t('billing.subscription_active_until', { date: formatDate(subscription.next_billing_date) }) }}
         </p>
       </div>
 
@@ -247,6 +247,8 @@ import {
   DocumentTextIcon,
 } from '@heroicons/vue/24/outline'
 import axios from 'axios'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 // Import base components
 import BasePage from '@/scripts/components/base/BasePage.vue'
@@ -260,6 +262,8 @@ import BaseDialog from '@/scripts/components/base/BaseDialog.vue'
 
 const router = useRouter()
 const { t } = useI18n()
+const companyStore = useCompanyStore()
+const notificationStore = useNotificationStore()
 const isLoading = ref(true)
 const isProcessing = ref(false)
 const error = ref(null)
@@ -397,14 +401,21 @@ const cancelSubscription = async () => {
   error.value = null
 
   try {
-    await axios.delete('/api/billing/subscription')
+    const companyId = companyStore.selectedCompany?.id
+    if (!companyId) {
+      throw new Error('No company selected')
+    }
+    await axios.post(`/api/v1/companies/${companyId}/subscription/cancel`)
     showCancelModal.value = false
 
     // Refresh subscription data
     await fetchSubscription()
 
-    // Show success message (you can add a toast notification here)
-    alert(t('billing.success_canceled'))
+    // Show success message
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('billing.success_canceled'),
+    })
   } catch (err) {
     console.error('Failed to cancel subscription:', err)
     error.value = err.response?.data?.message || t('billing.error_cancel')
@@ -425,7 +436,10 @@ const resumeSubscription = async () => {
     await fetchSubscription()
 
     // Show success message
-    alert(t('billing.success_resumed'))
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('billing.success_resumed'),
+    })
   } catch (err) {
     console.error('Failed to resume subscription:', err)
     error.value = err.response?.data?.message || t('billing.error_resume')

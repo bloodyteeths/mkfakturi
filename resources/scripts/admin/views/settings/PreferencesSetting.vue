@@ -55,10 +55,10 @@
           <BaseMultiselect
             v-model="settingsForm.time_zone"
             :content-loading="isFetchingInitialData"
-            :options="globalStore.timeZones"
-            label="key"
+            :options="timeZonesWithOffset"
+            label="displayKey"
             value-prop="value"
-            track-by="key"
+            track-by="displayKey"
             :searchable="true"
             :invalid="v$.time_zone.$error"
           />
@@ -259,6 +259,31 @@ const fiscalYearsList = computed(() => {
     return Object.assign({}, item, {
       key: t(item.key),
     })
+  })
+})
+
+const timeZonesWithOffset = computed(() => {
+  return globalStore.timeZones.map((tz) => {
+    // Try to get the UTC offset for the timezone
+    let offsetLabel = ''
+    try {
+      const now = new Date()
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz.value,
+        timeZoneName: 'shortOffset',
+      })
+      const parts = formatter.formatToParts(now)
+      const offsetPart = parts.find((part) => part.type === 'timeZoneName')
+      if (offsetPart) {
+        offsetLabel = ` (${offsetPart.value})`
+      }
+    } catch (e) {
+      // If timezone is invalid, just use the key as-is
+    }
+    return {
+      ...tz,
+      displayKey: `${tz.key}${offsetLabel}`,
+    }
   })
 })
 

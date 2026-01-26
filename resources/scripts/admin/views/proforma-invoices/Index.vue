@@ -24,7 +24,7 @@
         </BaseButton>
 
         <router-link
-          v-if="userStore.hasAbilities(abilities.CREATE_ESTIMATE)"
+          v-if="userStore.hasAbilities(abilities.CREATE_PROFORMA_INVOICE)"
           to="proforma-invoices/create"
         >
           <BaseButton variant="primary" class="ml-4">
@@ -99,7 +99,7 @@
     >
       <ObservatoryIcon class="mt-5 mb-4" />
       <template
-        v-if="userStore.hasAbilities(abilities.CREATE_ESTIMATE)"
+        v-if="userStore.hasAbilities(abilities.CREATE_PROFORMA_INVOICE)"
         #actions
       >
         <BaseButton
@@ -138,7 +138,7 @@
         <BaseDropdown
           v-if="
             proformaInvoiceStore.selectedProformaInvoices.length &&
-            userStore.hasAbilities(abilities.DELETE_ESTIMATE)
+            userStore.hasAbilities(abilities.DELETE_PROFORMA_INVOICE)
           "
           class="absolute float-right"
         >
@@ -366,10 +366,10 @@ onUnmounted(() => {
 
 function hasAtleastOneAbility() {
   return userStore.hasAbilities([
-    abilities.DELETE_ESTIMATE,
-    abilities.EDIT_ESTIMATE,
-    abilities.VIEW_ESTIMATE,
-    abilities.SEND_ESTIMATE,
+    abilities.DELETE_PROFORMA_INVOICE,
+    abilities.EDIT_PROFORMA_INVOICE,
+    abilities.VIEW_PROFORMA_INVOICE,
+    abilities.SEND_PROFORMA_INVOICE,
   ])
 }
 

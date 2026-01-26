@@ -250,12 +250,14 @@ import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import AccountTreeComponent from '@/scripts/admin/components/accounting/AccountTreeComponent.vue'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
 const partnerAccountingStore = usePartnerAccountingStore()
 const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 
 // State
 const selectedCompanyId = ref(null)
@@ -366,7 +368,11 @@ async function loadAccounts() {
   try {
     await partnerAccountingStore.fetchAccounts(selectedCompanyId.value)
   } catch (error) {
-    console.error('Failed to load accounts:', error)
+    const errorMessage = error.response?.data?.message || t('errors.failed_to_load_accounts')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
   }
 }
 
@@ -475,7 +481,11 @@ function onDeleteAccount(account) {
           )
           await loadAccounts()
         } catch (error) {
-          console.error('Failed to delete account:', error)
+          const errorMessage = error.response?.data?.message || t('errors.failed_to_delete')
+          notificationStore.showNotification({
+            type: 'error',
+            message: errorMessage,
+          })
         }
       }
     })
@@ -515,7 +525,11 @@ async function submitImport() {
     closeImportModal()
     await loadAccounts()
   } catch (error) {
-    console.error('Failed to import accounts:', error)
+    const errorMessage = error.response?.data?.message || t('errors.import_failed')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
   }
 }
 
@@ -533,7 +547,11 @@ async function exportAccounts() {
   try {
     await partnerAccountingStore.exportAccounts(selectedCompanyId.value)
   } catch (error) {
-    console.error('Failed to export accounts:', error)
+    const errorMessage = error.response?.data?.message || t('errors.export_failed')
+    notificationStore.showNotification({
+      type: 'error',
+      message: errorMessage,
+    })
   }
 }
 </script>

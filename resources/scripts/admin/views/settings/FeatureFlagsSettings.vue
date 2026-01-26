@@ -21,8 +21,7 @@
       >
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
-            <h3 class="text-base font-semibold text-gray-900">
-              {{ flag.name }}
+            <h3 class="text-base font-semibold text-gray-900" v-text="flag.name">
             </h3>
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"

@@ -464,19 +464,57 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
     },
 
     /**
-     * Add suggestion to cache with size limit to prevent memory leak
+     * Add suggestion to cache with size limit and TTL to prevent memory leak and stale data
      * @param {string} key - The suggestion key
      * @param {Object} value - The suggestion data
      * @param {number} maxSize - Maximum cache size (default 100)
+     * @param {number} ttlMs - Time-to-live in milliseconds (default 5 minutes)
      */
-    addSuggestionWithLimit(key, value, maxSize = 100) {
+    addSuggestionWithLimit(key, value, maxSize = 100, ttlMs = 5 * 60 * 1000) {
+      const now = Date.now()
+
+      // First, clean up expired entries
       const keys = Object.keys(this.suggestions)
-      if (keys.length >= maxSize && !this.suggestions[key]) {
+      keys.forEach((k) => {
+        const entry = this.suggestions[k]
+        if (entry && entry._expiresAt && entry._expiresAt < now) {
+          delete this.suggestions[k]
+        }
+      })
+
+      // Then check size limit after cleanup
+      const remainingKeys = Object.keys(this.suggestions)
+      if (remainingKeys.length >= maxSize && !this.suggestions[key]) {
         // Remove oldest entries (first 10) when limit is reached
-        const keysToRemove = keys.slice(0, 10)
+        const keysToRemove = remainingKeys.slice(0, 10)
         keysToRemove.forEach((k) => delete this.suggestions[k])
       }
-      this.suggestions[key] = value
+
+      // Store value with expiry timestamp
+      this.suggestions[key] = {
+        ...value,
+        _expiresAt: now + ttlMs,
+      }
+    },
+
+    /**
+     * Get suggestion from cache, respecting TTL
+     * @param {string} key - The suggestion key
+     * @returns {Object|null} - The suggestion data or null if expired/not found
+     */
+    getSuggestionFromCache(key) {
+      const entry = this.suggestions[key]
+      if (!entry) return null
+
+      // Check if expired
+      if (entry._expiresAt && entry._expiresAt < Date.now()) {
+        delete this.suggestions[key]
+        return null
+      }
+
+      // Return data without internal _expiresAt field
+      const { _expiresAt, ...data } = entry
+      return data
     },
 
     /**

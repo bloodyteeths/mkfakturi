@@ -103,7 +103,7 @@ async function onConvertToInvoice() {
             router.push(`/admin/invoices/${result.data.invoice_id}/view`)
           }
         } catch (error) {
-          console.error('Convert error:', error)
+          // Error handled by store/notification system
         } finally {
           isConverting.value = false
         }
@@ -240,11 +240,6 @@ async function loadProformaInvoice() {
   }
 }
 
-async function onSearched() {
-  proformaInvoiceList.value = []
-  loadProformaInvoices()
-}
-
 function sortData() {
   if (searchData.orderBy === 'asc') {
     searchData.orderBy = 'desc'
@@ -268,9 +263,13 @@ function getStatusColor(status) {
   return colors[status] || '#6B7280'
 }
 
+const onSearched = debounce(async function () {
+  proformaInvoiceList.value = []
+  loadProformaInvoices()
+}, 500)
+
 loadProformaInvoices()
 loadProformaInvoice()
-onSearched = debounce(onSearched, 500)
 </script>
 
 <template>
@@ -282,7 +281,7 @@ onSearched = debounce(onSearched, 500)
           v-if="
             (proformaInvoiceData.status === 'DRAFT' || proformaInvoiceData.status === 'SENT') &&
             !proformaInvoiceData.is_expired &&
-            userStore.hasAbilities(abilities.SEND_ESTIMATE)
+            userStore.hasAbilities(abilities.SEND_PROFORMA_INVOICE)
           "
           variant="primary"
           class="mr-3"
@@ -317,7 +316,7 @@ onSearched = debounce(onSearched, 500)
             proformaInvoiceData.status !== 'CONVERTED' &&
             proformaInvoiceData.status !== 'EXPIRED' &&
             proformaInvoiceData.status !== 'REJECTED' &&
-            userStore.hasAbilities(abilities.EDIT_ESTIMATE)
+            userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE)
           "
           variant="danger-outline"
           class="mr-3"

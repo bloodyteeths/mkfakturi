@@ -1,14 +1,12 @@
 {
   "hooks": {
-    "PostPromptSubmit": [
+    "PostToolUse": [
       {
-        "matcher": {
-          "prompt": "@claude:"
-        },
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "claude agent smart-agent-selector \"${prompt}\""
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -q '\\.php\"'; then vendor/bin/pint --quiet $(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path') 2>/dev/null || true; fi"
           }
         ]
       }

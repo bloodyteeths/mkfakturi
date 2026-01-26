@@ -139,7 +139,7 @@
           <span v-else>-</span>
         </template>
 
-        <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
+        <template v-if="hasAtLeastOneAbility()" #cell-actions="{ row }">
           <ProjectDropdown
             :row="row.data"
             :table="tableComponent"
@@ -252,7 +252,7 @@ function refreshTable() {
   fetchData()
 }
 
-function hasAtleastOneAbility() {
+function hasAtLeastOneAbility() {
   return userStore.hasAbilities([
     abilities.DELETE_PROJECT,
     abilities.EDIT_PROJECT,

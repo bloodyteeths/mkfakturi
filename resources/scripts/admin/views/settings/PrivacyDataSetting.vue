@@ -143,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
@@ -309,8 +309,9 @@ function getStatusLabel(status) {
     processing: t('settings.privacy_data.status_processing'),
     completed: t('settings.privacy_data.status_completed'),
     failed: t('settings.privacy_data.status_failed'),
+    unknown: t('settings.privacy_data.status_unknown'),
   }
-  return labels[status] || status
+  return labels[status] || t('settings.privacy_data.status_unknown')
 }
 
 function getStatusBadgeClass(status) {
@@ -319,6 +320,7 @@ function getStatusBadgeClass(status) {
     processing: 'bg-blue-100 text-blue-800',
     completed: 'bg-green-100 text-green-800',
     failed: 'bg-red-100 text-red-800',
+    unknown: 'bg-gray-100 text-gray-800',
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
@@ -343,8 +345,7 @@ function formatFileSize(bytes) {
   return `${size.toFixed(2)} ${units[i]}`
 }
 
-// Clean up polling on component unmount
-import { onBeforeUnmount } from 'vue'
+// Clean up polling on component unmount - handled via onBeforeUnmount imported above
 onBeforeUnmount(() => {
   stopPolling()
 })

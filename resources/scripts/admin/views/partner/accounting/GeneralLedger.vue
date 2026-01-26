@@ -494,11 +494,19 @@ function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
 
   try {
+    // Get currency precision from company settings (0 for MKD, 2 for others)
+    const company = companies.value.find(c => c.id === selectedCompanyId.value)
+    const precision = company?.currency?.precision ?? 2
+
     const absAmount = Math.abs(amount)
+    // Only divide by 100 if the currency has decimal precision
+    // MKD and other currencies with precision 0 should not be divided
+    const displayAmount = precision > 0 ? absAmount / 100 : absAmount
+
     const formatted = new Intl.NumberFormat(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(absAmount / 100)
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    }).format(displayAmount)
 
     const sign = amount < 0 ? '-' : ''
     return `${sign}${formatted} ${selectedCompanyCurrency.value}`
@@ -508,7 +516,10 @@ function formatMoney(amount) {
 }
 
 function balanceColorClass(balance) {
-  if (balance === null || balance === undefined) return 'text-gray-900'
+  // Validate that balance exists and is a number before applying styling
+  if (balance === null || balance === undefined || typeof balance !== 'number' || isNaN(balance)) {
+    return 'text-gray-900'
+  }
   if (balance < 0) return 'text-red-600'
   if (balance > 0) return 'text-green-600'
   return 'text-gray-900'

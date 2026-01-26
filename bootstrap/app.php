@@ -36,6 +36,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 Route::middleware('web')
                     ->group(base_path('routes/debug.php'));
             }
+
+            // Bitrix CRM integration routes
+            // - Public unsubscribe routes (with web middleware)
+            // - Postmark webhooks (without CSRF)
+            // - Bitrix API routes (with bitrix.auth middleware)
+            Route::middleware('web')
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
+                ->group(base_path('routes/bitrix.php'));
         },
         // CLAUDE-CHECKPOINT
     )
@@ -100,6 +108,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'redirect-if-unauthenticated' => \App\Http\Middleware\RedirectIfUnauthorized::class,
             'super-admin' => \App\Http\Middleware\SuperAdminMiddleware::class, // AC-08: Super admin only routes
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
+            'bitrix.auth' => \Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware::class, // Bitrix CRM integration
         ]);
         // CLAUDE-CHECKPOINT
 

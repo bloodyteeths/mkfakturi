@@ -665,7 +665,7 @@
     "payment_deleted_message": "Плаќањето е успешно избришано",
     "default_send_subject": "Сметка :number",
     "default_send_body": "Вашата сметка од Fakturino.",
-    "sent_message": "Сметката е означена како испратена",
+    "sent_message": "Сметката е испратена успешно",
     "marked_viewed_message": "Сметката е означена како прегледана",
     "marked_completed_message": "Сметката е означена како завршена",
     "payments_title": "Плаќања за сметката",
@@ -891,7 +891,16 @@
     "in_stock": "На залиха",
     "stock_value": "Вредност на залиха",
     "average_cost": "Просечна цена",
-    "reorder_level": "Ниво за нарачка"
+    "reorder_level": "Ниво за нарачка",
+    "adjustment_reasons": {
+      "inventory_correction": "Корекција на попис",
+      "damaged_goods": "Оштетена стока",
+      "expired_goods": "Истечена стока",
+      "lost_stolen": "Изгубено/украдено",
+      "found_during_audit": "Пронајдено при ревизија",
+      "opening_balance": "Почетна состојба",
+      "other": "Друго"
+    }
   },
   "warehouses": {
     "title": "Магацини",
@@ -1562,7 +1571,9 @@
       "on_the_first_day_of_every_month_at_midnight": "На првиот ден од секој месец во 00:00",
       "every_6_month": "Секои 6 месеци",
       "every_year_on_the_first_day_of_january_at_midnight": "Секоја година на првиот ден од јануари во 00:00",
-      "custom": "Прилагодено"
+      "custom": "Прилагодено",
+      "cron_format_hint": "Формат: минута час ден месец ден_од_недела (пр. 0 0 * * * за секој ден во полноќ)",
+      "invalid_cron_format": "Невалиден cron формат. Користете 5 вредности одделени со празно место: минута час ден месец ден_од_недела"
     },
     "limit_by": "Ограничи по",
     "limit_count": "Ограничи број",
@@ -1698,6 +1709,7 @@
       "success": "Плаќањето е успешно",
       "failed": "Плаќањето е неуспешно"
     },
+    "error_loading_customer_data": "Грешка при вчитување на податоците за клиентот",
     "delete_payment": "Избриши плаќање",
     "payment_date": "Датум на плаќање",
     "select_invoice": "Изберете фактура",
@@ -1774,6 +1786,7 @@
     "duplicate_details": "Детали за постоечкиот трошок:",
     "confirm_save_duplicate": "Зачувај сепак",
     "cancel_duplicate": "Откажи",
+    "error_saving_expense": "Грешка при зачувување на трошокот",
     "categories": "Категории",
     "view_expense": "Прегледај трошок",
     "delete_expense": "Избриши трошок",
@@ -1921,7 +1934,7 @@
     "edit_user": "Уреди корисник",
     "no_users": "Нема корисници",
     "list_of_users": "This section will contain the list of users.",
-    "email": "Email",
+    "email": "Е-пошта",
     "phone": "Телефон",
     "password": "Лозинка",
     "user_attached_message": "Cannot delete an item which is already in use",
@@ -2207,7 +2220,43 @@
       "journal_export": "Извоз на налози",
       "account_review": "Преглед на сметки",
       "two_factor": "Двофакторска автентикација",
-      "partner_settings": "Управување со партнери"
+      "partner_settings": "Управување со партнери",
+      "privacy_data": "Приватност и податоци"
+    },
+    "invite_company_description": "Поканете компанија да се поврзе со вашата сметка.",
+    "privacy_data": {
+      "title": "Приватност и податоци",
+      "description": "Управувајте со вашите лични податоци и остварете ги вашите GDPR права",
+      "export_title": "Преземете ги вашите податоци",
+      "export_description": "Побарајте целосна копија од сите ваши лични и деловни податоци зачувани во нашиот систем.",
+      "latest_export": "Последен извоз",
+      "requested_at": "Побарано",
+      "expires_at": "Истекува",
+      "file_size": "Големина на датотека",
+      "error": "Грешка",
+      "download": "Преземи",
+      "processing_message": "Вашиот извоз на податоци се обработува. Ова може да потрае неколку минути.",
+      "request_export": "Побарај извоз на податоци",
+      "export_note": "Извозите се достапни 7 дена и вклучуваат сите ваши податоци во CSV и JSON формати.",
+      "export_requested_success": "Вашиот извоз на податоци е побаран и ќе биде готов наскоро.",
+      "export_in_progress": "Веќе имате извоз на податоци во тек.",
+      "export_request_failed": "Неуспешно барање за извоз на податоци. Обидете се повторно.",
+      "download_success": "Вашиот извоз на податоци е успешно преземен.",
+      "download_failed": "Неуспешно преземање на извоз. Датотеката можеби истекла.",
+      "delete_confirm": "Дали сте сигурни дека сакате да го избришете овој извоз? Оваа акција не може да се врати.",
+      "delete_success": "Извозот е успешно избришан.",
+      "delete_failed": "Неуспешно бришење на извоз.",
+      "status_pending": "Во тек",
+      "status_processing": "Се обработува",
+      "status_completed": "Готово",
+      "status_failed": "Неуспешно",
+      "status_unknown": "Непознато",
+      "your_rights_title": "Вашите права за податоци (GDPR)",
+      "rights_description": "Според Општата регулатива за заштита на податоци (GDPR), имате следните права во однос на вашите лични податоци:",
+      "right_access": "Право на пристап - Побарајте копии од вашите лични податоци",
+      "right_rectification": "Право на исправка - Побарајте исправка на неточни податоци",
+      "right_erasure": "Право на бришење - Побарајте бришење на вашите податоци",
+      "right_portability": "Право на преносливост на податоци - Примете ги вашите податоци во преносен формат"
     },
     "address_information": {
       "section_description": "Можете да ги ажурирате информациите за адресата користејќи го формуларот подолу."
@@ -2351,7 +2400,8 @@
       "business_type": "Тип на бизнис",
       "industry": "Индустрија",
       "founded": "Основана",
-      "employees": "Вработени"
+      "employees": "Вработени",
+      "cannot_update_currency": "Не може да се промени валутата на компанијата откако се креирани трансакции."
     },
     "custom_fields": {
       "title": "Прилагодени полиња",
@@ -2878,7 +2928,8 @@
       "individual": "Индивидуален",
       "status": "Статус",
       "active": "Активен",
-      "inactive": "Неактивен"
+      "inactive": "Неактивен",
+      "taxes_attached": "Даноците се прикачени."
     },
     "payment_modes": {
       "title": "Начини на плаќање",

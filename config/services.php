@@ -169,4 +169,10 @@ return [
         'timeout' => env('INVOICE2DATA_TIMEOUT', 90),
     ],
 
+    'bitrix' => [
+        'webhook_url' => env('BITRIX_WEBHOOK_URL'),
+        'shared_secret' => env('BITRIX_SHARED_SECRET'),
+    ],
+
 ];
+// CLAUDE-CHECKPOINT

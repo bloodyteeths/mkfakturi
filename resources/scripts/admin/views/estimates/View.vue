@@ -339,7 +339,7 @@ const shareableLink = computed(() => {
 
 const getCurrentEstimateId = computed(() => {
   if (estimateData.value && estimateData.value.id) {
-    return estimate.value.id
+    return estimateData.value.id
   }
   return null
 })
@@ -350,10 +350,13 @@ watch(route, (to, from) => {
   }
 })
 
+const onSearched = debounce(async function () {
+  estimateList.value = []
+  loadEstimates()
+}, 500)
+
 loadEstimates()
 loadEstimate()
-
-onSearched = debounce(onSearched, 500)
 
 function hasActiveUrl(id) {
   return route.params.id == id
@@ -451,10 +454,6 @@ async function loadEstimate() {
   }
 }
 
-async function onSearched() {
-  estimateList.value = []
-  loadEstimates()
-}
 
 function sortData() {
   if (searchData.orderBy === 'asc') {
@@ -520,7 +519,7 @@ async function removeEstimate(id) {
             router.push('/admin/estimates')
           })
           .catch((err) => {
-            console.error(err)
+            // Error handled by store/notification system
           })
       }
     })

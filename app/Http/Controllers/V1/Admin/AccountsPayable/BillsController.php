@@ -194,7 +194,7 @@ class BillsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Bill sent successfully',
+            'message' => __('bills.sent_message'),
         ]);
     }
 

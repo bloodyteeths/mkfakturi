@@ -231,7 +231,7 @@ const userTableColumns = computed(() => {
       thClass: 'extra',
       tdClass: 'font-medium text-gray-900',
     },
-    { key: 'email', label: 'Email' },
+    { key: 'email', label: t('users.email') },
     {
       key: 'phone',
       label: t('users.phone'),

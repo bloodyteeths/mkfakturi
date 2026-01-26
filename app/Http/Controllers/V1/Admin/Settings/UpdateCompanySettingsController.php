@@ -30,7 +30,7 @@ class UpdateCompanySettingsController extends Controller
         ) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot update company currency after transactions are created.',
+                'message' => __('settings.company_info.cannot_update_currency'),
             ]);
         }
 

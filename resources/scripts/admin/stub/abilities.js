@@ -26,6 +26,13 @@ export default {
   VIEW_ESTIMATE: 'view-estimate',
   SEND_ESTIMATE: 'send-estimate',
 
+  // Proforma Invoices
+  CREATE_PROFORMA_INVOICE: 'create-proforma-invoice',
+  DELETE_PROFORMA_INVOICE: 'delete-proforma-invoice',
+  EDIT_PROFORMA_INVOICE: 'edit-proforma-invoice',
+  VIEW_PROFORMA_INVOICE: 'view-proforma-invoice',
+  SEND_PROFORMA_INVOICE: 'send-proforma-invoice',
+
   // Invoices
   CREATE_INVOICE: 'create-invoice',
   DELETE_INVOICE: 'delete-invoice',
