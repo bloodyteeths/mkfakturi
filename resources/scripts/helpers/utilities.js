@@ -43,13 +43,12 @@ export default {
       precision = Math.abs(precision)
       precision = isNaN(precision) ? 2 : precision
 
-      // CRITICAL FIX: Only divide by 100 for currencies with decimal places (precision > 0)
-      // For zero-precision currencies like MKD, amount is already in the correct unit
-      // Example: MKD with amount=12000 stays as 12000 (12 thousand denars)
-      // USD with amount=12000 becomes 120.00 (120 dollars, stored as cents)
-      if (precision > 0) {
-        amount = amount / 100
-      }
+      // All amounts are stored in cents (integer format) regardless of currency
+      // Always divide by 100 to convert to the display value
+      // The precision only affects how many decimal places to show
+      // Example: MKD amount=120000 becomes 1200 (1,200 denars) with precision 0
+      // Example: USD amount=12000 becomes 120.00 (120 dollars) with precision 2
+      amount = amount / 100
 
       const negativeSign = amount < 0 ? '-' : ''
 

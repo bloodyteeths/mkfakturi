@@ -66,16 +66,6 @@
           :content-loading="isLoading"
         />
       </BaseInputGroup>
-
-      <BaseInputGroup
-        :label="$t('proforma_invoices.customer_po_number')"
-        :content-loading="isLoading"
-      >
-        <BaseInput
-          v-model="proformaInvoiceStore.newProformaInvoice.customer_po_number"
-          :content-loading="isLoading"
-        />
-      </BaseInputGroup>
     </BaseInputGrid>
   </div>
 </template>

@@ -87,9 +87,9 @@ class ProformaInvoice extends Model
     ];
 
     protected $with = [
-        'customer:id,name,email',
+        'customer:id,name,email,vat_number',
         'currency:id,name,code,symbol',
-        'company:id,name',
+        'company:id,name,vat_id,tax_id,logo,logo_path',
     ];
 
     protected function casts(): array
@@ -729,6 +729,7 @@ class ProformaInvoice extends Model
         // Share view data - use 'invoice' key for template compatibility
         view()->share([
             'invoice' => $this,
+            'company' => $company,
             'customFields' => $customFields,
             'company_address' => $companyAddress,
             'shipping_address' => $shippingAddress,

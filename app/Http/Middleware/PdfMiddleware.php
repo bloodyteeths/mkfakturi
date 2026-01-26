@@ -11,19 +11,17 @@ class PdfMiddleware
 {
     /**
      * Рачка со дојдовен барање за PDF
-     * Проверка на автентикација преку различни guards
+     * PDF линковите се ЈАВНИ (public) за споделување со клиенти.
+     * Безбедноста е обезбедена преку unique_hash во URL-то.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Провери ако корисникот е автентициран преку било кој guard
-        if (Auth::guard('web')->check() || Auth::guard('sanctum')->check() || Auth::guard('customer')->check()) {
-            return $next($request);
-        }
-
-        // Ако не е автентициран, врати 401 (за iframe барања)
-        abort(401, 'Unauthorized');
+        // PDF линковите се јавно достапни за споделување со клиенти
+        // Безбедноста е обезбедена преку unique_hash во URL-то кој е тежок за погодување
+        // Ова овозможува клиентите да гледаат фактури без логирање
+        return $next($request);
     }
 }

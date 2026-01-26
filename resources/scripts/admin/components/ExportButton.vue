@@ -57,7 +57,7 @@ async function handleExport(format) {
   try {
     isExporting.value = true
 
-    const companyId = companyStore().selectedCompany?.id
+    const companyId = companyStore.selectedCompany?.id
     if (!companyId) {
       throw new Error('No company selected')
     }

@@ -75,6 +75,7 @@
               "
               :content-loading="isFetchingInitialData"
               :label="$t('customers.email')"
+              required
             >
               <BaseInput
                 v-model.trim="customerStore.currentCustomer.email"
@@ -170,93 +171,6 @@
               />
             </BaseInputGroup>
 
-          </BaseInputGrid>
-        </div>
-
-        <BaseDivider class="mb-5 md:mb-8" />
-
-        <!-- Portal Access-->
-
-        <div class="grid grid-cols-5 gap-4 mb-8">
-          <h6 class="col-span-5 text-lg font-semibold text-left lg:col-span-1">
-            {{ $t('customers.portal_access') }}
-          </h6>
-
-          <BaseInputGrid class="col-span-5 lg:col-span-4">
-            <div class="md:col-span-2">
-              <p class="text-sm text-gray-500">
-                {{ $t('customers.portal_access_text') }}
-              </p>
-
-              <BaseSwitch
-                v-model="customerStore.currentCustomer.enable_portal"
-                class="mt-1 flex"
-              />
-            </div>
-
-            <BaseInputGroup
-              v-if="customerStore.currentCustomer.enable_portal"
-              :content-loading="isFetchingInitialData"
-              :label="$t('customers.portal_access_url')"
-              class="md:col-span-2"
-              :help-text="$t('customers.portal_access_url_help')"
-            >
-              <CopyInputField :token="getCustomerPortalUrl" />
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              v-if="customerStore.currentCustomer.enable_portal"
-              :content-loading="isFetchingInitialData"
-              :error="
-                v$.currentCustomer.password.$error &&
-                v$.currentCustomer.password.$errors[0].$message
-              "
-              :label="$t('customers.password')"
-            >
-              <BaseInput
-                v-model.trim="customerStore.currentCustomer.password"
-                :content-loading="isFetchingInitialData"
-                :type="isShowPassword ? 'text' : 'password'"
-                name="password"
-                :invalid="v$.currentCustomer.password.$error"
-                @input="v$.currentCustomer.password.$touch()"
-              >
-                <template #right>
-                  <BaseIcon
-                    :name="isShowPassword ? 'EyeIcon' : 'EyeSlashIcon'"
-                    class="mr-1 text-gray-500 cursor-pointer"
-                    @click="isShowPassword = !isShowPassword"
-                  />
-                </template>
-              </BaseInput>
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              v-if="customerStore.currentCustomer.enable_portal"
-              :error="
-                v$.currentCustomer.confirm_password.$error &&
-                v$.currentCustomer.confirm_password.$errors[0].$message
-              "
-              :content-loading="isFetchingInitialData"
-              :label="$t('customers.confirm_password')"
-            >
-              <BaseInput
-                v-model.trim="customerStore.currentCustomer.confirm_password"
-                :content-loading="isFetchingInitialData"
-                :type="isShowConfirmPassword ? 'text' : 'password'"
-                name="confirm_password"
-                :invalid="v$.currentCustomer.confirm_password.$error"
-                @input="v$.currentCustomer.confirm_password.$touch()"
-              >
-                <template #right>
-                  <BaseIcon
-                    :name="isShowConfirmPassword ? 'EyeIcon' : 'EyeSlashIcon'"
-                    class="mr-1 text-gray-500 cursor-pointer"
-                    @click="isShowConfirmPassword = !isShowConfirmPassword"
-                  />
-                </template>
-              </BaseInput>
-            </BaseInputGroup>
           </BaseInputGrid>
         </div>
 
@@ -592,15 +506,12 @@ import {
   maxLength,
   helpers,
   email,
-  sameAs,
-  requiredIf,
 } from '@vuelidate/validators'
 import useVuelidate from '@vuelidate/core'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
 import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import CustomerCustomFields from '@/scripts/admin/components/custom-fields/CreateCustomFields.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
-import CopyInputField from '@/scripts/admin/components/CopyInputField.vue'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 
 const customerStore = useCustomerStore()
@@ -616,8 +527,6 @@ const router = useRouter()
 const route = useRoute()
 
 let isFetchingInitialData = ref(false)
-let isShowPassword = ref(false)
-let isShowConfirmPassword = ref(false)
 
 let active = ref(false)
 const isSaving = ref(false)
@@ -651,30 +560,8 @@ const rules = computed(() => {
       },
 
       email: {
-        required: helpers.withMessage(
-          t('validation.required'),
-          requiredIf(customerStore.currentCustomer.enable_portal == true)
-        ),
+        required: helpers.withMessage(t('validation.required'), required),
         email: helpers.withMessage(t('validation.email_incorrect'), email),
-      },
-      password: {
-        required: helpers.withMessage(
-          t('validation.required'),
-          requiredIf(
-            customerStore.currentCustomer.enable_portal == true &&
-              !customerStore.currentCustomer.password_added
-          )
-        ),
-        minLength: helpers.withMessage(
-          t('validation.password_min_length', { count: 8 }),
-          minLength(8)
-        ),
-      },
-      confirm_password: {
-        sameAsPassword: helpers.withMessage(
-          t('validation.password_incorrect'),
-          sameAs(customerStore.currentCustomer.password)
-        ),
       },
 
       website: {
@@ -713,10 +600,6 @@ const rules = computed(() => {
       },
     },
   }
-})
-
-const getCustomerPortalUrl = computed(() => {
-  return `${window.location.origin}/${companyStore.selectedCompany.slug}/customer/login`
 })
 
 const v$ = useVuelidate(rules, customerStore, {
