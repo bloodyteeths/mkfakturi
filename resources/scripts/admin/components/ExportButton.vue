@@ -1,7 +1,7 @@
 <template>
   <BaseDropdown wrapper-class="inline-flex items-center">
     <template #activator>
-      <BaseButton variant="primary-outline" :loading="isExporting">
+      <BaseButton tag="span" variant="primary-outline" :loading="isExporting">
         <template #left="slotProps">
           <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
         </template>
