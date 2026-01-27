@@ -14,11 +14,11 @@ class GetCompanyMailConfigurationController extends Controller
      */
     public function __invoke(Request $request)
     {
-        // Hardcoded Facturino mail configuration
+        // Facturino mail configuration - use config values which default to fakturi@facturino.mk
         // All emails are sent from the system address for deliverability
         $mailConfig = [
-            'from_name' => 'Facturino',
-            'from_mail' => 'invoices@facturino.mk',
+            'from_name' => config('mail.from.name', 'Facturino'),
+            'from_mail' => config('mail.from.address', 'fakturi@facturino.mk'),
         ];
 
         return response()->json($mailConfig);
