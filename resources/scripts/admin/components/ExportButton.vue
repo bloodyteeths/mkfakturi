@@ -1,5 +1,5 @@
 <template>
-  <BaseDropdown>
+  <BaseDropdown wrapper-class="inline-flex items-center">
     <template #activator>
       <BaseButton variant="primary-outline" :loading="isExporting">
         <template #left="slotProps">
