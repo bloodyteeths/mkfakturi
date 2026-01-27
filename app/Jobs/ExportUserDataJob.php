@@ -40,36 +40,58 @@ class ExportUserDataJob implements ShouldQueue
     public function handle(): void
     {
         try {
+            Log::info("Starting data export job", ['export_id' => $this->export->id]);
+
             $this->export->markAsProcessing();
 
             $user = $this->export->user;
 
+            if (! $user) {
+                throw new \Exception('User not found for export');
+            }
+
+            Log::info("Data export: Processing for user", [
+                'export_id' => $this->export->id,
+                'user_id' => $user->id,
+            ]);
+
             // Create temporary directory for export files
             $tempDir = storage_path('app/temp/user-data-export-'.$this->export->id);
             if (! file_exists($tempDir)) {
-                mkdir($tempDir, 0755, true);
+                if (! mkdir($tempDir, 0755, true)) {
+                    throw new \Exception('Could not create temporary directory: '.$tempDir);
+                }
             }
+
+            Log::info("Data export: Created temp directory", ['path' => $tempDir]);
 
             // 1. Export user profile data
             $this->exportUserProfile($user, $tempDir);
+            Log::info("Data export: Profile exported");
 
             // 2. Export companies data
             $this->exportCompanies($user, $tempDir);
+            Log::info("Data export: Companies exported");
 
             // 3. Export invoices data
             $this->exportInvoices($user, $tempDir);
+            Log::info("Data export: Invoices exported");
 
             // 4. Export customers data
             $this->exportCustomers($user, $tempDir);
+            Log::info("Data export: Customers exported");
 
             // 5. Export expenses data
             $this->exportExpenses($user, $tempDir);
+            Log::info("Data export: Expenses exported");
 
             // 6. Export payments data
             $this->exportPayments($user, $tempDir);
+            Log::info("Data export: Payments exported");
 
             // Create ZIP file
             $zipPath = $this->createZipArchive($tempDir);
+            Log::info("Data export: ZIP created", ['path' => $zipPath]);
 
             // Get file size
             $fileSize = Storage::size($zipPath);
@@ -79,6 +101,7 @@ class ExportUserDataJob implements ShouldQueue
 
             // Clean up temp directory
             $this->cleanupTempDirectory($tempDir);
+            Log::info("Data export: Temp directory cleaned up");
 
             // Send email notification to user
             try {
@@ -134,7 +157,7 @@ class ExportUserDataJob implements ShouldQueue
      */
     protected function exportCompanies($user, string $tempDir): void
     {
-        $companies = $user->companies()->with('address')->get();
+        $companies = $user->companies()->with(['address', 'address.country'])->get();
 
         $companiesData = $companies->map(function ($company) {
             return [
@@ -164,7 +187,7 @@ class ExportUserDataJob implements ShouldQueue
     {
         $invoices = Invoice::whereHas('company.users', function ($query) use ($user) {
             $query->where('users.id', $user->id);
-        })->with('customer')->get();
+        })->with(['customer', 'currency'])->get();
 
         if ($invoices->isEmpty()) {
             return;
@@ -238,7 +261,7 @@ class ExportUserDataJob implements ShouldQueue
     {
         $expenses = Expense::whereHas('company.users', function ($query) use ($user) {
             $query->where('users.id', $user->id);
-        })->with('category', 'customer')->get();
+        })->with(['category', 'customer', 'currency'])->get();
 
         if ($expenses->isEmpty()) {
             return;
@@ -277,7 +300,7 @@ class ExportUserDataJob implements ShouldQueue
     {
         $payments = Payment::whereHas('company.users', function ($query) use ($user) {
             $query->where('users.id', $user->id);
-        })->with('customer', 'invoice')->get();
+        })->with(['customer', 'invoice', 'currency', 'paymentMethod'])->get();
 
         if ($payments->isEmpty()) {
             return;
@@ -304,7 +327,7 @@ class ExportUserDataJob implements ShouldQueue
                 $payment->payment_date?->toDateString() ?? '',
                 $payment->amount ?? 0,
                 $payment->currency->code ?? '',
-                $payment->payment_method->name ?? '',
+                $payment->paymentMethod->name ?? '',
                 $payment->notes ?? '',
                 $payment->created_at?->toDateTimeString() ?? '',
             ]);
