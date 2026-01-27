@@ -351,9 +351,8 @@ function selectItem(index, item) {
   items[index].item_id = item.id
   items[index].name = item.name
   items[index].description = item.description || ''
-  // Convert price based on currency precision (MKD has precision 0, no conversion needed)
-  const precision = parseInt(companyStore.selectedCompanyCurrency?.precision ?? 2)
-  items[index].price = precision === 0 ? item.price : item.price / 100
+  // Item prices are stored in cents, always divide by 100 for display
+  items[index].price = item.price / 100
   items[index].track_quantity = item.track_quantity || false
   items[index].selectedItem = item
 

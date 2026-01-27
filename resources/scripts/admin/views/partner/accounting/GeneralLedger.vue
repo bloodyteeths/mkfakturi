@@ -499,9 +499,8 @@ function formatMoney(amount) {
     const precision = company?.currency?.precision ?? 2
 
     const absAmount = Math.abs(amount)
-    // Only divide by 100 if the currency has decimal precision
-    // MKD and other currencies with precision 0 should not be divided
-    const displayAmount = precision > 0 ? absAmount / 100 : absAmount
+    // All amounts stored in cents, always divide by 100 for display
+    const displayAmount = absAmount / 100
 
     const formatted = new Intl.NumberFormat(undefined, {
       minimumFractionDigits: precision,

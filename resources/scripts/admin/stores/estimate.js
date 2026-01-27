@@ -157,7 +157,17 @@ export const useEstimateStore = (useWindow = false) => {
       },
 
       setEstimateData(estimate) {
+        const companyStore = useCompanyStore()
         Object.assign(this.newEstimate, estimate)
+
+        // Fall back to company settings if tax_per_item is null (old records)
+        if (this.newEstimate.tax_per_item === null) {
+          this.newEstimate.tax_per_item = companyStore.selectedCompanySettings.tax_per_item
+        }
+        if (this.newEstimate.discount_per_item === null) {
+          this.newEstimate.discount_per_item = companyStore.selectedCompanySettings.discount_per_item
+        }
+
         if (this.newEstimate.tax_per_item === 'YES') {
           this.newEstimate.items.forEach((_i) => {
             if (_i.taxes && !_i.taxes.length){

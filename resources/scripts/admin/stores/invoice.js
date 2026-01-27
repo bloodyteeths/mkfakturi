@@ -146,7 +146,17 @@ export const useInvoiceStore = (useWindow = false) => {
       },
 
       setInvoiceData(invoice) {
+        const companyStore = useCompanyStore()
         Object.assign(this.newInvoice, invoice)
+
+        // Fall back to company settings if tax_per_item is null (old invoices)
+        if (this.newInvoice.tax_per_item === null) {
+          this.newInvoice.tax_per_item = companyStore.selectedCompanySettings.tax_per_item
+        }
+        // Fall back to company settings if discount_per_item is null
+        if (this.newInvoice.discount_per_item === null) {
+          this.newInvoice.discount_per_item = companyStore.selectedCompanySettings.discount_per_item
+        }
 
         if (this.newInvoice.tax_per_item === 'YES') {
           this.newInvoice.items.forEach((_i) => {

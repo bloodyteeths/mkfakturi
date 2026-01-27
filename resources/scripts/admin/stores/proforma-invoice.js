@@ -134,7 +134,16 @@ export const useProformaInvoiceStore = (useWindow = false) => {
       },
 
       setProformaInvoiceData(proformaInvoice) {
+        const companyStore = useCompanyStore()
         Object.assign(this.newProformaInvoice, proformaInvoice)
+
+        // Fall back to company settings if tax_per_item is null (old records)
+        if (this.newProformaInvoice.tax_per_item === null) {
+          this.newProformaInvoice.tax_per_item = companyStore.selectedCompanySettings.tax_per_item
+        }
+        if (this.newProformaInvoice.discount_per_item === null) {
+          this.newProformaInvoice.discount_per_item = companyStore.selectedCompanySettings.discount_per_item
+        }
 
         if (this.newProformaInvoice.tax_per_item === 'YES') {
           this.newProformaInvoice.items.forEach((_i) => {

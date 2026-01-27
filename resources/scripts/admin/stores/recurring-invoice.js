@@ -144,9 +144,19 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
           axios
             .get(`/recurring-invoices/${id}`)
             .then((response) => {
+              const companyStore = useCompanyStore()
               Object.assign(this.newRecurringInvoice, response.data.data)
               this.newRecurringInvoice.invoices =
                 response.data.data.invoices || []
+
+              // Fall back to company settings if tax_per_item is null (old records)
+              if (this.newRecurringInvoice.tax_per_item === null) {
+                this.newRecurringInvoice.tax_per_item = companyStore.selectedCompanySettings.tax_per_item
+              }
+              if (this.newRecurringInvoice.discount_per_item === null) {
+                this.newRecurringInvoice.discount_per_item = companyStore.selectedCompanySettings.discount_per_item
+              }
+
               this.setSelectedFrequency()
               this.isFetchingViewData = false
               resolve(response)
