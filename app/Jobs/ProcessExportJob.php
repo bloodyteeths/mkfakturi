@@ -164,13 +164,13 @@ class ProcessExportJob implements ShouldQueue
             ? 'exports.'.$this->exportJob->type
             : 'exports.generic';
 
-        // Create PDF
+        // Create PDF in landscape orientation for better table display
         $pdf = Pdf::loadView($viewName, [
             'data' => $data,
             'type' => $this->exportJob->type,
             'company' => $this->exportJob->company,
             'params' => $this->exportJob->params,
-        ]);
+        ])->setPaper('a4', 'landscape');
 
         // Save to storage
         Storage::put($path, $pdf->output());

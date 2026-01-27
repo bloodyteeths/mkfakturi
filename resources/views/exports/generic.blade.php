@@ -4,52 +4,68 @@
     <meta charset="utf-8">
     <title>{{ ucfirst($type) }} Export</title>
     <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 10px;
-            line-height: 1.4;
+            font-size: 8px;
+            line-height: 1.3;
+            margin: 0;
+            padding: 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #333;
         }
         .header h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
             color: #333;
         }
         .header p {
-            margin: 5px 0 0;
+            margin: 3px 0 0;
             color: #666;
-            font-size: 11px;
+            font-size: 9px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 8px;
+            table-layout: auto;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 6px 8px;
+            border: 1px solid #ccc;
+            padding: 4px 5px;
             text-align: left;
-            font-size: 9px;
+            font-size: 7px;
+            word-wrap: break-word;
+            overflow: hidden;
         }
         th {
-            background-color: #f5f5f5;
+            background-color: #4a5568;
+            color: white;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 8px;
+            font-size: 6px;
+            white-space: nowrap;
         }
         tr:nth-child(even) {
-            background-color: #fafafa;
+            background-color: #f7fafc;
+        }
+        tr:hover {
+            background-color: #edf2f7;
         }
         .footer {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
-            font-size: 9px;
-            color: #999;
+            font-size: 8px;
+            color: #718096;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
         }
         .no-data {
             text-align: center;
@@ -67,24 +83,71 @@
         <p>Generated: {{ now()->format('Y-m-d H:i:s') }}</p>
     </div>
 
-    @if(count($data) > 0)
+    @php
+        // Columns to exclude from export (internal/system fields)
+        $excludeColumns = [
+            'password', 'remember_token', 'email_verified_at',
+            'facebook_id', 'google_id', 'github_id', 'stripe_id',
+            'deleted_at', 'creator_id', 'unique_hash', 'token',
+            'two_factor_secret', 'two_factor_recovery_codes',
+            'pivot', 'media', 'settings', 'meta',
+        ];
+
+        // Get headers from first row, filtering out excluded columns
+        $headers = [];
+        $filteredData = [];
+
+        if (count($data) > 0) {
+            $allKeys = array_keys($data[0]);
+            foreach ($allKeys as $key) {
+                // Skip excluded columns and columns that are all null/empty
+                if (in_array($key, $excludeColumns)) continue;
+
+                // Check if column has any non-empty values
+                $hasValue = false;
+                foreach ($data as $row) {
+                    $val = $row[$key] ?? null;
+                    if ($val !== null && $val !== '' && $val !== [] && $val !== '[]') {
+                        $hasValue = true;
+                        break;
+                    }
+                }
+                if ($hasValue) {
+                    $headers[] = $key;
+                }
+            }
+
+            // Build filtered data
+            foreach ($data as $row) {
+                $filteredRow = [];
+                foreach ($headers as $header) {
+                    $filteredRow[$header] = $row[$header] ?? '';
+                }
+                $filteredData[] = $filteredRow;
+            }
+        }
+    @endphp
+
+    @if(count($filteredData) > 0)
         <table>
             <thead>
                 <tr>
-                    @foreach(array_keys($data[0]) as $header)
+                    @foreach($headers as $header)
                         <th>{{ str_replace('_', ' ', $header) }}</th>
                     @endforeach
                 </tr>
             </thead>
             <tbody>
-                @foreach($data as $row)
+                @foreach($filteredData as $row)
                     <tr>
                         @foreach($row as $value)
                             <td>
                                 @if(is_array($value))
-                                    {{ json_encode($value) }}
+                                    {{ implode(', ', array_filter($value)) }}
                                 @elseif(is_bool($value))
                                     {{ $value ? 'Yes' : 'No' }}
+                                @elseif(strlen($value) > 50)
+                                    {{ substr($value, 0, 47) }}...
                                 @else
                                     {{ $value }}
                                 @endif
