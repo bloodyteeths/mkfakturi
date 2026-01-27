@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\V1\Admin\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ExportUserDataJob;
 use App\Models\UserDataExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -35,60 +34,23 @@ class DataExportController extends Controller
             }
         }
 
-        // Create export job
+        // Create export job record
         $export = UserDataExport::create([
             'user_id' => $user->id,
             'status' => 'pending',
         ]);
 
-        // For sync queue driver, run the job synchronously with error handling
-        // This ensures the export completes before the HTTP response
-        if (config('queue.default') === 'sync') {
-            try {
-                Log::info("Starting synchronous data export for user {$user->id}", [
-                    'export_id' => $export->id,
-                ]);
+        Log::info("Data export requested for user {$user->id}", [
+            'export_id' => $export->id,
+        ]);
 
-                // Run the job synchronously
-                ExportUserDataJob::dispatchSync($export);
-
-                // Refresh to get updated status
-                $export->refresh();
-
-                Log::info("Completed synchronous data export for user {$user->id}", [
-                    'export_id' => $export->id,
-                    'status' => $export->status,
-                ]);
-
-                return response()->json([
-                    'export' => $export,
-                    'message' => $export->status === 'completed'
-                        ? 'Your data export is ready for download.'
-                        : 'Your data export request has been processed.',
-                ], 201);
-            } catch (\Exception $e) {
-                // Mark export as failed
-                $export->markAsFailed('Export failed: '.$e->getMessage());
-
-                Log::error("Data export failed for user {$user->id}", [
-                    'export_id' => $export->id,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
-                return response()->json([
-                    'export' => $export->fresh(),
-                    'message' => 'Data export failed. Please try again.',
-                ], 500);
-            }
-        }
-
-        // For async queue drivers (database, redis), dispatch to queue
-        ExportUserDataJob::dispatch($export);
+        // NOTE: We do NOT run the export here to avoid HTTP timeout issues
+        // The export will be processed by the 'exports:process-pending' artisan command
+        // which runs every minute via the scheduler (cron)
 
         return response()->json([
             'export' => $export,
-            'message' => 'Your data export request has been queued. You will be notified when it is ready.',
+            'message' => 'Your data export has been requested. You will receive an email when it is ready for download.',
         ], 201);
     }
 

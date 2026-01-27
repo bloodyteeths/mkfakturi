@@ -125,6 +125,14 @@ if (InstallUtils::isDbCreated()) {
     })->hourly()
         ->name('health-check-self-test');
 
+    // Process pending GDPR data exports - runs every minute
+    // Avoids HTTP timeout issues by processing exports via cron instead of inline
+    Schedule::command('exports:process-pending')
+        ->everyMinute()
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('process-data-exports');
+
     // Outreach email batch send - runs every 15 minutes during business hours
     // Sends up to 10 emails per batch, respects daily/hourly limits
     // Only runs on weekdays between 08:00-18:00 Macedonia time
