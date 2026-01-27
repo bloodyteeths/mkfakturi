@@ -208,7 +208,7 @@ return [
     'notifications' => [
         'notifications' => [
             \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => [],
             \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => [],

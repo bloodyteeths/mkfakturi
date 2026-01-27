@@ -65,8 +65,7 @@ if (InstallUtils::isDbCreated()) {
 
     // Certificate expiry check - runs daily at 8:00 AM
     Schedule::command('certificates:check-expiry')
-        ->dailyAt('08:00')
-        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+        ->dailyAt('08:00');
 
     // Award affiliate bounties - runs daily at 2:00 AM UTC (AC-01-24)
     // Checks for eligible partners (verified KYC + 3 companies OR 30 days)
@@ -88,15 +87,13 @@ if (InstallUtils::isDbCreated()) {
     Schedule::command('payouts:calculate')
         ->monthlyOn(5, '03:00')
         ->runInBackground()
-        ->withoutOverlapping()
-        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+        ->withoutOverlapping();
 
     // Process partner Stripe Connect payouts - runs on 5th of each month at 2:00 AM
     Schedule::command('partner:process-payouts')
         ->monthlyOn(5, '02:00')
         ->runInBackground()
-        ->withoutOverlapping()
-        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+        ->withoutOverlapping();
 
     // Process trial expirations - runs daily at 1:00 AM UTC (FG-01-41)
     // Sends trial expiry reminders (7 days, 1 day before)
@@ -104,8 +101,7 @@ if (InstallUtils::isDbCreated()) {
     Schedule::command('subscriptions:process-trial-expirations')
         ->dailyAt('01:00')
         ->runInBackground()
-        ->withoutOverlapping()
-        ->emailOutputOnFailure(config('mail.from.address', 'admin@facturino.mk'));
+        ->withoutOverlapping();
 
     // Health check self-test - runs every hour
     Schedule::call(function () {

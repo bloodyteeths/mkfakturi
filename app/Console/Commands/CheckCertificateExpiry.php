@@ -46,8 +46,8 @@ class CheckCertificateExpiry extends Command
 
         // Find certificates expiring within 30 days
         $expiringCerts = DB::table('certificates')
-            ->where('expires_at', '<=', Carbon::now()->addDays(30))
-            ->where('expires_at', '>', Carbon::now())
+            ->where('valid_to', '<=', Carbon::now()->addDays(30))
+            ->where('valid_to', '>', Carbon::now())
             ->get();
 
         if ($expiringCerts->isEmpty()) {
@@ -59,7 +59,7 @@ class CheckCertificateExpiry extends Command
         $this->warn("Found {$expiringCerts->count()} expiring certificate(s).");
 
         foreach ($expiringCerts as $cert) {
-            $daysLeft = Carbon::now()->diffInDays(Carbon::parse($cert->expires_at));
+            $daysLeft = Carbon::now()->diffInDays(Carbon::parse($cert->valid_to));
             $certName = $cert->name ?? 'Unnamed';
 
             $this->line("Certificate ID {$cert->id}: {$certName} expires in {$daysLeft} days");
@@ -132,7 +132,7 @@ class CheckCertificateExpiry extends Command
     protected function buildEmailBody($cert, $company, int $daysLeft): string
     {
         $urgency = $daysLeft <= 7 ? '🚨 URGENT' : '⚠️ WARNING';
-        $expiryDate = Carbon::parse($cert->expires_at)->format('Y-m-d H:i:s');
+        $expiryDate = Carbon::parse($cert->valid_to)->format('Y-m-d H:i:s');
 
         return <<<EMAIL
 {$urgency}: QES Certificate Expiring Soon
