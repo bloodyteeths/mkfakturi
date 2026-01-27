@@ -147,6 +147,7 @@ class PartnerInvitationController extends Controller
         $validated = $request->validate([
             'inviter_company_id' => 'required|exists:companies,id',
             'invitee_email' => 'required|email',
+            'message' => 'nullable|string|max:500',
         ]);
 
         // Create referral token
@@ -154,9 +155,12 @@ class PartnerInvitationController extends Controller
 
         DB::table('company_referrals')->insert([
             'inviter_company_id' => $validated['inviter_company_id'],
+            'invitee_company_id' => null, // Explicitly set to NULL (filled when invitee signs up)
             'invitee_email' => $validated['invitee_email'],
             'referral_token' => $token,
             'status' => 'pending',
+            'message' => $validated['message'] ?? null,
+            'invited_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
