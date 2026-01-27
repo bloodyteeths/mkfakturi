@@ -38,6 +38,9 @@ export const useGlobalStore = (useWindow = false) => {
       isSidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
       areCurrenciesLoading: false,
 
+      // Super Admin Support Mode
+      supportMode: null,
+
       downloadReport: () => {},
     }),
 
@@ -69,6 +72,9 @@ export const useGlobalStore = (useWindow = false) => {
               this.config = response.data.config
               this.globalSettings = response.data.global_settings
               this.featureFlags = response.data.feature_flags || {}
+
+              // Super admin support mode
+              this.supportMode = response.data.support_mode || null
 
               // user store
               userStore.currentUser = response.data.current_user

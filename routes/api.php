@@ -695,6 +695,12 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/tickets/{ticket}/assign', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'assignTicket']);
                     Route::post('/tickets/{ticket}/change-status', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'changeStatus']);
                     Route::post('/tickets/{ticket}/internal-notes', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'addInternalNote']);
+
+                    // Super Admin Company Browser (Support Mode)
+                    Route::get('/companies/search', [\App\Http\Controllers\V1\Admin\Support\AdminCompanyBrowserController::class, 'search']);
+                    Route::post('/companies/{company}/enter-support-mode', [\App\Http\Controllers\V1\Admin\Support\AdminCompanyBrowserController::class, 'enterSupportMode']);
+                    Route::post('/support-mode/exit', [\App\Http\Controllers\V1\Admin\Support\AdminCompanyBrowserController::class, 'exitSupportMode']);
+                    Route::get('/support-mode/status', [\App\Http\Controllers\V1\Admin\Support\AdminCompanyBrowserController::class, 'status']);
                 });
 
                 // Canned Responses (Admin/Support Only)

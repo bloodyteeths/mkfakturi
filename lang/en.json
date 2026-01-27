@@ -462,15 +462,25 @@
   },
   "company_switcher": {
     "add_new_company": "Add new company",
+    "admin_support": "Admin Support",
     "commission": "Commission",
     "created_message": "Company created successfully",
+    "entered_support_mode": "Entered support mode for {name}",
+    "exit": "Exit",
+    "exit_support_mode_failed": "Failed to exit support mode",
+    "exited_support_mode": "Exited support mode",
     "label": "SWITCH COMPANY",
     "manage_clients": "Manage Clients",
     "new_company": "New company",
     "no_partner_companies_found": "No Partner Companies Found",
     "no_results_found": "No Results Found",
     "partner_clients": "Partner Clients",
-    "primary": "Primary"
+    "primary": "Primary",
+    "search_all_companies": "Search all companies...",
+    "support_mode": "Support Mode",
+    "support_mode_active": "Support Mode Active",
+    "support_mode_failed": "Failed to enter support mode",
+    "type_to_search": "Type at least 2 characters to search"
   },
   "credit_notes": {
     "apply_to_invoice": "Apply To Invoice",

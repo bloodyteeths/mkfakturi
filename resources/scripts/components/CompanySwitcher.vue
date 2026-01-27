@@ -2,6 +2,23 @@
   <div ref="companySwitchBar" class="relative rounded">
     <CompanyModal />
 
+    <!-- Support Mode Indicator -->
+    <div
+      v-if="supportMode"
+      class="
+        absolute
+        -top-1
+        -right-1
+        w-3
+        h-3
+        bg-orange-500
+        rounded-full
+        animate-pulse
+        z-10
+      "
+      :title="$t('company_switcher.support_mode_active')"
+    />
+
     <div
       class="
         flex
@@ -12,11 +29,10 @@
         md:h-9
         ml-2
         text-sm text-white
-        bg-white
         rounded
         cursor-pointer
-        bg-opacity-20
       "
+      :class="supportMode ? 'bg-orange-500 bg-opacity-80' : 'bg-white bg-opacity-20'"
       @click="isShow = !isShow"
     >
       <span
@@ -242,6 +258,131 @@
               <span class="font-medium">{{ $t('company_switcher.manage_clients') }}</span>
             </div>
           </div>
+
+          <!-- Super Admin Support Mode Section -->
+          <div v-if="isSuperAdmin" class="border-t-2 border-gray-100 mt-2 pt-2">
+            <!-- Support Mode Active Banner -->
+            <div
+              v-if="supportMode"
+              class="mx-2 mb-2 p-2 bg-orange-100 border border-orange-300 rounded-md"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center text-orange-700">
+                  <BaseIcon name="EyeIcon" class="h-4 w-4 mr-1" />
+                  <span class="text-xs font-medium">{{ $t('company_switcher.support_mode') }}</span>
+                </div>
+                <button
+                  class="text-xs text-orange-600 hover:text-orange-800 font-medium"
+                  @click="exitSupportMode"
+                >
+                  {{ $t('company_switcher.exit') }}
+                </button>
+              </div>
+              <p class="text-xs text-orange-600 mt-1">
+                {{ supportMode.company_name }}
+              </p>
+            </div>
+
+            <label
+              class="
+                px-3
+                py-2
+                text-xs
+                font-semibold
+                text-orange-500
+                mb-0.5
+                block
+                uppercase
+              "
+            >
+              {{ $t('company_switcher.admin_support') }}
+            </label>
+
+            <!-- Search Input -->
+            <div class="px-3 mb-2">
+              <input
+                v-model="adminSearchQuery"
+                type="text"
+                :placeholder="$t('company_switcher.search_all_companies')"
+                class="
+                  w-full
+                  px-3
+                  py-2
+                  text-sm
+                  border
+                  border-gray-300
+                  rounded-md
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-orange-500
+                  focus:border-transparent
+                "
+                @input="debouncedAdminSearch"
+              />
+            </div>
+
+            <!-- Search Results -->
+            <div v-if="adminSearchLoading" class="px-3 py-2 text-center">
+              <div class="animate-spin h-5 w-5 border-2 border-orange-500 border-t-transparent rounded-full mx-auto"></div>
+            </div>
+
+            <div v-else-if="adminSearchResults.length > 0" class="max-h-48 overflow-y-auto">
+              <div
+                v-for="company in adminSearchResults"
+                :key="`admin-${company.id}`"
+                class="
+                  p-2
+                  px-3
+                  cursor-pointer
+                  hover:bg-orange-50
+                  hover:text-orange-600
+                "
+                :class="{
+                  'bg-orange-50 text-orange-600': supportMode?.company_id === company.id,
+                }"
+                @click="enterSupportMode(company)"
+              >
+                <div class="flex items-center">
+                  <span
+                    class="
+                      flex
+                      items-center
+                      justify-center
+                      mr-3
+                      overflow-hidden
+                      text-base
+                      font-semibold
+                      bg-orange-100
+                      rounded-md
+                      w-9
+                      h-9
+                      text-orange-600
+                    "
+                  >
+                    {{ initGenerator(company.name) }}
+                  </span>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium">{{ company.name }}</span>
+                    <span class="text-xs text-gray-500">{{ company.owner_email }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-else-if="adminSearchQuery.length >= 2 && !adminSearchLoading"
+              class="px-3 py-2 text-sm text-gray-500 text-center"
+            >
+              {{ $t('company_switcher.no_results_found') }}
+            </div>
+
+            <div
+              v-else-if="adminSearchQuery.length < 2"
+              class="px-3 py-2 text-xs text-gray-400 text-center"
+            >
+              {{ $t('company_switcher.type_to_search') }}
+            </div>
+          </div>
         </div>
         <div
           v-if="userStore.currentUser.is_owner"
@@ -273,12 +414,14 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useDebounceFn } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { useModalStore } from '../stores/modal'
 import { useI18n } from 'vue-i18n'
 import { useGlobalStore } from '@/scripts/admin//stores/global'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import axios from 'axios'
 
 import CompanyModal from '@/scripts/admin/components/modal-components/CompanyModal.vue'
 import abilities from '@/scripts/admin/stub/abilities'
@@ -286,6 +429,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 const companyStore = useCompanyStore()
 const consoleStore = useConsoleStore()
 const modalStore = useModalStore()
+const notificationStore = useNotificationStore()
 const route = useRoute()
 const router = useRouter()
 const globalStore = useGlobalStore()
@@ -295,10 +439,25 @@ const isShow = ref(false)
 const name = ref('')
 const companySwitchBar = ref(null)
 
+// Super Admin Search
+const adminSearchQuery = ref('')
+const adminSearchResults = ref([])
+const adminSearchLoading = ref(false)
+
 // Check if current user is a partner
 const isPartner = computed(() => {
   // Check user role directly - only show partner UI for actual partner users
   return userStore.currentUser?.role === 'partner'
+})
+
+// Check if current user is a super admin
+const isSuperAdmin = computed(() => {
+  return userStore.currentUser?.role === 'super admin'
+})
+
+// Get support mode from global store
+const supportMode = computed(() => {
+  return globalStore.supportMode
 })
 
 watch(route, () => {
@@ -358,6 +517,83 @@ async function changeToPartnerCompany(company) {
 function goToConsole() {
   isShow.value = false
   router.push('/admin/console')
+}
+
+// Super Admin Support Mode Functions
+async function searchAdminCompanies() {
+  if (adminSearchQuery.value.length < 2) {
+    adminSearchResults.value = []
+    return
+  }
+
+  adminSearchLoading.value = true
+  try {
+    const response = await axios.get('/support/admin/companies/search', {
+      params: { q: adminSearchQuery.value, limit: 10 }
+    })
+    adminSearchResults.value = response.data.companies
+  } catch (error) {
+    console.error('Failed to search companies:', error)
+    adminSearchResults.value = []
+  } finally {
+    adminSearchLoading.value = false
+  }
+}
+
+const debouncedAdminSearch = useDebounceFn(searchAdminCompanies, 300)
+
+async function enterSupportMode(company) {
+  try {
+    const response = await axios.post(`/support/admin/companies/${company.id}/enter-support-mode`)
+
+    if (response.data.success) {
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('company_switcher.entered_support_mode', { name: company.name }),
+      })
+
+      isShow.value = false
+      adminSearchQuery.value = ''
+      adminSearchResults.value = []
+
+      // Refresh bootstrap to load the support company context
+      await globalStore.setIsAppLoaded(false)
+      await globalStore.bootstrap()
+
+      router.push('/admin/dashboard')
+    }
+  } catch (error) {
+    console.error('Failed to enter support mode:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('company_switcher.support_mode_failed'),
+    })
+  }
+}
+
+async function exitSupportMode() {
+  try {
+    await axios.post('/support/admin/support-mode/exit')
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('company_switcher.exited_support_mode'),
+    })
+
+    isShow.value = false
+
+    // Refresh bootstrap to restore normal context
+    await globalStore.setIsAppLoaded(false)
+    await globalStore.bootstrap()
+
+    router.push('/admin/dashboard')
+  } catch (error) {
+    console.error('Failed to exit support mode:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('company_switcher.exit_support_mode_failed'),
+    })
+  }
 }
 </script>
 

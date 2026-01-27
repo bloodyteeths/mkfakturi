@@ -368,16 +368,26 @@
     "no_results_found": "Не се најдени резултати"
   },
   "company_switcher": {
-    "label": "СМЕНИ КОМПАНИЈА",
-    "no_results_found": "Не се најдени резултати",
     "add_new_company": "Додај нова компанија",
-    "new_company": "Нова компанија",
-    "created_message": "Компанијата е успешно создадена",
-    "partner_clients": "Партнерски клиенти",
-    "no_partner_companies_found": "Не се најдени партнерски компании",
+    "admin_support": "Админ Поддршка",
     "commission": "провизија",
+    "created_message": "Компанијата е успешно создадена",
+    "entered_support_mode": "Влеговте во режим на поддршка за {name}",
+    "exit": "Излези",
+    "exit_support_mode_failed": "Неуспешно излегување од режим на поддршка",
+    "exited_support_mode": "Излеговте од режим на поддршка",
+    "label": "СМЕНИ КОМПАНИЈА",
+    "manage_clients": "Управувај со клиенти",
+    "new_company": "Нова компанија",
+    "no_partner_companies_found": "Не се најдени партнерски компании",
+    "no_results_found": "Не се најдени резултати",
+    "partner_clients": "Партнерски клиенти",
     "primary": "Главна",
-    "manage_clients": "Управувај со клиенти"
+    "search_all_companies": "Пребарај ги сите компании...",
+    "support_mode": "Режим на поддршка",
+    "support_mode_active": "Режим на поддршка е активен",
+    "support_mode_failed": "Неуспешно влегување во режим на поддршка",
+    "type_to_search": "Внесете барем 2 карактери за пребарување"
   },
   "dateRange": {
     "today": "Денес",

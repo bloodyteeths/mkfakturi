@@ -368,16 +368,26 @@
     "no_results_found": "Nuk u Gjetën Rezultate"
   },
   "company_switcher": {
-    "label": "NDRYSHO KOMPANI",
-    "no_results_found": "Nuk u Gjetën Rezultate",
     "add_new_company": "Shto kompani të re",
-    "new_company": "Kompani e re",
-    "created_message": "Kompania u krijua me sukses",
-    "partner_clients": "Klientë partnerë",
-    "no_partner_companies_found": "Nuk u gjetën kompani partnerë",
+    "admin_support": "Mbështetje Admin",
     "commission": "provizion",
+    "created_message": "Kompania u krijua me sukses",
+    "entered_support_mode": "Hyri në modalitetin e mbështetjes për {name}",
+    "exit": "Dil",
+    "exit_support_mode_failed": "Dështoi dalja nga modaliteti i mbështetjes",
+    "exited_support_mode": "Doli nga modaliteti i mbështetjes",
+    "label": "NDRYSHO KOMPANI",
+    "manage_clients": "Menaxho klientët",
+    "new_company": "Kompani e re",
+    "no_partner_companies_found": "Nuk u gjetën kompani partnerë",
+    "no_results_found": "Nuk u Gjetën Rezultate",
+    "partner_clients": "Klientë partnerë",
     "primary": "Kryesore",
-    "manage_clients": "Menaxho klientët"
+    "search_all_companies": "Kërko të gjitha kompanitë...",
+    "support_mode": "Modaliteti i Mbështetjes",
+    "support_mode_active": "Modaliteti i Mbështetjes Aktiv",
+    "support_mode_failed": "Dështoi hyrja në modalitetin e mbështetjes",
+    "type_to_search": "Shkruani të paktën 2 karaktere për të kërkuar"
   },
   "dateRange": {
     "today": "Sot",

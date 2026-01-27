@@ -244,6 +244,34 @@ class BootstrapController extends Controller
             $payload = $bootstrapLogic();
         }
 
+        // Super Admin Support Mode: Override company context if in support mode
+        $supportMode = session('support_mode');
+        if ($current_user->role === 'super admin' && $supportMode) {
+            $supportCompany = \App\Models\Company::with('address')->find($supportMode['company_id']);
+            if ($supportCompany) {
+                $supportCompanySettings = CompanySetting::getAllSettings($supportCompany->id)->toArray();
+                $currencyId = $supportCompanySettings['currency'] ?? null;
+                $currencyModel = $currencyId ? Currency::find($currencyId) : Currency::first();
+
+                $payload['support_mode'] = $supportMode;
+                $payload['current_company'] = (new CompanyResource($supportCompany))->toArray($request);
+                $payload['current_company_settings'] = $supportCompanySettings;
+                $payload['current_company_currency'] = $currencyModel ? $currencyModel->toArray() : null;
+
+                // Keep original companies list but add support company if not present
+                $companiesArray = $payload['companies'];
+                $hasCompany = collect($companiesArray)->contains('id', $supportCompany->id);
+                if (! $hasCompany) {
+                    $payload['companies'][] = (new CompanyResource($supportCompany))->toArray($request);
+                }
+            }
+        }
+
+        // Always include support_mode status for super admins
+        if ($current_user->role === 'super admin') {
+            $payload['support_mode'] = $supportMode ?: null;
+        }
+
         return response()->json($payload);
     }
 
