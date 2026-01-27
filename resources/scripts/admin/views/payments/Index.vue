@@ -25,6 +25,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="paymentStore.paymentTotalCount"
+          type="payments"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_PAYMENT)"
           variant="primary"
@@ -211,6 +218,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 import CapsuleIcon from '@/scripts/components/icons/empty/CapsuleIcon.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 import PaymentDropdown from '@/scripts/admin/components/dropdowns/PaymentIndexDropdown.vue'
 import SendPaymentModal from '@/scripts/admin/components/modal-components/SendPaymentModal.vue'
 

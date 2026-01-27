@@ -23,6 +23,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="proformaInvoiceStore.proformaInvoiceTotalCount"
+          type="proforma_invoices"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_PROFORMA_INVOICE)"
           to="proforma-invoices/create"
@@ -259,6 +266,7 @@ import { debouncedWatch } from '@vueuse/core'
 
 import ObservatoryIcon from '@/scripts/components/icons/empty/ObservatoryIcon.vue'
 import ProformaInvoiceDropdown from '@/scripts/admin/components/dropdowns/ProformaInvoiceIndexDropdown.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 
 // Stores
 const proformaInvoiceStore = useProformaInvoiceStore()

@@ -38,7 +38,7 @@ const props = defineProps({
     type: String,
     required: true,
     validator: (value) => {
-      return ['invoices', 'customers', 'suppliers', 'expenses', 'items', 'bills', 'payments', 'transactions'].includes(value)
+      return ['invoices', 'customers', 'suppliers', 'expenses', 'items', 'bills', 'payments', 'transactions', 'estimates', 'proforma_invoices', 'recurring_invoices'].includes(value)
     }
   },
   filters: {

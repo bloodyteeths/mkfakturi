@@ -30,6 +30,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="recurringInvoiceStore.totalRecurringInvoices"
+          type="recurring_invoices"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_RECURRING_INVOICE)"
           to="recurring-invoices/create"
@@ -263,6 +270,7 @@ import { debouncedWatch } from '@vueuse/core'
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
 import RecurringInvoiceIndexDropdown from '@/scripts/admin/components/dropdowns/RecurringInvoiceIndexDropdown.vue'
 import MoonwalkerIcon from '@/scripts/components/icons/empty/MoonwalkerIcon.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 import abilities from '@/scripts/admin/stub/abilities'
 
 const recurringInvoiceStore = useRecurringInvoiceStore()

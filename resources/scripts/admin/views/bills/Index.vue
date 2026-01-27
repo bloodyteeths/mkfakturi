@@ -23,6 +23,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="billsStore.billTotalCount"
+          type="bills"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
           to="bills/create"
@@ -290,6 +297,7 @@ import { debouncedWatch } from '@vueuse/core'
 
 import MoonwalkerIcon from '@/scripts/components/icons/empty/MoonwalkerIcon.vue'
 import BillIndexDropdown from '@/scripts/admin/components/dropdowns/BillIndexDropdown.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 import BaseBillStatusLabel from "@/scripts/components/base/BaseBillStatusLabel.vue"
 import BillCard from '@/scripts/admin/components/BillCard.vue'
 

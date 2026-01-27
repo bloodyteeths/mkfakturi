@@ -77,15 +77,20 @@ class ProcessExportJob implements ShouldQueue
      */
     protected function getData(): array
     {
+        // Use direct where() instead of whereCompany() scope because the scope
+        // relies on request()->header('company') which is null in queue context
         $query = match ($this->exportJob->type) {
-            'invoices' => Invoice::whereCompany($this->exportJob->company_id),
-            'bills' => Bill::whereCompany($this->exportJob->company_id),
-            'customers' => Customer::whereCompany($this->exportJob->company_id),
-            'suppliers' => Customer::whereCompany($this->exportJob->company_id)->whereIsSupplier(true),
+            'invoices' => Invoice::where('company_id', $this->exportJob->company_id),
+            'bills' => Bill::where('company_id', $this->exportJob->company_id),
+            'customers' => Customer::where('company_id', $this->exportJob->company_id)->where('is_supplier', false),
+            'suppliers' => Customer::where('company_id', $this->exportJob->company_id)->where('is_supplier', true),
             'expenses' => Expense::where('company_id', $this->exportJob->company_id),
             'payments' => Payment::where('company_id', $this->exportJob->company_id),
             'transactions' => \App\Models\Transaction::where('company_id', $this->exportJob->company_id),
             'items' => \App\Models\Item::where('company_id', $this->exportJob->company_id),
+            'estimates' => \App\Models\Estimate::where('company_id', $this->exportJob->company_id),
+            'proforma_invoices' => \App\Models\ProformaInvoice::where('company_id', $this->exportJob->company_id),
+            'recurring_invoices' => \App\Models\RecurringInvoice::where('company_id', $this->exportJob->company_id),
             default => throw new \Exception("Unknown export type: {$this->exportJob->type}"),
         };
 

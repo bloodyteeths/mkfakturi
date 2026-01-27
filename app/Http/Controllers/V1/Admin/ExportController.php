@@ -19,7 +19,7 @@ class ExportController extends Controller
         $this->authorize('view', $company);
 
         $validated = $request->validate([
-            'type' => 'required|in:invoices,bills,customers,suppliers,transactions,expenses,payments,items',
+            'type' => 'required|in:invoices,bills,customers,suppliers,transactions,expenses,payments,items,estimates,proforma_invoices,recurring_invoices',
             'format' => 'required|in:csv,xlsx,pdf',
             'params' => 'nullable|array',
             'params.start_date' => 'nullable|date',

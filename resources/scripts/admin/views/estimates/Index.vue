@@ -30,6 +30,13 @@
           </template>
         </BaseButton>
 
+        <ExportButton
+          v-show="estimateStore.totalEstimateCount"
+          type="estimates"
+          :filters="filters"
+          class="ml-4"
+        />
+
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_ESTIMATE)"
           to="estimates/create"
@@ -249,6 +256,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 
 import ObservatoryIcon from '@/scripts/components/icons/empty/ObservatoryIcon.vue'
 import EstimateDropDown from '@/scripts/admin/components/dropdowns/EstimateIndexDropdown.vue'
+import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 import SendEstimateModal from '@/scripts/admin/components/modal-components/SendEstimateModal.vue'
 import BaseEstimateStatusLabel from "@/scripts/components/base/BaseEstimateStatusLabel.vue";
 
