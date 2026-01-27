@@ -84,7 +84,7 @@ export const useRoleStore = (useWindow = false) => {
           axios
             .post('/roles', data)
             .then((response) => {
-              this.roles.push(response.data.role)
+              this.roles.push(response.data.data)
               notificationStore.showNotification({
                 type: 'success',
                 message: global.t('settings.roles.created_message'),
@@ -104,11 +104,13 @@ export const useRoleStore = (useWindow = false) => {
           axios
             .put(`/roles/${data.id}`, data)
             .then((response) => {
-              if (response.data) {
+              if (response.data?.data) {
                 let pos = this.roles.findIndex(
                   (role) => role.id === response.data.data.id
                 )
-                this.roles[pos] = data.role
+                if (pos !== -1) {
+                  this.roles[pos] = response.data.data
+                }
                 notificationStore.showNotification({
                   type: 'success',
                   message: global.t('settings.roles.updated_message'),

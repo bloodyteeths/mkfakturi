@@ -62,11 +62,13 @@ export const useUsersStore = (useWindow = false) => {
             .get(`/users/${id}`)
             .then((response) => {
               this.userData = response.data.data
-              if (this.userData?.companies?.length) {
+              if (this.userData?.companies?.length && this.userData?.roles?.length) {
                 this.userData.companies.forEach((c, i) => {
                   this.userData.roles.forEach((r) => {
-                    if (r.scope === c.id)
+                    // Use == for type coercion (scope may be string, id may be number)
+                    if (r.scope == c.id) {
                       this.userData.companies[i].role = r.name
+                    }
                   })
                 })
               }
