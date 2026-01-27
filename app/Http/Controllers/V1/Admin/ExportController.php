@@ -36,8 +36,9 @@ class ExportController extends Controller
             'status' => 'pending',
         ]);
 
-        // Dispatch job for processing
-        ProcessExportJob::dispatch($exportJob);
+        // Run job synchronously since queue workers are disabled on Railway
+        // This executes immediately instead of being queued
+        ProcessExportJob::dispatchSync($exportJob);
 
         return response()->json([
             'export_job' => $exportJob,
