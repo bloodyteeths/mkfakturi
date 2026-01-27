@@ -237,12 +237,9 @@
 
         <!-- Proforma Invoice status  -->
         <template #cell-status="{ row }">
-          <BaseBadge
-            :bg-color="getStatusColor(row.data.status)"
-            class="px-3 py-1"
-          >
-            {{ $t(`proforma_invoices.statuses.${row.data.status.toLowerCase()}`) }}
-          </BaseBadge>
+          <BaseProformaInvoiceStatusBadge :status="row.data.status">
+            <BaseProformaInvoiceStatusLabel :status="row.data.status" />
+          </BaseProformaInvoiceStatusBadge>
         </template>
 
         <!-- Actions -->
@@ -267,6 +264,8 @@ import { debouncedWatch } from '@vueuse/core'
 import ObservatoryIcon from '@/scripts/components/icons/empty/ObservatoryIcon.vue'
 import ProformaInvoiceDropdown from '@/scripts/admin/components/dropdowns/ProformaInvoiceIndexDropdown.vue'
 import ExportButton from '@/scripts/admin/components/ExportButton.vue'
+import BaseProformaInvoiceStatusBadge from '@/scripts/components/base/BaseProformaInvoiceStatusBadge.vue'
+import BaseProformaInvoiceStatusLabel from '@/scripts/components/base/BaseProformaInvoiceStatusLabel.vue'
 
 // Stores
 const proformaInvoiceStore = useProformaInvoiceStore()
@@ -345,18 +344,6 @@ const proformaInvoiceColumns = computed(() => {
     },
   ]
 })
-
-function getStatusColor(status) {
-  const colors = {
-    DRAFT: '#6B7280', // gray
-    SENT: '#3B82F6', // blue
-    VIEWED: '#F59E0B', // amber
-    EXPIRED: '#EF4444', // red
-    CONVERTED: '#10B981', // green
-    REJECTED: '#EF4444', // red
-  }
-  return colors[status] || '#6B7280'
-}
 
 debouncedWatch(
   filters,
