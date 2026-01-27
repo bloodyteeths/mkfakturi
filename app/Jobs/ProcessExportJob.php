@@ -8,6 +8,7 @@ use App\Models\Expense;
 use App\Models\ExportJob;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Supplier;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -82,8 +83,8 @@ class ProcessExportJob implements ShouldQueue
         $query = match ($this->exportJob->type) {
             'invoices' => Invoice::where('company_id', $this->exportJob->company_id),
             'bills' => Bill::where('company_id', $this->exportJob->company_id),
-            'customers' => Customer::where('company_id', $this->exportJob->company_id)->where('is_supplier', false),
-            'suppliers' => Customer::where('company_id', $this->exportJob->company_id)->where('is_supplier', true),
+            'customers' => Customer::where('company_id', $this->exportJob->company_id),
+            'suppliers' => Supplier::where('company_id', $this->exportJob->company_id),
             'expenses' => Expense::where('company_id', $this->exportJob->company_id),
             'payments' => Payment::where('company_id', $this->exportJob->company_id),
             'transactions' => \App\Models\Transaction::where('company_id', $this->exportJob->company_id),
@@ -158,9 +159,15 @@ class ProcessExportJob implements ShouldQueue
         $filename = $this->getFilename('pdf');
         $path = "exports/{$this->exportJob->company_id}/{$filename}";
 
+        // Use type-specific view if exists, otherwise use generic view
+        $viewName = view()->exists('exports.'.$this->exportJob->type)
+            ? 'exports.'.$this->exportJob->type
+            : 'exports.generic';
+
         // Create PDF
-        $pdf = Pdf::loadView('exports.'.$this->exportJob->type, [
+        $pdf = Pdf::loadView($viewName, [
             'data' => $data,
+            'type' => $this->exportJob->type,
             'company' => $this->exportJob->company,
             'params' => $this->exportJob->params,
         ]);
