@@ -86,11 +86,24 @@
     @php
         // Columns to exclude from export (internal/system fields)
         $excludeColumns = [
+            // Auth/security fields
             'password', 'remember_token', 'email_verified_at',
             'facebook_id', 'google_id', 'github_id', 'stripe_id',
-            'deleted_at', 'creator_id', 'unique_hash', 'token',
             'two_factor_secret', 'two_factor_recovery_codes',
+            'token', 'unique_hash',
+            // Foreign key IDs (users see names, not IDs)
+            'company_id', 'user_id', 'creator_id', 'customer_id', 'supplier_id',
+            'unit_id', 'currency_id', 'category_id', 'warehouse_id',
+            'invoice_id', 'bill_id', 'expense_id', 'payment_id',
+            'estimate_id', 'proforma_invoice_id', 'recurring_invoice_id',
+            'parent_id', 'address_id', 'tax_type_id',
+            // Timestamps (redundant with formatted versions)
+            'created_at', 'updated_at', 'deleted_at',
+            // Internal/system fields
             'pivot', 'media', 'settings', 'meta',
+            // Computed/appended attributes (often duplicates or internal)
+            'formattedCreatedAt', 'unit_name', 'formatted_created_at',
+            'tax_per_item', 'discount_per_item',
         ];
 
         // Get headers from first row, filtering out excluded columns
@@ -100,8 +113,11 @@
         if (count($data) > 0) {
             $allKeys = array_keys($data[0]);
             foreach ($allKeys as $key) {
-                // Skip excluded columns and columns that are all null/empty
+                // Skip excluded columns
                 if (in_array($key, $excludeColumns)) continue;
+
+                // Skip any column ending with _id (likely foreign keys)
+                if (preg_match('/_id$/', $key) && $key !== 'id') continue;
 
                 // Check if column has any non-empty values
                 $hasValue = false;
