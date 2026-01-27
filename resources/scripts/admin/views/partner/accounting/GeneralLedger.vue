@@ -391,7 +391,7 @@ async function loadLedger() {
   ledgerData.value = null
 
   try {
-    const response = await window.axios.get(`/api/v1/partner/companies/${selectedCompanyId.value}/accounting/general-ledger`, {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/general-ledger`, {
       params: {
         account_id: filters.value.account_id,
         from_date: filters.value.start_date,

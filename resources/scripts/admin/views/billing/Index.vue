@@ -405,7 +405,7 @@ const cancelSubscription = async () => {
     if (!companyId) {
       throw new Error('No company selected')
     }
-    await axios.post(`/api/v1/companies/${companyId}/subscription/cancel`)
+    await axios.post(`/companies/${companyId}/subscription/cancel`)
     showCancelModal.value = false
 
     // Refresh subscription data

@@ -24,7 +24,7 @@ export const useUserStore = defineStore('partnerUser', () => {
       await axios.get('/sanctum/csrf-cookie')
 
       // Actual login API call
-      const response = await axios.post('/api/v1/auth/login', {
+      const response = await axios.post('/auth/login', {
         username: credentials.email,
         password: credentials.password,
         remember: credentials.remember || false
@@ -53,7 +53,7 @@ export const useUserStore = defineStore('partnerUser', () => {
 
   const logout = async () => {
     try {
-      await axios.post('/api/v1/auth/logout')
+      await axios.post('/auth/logout')
       currentUser.value = {
         id: null,
         name: '',
@@ -71,7 +71,7 @@ export const useUserStore = defineStore('partnerUser', () => {
   const loadCurrentUser = async () => {
     isLoading.value = true
     try {
-      const response = await axios.get('/api/v1/bootstrap')
+      const response = await axios.get('/bootstrap')
 
       if (response.data && response.data.current_user) {
         const user = response.data.current_user

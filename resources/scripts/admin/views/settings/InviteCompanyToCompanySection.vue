@@ -149,7 +149,7 @@ async function generateLink() {
   generatingLink.value = true
   try {
     // Generate a link (creates a pending referral with empty email that can be used as a general link)
-    const response = await axios.post('/api/v1/invitations/company-to-company', {
+    const response = await axios.post('/invitations/company-to-company', {
       inviter_company_id: companyId.value,
       invitee_email: 'link@generated.placeholder',
     })
@@ -189,7 +189,7 @@ async function sendEmailInvite() {
 
   sendingEmail.value = true
   try {
-    const response = await axios.post('/api/v1/invitations/company-to-company', {
+    const response = await axios.post('/invitations/company-to-company', {
       inviter_company_id: companyId.value,
       invitee_email: emailForm.value.email,
     })
@@ -221,7 +221,7 @@ async function loadStats() {
   if (!companyId.value) return
 
   try {
-    const response = await axios.get(`/api/v1/companies/${companyId.value}/referral-stats`)
+    const response = await axios.get(`/companies/${companyId.value}/referral-stats`)
     stats.value = response.data
   } catch (error) {
     // Stats are optional, don't show error
@@ -232,7 +232,7 @@ async function loadReferrals() {
   if (!companyId.value) return
 
   try {
-    const response = await axios.get(`/api/v1/companies/${companyId.value}/referrals`)
+    const response = await axios.get(`/companies/${companyId.value}/referrals`)
     referrals.value = response.data.data || []
   } catch (error) {
     // Referrals are optional, don't show error

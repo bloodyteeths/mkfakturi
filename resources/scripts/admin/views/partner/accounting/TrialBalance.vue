@@ -321,7 +321,7 @@ async function loadTrialBalance() {
   trialBalanceData.value = null
 
   try {
-    const response = await window.axios.get(`/api/v1/partner/companies/${selectedCompanyId.value}/accounting/trial-balance`, {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/trial-balance`, {
       params: {
         as_of_date: filters.value.as_of_date,
       },

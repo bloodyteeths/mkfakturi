@@ -77,7 +77,7 @@ async function handleExport(format) {
     }
 
     const response = await axios.post(
-      `/api/v1/admin/companies/${companyId}/exports`,
+      `/companies/${companyId}/exports`,
       {
         type: props.type,
         format: format,
@@ -117,7 +117,7 @@ async function pollExportStatus(companyId, exportJobId, attempts = 0) {
   }
 
   try {
-    const response = await axios.get(`/api/v1/admin/companies/${companyId}/exports`)
+    const response = await axios.get(`/companies/${companyId}/exports`)
 
     const exportJob = response.data.data?.find(job => job.id === exportJobId)
 
@@ -127,7 +127,7 @@ async function pollExportStatus(companyId, exportJobId, attempts = 0) {
 
     if (exportJob.status === 'completed') {
       // Download the file
-      const downloadUrl = `/api/v1/admin/companies/${companyId}/exports/${exportJobId}/download`
+      const downloadUrl = `/api/v1/companies/${companyId}/exports/${exportJobId}/download`  // Keep full path for window.location
       window.location.href = downloadUrl
 
       notificationStore.showNotification({

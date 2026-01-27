@@ -456,14 +456,16 @@ Route::prefix('/v1')->group(function () {
             // Exports (Phase 4)
             // ----------------------------------
 
-            Route::get('/exports', [\App\Http\Controllers\V1\Admin\ExportController::class, 'index']);
+            Route::prefix('companies/{company}')->group(function () {
+                Route::get('/exports', [\App\Http\Controllers\V1\Admin\ExportController::class, 'index']);
 
-            Route::post('/exports', [\App\Http\Controllers\V1\Admin\ExportController::class, 'store']);
+                Route::post('/exports', [\App\Http\Controllers\V1\Admin\ExportController::class, 'store']);
 
-            Route::get('/exports/{exportJob}/download', [\App\Http\Controllers\V1\Admin\ExportController::class, 'download'])
-                ->name('exports.download');
+                Route::get('/exports/{exportJob}/download', [\App\Http\Controllers\V1\Admin\ExportController::class, 'download'])
+                    ->name('exports.download');
 
-            Route::delete('/exports/{exportJob}', [\App\Http\Controllers\V1\Admin\ExportController::class, 'destroy']);
+                Route::delete('/exports/{exportJob}', [\App\Http\Controllers\V1\Admin\ExportController::class, 'destroy']);
+            });
 
             // User Data Exports (GDPR Compliance)
             // ----------------------------------

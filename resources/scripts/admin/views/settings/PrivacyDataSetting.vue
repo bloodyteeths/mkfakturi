@@ -170,7 +170,7 @@ onMounted(() => {
 
 async function fetchLatestExport() {
   try {
-    const response = await axios.get('/api/v1/user-data-exports/latest')
+    const response = await axios.get('/user-data-exports/latest')
     latestExport.value = response.data.export
 
     // Start polling if export is in progress
@@ -212,7 +212,7 @@ async function requestExport() {
   isRequesting.value = true
 
   try {
-    const response = await axios.post('/api/v1/user-data-exports')
+    const response = await axios.post('/user-data-exports')
     latestExport.value = response.data.export
 
     notificationStore.showNotification({
@@ -287,7 +287,7 @@ async function deleteExport() {
   }
 
   try {
-    await axios.delete(`/api/v1/user-data-exports/${latestExport.value.id}`)
+    await axios.delete(`/user-data-exports/${latestExport.value.id}`)
 
     notificationStore.showNotification({
       type: 'success',
