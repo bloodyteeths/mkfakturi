@@ -375,7 +375,65 @@ class ProcessWebhookEvent implements ShouldQueue
             'metadata' => $metadata,
         ]);
 
+        // Process company referral reward if this checkout was from a referral
+        if (! empty($metadata['company_referral_id'])) {
+            $this->processCompanyReferralReward((int) $metadata['company_referral_id']);
+        }
+
         // Payment handling will be done by payment_intent.succeeded event
+    }
+
+    /**
+     * Process company-to-company referral reward.
+     * Inviter gets 10% off their next billing cycle.
+     */
+    protected function processCompanyReferralReward(int $referralId): void
+    {
+        try {
+            $referral = \App\Models\CompanyReferral::find($referralId);
+
+            if (! $referral) {
+                Log::warning('Company referral not found for reward processing', [
+                    'referral_id' => $referralId,
+                ]);
+
+                return;
+            }
+
+            // Skip if already processed
+            if ($referral->referral_reward_status === 'both_rewarded') {
+                Log::info('Company referral already fully rewarded', [
+                    'referral_id' => $referralId,
+                ]);
+
+                return;
+            }
+
+            // Mark invitee as rewarded (coupon was applied at checkout)
+            if ($referral->referral_reward_status === 'pending') {
+                $referral->update([
+                    'invitee_discount_applied_at' => now(),
+                    'referral_reward_status' => 'invitee_rewarded',
+                    'status' => 'accepted',
+                    'accepted_at' => now(),
+                ]);
+            }
+
+            // Process inviter reward
+            $rewardService = app(\Modules\Mk\Public\Services\CompanyReferralRewardService::class);
+            $rewardService->processInviterReward($referral);
+
+            Log::info('Company referral reward processed', [
+                'referral_id' => $referralId,
+                'inviter_company_id' => $referral->inviter_company_id,
+                'invitee_company_id' => $referral->invitee_company_id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to process company referral reward', [
+                'referral_id' => $referralId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

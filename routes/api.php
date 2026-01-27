@@ -1410,6 +1410,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1/ai')->group(function () {
 // ----------------------------------
 Route::prefix('v1/public/signup')->middleware(['throttle:public'])->group(function () {
     Route::post('/validate-referral', [\Modules\Mk\Public\Controllers\SignupController::class, 'validateReferral']);
+    Route::post('/validate-company-referral', [\Modules\Mk\Public\Controllers\SignupController::class, 'validateCompanyReferral']);
     Route::get('/plans', [\Modules\Mk\Public\Controllers\SignupController::class, 'getPlans']);
     Route::post('/register', [\Modules\Mk\Public\Controllers\SignupController::class, 'register'])->middleware('throttle:strict');
 });

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Modules\Mk\Public\Requests\SignupRequest;
+use Modules\Mk\Public\Services\CompanyReferralRewardService;
 use Modules\Mk\Public\Services\SignupService;
 
 /**
@@ -26,6 +27,58 @@ class SignupController extends Controller
     public function __construct(SignupService $signupService)
     {
         $this->signupService = $signupService;
+    }
+
+    /**
+     * Validate company-to-company referral token
+     *
+     * POST /api/v1/public/signup/validate-company-referral
+     */
+    public function validateCompanyReferral(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string|max:64',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $token = $request->input('token');
+
+        try {
+            $rewardService = app(CompanyReferralRewardService::class);
+            $referralData = $rewardService->validateReferralToken($token);
+
+            if (! $referralData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired referral link.',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'referral_id' => $referralData['referral_id'],
+                    'inviter_company_name' => $referralData['inviter_company_name'],
+                    'discount_percent' => $referralData['discount_percent'],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Company referral validation failed', [
+                'token' => $token,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to validate referral link.',
+            ], 500);
+        }
     }
 
     /**

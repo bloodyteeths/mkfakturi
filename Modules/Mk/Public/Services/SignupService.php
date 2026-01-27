@@ -4,6 +4,7 @@ namespace Modules\Mk\Public\Services;
 
 use App\Models\AffiliateLink;
 use App\Models\Company;
+use App\Models\CompanyReferral;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -170,6 +171,27 @@ class SignupService
                 $this->recordConversion($data['affiliate_link_id'], $company->id);
             }
 
+            // Handle company-to-company referral
+            $companyReferral = null;
+            if (! empty($data['company_referral_token'])) {
+                $companyReferral = CompanyReferral::where('referral_token', $data['company_referral_token'])
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($companyReferral) {
+                    // Link the invitee company to the referral
+                    $companyReferral->update([
+                        'invitee_company_id' => $company->id,
+                    ]);
+
+                    Log::info('Company referral linked', [
+                        'referral_id' => $companyReferral->id,
+                        'inviter_company_id' => $companyReferral->inviter_company_id,
+                        'invitee_company_id' => $company->id,
+                    ]);
+                }
+            }
+
             $plan = $data['plan'] ?? 'free';
             $checkoutUrl = null;
             $checkoutSessionId = null;
@@ -186,7 +208,8 @@ class SignupService
                 $checkoutUrl = config('app.url').'/login?registered=1&email='.urlencode($data['email']);
             } else {
                 // Create Stripe Checkout session for paid plans
-                $checkoutSession = $this->createStripeCheckoutSession($company, $data);
+                // Pass company referral for discount application
+                $checkoutSession = $this->createStripeCheckoutSession($company, $data, $companyReferral);
                 $checkoutUrl = $checkoutSession->url;
                 $checkoutSessionId = $checkoutSession->id;
             }
@@ -310,10 +333,11 @@ class SignupService
      *
      * @param  Company  $company  Company instance
      * @param  array  $data  Checkout data
+     * @param  CompanyReferral|null  $companyReferral  Optional company referral for discount
      *
      * @throws \Stripe\Exception\ApiErrorException
      */
-    private function createStripeCheckoutSession(Company $company, array $data): \Stripe\Checkout\Session
+    private function createStripeCheckoutSession(Company $company, array $data, ?CompanyReferral $companyReferral = null): \Stripe\Checkout\Session
     {
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -342,7 +366,8 @@ class SignupService
             $metadata['affiliate_link_id'] = $data['affiliate_link_id'];
         }
 
-        $session = \Stripe\Checkout\Session::create([
+        // Build session parameters
+        $sessionParams = [
             'mode' => 'subscription',
             'customer_email' => $data['email'],
             'line_items' => [
@@ -358,7 +383,37 @@ class SignupService
                 'metadata' => $metadata,
                 'trial_period_days' => 14, // 14-day trial
             ],
-        ]);
+        ];
+
+        // Apply company referral discount (10% off first payment)
+        if ($companyReferral && $companyReferral->isEligibleForRewards()) {
+            $rewardService = app(CompanyReferralRewardService::class);
+            $couponId = $rewardService->createInviteeCoupon($companyReferral);
+
+            if ($couponId) {
+                $sessionParams['discounts'] = [
+                    ['coupon' => $couponId],
+                ];
+
+                // Add referral ID to metadata for webhook processing
+                $metadata['company_referral_id'] = $companyReferral->id;
+                $sessionParams['metadata'] = $metadata;
+                $sessionParams['subscription_data']['metadata'] = $metadata;
+
+                // Store the coupon ID on the referral
+                $companyReferral->update([
+                    'invitee_stripe_coupon_id' => $couponId,
+                ]);
+
+                Log::info('Applied company referral discount to checkout', [
+                    'referral_id' => $companyReferral->id,
+                    'coupon_id' => $couponId,
+                    'company_id' => $company->id,
+                ]);
+            }
+        }
+
+        $session = \Stripe\Checkout\Session::create($sessionParams);
 
         return $session;
     }

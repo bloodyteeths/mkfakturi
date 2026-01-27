@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-    <!-- Referral Banner -->
+    <!-- Partner Referral Banner -->
     <div
       v-if="referralPartnerName"
       class="bg-primary-50 border-l-4 border-primary-500 p-4"
@@ -13,6 +13,24 @@
           </p>
           <p class="text-sm text-primary-700">
             Регистрирате се преку <strong>{{ referralPartnerName }}</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Referral Banner with Discount -->
+    <div
+      v-if="companyReferralData"
+      class="bg-green-50 border-l-4 border-green-500 p-4"
+    >
+      <div class="flex items-center">
+        <BaseIcon name="GiftIcon" class="h-6 w-6 text-green-600 mr-3" />
+        <div>
+          <p class="text-sm font-medium text-green-900">
+            Покана од {{ companyReferralData.inviter_company_name }}
+          </p>
+          <p class="text-sm text-green-700">
+            Добивате <strong>{{ companyReferralData.discount_percent }}% попуст</strong> на првата уплата!
           </p>
         </div>
       </div>
@@ -524,6 +542,10 @@ const v$ = computed(() => currentStep.value === 0 ? companyV$ : userV$)
 // Referral data for registration
 const referralData = ref(null)
 
+// Company-to-company referral data
+const companyReferralToken = ref('')
+const companyReferralData = ref(null)
+
 // Methods
 async function validateReferralCode() {
   if (!referralCode.value) return
@@ -540,6 +562,23 @@ async function validateReferralCode() {
   } catch (error) {
     console.error('Failed to validate referral code:', error)
     // Don't show error to user - just proceed without referral
+  }
+}
+
+async function validateCompanyReferral() {
+  if (!companyReferralToken.value) return
+
+  try {
+    const response = await axios.post('/public/signup/validate-company-referral', {
+      token: companyReferralToken.value,
+    })
+
+    if (response.data.success && response.data.data) {
+      companyReferralData.value = response.data.data
+    }
+  } catch (error) {
+    console.error('Failed to validate company referral:', error)
+    // Don't show error to user - just proceed without referral discount
   }
 }
 
@@ -630,12 +669,17 @@ async function completeRegistration() {
       billing_period: billingPeriod.value,
     }
 
-    // Add referral data if available
+    // Add partner referral data if available
     if (referralData.value) {
       payload.partner_id = referralData.value.partner_id
       payload.affiliate_link_id = referralData.value.affiliate_link_id
     } else if (referralCode.value) {
       payload.referral_code = referralCode.value
+    }
+
+    // Add company referral token if available (for 10% discount)
+    if (companyReferralToken.value && companyReferralData.value) {
+      payload.company_referral_token = companyReferralToken.value
     }
 
     const response = await axios.post('/public/signup/register', payload)
@@ -682,10 +726,16 @@ async function completeRegistration() {
 
 // Lifecycle
 onMounted(() => {
-  // Capture referral code from URL
+  // Capture partner referral code from URL
   if (route.query.ref) {
     referralCode.value = route.query.ref
     validateReferralCode()
+  }
+
+  // Capture company referral token from URL (for 10% discount)
+  if (route.query.company_ref) {
+    companyReferralToken.value = route.query.company_ref
+    validateCompanyReferral()
   }
 })
 </script>
