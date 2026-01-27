@@ -649,7 +649,7 @@ export default [
           {
             path: 'pdf-generation',
             name: 'pdf.generation',
-            meta: { isOwner: true },
+            meta: { isOwner: true, requiresSuperAdmin: true },
             component: PDFGenerationSettings,
           },
           {

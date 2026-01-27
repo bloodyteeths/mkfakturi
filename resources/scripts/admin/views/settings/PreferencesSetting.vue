@@ -451,14 +451,16 @@ setInitialData()
 
 async function setInitialData() {
   isFetchingInitialData.value = true
-  Promise.all([
-    globalStore.fetchCurrencies(),
-    globalStore.fetchDateFormats(),
-    globalStore.fetchTimeFormats(),
-    globalStore.fetchTimeZones(),
-  ]).then(([res1]) => {
+  try {
+    await Promise.all([
+      globalStore.fetchCurrencies(),
+      globalStore.fetchDateFormats(),
+      globalStore.fetchTimeFormats(),
+      globalStore.fetchTimeZones(),
+    ])
+  } finally {
     isFetchingInitialData.value = false
-  })
+  }
 }
 
 async function updatePreferencesData() {

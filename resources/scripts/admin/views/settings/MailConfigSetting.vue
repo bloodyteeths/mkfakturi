@@ -55,12 +55,14 @@ function changeDriver(value) {
 
 async function loadData() {
   isFetchingInitialData.value = true
-  Promise.all([
-    await mailDriverStore.fetchMailDrivers(),
-    await mailDriverStore.fetchMailConfig(),
-  ]).then(([res1]) => {
+  try {
+    await Promise.all([
+      mailDriverStore.fetchMailDrivers(),
+      mailDriverStore.fetchMailConfig(),
+    ])
+  } finally {
     isFetchingInitialData.value = false
-  })
+  }
 }
 
 const mailDriver = computed(() => {
