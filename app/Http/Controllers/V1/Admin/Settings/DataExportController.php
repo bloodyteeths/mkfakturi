@@ -23,10 +23,15 @@ class DataExportController extends Controller
             ->first();
 
         if ($existingExport) {
-            return response()->json([
-                'message' => 'You already have a data export in progress',
-                'export' => $existingExport,
-            ], 422);
+            // Auto-recover stuck exports (stuck for more than 15 minutes)
+            if ($existingExport->resetIfStuck(15)) {
+                // Export was stuck, continue to create a new one
+            } else {
+                return response()->json([
+                    'message' => 'You already have a data export in progress',
+                    'export' => $existingExport,
+                ], 422);
+            }
         }
 
         // Create export job
@@ -70,6 +75,13 @@ class DataExportController extends Controller
                 'export' => null,
             ]);
         }
+
+        // Auto-detect stuck exports when user checks status
+        // Mark as failed if stuck for more than 15 minutes
+        $export->resetIfStuck(15);
+
+        // Refresh to get updated status
+        $export->refresh();
 
         return response()->json([
             'export' => $export,

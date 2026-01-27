@@ -320,6 +320,15 @@
     "prev": "Önceki",
     "next_nav": "Sonraki"
   },
+  "data_export": {
+    "email_subject": "Veri Dışa Aktarımınız Hazır",
+    "email_greeting": "Merhaba {name}!",
+    "email_intro": "İstediğiniz veri dışa aktarımı tamamlandı ve indirilmeye hazır.",
+    "email_file_size": "Dosya Boyutu",
+    "email_expires": "Geçerlilik",
+    "email_download_button": "Verilerinizi İndirin",
+    "email_expiry_notice": "Not: Bu indirme bağlantısı 7 gün sonra sona erecektir. Bu süre sonunda yeni bir dışa aktarım talep etmeniz gerekecektir."
+  },
   "customers": {
     "title": "Müşteriler",
     "prefix": "Ön ek",

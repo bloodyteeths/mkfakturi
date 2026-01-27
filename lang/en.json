@@ -499,6 +499,15 @@
     "total": "Total",
     "view_credit_note": "View Credit Note"
   },
+  "data_export": {
+    "email_subject": "Your Data Export is Ready",
+    "email_greeting": "Hello {name}!",
+    "email_intro": "Your requested data export has been completed and is ready for download.",
+    "email_file_size": "File Size",
+    "email_expires": "Available Until",
+    "email_download_button": "Download Your Data",
+    "email_expiry_notice": "Please note: This download link will expire in 7 days. After that, you will need to request a new export."
+  },
   "customers": {
     "action": "Action",
     "add_customer": "Add Customer",

@@ -50,6 +50,42 @@ class UserDataExport extends Model
     }
 
     /**
+     * Scope to filter stuck exports (processing for too long)
+     * Considers an export stuck if it's been processing for more than 15 minutes
+     */
+    public function scopeStuck($query, int $minutes = 15)
+    {
+        return $query->whereIn('status', ['pending', 'processing'])
+            ->where('updated_at', '<=', now()->subMinutes($minutes));
+    }
+
+    /**
+     * Check if this export is stuck
+     */
+    public function isStuck(int $minutes = 15): bool
+    {
+        return in_array($this->status, ['pending', 'processing'])
+            && $this->updated_at->diffInMinutes(now()) >= $minutes;
+    }
+
+    /**
+     * Reset a stuck export so it can be retried
+     */
+    public function resetIfStuck(int $minutes = 15): bool
+    {
+        if ($this->isStuck($minutes)) {
+            $this->update([
+                'status' => 'failed',
+                'error_message' => 'Export timed out after '.$minutes.' minutes. Please try again.',
+            ]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Relationship to user
      */
     public function user(): BelongsTo

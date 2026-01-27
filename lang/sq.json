@@ -476,6 +476,15 @@
     "no_projects": "Joма проектdhe",
     "profit": "Fitim"
   },
+  "data_export": {
+    "email_subject": "Eksporti i të Dhënave Tuaja është Gati",
+    "email_greeting": "Përshëndetje {name}!",
+    "email_intro": "Eksporti i të dhënave që keni kërkuar është përfunduar dhe gati për shkarkim.",
+    "email_file_size": "Madhësia e Skedarit",
+    "email_expires": "Disponueshëm Deri",
+    "email_download_button": "Shkarkoni të Dhënat Tuaja",
+    "email_expiry_notice": "Shënim: Kjo lidhje shkarkimi do të skadojë pas 7 ditësh. Pas kësaj, do t'ju duhet të kërkoni një eksport të ri."
+  },
   "customers": {
     "title": "Klientët",
     "prefix": "Prefiksi",

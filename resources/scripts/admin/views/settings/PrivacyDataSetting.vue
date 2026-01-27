@@ -246,7 +246,7 @@ async function downloadExport() {
 
   try {
     const response = await axios.get(
-      `/api/v1/user-data-exports/${latestExport.value.id}/download`,
+      `/user-data-exports/${latestExport.value.id}/download`,
       {
         responseType: 'blob',
       }

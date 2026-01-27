@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Mail\DataExportReadyMail;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Invoice;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Writer;
 use ZipArchive;
@@ -77,6 +79,20 @@ class ExportUserDataJob implements ShouldQueue
 
             // Clean up temp directory
             $this->cleanupTempDirectory($tempDir);
+
+            // Send email notification to user
+            try {
+                Mail::to($user->email)->send(new DataExportReadyMail($user, $this->export));
+                Log::info("User data export email sent to {$user->email}", [
+                    'export_id' => $this->export->id,
+                ]);
+            } catch (\Exception $e) {
+                // Don't fail the job if email fails - export is still ready
+                Log::warning("Failed to send data export email", [
+                    'export_id' => $this->export->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             Log::info("User data export {$this->export->id} completed successfully", [
                 'user_id' => $user->id,
