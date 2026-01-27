@@ -80,18 +80,19 @@ class ProcessExportJob implements ShouldQueue
     {
         // Use direct where() instead of whereCompany() scope because the scope
         // relies on request()->header('company') which is null in queue context
+        // Use setEagerLoads([]) to disable auto-loaded relationships that cause nested arrays
         $query = match ($this->exportJob->type) {
-            'invoices' => Invoice::where('company_id', $this->exportJob->company_id),
-            'bills' => Bill::where('company_id', $this->exportJob->company_id),
-            'customers' => Customer::where('company_id', $this->exportJob->company_id),
-            'suppliers' => Supplier::where('company_id', $this->exportJob->company_id),
-            'expenses' => Expense::where('company_id', $this->exportJob->company_id),
-            'payments' => Payment::where('company_id', $this->exportJob->company_id),
-            'transactions' => \App\Models\Transaction::where('company_id', $this->exportJob->company_id),
-            'items' => \App\Models\Item::where('company_id', $this->exportJob->company_id),
-            'estimates' => \App\Models\Estimate::where('company_id', $this->exportJob->company_id),
-            'proforma_invoices' => \App\Models\ProformaInvoice::where('company_id', $this->exportJob->company_id),
-            'recurring_invoices' => \App\Models\RecurringInvoice::where('company_id', $this->exportJob->company_id),
+            'invoices' => Invoice::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'bills' => Bill::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'customers' => Customer::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'suppliers' => Supplier::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'expenses' => Expense::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'payments' => Payment::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'transactions' => \App\Models\Transaction::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'items' => \App\Models\Item::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'estimates' => \App\Models\Estimate::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'proforma_invoices' => \App\Models\ProformaInvoice::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'recurring_invoices' => \App\Models\RecurringInvoice::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
             default => throw new \Exception("Unknown export type: {$this->exportJob->type}"),
         };
 
@@ -122,7 +123,15 @@ class ProcessExportJob implements ShouldQueue
             }
         }
 
-        return $query->get()->toArray();
+        // Get data and flatten any remaining nested structures
+        $results = $query->get();
+
+        // Convert to array and flatten nested relations/appends
+        return $results->map(function ($model) {
+            $data = $model->attributesToArray(); // Only raw attributes, no appends/relations
+
+            return $data;
+        })->toArray();
     }
 
     /**
