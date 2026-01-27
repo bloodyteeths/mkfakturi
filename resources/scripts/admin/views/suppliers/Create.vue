@@ -15,12 +15,29 @@
     <BaseCard>
       <form @submit.prevent="handleSubmit">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BaseInputGroup :label="$t('suppliers.name')">
-            <BaseInput v-model="form.name" required />
+          <BaseInputGroup
+            :label="$t('suppliers.name')"
+            :error="v$.form.name.$error && v$.form.name.$errors[0].$message"
+            required
+          >
+            <BaseInput
+              v-model="form.name"
+              :invalid="v$.form.name.$error"
+              @input="v$.form.name.$touch()"
+            />
           </BaseInputGroup>
 
-          <BaseInputGroup :label="$t('suppliers.email')">
-            <BaseInput v-model="form.email" type="email" />
+          <BaseInputGroup
+            :label="$t('suppliers.email')"
+            :error="v$.form.email.$error && v$.form.email.$errors[0].$message"
+            required
+          >
+            <BaseInput
+              v-model="form.email"
+              type="email"
+              :invalid="v$.form.email.$error"
+              @input="v$.form.email.$touch()"
+            />
           </BaseInputGroup>
 
           <BaseInputGroup :label="$t('suppliers.tax_id')">
@@ -52,8 +69,12 @@
 <script setup>
 import { reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
+import { useVuelidate } from '@vuelidate/core'
+import { required, email, helpers } from '@vuelidate/validators'
 
+const { t } = useI18n()
 const suppliersStore = useSuppliersStore()
 const route = useRoute()
 const router = useRouter()
@@ -67,6 +88,20 @@ const form = reactive({
   website: '',
 })
 
+const rules = {
+  form: {
+    name: {
+      required: helpers.withMessage(t('validation.required'), required),
+    },
+    email: {
+      required: helpers.withMessage(t('validation.required'), required),
+      email: helpers.withMessage(t('validation.email_incorrect'), email),
+    },
+  },
+}
+
+const v$ = useVuelidate(rules, { form })
+
 const isEdit = computed(() => !!route.params.id)
 
 function hydrateForm(data) {
@@ -78,7 +113,12 @@ function hydrateForm(data) {
   form.website = data.website
 }
 
-function handleSubmit() {
+async function handleSubmit() {
+  v$.value.$touch()
+  if (v$.value.$invalid) {
+    return
+  }
+
   const payload = { ...form }
   if (isEdit.value) {
     suppliersStore.updateSupplier(payload).then(() => {
