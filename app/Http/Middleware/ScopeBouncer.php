@@ -33,6 +33,16 @@ class ScopeBouncer
     {
         $user = $request->user();
 
+        // Super Admin Support Mode: Override company scope
+        if ($user && $user->role === 'super admin') {
+            $supportMode = session('support_mode');
+            if ($supportMode && isset($supportMode['company_id'])) {
+                $this->bouncer->scope()->to($supportMode['company_id']);
+
+                return $next($request);
+            }
+        }
+
         // Get company ID from header or use first company
         $tenantId = $request->header('company');
 

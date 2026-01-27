@@ -26,6 +26,25 @@ class CompanyMiddleware
         if (Schema::hasTable('user_company')) {
             $user = $request->user();
 
+            // Super Admin Support Mode: Override company context if in support mode
+            if ($user && $user->role === 'super admin') {
+                $supportMode = session('support_mode');
+                if ($supportMode && isset($supportMode['company_id'])) {
+                    $supportCompanyId = $supportMode['company_id'];
+
+                    // Set the company header to the support mode company
+                    $request->headers->set('company', $supportCompanyId);
+
+                    // Load the support company with its IFRS entity
+                    $company = Company::with('ifrsEntity')->find($supportCompanyId);
+                    if ($company && $company->ifrsEntity) {
+                        $user->setRelation('entity', $company->ifrsEntity);
+                    }
+
+                    return $next($request);
+                }
+            }
+
             // Handle partner users - they access client companies via partner_company_links
             if ($user && $user->role === 'partner') {
                 $companyId = $request->header('company');
