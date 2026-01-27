@@ -557,8 +557,10 @@ Route::prefix('/v1')->group(function () {
             Route::post('/certificates/{id}/verify', [CertUploadController::class, 'verify']);
             Route::delete('/certificates/{id}', [CertUploadController::class, 'delete']);
 
-            // Mails - removed, using centralized Postmark setup
+            // Mails - using centralized Postmark setup
             // ----------------------------------
+            // This endpoint returns mail from_name/from_mail for invoice sending UI
+            Route::get('/company/mail/config', \App\Http\Controllers\V1\Admin\Settings\GetCompanyMailConfigurationController::class);
 
             // PDF Generation
             // ----------------------------------
