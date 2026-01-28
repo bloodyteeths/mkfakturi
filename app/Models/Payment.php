@@ -416,7 +416,7 @@ class Payment extends Model implements HasMedia
     public function getPDFData()
     {
         // Load relationships needed for PDF
-        $this->load(['customer.currency', 'customer.billingAddress', 'company.address', 'company.currency', 'invoice', 'paymentMethod']);
+        $this->load(['customer.currency', 'customer.billingAddress', 'company.address', 'invoice', 'paymentMethod']);
 
         $company = $this->company ?? Company::find($this->company_id);
         $locale = CompanySetting::getSetting('language', $company->id ?? $this->company_id);

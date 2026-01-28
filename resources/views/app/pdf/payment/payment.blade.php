@@ -359,7 +359,7 @@
     </div>
     <div class="total-display-box">
         <p class="total-display-label">@lang('pdf_payment_amount_received_label')</p>
-        <span class="amount">{!! format_money_pdf($payment->amount, $payment->customer->currency ?? $payment->company->currency ?? null) !!}</span>
+        <span class="amount">{!! format_money_pdf($payment->amount, $payment->customer->currency ?? null) !!}</span>
     </div>
     <div class="notes">
         @if ($notes)
