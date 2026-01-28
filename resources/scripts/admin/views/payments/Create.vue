@@ -99,11 +99,7 @@
             :label="$t('payments.invoice')"
             :help-text="
               selectedInvoice
-                ? `${t('payments.amount_due')}: ${
-                    parseInt(selectedInvoice.currency?.precision ?? 2) === 0
-                      ? paymentStore.currentPayment.maxPayableAmount
-                      : paymentStore.currentPayment.maxPayableAmount / 100
-                  }`
+                ? `${t('payments.amount_due')}: ${paymentStore.currentPayment.maxPayableAmount / 100}`
                 : ''
             "
           >
@@ -331,29 +327,12 @@ const PaymentFields = reactive([
 
 const amount = computed({
   get: () => {
-    // Get precision from payment currency or fall back to company currency
-    const currency = paymentStore.currentPayment.currency || companyStore.selectedCompanyCurrency
-    const precision = parseInt(currency?.precision ?? 2)
-
-    // For zero-precision currencies (like MKD), amounts are stored as whole numbers
-    // For precision-2 currencies (like USD), amounts are stored in cents
-    if (precision === 0) {
-      return paymentStore.currentPayment.amount
-    }
+    // All amounts are stored in cents - always divide by 100 for display
     return paymentStore.currentPayment.amount / 100
   },
   set: (value) => {
-    // Get precision from payment currency or fall back to company currency
-    const currency = paymentStore.currentPayment.currency || companyStore.selectedCompanyCurrency
-    const precision = parseInt(currency?.precision ?? 2)
-
-    // For zero-precision currencies, store as-is
-    // For precision-2 currencies, multiply by 100 to store as cents
-    if (precision === 0) {
-      paymentStore.currentPayment.amount = Math.round(value)
-    } else {
-      paymentStore.currentPayment.amount = Math.round(value * 100)
-    }
+    // All amounts are stored in cents - always multiply by 100 for storage
+    paymentStore.currentPayment.amount = Math.round(value * 100)
   },
 })
 
@@ -503,12 +482,8 @@ function onCustomerChange(customer_id) {
             paymentStore.currentPayment.amount
 
           if (amount.value === 0) {
-            // Use the computed setter which handles precision conversion
-            // Use invoice's currency precision, not company's
-            const precision = parseInt(selectedInvoice.value.currency?.precision ?? 2)
-            amount.value = precision === 0
-              ? selectedInvoice.value.due_amount
-              : selectedInvoice.value.due_amount / 100
+            // All amounts stored in cents - divide by 100 for display value
+            amount.value = selectedInvoice.value.due_amount / 100
           }
         }
 
