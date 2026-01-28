@@ -286,18 +286,20 @@
     <div class="header-container">
         <table width="100%">
             <tr>
-                @if ($logo)
-                    <td width="50%" class="header-section-left">
+                <td width="50%" class="header-section-left">
+                    @if ($logo)
                         <img style="height:50px" class="header-logo" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="@lang('pdf_company_logo')">
                     @else
-                        @if ($payment->customer)
-                    <td class="header-section-left" style="padding-top:0px;">
-                        <h1 class="header-logo"> {{ $payment->customer->company->name }} </h1>
-                @endif
-                @endif
+                        <h1 class="header-logo">{{ $payment->company->name ?? '' }}</h1>
+                    @endif
                 </td>
                 <td width="50%" class="header-section-right company-details company-address">
-                    {!! $company_address !!}
+                    @if ($company_address)
+                        {!! $company_address !!}
+                    @else
+                        {{-- Fallback: show company name if no formatted address --}}
+                        <h3><strong>{{ $payment->company->name ?? '' }}</strong></h3>
+                    @endif
                 </td>
             </tr>
         </table>
@@ -313,9 +315,15 @@
         <div class="main-content">
             <div class="customer-address-container">
                 <div class="billing-address-container billing-address">
+                    @lang('pdf_received_from')
                     @if ($billing_address)
-                        @lang('pdf_received_from')
                         {!! $billing_address !!}
+                    @elseif ($payment->customer)
+                        {{-- Fallback: show customer name if no formatted address --}}
+                        <h3>{{ $payment->customer->name ?? '' }}</h3>
+                        @if ($payment->customer->email)
+                            <p>{{ $payment->customer->email }}</p>
+                        @endif
                     @endif
                 </div>
                 <div class="billing-address-container--right">
@@ -351,7 +359,7 @@
     </div>
     <div class="total-display-box">
         <p class="total-display-label">@lang('pdf_payment_amount_received_label')</p>
-        <span class="amount">{!! format_money_pdf($payment->amount, $payment->customer->currency) !!}</span>
+        <span class="amount">{!! format_money_pdf($payment->amount, $payment->customer->currency ?? $payment->company->currency ?? null) !!}</span>
     </div>
     <div class="notes">
         @if ($notes)

@@ -121,14 +121,14 @@
               <template #singlelabel="{ value }">
                 <div class="absolute left-3.5">
                   {{ value.invoice_number }} ({{
-                    utils.formatMoney(value.total, value.currency)
+                    utils.formatMoney(value.total, value.currency || value.customer?.currency || companyStore.selectedCompanyCurrency)
                   }})
                 </div>
               </template>
 
               <template #option="{ option }">
                 {{ option.invoice_number }} ({{
-                  utils.formatMoney(option.total, option.currency)
+                  utils.formatMoney(option.total, option.currency || option.customer?.currency || companyStore.selectedCompanyCurrency)
                 }})
               </template>
             </BaseMultiselect>
@@ -486,7 +486,8 @@ function onCustomerChange(customer_id) {
         if (res2 && res2.data) {
           paymentStore.currentPayment.selectedCustomer = res2.data.data
           paymentStore.currentPayment.customer = res2.data.data
-          paymentStore.currentPayment.currency = res2.data.data.currency
+          // Use customer's currency if available, otherwise fall back to company currency
+          paymentStore.currentPayment.currency = res2.data.data.currency || companyStore.selectedCompanyCurrency
           if(isEdit.value && !customerStore.editCustomer && paymentStore.currentPayment.customer_id) {
             customerStore.editCustomer = res2.data.data
           }

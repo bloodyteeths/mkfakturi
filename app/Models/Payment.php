@@ -415,12 +415,15 @@ class Payment extends Model implements HasMedia
 
     public function getPDFData()
     {
-        $company = Company::find($this->company_id);
-        $locale = CompanySetting::getSetting('language', $company->id);
+        // Load relationships needed for PDF
+        $this->load(['customer.currency', 'customer.billingAddress', 'company.address', 'company.currency', 'invoice', 'paymentMethod']);
+
+        $company = $this->company ?? Company::find($this->company_id);
+        $locale = CompanySetting::getSetting('language', $company->id ?? $this->company_id);
 
         \App::setLocale($locale);
 
-        $logo = $company->logo_path;
+        $logo = $company->logo_path ?? null;
         if (! $logo) {
             $defaultLogo = base_path('logo/facturino_logo.png');
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
@@ -443,22 +446,30 @@ class Payment extends Model implements HasMedia
 
     public function getCompanyAddress()
     {
-        if ($this->company && (! $this->company->address()->exists())) {
-            return false;
+        // Return null if company doesn't exist or has no address
+        if (! $this->company || ! $this->company->address()->exists()) {
+            return null;
         }
 
         $format = CompanySetting::getSetting('payment_company_address_format', $this->company_id);
+        if (! $format) {
+            return null;
+        }
 
         return $this->getFormattedString($format);
     }
 
     public function getCustomerBillingAddress()
     {
-        if ($this->customer && (! $this->customer->billingAddress()->exists())) {
-            return false;
+        // Return null if customer doesn't exist or has no billing address
+        if (! $this->customer || ! $this->customer->billingAddress()->exists()) {
+            return null;
         }
 
         $format = CompanySetting::getSetting('payment_from_customer_address_format', $this->company_id);
+        if (! $format) {
+            return null;
+        }
 
         return $this->getFormattedString($format);
     }
