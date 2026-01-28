@@ -29,6 +29,8 @@ class Expense extends Model implements HasMedia
         'expense_date',
         'attachment_receipt',
         'amount',
+        'base_amount',
+        'exchange_rate',
         'notes',
         'expense_category_id',
         'company_id',
