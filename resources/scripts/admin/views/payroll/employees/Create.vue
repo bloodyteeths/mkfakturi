@@ -343,18 +343,17 @@ const pageTitle = computed(() =>
   isEdit.value ? t('payroll.edit_employee') : t('payroll.new_employee')
 )
 
+// All amounts are stored in cents (integer format) regardless of currency
+// Always multiply by 100 for storage, divide by 100 for display
+// Precision only affects how many decimal places to show in the input
 const baseSalaryData = computed({
   get: () => {
-    const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
-    return precision === 0
-      ? currentEmployee.base_salary_amount
-      : currentEmployee.base_salary_amount / 100
+    // Always divide by 100 to convert from cents to display value
+    return currentEmployee.base_salary_amount / 100
   },
   set: (value) => {
-    const precision = parseInt(companyStore.selectedCompanyCurrency.precision)
-    currentEmployee.base_salary_amount = precision === 0
-      ? Math.round(value)
-      : Math.round(value * 100)
+    // Always multiply by 100 to convert to cents for storage
+    currentEmployee.base_salary_amount = Math.round(value * 100)
   },
 })
 
