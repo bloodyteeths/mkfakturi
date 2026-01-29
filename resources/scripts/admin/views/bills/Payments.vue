@@ -165,17 +165,20 @@ const paymentForm = reactive({
 const bill = computed(() => billsStore.selectedBill)
 
 // Auto-populate amount with bill's due amount when bill is loaded
+// Note: due_amount/total are stored in cents, but BaseMoney expects display value
 watch(bill, (newBill) => {
   if (newBill && !editingPayment.value && paymentForm.amount === 0) {
-    // Use due_amount if available, otherwise use total
-    paymentForm.amount = newBill.due_amount ?? newBill.total ?? 0
+    // Use due_amount if available, otherwise use total - divide by 100 for display
+    const amountInCents = newBill.due_amount ?? newBill.total ?? 0
+    paymentForm.amount = amountInCents / 100
   }
 }, { immediate: true })
 
 function hydratePaymentForm(payment) {
   paymentForm.id = payment.id
   paymentForm.payment_date = payment.payment_date
-  paymentForm.amount = payment.amount
+  // Payment amount is stored in cents, convert to display value
+  paymentForm.amount = payment.amount / 100
   paymentForm.payment_method_id = payment.payment_method_id
   paymentForm.notes = payment.notes || ''
   editingPayment.value = true
@@ -203,7 +206,8 @@ function removePayment(paymentId) {
 function submitPayment() {
   const payload = {
     payment_date: paymentForm.payment_date,
-    amount: paymentForm.amount,
+    // Convert display value back to cents for API
+    amount: Math.round(paymentForm.amount * 100),
     payment_method_id: paymentForm.payment_method_id,
     notes: paymentForm.notes,
   }
