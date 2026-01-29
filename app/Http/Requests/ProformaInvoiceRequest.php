@@ -130,10 +130,14 @@ class ProformaInvoiceRequest extends FormRequest
 
         // Update validation for PUT requests
         if ($this->isMethod('PUT')) {
+            // Get proforma invoice from route - try both parameter names for compatibility
+            $proformaInvoice = $this->route('proforma_invoice') ?? $this->route('proformaInvoice');
+            $proformaInvoiceId = $proformaInvoice?->id ?? $proformaInvoice;
+
             $rules['proforma_invoice_number'] = [
                 'required',
                 Rule::unique('proforma_invoices')
-                    ->ignore($this->route('proformaInvoice')->id)
+                    ->ignore($proformaInvoiceId)
                     ->where('company_id', $this->header('company')),
             ];
         }
