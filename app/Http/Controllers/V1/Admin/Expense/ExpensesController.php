@@ -23,12 +23,10 @@ class ExpensesController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $expenses = Expense::with('category', 'creator', 'fields')
+        $expenses = Expense::with(['category', 'creator', 'fields', 'customer:id,name'])
             ->whereCompany()
-            ->leftJoin('customers', 'customers.id', '=', 'expenses.customer_id')
-            ->join('expense_categories', 'expense_categories.id', '=', 'expenses.expense_category_id')
             ->applyFilters($request->all())
-            ->select('expenses.*', 'expense_categories.name', 'customers.name as user_name')
+            ->latest()
             ->paginateData($limit);
 
         // Get company and usage stats
