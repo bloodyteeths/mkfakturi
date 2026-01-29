@@ -209,12 +209,21 @@
                   {{ movement.date }}
                 </td>
                 <td class="px-4 py-3 text-sm whitespace-nowrap">
-                  <BaseBadge :bg-color="getSourceColor(movement.source_type)">
-                    {{ $t(`stock.source_types.${movement.source_type}`) }}
-                  </BaseBadge>
-                  <span v-if="movement.reference" class="ml-2 text-gray-500">
-                    {{ movement.reference }}
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium"
+                      :class="getSourceClasses(movement.source_type)"
+                    >
+                      <span
+                        class="w-1.5 h-1.5 rounded-full mr-1.5"
+                        :class="getSourceDotClass(movement.source_type)"
+                      ></span>
+                      {{ getSourceLabel(movement.source_type) }}
+                    </span>
+                    <span v-if="movement.reference" class="text-xs text-gray-500 font-mono">
+                      {{ movement.reference }}
+                    </span>
+                  </div>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
                   {{ movement.description || '-' }}
@@ -294,16 +303,43 @@ function formatNumber(num) {
   return Number(num).toLocaleString('mk-MK', { maximumFractionDigits: 4 })
 }
 
-function getSourceColor(sourceType) {
-  const colors = {
-    initial: '#6B7280',
-    bill: '#10B981',
-    invoice: '#EF4444',
-    adjustment: '#F59E0B',
-    transfer_in: '#3B82F6',
-    transfer_out: '#8B5CF6',
+function getSourceClasses(sourceType) {
+  const classes = {
+    initial: 'bg-gray-100 text-gray-700',
+    bill: 'bg-green-100 text-green-700',
+    bill_item: 'bg-green-100 text-green-700',
+    invoice: 'bg-red-100 text-red-700',
+    invoice_item: 'bg-red-100 text-red-700',
+    adjustment: 'bg-amber-100 text-amber-700',
+    transfer_in: 'bg-blue-100 text-blue-700',
+    transfer_out: 'bg-purple-100 text-purple-700',
   }
-  return colors[sourceType] || '#6B7280'
+  return classes[sourceType] || 'bg-gray-100 text-gray-700'
+}
+
+function getSourceDotClass(sourceType) {
+  const dots = {
+    initial: 'bg-gray-500',
+    bill: 'bg-green-500',
+    bill_item: 'bg-green-500',
+    invoice: 'bg-red-500',
+    invoice_item: 'bg-red-500',
+    adjustment: 'bg-amber-500',
+    transfer_in: 'bg-blue-500',
+    transfer_out: 'bg-purple-500',
+  }
+  return dots[sourceType] || 'bg-gray-500'
+}
+
+function getSourceLabel(sourceType) {
+  // Try translation first, fallback to formatted type
+  const key = `stock.source_types.${sourceType}`
+  const translated = t(key)
+  if (translated !== key) {
+    return translated
+  }
+  // Fallback: format the source type nicely
+  return sourceType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
 /**
