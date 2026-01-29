@@ -93,7 +93,7 @@
       >
         <template #cell-name="{ row }">
           <router-link
-            :to="{ path: `/admin/stock/warehouses/${row.data.id}/edit` }"
+            :to="{ path: '/admin/stock/warehouse-inventory', query: { warehouse_id: row.data.id } }"
             class="font-medium text-primary-500"
           >
             {{ row.data.name }}

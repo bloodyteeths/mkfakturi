@@ -214,8 +214,10 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 
+const route = useRoute()
 const stockStore = useStockStore()
 
 const filters = reactive({
@@ -288,6 +290,16 @@ function exportToCsv() {
 onMounted(async () => {
   // Stock module is always enabled - load warehouses
   await stockStore.fetchWarehouses()
+
+  // Check for warehouse_id in query params and auto-load
+  const warehouseId = route.query.warehouse_id
+  if (warehouseId) {
+    const warehouse = stockStore.warehouses.find(w => w.id === parseInt(warehouseId))
+    if (warehouse) {
+      filters.warehouse = warehouse
+      await loadInventory()
+    }
+  }
 })
 </script>
 // CLAUDE-CHECKPOINT

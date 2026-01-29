@@ -133,7 +133,7 @@
                 {{ adj.warehouse_name }}
               </td>
               <td class="px-4 py-3 text-sm text-right font-medium" :class="adj.quantity > 0 ? 'text-green-600' : 'text-red-600'">
-                {{ adj.quantity > 0 ? '+' : '' }}{{ adj.quantity }}
+                {{ adj.quantity > 0 ? '+' : '' }}{{ formatQuantity(adj.quantity) }}
               </td>
               <td class="px-4 py-3 text-sm text-right text-gray-900">
                 <BaseFormatMoney v-if="adj.unit_cost" :amount="adj.unit_cost" />
@@ -549,6 +549,13 @@ async function searchItems(search) {
   } finally {
     isLoadingItems.value = false
   }
+}
+
+function formatQuantity(qty) {
+  if (qty === null || qty === undefined) return '-'
+  // Remove unnecessary trailing zeros (e.g., -20.0000 -> -20)
+  const num = Number(qty)
+  return Number.isInteger(num) ? num.toString() : num.toFixed(2).replace(/\.?0+$/, '')
 }
 
 async function loadAdjustments() {
