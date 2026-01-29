@@ -73,6 +73,7 @@ if (InstallUtils::isDbCreated()) {
     // Note: job events cannot be marked runInBackground() in Laravel 12, so we keep it foreground here.
     Schedule::job(new \App\Jobs\AwardBounties)
         ->dailyAt('02:00')
+        ->name('award-bounties')
         ->withoutOverlapping()
         ->onSuccess(function () {
             Log::info('AwardBounties job completed successfully');
@@ -126,8 +127,8 @@ if (InstallUtils::isDbCreated()) {
     Schedule::command('exports:process-pending')
         ->everyMinute()
         ->runInBackground()
-        ->withoutOverlapping()
-        ->name('process-data-exports');
+        ->name('process-data-exports')
+        ->withoutOverlapping();
 
     // Outreach email batch send - runs every 15 minutes during business hours
     // Sends up to 10 emails per batch, respects daily/hourly limits
@@ -138,16 +139,16 @@ if (InstallUtils::isDbCreated()) {
         ->weekdays()
         ->timezone('Europe/Skopje')
         ->runInBackground()
-        ->withoutOverlapping()
-        ->name('outreach-batch-send');
+        ->name('outreach-batch-send')
+        ->withoutOverlapping();
 
     // Poll HubSpot for deals in "interested" stage and create partner accounts
     // Runs every 10 minutes to detect stage changes
     Schedule::command('hubspot:process-stage-changes')
         ->everyTenMinutes()
         ->runInBackground()
-        ->withoutOverlapping()
-        ->name('hubspot-process-stage-changes');
+        ->name('hubspot-process-stage-changes')
+        ->withoutOverlapping();
 
     // Sync partner activity and commission data to HubSpot
     // Updates deal properties with revenue, commissions, invoice counts, health scores
@@ -155,8 +156,8 @@ if (InstallUtils::isDbCreated()) {
     Schedule::command('hubspot:sync-partner-activity')
         ->everySixHours()
         ->runInBackground()
-        ->withoutOverlapping()
-        ->name('hubspot-sync-partner-activity');
+        ->name('hubspot-sync-partner-activity')
+        ->withoutOverlapping();
 
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
@@ -191,8 +192,8 @@ if (InstallUtils::isDbCreated()) {
                 })
                     ->cron($recurringInvoice->frequency)
                     ->timezone($timeZone)
-                    ->withoutOverlapping()
-                    ->name("recurring-invoice-{$recurringInvoice->id}");
+                    ->name("recurring-invoice-{$recurringInvoice->id}")
+                    ->withoutOverlapping();
             } catch (\Exception $e) {
                 \Log::warning('Invalid cron expression for recurring invoice', [
                     'recurring_invoice_id' => $recurringInvoice->id,
