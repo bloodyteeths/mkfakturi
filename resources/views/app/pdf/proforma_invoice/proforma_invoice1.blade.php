@@ -23,8 +23,8 @@
 
         /* Header */
         .header {
-            padding: 25px 35px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 35px;
+            background-color: #667eea;
             color: white;
         }
 
@@ -37,8 +37,8 @@
         }
 
         .logo {
-            height: 60px;
-            max-width: 200px;
+            height: 50px;
+            max-width: 180px;
         }
 
         .company-name {
@@ -53,15 +53,16 @@
         }
 
         .doc-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
+            letter-spacing: 2px;
+            color: white;
         }
 
         .doc-number {
-            font-size: 13px;
-            opacity: 0.9;
+            font-size: 14px;
+            color: white;
+            margin-top: 5px;
         }
 
         /* Main Content */
@@ -274,26 +275,30 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <div class="header">
-        <table class="header-table">
-            <tr>
-                <td class="logo-cell" width="60%">
-                    @if ($logo)
-                        <img class="logo" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
-                    @else
-                        @if ($invoice->company)
-                            <div class="company-name">{{ $invoice->company->name }}</div>
-                        @endif
-                    @endif
-                </td>
-                <td class="title-cell" width="40%">
-                    <div class="doc-title">ПРОФАКТУРА</div>
-                    <div class="doc-number">{{ $invoice->proforma_invoice_number }}</div>
-                </td>
-            </tr>
-        </table>
-    </div>
+    <!-- Header with ПРОФАКТУРА title -->
+    <table width="100%" style="background-color: #667eea; padding: 15px 0; margin-bottom: 20px;" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="padding: 15px 35px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="50%" style="vertical-align: middle;">
+                            @if ($logo)
+                                <img style="height: 50px; max-width: 180px;" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
+                            @else
+                                @if ($invoice->company)
+                                    <span style="font-size: 20px; font-weight: bold; color: white;">{{ $invoice->company->name }}</span>
+                                @endif
+                            @endif
+                        </td>
+                        <td width="50%" style="text-align: right; vertical-align: middle;">
+                            <div style="font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px;">ПРОФАКТУРА</div>
+                            <div style="font-size: 14px; color: white; margin-top: 5px;">{{ $invoice->proforma_invoice_number }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
     <!-- Content -->
     <div class="content">
