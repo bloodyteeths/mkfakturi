@@ -86,8 +86,12 @@ class ProcessExportJob implements ShouldQueue
             'bills' => Bill::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
             'customers' => Customer::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
             'suppliers' => Supplier::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
-            'expenses' => Expense::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
-            'payments' => Payment::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
+            'expenses' => Expense::where('company_id', $this->exportJob->company_id)
+                ->setEagerLoads([])
+                ->with(['category:id,name', 'supplier:id,name']),
+            'payments' => Payment::where('company_id', $this->exportJob->company_id)
+                ->setEagerLoads([])
+                ->with(['customer:id,name', 'paymentMethod:id,name']),
             'transactions' => \App\Models\Transaction::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
             'items' => \App\Models\Item::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
             'estimates' => \App\Models\Estimate::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
@@ -126,9 +130,24 @@ class ProcessExportJob implements ShouldQueue
         // Get data and flatten any remaining nested structures
         $results = $query->get();
 
-        // Convert to array and flatten nested relations/appends
+        // Convert to array and include meaningful relationship data
         return $results->map(function ($model) {
             $data = $model->attributesToArray(); // Only raw attributes, no appends/relations
+
+            // Add relationship names for expenses
+            if ($this->exportJob->type === 'expenses') {
+                $data['category_name'] = $model->category?->name ?? '';
+                $data['supplier_name'] = $model->supplier?->name ?? '';
+                // Format amount for readability (stored in cents)
+                $data['amount_formatted'] = number_format($data['amount'] / 100, 2);
+            }
+
+            // Add relationship names for payments
+            if ($this->exportJob->type === 'payments') {
+                $data['customer_name'] = $model->customer?->name ?? '';
+                $data['payment_method_name'] = $model->paymentMethod?->name ?? '';
+                $data['amount_formatted'] = number_format($data['amount'] / 100, 2);
+            }
 
             return $data;
         })->toArray();

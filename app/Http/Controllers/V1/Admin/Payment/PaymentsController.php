@@ -23,11 +23,8 @@ class PaymentsController extends Controller
         $limit = $request->has('limit') ? $request->limit : 10;
 
         $payments = Payment::whereCompany()
-            ->join('customers', 'customers.id', '=', 'payments.customer_id')
-            ->leftJoin('invoices', 'invoices.id', '=', 'payments.invoice_id')
-            ->leftJoin('payment_methods', 'payment_methods.id', '=', 'payments.payment_method_id')
+            ->with(['customer:id,name,currency_id', 'customer.currency', 'invoice:id,invoice_number', 'paymentMethod:id,name'])
             ->applyFilters($request->all())
-            ->select('payments.*', 'customers.name', 'invoices.invoice_number', 'payment_methods.name as payment_mode')
             ->latest()
             ->paginateData($limit);
 
@@ -81,3 +78,5 @@ class PaymentsController extends Controller
         ]);
     }
 }
+
+// CLAUDE-CHECKPOINT
