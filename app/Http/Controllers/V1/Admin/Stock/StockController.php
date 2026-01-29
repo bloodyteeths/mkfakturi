@@ -285,28 +285,48 @@ class StockController extends Controller
             'value' => $currentStock['total_value'],
         ];
 
-        // Opening balance: For all-warehouse view, use recalculated values
-        // For single warehouse, calculate from oldest movement
+        // Opening balance logic:
+        // - If date filter applied: balance BEFORE the first movement in the filtered period
+        // - If NO date filter (all time): balance AFTER the first movement (initial recorded state)
+        $hasDateFilter = $fromDate || $toDate;
         $openingBalance = ['quantity' => 0, 'value' => 0];
+
         if ($movements->isNotEmpty()) {
-            if ($needsBalanceRecalculation) {
-                // Get the oldest movement (now last after reverse)
-                $oldestMovement = $movements->last();
-                $oldestBalance = $movementBalances[$oldestMovement->id] ?? null;
-                if ($oldestBalance) {
+            // Get the oldest movement (last in DESC-sorted list)
+            $oldestMovement = $movements->last();
+
+            if ($hasDateFilter) {
+                // With date filter: show balance BEFORE the filtered period starts
+                if ($needsBalanceRecalculation) {
+                    $oldestBalance = $movementBalances[$oldestMovement->id] ?? null;
+                    if ($oldestBalance) {
+                        $openingBalance = [
+                            'quantity' => $oldestBalance['balance_quantity'] - $oldestMovement->quantity,
+                            'value' => max(0, $oldestBalance['balance_value'] - abs($oldestMovement->total_cost ?? 0)),
+                        ];
+                    }
+                } else {
                     $openingBalance = [
-                        'quantity' => $oldestBalance['balance_quantity'] - $oldestMovement->quantity,
-                        'value' => max(0, $oldestBalance['balance_value'] - abs($oldestMovement->total_cost ?? 0)),
+                        'quantity' => $oldestMovement->balance_quantity - $oldestMovement->quantity,
+                        'value' => max(0, $oldestMovement->balance_value - abs($oldestMovement->quantity * ($oldestMovement->unit_cost ?? 0))),
                     ];
                 }
             } else {
-                // Movements are ordered desc by date, so last() is the oldest
-                $oldestMovement = $movements->last();
-                // Opening is balance BEFORE that movement was applied
-                $openingBalance = [
-                    'quantity' => $oldestMovement->balance_quantity - $oldestMovement->quantity,
-                    'value' => max(0, $oldestMovement->balance_value - abs($oldestMovement->quantity * ($oldestMovement->unit_cost ?? 0))),
-                ];
+                // No date filter (all time): show balance AFTER the first movement (initial state)
+                if ($needsBalanceRecalculation) {
+                    $oldestBalance = $movementBalances[$oldestMovement->id] ?? null;
+                    if ($oldestBalance) {
+                        $openingBalance = [
+                            'quantity' => $oldestBalance['balance_quantity'],
+                            'value' => $oldestBalance['balance_value'],
+                        ];
+                    }
+                } else {
+                    $openingBalance = [
+                        'quantity' => $oldestMovement->balance_quantity,
+                        'value' => $oldestMovement->balance_value,
+                    ];
+                }
             }
         }
 
