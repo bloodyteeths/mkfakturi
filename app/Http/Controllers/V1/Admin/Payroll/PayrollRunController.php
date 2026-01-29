@@ -204,23 +204,36 @@ class PayrollRunController extends Controller
             $totalEmployerTax = 0;
             $totalEmployeeTax = 0;
 
+            // Get company currency to determine precision
+            $company = \App\Models\Company::find($payrollRun->company_id);
+            $currency = $company->currency;
+            $currencyPrecision = $currency ? (int) $currency->precision : 2;
+
             // Calculate for each employee
             foreach ($employees as $employee) {
                 // Get gross salary from salary structure or base_salary_amount
-                // base_salary_amount is stored in MKD (e.g., 12000 for 12,000 MKD)
+                // base_salary_amount storage depends on currency precision:
+                // - For precision 0 (MKD): stored as whole units (12000 = 12,000 MKD)
+                // - For precision 2 (EUR): stored as cents (120000 = 1,200.00 EUR)
                 $salaryStructure = $employee->currentSalaryStructure;
                 $grossSalary = $salaryStructure
-                    ? $salaryStructure->base_salary
+                    ? $salaryStructure->gross_salary
                     : $employee->base_salary_amount;
 
                 if (!$grossSalary || $grossSalary <= 0) {
                     continue; // Skip employees without salary
                 }
 
+                // Convert to cents for the tax service which expects all values in cents
+                // For precision 0 currencies (like MKD), multiply by 100 to convert to cents
+                // For precision 2 currencies, the value is already in cents
+                $grossSalaryCents = $currencyPrecision === 0
+                    ? $grossSalary * 100
+                    : $grossSalary;
+
                 // Use the Macedonian tax service to calculate
-                // Pass salary as-is (in MKD, not cents) - the service will handle it
                 $taxService = app(\Modules\Mk\Payroll\Services\MacedonianPayrollTaxService::class);
-                $calculation = $taxService->calculateFromGross($grossSalary);
+                $calculation = $taxService->calculateFromGross($grossSalaryCents);
 
                 // Calculate working days (simplified: assume full month)
                 $workingDays = 22; // Standard working days per month
