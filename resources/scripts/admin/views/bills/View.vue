@@ -164,7 +164,7 @@ onMounted(() => {
             userStore.hasAbilities(abilities.CREATE_PAYMENT) &&
             (bill.status === 'SENT' || bill.status === 'VIEWED')
           "
-          :to="`/admin/bills/${bill.id}/payments/create`"
+          :to="`/admin/bills/${bill.id}/payments`"
         >
           <BaseButton
             variant="primary"
@@ -377,7 +377,7 @@ onMounted(() => {
                 </h3>
                 <router-link
                   v-if="userStore.hasAbilities(abilities.CREATE_PAYMENT)"
-                  :to="`/admin/bills/${bill.id}/payments/create`"
+                  :to="`/admin/bills/${bill.id}/payments`"
                 >
                   <BaseButton variant="primary">
                     {{ $t('bills.add_payment') }}
