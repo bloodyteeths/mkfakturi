@@ -213,13 +213,12 @@ function format_money_pdf($money, $currency = null)
         }
     }
 
-    // CRITICAL FIX: Only divide by 100 for currencies with decimal places (precision > 0)
-    // For zero-precision currencies like MKD, amount is already in the correct unit
-    // Example: MKD with amount=12000 stays as 12000 (12 thousand denars)
-    // USD with amount=12000 becomes 120.00 (120 dollars, stored as cents)
-    if ($currency->precision > 0) {
-        $money = $money / 100;
-    }
+    // All amounts are stored in cents (integer format) regardless of currency
+    // Always divide by 100 to convert to display value
+    // The precision only affects how many decimal places to show
+    // Example: MKD amount=27100 becomes 271 (precision 0 shows no decimals)
+    // Example: USD amount=27100 becomes 271.00 (precision 2 shows 2 decimals)
+    $money = $money / 100;
 
     $format_money = number_format(
         $money,
