@@ -387,6 +387,9 @@
                         @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
                             <br>ЕДБ: {{ $invoice->customer->vat_number }}
                         @endif
+                        @if(isset($invoice->customer->tax_id) && $invoice->customer->tax_id)
+                            <br>ЕМБС: {{ $invoice->customer->tax_id }}
+                        @endif
                     </div>
                 </td>
             </tr>
