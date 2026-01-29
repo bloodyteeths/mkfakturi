@@ -31,6 +31,18 @@
         />
 
         <router-link
+          v-if="userStore.hasAbilities(abilities.VIEW_BILL)"
+          to="/admin/bills/inbox"
+        >
+          <BaseButton variant="primary-outline" class="ml-4">
+            <template #left="slotProps">
+              <BaseIcon name="InboxStackIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('bills.inbox') }}
+          </BaseButton>
+        </router-link>
+
+        <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
           to="bills/create"
         >

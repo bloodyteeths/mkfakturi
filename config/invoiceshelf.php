@@ -446,16 +446,6 @@ return [
             'feature_flag' => 'stock',
         ],
         [
-            'title' => 'navigation.bills_inbox',
-            'group' => 2,
-            'link' => '/admin/bills/inbox',
-            'icon' => 'InboxStackIcon',
-            'name' => 'Bills Inbox',
-            'owner_only' => false,
-            'ability' => 'view-bill',
-            'model' => Bill::class,
-        ],
-        [
             'title' => 'navigation.receipts_scan',
             'group' => 2,
             'link' => '/admin/receipts/scan',
