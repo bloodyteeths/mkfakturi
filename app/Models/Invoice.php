@@ -68,9 +68,9 @@ class Invoice extends Model implements HasMedia
      * Default eager loaded relationships
      */
     protected $with = [
-        'customer:id,name,email',
+        'customer:id,name,email,phone,vat_number,tax_id',
         'currency:id,name,code,symbol',
-        'company:id,name',
+        'company:id,name,vat_id,tax_id',
     ];
 
     protected function casts(): array
@@ -675,6 +675,14 @@ class Invoice extends Model implements HasMedia
 
     public function getPDFData()
     {
+        // Eager load relationships needed for PDF
+        $this->load([
+            'company.address',
+            'customer.billingAddress',
+            'customer.currency',
+            'items.taxes.taxType',
+        ]);
+
         $taxes = collect();
 
         if ($this->tax_per_item === 'YES') {
@@ -695,7 +703,7 @@ class Invoice extends Model implements HasMedia
 
         $invoiceTemplate = self::find($this->id)->template_name;
 
-        $company = Company::find($this->company_id);
+        $company = $this->company;
         $locale = CompanySetting::getSetting('language', $company->id);
         $customFields = CustomField::where('model_type', 'Item')->get();
 
