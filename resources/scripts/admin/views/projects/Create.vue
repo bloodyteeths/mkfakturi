@@ -165,7 +165,8 @@ function hydrateForm(data) {
   form.description = data.description
   form.customer_id = data.customer_id
   form.status = data.status
-  form.budget_amount = data.budget_amount
+  // Budget is stored in cents, convert to display value for BaseMoney
+  form.budget_amount = data.budget_amount ? data.budget_amount / 100 : null
   form.currency_id = data.currency_id
   form.start_date = data.start_date
   form.end_date = data.end_date
@@ -178,7 +179,11 @@ async function handleSubmit() {
   }
 
   isLoading.value = true
-  const payload = { ...form }
+  const payload = {
+    ...form,
+    // Convert budget from display value to cents for storage
+    budget_amount: form.budget_amount ? Math.round(form.budget_amount * 100) : null,
+  }
 
   try {
     if (isEdit.value) {
