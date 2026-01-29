@@ -415,7 +415,12 @@
     <div class="wrapper">
         <div class="company-details-container">
             <div class="company-address-container company-address">
-                {!! $company_address !!}
+                @if ($company_address)
+                    {!! $company_address !!}
+                @else
+                    {{-- Fallback: show company name if no formatted address --}}
+                    <h1><strong>{{ $estimate->company->name ?? '' }}</strong></h1>
+                @endif
             </div>
 
             <div class="estimate-details-container">
@@ -438,14 +443,18 @@
         </div>
 
         <div class="customer-address-container">
-            @if ($billing_address !== '</br>')
-                <div class="billing-address-container billing-address">
-                    @if ($billing_address)
-                        <b>@lang('pdf_bill_to')</b> <br>
-                        {!! $billing_address !!}
+            <div class="billing-address-container billing-address">
+                <b>@lang('pdf_bill_to')</b> <br>
+                @if ($billing_address && $billing_address !== '</br>')
+                    {!! $billing_address !!}
+                @elseif ($estimate->customer)
+                    {{-- Fallback: show customer name if no formatted address --}}
+                    <h3>{{ $estimate->customer->name ?? '' }}</h3>
+                    @if ($estimate->customer->email)
+                        <p>{{ $estimate->customer->email }}</p>
                     @endif
-                </div>
-            @endif
+                @endif
+            </div>
 
 
             <div @if ($billing_address !== '</br>') class="shipping-address-container shipping-address" @else
