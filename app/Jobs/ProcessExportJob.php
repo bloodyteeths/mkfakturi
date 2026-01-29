@@ -88,7 +88,7 @@ class ProcessExportJob implements ShouldQueue
             'suppliers' => Supplier::where('company_id', $this->exportJob->company_id)->setEagerLoads([]),
             'expenses' => Expense::where('company_id', $this->exportJob->company_id)
                 ->setEagerLoads([])
-                ->with(['category:id,name', 'supplier:id,name']),
+                ->with(['category:id,name', 'supplier:id,name', 'customer:id,name']),
             'payments' => Payment::where('company_id', $this->exportJob->company_id)
                 ->setEagerLoads([])
                 ->with(['customer:id,name', 'paymentMethod:id,name']),
@@ -138,6 +138,7 @@ class ProcessExportJob implements ShouldQueue
             if ($this->exportJob->type === 'expenses') {
                 $data['category_name'] = $model->category?->name ?? '';
                 $data['supplier_name'] = $model->supplier?->name ?? '';
+                $data['customer_name'] = $model->customer?->name ?? '';
                 // Format amount for readability (stored in cents)
                 $data['amount_formatted'] = number_format($data['amount'] / 100, 2);
             }

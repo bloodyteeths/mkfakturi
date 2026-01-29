@@ -100,11 +100,12 @@
             <thead>
                 <tr>
                     <th style="width: 8%;">Date</th>
-                    <th style="width: 15%;">Category</th>
-                    <th style="width: 15%;">Supplier</th>
-                    <th style="width: 30%;">Notes / Description</th>
+                    <th style="width: 12%;">Category</th>
+                    <th style="width: 14%;">Customer</th>
+                    <th style="width: 14%;">Supplier</th>
+                    <th style="width: 22%;">Notes / Description</th>
                     <th style="width: 10%;">Invoice #</th>
-                    <th style="width: 12%;">Amount</th>
+                    <th style="width: 10%;">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,6 +118,7 @@
                     <tr>
                         <td class="date">{{ \Carbon\Carbon::parse($expense['expense_date'] ?? '')->format('d.m.Y') }}</td>
                         <td>{{ $expense['category_name'] ?? '-' }}</td>
+                        <td>{{ $expense['customer_name'] ?? '-' }}</td>
                         <td>{{ $expense['supplier_name'] ?? '-' }}</td>
                         <td class="notes">{{ $expense['notes'] ?? '-' }}</td>
                         <td>{{ $expense['invoice_number'] ?? '-' }}</td>
