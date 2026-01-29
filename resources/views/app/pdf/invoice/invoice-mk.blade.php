@@ -46,12 +46,24 @@
             <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->company->name ?? '' }}</span></div>
             @if($company_address)
                 <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $company_address) !!}</span></div>
+            @elseif($invoice->company && $invoice->company->address)
+                {{-- Fallback: show address from relationship --}}
+                <div><span class="field-label">Адреса:</span> <span class="field-value">
+                    {{ $invoice->company->address->address_street_1 ?? '' }}
+                    @if($invoice->company->address->address_street_2), {{ $invoice->company->address->address_street_2 }}@endif
+                    @if($invoice->company->address->city), {{ $invoice->company->address->city }}@endif
+                    @if($invoice->company->address->zip) {{ $invoice->company->address->zip }}@endif
+                    @if($invoice->company->address->country_name), {{ $invoice->company->address->country_name }}@endif
+                </span></div>
             @endif
             @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
                 <div><span class="field-label">ЕДБ за ДДВ:</span> <span class="field-value">{{ $invoice->company->vat_id }}</span></div>
             @endif
             @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
                 <div><span class="field-label">Даночен број (ЕМБС):</span> <span class="field-value">{{ $invoice->company->tax_id }}</span></div>
+            @endif
+            @if($invoice->company && $invoice->company->address && $invoice->company->address->phone)
+                <div><span class="field-label">Телефон:</span> <span class="field-value">{{ $invoice->company->address->phone }}</span></div>
             @endif
             <div><span class="field-label">Место на издавање:</span> <span class="field-value">{{ optional($invoice->company->address)->city ?? 'Скопје' }}</span></div>
         </div>
@@ -62,9 +74,24 @@
             <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->name ?? '' }}</span></div>
             @if($billing_address)
                 <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $billing_address) !!}</span></div>
+            @elseif($invoice->customer && $invoice->customer->billingAddress)
+                {{-- Fallback: show address from relationship --}}
+                <div><span class="field-label">Адреса:</span> <span class="field-value">
+                    {{ $invoice->customer->billingAddress->address_street_1 ?? '' }}
+                    @if($invoice->customer->billingAddress->address_street_2), {{ $invoice->customer->billingAddress->address_street_2 }}@endif
+                    @if($invoice->customer->billingAddress->city), {{ $invoice->customer->billingAddress->city }}@endif
+                    @if($invoice->customer->billingAddress->zip) {{ $invoice->customer->billingAddress->zip }}@endif
+                    @if($invoice->customer->billingAddress->country_name), {{ $invoice->customer->billingAddress->country_name }}@endif
+                </span></div>
             @endif
             @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
-                <div><span class="field-label">Даночен број:</span> <span class="field-value">{{ $invoice->customer->vat_number }}</span></div>
+                <div><span class="field-label">ЕДБ за ДДВ:</span> <span class="field-value">{{ $invoice->customer->vat_number }}</span></div>
+            @endif
+            @if(isset($invoice->customer->tax_id) && $invoice->customer->tax_id)
+                <div><span class="field-label">ЕМБС:</span> <span class="field-value">{{ $invoice->customer->tax_id }}</span></div>
+            @endif
+            @if($invoice->customer && $invoice->customer->phone)
+                <div><span class="field-label">Телефон:</span> <span class="field-value">{{ $invoice->customer->phone }}</span></div>
             @endif
         </div>
     </div>
