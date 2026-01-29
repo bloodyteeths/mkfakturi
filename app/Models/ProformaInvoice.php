@@ -663,6 +663,8 @@ class ProformaInvoice extends Model
             'taxes.taxType',
             'company.address',
             'customer.addresses',
+            'customer.billingAddress',
+            'customer.currency',
             'currency',
         ]);
 
@@ -763,11 +765,18 @@ class ProformaInvoice extends Model
      */
     public function getCompanyAddress()
     {
-        if ($this->company && (! $this->company->address()->exists())) {
-            return false;
+        // Return null if company doesn't exist or has no address
+        if (! $this->company || ! $this->company->address()->exists()) {
+            return null;
         }
 
-        $format = CompanySetting::getSetting('invoice_company_address_format', $this->company_id);
+        // Try proforma-specific format first, then fall back to invoice format
+        $format = CompanySetting::getSetting('proforma_invoice_company_address_format', $this->company_id)
+            ?? CompanySetting::getSetting('invoice_company_address_format', $this->company_id);
+
+        if (! $format) {
+            return null;
+        }
 
         return $this->getFormattedString($format);
     }
@@ -777,11 +786,18 @@ class ProformaInvoice extends Model
      */
     public function getCustomerShippingAddress()
     {
-        if ($this->customer && (! $this->customer->shippingAddress()->exists())) {
-            return false;
+        // Return null if customer doesn't exist or has no shipping address
+        if (! $this->customer || ! $this->customer->shippingAddress()->exists()) {
+            return null;
         }
 
-        $format = CompanySetting::getSetting('invoice_shipping_address_format', $this->company_id);
+        // Try proforma-specific format first, then fall back to invoice format
+        $format = CompanySetting::getSetting('proforma_invoice_shipping_address_format', $this->company_id)
+            ?? CompanySetting::getSetting('invoice_shipping_address_format', $this->company_id);
+
+        if (! $format) {
+            return null;
+        }
 
         return $this->getFormattedString($format);
     }
@@ -791,11 +807,18 @@ class ProformaInvoice extends Model
      */
     public function getCustomerBillingAddress()
     {
-        if ($this->customer && (! $this->customer->billingAddress()->exists())) {
-            return false;
+        // Return null if customer doesn't exist or has no billing address
+        if (! $this->customer || ! $this->customer->billingAddress()->exists()) {
+            return null;
         }
 
-        $format = CompanySetting::getSetting('invoice_billing_address_format', $this->company_id);
+        // Try proforma-specific format first, then fall back to invoice format
+        $format = CompanySetting::getSetting('proforma_invoice_billing_address_format', $this->company_id)
+            ?? CompanySetting::getSetting('invoice_billing_address_format', $this->company_id);
+
+        if (! $format) {
+            return null;
+        }
 
         return $this->getFormattedString($format);
     }

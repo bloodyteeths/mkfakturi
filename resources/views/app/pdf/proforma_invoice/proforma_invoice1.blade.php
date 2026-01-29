@@ -308,6 +308,28 @@
                     <div class="party-details">
                         @if ($company_address)
                             {!! $company_address !!}
+                        @else
+                            {{-- Fallback: show company address from relationship --}}
+                            @if ($invoice->company && $invoice->company->address)
+                                @if ($invoice->company->address->address_street_1)
+                                    {{ $invoice->company->address->address_street_1 }}<br>
+                                @endif
+                                @if ($invoice->company->address->address_street_2)
+                                    {{ $invoice->company->address->address_street_2 }}<br>
+                                @endif
+                                @if ($invoice->company->address->city || $invoice->company->address->zip)
+                                    {{ $invoice->company->address->city }}{{ $invoice->company->address->city && $invoice->company->address->zip ? ', ' : '' }}{{ $invoice->company->address->zip }}<br>
+                                @endif
+                                @if ($invoice->company->address->state)
+                                    {{ $invoice->company->address->state }}<br>
+                                @endif
+                                @if ($invoice->company->address->country_name)
+                                    {{ $invoice->company->address->country_name }}<br>
+                                @endif
+                                @if ($invoice->company->address->phone)
+                                    Тел: {{ $invoice->company->address->phone }}<br>
+                                @endif
+                            @endif
                         @endif
                         @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
                             <br>ЕДБ: {{ $invoice->company->vat_id }}
@@ -326,6 +348,36 @@
                     <div class="party-details">
                         @if ($billing_address)
                             {!! $billing_address !!}
+                        @else
+                            {{-- Fallback: show customer billing address from relationship --}}
+                            @if ($invoice->customer && $invoice->customer->billingAddress)
+                                @if ($invoice->customer->billingAddress->address_street_1)
+                                    {{ $invoice->customer->billingAddress->address_street_1 }}<br>
+                                @endif
+                                @if ($invoice->customer->billingAddress->address_street_2)
+                                    {{ $invoice->customer->billingAddress->address_street_2 }}<br>
+                                @endif
+                                @if ($invoice->customer->billingAddress->city || $invoice->customer->billingAddress->zip)
+                                    {{ $invoice->customer->billingAddress->city }}{{ $invoice->customer->billingAddress->city && $invoice->customer->billingAddress->zip ? ', ' : '' }}{{ $invoice->customer->billingAddress->zip }}<br>
+                                @endif
+                                @if ($invoice->customer->billingAddress->state)
+                                    {{ $invoice->customer->billingAddress->state }}<br>
+                                @endif
+                                @if ($invoice->customer->billingAddress->country_name)
+                                    {{ $invoice->customer->billingAddress->country_name }}<br>
+                                @endif
+                                @if ($invoice->customer->billingAddress->phone)
+                                    Тел: {{ $invoice->customer->billingAddress->phone }}<br>
+                                @endif
+                            @elseif ($invoice->customer)
+                                {{-- Fallback: show basic customer info --}}
+                                @if ($invoice->customer->email)
+                                    {{ $invoice->customer->email }}<br>
+                                @endif
+                                @if ($invoice->customer->phone)
+                                    Тел: {{ $invoice->customer->phone }}<br>
+                                @endif
+                            @endif
                         @endif
                         @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
                             <br>ЕДБ: {{ $invoice->customer->vat_number }}
