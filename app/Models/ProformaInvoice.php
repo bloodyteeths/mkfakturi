@@ -89,7 +89,7 @@ class ProformaInvoice extends Model
     protected $with = [
         'customer:id,name,email,vat_number',
         'currency:id,name,code,symbol',
-        'company:id,name,vat_id,tax_id,logo,logo_path',
+        'company:id,name,vat_id,tax_id',
     ];
 
     protected function casts(): array
