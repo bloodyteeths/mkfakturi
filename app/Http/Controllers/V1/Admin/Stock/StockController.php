@@ -206,28 +206,35 @@ class StockController extends Controller
                 ['id', 'asc'],
             ])->values();
 
-            // Calculate running balance across all warehouses
+            // Calculate running balance and WAC across all warehouses
             $runningQty = 0;
             $runningValue = 0;
             $movementBalances = [];
 
             foreach ($sortedMovements as $movement) {
-                $runningQty += $movement->quantity;
+                // Calculate WAC before this movement (for stock OUT)
+                $currentWac = $runningQty > 0 ? (int) round($runningValue / $runningQty) : 0;
 
                 // Calculate value change
                 if ($movement->quantity > 0) {
                     // Stock IN: add at unit cost
-                    $lineValue = (int) ($movement->quantity * ($movement->unit_cost ?? 0));
+                    $unitCost = $movement->unit_cost ?? 0;
+                    $lineValue = (int) ($movement->quantity * $unitCost);
                     $runningValue += $lineValue;
                 } else {
-                    // Stock OUT: remove at WAC (use total_cost if available)
-                    $lineValue = abs($movement->total_cost ?? 0);
+                    // Stock OUT: remove at calculated WAC (not stored total_cost which may be wrong)
+                    $unitCost = $currentWac;
+                    $lineValue = (int) (abs($movement->quantity) * $currentWac);
                     $runningValue = max(0, $runningValue - $lineValue);
                 }
+
+                $runningQty += $movement->quantity;
 
                 $movementBalances[$movement->id] = [
                     'balance_quantity' => $runningQty,
                     'balance_value' => $runningValue,
+                    'unit_cost' => $unitCost,
+                    'line_value' => $lineValue,
                 ];
             }
 
@@ -237,20 +244,23 @@ class StockController extends Controller
 
         // Format movements for response
         $formattedMovements = $movements->map(function ($movement) use ($needsBalanceRecalculation, $movementBalances) {
-            // For Stock OUT, unit_cost is null - calculate from total_cost / quantity
-            // This shows the WAC that was used for the outgoing movement
+            // Get recalculated values for all-warehouse view
+            $recalc = $needsBalanceRecalculation ? ($movementBalances[$movement->id] ?? null) : null;
+
+            // Unit cost: use recalculated value, or calculate from stored total_cost, or use stored unit_cost
             $effectiveUnitCost = $movement->unit_cost;
-            if ($movement->isStockOut() && $movement->unit_cost === null && $movement->total_cost !== null) {
+            if ($recalc) {
+                $effectiveUnitCost = $recalc['unit_cost'];
+            } elseif ($movement->isStockOut() && $movement->unit_cost === null && $movement->total_cost !== null && $movement->total_cost > 0) {
                 $effectiveUnitCost = (int) round(abs($movement->total_cost / $movement->quantity));
             }
 
-            // Use recalculated balances for all-warehouse view, otherwise use stored values
-            $balanceQty = $needsBalanceRecalculation
-                ? ($movementBalances[$movement->id]['balance_quantity'] ?? $movement->balance_quantity)
-                : $movement->balance_quantity;
-            $balanceVal = $needsBalanceRecalculation
-                ? ($movementBalances[$movement->id]['balance_value'] ?? $movement->balance_value)
-                : $movement->balance_value;
+            // Line value: use recalculated value or stored total_cost
+            $lineValue = $recalc ? $recalc['line_value'] : abs($movement->total_cost ?? 0);
+
+            // Balance values: use recalculated or stored
+            $balanceQty = $recalc ? $recalc['balance_quantity'] : $movement->balance_quantity;
+            $balanceVal = $recalc ? $recalc['balance_value'] : $movement->balance_value;
 
             return [
                 'id' => $movement->id,
@@ -265,7 +275,7 @@ class StockController extends Controller
                 'absolute_quantity' => $movement->absolute_quantity,
                 'unit_cost' => $effectiveUnitCost,
                 'total_cost' => $movement->total_cost,
-                'line_value' => abs($movement->total_cost ?? 0),
+                'line_value' => $lineValue,
                 'balance_quantity' => $balanceQty,
                 'balance_value' => $balanceVal,
                 'weighted_average_cost' => $movement->weighted_average_cost,
