@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
@@ -156,13 +156,21 @@ const columns = computed(() => [
 
 const paymentForm = reactive({
   id: null,
-  payment_date: '',
+  payment_date: new Date().toISOString().split('T')[0], // Default to today
   amount: 0,
   payment_method_id: null,
   notes: '',
 })
 
 const bill = computed(() => billsStore.selectedBill)
+
+// Auto-populate amount with bill's due amount when bill is loaded
+watch(bill, (newBill) => {
+  if (newBill && !editingPayment.value && paymentForm.amount === 0) {
+    // Use due_amount if available, otherwise use total
+    paymentForm.amount = newBill.due_amount ?? newBill.total ?? 0
+  }
+}, { immediate: true })
 
 function hydratePaymentForm(payment) {
   paymentForm.id = payment.id
