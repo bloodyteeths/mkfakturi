@@ -194,14 +194,63 @@ class StockController extends Controller
             $limit
         );
 
+        // When viewing ALL warehouses (no filter), we need to recalculate running balances
+        // because stored balance_quantity/value are per-warehouse
+        $needsBalanceRecalculation = ! $warehouseId && $movements->isNotEmpty();
+        $movementBalances = [];
+
+        if ($needsBalanceRecalculation) {
+            // Sort by date ASC to calculate running balance chronologically
+            $sortedMovements = $movements->sortBy([
+                ['movement_date', 'asc'],
+                ['id', 'asc'],
+            ])->values();
+
+            // Calculate running balance across all warehouses
+            $runningQty = 0;
+            $runningValue = 0;
+            $movementBalances = [];
+
+            foreach ($sortedMovements as $movement) {
+                $runningQty += $movement->quantity;
+
+                // Calculate value change
+                if ($movement->quantity > 0) {
+                    // Stock IN: add at unit cost
+                    $lineValue = (int) ($movement->quantity * ($movement->unit_cost ?? 0));
+                    $runningValue += $lineValue;
+                } else {
+                    // Stock OUT: remove at WAC (use total_cost if available)
+                    $lineValue = abs($movement->total_cost ?? 0);
+                    $runningValue = max(0, $runningValue - $lineValue);
+                }
+
+                $movementBalances[$movement->id] = [
+                    'balance_quantity' => $runningQty,
+                    'balance_value' => $runningValue,
+                ];
+            }
+
+            // Reverse back to DESC order for display (newest first)
+            $movements = $sortedMovements->reverse()->values();
+        }
+
         // Format movements for response
-        $formattedMovements = $movements->map(function ($movement) {
+        $formattedMovements = $movements->map(function ($movement) use ($needsBalanceRecalculation, $movementBalances) {
             // For Stock OUT, unit_cost is null - calculate from total_cost / quantity
             // This shows the WAC that was used for the outgoing movement
             $effectiveUnitCost = $movement->unit_cost;
             if ($movement->isStockOut() && $movement->unit_cost === null && $movement->total_cost !== null) {
                 $effectiveUnitCost = (int) round(abs($movement->total_cost / $movement->quantity));
             }
+
+            // Use recalculated balances for all-warehouse view, otherwise use stored values
+            $balanceQty = $needsBalanceRecalculation
+                ? ($movementBalances[$movement->id]['balance_quantity'] ?? $movement->balance_quantity)
+                : $movement->balance_quantity;
+            $balanceVal = $needsBalanceRecalculation
+                ? ($movementBalances[$movement->id]['balance_value'] ?? $movement->balance_value)
+                : $movement->balance_value;
 
             return [
                 'id' => $movement->id,
@@ -217,8 +266,8 @@ class StockController extends Controller
                 'unit_cost' => $effectiveUnitCost,
                 'total_cost' => $movement->total_cost,
                 'line_value' => abs($movement->total_cost ?? 0),
-                'balance_quantity' => $movement->balance_quantity,
-                'balance_value' => $movement->balance_value,
+                'balance_quantity' => $balanceQty,
+                'balance_value' => $balanceVal,
                 'weighted_average_cost' => $movement->weighted_average_cost,
                 'notes' => $movement->notes,
                 'description' => $movement->notes,
@@ -230,23 +279,35 @@ class StockController extends Controller
         });
 
         // Calculate opening and closing balance
-        // Closing balance is the current stock
+        // Closing balance is the current stock (already summed across warehouses)
         $closingBalance = [
             'quantity' => $currentStock['quantity'],
             'value' => $currentStock['total_value'],
         ];
 
-        // Opening balance: Calculate from the oldest movement shown
-        // If we have movements, opening is the balance BEFORE the oldest movement
+        // Opening balance: For all-warehouse view, use recalculated values
+        // For single warehouse, calculate from oldest movement
         $openingBalance = ['quantity' => 0, 'value' => 0];
         if ($movements->isNotEmpty()) {
-            // Movements are ordered desc by date, so last() is the oldest
-            $oldestMovement = $movements->last();
-            // Opening is balance BEFORE that movement was applied
-            $openingBalance = [
-                'quantity' => $oldestMovement->balance_quantity - $oldestMovement->quantity,
-                'value' => max(0, $oldestMovement->balance_value - abs($oldestMovement->quantity * $oldestMovement->unit_cost)),
-            ];
+            if ($needsBalanceRecalculation) {
+                // Get the oldest movement (now last after reverse)
+                $oldestMovement = $movements->last();
+                $oldestBalance = $movementBalances[$oldestMovement->id] ?? null;
+                if ($oldestBalance) {
+                    $openingBalance = [
+                        'quantity' => $oldestBalance['balance_quantity'] - $oldestMovement->quantity,
+                        'value' => max(0, $oldestBalance['balance_value'] - abs($oldestMovement->total_cost ?? 0)),
+                    ];
+                }
+            } else {
+                // Movements are ordered desc by date, so last() is the oldest
+                $oldestMovement = $movements->last();
+                // Opening is balance BEFORE that movement was applied
+                $openingBalance = [
+                    'quantity' => $oldestMovement->balance_quantity - $oldestMovement->quantity,
+                    'value' => max(0, $oldestMovement->balance_value - abs($oldestMovement->quantity * ($oldestMovement->unit_cost ?? 0))),
+                ];
+            }
         }
 
         return response()->json([
