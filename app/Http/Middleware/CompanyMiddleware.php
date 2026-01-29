@@ -26,8 +26,14 @@ class CompanyMiddleware
         if (Schema::hasTable('user_company')) {
             $user = $request->user();
 
+            // Allow unauthenticated requests through if company header is already set
+            // This handles public PDF routes where pdf-company middleware sets the company
+            if (! $user) {
+                return $next($request);
+            }
+
             // Super Admin Support Mode: Override company context if in support mode
-            if ($user && $user->role === 'super admin') {
+            if ($user->role === 'super admin') {
                 $supportMode = session('support_mode');
                 if ($supportMode && isset($supportMode['company_id'])) {
                     $supportCompanyId = $supportMode['company_id'];
