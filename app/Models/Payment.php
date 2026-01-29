@@ -70,9 +70,10 @@ class Payment extends Model implements HasMedia
      * Default eager loaded relationships
      */
     protected $with = [
-        'customer:id,name,email',
+        'customer:id,name,email,phone,vat_number,tax_id',
         'paymentMethod:id,name',
         'currency:id,name,code,symbol',
+        'company:id,name,vat_id,tax_id',
     ];
 
     protected function casts(): array
@@ -416,7 +417,13 @@ class Payment extends Model implements HasMedia
     public function getPDFData()
     {
         // Load relationships needed for PDF
-        $this->load(['customer.currency', 'customer.billingAddress', 'company.address', 'invoice', 'paymentMethod']);
+        $this->load([
+            'customer.currency',
+            'customer.billingAddress.country',
+            'company.address.country',
+            'invoice',
+            'paymentMethod',
+        ]);
 
         $company = $this->company ?? Company::find($this->company_id);
         $locale = CompanySetting::getSetting('language', $company->id ?? $this->company_id);
@@ -446,32 +453,42 @@ class Payment extends Model implements HasMedia
 
     public function getCompanyAddress()
     {
-        // Return null if company doesn't exist or has no address
-        if (! $this->company || ! $this->company->address()->exists()) {
+        // Return null if company doesn't exist
+        if (! $this->company) {
             return null;
         }
 
-        $format = CompanySetting::getSetting('payment_company_address_format', $this->company_id);
-        if (! $format) {
-            return null;
+        // Try to get format setting, fall back to invoice format
+        $format = CompanySetting::getSetting('payment_company_address_format', $this->company_id)
+            ?? CompanySetting::getSetting('invoice_company_address_format', $this->company_id);
+
+        // If format exists and company has address, use formatted string
+        if ($format && $this->company->address()->exists()) {
+            return $this->getFormattedString($format);
         }
 
-        return $this->getFormattedString($format);
+        // Fallback: build basic address from company data
+        return null;
     }
 
     public function getCustomerBillingAddress()
     {
-        // Return null if customer doesn't exist or has no billing address
-        if (! $this->customer || ! $this->customer->billingAddress()->exists()) {
+        // Return null if customer doesn't exist
+        if (! $this->customer) {
             return null;
         }
 
-        $format = CompanySetting::getSetting('payment_from_customer_address_format', $this->company_id);
-        if (! $format) {
-            return null;
+        // Try to get format setting, fall back to invoice format
+        $format = CompanySetting::getSetting('payment_from_customer_address_format', $this->company_id)
+            ?? CompanySetting::getSetting('invoice_from_customer_address_format', $this->company_id);
+
+        // If format exists and customer has billing address, use formatted string
+        if ($format && $this->customer->billingAddress()->exists()) {
+            return $this->getFormattedString($format);
         }
 
-        return $this->getFormattedString($format);
+        // Fallback: return null, template will handle display
+        return null;
     }
 
     public function getEmailAttachmentSetting()
@@ -542,3 +559,5 @@ class Payment extends Model implements HasMedia
         return $payment;
     }
 }
+
+// CLAUDE-CHECKPOINT

@@ -168,11 +168,38 @@ if (InstallUtils::isDbCreated()) {
     if (\Schema::hasTable('recurring_invoices')) {
         $recurringInvoices = RecurringInvoice::where('status', 'ACTIVE')->get();
         foreach ($recurringInvoices as $recurringInvoice) {
-            $timeZone = CompanySetting::getSetting('time_zone', $recurringInvoice->company_id);
+            try {
+                // Validate cron expression before scheduling
+                $cron = new \Cron\CronExpression($recurringInvoice->frequency);
+                $cron->getNextRunDate(); // Test if valid
 
-            Schedule::call(function () use ($recurringInvoice) {
-                $recurringInvoice->generateInvoice();
-            })->cron($recurringInvoice->frequency)->timezone($timeZone);
+                $timeZone = CompanySetting::getSetting('time_zone', $recurringInvoice->company_id) ?? 'Europe/Skopje';
+
+                Schedule::call(function () use ($recurringInvoice) {
+                    try {
+                        // Reload to get fresh data
+                        $invoice = RecurringInvoice::find($recurringInvoice->id);
+                        if ($invoice && $invoice->status === 'ACTIVE') {
+                            $invoice->generateInvoice();
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to generate recurring invoice', [
+                            'recurring_invoice_id' => $recurringInvoice->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                })
+                    ->cron($recurringInvoice->frequency)
+                    ->timezone($timeZone)
+                    ->withoutOverlapping()
+                    ->name("recurring-invoice-{$recurringInvoice->id}");
+            } catch (\Exception $e) {
+                \Log::warning('Invalid cron expression for recurring invoice', [
+                    'recurring_invoice_id' => $recurringInvoice->id,
+                    'frequency' => $recurringInvoice->frequency,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 }

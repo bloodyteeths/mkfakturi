@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\RecurringInvoice;
+use App\Rules\ValidCronExpression;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RecurringInvoiceRequest extends FormRequest
@@ -66,6 +67,7 @@ class RecurringInvoiceRequest extends FormRequest
             ],
             'frequency' => [
                 'required',
+                new ValidCronExpression,
             ],
             'limit_by' => [
                 'required',
