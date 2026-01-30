@@ -266,11 +266,23 @@
     "view_reports_desc": "Raporları görüntüleyin",
     "overdue_invoices": "Gecikmiş Faturalar",
     "no_overdue_invoices": "Gecikmiş fatura yok",
-    "total_overdue": "Toplam Доцнетve",
-    "view_all_overdue": "Прveкажve Tümü Доцнетve",
+    "total_overdue": "Toplam Gecikmiş",
+    "view_all_overdue": "Tüm Gecikmiş Faturaları Göster",
     "recent_bills_card": {
       "amount_due": "Tutar için ödeme"
-    }
+    },
+    "unpaid_summary": "Ödenmemiş Faturalar",
+    "total_outstanding": "Toplam Ödenmemiş",
+    "unpaid_invoices_count": "ödenmemiş fatura",
+    "due_today": "Bugün Vadesi Dolan",
+    "overdue": "Gecikmiş",
+    "upcoming": "Yaklaşan",
+    "all_invoices_paid": "Tüm faturalar ödendi!",
+    "view_all_unpaid": "Tüm ödenmemiş faturaları göster",
+    "recent_payments": "Son Ödemeler",
+    "no_recent_payments": "Son ödeme yok",
+    "received_this_month": "Bu Ay Alınan",
+    "view_all_payments": "Tüm ödemeleri göster"
   },
   "tax_types": {
     "name": "İsim",

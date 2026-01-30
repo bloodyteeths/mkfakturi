@@ -305,7 +305,19 @@
     "recent_bills_card": {
       "amount_due": "Shuma për pagesë"
     },
-    "no_overdue_invoices": "Nuk ka fatura të vonuara"
+    "no_overdue_invoices": "Nuk ka fatura të vonuara",
+    "unpaid_summary": "Faturat e Papaguara",
+    "total_outstanding": "Totali i Papaguar",
+    "unpaid_invoices_count": "fatura të papaguara",
+    "due_today": "Skadon Sot",
+    "overdue": "Të Vonuara",
+    "upcoming": "Të Ardhshme",
+    "all_invoices_paid": "Të gjitha faturat janë paguar!",
+    "view_all_unpaid": "Shiko të gjitha faturat e papaguara",
+    "recent_payments": "Pagesat e Fundit",
+    "no_recent_payments": "Nuk ka pagesa të fundit",
+    "received_this_month": "Pranuar Këtë Muaj",
+    "view_all_payments": "Shiko të gjitha pagesat"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Komisionet e Fundit",
