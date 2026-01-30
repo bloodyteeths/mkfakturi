@@ -52,13 +52,14 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  // Check for partner-only routes
+  // Check for partner-only routes (super admins can also access)
   if (to.meta.isPartner && isAppLoaded && userStore.currentUser) {
     const isPartner = userStore.currentUser.role === 'partner' ||
                       userStore.currentUser.account_type === 'accountant' ||
                       userStore.currentUser.is_partner
-    if (!isPartner) {
-      // Redirect non-partner users to admin dashboard
+    const isSuperAdmin = userStore.currentUser.role === 'super admin'
+    if (!isPartner && !isSuperAdmin) {
+      // Redirect non-partner/non-super-admin users to admin dashboard
       next({ name: 'dashboard' })
       return
     }
