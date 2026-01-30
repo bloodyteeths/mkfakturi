@@ -6,9 +6,6 @@ import AiInsightsWidget from './widgets/AiInsightsWidget.vue'
 import AiChatWidget from './widgets/AiChatWidget.vue'
 import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
 import OverdueInvoicesWidget from './widgets/OverdueInvoicesWidget.vue'
-import BankStatus from '@/scripts/components/widgets/BankStatus.vue'
-import VatStatus from '@/scripts/components/widgets/VatStatus.vue'
-import CertExpiry from '@/scripts/components/widgets/CertExpiry.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { onMounted, computed } from 'vue'
@@ -27,11 +24,6 @@ const showAiInsights = computed(() => {
 // Check if MCP AI Tools feature flag is enabled
 const mcpAiToolsEnabled = computed(() => {
   return globalStore.featureFlags?.['mcp_ai_tools'] === true
-})
-
-// Check if PSD2 Banking feature flag is enabled
-const bankingEnabled = computed(() => {
-  return globalStore.featureFlags?.['psd2_banking'] === true
 })
 
 onMounted(() => {
@@ -66,13 +58,6 @@ onMounted(() => {
     <div v-if="mcpAiToolsEnabled && showAiInsights" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <AiInsightsWidget />
       <AiChatWidget />
-    </div>
-
-    <!-- Status Widgets Section - Only show if banking enabled (3 cols), otherwise hide for cleaner look -->
-    <div v-if="bankingEnabled" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-      <BankStatus />
-      <VatStatus />
-      <CertExpiry />
     </div>
 
     <!-- Quick Actions & Overdue Alerts Row (Mobile: stack, Desktop: side-by-side) -->
