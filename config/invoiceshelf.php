@@ -464,6 +464,7 @@ return [
             'owner_only' => false,
             'ability' => 'view-report',
             'model' => '',
+            'feature_flag' => 'psd2_banking',
         ],
         [
             'title' => 'navigation.payroll',

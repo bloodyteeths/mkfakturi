@@ -29,6 +29,11 @@ const mcpAiToolsEnabled = computed(() => {
   return globalStore.featureFlags?.['mcp_ai_tools'] === true
 })
 
+// Check if PSD2 Banking feature flag is enabled
+const bankingEnabled = computed(() => {
+  return globalStore.featureFlags?.['psd2_banking'] === true
+})
+
 onMounted(() => {
   // Only redirect if abilities are fully loaded AND user lacks the required ability
   // Don't redirect if abilities haven't loaded yet or if route doesn't require special permissions
@@ -65,7 +70,7 @@ onMounted(() => {
 
     <!-- Status Widgets Section (Mobile: stack, Tablet: 2 cols, Desktop: 3 cols) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-      <BankStatus />
+      <BankStatus v-if="bankingEnabled" />
       <VatStatus />
       <CertExpiry />
     </div>
