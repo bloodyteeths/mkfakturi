@@ -42,7 +42,7 @@ return [
 
         'gemini' => [
             'api_key' => env('GEMINI_API_KEY'),
-            'model' => env('GEMINI_MODEL', 'gemini-2.0-flash-exp'),
+            'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
             'api_url' => 'https://generativelanguage.googleapis.com/v1beta/models',
             'max_tokens' => env('GEMINI_MAX_TOKENS', 8192),
             'temperature' => env('GEMINI_TEMPERATURE', 0.7),
@@ -116,15 +116,15 @@ return [
     |--------------------------------------------------------------------------
     |
     | Configure which models to use for different operation types.
-    | For Gemini: gemini-1.5-flash (fast/cheap) vs gemini-1.5-pro (powerful)
+    | For Gemini: gemini-2.5-flash-lite (fast/cheap) vs gemini-2.5-flash (balanced)
     | For Claude: claude-3-haiku (fast) vs claude-3-5-sonnet (powerful)
     |
     */
     'model_routing' => [
-        'classification' => env('AI_MODEL_CLASSIFICATION', 'gemini-2.0-flash-exp'),
-        'chat' => env('AI_MODEL_CHAT', 'gemini-2.0-flash-exp'),
-        'analysis' => env('AI_MODEL_ANALYSIS', 'gemini-2.0-flash-exp'),
-        'vision' => env('AI_MODEL_VISION', 'gemini-2.0-flash-exp'),
+        'classification' => env('AI_MODEL_CLASSIFICATION', 'gemini-2.5-flash'),
+        'chat' => env('AI_MODEL_CHAT', 'gemini-2.5-flash'),
+        'analysis' => env('AI_MODEL_ANALYSIS', 'gemini-2.5-flash'),
+        'vision' => env('AI_MODEL_VISION', 'gemini-2.5-flash'),
     ],
 
     /*
@@ -133,7 +133,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Use a lighter model for fast intent classification to reduce costs.
-    | Gemini: uses gemini-1.5-flash, Claude: uses claude-3-haiku
+    | Gemini: uses gemini-2.5-flash-lite, Claude: uses claude-3-haiku
     |
     */
     'use_fast_classification' => env('AI_USE_FAST_CLASSIFICATION', true),

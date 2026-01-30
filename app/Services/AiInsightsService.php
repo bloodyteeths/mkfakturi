@@ -294,7 +294,7 @@ Question: {$question}
 Response (comma-separated categories only):
 PROMPT;
 
-            $classificationModel = config('ai.model_routing.classification', 'gemini-2.0-flash-exp');
+            $classificationModel = config('ai.model_routing.classification', 'gemini-2.5-flash');
 
             // Use generateWithModel if provider supports it (Claude, Gemini)
             if (method_exists($this->aiProvider, 'generateWithModel')) {
