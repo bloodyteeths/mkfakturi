@@ -85,7 +85,7 @@
           v-if="canRecalculate"
           variant="warning-outline"
           class="ml-2"
-          @click="calculatePayroll"
+          @click="calculateRun"
         >
           <template #left="slotProps">
             <BaseIcon name="CalculatorIcon" :class="slotProps.class" />
