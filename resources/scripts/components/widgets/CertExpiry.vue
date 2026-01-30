@@ -335,8 +335,7 @@ onUnmounted(() => {
 
 <style scoped>
 .cert-expiry-widget {
-  min-width: 320px;
-  max-width: 400px;
+  /* Allow widget to fill grid column */
 }
 
 @keyframes pulse {

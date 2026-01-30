@@ -68,9 +68,9 @@ onMounted(() => {
       <AiChatWidget />
     </div>
 
-    <!-- Status Widgets Section (Mobile: stack, Tablet: 2 cols, Desktop: 3 cols) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-      <BankStatus v-if="bankingEnabled" />
+    <!-- Status Widgets Section - Only show if banking enabled (3 cols), otherwise hide for cleaner look -->
+    <div v-if="bankingEnabled" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <BankStatus />
       <VatStatus />
       <CertExpiry />
     </div>
