@@ -19,7 +19,7 @@ class PayslipController extends Controller
         // Load required relationships
         $payrollRunLine->load([
             'employee.currency',
-            'employee.company',
+            'employee.company.address',
             'payrollRun',
         ]);
 
@@ -65,7 +65,7 @@ class PayslipController extends Controller
         // Load required relationships
         $payrollRunLine->load([
             'employee.currency',
-            'employee.company',
+            'employee.company.address',
             'payrollRun',
         ]);
 
@@ -84,7 +84,7 @@ class PayslipController extends Controller
         // Load required relationships
         $payrollRunLine->load([
             'employee.currency',
-            'employee.company',
+            'employee.company.address',
             'payrollRun',
         ]);
 

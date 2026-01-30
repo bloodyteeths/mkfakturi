@@ -152,17 +152,19 @@
                 <div class="info-col">
                     <div class="info-label">Компанија:</div>
                     <div class="info-value">{{ $company->name }}</div>
-                    @if($company->address_street_1)
-                        <div class="info-value">{{ $company->address_street_1 }}</div>
-                    @endif
-                    @if($company->address_street_2)
-                        <div class="info-value">{{ $company->address_street_2 }}</div>
-                    @endif
-                    @if($company->city || $company->zip)
-                        <div class="info-value">{{ $company->zip }} {{ $company->city }}@if($company->state), {{ $company->state }}@endif</div>
-                    @endif
-                    @if($company->phone)
-                        <div class="info-value">Тел: {{ $company->phone }}</div>
+                    @if($company->address)
+                        @if($company->address->address_street_1)
+                            <div class="info-value">{{ $company->address->address_street_1 }}</div>
+                        @endif
+                        @if($company->address->address_street_2)
+                            <div class="info-value">{{ $company->address->address_street_2 }}</div>
+                        @endif
+                        @if($company->address->city || $company->address->zip)
+                            <div class="info-value">{{ $company->address->zip }} {{ $company->address->city }}@if($company->address->state), {{ $company->address->state }}@endif</div>
+                        @endif
+                        @if($company->address->phone)
+                            <div class="info-value">Тел: {{ $company->address->phone }}</div>
+                        @endif
                     @endif
                     @php
                         $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
