@@ -67,16 +67,17 @@ onMounted(() => {
         return
       }
     }
-    // Check isPartner meta first - partners should access partner routes even if they don't have is_owner
+    // Check isPartner meta first - partners and super admins should access partner routes
     if (route.meta.isPartner && userStore.currentUser) {
       const isPartner = userStore.currentUser.role === 'partner' ||
                         userStore.currentUser.account_type === 'accountant' ||
                         userStore.currentUser.is_partner
-      if (!isPartner) {
+      const isSuperAdmin = userStore.currentUser.role === 'super admin'
+      if (!isPartner && !isSuperAdmin) {
         router.push({ name: 'dashboard' })
         return
       }
-      // Partners can access partner routes - skip other checks
+      // Partners and super admins can access partner routes - skip other checks
       return
     }
 
