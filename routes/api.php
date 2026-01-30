@@ -418,40 +418,42 @@ Route::prefix('/v1')->group(function () {
 
             // Payroll Module (MK Tax Compliance)
             // ----------------------------------
+            // Requires Business tier or higher (see config/subscriptions.php)
+            Route::middleware(['tier:payroll'])->group(function () {
+                // Payroll Employees
+                Route::get('/payroll-employees/departments', [PayrollEmployeeController::class, 'departments']);
+                Route::post('/payroll-employees/{payrollEmployee}/terminate', [PayrollEmployeeController::class, 'terminate']);
+                Route::post('/payroll-employees/{id}/restore', [PayrollEmployeeController::class, 'restore']);
+                Route::apiResource('payroll-employees', PayrollEmployeeController::class);
 
-            // Payroll Employees
-            Route::get('/payroll-employees/departments', [PayrollEmployeeController::class, 'departments']);
-            Route::post('/payroll-employees/{payrollEmployee}/terminate', [PayrollEmployeeController::class, 'terminate']);
-            Route::post('/payroll-employees/{id}/restore', [PayrollEmployeeController::class, 'restore']);
-            Route::apiResource('payroll-employees', PayrollEmployeeController::class);
+                // Salary Structures
+                Route::get('/salary-structures/history/{employeeId}', [SalaryStructureController::class, 'history']);
+                Route::post('/salary-structures/{salaryStructure}/set-current', [SalaryStructureController::class, 'setCurrent']);
+                Route::apiResource('salary-structures', SalaryStructureController::class);
 
-            // Salary Structures
-            Route::get('/salary-structures/history/{employeeId}', [SalaryStructureController::class, 'history']);
-            Route::post('/salary-structures/{salaryStructure}/set-current', [SalaryStructureController::class, 'setCurrent']);
-            Route::apiResource('salary-structures', SalaryStructureController::class);
+                // Payroll Runs
+                Route::post('/payroll-runs/{payrollRun}/calculate', [PayrollRunController::class, 'calculate']);
+                Route::post('/payroll-runs/{payrollRun}/approve', [PayrollRunController::class, 'approve']);
+                Route::post('/payroll-runs/{payrollRun}/post', [PayrollRunController::class, 'post']);
+                Route::post('/payroll-runs/{payrollRun}/mark-paid', [PayrollRunController::class, 'markPaid']);
+                Route::get('/payroll-runs/{payrollRun}/bank-file', [PayrollRunController::class, 'downloadBankFile']);
+                Route::apiResource('payroll-runs', PayrollRunController::class);
 
-            // Payroll Runs
-            Route::post('/payroll-runs/{payrollRun}/calculate', [PayrollRunController::class, 'calculate']);
-            Route::post('/payroll-runs/{payrollRun}/approve', [PayrollRunController::class, 'approve']);
-            Route::post('/payroll-runs/{payrollRun}/post', [PayrollRunController::class, 'post']);
-            Route::post('/payroll-runs/{payrollRun}/mark-paid', [PayrollRunController::class, 'markPaid']);
-            Route::get('/payroll-runs/{payrollRun}/bank-file', [PayrollRunController::class, 'downloadBankFile']);
-            Route::apiResource('payroll-runs', PayrollRunController::class);
+                // Payslips
+                Route::get('/payslips/{payrollRunLine}/download', [PayslipController::class, 'download']);
+                Route::get('/payslips/{payrollRunLine}/preview', [PayslipController::class, 'preview']);
+                Route::get('/payslips/bulk/{payrollRunId}', [PayslipController::class, 'bulkDownload']);
+                Route::get('/payslips/download-zip/{token}', [PayslipController::class, 'downloadZip']);
 
-            // Payslips
-            Route::get('/payslips/{payrollRunLine}/download', [PayslipController::class, 'download']);
-            Route::get('/payslips/{payrollRunLine}/preview', [PayslipController::class, 'preview']);
-            Route::get('/payslips/bulk/{payrollRunId}', [PayslipController::class, 'bulkDownload']);
-            Route::get('/payslips/download-zip/{token}', [PayslipController::class, 'downloadZip']);
-
-            // Payroll Reports
-            Route::get('/payroll-reports/tax-summary', [PayrollReportController::class, 'taxSummary']);
-            Route::get('/payroll-reports/statistics', [PayrollReportController::class, 'statistics']);
-            Route::get('/payroll-reports/employee-history/{employeeId}', [PayrollReportController::class, 'employeeHistory']);
-            Route::get('/payroll-reports/monthly-comparison', [PayrollReportController::class, 'monthlyComparison']);
-            Route::get('/payroll-reports/export-tax-summary', [PayrollReportController::class, 'exportTaxSummary']);
-            Route::get('/payroll-reports/download-mpin-xml', [PayrollReportController::class, 'downloadMpinXml']);
-            Route::get('/payroll-reports/download-ddv04-xml', [PayrollReportController::class, 'downloadDdv04Xml']);
+                // Payroll Reports
+                Route::get('/payroll-reports/tax-summary', [PayrollReportController::class, 'taxSummary']);
+                Route::get('/payroll-reports/statistics', [PayrollReportController::class, 'statistics']);
+                Route::get('/payroll-reports/employee-history/{employeeId}', [PayrollReportController::class, 'employeeHistory']);
+                Route::get('/payroll-reports/monthly-comparison', [PayrollReportController::class, 'monthlyComparison']);
+                Route::get('/payroll-reports/export-tax-summary', [PayrollReportController::class, 'exportTaxSummary']);
+                Route::get('/payroll-reports/download-mpin-xml', [PayrollReportController::class, 'downloadMpinXml']);
+                Route::get('/payroll-reports/download-ddv04-xml', [PayrollReportController::class, 'downloadDdv04Xml']);
+            });
 
             // Exports (Phase 4)
             // ----------------------------------
