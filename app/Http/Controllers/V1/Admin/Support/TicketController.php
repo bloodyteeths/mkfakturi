@@ -124,7 +124,23 @@ class TicketController extends Controller
     {
         $this->authorize('update', $ticket);
 
-        $ticket->update($request->only(['title', 'priority', 'status', 'is_resolved', 'is_locked']));
+        $user = $request->user();
+        $isAdmin = $user->role === 'super admin' || $user->role === 'support';
+
+        // Build allowed fields based on user role
+        $allowedFields = ['title']; // All users can update title
+
+        if ($isAdmin) {
+            // Admins can update all fields
+            $allowedFields = array_merge($allowedFields, ['priority', 'status', 'is_resolved', 'is_locked']);
+        } else {
+            // Regular users can only close their own tickets (not change to other statuses)
+            if ($request->has('status') && $request->status === 'closed') {
+                $allowedFields[] = 'status';
+            }
+        }
+
+        $ticket->update($request->only($allowedFields));
 
         if ($request->has('categories')) {
             $ticket->categories()->sync($request->categories);

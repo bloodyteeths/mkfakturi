@@ -19,7 +19,8 @@
           {{ $t('general.back') }}
         </BaseButton>
 
-        <BaseDropdown class="ml-4">
+        <!-- Admin-only actions dropdown -->
+        <BaseDropdown v-if="isAdminOrOwner" class="ml-4">
           <template #activator>
             <BaseButton variant="primary-outline">
               {{ $t('general.actions') }}
