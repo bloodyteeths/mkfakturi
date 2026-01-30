@@ -5,6 +5,8 @@ import DashboardTable from '../dashboard/DashboardTable.vue'
 import AiInsightsWidget from './widgets/AiInsightsWidget.vue'
 import AiChatWidget from './widgets/AiChatWidget.vue'
 import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
+import UnpaidSummaryWidget from './widgets/UnpaidSummaryWidget.vue'
+import RecentPaymentsWidget from './widgets/RecentPaymentsWidget.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { onMounted, computed } from 'vue'
@@ -57,6 +59,12 @@ onMounted(() => {
     <div v-if="mcpAiToolsEnabled && showAiInsights" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <AiInsightsWidget />
       <AiChatWidget />
+    </div>
+
+    <!-- Key Metrics Row: Unpaid Summary + Recent Payments -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <UnpaidSummaryWidget />
+      <RecentPaymentsWidget />
     </div>
 
     <!-- Quick Actions -->
