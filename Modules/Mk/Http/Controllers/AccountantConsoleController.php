@@ -28,6 +28,49 @@ class AccountantConsoleController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        // Super admin can see all companies
+        if ($user->role === 'super admin') {
+            \Log::info('AccountantConsoleController::index - Super admin access, returning all companies');
+
+            $allCompanies = Company::with('address')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($company) {
+                    return [
+                        'id' => $company->id,
+                        'name' => $company->name,
+                        'slug' => $company->slug,
+                        'logo' => $company->logo,
+                        'is_primary' => false,
+                        'commission_rate' => 0,
+                        'permissions' => ['full_access'],
+                        'address' => $company->address ? [
+                            'name' => $company->address->name,
+                            'address_street_1' => $company->address->address_street_1,
+                            'city' => $company->address->city,
+                            'state' => $company->address->state,
+                        ] : null,
+                    ];
+                });
+
+            return response()->json([
+                'partner' => [
+                    'id' => 0,
+                    'name' => 'Super Admin',
+                    'email' => $user->email,
+                    'commission_rate' => 0,
+                    'is_active' => true,
+                    'kyc_status' => 'approved',
+                ],
+                'managed_companies' => $allCompanies,
+                'referred_companies' => [],
+                'pending_invitations' => [],
+                'total_managed' => $allCompanies->count(),
+                'total_referred' => 0,
+                'total_pending' => 0,
+            ]);
+        }
+
         // Find the partner record for this user
         $partner = Partner::where('user_id', $user->id)->first();
 
