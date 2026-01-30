@@ -305,7 +305,19 @@
     "recent_bills_card": {
       "amount_due": "Износ за плаќање"
     },
-    "no_overdue_invoices": "Нема доцнети фактури"
+    "no_overdue_invoices": "Нема доцнети фактури",
+    "unpaid_summary": "Неплатени фактури",
+    "total_outstanding": "Вкупно неплатено",
+    "unpaid_invoices_count": "неплатени фактури",
+    "due_today": "Доспева денес",
+    "overdue": "Доцнети",
+    "upcoming": "Претстојни",
+    "all_invoices_paid": "Сите фактури се платени!",
+    "view_all_unpaid": "Прикажи сите неплатени фактури",
+    "recent_payments": "Последни плаќања",
+    "no_recent_payments": "Нема последни плаќања",
+    "received_this_month": "Примено овој месец",
+    "view_all_payments": "Прикажи сите плаќања"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Најнови Провизии",

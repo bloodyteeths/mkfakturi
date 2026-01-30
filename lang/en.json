@@ -675,7 +675,19 @@
     "select_year": "Select year",
     "total_overdue": "Total Overdue",
     "view_all_overdue": "View All Overdue",
-    "view_reports_desc": "View financial reports and analytics"
+    "view_reports_desc": "View financial reports and analytics",
+    "unpaid_summary": "Unpaid Invoices",
+    "total_outstanding": "Total Outstanding",
+    "unpaid_invoices_count": "unpaid invoices",
+    "due_today": "Due Today",
+    "overdue": "Overdue",
+    "upcoming": "Upcoming",
+    "all_invoices_paid": "All invoices are paid!",
+    "view_all_unpaid": "View all unpaid invoices",
+    "recent_payments": "Recent Payments",
+    "no_recent_payments": "No recent payments",
+    "received_this_month": "Received This Month",
+    "view_all_payments": "View all payments"
   },
   "dateRange": {
     "custom": "Custom",
