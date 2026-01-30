@@ -5,7 +5,6 @@ import DashboardTable from '../dashboard/DashboardTable.vue'
 import AiInsightsWidget from './widgets/AiInsightsWidget.vue'
 import AiChatWidget from './widgets/AiChatWidget.vue'
 import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
-import OverdueInvoicesWidget from './widgets/OverdueInvoicesWidget.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { onMounted, computed } from 'vue'
@@ -60,13 +59,12 @@ onMounted(() => {
       <AiChatWidget />
     </div>
 
-    <!-- Quick Actions & Overdue Alerts Row (Mobile: stack, Desktop: side-by-side) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Quick Actions -->
+    <div class="mb-6">
       <QuickActionsWidget />
-      <OverdueInvoicesWidget />
     </div>
 
-    <!-- Recent Invoices Table -->
+    <!-- Due Invoices & Recent Estimates -->
     <DashboardTable />
   </BasePage>
 </template>
