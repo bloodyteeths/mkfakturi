@@ -6,36 +6,38 @@
     <style type="text/css">
         body {
             font-family: "DejaVu Sans", sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
         .container {
             width: 100%;
-            padding: 20px;
+            padding: 15px;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             border-bottom: 2px solid #2c3e50;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 20px;
             color: #2c3e50;
         }
         .header .period {
-            font-size: 14px;
+            font-size: 12px;
             color: #7f8c8d;
-            margin-top: 5px;
+            margin-top: 3px;
         }
         .info-section {
-            margin-bottom: 25px;
+            margin-bottom: 12px;
         }
         .info-row {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         .info-col {
             display: table-cell;
@@ -45,26 +47,31 @@
         .info-label {
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+            font-size: 10px;
         }
         .info-value {
             color: #555;
+            font-size: 9px;
+            line-height: 1.3;
         }
         .breakdown-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 10px 0;
         }
         .breakdown-table th {
             background-color: #34495e;
             color: white;
-            padding: 10px;
+            padding: 6px;
             text-align: left;
             font-weight: bold;
+            font-size: 9px;
         }
         .breakdown-table td {
-            padding: 8px;
+            padding: 5px 6px;
             border-bottom: 1px solid #ecf0f1;
+            font-size: 9px;
         }
         .breakdown-table tr:nth-child(even) {
             background-color: #f8f9fa;
@@ -74,38 +81,60 @@
             font-weight: bold;
             color: #2c3e50;
         }
+        .breakdown-table .section-header td {
+            padding: 4px 6px;
+            font-size: 9px;
+        }
         .breakdown-table .amount {
             text-align: right;
             font-family: "DejaVu Sans Mono", monospace;
         }
         .summary-box {
-            margin-top: 30px;
+            margin-top: 15px;
             border: 2px solid #27ae60;
-            padding: 15px;
+            padding: 10px;
             background-color: #e8f8f5;
         }
         .summary-box .label {
-            font-size: 14px;
+            font-size: 11px;
             color: #27ae60;
             font-weight: bold;
         }
         .summary-box .amount {
-            font-size: 20px;
+            font-size: 16px;
             color: #27ae60;
             font-weight: bold;
             text-align: right;
             font-family: "DejaVu Sans Mono", monospace;
         }
         .footer {
-            margin-top: 40px;
-            padding-top: 15px;
+            margin-top: 15px;
+            padding-top: 8px;
             border-top: 1px solid #bdc3c7;
             text-align: center;
-            font-size: 9px;
+            font-size: 8px;
             color: #7f8c8d;
+        }
+        .footer p {
+            margin: 2px 0;
         }
         .money-format {
             font-family: "DejaVu Sans Mono", monospace;
+        }
+        .employer-box {
+            margin-top: 12px;
+            background-color: #f8f9fa;
+            padding: 8px;
+            border-left: 3px solid #3498db;
+            font-size: 9px;
+        }
+        .employer-box .info-label {
+            color: #3498db;
+            font-size: 9px;
+        }
+        .payment-info {
+            margin-top: 10px;
+            font-size: 9px;
         }
     </style>
 </head>
@@ -126,33 +155,42 @@
                     @if($company->address_street_1)
                         <div class="info-value">{{ $company->address_street_1 }}</div>
                     @endif
+                    @if($company->address_street_2)
+                        <div class="info-value">{{ $company->address_street_2 }}</div>
+                    @endif
                     @if($company->city || $company->zip)
-                        <div class="info-value">{{ $company->zip }} {{ $company->city }}</div>
+                        <div class="info-value">{{ $company->zip }} {{ $company->city }}@if($company->state), {{ $company->state }}@endif</div>
+                    @endif
+                    @if($company->phone)
+                        <div class="info-value">Тел: {{ $company->phone }}</div>
+                    @endif
+                    @php
+                        $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
+                        $embs = \App\Models\CompanySetting::getSetting('registration_number', $company->id);
+                    @endphp
+                    @if($edb)
+                        <div class="info-value">ЕДБ: {{ $edb }}</div>
+                    @endif
+                    @if($embs)
+                        <div class="info-value">ЕМБС: {{ $embs }}</div>
                     @endif
                 </div>
                 <div class="info-col">
                     <div class="info-label">Вработен:</div>
                     <div class="info-value">{{ $employee->full_name }}</div>
-                    <div class="info-value">Број на вработен: {{ $employee->employee_number }}</div>
-                    <div class="info-value">ЕМБГ: {{ $employee->embg }}</div>
-                    <div class="info-value">Позиција: {{ $employee->position }}</div>
+                    <div class="info-value">Број: {{ $employee->employee_number }} | ЕМБГ: {{ $employee->embg }}</div>
+                    @if($employee->position)
+                        <div class="info-value">Позиција: {{ $employee->position }}</div>
+                    @endif
                     @if($employee->department)
                         <div class="info-value">Оддел: {{ $employee->department }}</div>
                     @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Pay Period -->
-        <div class="info-section">
-            <div class="info-row">
-                <div class="info-col">
-                    <div class="info-label">Период на исплата:</div>
-                    <div class="info-value">{{ $payrollRun->period_start->format('d.m.Y') }} - {{ $payrollRun->period_end->format('d.m.Y') }}</div>
-                </div>
-                <div class="info-col">
-                    <div class="info-label">Работни денови:</div>
-                    <div class="info-value">{{ $payrollRunLine->worked_days }} / {{ $payrollRunLine->working_days }}</div>
+                    <div class="info-value" style="margin-top: 5px;">
+                        <strong>Период:</strong> {{ $payrollRun->period_start->format('d.m.Y') }} - {{ $payrollRun->period_end->format('d.m.Y') }}
+                    </div>
+                    <div class="info-value">
+                        <strong>Работни денови:</strong> {{ $payrollRunLine->worked_days }} / {{ $payrollRunLine->working_days }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -250,35 +288,38 @@
             </table>
         </div>
 
-        <!-- Additional Information -->
-        @if($employee->bank_name || $employee->bank_account_iban)
-        <div class="info-section" style="margin-top: 20px;">
-            <div class="info-label">Податоци за исплата:</div>
-            @if($employee->bank_name)
-            <div class="info-value">Банка: {{ $employee->bank_name }}</div>
-            @endif
-            @if($employee->bank_account_iban)
-            <div class="info-value">IBAN: {{ $employee->bank_account_iban }}</div>
-            @endif
-        </div>
-        @endif
+        <!-- Payment Info & Employer Contributions side by side -->
+        <div class="info-row" style="margin-top: 12px;">
+            <!-- Payment Information -->
+            <div class="info-col">
+                @if($employee->bank_name || $employee->bank_account_iban)
+                <div class="payment-info">
+                    <div class="info-label">Податоци за исплата:</div>
+                    @if($employee->bank_name)
+                    <div class="info-value">Банка: {{ $employee->bank_name }}</div>
+                    @endif
+                    @if($employee->bank_account_iban)
+                    <div class="info-value">IBAN: {{ $employee->bank_account_iban }}</div>
+                    @endif
+                </div>
+                @endif
+            </div>
 
-        <!-- Employer Contributions (Information Only) -->
-        <div class="info-section" style="margin-top: 20px; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #3498db;">
-            <div class="info-label" style="color: #3498db;">Придонеси на работодавач (Информативно):</div>
-            <div class="info-value">Пензиски фонд (ПИО) - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
-            <div class="info-value">Здравствено осигурување (ЗО) - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
-            <div class="info-value" style="margin-top: 5px; font-weight: bold;">Вкупен трошок на работодавач: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+            <!-- Employer Contributions -->
+            <div class="info-col">
+                <div class="employer-box">
+                    <div class="info-label">Придонеси на работодавач:</div>
+                    <div class="info-value">ПИО 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} | ЗО 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }}</div>
+                    <div class="info-value" style="font-weight: bold;">Вкупен трошок: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+                </div>
+            </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <p>Ова е компјутерски генериран документ. Не е потребен потпис.</p>
             <p>Генерирано на {{ $generatedAt }} од {{ $company->name }}</p>
-            <p>За прашања во врска со овој платен лист, контактирајте го одделот за човечки ресурси.</p>
         </div>
     </div>
 </body>
 </html>
-
-<!-- LLM-CHECKPOINT -->
