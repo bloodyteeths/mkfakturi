@@ -12,23 +12,64 @@ use Illuminate\Support\Facades\Validator;
 class PartnerReferralsController extends Controller
 {
     /**
+     * Get partner from authenticated request.
+     * For super admin, returns a "fake" partner object to allow access.
+     *
+     * @return Partner|null
+     */
+    protected function getPartnerFromRequest(Request $request): ?Partner
+    {
+        // Get partner from middleware first
+        if ($request->partner) {
+            return $request->partner;
+        }
+
+        $user = Auth::user();
+
+        if (! $user) {
+            return null;
+        }
+
+        // Super admin gets a fake partner to pass validation
+        if ($user->role === 'super admin') {
+            $fakePartner = new Partner();
+            $fakePartner->id = 0;
+            $fakePartner->user_id = $user->id;
+            $fakePartner->name = 'Super Admin';
+            $fakePartner->email = $user->email;
+            $fakePartner->is_super_admin = true;
+            $fakePartner->commission_rate = 0;
+
+            return $fakePartner;
+        }
+
+        return Partner::where('user_id', $user->id)->first();
+    }
+
+    /**
      * Get partner referral data including active link and statistics
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
-        // Get partner from middleware (already validated)
-        $partner = $request->partner;
+        $partner = $this->getPartnerFromRequest($request);
 
         if (! $partner) {
-            // Fallback to lookup if not set by middleware
-            $user = Auth::user();
-            $partner = Partner::where('user_id', $user->id)->first();
+            return response()->json(['error' => 'Partner account not found'], 403);
+        }
 
-            if (! $partner) {
-                return response()->json(['error' => 'Partner account not found'], 403);
-            }
+        // Super admin gets empty referral stats
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'activeLink' => null,
+                'statistics' => [
+                    'totalClicks' => 0,
+                    'signups' => 0,
+                    'activeSubscriptions' => 0,
+                ],
+                'is_super_admin' => true,
+            ]);
         }
 
         // Get active affiliate link
@@ -71,6 +112,15 @@ class PartnerReferralsController extends Controller
      */
     public function store(Request $request)
     {
+        // Super admin cannot create referral links
+        $user = Auth::user();
+        if ($user->role === 'super admin') {
+            return response()->json([
+                'error' => 'Super admin cannot create referral links',
+                'is_super_admin' => true,
+            ], 400);
+        }
+
         $validator = Validator::make($request->all(), [
             'custom_code' => 'nullable|string|max:50|unique:affiliate_links,code',
         ]);
@@ -82,17 +132,10 @@ class PartnerReferralsController extends Controller
             ], 422);
         }
 
-        // Get partner from middleware (already validated)
-        $partner = $request->partner;
+        $partner = $this->getPartnerFromRequest($request);
 
         if (! $partner) {
-            // Fallback to lookup if not set by middleware
-            $user = Auth::user();
-            $partner = Partner::where('user_id', $user->id)->first();
-
-            if (! $partner) {
-                return response()->json(['error' => 'Partner account not found'], 403);
-            }
+            return response()->json(['error' => 'Partner account not found'], 403);
         }
 
         // Check if partner already has an active link

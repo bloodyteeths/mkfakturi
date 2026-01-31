@@ -15,17 +15,67 @@ use Illuminate\Support\Facades\Validator;
 class PartnerPayoutsController extends Controller
 {
     /**
+     * Get partner from authenticated request.
+     * For super admin, returns a "fake" partner object to allow access.
+     *
+     * @return Partner|null
+     */
+    protected function getPartnerFromRequest(): ?Partner
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return null;
+        }
+
+        // Super admin gets a fake partner to pass validation
+        if ($user->role === 'super admin') {
+            $fakePartner = new Partner();
+            $fakePartner->id = 0;
+            $fakePartner->user_id = $user->id;
+            $fakePartner->name = 'Super Admin';
+            $fakePartner->email = $user->email;
+            $fakePartner->is_super_admin = true;
+            $fakePartner->commission_rate = 0;
+
+            return $fakePartner;
+        }
+
+        return Partner::where('user_id', $user->id)->first();
+    }
+
+    /**
      * Get paginated list of payouts for the partner
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty payouts
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'data' => [],
+                'current_page' => 1,
+                'per_page' => 20,
+                'total' => 0,
+                'last_page' => 1,
+                'from' => null,
+                'to' => null,
+                'summary' => [
+                    'totalPaid' => 0,
+                    'pending' => 0,
+                    'thisMonth' => 0,
+                    'nextPayout' => 0,
+                    'nextPayoutDate' => null,
+                ],
+                'is_super_admin' => true,
+            ]);
         }
 
         // Build query
@@ -87,11 +137,21 @@ class PartnerPayoutsController extends Controller
      */
     public function getBankDetails(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty bank details
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'account_holder' => null,
+                'bank_name' => null,
+                'account_number' => null,
+                'bank_code' => null,
+                'is_super_admin' => true,
+            ]);
         }
 
         return response()->json([
@@ -109,6 +169,15 @@ class PartnerPayoutsController extends Controller
      */
     public function updateBankDetails(Request $request)
     {
+        // Super admin cannot update bank details
+        $user = Auth::user();
+        if ($user->role === 'super admin') {
+            return response()->json([
+                'error' => 'Super admin cannot update bank details',
+                'is_super_admin' => true,
+            ], 400);
+        }
+
         $validator = Validator::make($request->all(), [
             'account_holder' => 'required|string|max:255',
             'bank_name' => 'required|string|max:255',
@@ -123,8 +192,7 @@ class PartnerPayoutsController extends Controller
             ], 422);
         }
 
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
@@ -155,11 +223,18 @@ class PartnerPayoutsController extends Controller
      */
     public function downloadReceipt(Request $request, $payoutId)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin cannot download partner receipts (no partner context)
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'error' => 'Super admin cannot download partner receipts',
+                'is_super_admin' => true,
+            ], 400);
         }
 
         $payout = Payout::where('id', $payoutId)

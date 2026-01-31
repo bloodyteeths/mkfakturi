@@ -2045,7 +2045,9 @@
         "not_balanced": "Бdheланmeт jo е во рамнотежа",
         "difference": "Diferenca",
         "no_data": "Joма поpoтоцdhe",
-        "no_data_description": "Joма прajoјditaо llogaritë për dheзбранdheот data"
+        "no_data_description": "Joма прajoјditaо llogaritë për dheзбранdheот data",
+        "select_and_load": "Zgjidhni datën dhe ngarkoni raportin",
+        "select_and_load_description": "Zgjidhni datën për të cilën dëshironi të shihni bilancin e verifikimit dhe klikoni butonin e përditësimit."
       },
       "balance_sheet": "Бdheланс në menjëqindјба",
       "income_statement": "Бdheланс në sukses",
@@ -2087,7 +2089,9 @@
         "document": "Dokumenti",
         "description": "Përshkrimi",
         "debit": "Deriлжdhe",
-        "credit": "Побарува"
+        "credit": "Побарува",
+        "select_and_load": "Zgjidhni llogarinë dhe ngarkoni raportin",
+        "select_and_load_description": "Zgjidhni një llogari dhe periudhën kohore, pastaj klikoni butonin e ngarkimit për të parë librin e madh."
       },
       "journal_entries": {
         "title": "Дjoвнdheк në кнdheжења",

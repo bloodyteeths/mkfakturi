@@ -3723,7 +3723,9 @@
         "running_balance": "Balance",
         "select_account": "Select Account",
         "select_account_placeholder": "Select an account to view...",
-        "title": "General Ledger"
+        "title": "General Ledger",
+        "select_and_load": "Select an account and load the report",
+        "select_and_load_description": "Choose an account and date range, then click the load button to view the general ledger."
       },
       "income_statement": "Income Statement",
       "journal_entries": {
@@ -3763,7 +3765,9 @@
         "no_data": "No data",
         "no_data_description": "No accounts found for the selected date",
         "not_balanced": "Trial Balance is not balanced",
-        "title": "Trial Balance"
+        "title": "Trial Balance",
+        "select_and_load": "Select a date and load the report",
+        "select_and_load_description": "Choose the date for which you want to view the trial balance and click the update button."
       },
       "unbalanced": "Trial Balance is not balanced"
     },

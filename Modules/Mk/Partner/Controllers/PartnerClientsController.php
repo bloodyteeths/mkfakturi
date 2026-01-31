@@ -10,6 +10,36 @@ use Illuminate\Support\Facades\Auth;
 class PartnerClientsController extends Controller
 {
     /**
+     * Get partner from authenticated request.
+     * For super admin, returns a "fake" partner object to allow access.
+     *
+     * @return Partner|null
+     */
+    protected function getPartnerFromRequest(): ?Partner
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return null;
+        }
+
+        // Super admin gets a fake partner to pass validation
+        if ($user->role === 'super admin') {
+            $fakePartner = new Partner();
+            $fakePartner->id = 0;
+            $fakePartner->user_id = $user->id;
+            $fakePartner->name = 'Super Admin';
+            $fakePartner->email = $user->email;
+            $fakePartner->is_super_admin = true;
+            $fakePartner->commission_rate = 0;
+
+            return $fakePartner;
+        }
+
+        return Partner::where('user_id', $user->id)->first();
+    }
+
+    /**
      * Get paginated list of referred companies with filters
      *
      * @return \Illuminate\Http\JsonResponse
@@ -22,22 +52,27 @@ class PartnerClientsController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
+        // Super admin sees all companies
+        if ($partner->is_super_admin ?? false) {
+            $query = \App\Models\Company::with(['subscription'])->select('companies.*');
+        } else {
+            // Build query for partner's companies
+            $query = $partner->companies()
+                ->with(['subscription'])
+                ->select('companies.*', 'partner_company_links.override_commission_rate');
+        }
+
         \Log::info('Partner found for clients', [
             'partner_id' => $partner->id,
-            'user_id' => $user->id,
+            'user_id' => Auth::id(),
+            'is_super_admin' => $partner->is_super_admin ?? false,
         ]);
-
-        // Build query
-        $query = $partner->companies()
-            ->with(['subscription'])
-            ->select('companies.*', 'partner_company_links.override_commission_rate');
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -76,14 +111,16 @@ class PartnerClientsController extends Controller
         $perPage = $request->input('per_page', 20);
         $companies = $query->paginate($perPage);
 
+        $isSuperAdmin = $partner->is_super_admin ?? false;
+
         // Transform results
-        $data = $companies->getCollection()->map(function ($company) use ($partner) {
+        $data = $companies->getCollection()->map(function ($company) use ($partner, $isSuperAdmin) {
             $subscription = $company->subscription;
             $planTier = $subscription->plan_tier ?? 'free';
             $mrr = $subscription->price ?? 0;
 
-            // Calculate commission for this client
-            $commissionRate = $company->pivot->override_commission_rate ?? $partner->commission_rate;
+            // Calculate commission for this client (super admin has 0 commission)
+            $commissionRate = $isSuperAdmin ? 0 : ($company->pivot->override_commission_rate ?? $partner->commission_rate);
             $commission = $mrr * ($commissionRate / 100);
 
             return [
@@ -100,7 +137,12 @@ class PartnerClientsController extends Controller
         });
 
         // Calculate summary
-        $allCompanies = $partner->companies()->get();
+        if ($isSuperAdmin) {
+            $allCompanies = \App\Models\Company::with('subscription')->get();
+        } else {
+            $allCompanies = $partner->companies()->get();
+        }
+
         $totalClients = $allCompanies->count();
         $activeClients = $allCompanies->filter(function ($company) {
             return $company->subscription && $company->subscription->status === 'active';
@@ -112,7 +154,7 @@ class PartnerClientsController extends Controller
             return $carry + ($subscription->price ?? 0);
         }, 0);
 
-        $monthlyCommission = $allCompanies->reduce(function ($carry, $company) use ($partner) {
+        $monthlyCommission = $isSuperAdmin ? 0 : $allCompanies->reduce(function ($carry, $company) use ($partner) {
             $subscription = $company->subscription;
             if (! $subscription || $subscription->status !== 'active') {
                 return $carry;
@@ -149,25 +191,33 @@ class PartnerClientsController extends Controller
      */
     public function show(Request $request, $companyId)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
         }
 
-        // Verify this company belongs to the partner
-        $company = $partner->companies()
-            ->with(['subscription', 'owner', 'address'])
-            ->where('companies.id', $companyId)
-            ->first();
+        $isSuperAdmin = $partner->is_super_admin ?? false;
+
+        // Super admin can access any company
+        if ($isSuperAdmin) {
+            $company = \App\Models\Company::with(['subscription', 'owner', 'address'])
+                ->where('id', $companyId)
+                ->first();
+        } else {
+            // Verify this company belongs to the partner
+            $company = $partner->companies()
+                ->with(['subscription', 'owner', 'address'])
+                ->where('companies.id', $companyId)
+                ->first();
+        }
 
         if (! $company) {
             return response()->json(['error' => 'Client not found or not accessible'], 404);
         }
 
         $subscription = $company->subscription;
-        $commissionRate = $company->pivot->override_commission_rate ?? $partner->commission_rate;
+        $commissionRate = $isSuperAdmin ? 0 : ($company->pivot->override_commission_rate ?? $partner->commission_rate);
         $mrr = $subscription->price ?? 0;
         $commission = $mrr * ($commissionRate / 100);
 
@@ -216,7 +266,7 @@ class PartnerClientsController extends Controller
                 'commission' => [
                     'rate' => $commissionRate,
                     'monthly_amount' => $commission,
-                    'is_override' => $company->pivot->override_commission_rate !== null,
+                    'is_override' => $isSuperAdmin ? false : ($company->pivot->override_commission_rate !== null),
                 ],
                 'signup_date' => $company->created_at->toIso8601String(),
                 'billing_history' => $billingHistory,

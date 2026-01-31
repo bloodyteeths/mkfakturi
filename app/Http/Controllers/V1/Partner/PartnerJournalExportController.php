@@ -51,7 +51,8 @@ class PartnerJournalExportController extends Controller
         }
 
         // Check granular permissions - require VIEW_REPORTS or EXPORT_REPORTS
-        if (!$partner->hasAnyPermission($company, [
+        // Super admin bypasses permission checks
+        if (!($partner->is_super_admin ?? false) && !$partner->hasAnyPermission($company, [
             PartnerPermission::VIEW_REPORTS,
             PartnerPermission::EXPORT_REPORTS,
         ])) {
@@ -312,7 +313,8 @@ class PartnerJournalExportController extends Controller
         }
 
         // Check granular permissions - require EXPORT_REPORTS
-        if (!$partner->hasPermission($company, PartnerPermission::EXPORT_REPORTS)) {
+        // Super admin bypasses permission checks
+        if (!($partner->is_super_admin ?? false) && !$partner->hasPermission($company, PartnerPermission::EXPORT_REPORTS)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Insufficient permissions',
@@ -510,7 +512,8 @@ class PartnerJournalExportController extends Controller
         }
 
         // Check granular permissions - require MANAGE_COMPANY_SETTINGS
-        if (!$partner->hasPermission($company, PartnerPermission::MANAGE_COMPANY_SETTINGS)) {
+        // Super admin bypasses permission checks
+        if (!($partner->is_super_admin ?? false) && !$partner->hasPermission($company, PartnerPermission::MANAGE_COMPANY_SETTINGS)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Insufficient permissions',
@@ -612,7 +615,8 @@ class PartnerJournalExportController extends Controller
         }
 
         // Check granular permissions - require MANAGE_COMPANY_SETTINGS
-        if (!$partner->hasPermission($company, PartnerPermission::MANAGE_COMPANY_SETTINGS)) {
+        // Super admin bypasses permission checks
+        if (!($partner->is_super_admin ?? false) && !$partner->hasPermission($company, PartnerPermission::MANAGE_COMPANY_SETTINGS)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Insufficient permissions',

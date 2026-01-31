@@ -1454,7 +1454,9 @@
         "not_balanced": "Bilançoот не е рамamaтежа",
         "difference": "Разлveка",
         "no_data": "Yok altındaатоцve",
-        "no_data_description": "Yok bulunduо hesaplar seçilen tarih"
+        "no_data_description": "Yok bulunduо hesaplar seçilen tarih",
+        "select_and_load": "Tarih secin ve raporu yukleyin",
+        "select_and_load_description": "Mizan gormek istediginiz tarihi secin ve guncelle butonuna tiklayin."
       },
       "balance_sheet": "Bilanço ileсoба",
       "income_statement": "Bilanço успех",
@@ -1496,7 +1498,9 @@
         "document": "Belge",
         "description": "Açıklama",
         "debit": "Borç",
-        "credit": "Alacak"
+        "credit": "Alacak",
+        "select_and_load": "Hesap secin ve raporu yukleyin",
+        "select_and_load_description": "Hesap ve tarih araligi secin, ardindan defteri kebiri goruntlemek icin yukle butonuna tiklayin."
       },
       "journal_entries": {
         "title": "Günlük Kayıtları",

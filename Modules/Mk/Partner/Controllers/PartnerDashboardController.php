@@ -12,6 +12,44 @@ use Illuminate\Support\Facades\Auth;
 class PartnerDashboardController extends Controller
 {
     /**
+     * Get partner from authenticated request.
+     * For super admin, returns a "fake" partner object to allow access.
+     *
+     * @return Partner|null
+     */
+    protected function getPartnerFromRequest(): ?Partner
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return null;
+        }
+
+        // Super admin gets a fake partner to pass validation
+        if ($user->role === 'super admin') {
+            $fakePartner = new Partner();
+            $fakePartner->id = 0;
+            $fakePartner->user_id = $user->id;
+            $fakePartner->name = 'Super Admin';
+            $fakePartner->email = $user->email;
+            $fakePartner->is_super_admin = true;
+            $fakePartner->commission_rate = 0;
+
+            return $fakePartner;
+        }
+
+        return Partner::where('user_id', $user->id)->first();
+    }
+
+    /**
+     * Check if user is super admin.
+     */
+    protected function isSuperAdmin(): bool
+    {
+        return Auth::user()?->role === 'super admin';
+    }
+
+    /**
      * Get partner dashboard data including KPIs, earnings history, and recent commissions
      *
      * @return \Illuminate\Http\JsonResponse
@@ -25,6 +63,23 @@ class PartnerDashboardController extends Controller
         ]);
 
         $user = Auth::user();
+
+        // Super admin gets a simplified dashboard response
+        if ($user->role === 'super admin') {
+            return response()->json([
+                'data' => [
+                    'active_clients' => \App\Models\Company::count(),
+                    'monthly_commissions' => 0,
+                    'processed_invoices' => 0,
+                    'total_earnings' => 0,
+                    'pending_payout' => 0,
+                ],
+                'earningsHistory' => [],
+                'recentCommissions' => [],
+                'nextPayout' => null,
+                'is_super_admin' => true,
+            ]);
+        }
 
         // Get partner record for the authenticated user
         $partner = Partner::where('user_id', $user->id)->first();
@@ -116,11 +171,22 @@ class PartnerDashboardController extends Controller
      */
     public function getPendingEarnings(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty pending earnings
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'month' => Carbon::now()->format('Y-m'),
+                'pending_amount' => 0,
+                'event_count' => 0,
+                'next_payout_date' => now()->startOfMonth()->addMonth()->addDays(4)->toISOString(),
+                'is_super_admin' => true,
+            ]);
         }
 
         $currentMonth = Carbon::now()->format('Y-m');
@@ -152,11 +218,19 @@ class PartnerDashboardController extends Controller
      */
     public function getMonthlyEarnings(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty earnings history
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'earnings' => [],
+                'is_super_admin' => true,
+            ]);
         }
 
         $earningsHistory = [];
@@ -190,11 +264,21 @@ class PartnerDashboardController extends Controller
      */
     public function getLifetimeEarnings(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets zero earnings
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'lifetime_total' => 0,
+                'total_paid' => 0,
+                'total_pending' => 0,
+                'is_super_admin' => true,
+            ]);
         }
 
         $totalEarnings = $partner->getLifetimeEarnings();
@@ -219,11 +303,23 @@ class PartnerDashboardController extends Controller
      */
     public function getActiveCompanies(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets all companies count
+        if ($partner->is_super_admin ?? false) {
+            $totalCount = \App\Models\Company::count();
+
+            return response()->json([
+                'success' => true,
+                'active_companies' => $totalCount,
+                'total_companies' => $totalCount,
+                'inactive_companies' => 0,
+                'is_super_admin' => true,
+            ]);
         }
 
         $activeCount = $partner->activeCompanies()->count();
@@ -245,11 +341,23 @@ class PartnerDashboardController extends Controller
      */
     public function getNextPayoutEstimate(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets zero payout estimate
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'pending_amount' => 0,
+                'minimum_threshold' => 100.00,
+                'meets_threshold' => false,
+                'estimated_payout_date' => null,
+                'remaining_to_threshold' => 100.00,
+                'is_super_admin' => true,
+            ]);
         }
 
         $pendingAmount = $partner->getUnpaidCommissionsTotal();
@@ -276,11 +384,25 @@ class PartnerDashboardController extends Controller
      */
     public function getReferrals(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty referrals
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'referrals' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total_pages' => 1,
+                    'total' => 0,
+                    'per_page' => 20,
+                ],
+                'is_super_admin' => true,
+            ]);
         }
 
         $perPage = $request->get('per_page', 20);
@@ -325,6 +447,15 @@ class PartnerDashboardController extends Controller
         ]);
 
         $user = Auth::user();
+
+        // Super admin gets empty commissions
+        if ($user->role === 'super admin') {
+            return response()->json([
+                'data' => [],
+                'is_super_admin' => true,
+            ]);
+        }
+
         $partner = Partner::where('user_id', $user->id)->first();
 
         if (! $partner) {
@@ -366,11 +497,25 @@ class PartnerDashboardController extends Controller
      */
     public function getEarnings(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty earnings
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'earnings' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total_pages' => 1,
+                    'total' => 0,
+                    'per_page' => 20,
+                ],
+                'is_super_admin' => true,
+            ]);
         }
 
         $perPage = $request->get('per_page', 20);
@@ -418,11 +563,25 @@ class PartnerDashboardController extends Controller
      */
     public function getPayouts(Request $request)
     {
-        $user = Auth::user();
-        $partner = Partner::where('user_id', $user->id)->first();
+        $partner = $this->getPartnerFromRequest();
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
+        }
+
+        // Super admin gets empty payouts
+        if ($partner->is_super_admin ?? false) {
+            return response()->json([
+                'success' => true,
+                'payouts' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total_pages' => 1,
+                    'total' => 0,
+                    'per_page' => 20,
+                ],
+                'is_super_admin' => true,
+            ]);
         }
 
         $perPage = $request->get('per_page', 20);
@@ -464,6 +623,16 @@ class PartnerDashboardController extends Controller
     public function generateReferralLink(Request $request)
     {
         $user = Auth::user();
+
+        // Super admin doesn't have referral links
+        if ($user->role === 'super admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Super admin cannot generate referral links',
+                'is_super_admin' => true,
+            ], 400);
+        }
+
         $partner = Partner::where('user_id', $user->id)->first();
 
         if (! $partner) {
@@ -497,5 +666,7 @@ class PartnerDashboardController extends Controller
         ]);
     }
 }
+
+// CLAUDE-CHECKPOINT
 
 // CLAUDE-CHECKPOINT

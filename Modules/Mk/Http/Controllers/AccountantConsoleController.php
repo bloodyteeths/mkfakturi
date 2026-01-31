@@ -266,6 +266,20 @@ class AccountantConsoleController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        // Super admin gets empty commission data
+        if ($user->role === 'super admin') {
+            return response()->json([
+                'kpis' => [
+                    'total_earnings' => 0,
+                    'this_month' => 0,
+                    'pending_payout' => 0,
+                ],
+                'monthly_trend' => [],
+                'per_company' => [],
+                'is_super_admin' => true,
+            ]);
+        }
+
         $partner = Partner::where('user_id', $user->id)->first();
 
         if (! $partner) {
