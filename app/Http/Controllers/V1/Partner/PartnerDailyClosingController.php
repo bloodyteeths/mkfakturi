@@ -142,6 +142,7 @@ class PartnerDailyClosingController extends Controller
 
     /**
      * Get partner from authenticated request.
+     * For super admin, returns a "fake" partner object to allow access.
      */
     protected function getPartnerFromRequest(Request $request): ?Partner
     {
@@ -151,14 +152,31 @@ class PartnerDailyClosingController extends Controller
             return null;
         }
 
+        // Super admin gets a fake partner to pass validation
+        if ($user->role === 'super admin') {
+            $fakePartner = new Partner();
+            $fakePartner->id = 0;
+            $fakePartner->user_id = $user->id;
+            $fakePartner->name = 'Super Admin';
+            $fakePartner->email = $user->email;
+            $fakePartner->is_super_admin = true;
+            return $fakePartner;
+        }
+
         return Partner::where('user_id', $user->id)->first();
     }
 
     /**
      * Check if partner has access to a company.
+     * Super admin has access to all companies.
      */
     protected function hasCompanyAccess(Partner $partner, int $companyId): bool
     {
+        // Super admin has access to all companies
+        if ($partner->is_super_admin ?? false) {
+            return true;
+        }
+
         return $partner->companies()
             ->where('companies.id', $companyId)
             ->where('partner_company_links.is_active', true)
