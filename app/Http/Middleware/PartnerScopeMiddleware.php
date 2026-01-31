@@ -31,6 +31,30 @@ class PartnerScopeMiddleware
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        // Super admin bypasses all partner checks - they have full access
+        if ($user->role === 'super admin') {
+            \Log::info('PartnerScopeMiddleware - Super admin bypass', ['user_id' => $user->id]);
+
+            // Get company context for super admin
+            $companyId = $this->getCurrentCompanyId($request);
+
+            if ($companyId) {
+                $company = Company::find($companyId);
+                if ($company) {
+                    $request->merge([
+                        'partner_context' => [
+                            'partner_id' => 0,
+                            'company_id' => $companyId,
+                            'partner' => null,
+                            'is_super_admin' => true,
+                        ],
+                    ]);
+                }
+            }
+
+            return $next($request);
+        }
+
         // Check if user is a partner
         $partner = Partner::where('user_id', $user->id)->first();
 
