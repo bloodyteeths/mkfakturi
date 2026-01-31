@@ -393,6 +393,46 @@ class AccountantConsoleController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        // Super admin can switch to any company
+        if ($user->role === 'super admin') {
+            $company = Company::find($companyId);
+
+            if (! $company) {
+                return response()->json([
+                    'error' => 'Company not found',
+                ], 404);
+            }
+
+            // Store the selected company in session for super admin
+            session([
+                'partner_selected_company_id' => $companyId,
+                'partner_selected_company_slug' => $company->slug,
+                'partner_context' => [
+                    'partner_id' => 0,
+                    'company_id' => $companyId,
+                    'permissions' => ['full_access'],
+                    'commission_rate' => 0,
+                    'switched_at' => now(),
+                ],
+            ]);
+
+            return response()->json([
+                'message' => 'Successfully switched to company context',
+                'company' => [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                    'slug' => $company->slug,
+                    'logo' => $company->logo,
+                ],
+                'context' => [
+                    'partner_id' => 0,
+                    'company_id' => $companyId,
+                    'permissions' => ['full_access'],
+                    'commission_rate' => 0,
+                ],
+            ]);
+        }
+
         // Find the partner record for this user
         $partner = Partner::where('user_id', $user->id)->first();
 
