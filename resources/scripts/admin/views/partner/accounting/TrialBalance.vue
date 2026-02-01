@@ -426,10 +426,11 @@ function formatMoney(amount) {
 
   try {
     const absAmount = Math.abs(amount)
+    // IFRS returns amounts in full currency units, not cents
     const formatted = new Intl.NumberFormat(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(absAmount / 100)
+    }).format(absAmount)
 
     const sign = amount < 0 ? '-' : ''
     return `${sign}${formatted} ${selectedCompanyCurrency.value}`

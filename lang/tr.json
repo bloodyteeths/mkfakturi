@@ -6157,5 +6157,27 @@
   "pdf_net_loss_label": "НЕТО ЗАГУБА",
   "pdf_trial_balance_balanced_label": "Bilançoот е рамamaтежа",
   "pdf_trial_balance_unbalanced_label": "Bilançoот не е рамamaтежа",
-  "pdf_company_logo": "Ло şirketта"
+  "pdf_company_logo": "Ло şirketта",
+  "ifrs": {
+    "account_types": {
+      "non_current_asset": "Duran Varlıklar",
+      "contra_asset": "Karşı Varlıklar",
+      "inventory": "Stoklar",
+      "bank": "Banka",
+      "current_asset": "Dönen Varlıklar",
+      "receivable": "Alacaklar",
+      "non_current_liability": "Uzun Vadeli Yükümlülükler",
+      "control": "Kontrol Hesapları",
+      "current_liability": "Kısa Vadeli Yükümlülükler",
+      "payable": "Borçlar",
+      "reconciliation": "Mutabakat",
+      "equity": "Özkaynak",
+      "operating_revenue": "Faaliyet Gelirleri",
+      "operating_expense": "Faaliyet Giderleri",
+      "non_operating_revenue": "Faaliyet Dışı Gelirler",
+      "direct_expense": "Doğrudan Giderler",
+      "overhead_expense": "Genel Giderler",
+      "other_expense": "Diğer Giderler"
+    }
+  }
 }

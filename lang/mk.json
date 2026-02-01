@@ -5531,5 +5531,27 @@
     "october": "Октомври",
     "november": "Ноември",
     "december": "Декември"
+  },
+  "ifrs": {
+    "account_types": {
+      "non_current_asset": "Нетековни средства",
+      "contra_asset": "Контра средства",
+      "inventory": "Залихи",
+      "bank": "Банка",
+      "current_asset": "Тековни средства",
+      "receivable": "Побарувања",
+      "non_current_liability": "Нетековни обврски",
+      "control": "Контролни сметки",
+      "current_liability": "Тековни обврски",
+      "payable": "Обврски кон добавувачи",
+      "reconciliation": "Порамнување",
+      "equity": "Капитал",
+      "operating_revenue": "Оперативни приходи",
+      "operating_expense": "Оперативни расходи",
+      "non_operating_revenue": "Неоперативни приходи",
+      "direct_expense": "Директни трошоци",
+      "overhead_expense": "Режиски трошоци",
+      "other_expense": "Други трошоци"
+    }
   }
 }

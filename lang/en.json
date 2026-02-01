@@ -6220,5 +6220,27 @@
     "writable": "Writable",
     "zip": "ZIP",
     "zip_code": "Zip Code"
+  },
+  "ifrs": {
+    "account_types": {
+      "non_current_asset": "Non-Current Assets",
+      "contra_asset": "Contra Assets",
+      "inventory": "Inventory",
+      "bank": "Bank",
+      "current_asset": "Current Assets",
+      "receivable": "Receivables",
+      "non_current_liability": "Non-Current Liabilities",
+      "control": "Control Accounts",
+      "current_liability": "Current Liabilities",
+      "payable": "Payables",
+      "reconciliation": "Reconciliation",
+      "equity": "Equity",
+      "operating_revenue": "Operating Revenue",
+      "operating_expense": "Operating Expenses",
+      "non_operating_revenue": "Non-Operating Revenue",
+      "direct_expense": "Direct Expenses",
+      "overhead_expense": "Overhead Expenses",
+      "other_expense": "Other Expenses"
+    }
   }
 }

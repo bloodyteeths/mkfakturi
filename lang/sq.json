@@ -5516,5 +5516,27 @@
     "october": "Tetor",
     "november": "Nëntor",
     "december": "Dhjetor"
+  },
+  "ifrs": {
+    "account_types": {
+      "non_current_asset": "Asete afatgjata",
+      "contra_asset": "Asete kundër",
+      "inventory": "Inventari",
+      "bank": "Banka",
+      "current_asset": "Asete rrjedhëse",
+      "receivable": "Të arkëtueshme",
+      "non_current_liability": "Detyrime afatgjata",
+      "control": "Llogari kontrolli",
+      "current_liability": "Detyrime rrjedhëse",
+      "payable": "Të pagueshme",
+      "reconciliation": "Pajtimi",
+      "equity": "Kapitali",
+      "operating_revenue": "Të ardhura operative",
+      "operating_expense": "Shpenzime operative",
+      "non_operating_revenue": "Të ardhura jo-operative",
+      "direct_expense": "Shpenzime direkte",
+      "overhead_expense": "Shpenzime të përgjithshme",
+      "other_expense": "Shpenzime të tjera"
+    }
   }
 }

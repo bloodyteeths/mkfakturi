@@ -481,8 +481,16 @@ class IfrsAdapter
                         // Get friendly name from IFRS config or use account type
                         $friendlyName = $accountTypeNames[$accountType] ?? str_replace('_', ' ', ucwords(strtolower($accountType), '_'));
 
+                        // Translate account type name using translation key
+                        $translationKey = 'ifrs.account_types.' . strtolower($accountType);
+                        $translatedName = __($translationKey);
+                        // If translation not found, fall back to English name
+                        if ($translatedName === $translationKey) {
+                            $translatedName = $friendlyName;
+                        }
+
                         $accounts[] = [
-                            'name' => $friendlyName,
+                            'name' => $translatedName,
                             'code' => $accountType,
                             'debit' => $balance > 0 ? $balance : 0,
                             'credit' => $balance < 0 ? abs($balance) : 0,
