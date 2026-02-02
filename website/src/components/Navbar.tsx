@@ -12,8 +12,8 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
       <div className="container flex items-center justify-between py-3">
         <div className="flex items-center gap-3 md:gap-6">
           <Link href={`/${locale}`} className="flex items-center gap-2">
-            <Image src="/brand/facturino_logo.png" alt="Facturino" width={28} height={28} />
-            <span className="text-xl font-bold text-[color:var(--color-primary)]">Facturino</span>
+            <Image src="/brand/facturino_logo.png" alt="Facturino" width={40} height={40} className="w-10 h-10" />
+            <span className="text-2xl font-bold text-[color:var(--color-primary)]">Facturino</span>
           </Link>
           <nav className="hidden gap-5 text-sm md:flex">
             <Link href={`/${locale}/features`} className="hover:underline">
