@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
-// Supported locales
-const locales = ['mk', 'sq', 'tr'] as const
+// Supported locales - must match src/i18n/locales.ts
+const locales = ['mk', 'sq', 'tr', 'en'] as const
 type Locale = typeof locales[number]
 const defaultLocale: Locale = 'mk'
 
