@@ -32,6 +32,16 @@ const copy = {
     sending: 'Gönderiliyor...',
     success: 'Mesaj başarıyla gönderildi!',
     error: 'Gönderim hatası. Tekrar deneyin.',
+  },
+  en: {
+    h1: 'Contact',
+    name: 'Name',
+    email: 'Email',
+    message: 'Message',
+    submit: 'Send',
+    sending: 'Sending...',
+    success: 'Message sent successfully!',
+    error: 'Error sending. Please try again.',
   }
 } as const
 

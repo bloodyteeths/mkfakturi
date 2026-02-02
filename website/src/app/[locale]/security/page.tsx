@@ -27,6 +27,15 @@ const copy = {
       ['Erişim ve roller', 'Rollere dayalı erişim: sahip, muhasebeci, personel.'],
       ['Audit kayıtları', 'Tam izlenebilirlik için kritik işlemler kaydedilir.']
     ]
+  },
+  en: {
+    h1: 'Security and Privacy',
+    blocks: [
+      ['Encryption', 'Data encrypted in transit and at rest.'],
+      ['EU Hosting', 'Infrastructure in EU region with regular backups.'],
+      ['Access & Roles', 'Role-based access: owner, accountant, staff.'],
+      ['Audit Trails', 'Key activities logged for full traceability.']
+    ]
   }
 } as const
 

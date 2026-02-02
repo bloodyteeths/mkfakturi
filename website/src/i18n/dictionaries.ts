@@ -657,6 +657,206 @@ const tr: Dictionary = {
   }
 }
 
+const en: Dictionary = {
+  meta: {
+    title: 'Facturino — The Most Advanced AI Accounting Platform in Macedonia',
+    description:
+      'AI + e-Invoice ready system for Macedonian accountants. Multi-client, PSD2 banks, IFRS reports.'
+  },
+  nav: {
+    features: 'Features',
+    forAccountants: 'For Accountants',
+    how: 'How It Works',
+    efaktura: 'e-Invoice',
+    pricing: 'Pricing',
+    security: 'Security',
+    contact: 'Contact',
+    contactSales: 'Contact Sales',
+    start: 'Start Free',
+    login: 'Login',
+    language: 'Language'
+  },
+  hero: {
+    h1: 'The most powerful AI accounting platform in Macedonia, ready for e-Invoice.',
+    sub:
+      'Global platform-level power, but designed specifically for Macedonian accountants.',
+    primaryCta: 'Start Free',
+    secondaryCta: 'Schedule Demo',
+    claim:
+      'Facturino is the most advanced AI accounting platform in Macedonia, ready for the new e-Invoice system.',
+    onlyPlatform:
+      'The only local platform that combines AI, Macedonian accounting rules, e-Invoice readiness, and PSD2 bank connections — all in one place.'
+  },
+  heroTagline: 'The accounting software you have been waiting for — is finally here.',
+  aiSection: {
+    badge: 'AI Financial Advisor',
+    title: 'Ask me anything about your business',
+    subtitle: 'Not just automation — you get a personal financial advisor who analyzes your data and provides concrete advice.',
+    features: [
+      { title: 'Chat with AI', desc: 'Ask "Which client owes me the most?" or "Am I profitable?" — get an answer instantly.' },
+      { title: 'Early Risk Warning', desc: 'AI notifies you when a client becomes too high-risk or when you have overdue invoices.' },
+      { title: 'Cash Flow Forecast', desc: 'Look 90 days ahead — will you have enough money in your account next month?' },
+      { title: 'Profit Advice', desc: '"How much should I raise prices to achieve 500,000 profit?" — get a concrete plan by product.' }
+    ]
+  },
+  featureGrid: {
+    title: 'Everything you need to run your business',
+    subtitle: 'Powerful features designed for modern Macedonian businesses and accountants.',
+    features: [
+      { title: 'e-Invoice Ready', desc: 'Fully compliant with new government regulations. Connect immediately when the API opens.' },
+      { title: 'Bank Integration', desc: 'Connect your local bank accounts for real-time transaction updates.' },
+      { title: 'Bank-Level Security', desc: 'Your data is encrypted and securely stored in EU data centers.' },
+      { title: 'Multi-Client', desc: 'Perfect for accountants managing multiple client companies from one place.' }
+    ]
+  },
+  socialProof: { trustedBy: 'Trusted by accountants and small businesses' },
+  whyDifferent: {
+    title: 'Why Facturino is different from any software in Macedonia',
+    cards: [
+      { title: 'AI Invoicing & Coding', body: 'Smart suggestions for VAT categories and accounts per line item — you confirm.' },
+      { title: 'e-Invoice Ready', body: 'The model already supports all structures; connecting as soon as UJP opens production API + QES.' },
+      { title: 'PSD2 Banks', body: 'Bank statements directly in Facturino with semi-automatic reconciliation with invoices.' },
+      { title: 'Multi-Client for Offices', body: 'One login, many companies, separate accounts, reports, and permissions.' },
+      { title: 'IFRS Reports', body: 'IFRS package built into the backend for professional reports.' },
+      { title: 'Security', body: 'EU hosting, encryption, backups, and activity audit trails.' }
+    ]
+  },
+  benefits: {
+    title: 'Benefits',
+    badge: 'Advantages',
+    cards: [
+      { title: 'Save Time', body: 'Complete month-end closing in hours, not days.' },
+      { title: 'Work Faster', body: 'Onboard a new client in one afternoon.' },
+      { title: 'Be Prepared', body: 'Prepare e-invoices from day one.' }
+    ]
+  },
+  how: {
+    title: 'How It Works',
+    process: 'Process',
+    subtitle: 'Get started in minutes, not days.',
+    steps: [
+      { title: '1. Connect Company', body: 'Activate e-Invoice and set up VAT/account settings.' },
+      { title: '2. Create Invoice', body: 'AI suggests VAT and accounts; you confirm and send.' },
+      { title: '3. Reconcile Receivables', body: 'Import bank statements and reconcile in minutes, not hours.' }
+    ]
+  },
+  partners: { title: 'Trusted by', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  pricingPreview: {
+    title: 'Plans',
+    cta: 'View Pricing',
+    plans: [
+      { name: 'Starter', bullets: ['e-Invoice Ready', '1 user', 'AI suggestions (basic)'] },
+      { name: 'Pro', bullets: ['Multi-users/roles', 'PSD2 statements', 'Automations'] },
+      { name: 'Business', bullets: ['Multiple companies', 'API and advanced permissions', 'SLA'] }
+    ]
+  },
+  testimonials: {
+    title: 'Loved by Customers',
+    subtitle: 'Join hundreds of satisfied accountants and business owners.',
+    items: [
+      { quote: 'Our month-end closing dropped from 3 days to a few hours.', author: 'Ana, Accountant' },
+      { quote: 'Bank statements come in directly and reconciliation is easy.', author: 'Igor, Business Owner' },
+      { quote: 'The e-Invoice integration is perfect. We saved so much time.', author: 'Maria, CFO' },
+      { quote: 'AI told me that 85% of my revenue comes from one client. I immediately started looking for new ones.', author: 'Stefan, Small Business Owner' }
+    ]
+  },
+  faq: {
+    title: 'FAQ',
+    items: [
+      { q: 'Are you ready for e-Invoice?', a: 'Yes, the model is built around e-invoices and we connect as soon as UJP opens production API + QES.' },
+      { q: 'How does AI work?', a: 'It suggests VAT/accounts per line item — a human always confirms/edits.' },
+      { q: 'Do you support PSD2?', a: 'Yes, including bank statement import and semi-automatic reconciliation.' },
+      { q: 'What can I ask the AI advisor?', a: 'Anything about your business! "Who owes me?", "Am I profitable?", "What if I lose my biggest client?", "How do I increase profit?" — AI analyzes your data and provides concrete answers.' }
+    ]
+  },
+  cta: { title: 'Ready? Start free today.', sub: 'No credit card required • 14-day free trial • Cancel anytime', button: 'Start Free' },
+  footer: { rights: '© Facturino. All rights reserved.' },
+  featuresPage: {
+    heroTitle: 'Features You Cannot Miss',
+    groups: [
+      {
+        title: 'AI Financial Advisor',
+        items: [
+          'Ask anything: "Who owes me?", "Am I profitable?", "How do I increase profit?"',
+          'Early warning: AI notifies you about client dependency risks',
+          '90-day cash flow forecast',
+          'Price and profit optimization advice',
+          'Accounts receivable aging analysis (AR Aging) with top debtors',
+          'What-if scenarios: "What if I lose my biggest client?"'
+        ]
+      },
+      {
+        title: 'e-Invoice & Compliance',
+        items: [
+          'Structured data: Tax IDs, VAT by rate, payment terms',
+          'Ready to connect when UJP opens production API + QES',
+          'Professional Macedonian-style PDF templates'
+        ]
+      },
+      {
+        title: 'Banking & Cash Flow',
+        items: [
+          'PSD2 connections with local banks',
+          'Bank statement import and semi-automatic reconciliation',
+          'CSV/MT940 as alternative'
+        ]
+      },
+      {
+        title: 'For Accountants',
+        items: [
+          'One login → multiple companies',
+          'Separate chart of accounts and reports',
+          'Roles and permissions, audit trails'
+        ]
+      },
+      {
+        title: 'Security & Control',
+        items: [
+          'Encryption at rest and in transit',
+          'Regular backups and EU hosting',
+          'Audit logs for key activities'
+        ]
+      }
+    ]
+  },
+  pricingPage: {
+    h1: 'Pricing',
+    sub: '14-day free trial. No obligation.',
+    sectionCompany: 'For Companies',
+    sectionPartner: 'For Accountants (Partners)',
+    popularBadge: 'Popular',
+    recommendedBadge: 'Recommended',
+    includesPrevious: 'Includes everything in {plan}',
+    companyPlans: [
+      { name: 'Free', price: '€0', period: '/forever', bullets: ['5 invoices/month', '1 user', 'PDF export', '3 AI questions/month'], popular: false },
+      { name: 'Starter', price: '€12', period: '/month', bullets: ['50 invoices/month', '1 user', 'Unlimited clients', '10 AI questions/month'], popular: false },
+      { name: 'Standard', price: '€29', period: '/month', bullets: ['200 invoices/month', '3 users', 'e-Invoice + QES', '25 AI questions/month'], popular: true },
+      { name: 'Business', price: '€59', period: '/month', bullets: ['1000 invoices/month', '5 users', 'Bank statements', '50 AI questions/month'], popular: false },
+      { name: 'Max', price: '€149', period: '/month', bullets: ['Unlimited invoices', 'API access', 'Multi-locations', '100 AI questions/month'], popular: false }
+    ],
+    partnerPlans: [
+      { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Partner portal', '20% recurring commission', 'Earnings tracking'], popular: true },
+      { name: 'Partner Plus', price: '€29', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
+    ],
+    cta: 'Start Now',
+    ctaPartner: 'Join',
+    comparisonTable: {
+      title: 'Compare Plans',
+      plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
+      rows: [
+        { feature: 'Invoices per Month', values: ['5', '50', '200', '1000', 'Unlimited'] },
+        { feature: 'Users', values: ['1', '1', '3', '5', 'Unlimited'] },
+        { feature: 'Clients', values: ['Unlimited', 'Unlimited', 'Unlimited', 'Unlimited', 'Unlimited'] },
+        { feature: 'e-Invoice (UJP)', values: [false, false, true, true, true] },
+        { feature: 'AI Questions/month', values: ['3', '10', '25', '50', '100'] },
+        { feature: 'Bank Statements (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'API Access', values: [false, false, false, true, true] },
+        { feature: 'Support', values: ['Email', 'Email', 'Email/Chat', 'Priority', 'WhatsApp'] }
+      ]
+    }
+  }
+}
+
 export async function getDictionary(locale: Locale): Promise<Dictionary> {
   switch (locale) {
     case 'mk':
@@ -665,5 +865,7 @@ export async function getDictionary(locale: Locale): Promise<Dictionary> {
       return sq
     case 'tr':
       return tr
+    case 'en':
+      return en
   }
 }

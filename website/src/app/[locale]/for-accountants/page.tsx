@@ -33,8 +33,20 @@ const copy = {
       ['Yapay zekâ asistanı', 'Her satır için KDV ve hesap önerileri; onay sizde.'],
       ['PSD2 bankalar', 'Ekstre içe aktarımı ve dakikalarda mutabakat.'],
       ['IFRS raporları', 'Her müşteri için profesyonel IFRS raporları.'],
-      ['İş akışları', 'Tekrarlayan faturalar, hatırlatıcılar ve “ödenmediyse → hatırlat” kuralı.'],
+      ['İş akışları', 'Tekrarlayan faturalar, hatırlatıcılar ve "ödenmediyse → hatırlat" kuralı.'],
       ['Çok dilli arayüz', 'MK, SQ, TR – kullanıcı bazında dil seçimi.']
+    ]
+  },
+  en: {
+    h1: 'For Accounting Firms',
+    sub: 'One login → dozens of clients. Maximum control and speed.',
+    blocks: [
+      ['Multi-company', 'Each client is a separate company with its own accounts, documents, and permissions.'],
+      ['AI Assistant', 'VAT and account suggestions per line item; human always confirms.'],
+      ['PSD2 Banks', 'Import statements and semi-automatic reconciliation in minutes.'],
+      ['IFRS Reports', 'IFRS package for professional reports per client.'],
+      ['Workflows', 'Recurring invoices, reminders, and "if unpaid → remind" rules.'],
+      ['Multilingual UI', 'MK, SQ, TR, EN – each user chooses their language.']
     ]
   }
 } as const
@@ -66,6 +78,13 @@ export default function ForAccountantsPage({ params }: { params: { locale: strin
           <div className="mb-6 rounded-lg bg-white p-4 shadow-sm">
             <p className="font-medium">
               QuickBooks/Xero seviyesinde bir deneyim, ama Makedonya mevzuatına göre tasarlanmış.
+            </p>
+          </div>
+        )}
+        {locale === 'en' && (
+          <div className="mb-6 rounded-lg bg-white p-4 shadow-sm">
+            <p className="font-medium">
+              Facturino is QuickBooks/Xero-class software – but with logic, reports, and VAT rules for Macedonia.
             </p>
           </div>
         )}
