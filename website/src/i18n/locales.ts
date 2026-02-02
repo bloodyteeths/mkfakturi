@@ -6,3 +6,4 @@ export function isLocale(input: string): input is Locale {
   return (locales as readonly string[]).includes(input)
 }
 
+
