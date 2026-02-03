@@ -1,5 +1,5 @@
 <template>
-  <div class="grid min-h-screen grid-cols-12 overflow-y-auto bg-gray-100">
+  <div class="grid min-h-screen grid-cols-12 bg-gray-100">
     <NotificationRoot />
 
     <div
@@ -15,8 +15,9 @@
         text-gray-900
         md:p-8 md:col-span-6
         lg:col-span-4
-        flex-2
-        md:pb-48 md:pt-40
+        overflow-y-auto
+        py-8
+        md:py-16
       "
     >
       <div class="w-full">
