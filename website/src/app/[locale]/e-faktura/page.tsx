@@ -8,8 +8,9 @@ const message = {
   en: 'Facturino is already built around structured e-invoice data and is ready to connect to the official e-Invoice system as soon as UJP opens the production API and QES integration. By the time e-Invoice becomes mandatory, your workflow in Facturino will already be set up.'
 } as const
 
-export default async function EFakturaPage({ params }: { params: { locale: string } }) {
-  const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
+export default async function EFakturaPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: localeParam } = await params
+  const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = await getDictionary(locale)
 
   const bullets: Record<Locale, string[]> = {

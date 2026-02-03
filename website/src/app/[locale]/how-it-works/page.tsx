@@ -1,8 +1,9 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { getDictionary } from '@/i18n/dictionaries'
 
-export default async function HowItWorksPage({ params }: { params: { locale: string } }) {
-  const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
+export default async function HowItWorksPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: localeParam } = await params
+  const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = await getDictionary(locale)
 
   return (

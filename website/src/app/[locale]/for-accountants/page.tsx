@@ -51,8 +51,9 @@ const copy = {
   }
 } as const
 
-export default function ForAccountantsPage({ params }: { params: { locale: string } }) {
-  const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
+export default async function ForAccountantsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: localeParam } = await params
+  const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
   return (
     <main className="section">

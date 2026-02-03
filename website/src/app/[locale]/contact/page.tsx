@@ -1,6 +1,6 @@
 "use client"
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { useMemo, useState } from 'react'
+import { use, useMemo, useState } from 'react'
 
 const copy = {
   mk: {
@@ -45,8 +45,9 @@ const copy = {
   }
 } as const
 
-export default function ContactPage({ params }: { params: { locale: string } }) {
-  const locale: Locale = isLocale(params.locale) ? (params.locale as Locale) : defaultLocale
+export default function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: localeParam } = use(params)
+  const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = useMemo(() => copy[locale], [locale])
 
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
