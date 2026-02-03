@@ -1,5 +1,4 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { getDictionary } from '@/i18n/dictionaries'
 
 const message = {
   mk: 'Facturino веќе е изграден околу структурираните податоци за е‑фактури и е подготвен да се поврзе со официјалниот систем за е‑Фактура во моментот кога УЈП ќе го отвори продукцискиот API и QES интеграцијата. До моментот кога е‑Фактура ќе стане задолжителна, вашиот процес во Facturino ќе биде веќе поставен.',
@@ -11,7 +10,6 @@ const message = {
 export default async function EFakturaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await params
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
-  const t = await getDictionary(locale)
 
   const bullets: Record<Locale, string[]> = {
     mk: [

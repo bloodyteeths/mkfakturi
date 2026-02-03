@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { getDictionary } from '@/i18n/dictionaries'
-import { isLocale, Locale, locales, defaultLocale } from '@/i18n/locales'
+import { isLocale, Locale, defaultLocale } from '@/i18n/locales'
 import '../globals.css'
 
 
