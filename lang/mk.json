@@ -4569,7 +4569,26 @@
     "reconciliation": "Рапорт",
     "reconcile": "Рапортирај",
     "reconciled": "Рапортирано",
-    "pending_reconciliation": "На чекање рапорт"
+    "pending_reconciliation": "На чекање рапорт",
+    "unmatched_transactions": "Неповрзани трансакции",
+    "all_transactions_matched": "Сите трансакции се поврзани",
+    "match_manually": "Поврзи рачно",
+    "suggested_match": "Предлог за поврзување",
+    "choose_different": "Избери друга",
+    "total_transactions": "Вкупно трансакции",
+    "match_rate": "Стапка на поврзување",
+    "auto_match": "Авто поврзи",
+    "auto_match_complete": "Автоматското поврзување е завршено. Најдени се {count} совпаѓања.",
+    "auto_match_failed": "Автоматското поврзување не успеа. Обидете се повторно.",
+    "matching_transaction": "Поврзување на трансакција",
+    "no_unpaid_invoices": "Нема неплатени фактури",
+    "exact_match": "Точно совпаѓање",
+    "confirm_match": "Потврди поврзување",
+    "match_successful": "Трансакцијата е успешно поврзана",
+    "match_failed": "Поврзувањето не успеа",
+    "failed_to_load_data": "Не можеше да се вчита податоците за рапорт",
+    "from": "Од",
+    "select_invoice_to_match": "Избери фактура за поврзување"
   },
   "widgets": {
     "cert_expiry": {

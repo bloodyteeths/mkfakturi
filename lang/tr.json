@@ -5748,7 +5748,26 @@
     "reconciliation": "Mutabakat",
     "reconcile": "Mutabakat yap",
     "reconciled": "Mutabakat yapıldı",
-    "pending_reconciliation": "Mutabakat bekliyor"
+    "pending_reconciliation": "Mutabakat bekliyor",
+    "unmatched_transactions": "Eşlenmemiş İşlemler",
+    "all_transactions_matched": "Tüm işlemler eşlendi",
+    "match_manually": "Manuel Eşle",
+    "suggested_match": "Önerilen Eşleşme",
+    "choose_different": "Farklı Seç",
+    "total_transactions": "Toplam İşlemler",
+    "match_rate": "Eşleşme Oranı",
+    "auto_match": "Otomatik Eşle",
+    "auto_match_complete": "Otomatik eşleme tamamlandı. {count} eşleşme bulundu.",
+    "auto_match_failed": "Otomatik eşleme başarısız. Tekrar deneyin.",
+    "matching_transaction": "İşlem Eşleniyor",
+    "no_unpaid_invoices": "Ödenmemiş fatura bulunamadı",
+    "exact_match": "Tam Eşleşme",
+    "confirm_match": "Eşleşmeyi Onayla",
+    "match_successful": "İşlem başarıyla eşlendi",
+    "match_failed": "Eşleme başarısız",
+    "failed_to_load_data": "Mutabakat verileri yüklenemedi",
+    "from": "Gönderen",
+    "select_invoice_to_match": "Eşlenecek Faturayı Seçin"
   },
   "widgets": {
     "cert_expiry": {

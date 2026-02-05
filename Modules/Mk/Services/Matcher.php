@@ -80,7 +80,7 @@ class Matcher
     }
 
     /**
-     * Match a specific transaction with invoices
+     * Match a specific transaction with invoices (creates payment)
      */
     public function matchTransaction($transaction): ?array
     {
@@ -96,8 +96,33 @@ class Matcher
                     'invoice_id' => $matchedInvoice->id,
                     'amount' => $transaction->amount,
                     'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
+                    'invoice_number' => $matchedInvoice->invoice_number,
+                    'invoice_total' => (float) $matchedInvoice->total,
                 ];
             }
+        }
+
+        return null;
+    }
+
+    /**
+     * Suggest a match for a transaction without creating a payment
+     * Used for displaying suggested matches in the UI
+     */
+    public function suggestMatch($transaction): ?array
+    {
+        $unpaidInvoices = $this->getUnpaidInvoices();
+        $matchedInvoice = $this->findMatchingInvoice($transaction, $unpaidInvoices);
+
+        if ($matchedInvoice) {
+            return [
+                'transaction_id' => $transaction->id,
+                'invoice_id' => $matchedInvoice->id,
+                'amount' => (float) $transaction->amount,
+                'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
+                'invoice_number' => $matchedInvoice->invoice_number,
+                'invoice_total' => (float) $matchedInvoice->total,
+            ];
         }
 
         return null;

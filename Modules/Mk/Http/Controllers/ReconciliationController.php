@@ -34,9 +34,9 @@ class ReconciliationController extends Controller
             ->orderBy('transaction_date', 'desc')
             ->paginate($request->get('limit', 20));
 
-        // Get suggested matches for each transaction
+        // Get suggested matches for each transaction (without creating payments)
         $transactionsWithMatches = $transactions->getCollection()->map(function ($transaction) use ($matcher) {
-            $match = $matcher->matchTransaction($transaction);
+            $match = $matcher->suggestMatch($transaction);
 
             return [
                 'id' => $transaction->id,
