@@ -1257,7 +1257,10 @@
     "view_pdf": "View PDF",
     "warning": "Warning",
     "yes": "Yes",
-    "you_got_lost": "Whoops! You got Lost!"
+    "you_got_lost": "Whoops! You got Lost!",
+    "refresh": "Refresh",
+    "accept": "Accept",
+    "due": "Due"
   },
   "global_search": {
     "customers": "Customers",

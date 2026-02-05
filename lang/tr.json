@@ -221,8 +221,11 @@
     "try_again": "Tekrar deneyin",
     "required": "Заborçтелama",
     "optional": "Опцveолama",
-    "expand": "Прошveрve",
-    "expand_sidebar": "Прошveрve странveч лента"
+    "expand": "Genişlet",
+    "expand_sidebar": "Kenar çubuğunu genişlet",
+    "refresh": "Yenile",
+    "accept": "Kabul Et",
+    "due": "Vade"
   },
   "dashboard": {
     "select_year": "Yılı seçin",

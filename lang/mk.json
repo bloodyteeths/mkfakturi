@@ -223,7 +223,10 @@
     "collapse": "Собери",
     "expand": "Прошири",
     "collapse_sidebar": "Собери странична лента",
-    "expand_sidebar": "Прошири странична лента"
+    "expand_sidebar": "Прошири странична лента",
+    "refresh": "Освежи",
+    "accept": "Прифати",
+    "due": "Достасува"
   },
   "accounting": {
     "journal_entries": {

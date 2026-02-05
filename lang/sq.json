@@ -221,9 +221,12 @@
     "required": "E detyrueshme",
     "optional": "Opsionale",
     "collapse": "Mbyll",
-    "expand": "Прошdheрdhe",
+    "expand": "Zgjero",
     "collapse_sidebar": "Mbyll shiritin anësor",
-    "expand_sidebar": "Прошdheрdhe странdheчnë лента"
+    "expand_sidebar": "Zgjero shiritin anësor",
+    "refresh": "Rifresko",
+    "accept": "Prano",
+    "due": "Afati"
   },
   "accounting": {
     "journal_entries": {
