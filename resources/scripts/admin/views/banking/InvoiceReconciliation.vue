@@ -267,8 +267,8 @@ const fetchData = async (page = 1) => {
   isLoading.value = true
   try {
     const [transactionsRes, statsRes] = await Promise.all([
-      axios.get('/api/v1/banking/reconciliation', { params: { page, limit: 20 } }),
-      axios.get('/api/v1/banking/reconciliation/stats')
+      axios.get('/banking/reconciliation', { params: { page, limit: 20 } }),
+      axios.get('/banking/reconciliation/stats')
     ])
 
     unmatchedTransactions.value = transactionsRes.data.data || []
@@ -287,7 +287,7 @@ const fetchData = async (page = 1) => {
 
 const fetchUnpaidInvoices = async () => {
   try {
-    const response = await axios.get('/api/v1/banking/reconciliation/unpaid-invoices')
+    const response = await axios.get('/banking/reconciliation/unpaid-invoices')
     unpaidInvoices.value = response.data.data || []
   } catch (error) {
     console.error('Failed to fetch unpaid invoices:', error)
@@ -305,7 +305,7 @@ const changePage = (page) => {
 const runAutoMatch = async () => {
   isLoading.value = true
   try {
-    const response = await axios.post('/api/v1/banking/reconciliation/auto-match')
+    const response = await axios.post('/banking/reconciliation/auto-match')
 
     notificationStore.showNotification({
       type: 'success',
@@ -327,7 +327,7 @@ const runAutoMatch = async () => {
 
 const acceptMatch = async (transaction, match) => {
   try {
-    await axios.post('/api/v1/banking/reconciliation/manual-match', {
+    await axios.post('/banking/reconciliation/manual-match', {
       transaction_id: transaction.id,
       invoice_id: match.invoice_id
     })
@@ -359,7 +359,7 @@ const confirmManualMatch = async () => {
   if (!selectedTransaction.value || !selectedInvoiceId.value) return
 
   try {
-    await axios.post('/api/v1/banking/reconciliation/manual-match', {
+    await axios.post('/banking/reconciliation/manual-match', {
       transaction_id: selectedTransaction.value.id,
       invoice_id: selectedInvoiceId.value
     })
