@@ -323,7 +323,7 @@ private function safeAddUnique(Blueprint $table, array $columns, string $indexNa
 ### Week 1-2: CSV Import Engine
 
 #### P0-01: Bank CSV Parsers
-**Priority:** P0 | **Estimate:** 2-3 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2-3 days | **Status:** ✅ DONE
 
 Create bank-specific CSV parsers for Macedonian banks.
 
@@ -407,7 +407,7 @@ Schema::create('bank_transactions', function (Blueprint $table) {
 ---
 
 #### P0-02: CSV Import UI
-**Priority:** P0 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2 days | **Status:** ✅ DONE
 
 Create Vue component for bank statement upload.
 
@@ -3257,12 +3257,12 @@ tests/
 ## Immediate Next Steps (Week 1)
 
 ### Day 1-2
-- [ ] **P0-01:** Create bank CSV parser structure
+- [x] **P0-01:** Create bank CSV parser structure
 - [ ] **P0-05:** Create reconciliation migration
 
 ### Day 3-4
-- [ ] **P0-01:** Implement NLB CSV parser
-- [ ] **P0-02:** Create ImportStatementPage.vue
+- [x] **P0-01:** Implement NLB CSV parser
+- [x] **P0-02:** Create ImportStatementPage.vue
 
 ### Day 5
 - [ ] **P0-04:** Start matching algorithm

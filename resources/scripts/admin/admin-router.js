@@ -203,6 +203,7 @@ const NetworkGraph = () => import('@/scripts/admin/views/partners/NetworkGraph.v
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
 const InvoiceReconciliation = () => import('@/scripts/admin/views/banking/InvoiceReconciliation.vue')
+const ImportStatement = () => import('@/scripts/admin/views/banking/ImportStatement.vue')
 
 // Billing & Subscription
 const PricingPage = () => import('@/js/pages/pricing/Companies.vue')
@@ -1022,6 +1023,12 @@ export default [
         name: 'banking.reconciliation',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: InvoiceReconciliation,
+      },
+      {
+        path: 'banking/import',
+        name: 'banking.import',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: ImportStatement,
       },
 
       // Billing & Subscription

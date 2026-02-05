@@ -870,6 +870,13 @@ Route::prefix('/v1')->group(function () {
                 Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
 
+                // CSV Import
+                Route::prefix('import')->group(function () {
+                    Route::post('/preview', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'preview']);
+                    Route::post('/confirm', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'confirm']);
+                    Route::get('/banks', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'supportedBanks']);
+                });
+
                 // Invoice Reconciliation
                 Route::prefix('reconciliation')->group(function () {
                     Route::get('/', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'index']);
