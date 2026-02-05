@@ -202,6 +202,7 @@ const NetworkGraph = () => import('@/scripts/admin/views/partners/NetworkGraph.v
 
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
+const InvoiceReconciliation = () => import('@/scripts/admin/views/banking/InvoiceReconciliation.vue')
 
 // Billing & Subscription
 const PricingPage = () => import('@/js/pages/pricing/Companies.vue')
@@ -1015,6 +1016,12 @@ export default [
         name: 'banking.dashboard',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT }, // Reuse financial report ability
         component: BankingDashboard,
+      },
+      {
+        path: 'banking/reconciliation',
+        name: 'banking.reconciliation',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: InvoiceReconciliation,
       },
 
       // Billing & Subscription

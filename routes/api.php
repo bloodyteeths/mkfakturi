@@ -870,6 +870,15 @@ Route::prefix('/v1')->group(function () {
                 Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
 
+                // Invoice Reconciliation
+                Route::prefix('reconciliation')->group(function () {
+                    Route::get('/', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'index']);
+                    Route::post('/auto-match', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'autoMatch']);
+                    Route::post('/manual-match', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'manualMatch']);
+                    Route::get('/stats', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'stats']);
+                    Route::get('/unpaid-invoices', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidInvoices']);
+                });
+
                 // OAuth routes (these need to be accessible without full auth for callback)
                 Route::get('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'start']);
             });

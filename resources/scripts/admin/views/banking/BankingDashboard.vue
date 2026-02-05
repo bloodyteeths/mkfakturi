@@ -14,6 +14,15 @@
       <template #actions>
         <div class="flex items-center justify-end space-x-5">
           <BaseButton
+            variant="primary-outline"
+            :to="{ name: 'banking.reconciliation' }"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ArrowsRightLeftIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.reconciliation') || 'Reconciliation' }}
+          </BaseButton>
+          <BaseButton
             variant="primary"
             @click="showConnectModal = true"
           >
