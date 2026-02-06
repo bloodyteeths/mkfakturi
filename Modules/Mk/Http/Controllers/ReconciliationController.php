@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\BankTransaction;
 use App\Models\Company;
 use App\Models\Invoice;
+use App\Models\Reconciliation;
+use App\Models\ReconciliationSplit;
+use App\Services\Reconciliation\ReconciliationPostingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -164,6 +167,166 @@ class ReconciliationController extends Controller
                 'customer_name' => $inv->customer->name ?? 'Unknown',
             ]),
         ]);
+    }
+
+    /**
+     * Post a split payment: one transaction allocated across multiple invoices.
+     *
+     * P0-14: Partial Payments + Multi-Invoice Settlement.
+     *
+     * @param  Request  $request
+     * @param  int  $id  Reconciliation ID
+     * @return JsonResponse
+     */
+    public function splitPayment(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'splits' => 'required|array|min:1',
+            'splits.*.invoice_id' => 'required|integer|exists:invoices,id',
+            'splits.*.amount' => 'required|numeric|min:0.01',
+        ]);
+
+        $company = $this->getCompany();
+
+        // P0-13: explicit tenant scope
+        $recon = Reconciliation::forCompany($company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Validate all invoices belong to the same company
+        $invoiceIds = array_column($request->splits, 'invoice_id');
+        $validInvoiceCount = Invoice::where('company_id', $company->id)
+            ->whereIn('id', $invoiceIds)
+            ->count();
+
+        if ($validInvoiceCount !== count(array_unique($invoiceIds))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'One or more invoices not found for this company',
+            ], 422);
+        }
+
+        $service = new ReconciliationPostingService();
+        $results = $service->postSplit($recon, $request->splits);
+
+        // Check if any result is an error
+        $hasErrors = collect($results)->contains(fn ($r) => $r->isError());
+        $successCount = collect($results)->filter(fn ($r) => $r->ok)->count();
+
+        return response()->json([
+            'success' => ! $hasErrors || $successCount > 0,
+            'message' => $hasErrors
+                ? 'Split payment completed with some errors'
+                : 'Split payment posted successfully',
+            'results' => collect($results)->map(fn ($r) => $r->toArray())->all(),
+            'splits_created' => $successCount,
+        ], $hasErrors && $successCount === 0 ? 422 : 200);
+    }
+
+    /**
+     * Get split allocations for a reconciliation.
+     *
+     * P0-14: Partial Payments + Multi-Invoice Settlement.
+     *
+     * @param  int  $id  Reconciliation ID
+     * @return JsonResponse
+     */
+    public function getSplits(int $id): JsonResponse
+    {
+        $company = $this->getCompany();
+
+        // P0-13: explicit tenant scope
+        $recon = Reconciliation::forCompany($company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $splits = ReconciliationSplit::where('reconciliation_id', $recon->id)
+            ->with(['invoice:id,invoice_number,total,due_amount,customer_id', 'payment:id,payment_number,amount'])
+            ->get();
+
+        return response()->json([
+            'data' => $splits->map(fn ($split) => [
+                'id' => $split->id,
+                'reconciliation_id' => $split->reconciliation_id,
+                'invoice_id' => $split->invoice_id,
+                'invoice_number' => $split->invoice->invoice_number ?? null,
+                'invoice_total' => (float) ($split->invoice->total ?? 0),
+                'allocated_amount' => (float) $split->allocated_amount,
+                'payment_id' => $split->payment_id,
+                'payment_number' => $split->payment->payment_number ?? null,
+                'created_at' => $split->created_at,
+            ]),
+        ]);
+    }
+
+    /**
+     * Confirm a match with optional split or partial payment support.
+     *
+     * If 'splits' array is provided, calls postSplit(). If 'partial' flag is true,
+     * calls postPartial(). Otherwise falls through to existing manualMatch logic.
+     *
+     * P0-14: Partial Payments + Multi-Invoice Settlement.
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function confirmMatch(Request $request): JsonResponse
+    {
+        $company = $this->getCompany();
+
+        // If splits are provided, delegate to split payment
+        if ($request->has('splits') && is_array($request->splits) && count($request->splits) > 0) {
+            $request->validate([
+                'reconciliation_id' => 'required|integer',
+                'splits' => 'required|array|min:1',
+                'splits.*.invoice_id' => 'required|integer|exists:invoices,id',
+                'splits.*.amount' => 'required|numeric|min:0.01',
+            ]);
+
+            $recon = Reconciliation::forCompany($company->id)
+                ->where('id', $request->reconciliation_id)
+                ->firstOrFail();
+
+            $service = new ReconciliationPostingService();
+            $results = $service->postSplit($recon, $request->splits);
+
+            $hasErrors = collect($results)->contains(fn ($r) => $r->isError());
+
+            return response()->json([
+                'success' => ! $hasErrors,
+                'message' => $hasErrors ? 'Split payment had errors' : 'Split payment posted',
+                'results' => collect($results)->map(fn ($r) => $r->toArray())->all(),
+            ]);
+        }
+
+        // If partial flag is set, delegate to partial payment
+        if ($request->boolean('partial')) {
+            $request->validate([
+                'reconciliation_id' => 'required|integer',
+                'invoice_id' => 'required|integer|exists:invoices,id',
+            ]);
+
+            $recon = Reconciliation::forCompany($company->id)
+                ->where('id', $request->reconciliation_id)
+                ->firstOrFail();
+
+            // Set the invoice on the reconciliation if not set
+            if (! $recon->invoice_id) {
+                $recon->update(['invoice_id' => $request->invoice_id]);
+            }
+
+            $service = new ReconciliationPostingService();
+            $result = $service->postPartial($recon);
+
+            return response()->json([
+                'success' => $result->ok,
+                'message' => $result->ok ? 'Partial payment posted' : $result->errorMessage,
+                'result' => $result->toArray(),
+            ], $result->ok ? 200 : 422);
+        }
+
+        // Fall through to regular manual match
+        return $this->manualMatch($request);
     }
 
     /**

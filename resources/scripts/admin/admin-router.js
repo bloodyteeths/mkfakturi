@@ -204,6 +204,9 @@ const NetworkGraph = () => import('@/scripts/admin/views/partners/NetworkGraph.v
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
 const InvoiceReconciliation = () => import('@/scripts/admin/views/banking/InvoiceReconciliation.vue')
 const ImportStatement = () => import('@/scripts/admin/views/banking/ImportStatement.vue')
+const ImportHistory = () => import('@/scripts/admin/views/banking/ImportHistory.vue')
+const ReconciliationAnalytics = () => import('@/scripts/admin/views/banking/ReconciliationAnalytics.vue')
+const MatchingRules = () => import('@/scripts/admin/views/banking/MatchingRules.vue')
 
 // Billing & Subscription
 const PricingPage = () => import('@/js/pages/pricing/Companies.vue')
@@ -1029,6 +1032,24 @@ export default [
         name: 'banking.import',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: ImportStatement,
+      },
+      {
+        path: 'banking/import-history',
+        name: 'banking.import-history',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: ImportHistory,
+      },
+      {
+        path: 'banking/analytics',
+        name: 'banking.analytics',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: ReconciliationAnalytics,
+      },
+      {
+        path: 'banking/matching-rules',
+        name: 'banking.matching-rules',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: MatchingRules,
       },
 
       // Billing & Subscription

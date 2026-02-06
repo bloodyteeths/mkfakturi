@@ -124,6 +124,14 @@
                   {{ $t('general.accept') }}
                 </BaseButton>
                 <BaseButton
+                  v-if="tx.amount > tx.suggested_match.invoice_total"
+                  variant="primary-outline"
+                  size="sm"
+                  @click="openSplitModal(tx)"
+                >
+                  {{ $t('banking.split') }}
+                </BaseButton>
+                <BaseButton
                   variant="secondary"
                   size="sm"
                   @click="openManualMatchModal(tx)"
@@ -134,7 +142,7 @@
             </div>
 
             <!-- No Match Found -->
-            <div v-else class="ml-6">
+            <div v-else class="ml-6 flex space-x-2">
               <BaseButton
                 variant="primary-outline"
                 size="sm"
@@ -144,6 +152,13 @@
                   <BaseIcon name="LinkIcon" :class="slotProps.class" />
                 </template>
                 {{ $t('banking.match_manually') }}
+              </BaseButton>
+              <BaseButton
+                variant="primary-outline"
+                size="sm"
+                @click="openSplitModal(tx)"
+              >
+                {{ $t('banking.split') }}
               </BaseButton>
             </div>
           </div>
@@ -229,6 +244,16 @@
         </div>
       </template>
     </BaseModal>
+
+    <!-- P0-14: Split Payment Modal -->
+    <SplitPaymentModal
+      :show="showSplitModal"
+      :transaction="splitTransaction"
+      :reconciliation-id="splitReconciliationId"
+      :unpaid-invoices="unpaidInvoices"
+      @close="showSplitModal = false"
+      @split-complete="onSplitComplete"
+    />
   </BasePage>
 </template>
 
@@ -237,6 +262,7 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
+import SplitPaymentModal from './SplitPaymentModal.vue'
 
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
@@ -261,6 +287,11 @@ const meta = ref({
 const showManualMatchModal = ref(false)
 const selectedTransaction = ref(null)
 const selectedInvoiceId = ref(null)
+
+// P0-14: Split payment state
+const showSplitModal = ref(false)
+const splitTransaction = ref(null)
+const splitReconciliationId = ref(null)
 
 // Methods
 const fetchData = async (page = 1) => {
@@ -382,6 +413,22 @@ const confirmManualMatch = async () => {
       message: t('banking.match_failed')
     })
   }
+}
+
+// P0-14: Split payment methods
+const openSplitModal = async (transaction) => {
+  splitTransaction.value = transaction
+  // The reconciliation_id may come from the transaction data if available
+  splitReconciliationId.value = transaction.reconciliation_id || null
+  await fetchUnpaidInvoices()
+  showSplitModal.value = true
+}
+
+const onSplitComplete = async () => {
+  showSplitModal.value = false
+  splitTransaction.value = null
+  splitReconciliationId.value = null
+  await fetchData(meta.value.current_page)
 }
 
 const getConfidenceClass = (confidence) => {

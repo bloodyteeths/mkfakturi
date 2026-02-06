@@ -455,32 +455,26 @@ Route::prefix('v1/banking')->group(function () {
 ---
 
 #### P0-03: Import Logging & Analytics
-**Priority:** P1 | **Estimate:** 1 day | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 1 day | **Status:** ✅ DONE (2026-02-06)
 
 Track import success/failure for KPI measurement.
 
-**Migration:**
-```php
-// database/migrations/2026_02_05_000100_create_import_logs_table.php
-Schema::create('import_logs', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('company_id')->constrained();
-    $table->foreignId('user_id')->constrained();
-    $table->string('bank_code', 20);
-    $table->string('file_name');
-    $table->integer('total_rows');
-    $table->integer('parsed_rows');
-    $table->integer('failed_rows');
-    $table->json('errors')->nullable();
-    $table->integer('parse_time_ms');
-    $table->timestamps();
-});
-```
+**Implemented in:**
+- `database/migrations/2026_02_06_000800_create_import_logs_table.php` - Idempotent migration for `import_logs` table
+- `app/Models/BankImportLog.php` - Model with BelongsToCompany trait, scopes (forBank, recent, successful, failed)
+- `app/Services/Banking/ImportLoggingService.php` - Service with startImport/completeImport/failImport/getStats
+- `app/Http/Controllers/V1/Admin/Banking/BankImportController.php` - Wired with ImportLoggingService + DeduplicationService
+- `resources/scripts/admin/views/banking/ImportHistory.vue` - Vue UI with stats cards, per-bank breakdown, filterable log table
+- `routes/api.php` - GET `/banking/import/history` + GET `/banking/import/stats`
+- `resources/scripts/admin/admin-router.js` - Route `banking.import-history`
+- `resources/scripts/admin/views/banking/BankingDashboard.vue` - Navigation link to import history
 
-**Metrics to track:**
-- Parse accuracy per bank
-- Common error types
-- Processing time
+**Key features:**
+- Full import lifecycle tracking (pending -> completed/failed/partial)
+- DeduplicationService integration (P0-11) replaces manual isDuplicate/createTransaction
+- Aggregate stats: success rate, avg parse time, per-bank breakdown, error frequency
+- Filterable history table with pagination (bank code, status, date range)
+- Stats summary cards in Vue UI
 
 ---
 
@@ -677,64 +671,65 @@ Route::post('/webhooks/email/bank-statement', [EmailWebhookController::class, 'b
 ---
 
 #### P0-09: Matching Rules Engine
-**Priority:** P1 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 2 days | **Status:** :white_check_mark: DONE
 
 Let users create custom matching rules.
 
-**Migration:**
-```php
-// database/migrations/2026_02_10_000100_create_matching_rules_table.php
-Schema::create('matching_rules', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('company_id')->constrained();
-    $table->string('name');
-    $table->json('conditions'); // [{field: 'description', operator: 'contains', value: 'SUBSCRIPTION'}]
-    $table->json('actions');    // [{action: 'match_customer', customer_id: 123}]
-    $table->integer('priority')->default(0);
-    $table->boolean('is_active')->default(true);
-    $table->timestamps();
-});
-```
+**Implementation summary:**
+- `database/migrations/2026_02_06_000700_create_matching_rules_table.php` - Idempotent migration with `Schema::hasTable()` check, ENGINE=InnoDB, FK ON DELETE RESTRICT
+- `app/Models/MatchingRule.php` - Model with BelongsToCompany trait, JSON casts for conditions/actions, scopeActive/scopeByPriority scopes
+- `app/Services/Reconciliation/MatchingRulesService.php` - Rule evaluation engine supporting 7 operators (contains, equals, greater_than, less_than, starts_with, ends_with, regex) across 7 fields (description, remittance_info, debtor_name, creditor_name, amount, transaction_type, currency). Regex evaluation includes ReDoS protection (backtrack limit, pattern length cap, bomb detection).
+- `app/Http/Controllers/V1/Admin/Banking/MatchingRulesController.php` - Full CRUD + test endpoint. All queries use forCompany() tenant scoping. Validation enforces valid fields/operators/actions.
+- `routes/api.php` - Added `banking/matching-rules` prefix group with GET, POST, PUT/{id}, DELETE/{id}, POST/{id}/test routes inside the banking middleware group (tier:standard)
+- `resources/scripts/admin/views/banking/MatchingRules.vue` - Full Vue 3 Composition API UI with rule list, create/edit modal (conditions builder + actions builder), test button showing matched transactions preview, delete with confirmation dialog
+- `resources/scripts/admin/admin-router.js` - Added lazy-loaded route `banking/matching-rules` and navigation button in BankingDashboard
+- `modules/Mk/Services/Matcher.php` - Wired MatchingRulesService into matchAllTransactions(). Rules are applied before matching: `ignore` action skips transactions, `match_customer` action filters invoice pool to specific customer, `auto_match` action boosts confidence score by +0.15 and lowers threshold.
 
-**Example rule:**
-```json
-{
-  "name": "Monthly hosting fee",
-  "conditions": [
-    {"field": "description", "operator": "contains", "value": "HETZNER"},
-    {"field": "amount", "operator": "equals", "value": -49.00}
-  ],
-  "actions": [
-    {"action": "categorize", "category": "hosting"},
-    {"action": "match_expense", "expense_pattern": "Hetzner*"}
-  ]
-}
-```
+**Supported actions:** categorize, match_customer, match_expense, auto_match, ignore
 
 ---
 
 #### P0-10: Phase 0 Analytics Dashboard
-**Priority:** P1 | **Estimate:** 1 day | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 1 day | **Status:** :white_check_mark: DONE
 
 Track KPIs for Phase 0 acceptance criteria.
 
+**Implementation summary:**
+- `app/Services/Reconciliation/ReconciliationAnalyticsService.php` - Analytics service computing all KPIs from BankTransaction and Reconciliation models with explicit forCompany() tenant scoping
+- `app/Http/Controllers/V1/Admin/Banking/ReconciliationAnalyticsController.php` - API controller (GET /api/v1/banking/reconciliation/analytics)
+- `resources/scripts/admin/views/banking/ReconciliationAnalytics.vue` - Full dashboard with summary cards, daily trend chart (CSS bars), match method breakdown, per-bank accuracy table, and period selector with quick buttons
+- Route added in `routes/api.php` inside the banking/reconciliation prefix group
+- Router entry added in `resources/scripts/admin/admin-router.js` at `banking/analytics`
+- Analytics button added to `BankingDashboard.vue` header actions
+
 **Metrics endpoint:**
 ```php
-// GET /api/v1/reconciliation/analytics
+// GET /api/v1/banking/reconciliation/analytics?from=2026-01-01&to=2026-02-28
 {
-  "period": "2026-02",
+  "period": {"from": "2026-01-01", "to": "2026-02-28"},
   "total_transactions": 500,
   "auto_matched": 375,
   "auto_match_rate": 0.75,
   "manual_matched": 100,
   "pending": 25,
-  "avg_confidence": 0.82,
+  "avg_confidence": 82.0,
+  "total_amount_matched": 1500000.00,
+  "total_amount_pending": 250000.00,
   "avg_time_to_reconcile_seconds": 420,
   "parse_accuracy": {
     "nlb": 0.97,
     "stopanska": 0.95,
     "komercijalna": 0.93
-  }
+  },
+  "match_by_method": {
+    "amount": 200,
+    "reference": 100,
+    "customer": 50,
+    "rule": 25
+  },
+  "daily_trend": [
+    {"date": "2026-02-01", "matched": 10, "unmatched": 3}
+  ]
 }
 ```
 
@@ -1407,54 +1402,38 @@ class ValidateTenantAccess
 ---
 
 #### P0-14: Partial Payments + Multi-Invoice Settlement
-**Priority:** P1 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 2 days | **Status:** ✅ DONE
 
 Handle complex real-world reconciliation scenarios.
 
-**Scenarios to support:**
+**Implementation Summary (2026-02-06):**
 
-1. **One transaction → Multiple invoices** (split payment)
-   - Customer pays €1,000 covering INV-001 (€400) + INV-002 (€600)
+- **Migration:** `database/migrations/2026_02_06_000600_create_reconciliation_splits_table.php` (idempotent)
+- **Model:** `app/Models/ReconciliationSplit.php` — tracks allocation of transaction across invoices
+- **Service:** `app/Services/Reconciliation/ReconciliationPostingService.php` — added `postSplit()` and `postPartial()` methods
+- **Controller:** `modules/Mk/Http/Controllers/ReconciliationController.php` — added `splitPayment()`, `getSplits()`, `confirmMatch()` endpoints
+- **Routes:** `POST /{id}/split`, `GET /{id}/splits`, `POST /confirm-match` under `banking/reconciliation`
+- **Vue UI:** `resources/scripts/admin/views/banking/SplitPaymentModal.vue` — multi-invoice allocation modal with running total, 2% fee tolerance
+- **Wired into:** `resources/scripts/admin/views/banking/InvoiceReconciliation.vue` — "Split" button on transactions
 
-2. **Multiple transactions → One invoice** (installment)
-   - Invoice for €3,000 paid via 3 × €1,000 transactions
+**Scenarios supported:**
 
-3. **Transaction with fees** (amount mismatch)
-   - Invoice €100, transaction €98 (€2 bank fee)
-   - Need tolerance rules or explicit fee handling
-
-4. **Chargebacks/reversals**
-   - Negative transaction reversing previous payment
-
-**Migration:**
-```php
-// database/migrations/2026_02_08_000100_create_reconciliation_splits_table.php
-Schema::create('reconciliation_splits', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('reconciliation_id')->constrained();
-    $table->foreignId('invoice_id')->constrained();
-    $table->decimal('allocated_amount', 15, 2);
-    // Link to the payment created for this split allocation
-    // Nullable because payment is created AFTER split is recorded
-    $table->foreignId('payment_id')->nullable()->constrained();
-    $table->timestamps();
-
-    // Index for finding all splits for a reconciliation
-    $table->index(['reconciliation_id']);
-});
-```
+1. **One transaction -> Multiple invoices** (split payment) via `postSplit()`
+2. **Multiple transactions -> One invoice** (installment/partial) via `postPartial()`
+3. **Transaction with fees** (2% tolerance in split validation)
+4. Chargebacks/reversals deferred to future ticket
 
 **UI Requirements:**
-- [ ] "Split" button when transaction > single invoice
-- [ ] Multi-select invoices for split allocation
-- [ ] Show running total vs transaction amount
-- [ ] Warning when amounts don't balance
+- [x] "Split" button when transaction > single invoice
+- [x] Multi-select invoices for split allocation
+- [x] Show running total vs transaction amount
+- [x] Warning when amounts don't balance
 
 **Acceptance Criteria:**
-- [ ] Split payment across 2+ invoices
-- [ ] Multiple payments to single invoice (installments)
-- [ ] Fee tolerance: auto-match if within 2% of invoice
-- [ ] UI shows "partial" badge on partially paid invoices
+- [x] Split payment across 2+ invoices
+- [x] Multiple payments to single invoice (installments)
+- [x] Fee tolerance: auto-match if within 2% of invoice
+- [ ] UI shows "partial" badge on partially paid invoices (deferred — cosmetic)
 
 ---
 
@@ -3320,7 +3299,7 @@ These tickets are **MUST COMPLETE** before shipping to pilots:
 | **P0-11** | Transaction fingerprinting + dedupe | Re-imports create duplicates without this |
 | **P0-12** | Reconciliation posting service | Match → Payment must be atomic + idempotent |
 | **P0-13** | Tenant scoping audit | Data leaks between companies without this |
-| **P0-14** | Partial/split payments | Real-world reconciliation requires this |
+| **P0-14** | Partial/split payments | ✅ DONE — split + partial posting, SplitPaymentModal |
 
 ### Phase 1 Critical (Must complete before PSD2 live)
 

@@ -24,12 +24,39 @@
           </BaseButton>
           <BaseButton
             variant="primary-outline"
+            :to="{ name: 'banking.import-history' }"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ClockIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.history.title') || 'Import History' }}
+          </BaseButton>
+          <BaseButton
+            variant="primary-outline"
             :to="{ name: 'banking.reconciliation' }"
           >
             <template #left="slotProps">
               <BaseIcon name="ArrowsRightLeftIcon" :class="slotProps.class" />
             </template>
             {{ $t('banking.reconciliation') || 'Reconciliation' }}
+          </BaseButton>
+          <BaseButton
+            variant="primary-outline"
+            :to="{ name: 'banking.analytics' }"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ChartBarIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.analytics') || 'Analytics' }}
+          </BaseButton>
+          <BaseButton
+            variant="primary-outline"
+            :to="{ name: 'banking.matching-rules' }"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="AdjustmentsHorizontalIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('matching_rules.title') || 'Matching Rules' }}
           </BaseButton>
           <BaseButton
             variant="primary"

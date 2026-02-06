@@ -2,17 +2,23 @@
 
 namespace Modules\Mk\Services;
 
+use App\Models\BankTransaction;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Services\Reconciliation\MatchingRulesService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Invoice-Transaction Matcher Service
  *
  * Automatically matches bank transactions with invoices based on amount, date, and reference
  * Updates invoice status to PAID when match is found and confirmed
+ *
+ * P0-09: Integrates with MatchingRulesService to apply user-defined rules
+ * before and during the matching process.
  */
 class Matcher
 {
@@ -22,6 +28,16 @@ class Matcher
 
     protected $amountTolerance; // percentage tolerance for amount matching
 
+    /**
+     * @var MatchingRulesService|null Lazily-resolved matching rules service
+     */
+    protected ?MatchingRulesService $matchingRulesService = null;
+
+    /**
+     * @var array|null Cached rule actions for the current transaction being processed
+     */
+    protected ?array $currentRuleActions = null;
+
     public function __construct(int $companyId, int $matchingWindow = 7, float $amountTolerance = 0.01)
     {
         $this->companyId = $companyId;
@@ -30,7 +46,110 @@ class Matcher
     }
 
     /**
-     * Match all unmatched bank transactions with unpaid invoices
+     * Get or create the MatchingRulesService instance.
+     *
+     * Lazily resolved to avoid overhead when rules table doesn't exist yet.
+     *
+     * @return MatchingRulesService|null
+     */
+    protected function getMatchingRulesService(): ?MatchingRulesService
+    {
+        if ($this->matchingRulesService === null) {
+            // Only create service if the matching_rules table exists
+            if (Schema::hasTable('matching_rules')) {
+                $this->matchingRulesService = new MatchingRulesService();
+            }
+        }
+
+        return $this->matchingRulesService;
+    }
+
+    /**
+     * Apply matching rules to a transaction and return the collected actions.
+     *
+     * P0-09: Evaluates all active rules against the transaction and returns
+     * a flat array of action types found across all matching rules.
+     *
+     * @param object $transaction The bank transaction (may be stdClass from DB::table)
+     * @return array Matched rule actions, or empty array if no rules match
+     */
+    protected function applyMatchingRules($transaction): array
+    {
+        $service = $this->getMatchingRulesService();
+
+        if (! $service) {
+            return [];
+        }
+
+        try {
+            // The service expects a BankTransaction model, but we may have a stdClass
+            // from DB::table(). Convert if needed.
+            if (! ($transaction instanceof BankTransaction)) {
+                $bankTransaction = BankTransaction::find($transaction->id);
+                if (! $bankTransaction) {
+                    return [];
+                }
+            } else {
+                $bankTransaction = $transaction;
+            }
+
+            return $service->applyRules($bankTransaction, $this->companyId);
+        } catch (\Throwable $e) {
+            Log::warning('Failed to apply matching rules', [
+                'transaction_id' => $transaction->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Check if any matched rule actions contain a specific action type.
+     *
+     * @param array $ruleResults The results from applyMatchingRules()
+     * @param string $actionType The action type to look for (e.g., 'ignore', 'auto_match')
+     * @return bool
+     */
+    protected function hasRuleAction(array $ruleResults, string $actionType): bool
+    {
+        foreach ($ruleResults as $result) {
+            foreach ($result['actions'] as $action) {
+                if (($action['action'] ?? '') === $actionType) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the customer_id from match_customer rule actions, if any.
+     *
+     * @param array $ruleResults The results from applyMatchingRules()
+     * @return int|null The customer_id from the highest-priority matching rule
+     */
+    protected function getRuleCustomerId(array $ruleResults): ?int
+    {
+        foreach ($ruleResults as $result) {
+            foreach ($result['actions'] as $action) {
+                if (($action['action'] ?? '') === 'match_customer' && ! empty($action['customer_id'])) {
+                    return (int) $action['customer_id'];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Match all unmatched bank transactions with unpaid invoices.
+     *
+     * P0-09: Before matching, applies user-defined rules to each transaction.
+     * - If a rule has 'ignore' action, the transaction is skipped and marked as ignored.
+     * - If a rule has 'match_customer' action, that customer's invoices are prioritized.
+     * - If a rule has 'auto_match' action, the confidence threshold may be lowered.
      */
     public function matchAllTransactions(): array
     {
@@ -45,9 +164,50 @@ class Matcher
 
         $matches = [];
         $totalMatched = 0;
+        $totalIgnored = 0;
 
         foreach ($unmatchedTransactions as $transaction) {
-            $matchedInvoice = $this->findMatchingInvoice($transaction, $unpaidInvoices);
+            // P0-09: Apply matching rules before processing
+            $ruleResults = $this->applyMatchingRules($transaction);
+            $this->currentRuleActions = $ruleResults;
+
+            // P0-09: If an 'ignore' rule matches, skip this transaction
+            if ($this->hasRuleAction($ruleResults, 'ignore')) {
+                Log::debug('Transaction ignored by matching rule', [
+                    'transaction_id' => $transaction->id,
+                ]);
+
+                // Mark transaction as ignored
+                DB::table('bank_transactions')
+                    ->where('id', $transaction->id)
+                    ->update([
+                        'processing_status' => 'ignored',
+                        'processing_notes' => json_encode(['ignored_by_rule' => true]),
+                        'processed_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                $totalIgnored++;
+
+                continue;
+            }
+
+            // P0-09: If a 'match_customer' rule matches, filter invoices to that customer
+            $ruleCustomerId = $this->getRuleCustomerId($ruleResults);
+            $invoicePool = $unpaidInvoices;
+
+            if ($ruleCustomerId) {
+                $customerInvoices = $unpaidInvoices->filter(function ($invoice) use ($ruleCustomerId) {
+                    return $invoice->customer_id === $ruleCustomerId;
+                });
+
+                // If customer has unpaid invoices, use those; otherwise fall back to full pool
+                if ($customerInvoices->isNotEmpty()) {
+                    $invoicePool = $customerInvoices;
+                }
+            }
+
+            $matchedInvoice = $this->findMatchingInvoice($transaction, $invoicePool);
 
             if ($matchedInvoice) {
                 $success = $this->createPaymentRecord($transaction, $matchedInvoice);
@@ -68,11 +228,15 @@ class Matcher
                     });
                 }
             }
+
+            // Reset cached rule actions
+            $this->currentRuleActions = null;
         }
 
         Log::info('Transaction matching completed', [
             'company_id' => $this->companyId,
             'total_matched' => $totalMatched,
+            'total_ignored' => $totalIgnored,
             'matches' => $matches,
         ]);
 
@@ -155,23 +319,57 @@ class Matcher
     }
 
     /**
-     * Find matching invoice for a transaction
+     * Find matching invoice for a transaction.
+     *
+     * P0-09: If an 'auto_match' rule is active for this transaction,
+     * the confidence threshold is lowered to the rule's configured value
+     * (default 0.5 instead of 0.7), and the score is boosted by +0.15.
      */
     protected function findMatchingInvoice($transaction, $invoices): ?Invoice
     {
         $bestMatch = null;
         $bestScore = 0;
 
-        foreach ($invoices as $invoice) {
-            $score = $this->calculateMatchScore($transaction, $invoice);
+        // P0-09: Determine confidence threshold and score boost from rules
+        $minConfidence = 0.7; // Default minimum confidence
+        $scoreBoost = 0.0;
 
-            if ($score > $bestScore && $score >= 0.7) { // Minimum 70% confidence
+        if ($this->currentRuleActions && $this->hasRuleAction($this->currentRuleActions, 'auto_match')) {
+            // Get the confidence threshold from the rule, default to 50%
+            $threshold = $this->getAutoMatchThreshold($this->currentRuleActions);
+            $minConfidence = $threshold / 100.0; // Convert percentage to 0-1 scale
+            $scoreBoost = 0.15; // Boost score when auto_match rule matches
+        }
+
+        foreach ($invoices as $invoice) {
+            $score = $this->calculateMatchScore($transaction, $invoice) + $scoreBoost;
+
+            if ($score > $bestScore && $score >= $minConfidence) {
                 $bestScore = $score;
                 $bestMatch = $invoice;
             }
         }
 
         return $bestMatch;
+    }
+
+    /**
+     * Get the confidence threshold from auto_match rule actions.
+     *
+     * @param array $ruleResults The results from applyMatchingRules()
+     * @return float The confidence threshold percentage (default 50)
+     */
+    protected function getAutoMatchThreshold(array $ruleResults): float
+    {
+        foreach ($ruleResults as $result) {
+            foreach ($result['actions'] as $action) {
+                if (($action['action'] ?? '') === 'auto_match') {
+                    return (float) ($action['confidence_threshold'] ?? 50);
+                }
+            }
+        }
+
+        return 50.0;
     }
 
     /**
@@ -501,3 +699,5 @@ class Matcher
         ];
     }
 }
+
+// CLAUDE-CHECKPOINT

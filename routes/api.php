@@ -875,7 +875,11 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/preview', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'preview']);
                     Route::post('/confirm', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'confirm']);
                     Route::get('/banks', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'supportedBanks']);
+                    // P0-03: Import Logging & Analytics
+                    Route::get('/history', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importHistory']);
+                    Route::get('/stats', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importStats']);
                 });
+                // CLAUDE-CHECKPOINT
 
                 // Invoice Reconciliation
                 Route::prefix('reconciliation')->group(function () {
@@ -884,7 +888,23 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/manual-match', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'manualMatch']);
                     Route::get('/stats', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'stats']);
                     Route::get('/unpaid-invoices', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidInvoices']);
+                    Route::post('/confirm-match', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'confirmMatch']);
+                    Route::get('/analytics', [\App\Http\Controllers\V1\Admin\Banking\ReconciliationAnalyticsController::class, 'index']);
+
+                    // P0-14: Split payment endpoints
+                    Route::post('/{id}/split', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'splitPayment']);
+                    Route::get('/{id}/splits', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getSplits']);
                 });
+
+                // Matching Rules (P0-09)
+                Route::prefix('matching-rules')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'index']);
+                    Route::post('/', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'store']);
+                    Route::put('/{id}', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'update']);
+                    Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'destroy']);
+                    Route::post('/{id}/test', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'test']);
+                });
+                // CLAUDE-CHECKPOINT
 
                 // OAuth routes (these need to be accessible without full auth for callback)
                 Route::get('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'start']);

@@ -53,6 +53,8 @@ class Reconciliation extends Model
 
     public const STATUS_IGNORED = 'ignored';
 
+    public const STATUS_SPLIT = 'split';
+
     // Legacy constants for backward compatibility
     public const STATUS_APPROVED = 'matched';
 
@@ -167,6 +169,16 @@ class Reconciliation extends Model
     public function feedback(): HasMany
     {
         return $this->hasMany(ReconciliationFeedback::class);
+    }
+
+    /**
+     * Get the split allocations for this reconciliation.
+     *
+     * P0-14: Partial Payments + Multi-Invoice Settlement.
+     */
+    public function splits(): HasMany
+    {
+        return $this->hasMany(ReconciliationSplit::class);
     }
 
     /**
