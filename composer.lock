@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cef052399c3b17c29b0adb6abb5d9108",
+    "content-hash": "49f2ad63f5540a5a0cf8bfb2a7cba314",
     "packages": [
         {
             "name": "arquivei/laravel-prometheus-exporter",
@@ -341,6 +341,68 @@
                 }
             ],
             "time": "2025-02-13T15:07:54+00:00"
+        },
+        {
+            "name": "bojanvmk/laravel-cpay",
+            "version": "v0.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bojanvmk/laravel-cpay.git",
+                "reference": "107eab781ead12a8c66e7ba1c8f3e904459e8b60"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bojanvmk/laravel-cpay/zipball/107eab781ead12a8c66e7ba1c8f3e904459e8b60",
+                "reference": "107eab781ead12a8c66e7ba1c8f3e904459e8b60",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-soap": "*",
+                "illuminate/contracts": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/view": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": "^7.4|^8.0",
+                "wsdltophp/packagebase": "~5.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Bojanvmk\\CPay\\CPayServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Bojanvmk\\CPay\\": "src/",
+                    "Bojanvmk\\CPay\\Tests\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bojan Vasilevski",
+                    "email": "bojan.v.mk@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "cPay (CaSys) integration for Laravel",
+            "homepage": "https://github.com/bojanvmk/laravel-cpay",
+            "keywords": [
+                "casys",
+                "cpay",
+                "laravel",
+                "laravel-cpay"
+            ],
+            "support": {
+                "issues": "https://github.com/bojanvmk/laravel-cpay/issues",
+                "source": "https://github.com/bojanvmk/laravel-cpay/tree/v0.2.4"
+            },
+            "time": "2025-09-28T20:58:33+00:00"
         },
         {
             "name": "brick/math",
@@ -12443,6 +12505,103 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "wsdltophp/packagebase",
+            "version": "5.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WsdlToPhp/PackageBase.git",
+                "reference": "d2ac19eec63714da3ef8b8eecd529922cb44e26d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WsdlToPhp/PackageBase/zipball/d2ac19eec63714da3ef8b8eecd529922cb44e26d",
+                "reference": "d2ac19eec63714da3ef8b8eecd529922cb44e26d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-json": "*",
+                "ext-soap": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "~3.0",
+                "phpstan/phpstan": "^1.4",
+                "phpunit/phpunit": "^9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "WsdlToPhp\\PackageBase\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mikaël DELSOL",
+                    "email": "contact@wsdltophp.com",
+                    "role": "Owner"
+                },
+                {
+                    "name": "Luke Rodgers",
+                    "email": "lukerodgers90@gmail.com",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "Arthur Moore",
+                    "email": "github@cd-net.net",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "Necati Yared Ozal",
+                    "email": "mail@necatiozal.com",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "Gemorroj",
+                    "email": "wapinet@mail.ru",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "hordijk",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "Jacob Dreesen",
+                    "email": "jacob.dreesen@gmail.com",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "Karl Pierce",
+                    "email": "kpierce@ratespecial.com",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "maurobn",
+                    "role": "Contributor"
+                },
+                {
+                    "name": "Christo Yovev",
+                    "role": "Contributor"
+                }
+            ],
+            "description": "Contains the base classes to be used by classes generated by wsdltophp/packagegenerator",
+            "homepage": "https://github.com/WsdlToPhp/PackageBase",
+            "keywords": [
+                "models",
+                "php"
+            ],
+            "support": {
+                "email": "contact@wsdltophp.com",
+                "issues": "https://github.com/WsdlToPhp/PackageBase/issues",
+                "source": "https://github.com/WsdlToPhp/PackageBase/tree/5.0.4"
+            },
+            "time": "2024-02-05T22:04:31+00:00"
         }
     ],
     "packages-dev": [

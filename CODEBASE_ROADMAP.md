@@ -144,7 +144,17 @@ public function createReconciliation(BankTransaction $tx, Invoice $invoice): Rec
 ### Pre-Work: Dependencies & Requirements
 
 #### P0-DEP: Required Dependencies
-**Priority:** P0 | **Estimate:** 0.5 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 0.5 days | **Status:** 🟡 PARTIAL
+
+**Installed Core MVP Packages (2025-02-06):**
+- [x] laravel/cashier-paddle v2.6.2 - Paddle billing
+- [x] bojanvmk/laravel-cpay v0.2.4 - CASYS payments
+- [x] num-num/ubl-invoice v1.21.2 - UBL e-invoicing
+- [x] robrichards/xmlseclibs v3.1.3 - XML signatures
+- [x] league/csv v9.27.1 - CSV parsing
+
+**Missing/Unavailable:**
+- [ ] oak-labs-io/psd2 - **DOES NOT EXIST on Packagist** - needs NX ticket for alternative
 
 Before starting Phase 0, ensure these dependencies are installed:
 
@@ -219,7 +229,7 @@ RUN docker-php-ext-install intl bcmath
 ### Pre-Work: Migration Verification
 
 #### P0-00: Migration Patch + Index Verification
-**Priority:** P0 | **Estimate:** 0.5 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 0.5 days | **Status:** ✅ DONE
 
 Verify existing 2025 migrations and add missing indexes/columns for Phase 0.
 
@@ -312,11 +322,13 @@ private function safeAddUnique(Blueprint $table, array $columns, string $indexNa
 ```
 
 **Acceptance Criteria:**
-- [ ] All required columns exist on bank_transactions
-- [ ] Fingerprint + external_id unique constraints added
-- [ ] Performance indexes added
-- [ ] Migration is idempotent (can run multiple times safely)
-- [ ] Works on both MySQL and PostgreSQL
+- [x] All required columns exist on bank_transactions
+- [x] Fingerprint + external_id unique constraints added
+- [x] Performance indexes added
+- [x] Migration is idempotent (can run multiple times safely)
+- [x] Works on both MySQL and PostgreSQL
+
+**Implementation:** `database/migrations/2026_02_06_000200_add_banking_indexes.php`
 
 ---
 
@@ -509,7 +521,25 @@ tests/Feature/MatcherTest.php            # 23 passing tests
 ---
 
 #### P0-05: Reconciliation Database Schema
-**Priority:** P0 | **Estimate:** 1 day | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 1 day | **Status:** ✅ DONE (2026-02-06)
+
+**Implemented in:**
+```
+database/migrations/2026_02_06_000100_create_reconciliations_table.php
+database/migrations/2026_02_06_000200_create_reconciliation_feedback_table.php
+app/Models/Reconciliation.php
+app/Models/ReconciliationFeedback.php
+```
+
+**Features:**
+- Reconciliations table with company, bank_transaction, invoice, and payment foreign keys
+- Status enum: pending, matched, partial, manual, ignored
+- Match type enum: auto, manual, rule
+- Confidence score (0-100 scale) with JSON match_details
+- Reconciliation feedback table for ML improvement tracking
+- Idempotent migrations (Schema::hasTable checks for Railway auto-deploys)
+- All foreign keys use ON DELETE RESTRICT (except reconciliation_feedback cascade)
+- Added reconciliations() relationships to BankTransaction, Invoice, and Payment models
 
 **Migration:**
 ```php
@@ -535,7 +565,7 @@ Schema::create('reconciliations', function (Blueprint $table) {
 // Track match feedback for ML improvement
 Schema::create('reconciliation_feedback', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('reconciliation_id')->constrained();
+    $table->foreignId('reconciliation_id')->constrained()->onDelete('cascade');
     $table->enum('feedback', ['correct', 'wrong', 'partial']);
     $table->foreignId('correct_invoice_id')->nullable()->constrained('invoices');
     $table->foreignId('user_id')->constrained();
@@ -3258,7 +3288,7 @@ tests/
 
 ### Day 1-2
 - [x] **P0-01:** Create bank CSV parser structure
-- [ ] **P0-05:** Create reconciliation migration
+- [x] **P0-05:** Create reconciliation migration
 
 ### Day 3-4
 - [x] **P0-01:** Implement NLB CSV parser

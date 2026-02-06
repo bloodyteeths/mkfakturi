@@ -169,6 +169,14 @@ class Invoice extends Model implements HasMedia
         return $this->belongsTo(TaxReportPeriod::class, 'tax_report_period_id');
     }
 
+    /**
+     * Get all reconciliation records for this invoice
+     */
+    public function reconciliations(): HasMany
+    {
+        return $this->hasMany(Reconciliation::class);
+    }
+
     public function getInvoicePdfUrlAttribute()
     {
         return url('/invoices/pdf/'.$this->unique_hash);

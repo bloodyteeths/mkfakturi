@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Bank Transaction Model
@@ -143,6 +144,14 @@ class BankTransaction extends Model
     public function originalTransaction(): BelongsTo
     {
         return $this->belongsTo(BankTransaction::class, 'duplicate_of');
+    }
+
+    /**
+     * Get all reconciliation records for this transaction
+     */
+    public function reconciliations(): HasMany
+    {
+        return $this->hasMany(Reconciliation::class);
     }
 
     /**
@@ -341,3 +350,5 @@ class BankTransaction extends Model
         ]);
     }
 }
+
+// CLAUDE-CHECKPOINT
