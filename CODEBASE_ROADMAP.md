@@ -1,6 +1,6 @@
 # Facturino Codebase Roadmap
-**Version:** 1.1
-**Last Updated:** 2026-02-05
+**Version:** 1.2
+**Last Updated:** 2026-02-06
 **Maps to:** PAYMENT_INFRASTRUCTURE_ROADMAP.md
 
 This technical roadmap maps 1:1 to the investment roadmap phases. Each ticket follows CLAUDE.md conventions.
@@ -1457,17 +1457,54 @@ Handle complex real-world reconciliation scenarios.
 **Goal:** PSD2 as upgrade to CSV reconciliation
 **North Star:** 1+ bank live with 97%+ sync success
 
+### Phase 1 Reality Check (Audited 2026-02-06)
+
+Most Phase 1 infrastructure was already built before Phase 0 reconciliation work began. Feature flags keep it disabled in production.
+
+| Ticket | Roadmap Said | Reality | True Gap |
+|--------|-------------|---------|----------|
+| P1-01 PSD2 | 🔴 TODO | ✅ Built | Enable feature flag + production creds |
+| P1-02 Sync Scheduler | 🔴 TODO | 🟡 Built | Add `banking` to queue worker config |
+| P1-03 Bank UI | 🔴 TODO | ✅ Built | Wire `BankStatus.vue` to real API |
+| P1-04 CASYS | 🔴 TODO | ✅ Built | Enable feature flag + production creds |
+| P1-05 QES Signing | 🔴 TODO | ✅ Built | Production certificates |
+| P1-06 API v1 | 🔴 TODO | ✅ Built | — |
+| P1-07 Webhooks | 🔴 TODO | ✅ Built | Outbound webhooks deferred to Phase 5 |
+| P1-08 Token Encryption | 🔴 TODO | ✅ Built | Vault/KMS upgrade is Phase 2+ |
+| P1-09 Consent UX | 🔴 TODO | 🟡 Backend done | Expiry banners, notification emails |
+| P1-10 Observability | 🔴 TODO | 🟡 Health check exists | Alerting, sync dashboard |
+| P1-11 API Spec | 🔴 TODO | 🟡 Versioning done | OpenAPI spec, rate limiting |
+| P1-12 CASYS Hardening | 🔴 TODO | ✅ Mostly done | IP whitelist |
+| P1-13 Metered Billing | 🔴 TODO | 🟡 Infrastructure exists | Per-bank-connection pricing |
+| P1-14 Queue Hardening | 🔴 TODO | 🟡 Built | Add `banking` queue to worker |
+| P1-15 Audit Logging | 🔴 TODO | ✅ Built | — |
+
+**True remaining work for Phase 1 production-readiness:**
+1. **Fix `banking` queue worker** — add to `supervisor.conf` (30 min fix)
+2. **Consent expiry UX** — banners + notification emails (P1-09)
+3. **Bank sync alerting** — Slack/email alerts on failure (P1-10)
+4. **Wire `BankStatus.vue`** to real API (P1-03 polish)
+5. **Enable feature flags** in production `.env` + configure credentials
+6. **Per-bank metered billing** — Paddle add-on for `+€15/bank/mo` (P1-13)
+
 ### P1-01: PSD2 Partner Integration
-**Priority:** P0 | **Estimate:** 2-3 weeks | **Status:** 🟡 Sandbox ready
+**Priority:** P0 | **Estimate:** 2-3 weeks | **Status:** ✅ IMPLEMENTED (feature-flagged)
 
 Integrate with AISP partner for bank connectivity.
 
-**Existing code to extend:**
-```
-app/Services/Banking/Psd2Client.php  ← Extend this
-```
+**Already built:**
+- `app/Services/Banking/Psd2Client.php` — Abstract base class (627 lines), OAuth2 with PKCE, mTLS, token lifecycle
+- `Modules/Mk/Services/StopanskaGateway.php` — Stopanska bank PSD2 adapter
+- `Modules/Mk/Services/NlbGateway.php` — NLB bank PSD2 adapter
+- `Modules/Mk/Services/KomerGateway.php` — Komercijalna bank PSD2 adapter
+- `app/Models/BankToken.php` — Encrypted token storage with `Crypt::encryptString()`
+- `app/Models/BankConsent.php` — Consent tracking with expiry, status, scope
+- `app/Models/BankConnection.php` — Bank connection management
+- `Modules/Mk/Http/BankAuthController.php` — OAuth flow with CSRF-protected state
+- `app/Services/Banking/Psd2AccountSyncService.php` — Account discovery and storage
+- Feature flag: `FEATURE_PSD2_BANKING`
 
-**New files:**
+**Original spec (for reference):**
 ```
 app/Services/Banking/Psd2/
 ├── Psd2ServiceInterface.php
@@ -1518,9 +1555,21 @@ Schema::create('bank_consents', function (Blueprint $table) {
 ---
 
 #### P1-02: PSD2 Transaction Sync Scheduler
-**Priority:** P0 | **Estimate:** 3-4 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 3-4 days | **Status:** 🟡 MOSTLY IMPLEMENTED — queue worker gap
 
 Background job to sync transactions from connected banks with **per-bank rate limit policies**.
+
+**Already built:**
+- `routes/console.php` — Scheduled sync every 4 hours with `withoutOverlapping()`
+- `app/Jobs/SyncBankTransactions.php` — Main dispatcher, per-bank rate limiting (4s sleep = 15 req/min)
+- `Modules/Mk/Jobs/SyncNlb.php` — NLB-specific sync with balance updates
+- `Modules/Mk/Jobs/SyncStopanska.php` — Stopanska-specific sync
+- `Modules/Mk/Jobs/SyncKomer.php` — Komercijalna-specific sync
+- All jobs dispatch to `banking` queue with comprehensive error logging
+
+**GAP: `banking` queue not in worker config.** Jobs target `->onQueue('banking')` but `supervisor.conf` only processes `default,high,background`. Need to add `banking` to worker or add dedicated banking worker.
+
+**Remaining work (spec below still valid for per-bank policies):**
 
 ⚠️ **IMPORTANT:** Banks have different rate limits. Some allow 4 calls/day, others allow real-time. A global 15-minute schedule will get you blocked.
 
@@ -1699,20 +1748,19 @@ class SyncTransactionsJob implements ShouldQueue
 ---
 
 #### P1-03: Bank Connection UI
-**Priority:** P0 | **Estimate:** 2-3 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2-3 days | **Status:** ✅ IMPLEMENTED
 
-**Files to create:**
-```
-resources/js/pages/banking/
-├── ConnectBankPage.vue
-├── components/
-│   ├── BankList.vue
-│   ├── ConsentFlow.vue
-│   ├── ConnectedAccounts.vue
-│   └── SyncStatus.vue
-```
+**Already built:**
+- `resources/scripts/admin/views/banking/ConnectBank.vue` — Modal with bank selection (Stopanska, NLB), OAuth flow initiation
+- `resources/scripts/admin/views/banking/BankingDashboard.vue` — Connected accounts grid, sync/disconnect actions, balance display
+- `resources/scripts/admin/views/banking/TransactionsList.vue` — Paginated transactions with categorization
+- `resources/scripts/admin/views/banking/TransactionCategorization.vue` — AI-powered category suggestions
+- `resources/scripts/components/widgets/BankStatus.vue` — Dashboard widget (uses mock data, needs real API wiring)
+- `Modules/Mk/Http/BankAuthController.php` — OAuth backend with CSRF-protected state
 
-**Flow:**
+**Minor gap:** `BankStatus.vue` widget uses mock data — needs wiring to real `/banking/accounts` API.
+
+**Flow (working):**
 ```
 [Select Bank] → [OAuth Redirect] → [Consent] → [Account Selection] → [Connected!]
 ```
@@ -1720,9 +1768,21 @@ resources/js/pages/banking/
 ---
 
 #### P1-04: CASYS Payment Gateway Integration
-**Priority:** P0 | **Estimate:** 1 week | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 1 week | **Status:** ✅ IMPLEMENTED (feature-flagged)
 
 Integrate CASYS for payment link generation.
+
+**Already built:**
+- `Modules/Mk/Services/CpayDriver.php` (351 lines) — SHA256 signature generation/verification, checkout URL creation, subscription management
+- `Modules/Mk/Billing/Controllers/CpayWebhookController.php` (293 lines) — Subscription lifecycle webhooks
+- `app/Http/Controllers/Webhooks/CpayCallbackController.php` — Payment callback handler with validation
+- `app/Http/Controllers/CpayCallbackController.php` — Additional callback handler
+- Idempotency via 7-day cache, `hash_equals()` timing-safe comparison
+- Commission calculation on successful subscription payments
+- CSRF exemption configured in `VerifyCsrfToken.php`
+- Feature flag: `FEATURE_ADVANCED_PAYMENTS`
+
+**Minor gap:** No IP whitelist for CPAY webhook endpoints.
 
 **Files to create:**
 ```
@@ -1814,35 +1874,31 @@ Route::post('/webhooks/casys', [CasysWebhookController::class, 'handle'])
 ---
 
 #### P1-05: QES E-Invoice Signing
-**Priority:** P1 | **Estimate:** 1 week | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 1 week | **Status:** ✅ IMPLEMENTED (feature-flagged)
 
 Qualified Electronic Signature for invoices.
 
-**Files to create:**
-```
-app/Services/EInvoice/
-├── EInvoiceService.php
-├── Signers/
-│   ├── SignerInterface.php
-│   └── XmlSecSigner.php
-├── Generators/
-│   └── UblGenerator.php
-└── Models/
-    └── SignedInvoice.php
-```
+**Already built:**
+- `Modules/Mk/Services/MkXmlSigner.php` (370 lines) — RSA-SHA256 signing with `robrichards/xmlseclibs` v3.1, EXC_C14N canonicalization, X.509 certificate embedding, signature verification, self-signed test cert generation
+- `Modules/Mk/Services/MkUblMapper.php` — UBL 2.1 invoice mapping using `num-num/ubl-invoice` v1.21 with Macedonian tax compliance (18% / 5% VAT, MKD currency)
+- `Modules/Mk/Services/MkUblCreditNoteMapper.php` — Credit note UBL mapping
+- `app/Jobs/SubmitEInvoiceJob.php` — Async e-invoice submission to tax authorities
+- `app/Models/EInvoice.php`, `app/Models/EInvoiceSubmission.php`, `app/Models/Certificate.php`
+- `app/Http/Controllers/V1/Admin/EInvoice/EInvoiceController.php`
+- `app/Http/Controllers/V1/Admin/Invoice/ExportXmlController.php`
 
-**Dependencies:**
-```bash
-composer require robrichards/xmlseclibs
-composer require num-num/ubl-invoice
-```
+**Dependencies installed:**
+- `robrichards/xmlseclibs` v3.1.3 ✅
+- `num-num/ubl-invoice` v1.21.2 ✅
 
 ---
 
 #### P1-06: API v1 Foundation
-**Priority:** P1 | **Estimate:** 3-4 days | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 3-4 days | **Status:** ✅ IMPLEMENTED
 
 Stable public API with versioning.
+
+**Already built:** V1 controller namespaces (`app/Http/Controllers/V1/Admin/`, `V1/Partner/`, `V1/Customer/`), versioned route groups in `routes/api.php`.
 
 **Structure:**
 ```
@@ -1883,13 +1939,22 @@ Route::prefix('v1')->middleware(['api', 'api.version:1'])->group(function () {
 ---
 
 #### P1-07: Webhook System
-**Priority:** P1 | **Estimate:** 2-3 days | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 2-3 days | **Status:** ✅ IMPLEMENTED
 
 Reliable webhook delivery for events.
 
-**Dependencies:**
+**Already built:**
+- `routes/webhooks.php` — Multi-provider webhook routing (Paddle, CPAY, NLB, Stopanska, Stripe)
+- `app/Http/Controllers/Webhooks/WebhookController.php` — Central webhook dispatcher
+- `app/Models/GatewayWebhookEvent.php` — Event queuing with idempotency keys, status tracking (pending/processed/failed/retrying)
+- `app/Jobs/ProcessWebhookEvent.php` (589 lines) — Async processing with retry logic for Paddle, CPAY, bank, and Stripe events
+- Commission calculation and company referral rewards on successful payments
+
+**Not yet built:** Outbound webhook delivery to customers (spatie/laravel-webhook-server). This is Phase 5 developer platform scope.
+
+**Dependencies (deferred):**
 ```bash
-composer require spatie/laravel-webhook-server
+composer require spatie/laravel-webhook-server  # Phase 5
 ```
 
 **Migration:**
@@ -1922,9 +1987,17 @@ Schema::create('webhook_deliveries', function (Blueprint $table) {
 ### Critical Infrastructure (Phase 1)
 
 #### P1-08: Token Encryption + Secrets Management
-**Priority:** P0 | **Estimate:** 3-4 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 3-4 days | **Status:** ✅ IMPLEMENTED
 
 ⚠️ **SECURITY:** Bank tokens (access_token, refresh_token) MUST be encrypted at rest.
+
+**Already built:**
+- `app/Models/BankToken.php` (163 lines) — Encrypted token storage via `Crypt::encryptString()` (AES-256), auto-decrypt on retrieval, expiry tracking with `isExpiringSoon()`/`isExpired()`/`isValid()`, `$hidden` array prevents token leakage
+- `app/Models/BankConsent.php` (265 lines) — Encrypted access/refresh tokens
+- All secrets via environment variables (no hardcoded credentials)
+- `config/mk.php` — Certificate paths, API keys via env vars (CPAY_MERCHANT_ID, STOPANSKA_CLIENT_ID, NLB_CLIENT_ID, MK_XML_PRIVATE_KEY_PATH, etc.)
+
+**Phase 2+ upgrade:** Dedicated encryption key via HashiCorp Vault or AWS KMS (spec below still valid for that).
 
 **Files to create:**
 ```
@@ -2049,9 +2122,21 @@ class BankConsent extends Model
 ---
 
 #### P1-09: Consent Lifecycle UX
-**Priority:** P0 | **Estimate:** 2-3 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2-3 days | **Status:** 🟡 BACKEND DONE, UX INCOMPLETE
 
 Handle real-world bank connection failures gracefully.
+
+**Already built (backend):**
+- `app/Models/BankConsent.php` — Consent status tracking (pending/active/expired/revoked), token expiry, scope
+- `app/Models/BankToken.php` — `isExpiringSoon()`, `isExpired()`, `isValid()` methods
+- `Modules/Mk/Http/BankAuthController.php` — OAuth reconnect flow
+
+**Gaps (frontend UX):**
+- No "Bank connection expiring in X days" banner
+- No "Connection failed — Reconnect" banner
+- No expiry notification emails (7-day and 1-day warnings)
+- No scheduled `CheckExpiringConsentsJob`
+- `BankStatus.vue` widget uses mock data
 
 **States to handle:**
 ```
@@ -2116,9 +2201,20 @@ $schedule->job(new CheckExpiringConsentsJob)->daily();
 ---
 
 #### P1-10: Bank Sync Observability + Alerts
-**Priority:** P0 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2 days | **Status:** 🟡 PARTIAL — health check exists, no alerting dashboard
 
 ⚠️ **OPERATIONAL:** You need to know when bank sync breaks before users complain.
+
+**Already built:**
+- `app/Http/Controllers/HealthController.php` — `/health` endpoint with 9 checks including bank sync error detection (Telescope-based, last 24h, threshold: 10 errors)
+- `app/Jobs/SyncBankTransactions.php` — Per-bank error logging with detailed error arrays
+- `app/Models/GatewayWebhookEvent.php` — Webhook event tracking with status/retry_count
+
+**Gaps:**
+- No Slack/email alerting on sync failure
+- No visual bank sync health dashboard
+- No `bank_sync_logs` table (spec below still valid)
+- No correlation ID tracing
 
 **Files to create:**
 ```
@@ -2224,7 +2320,10 @@ return [
 ---
 
 #### P1-11: API Product Boundaries + OpenAPI Spec
-**Priority:** P1 | **Estimate:** 2-3 days | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 2-3 days | **Status:** 🟡 PARTIAL — versioning done, no OpenAPI spec
+
+**Already built:** V1 controller namespaces, route prefixing, Sanctum auth.
+**Gaps:** No OpenAPI/Swagger spec, no rate limiting middleware per tier, no `fct_live_` / `fct_test_` API key format.
 
 Define API auth, rate limits, and generate OpenAPI spec.
 
@@ -2333,7 +2432,7 @@ class WebhookSigner
 ---
 
 #### P1-12: CASYS Webhook Hardening
-**Priority:** P0 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2 days | **Status:** ✅ MOSTLY DONE — missing IP whitelist
 
 ⚠️ **PAYMENT CRITICAL:** Webhooks must be idempotent and secure.
 
@@ -2543,7 +2642,10 @@ if ($validated['Timestamp'] ?? null) {
 ---
 
 #### P1-13: Metered Billing for Bank Connections
-**Priority:** P1 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 2 days | **Status:** 🟡 INFRASTRUCTURE EXISTS — no per-connection metering
+
+**Already built:** `app/Models/UsageTracking.php` (feature-level usage tracking), `app/Models/CompanySubscription.php` (plans: free/starter/standard/business/max with Paddle+CPAY providers), Paddle billing via `laravel/cashier-paddle` v2.6.2.
+**Gap:** No per-bank-connection billing. All connections share single company subscription. Need `+€15/bank/mo` add-on pricing per PAYMENT_INFRASTRUCTURE_ROADMAP.md.
 
 Implement +€15/bank/mo pricing from investor roadmap.
 
@@ -2605,7 +2707,16 @@ $schedule->job(new UpdateBillingMetersJob)->daily();
 ---
 
 #### P1-14: Queue + Job Orchestration Hardening
-**Priority:** P0 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2 days | **Status:** 🟡 MOSTLY IMPLEMENTED — banking queue gap
+
+**Already built:**
+- `config/queue.php` — Redis/Database drivers, named queues (default, high, migration, background, einvoice), job batching, configurable timeouts/memory
+- 20+ job classes across `app/Jobs/` and `Modules/Mk/Jobs/`
+- `supervisor.conf` — General + einvoice queue workers
+- `railway-queue-worker.sh` + `start-queue-worker.sh` — Production queue scripts
+- `docker-supervisord.conf` — Scheduler process
+
+**GAP:** `banking` queue not in any worker config. Jobs dispatch to `->onQueue('banking')` but `supervisor.conf` only processes `default,high,background`. Banking sync jobs are silently unprocessed.
 
 ⚠️ **RELIABILITY:** Jobs fail silently without proper idempotency, retries, and dead-letter handling.
 
@@ -2714,7 +2825,15 @@ class SyncBankTransactionsJob implements ShouldQueue
 ---
 
 #### P1-15: Audit Logging for Compliance
-**Priority:** P1 | **Estimate:** 1 day | **Status:** 🔴 TODO
+**Priority:** P1 | **Estimate:** 1 day | **Status:** ✅ IMPLEMENTED
+
+**Already built:**
+- `app/Models/AuditLog.php` (195 lines) — Polymorphic auditable, old/new values, changed fields, request metadata (IP, user agent, URL), company isolation, batch IDs, tags
+- `app/Traits/HasAuditing.php` — Model trait for automatic audit tracking
+- `app/Observers/AuditObserver.php` — Eloquent observer for create/update/delete events
+- `app/Http/Controllers/V1/Admin/AuditLogs/AuditLogController.php` — API for querying audit logs
+- `database/migrations/2025_11_11_000001_create_audit_logs_table.php`
+- PII protection: AES encryption for sensitive fields (vat_id, iban, email, phone, ssn), masking fallback
 
 Use `spatie/laravel-activitylog` for compliance-ready audit trail.
 
