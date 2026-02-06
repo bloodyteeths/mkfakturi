@@ -85,7 +85,8 @@ class SyncKomer implements ShouldQueue
             foreach ($accounts as $account) {
                 // Skip if specific bank account ID is requested and doesn't match
                 if ($this->bankAccountId) {
-                    $bankAccount = BankAccount::where('company_id', $this->companyId)
+                    // P0-13: explicit tenant scope via forCompany()
+                    $bankAccount = BankAccount::forCompany($this->companyId)
                         ->where('id', $this->bankAccountId)
                         ->first();
 
@@ -177,7 +178,8 @@ class SyncKomer implements ShouldQueue
      */
     protected function findOrCreateBankAccount($account): BankAccount
     {
-        $bankAccount = BankAccount::where('company_id', $this->companyId)
+        // P0-13: explicit tenant scope via forCompany()
+        $bankAccount = BankAccount::forCompany($this->companyId)
             ->where('account_number', $account->getAccountNumber())
             ->first();
 

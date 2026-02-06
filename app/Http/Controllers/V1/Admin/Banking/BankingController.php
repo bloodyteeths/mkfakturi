@@ -62,8 +62,8 @@ class BankingController extends Controller
                 'company_id' => $company->id,
             ]);
 
-            // Query with proper error handling
-            $accountsQuery = BankAccount::where('company_id', $company->id);
+            // P0-13: explicit tenant scope via forCompany()
+            $accountsQuery = BankAccount::forCompany($company->id);
 
             // Some self-hosted deployments might still be on an older schema without the is_active column.
             if (Schema::hasColumn('bank_accounts', 'is_active')) {
@@ -188,7 +188,8 @@ class BankingController extends Controller
                 'company_id' => $company->id,
             ]);
 
-            $query = BankTransaction::where('company_id', $company->id);
+            // P0-13: explicit tenant scope via forCompany()
+            $query = BankTransaction::forCompany($company->id);
 
             // Only eager load relationships if they exist
             try {
@@ -476,8 +477,8 @@ class BankingController extends Controller
                 return response()->json(['data' => []], 200);
             }
 
-            // Get all active bank accounts
-            $accountsQuery = BankAccount::where('company_id', $company->id);
+            // P0-13: explicit tenant scope via forCompany()
+            $accountsQuery = BankAccount::forCompany($company->id);
             if (Schema::hasColumn('bank_accounts', 'is_active')) {
                 $accountsQuery->where('is_active', true);
             }
@@ -508,7 +509,8 @@ class BankingController extends Controller
 
             if (Schema::hasTable('bank_transactions')) {
                 $today = Carbon::today();
-                $transactions = BankTransaction::where('company_id', $company->id)
+                // P0-13: explicit tenant scope via forCompany()
+                $transactions = BankTransaction::forCompany($company->id)
                     ->whereDate('transaction_date', $today)
                     ->get();
 

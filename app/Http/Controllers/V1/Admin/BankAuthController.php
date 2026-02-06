@@ -267,14 +267,10 @@ class BankAuthController extends Controller
             ], 422);
         }
 
-        $bankAccount = BankAccount::findOrFail($request->bank_account_id);
-
-        // Ensure bank account belongs to this company
-        if ($bankAccount->company_id !== $companyId) {
-            return response()->json([
-                'error' => 'Bank account does not belong to this company',
-            ], 403);
-        }
+        // P0-13: Use forCompany() scope to ensure tenant isolation in a single query
+        $bankAccount = BankAccount::forCompany($companyId)
+            ->where('id', $request->bank_account_id)
+            ->firstOrFail();
 
         try {
             $file = $request->file('file');

@@ -165,6 +165,7 @@ class BankConnectionController extends Controller
         try {
             $companyId = $request->header('company');
 
+            // P0-13: explicit tenant scope
             $connections = BankConnection::with('bankProvider', 'consents')
                 ->where('company_id', $companyId)
                 ->orderBy('created_at', 'desc')
@@ -400,9 +401,9 @@ class BankConnectionController extends Controller
         try {
             $companyId = $request->header('company');
 
-            // Verify bank account belongs to this company
-            $bankAccount = \App\Models\BankAccount::where('id', $bankAccountId)
-                ->where('company_id', $companyId)
+            // P0-13: Verify bank account belongs to this company via forCompany() scope
+            $bankAccount = \App\Models\BankAccount::forCompany($companyId)
+                ->where('id', $bankAccountId)
                 ->firstOrFail();
 
             // Date range

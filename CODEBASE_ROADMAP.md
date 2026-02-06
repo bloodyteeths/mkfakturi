@@ -743,9 +743,9 @@ Track KPIs for Phase 0 acceptance criteria.
 ### Critical Infrastructure (Week 2-4)
 
 #### P0-15: Bank Accounts Normalization
-**Priority:** P0 | **Estimate:** 1 day | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 1 day | **Status:** ✅ DONE
 
-⚠️ **CRITICAL:** Without this, PSD2 multi-account handling is impossible and dedupe is weak.
+✅ **COMPLETED (2026-02-06):** Additive migration adds missing PSD2 columns (currency, nickname, status, external_id, last_synced_at, bank_consent_id) with idempotent Schema::hasColumn checks. BankAccount model enhanced with consent(), transactions() relationships, maskedIban accessor, scopeForCompany, scopeActive. Psd2AccountSyncService created for consent-based account sync.
 
 The `bank_transactions.bank_account_id` column exists but references no table. PSD2 consents can have multiple accounts per consent. Need normalized `bank_accounts` table.
 
@@ -856,7 +856,7 @@ class Psd2AccountSyncService
 ---
 
 #### P0-11: Transaction Fingerprinting + Dedupe
-**Priority:** P0 | **Estimate:** 2 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2 days | **Status:** ✅ DONE
 
 ⚠️ **CRITICAL:** Without this, re-imports create duplicates and pilots will hate you.
 
@@ -1060,7 +1060,7 @@ class DeduplicationService
 ---
 
 #### P0-12: Reconciliation Posting Service
-**Priority:** P0 | **Estimate:** 2-3 days | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 2-3 days | **Status:** ✅ DONE
 
 ⚠️ **CRITICAL:** Reconciliation must safely create Payment records and post to ledger.
 
@@ -1287,7 +1287,7 @@ class ReconciliationPostingService extends BaseCompanyService
 ---
 
 #### P0-13: Tenant Scoping Audit
-**Priority:** P0 | **Estimate:** 1 day | **Status:** 🔴 TODO
+**Priority:** P0 | **Estimate:** 1 day | **Status:** ✅ DONE
 
 ⚠️ **SECURITY:** Every query in banking/reconciliation MUST be scoped by company_id.
 

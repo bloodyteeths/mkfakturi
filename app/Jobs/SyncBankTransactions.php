@@ -72,8 +72,8 @@ class SyncBankTransactions implements ShouldQueue
         $totalImported = 0;
         $errors = [];
 
-        // Get all active bank accounts for this company
-        $bankAccounts = BankAccount::where('company_id', $this->company->id)
+        // P0-13: explicit tenant scope via forCompany()
+        $bankAccounts = BankAccount::forCompany($this->company->id)
             ->where('is_active', true)
             ->get();
 

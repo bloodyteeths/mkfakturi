@@ -27,8 +27,8 @@ class ReconciliationController extends Controller
         $company = $this->getCompany();
         $matcher = new Matcher($company->id);
 
-        // Get unmatched transactions
-        $transactions = BankTransaction::where('company_id', $company->id)
+        // Get unmatched transactions (P0-13: explicit tenant scope)
+        $transactions = BankTransaction::forCompany($company->id)
             ->whereNull('matched_invoice_id')
             ->where('amount', '>', 0)
             ->orderBy('transaction_date', 'desc')
@@ -95,7 +95,8 @@ class ReconciliationController extends Controller
 
         $company = $this->getCompany();
 
-        $transaction = BankTransaction::where('company_id', $company->id)
+        // P0-13: explicit tenant scope
+        $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
             ->whereNull('matched_invoice_id')
             ->firstOrFail();
@@ -166,11 +167,30 @@ class ReconciliationController extends Controller
     }
 
     /**
-     * Get the current company from the authenticated user
+     * Get the current company from the authenticated user.
+     *
+     * P0-13: Resolves company from request header and validates user access.
+     * Falls back to user's first company if no header is provided.
      */
     protected function getCompany(): Company
     {
-        return Company::find(Auth::user()->companies()->first()->id);
+        $user = Auth::user();
+        $companyIdHeader = request()->header('company');
+
+        if ($companyIdHeader) {
+            $companyId = (int) $companyIdHeader;
+
+            // Validate user has access to this company
+            if ($user->hasCompany($companyId)) {
+                $company = $user->companies()->where('companies.id', $companyId)->first();
+                if ($company) {
+                    return $company;
+                }
+            }
+        }
+
+        // Fall back to user's first company
+        return $user->companies()->firstOrFail();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class BankTransaction extends Model
 {
+    use BelongsToCompany;
     use HasFactory;
 
     protected $fillable = [
@@ -54,6 +56,8 @@ class BankTransaction extends Model
         'raw_data',
         'is_duplicate',
         'duplicate_of',
+        'fingerprint',
+        'external_transaction_id',
     ];
 
     protected $casts = [
@@ -186,13 +190,7 @@ class BankTransaction extends Model
         return $query->where('amount', '<', 0);
     }
 
-    /**
-     * Scope: Get transactions for a specific company
-     */
-    public function scopeForCompany($query, $companyId)
-    {
-        return $query->where('company_id', $companyId);
-    }
+    // scopeForCompany provided by BelongsToCompany trait
 
     /**
      * Scope: Get transactions in date range

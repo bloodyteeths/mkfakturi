@@ -45,9 +45,9 @@ class BankImportController extends Controller
                 ], 404);
             }
 
-            // Verify account belongs to company
-            $account = BankAccount::where('id', $request->account_id)
-                ->where('company_id', $company->id)
+            // Verify account belongs to company (P0-13: explicit tenant scope)
+            $account = BankAccount::forCompany($company->id)
+                ->where('id', $request->account_id)
                 ->first();
 
             if (!$account) {
@@ -163,7 +163,10 @@ class BankImportController extends Controller
                 ], 403);
             }
 
-            $account = BankAccount::find($importData['account_id']);
+            // P0-13: Validate bank account belongs to the company (tenant-scoped)
+            $account = BankAccount::forCompany($company->id)
+                ->where('id', $importData['account_id'])
+                ->first();
             if (!$account) {
                 return response()->json([
                     'error' => true,
@@ -332,7 +335,10 @@ class BankImportController extends Controller
     }
 
     /**
-     * Resolve the current company from the request
+     * Resolve the current company from the request.
+     *
+     * P0-13: Validates that the authenticated user has access to the requested company.
+     * Never returns a company the user doesn't belong to.
      */
     private function resolveCompany(Request $request): ?Company
     {
@@ -340,22 +346,26 @@ class BankImportController extends Controller
             return $this->currentCompany;
         }
 
-        $companyId = $request->header('company');
-
-        if ($companyId) {
-            $this->currentCompany = Company::find($companyId);
-
-            return $this->currentCompany;
-        }
-
         $user = $request->user();
-        if ($user && method_exists($user, 'currentCompany')) {
-            $this->currentCompany = $user->currentCompany();
 
-            return $this->currentCompany;
+        if (! $user) {
+            return null;
         }
 
-        return null;
+        $companyIdHeader = $request->header('company');
+        $companyId = $companyIdHeader !== null ? (int) $companyIdHeader : null;
+        $company = null;
+
+        // P0-13: Always verify user has access to the requested company
+        if ($companyId && $user->hasCompany($companyId)) {
+            $company = $user->companies()->where('companies.id', $companyId)->first();
+        }
+
+        if (! $company) {
+            $company = $user->companies()->first();
+        }
+
+        return $this->currentCompany = $company;
     }
 }
 
