@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Railway E-Invoice Queue Worker Script
-# Runs dedicated queue worker for e-invoice submissions
+# Railway E-Invoice & Banking Queue Worker Script
+# Runs dedicated queue worker for e-invoice submissions and banking sync
 set -e
 
-echo "=== Railway E-Invoice Queue Worker ==="
+echo "=== Railway E-Invoice & Banking Queue Worker ==="
 echo "Starting at: $(date)"
 
 # Parse DATABASE_URL and set DB environment variables
@@ -73,21 +73,21 @@ chmod -R 775 storage
 php artisan config:clear || true
 
 echo "================================="
-echo "Starting E-Invoice Queue Worker"
-echo "Queue: einvoice"
+echo "Starting E-Invoice & Banking Queue Worker"
+echo "Queues: einvoice,banking"
 echo "Tries: 3"
 echo "Timeout: 120 seconds"
 echo "================================="
 
 # Start the queue worker
-# --queue=einvoice: Process only e-invoice jobs
+# --queue=einvoice,banking: Process e-invoice and banking sync jobs
 # --tries=3: Maximum 3 attempts per job
 # --timeout=120: 120 second timeout per job
 # --sleep=3: Sleep 3 seconds when no jobs available
 # --max-jobs=100: Restart worker after 100 jobs (prevent memory leaks)
 # --max-time=3600: Restart worker after 1 hour (prevent memory leaks)
 php artisan queue:work redis \
-    --queue=einvoice \
+    --queue=einvoice,banking \
     --tries=3 \
     --timeout=120 \
     --sleep=3 \

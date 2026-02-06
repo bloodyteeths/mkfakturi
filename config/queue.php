@@ -103,6 +103,16 @@ return [
             'after_commit' => false,
         ],
 
+        // Banking sync queue for PSD2 bank feed operations
+        'banking' => [
+            'driver' => 'redis',
+            'connection' => env('QUEUE_REDIS_CONNECTION', 'queue'),
+            'queue' => 'banking',
+            'retry_after' => 150, // 2.5 minutes (longer than job timeout)
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
         // E-invoice submission queue for tax authority submissions
         'einvoice' => [
             'driver' => 'redis',

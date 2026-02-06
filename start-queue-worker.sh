@@ -3,7 +3,7 @@
 # Local Development Queue Worker Script
 # Simplified script for running queue worker during local development
 
-echo "=== Starting E-Invoice Queue Worker (Local Development) ==="
+echo "=== Starting E-Invoice & Banking Queue Worker (Local Development) ==="
 echo ""
 
 # Check if Redis is available
@@ -37,13 +37,13 @@ if [ -f ".env" ]; then
 fi
 
 echo "Starting queue worker..."
-echo "Queue: einvoice"
+echo "Queues: einvoice,banking"
 echo "Press Ctrl+C to stop"
 echo ""
 
 # Start the queue worker with verbose output
 php artisan queue:work redis \
-    --queue=einvoice \
+    --queue=einvoice,banking \
     --tries=3 \
     --timeout=120 \
     --sleep=3 \
