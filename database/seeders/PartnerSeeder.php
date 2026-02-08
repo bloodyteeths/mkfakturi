@@ -54,7 +54,7 @@ class PartnerSeeder extends Seeder
                     'registration_number' => null,
                     'bank_account' => null,
                     'bank_name' => null,
-                    'commission_rate' => 0.00,
+                    'commission_rate' => 20.00,
                     'is_active' => true,
                     'notes' => "Auto-generated partner record for {$user->role} user",
                 ]);

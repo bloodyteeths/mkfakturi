@@ -45,13 +45,13 @@ class AffiliateEventFactory extends Factory
     }
 
     /**
-     * Upline commission (5%)
+     * Upline commission (20%)
      */
     public function upline(): static
     {
         return $this->state(fn (array $attributes) => [
             'commission_type' => 'upline',
-            'commission_amount' => round($attributes['commission_amount'] * 0.05, 2),
+            'commission_amount' => round($attributes['commission_amount'] * 0.20, 2),
         ]);
     }
 

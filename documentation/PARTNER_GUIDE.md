@@ -32,7 +32,7 @@ This guide explains how accountants and business consultants can join the Factur
 The Facturino Partner Program is designed for **accountants**, **bookkeepers**, and **business consultants** who want to:
 
 - Offer modern invoicing and accounting solutions to their clients
-- Earn **recurring monthly commissions** (5% default rate)
+- Earn **recurring monthly commissions** (20% standard rate)
 - Provide value-added services (setup, training, support)
 - Grow their practice with referrals
 
@@ -46,7 +46,7 @@ The Facturino Partner Program is designed for **accountants**, **bookkeepers**, 
 
 ### Program Benefits
 
-- **5% recurring commission** on all referred customer subscriptions
+- **20% recurring commission** on all referred customer subscriptions (22% for Partner Plus)
 - **Lifetime earnings:** Earn as long as the client subscribes
 - **No sales quotas:** Refer at your own pace
 - **Free training:** Webinars, documentation, and 1-on-1 support
@@ -212,29 +212,23 @@ This builds loyalty and reduces churn (= longer commissions!).
 
 ## Commission Structure
 
-### Default Commission Rate
+### Commission Rates
 
-**5% of monthly subscription fees** (recurring)
+| Tier | Requirement | Commission Rate |
+|------|------------|----------------|
+| **Partner (Free)** | Sign up as partner | 20% |
+| **Partner Plus** | €29/month subscription OR 10+ active clients | 22% |
 
-### Commission Tiers
+**Example Earnings (20 clients):**
 
-| Tier | Active Referrals | Commission Rate |
-|------|-----------------|----------------|
-| **Bronze** | 1-10 clients | 5% |
-| **Silver** | 11-25 clients | 7.5% |
-| **Gold** | 26-50 clients | 10% |
-| **Platinum** | 51+ clients | 15% |
-
-**Example Earnings (Gold Tier, 30 clients):**
-
-| Plan | Clients | Price/Month | Monthly Revenue | Your 10% |
+| Plan | Clients | Price/Month | Monthly Revenue | Your 20% |
 |------|---------|-------------|----------------|----------|
-| Starter | 10 | €15 | €150 | €15 |
-| Professional | 15 | €30 | €450 | €45 |
-| Business | 5 | €60 | €300 | €30 |
-| **Total** | **30** | - | **€900** | **€90/month** |
+| Starter | 10 | €15 | €150 | €30 |
+| Professional | 5 | €30 | €150 | €30 |
+| Business | 5 | €60 | €300 | €60 |
+| **Total** | **20** | - | **€600** | **€120/month** |
 
-**Annual Earnings:** €1,080 (recurring!)
+**Annual Earnings:** €1,440 (recurring!)
 
 ### Commission Lifecycle
 
@@ -249,7 +243,7 @@ This builds loyalty and reduces churn (= longer commissions!).
 
 **What if a client downgrades?**
 - Commission is based on the current subscription price
-- Example: Business (€60) → Professional (€30) → Commission reduces to 5% of €30
+- Example: Business (€60) → Professional (€30) → Commission reduces to 20% of €30
 
 **What if a client churns?**
 - Commission stops when the client cancels

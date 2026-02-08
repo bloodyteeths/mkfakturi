@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
  * Partner Plus Subscription Controller
  *
  * Handles Partner Plus subscription (€29/mo) for accountants
- * Provides enhanced commission rate (22% vs 18%)
+ * Provides enhanced commission rate (22% vs 20%)
  */
 class PartnerSubscriptionController extends Controller
 {
@@ -42,7 +42,7 @@ class PartnerSubscriptionController extends Controller
         $currentPlan = [
             'tier' => $user->partner_subscription_tier ?? 'free',
             'price' => $user->partner_subscription_tier === 'plus' ? self::PARTNER_PLUS_PRICE : 0,
-            'commission_rate' => $user->partner_subscription_tier === 'plus' ? 0.22 : 0.18,
+            'commission_rate' => $user->partner_subscription_tier === 'plus' ? 0.22 : 0.20,
         ];
 
         if ($subscription && $subscription->valid()) {
@@ -195,7 +195,7 @@ class PartnerSubscriptionController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Partner Plus subscription cancelled. You will revert to 18% commission rate at the end of the billing period.',
+                'message' => 'Partner Plus subscription cancelled. You will revert to 20% commission rate at the end of the billing period.',
                 'ends_at' => $subscription->ends_at,
             ]);
 

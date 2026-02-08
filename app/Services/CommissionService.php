@@ -452,11 +452,11 @@ class CommissionService
     protected function getCommissionSplitType(?float $uplineCommission, ?float $salesRepCommission): string
     {
         if ($uplineCommission && $salesRepCommission) {
-            return '3-way'; // 15% direct + 5% upline + 5% sales rep = 25% total
+            return '3-way'; // 20% direct + 20% upline + 5% sales rep = 45% total
         } elseif ($uplineCommission) {
-            return '2-way_upline'; // 15% direct + 5% upline = 20% total
+            return '2-way_upline'; // 20% direct + 20% upline = 40% total
         } elseif ($salesRepCommission) {
-            return '2-way_sales_rep'; // 15% direct + 5% sales rep = 20% total
+            return '2-way_sales_rep'; // 20% direct + 5% sales rep = 25% total
         } else {
             return 'direct_only'; // 20% direct (or 22% for Plus)
         }

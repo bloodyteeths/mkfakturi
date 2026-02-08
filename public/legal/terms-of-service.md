@@ -146,7 +146,7 @@ Before filing a lawsuit, parties agree to attempt good-faith mediation for 30 da
 ## 12. Partner Program Terms
 
 ### 12.1 Commission Structure
-Partners earn a commission on referred customer subscriptions as specified in the Partner Dashboard. Default commission rate: 5% of monthly subscription fees.
+Partners earn a commission on referred customer subscriptions as specified in the Partner Dashboard. Default commission rate: 20% of monthly subscription fees (22% for Partner Plus).
 
 ### 12.2 Commission Payment
 Commissions are paid monthly via bank transfer after a 30-day holding period to account for refunds and chargebacks.

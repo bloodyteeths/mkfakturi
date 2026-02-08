@@ -15,10 +15,10 @@ use Tests\TestCase;
  * Multi-Level Commission Logic Tests
  *
  * Tests the 3-way commission split functionality:
- * - Direct accountant: 15%
- * - Upline: 5%
+ * - Direct accountant: 20% (22% for Partner Plus)
+ * - Upline: 20%
  * - Sales rep: 5%
- * Total: 25% of company subscription
+ * Total: up to 45% of company subscription
  *
  * @ticket AC-01-10 to AC-01-14
  */
@@ -118,8 +118,8 @@ class CommissionServiceMultiLevelTest extends TestCase
         );
 
         $this->assertTrue($result['success']);
-        $this->assertEquals(15.00, $result['direct_commission']); // 15% when upline exists
-        $this->assertEquals(5.00, $result['upline_commission']); // 5% to upline
+        $this->assertEquals(20.00, $result['direct_commission']); // 20% direct (upline doesn't reduce it)
+        $this->assertEquals(20.00, $result['upline_commission']); // 20% to upline
         $this->assertNull($result['sales_rep_commission']);
 
         // Verify 2 events created (direct + upline)
@@ -127,14 +127,14 @@ class CommissionServiceMultiLevelTest extends TestCase
 
         // Check direct event
         $directEvent = AffiliateEvent::where('affiliate_partner_id', $partner->id)->first();
-        $this->assertEquals(15.00, $directEvent->amount);
-        $this->assertEquals(5.00, $directEvent->upline_amount);
+        $this->assertEquals(20.00, $directEvent->amount);
+        $this->assertEquals(20.00, $directEvent->upline_amount);
         $this->assertNull($directEvent->sales_rep_amount);
         $this->assertEquals('2-way_upline', $directEvent->metadata['split_type']);
 
         // Check upline event
         $uplineEvent = AffiliateEvent::where('affiliate_partner_id', $uplinePartner->id)->first();
-        $this->assertEquals(5.00, $uplineEvent->amount);
+        $this->assertEquals(20.00, $uplineEvent->amount);
         $this->assertEquals('upline', $uplineEvent->metadata['type']);
     }
 
@@ -240,10 +240,10 @@ class CommissionServiceMultiLevelTest extends TestCase
         );
 
         $this->assertTrue($result['success']);
-        $this->assertEquals(15.00, $result['direct_commission']); // 15% to direct
-        $this->assertEquals(5.00, $result['upline_commission']); // 5% to upline
+        $this->assertEquals(20.00, $result['direct_commission']); // 20% to direct
+        $this->assertEquals(20.00, $result['upline_commission']); // 20% to upline
         $this->assertEquals(5.00, $result['sales_rep_commission']); // 5% to sales rep
-        // Total: 25% of subscription goes to affiliates
+        // Total: 45% of subscription goes to affiliates
 
         // Verify 3 events created (direct + upline + sales rep)
         $this->assertEquals(3, AffiliateEvent::count());
@@ -252,14 +252,14 @@ class CommissionServiceMultiLevelTest extends TestCase
         $directEvent = AffiliateEvent::where('affiliate_partner_id', $partner->id)
             ->whereNull('metadata->type')
             ->first();
-        $this->assertEquals(15.00, $directEvent->amount);
-        $this->assertEquals(5.00, $directEvent->upline_amount);
+        $this->assertEquals(20.00, $directEvent->amount);
+        $this->assertEquals(20.00, $directEvent->upline_amount);
         $this->assertEquals(5.00, $directEvent->sales_rep_amount);
         $this->assertEquals('3-way', $directEvent->metadata['split_type']);
 
-        // Verify total commission is 25%
+        // Verify total commission is 45%
         $totalCommission = AffiliateEvent::sum('amount');
-        $this->assertEquals(25.00, $totalCommission);
+        $this->assertEquals(45.00, $totalCommission);
     }
 
     /** @test */
@@ -303,16 +303,16 @@ class CommissionServiceMultiLevelTest extends TestCase
         );
 
         $this->assertTrue($result['success']);
-        // 15% of €29 = €4.35
-        $this->assertEquals(4.35, $result['direct_commission']);
-        // 5% of €29 = €1.45
-        $this->assertEquals(1.45, $result['upline_commission']);
+        // 20% of €29 = €5.80
+        $this->assertEquals(5.80, $result['direct_commission']);
+        // 20% of €29 = €5.80
+        $this->assertEquals(5.80, $result['upline_commission']);
         // 5% of €29 = €1.45
         $this->assertEquals(1.45, $result['sales_rep_commission']);
-        // Total: €7.25 (25% of €29)
+        // Total: €13.05 (45% of €29)
 
         $totalCommission = AffiliateEvent::sum('amount');
-        $this->assertEquals(7.25, $totalCommission);
+        $this->assertEquals(13.05, $totalCommission);
     }
 
     /** @test */
@@ -429,22 +429,22 @@ class CommissionServiceMultiLevelTest extends TestCase
             ->whereNull('metadata->type')
             ->sum('amount');
 
-        // Direct commissions: 15% of (€29 + €59 + €149) = 15% of €237 = €35.55
-        $this->assertEquals(35.55, $partnerEarnings);
+        // Direct commissions: 20% of (€29 + €59 + €149) = 20% of €237 = €47.40
+        $this->assertEquals(47.40, $partnerEarnings);
 
         // Calculate upline's total
         $uplineEarnings = AffiliateEvent::where('affiliate_partner_id', $uplinePartner->id)->sum('amount');
-        // 5% of €237 = €11.85
-        $this->assertEquals(11.85, $uplineEarnings);
+        // 20% of €237 = €47.40
+        $this->assertEquals(47.40, $uplineEarnings);
 
         // Calculate sales rep's total
         $salesRepEarnings = AffiliateEvent::where('sales_rep_id', $salesRepUser->id)->sum('amount');
         // 5% of €237 = €11.85
         $this->assertEquals(11.85, $salesRepEarnings);
 
-        // Total commissions paid out: 25% of €237 = €59.25
+        // Total commissions paid out: 45% of €237 = €106.65
         $totalCommissions = AffiliateEvent::sum('amount');
-        $this->assertEquals(59.25, $totalCommissions);
+        $this->assertEquals(106.65, $totalCommissions);
     }
 }
 

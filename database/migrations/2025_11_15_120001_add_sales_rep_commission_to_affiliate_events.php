@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Schema;
  * Add Sales Rep Commission Tracking to Affiliate Events (AC-01-14)
  *
  * Extends affiliate_events to track 3-way commission splits:
- * - amount: Direct accountant commission (15%)
- * - upline_amount: Upline commission (5%)
+ * - amount: Direct accountant commission (20%, or 22% for Plus)
+ * - upline_amount: Upline commission (20%)
  * - sales_rep_amount: Sales rep commission (5%)
  *
  * @ticket AC-01-14

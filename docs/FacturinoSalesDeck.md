@@ -61,7 +61,7 @@
 **💰 Revenue Potential:**
 - Average €50/month per client
 - Partner bureaus: 10-20 clients average
-- Commission model: 15% recurring revenue
+- Commission model: 20% recurring revenue (22% for Partner Plus)
 - Market penetration goal: 25% in 24 months
 
 ---
@@ -174,7 +174,7 @@
 ### **Immediate Business Benefits for Your Bureau**
 
 #### **💰 Revenue Growth**
-- **15% recurring commission** on all client payments
+- **20% recurring commission** on all client payments
 - **New client acquisition** through effortless migration
 - **Upselling opportunities** with advanced features
 - **Retention improvement** with superior platform
@@ -288,7 +288,7 @@
 ### **Professional Partnership Package**
 
 #### **💰 Commission Structure**
-- **15% recurring revenue** from all client subscriptions
+- **20% recurring revenue** from all client subscriptions (22% for Partner Plus)
 - **Monthly payment** via bank transfer or invoice
 - **Transparent tracking** with real-time dashboard
 - **Performance bonuses** for high-volume partners
@@ -355,10 +355,10 @@
 |--------|-------------|-----------|------------|
 | **Clients Migrated** | 10 | 15 | 20 |
 | **Avg. Monthly Revenue/Client** | €40 | €50 | €60 |
-| **Monthly Commission (15%)** | €60 | €112.50 | €180 |
-| **Annual Commission** | €720 | €1,350 | €2,160 |
+| **Monthly Commission (20%)** | €80 | €150 | €240 |
+| **Annual Commission** | €960 | €1,800 | €2,880 |
 | **New Client Acquisition** | 2 | 5 | 8 |
-| **Total Annual Revenue** | €900 | €1,725 | €2,880 |
+| **Total Annual Revenue** | €1,200 | €2,250 | €3,600 |
 
 #### **⚡ Efficiency Gains**
 - **Time Savings**: 40 hours/month → 20 hours/month
@@ -470,10 +470,8 @@
 - **Custom**: €150+/month (white-label, custom integrations)
 
 #### **Partner Commission Structure**
-- **Standard Partners**: 15% recurring commission
-- **Certified Partners**: 18% recurring commission (after training)
-- **Premium Partners**: 20% recurring commission (25+ clients)
-- **Elite Partners**: 25% recurring commission (50+ clients)
+- **Standard Partners**: 20% recurring commission (free)
+- **Partner Plus**: 22% recurring commission (€29/month or 10+ active clients)
 
 #### **Additional Revenue Opportunities**
 - **Migration Services**: €200-500 per complex migration

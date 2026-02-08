@@ -47,7 +47,7 @@ Facturino Macedonia is the **only comprehensive accounting platform** designed s
 2. Complete partner application form:
    - Bureau name and ЕДБ number
    - Contact information and address
-   - Commission preferences (default: 15%)
+   - Commission preferences (default: 20%)
    - Services offered checklist
 3. Upload required documentation:
    - Business registration certificate
@@ -115,9 +115,9 @@ Facturino Macedonia is the **only comprehensive accounting platform** designed s
 ```html
 <!-- Top navigation bar includes: -->
 📊 [Current Company: Client Name] ▼
-   🏢 ACME Ltd. (Primary) - 15% commission
-   🏭 Textile Co. - 12.5% commission  
-   🏬 Restaurant ABC - 15% commission
+   🏢 ACME Ltd. (Primary) - 20% commission
+   🏭 Textile Co. - 20% commission
+   🏬 Restaurant ABC - 20% commission
    ➕ Add New Client
    ⚙️ Manage Console
 ```

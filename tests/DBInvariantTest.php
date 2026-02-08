@@ -268,7 +268,7 @@ class DBInvariantTest extends TestCase
         // Create partner record
         $partner = Partner::factory()->create([
             'user_id' => $partnerUser->id,
-            'commission_rate' => 15.5, // 15.5% default commission
+            'commission_rate' => 20.00, // 20% default commission
         ]);
 
         // Create partner-company relationships

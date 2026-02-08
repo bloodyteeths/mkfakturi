@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Schema;
  * Add Sales Rep Tracking to Users (AC-01-13)
  *
  * Enables 3-way commission split:
- * - Direct accountant: 15%
- * - Upline (referrer): 5%
+ * - Direct accountant: 20% (22% for Partner Plus)
+ * - Upline (referrer): 20%
  * - Sales rep: 5%
- * Total: 25% of company subscription goes to affiliates
+ * Total: up to 45% of company subscription goes to affiliates
  *
  * @ticket AC-01-13
  */

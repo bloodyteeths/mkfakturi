@@ -20,7 +20,7 @@
 
           <div class="mb-6">
             <div class="bg-blue-100 border-l-4 border-blue-500 p-4 mb-4">
-              <p class="text-lg font-semibold text-blue-900">18% Commission Rate</p>
+              <p class="text-lg font-semibold text-blue-900">20% Commission Rate</p>
               <p class="text-sm text-blue-700">On all referred client subscriptions</p>
             </div>
           </div>
@@ -81,10 +81,10 @@
           <div class="mb-6">
             <div class="bg-green-100 border-l-4 border-green-500 p-4 mb-4">
               <p class="text-lg font-semibold text-green-900">22% Commission Rate</p>
-              <p class="text-sm text-green-700">+4% increase over Free plan</p>
+              <p class="text-sm text-green-700">+2% increase over Free plan</p>
             </div>
             <p class="text-sm text-gray-600 italic">
-              Pays for itself after just €725 in monthly client subscriptions
+              Pays for itself after just €1,450 in monthly client subscriptions
             </p>
           </div>
 
@@ -99,7 +99,7 @@
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span><strong>22% commission rate</strong> (vs 18%)</span>
+              <span><strong>22% commission rate</strong> (vs 20%)</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
@@ -154,13 +154,13 @@
         </div>
         <div class="grid grid-cols-2 gap-4 mt-6">
           <div class="bg-white p-4 rounded-lg border">
-            <p class="text-sm text-gray-600 mb-1">Free Partner (18%)</p>
-            <p class="text-2xl font-bold text-gray-900">€{{ (clientRevenue * 0.18).toFixed(2) }}</p>
+            <p class="text-sm text-gray-600 mb-1">Free Partner (20%)</p>
+            <p class="text-2xl font-bold text-gray-900">€{{ (clientRevenue * 0.20).toFixed(2) }}</p>
           </div>
           <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-500">
             <p class="text-sm text-blue-700 mb-1">Partner Plus (22%)</p>
             <p class="text-2xl font-bold text-blue-900">€{{ (clientRevenue * 0.22).toFixed(2) }}</p>
-            <p class="text-xs text-green-600 mt-1">+€{{ ((clientRevenue * 0.22) - (clientRevenue * 0.18)).toFixed(2) }} more</p>
+            <p class="text-xs text-green-600 mt-1">+€{{ ((clientRevenue * 0.22) - (clientRevenue * 0.20)).toFixed(2) }} more</p>
           </div>
         </div>
         <p class="text-center text-sm text-gray-600 mt-4">

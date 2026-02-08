@@ -308,18 +308,18 @@ class AffiliateSystemEndToEndTest extends TestCase
             'sub_multilevel_test'
         );
 
-        // ===== Verify multi-level split: 15% direct + 5% upline =====
+        // ===== Verify multi-level split: 20% direct + 20% upline =====
         $this->assertTrue($result['success']);
-        $this->assertEquals(15.00, $result['direct_commission']); // Accountant gets 15%
-        $this->assertEquals(5.00, $result['upline_commission']); // Sales Rep gets 5%
+        $this->assertEquals(20.00, $result['direct_commission']); // Accountant gets 20%
+        $this->assertEquals(20.00, $result['upline_commission']); // Sales Rep gets 20%
 
         // Verify accountant event
         $accountantEvent = AffiliateEvent::where('affiliate_partner_id', $accountant->id)
             ->where('month_ref', $monthRef)
             ->first();
         $this->assertNotNull($accountantEvent);
-        $this->assertEquals(15.00, $accountantEvent->amount);
-        $this->assertEquals(5.00, $accountantEvent->upline_amount);
+        $this->assertEquals(20.00, $accountantEvent->amount);
+        $this->assertEquals(20.00, $accountantEvent->upline_amount);
         $this->assertEquals($salesRep->id, $accountantEvent->upline_partner_id);
 
         // Verify sales rep event
@@ -327,11 +327,11 @@ class AffiliateSystemEndToEndTest extends TestCase
             ->where('month_ref', $monthRef)
             ->first();
         $this->assertNotNull($salesRepEvent);
-        $this->assertEquals(5.00, $salesRepEvent->amount);
+        $this->assertEquals(20.00, $salesRepEvent->amount);
         $this->assertArrayHasKey('type', $salesRepEvent->metadata);
         $this->assertEquals('upline', $salesRepEvent->metadata['type']);
 
-        $this->info('✓ Multi-level commission verified: Accountant €15, Sales Rep €5');
+        $this->info('✓ Multi-level commission verified: Accountant €20, Sales Rep €20');
     }
 
     /** @test */
