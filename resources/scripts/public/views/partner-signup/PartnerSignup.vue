@@ -229,11 +229,8 @@ const submitForm = async () => {
     const response = await axios.post('/public/partner-signup/register', form.value)
 
     if (response.data.success) {
-      // Redirect to partner login with success message
-      router.push({
-        path: '/admin/partner/login',
-        query: { registered: 1, email: form.value.email }
-      })
+      // Redirect to login with success message
+      window.location.href = '/admin/login?registered=1&email=' + encodeURIComponent(form.value.email)
     }
   } catch (err) {
     console.error('Partner registration failed:', err)

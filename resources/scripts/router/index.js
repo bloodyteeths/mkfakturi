@@ -8,12 +8,14 @@ import AdminRoutes from '@/scripts/admin/admin-router'
 import CustomerRoutes from '@/scripts/customer/customer-router'
 // Partner routes
 import PartnerRoutes from '@/scripts/partner/partner-router'
-//Payment Routes
+// Public routes (signup, legal pages)
+import PublicRoutes from '@/scripts/public/router/index'
 
 let routes = []
 // IMPORTANT: Partner routes MUST come before Admin routes
 // because /admin/partner/* needs to match before /admin/*
-routes = routes.concat(PartnerRoutes, AdminRoutes, CustomerRoutes)
+// Public routes first since they don't require auth
+routes = routes.concat(PublicRoutes, PartnerRoutes, AdminRoutes, CustomerRoutes)
 // CLAUDE-CHECKPOINT
 
 const router = createRouter({
@@ -29,7 +31,7 @@ router.beforeEach((to, from, next) => {
   const { isAppLoaded } = globalStore
 
   // Public routes that don't require authentication
-  const publicRoutes = ['login', 'forgot-password', 'reset-password', 'signup']
+  const publicRoutes = ['login', 'forgot-password', 'reset-password', 'signup', 'partner-signup', 'privacy', 'terms']
 
   // Check if route requires authentication
   if (to.meta.requiresAuth !== false && !publicRoutes.includes(to.name) && !to.meta.isPublic) {
