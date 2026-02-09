@@ -159,7 +159,7 @@ const copyrightText = computed(() => {
   if (window.copyright_text) {
     return window.copyright_text
   }
-  return 'Авторски права @ Факторино ДООЕЛ.'
+  return 'Авторски права @ Facturino ДООЕЛ.'
 })
 
 const loginPageLogo = computed(() => {

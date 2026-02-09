@@ -18,7 +18,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="text-center text-sm text-gray-600">
         <p>
-          Авторски права &copy; Факторино ДООЕЛ. {{ new Date().getFullYear() }}
+          Авторски права &copy; Facturino ДООЕЛ. {{ new Date().getFullYear() }}
         </p>
         <p class="mt-2">
           <a href="/terms" class="text-primary-600 hover:text-primary-700">Услови за користење</a>
