@@ -50,6 +50,24 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             </Link>
           </div>
 
+          {/* Social Proof - inside left column for proper alignment */}
+          <div className="flex flex-col items-center lg:items-start gap-2 pt-2">
+            <p className="text-sm font-semibold text-gray-700">{t.socialProof.stat}</p>
+            <div className="flex items-center gap-5 text-xs text-gray-500">
+              <span className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                {t.socialProof.freeTrial}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                {t.socialProof.noCreditCard}
+              </span>
+            </div>
+          </div>
 
         </div>
 
@@ -97,27 +115,6 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
                 <p className="text-sm font-bold text-green-600">Готово</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Social Proof */}
-      <div className="container relative z-10 mt-8 pt-8 border-t border-gray-200/60 px-4 sm:px-6">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-sm font-semibold text-gray-700">{t.socialProof.stat}</p>
-          <div className="flex items-center gap-6 text-xs text-gray-500">
-            <span className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-              {t.socialProof.freeTrial}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-              {t.socialProof.noCreditCard}
-            </span>
           </div>
         </div>
       </div>
