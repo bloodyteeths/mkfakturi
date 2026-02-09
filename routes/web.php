@@ -224,6 +224,15 @@ Route::get('/partner/signup', function () {
     return view('app');
 })->name('partner.signup');
 
+// Legal pages (public)
+Route::get('/privacy', function () {
+    return view('app');
+})->name('privacy');
+
+Route::get('/terms', function () {
+    return view('app');
+})->name('terms');
+
 // Move other http requests to the Vue App
 // -------------------------------------------------
 
