@@ -33,7 +33,7 @@ class PartnerPayoutService
         $partners = Partner::whereHas('affiliateEvents', function ($query) use ($cutoffDate) {
             $query->where('created_at', '<=', $cutoffDate)
                 ->whereNull('payout_id')
-                ->where('is_clawed_back', false);
+                ->where('is_clawed_back', 0);
         })->get();
 
         $payouts = [];
@@ -60,7 +60,7 @@ class PartnerPayoutService
             $events = AffiliateEvent::where('affiliate_partner_id', $partner->id)
                 ->where('created_at', '<=', $cutoffDate)
                 ->whereNull('payout_id')
-                ->where('is_clawed_back', false)
+                ->where('is_clawed_back', 0)
                 ->get();
 
             if ($events->isEmpty()) {

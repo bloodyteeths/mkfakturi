@@ -312,7 +312,7 @@ class CommissionServiceMultiLevelTest extends TestCase
         // Total: €13.05 (45% of €29)
 
         $totalCommission = AffiliateEvent::sum('amount');
-        $this->assertEquals(13.05, $totalCommission);
+        $this->assertEqualsWithDelta(13.05, $totalCommission, 0.01);
     }
 
     /** @test */

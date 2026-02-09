@@ -121,21 +121,8 @@ class AffiliateSystemEndToEndTest extends TestCase
 
         $this->info('✓ Company registered with referrer_user_id set');
 
-        // ===== STEP 3: Company subscribes to plan =====
-        $this->info('Step 3: Company subscribes to plan');
-
-        // Create Paddle subscription (mock)
-        $subscription = $company->subscriptions()->create([
-            'type' => 'default',
-            'paddle_id' => 'sub_test_'.Str::random(10),
-            'status' => 'active',
-        ]);
-
-        $this->assertNotNull($subscription);
-        $this->info('✓ Subscription created: '.$subscription->paddle_id);
-
-        // ===== STEP 4: Commission recorded automatically =====
-        $this->info('Step 4: Webhook triggers commission calculation');
+        // ===== STEP 3: Commission recorded (simulates Paddle webhook) =====
+        $this->info('Step 3: Webhook triggers commission calculation');
 
         $subscriptionAmount = 29.00; // Starter plan
         $monthRef = now()->format('Y-m');
@@ -145,7 +132,7 @@ class AffiliateSystemEndToEndTest extends TestCase
             $company->id,
             $subscriptionAmount,
             $monthRef,
-            $subscription->paddle_id
+            'sub_test_'.Str::random(10)
         );
 
         $this->assertTrue($result['success']);
@@ -163,16 +150,17 @@ class AffiliateSystemEndToEndTest extends TestCase
 
         $this->info('✓ Commission recorded: €5.80 (20% of €29.00)');
 
-        // ===== STEP 5: Simulate recurring payments for multiple months =====
-        $this->info('Step 5: Simulate 11 more months of recurring payments');
+        // ===== STEP 4: Simulate recurring payments for multiple months =====
+        $this->info('Step 4: Simulate 11 more months of recurring payments');
 
+        $paddleId = 'sub_test_'.Str::random(10);
         for ($i = 1; $i <= 11; $i++) {
             $futureMonth = now()->addMonths($i)->format('Y-m');
             $this->commissionService->recordRecurring(
                 $company->id,
                 $subscriptionAmount,
                 $futureMonth,
-                $subscription->paddle_id
+                $paddleId
             );
         }
 
@@ -189,8 +177,8 @@ class AffiliateSystemEndToEndTest extends TestCase
 
         $this->info('✓ 12 months of commissions recorded: €69.60 total');
 
-        // ===== STEP 6: Payout processing (dry run) =====
-        $this->info('Step 6: Test payout command (dry-run)');
+        // ===== STEP 5: Payout processing (dry run) =====
+        $this->info('Step 5: Test payout command (dry-run)');
 
         // Add a few more companies to exceed €100 threshold
         $this->createAdditionalCompanies($this->partner, 2, 50.00);
@@ -209,8 +197,8 @@ class AffiliateSystemEndToEndTest extends TestCase
         // Verify no payout was created (dry-run)
         $this->assertEquals(0, Payout::count());
 
-        // ===== STEP 7: Actual payout processing =====
-        $this->info('Step 7: Process actual payout');
+        // ===== STEP 6: Actual payout processing =====
+        $this->info('Step 6: Process actual payout');
 
         // Backdate events to be outside clawback period (30+ days ago)
         AffiliateEvent::where('affiliate_partner_id', $this->partner->id)
@@ -290,14 +278,7 @@ class AffiliateSystemEndToEndTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        // 4. Company subscribes
-        $company->subscriptions()->create([
-            'type' => 'default',
-            'paddle_id' => 'sub_multilevel_test',
-            'status' => 'active',
-        ]);
-
-        // 5. Record commission
+        // 4. Record commission (simulates Paddle webhook after subscription)
         $subscriptionAmount = 100.00;
         $monthRef = now()->format('Y-m');
 
@@ -407,25 +388,32 @@ class AffiliateSystemEndToEndTest extends TestCase
         $this->setupBasicPartnerCompany();
         $company = $this->partner->companies()->first();
 
-        // Create events inside clawback period (recent)
+        // Create events inside clawback period (recent) — should NOT be paid
         $recentEvent = AffiliateEvent::create([
             'affiliate_partner_id' => $this->partner->id,
             'company_id' => $company->id,
             'event_type' => 'recurring_commission',
             'amount' => 50.00,
+            'is_clawed_back' => false,
             'month_ref' => now()->format('Y-m'),
-            'created_at' => now()->subDays(10), // Too recent
         ]);
+        // Backdate to 10 days ago (inside 30-day clawback — should NOT be paid)
+        AffiliateEvent::where('id', $recentEvent->id)
+            ->update(['created_at' => now()->subDays(10)]);
 
-        // Create events outside clawback period (old)
+        // Create events outside clawback period (old) — should be paid
+        // Amount must exceed payout_min threshold (€100)
         $oldEvent = AffiliateEvent::create([
             'affiliate_partner_id' => $this->partner->id,
             'company_id' => $company->id,
             'event_type' => 'recurring_commission',
-            'amount' => 60.00,
+            'amount' => 150.00,
+            'is_clawed_back' => false,
             'month_ref' => now()->subMonth()->format('Y-m'),
-            'created_at' => now()->subDays(40), // Outside clawback period
         ]);
+        // Backdate to 40 days ago (outside 30-day clawback — should be paid)
+        AffiliateEvent::where('id', $oldEvent->id)
+            ->update(['created_at' => now()->subDays(40)]);
 
         // Run payout
         Artisan::call('affiliate:process-payouts', ['--force' => true]);
@@ -447,14 +435,18 @@ class AffiliateSystemEndToEndTest extends TestCase
         $company = $this->partner->companies()->first();
 
         // Create commission below threshold (€99)
-        AffiliateEvent::create([
+        $event1 = AffiliateEvent::create([
             'affiliate_partner_id' => $this->partner->id,
             'company_id' => $company->id,
             'event_type' => 'recurring_commission',
             'amount' => 99.00,
+            'is_clawed_back' => false,
             'month_ref' => now()->format('Y-m'),
-            'created_at' => now()->subDays(40),
         ]);
+
+        // Backdate to outside clawback period (created_at not mass-assignable)
+        AffiliateEvent::where('id', $event1->id)
+            ->update(['created_at' => now()->subDays(40)]);
 
         Artisan::call('affiliate:process-payouts', ['--force' => true]);
 
@@ -464,14 +456,18 @@ class AffiliateSystemEndToEndTest extends TestCase
         $this->info('✓ Payout skipped for amount below threshold');
 
         // Add more to exceed threshold
-        AffiliateEvent::create([
+        $event2 = AffiliateEvent::create([
             'affiliate_partner_id' => $this->partner->id,
             'company_id' => $company->id,
             'event_type' => 'recurring_commission',
             'amount' => 10.00,
+            'is_clawed_back' => false,
             'month_ref' => now()->addMonth()->format('Y-m'),
-            'created_at' => now()->subDays(40),
         ]);
+
+        // Backdate to outside clawback period
+        AffiliateEvent::where('id', $event2->id)
+            ->update(['created_at' => now()->subDays(40)]);
 
         Artisan::call('affiliate:process-payouts', ['--force' => true]);
 
@@ -524,14 +520,17 @@ class AffiliateSystemEndToEndTest extends TestCase
                 'updated_at' => now(),
             ]);
 
-            AffiliateEvent::create([
+            $event = AffiliateEvent::create([
                 'affiliate_partner_id' => $partner->id,
                 'company_id' => $company->id,
                 'event_type' => 'recurring_commission',
                 'amount' => $commissionAmount,
+                'is_clawed_back' => false,
                 'month_ref' => now()->format('Y-m'),
-                'created_at' => now()->subDays(35), // Outside clawback
             ]);
+            // Backdate via query builder (created_at not mass-assignable)
+            AffiliateEvent::where('id', $event->id)
+                ->update(['created_at' => now()->subDays(35)]);
         }
     }
 

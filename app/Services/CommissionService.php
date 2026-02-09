@@ -407,7 +407,7 @@ class CommissionService
         $events = AffiliateEvent::where('company_id', $companyId)
             ->where('event_type', 'recurring_commission')
             ->where('month_ref', $monthRef)
-            ->where('is_clawed_back', false)
+            ->where('is_clawed_back', 0)
             ->get();
 
         if ($events->isEmpty()) {

@@ -129,7 +129,7 @@ class PartnerManagementController extends Controller
         $partner->monthly_commissions = DB::table('affiliate_events')
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(amount) as total')
             ->where('affiliate_partner_id', $partnerId)
-            ->where('is_clawed_back', false)
+            ->where('is_clawed_back', 0)
             ->groupBy('month')
             ->orderBy('month', 'desc')
             ->limit(12)

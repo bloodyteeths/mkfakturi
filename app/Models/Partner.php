@@ -188,7 +188,7 @@ class Partner extends Model
     public function getLifetimeEarnings(): float
     {
         return $this->affiliateEvents()
-            ->where('is_clawed_back', false)
+            ->where('is_clawed_back', 0)
             ->sum('amount');
     }
 
@@ -203,7 +203,7 @@ class Partner extends Model
                 'affiliate_events.*',
                 \DB::raw('SUM(affiliate_events.amount) as total_commissions'),
             ])
-            ->where('is_clawed_back', false)
+            ->where('is_clawed_back', 0)
             ->groupBy('company_id');
     }
 

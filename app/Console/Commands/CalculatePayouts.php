@@ -55,7 +55,7 @@ class CalculatePayouts extends Command
 
         // Get all verified partners
         $partners = Partner::where('kyc_status', 'verified')
-            ->where('is_active', true)
+            ->where('is_active', 1)
             ->get();
 
         $this->info("Found {$partners->count()} verified partners");
@@ -66,7 +66,7 @@ class CalculatePayouts extends Command
                 ->where('month_ref', $monthRef)
                 ->whereNull('paid_at')
                 ->whereNull('payout_id')
-                ->where('is_clawed_back', false)
+                ->where('is_clawed_back', 0)
                 ->get();
 
             if ($unpaidEvents->isEmpty()) {

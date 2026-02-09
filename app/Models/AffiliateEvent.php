@@ -74,7 +74,7 @@ class AffiliateEvent extends Model
     public function scopeUnpaid($query)
     {
         return $query->whereNull('paid_at')
-            ->where('is_clawed_back', false);
+            ->where('is_clawed_back', 0);
     }
 
     /**

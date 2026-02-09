@@ -145,24 +145,27 @@ return new class extends Migration
     private function indexExists(string $table, string $indexName): bool
     {
         $connection = Schema::getConnection();
-        $schemaManager = $connection->getDoctrineSchemaManager();
+        $driver = $connection->getDriverName();
 
         try {
-            $indexes = $schemaManager->listTableIndexes($table);
-
-            return isset($indexes[strtolower($indexName)]);
-        } catch (\Exception $e) {
-            // Fallback: try raw SQL for MySQL
-            try {
-                $results = $connection->select(
-                    "SHOW INDEX FROM `{$table}` WHERE Key_name = ?",
-                    [$indexName]
-                );
-
-                return count($results) > 0;
-            } catch (\Exception $e2) {
+            if ($driver === 'sqlite') {
+                $indexes = $connection->select("PRAGMA index_list(`{$table}`)");
+                foreach ($indexes as $index) {
+                    if ($index->name === $indexName) {
+                        return true;
+                    }
+                }
                 return false;
             }
+
+            // MySQL
+            $results = $connection->select(
+                "SHOW INDEX FROM `{$table}` WHERE Key_name = ?",
+                [$indexName]
+            );
+            return count($results) > 0;
+        } catch (\Exception $e) {
+            return false;
         }
     }
 
@@ -172,18 +175,20 @@ return new class extends Migration
     private function foreignKeyExists(string $table, string $foreignKeyName): bool
     {
         $connection = Schema::getConnection();
+        $driver = $connection->getDriverName();
 
         try {
-            $schemaManager = $connection->getDoctrineSchemaManager();
-            $foreignKeys = $schemaManager->listTableForeignKeys($table);
-
-            foreach ($foreignKeys as $fk) {
-                if ($fk->getName() === $foreignKeyName) {
-                    return true;
-                }
+            if ($driver === 'sqlite') {
+                // SQLite doesn't name foreign keys the same way; skip check
+                return false;
             }
 
-            return false;
+            $results = $connection->select(
+                "SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE TABLE_NAME = ? AND CONSTRAINT_NAME = ? AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
+                [$table, $foreignKeyName]
+            );
+            return count($results) > 0;
         } catch (\Exception $e) {
             return false;
         }

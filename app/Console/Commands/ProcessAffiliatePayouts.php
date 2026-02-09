@@ -50,7 +50,7 @@ class ProcessAffiliatePayouts extends Command
         $this->info("Only including events created before: {$clawbackCutoff->format('Y-m-d')}");
 
         // Get minimum payout threshold
-        $minPayout = config('affiliate.payout_min', 100.00);
+        $minPayout = (int) config('affiliate.payout_min', 100);
         $this->info("Minimum payout threshold: €{$minPayout}");
 
         // Find eligible partners with pending events
@@ -116,7 +116,7 @@ class ProcessAffiliatePayouts extends Command
      *
      * @return \Illuminate\Support\Collection
      */
-    protected function findEligiblePartners(Carbon $clawbackCutoff, float $minPayout)
+    protected function findEligiblePartners(Carbon $clawbackCutoff, int $minPayout)
     {
         return Partner::select([
             'partners.id',
@@ -128,9 +128,9 @@ class ProcessAffiliatePayouts extends Command
         ])
             ->join('affiliate_events', 'partners.id', '=', 'affiliate_events.affiliate_partner_id')
             ->whereNull('affiliate_events.paid_at')
-            ->where('affiliate_events.is_clawed_back', false)
+            ->where('affiliate_events.is_clawed_back', 0)
             ->where('affiliate_events.created_at', '<=', $clawbackCutoff)
-            ->where('partners.is_active', true)
+            ->where('partners.is_active', 1)
             ->groupBy('partners.id', 'partners.name', 'partners.email', 'partners.is_active')
             ->havingRaw('SUM(affiliate_events.amount) >= ?', [$minPayout])
             ->get();
@@ -179,7 +179,7 @@ class ProcessAffiliatePayouts extends Command
                 // Get all unpaid events for this partner (respecting clawback period)
                 $events = AffiliateEvent::where('affiliate_partner_id', $partner->id)
                     ->whereNull('paid_at')
-                    ->where('is_clawed_back', false)
+                    ->where('is_clawed_back', 0)
                     ->where('created_at', '<=', $clawbackCutoff)
                     ->get();
 
