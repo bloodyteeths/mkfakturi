@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { getDictionary } from '@/i18n/dictionaries'
 import { isLocale, Locale, defaultLocale } from '@/i18n/locales'
 import FAQ from '@/components/FAQ'
@@ -78,15 +77,15 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                   </div>
 
                   <div className="p-6 pt-0 mt-auto">
-                    <Link
-                      href={`/${locale}/contact`}
+                    <a
+                      href="https://app.facturino.mk/signup"
                       className={`block w-full py-3 px-4 rounded-xl text-center font-bold transition-all ${p.popular
                         ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/30'
                         : 'bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200'
                         }`}
                     >
                       {cta}
-                    </Link>
+                    </a>
                   </div>
                 </div>
               )
@@ -145,15 +144,15 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                   </div>
 
                   <div className="p-8 pt-0 mt-auto">
-                    <Link
-                      href={`/${locale}/contact`}
+                    <a
+                      href="https://app.facturino.mk/partner/signup"
                       className={`block w-full py-4 px-6 rounded-xl text-center font-bold transition-all ${p.popular
                         ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-green-500/30'
                         : 'bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200'
                         }`}
                     >
                       {ctaPartner}
-                    </Link>
+                    </a>
                   </div>
                 </div>
               )
