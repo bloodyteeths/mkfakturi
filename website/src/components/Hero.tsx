@@ -38,13 +38,13 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link href={`/${locale}/pricing`} className="btn-primary w-full sm:w-auto group">
+          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+            <a href="https://app.facturino.mk/signup" className="btn-primary w-full sm:w-auto group">
               {t.hero.primaryCta}
               <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </Link>
+            </a>
             <Link href={`/${locale}/contact`} className="btn-accent w-full sm:w-auto">
               {t.hero.secondaryCta}
             </Link>
@@ -102,20 +102,19 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
       </div>
 
       {/* Social Proof */}
-      <div className="container relative z-10 mt-12 px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-gray-500">
-          <p className="font-semibold text-gray-700">{t.socialProof.stat}</p>
-          <span className="hidden sm:inline text-gray-300">|</span>
-          <div className="flex items-center gap-4">
+      <div className="container relative z-10 mt-8 pt-8 border-t border-gray-200/60 px-4 sm:px-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <p className="text-sm font-semibold text-gray-700">{t.socialProof.stat}</p>
+          <div className="flex items-center gap-6 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
               {t.socialProof.freeTrial}
             </span>
             <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
               {t.socialProof.noCreditCard}
             </span>

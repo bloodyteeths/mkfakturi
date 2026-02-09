@@ -4,23 +4,25 @@ import { Dictionary } from '@/i18n/dictionaries'
 export default function Partners({ t }: { t: Dictionary }) {
   if (!t.partners) return null
   return (
-    <section className="py-6 md:py-8 bg-gray-50/50">
+    <section className="py-10 md:py-14 bg-gray-50">
       <div className="container px-4">
-        <h3 className="mb-1 text-center text-xs font-semibold uppercase tracking-wide text-gray-400">
-          {t.partners.title}
-        </h3>
-        {t.partners.subtitle && (
-          <p className="mb-4 text-center text-xs text-gray-400">
-            {t.partners.subtitle}
-          </p>
-        )}
+        <div className="text-center mb-6">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
+            {t.partners.title}
+          </h3>
+          {t.partners.subtitle && (
+            <p className="mt-1 text-xs text-gray-400">
+              {t.partners.subtitle}
+            </p>
+          )}
+        </div>
         <div className="flex items-center justify-center">
           <Image
             src="/assets/images/bank_logos.png"
             alt="Macedonian Bank Logos"
-            width={600}
-            height={80}
-            className="w-auto h-12 md:h-16 opacity-50 hover:opacity-70 transition-opacity"
+            width={800}
+            height={100}
+            className="w-auto h-16 md:h-20 opacity-60 hover:opacity-80 transition-opacity"
           />
         </div>
       </div>
