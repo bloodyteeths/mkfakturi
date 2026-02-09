@@ -7,7 +7,7 @@ const copy = {
     sections: [
       {
         title: '1. Вовед',
-        content: 'MK Accounting DOOEL, Скопје, Северна Македонија ("Facturino", "ние", "нас") ја цени вашата приватност. Оваа Политика за приватност објаснува како ги собираме, користиме, чуваме и заштитуваме вашите лични податоци кога ја користите нашата платформа за сметководство достапна на app.facturino.mk и поврзаните услуги.'
+        content: 'Facturino DOOEL, Скопје, Северна Македонија ("Facturino", "ние", "нас") ја цени вашата приватност. Оваа Политика за приватност објаснува како ги собираме, користиме, чуваме и заштитуваме вашите лични податоци кога ја користите нашата платформа за сметководство достапна на app.facturino.mk и поврзаните услуги.'
       },
       {
         title: '2. Податоци што ги собираме',
@@ -110,7 +110,7 @@ const copy = {
         content: 'За прашања поврзани со приватноста, контактирајте не на:',
         list: [
           'Е-пошта: info@facturino.mk',
-          'Компанија: MK Accounting DOOEL',
+          'Компанија: Facturino DOOEL',
           'Адреса: Скопје, Северна Македонија'
         ]
       }
@@ -122,7 +122,7 @@ const copy = {
     sections: [
       {
         title: '1. Hyrje',
-        content: 'MK Accounting DOOEL, Shkup, Maqedonia e Veriut ("Facturino", "ne", "neve") e vlerëson privatësinë tuaj. Kjo Politikë e privatësisë shpjegon si i mbledhim, përdorim, ruajmë dhe mbrojmë të dhënat tuaja personale kur përdorni platformën tonë të kontabilitetit të disponueshme në app.facturino.mk dhe shërbimet e lidhura.'
+        content: 'Facturino DOOEL, Shkup, Maqedonia e Veriut ("Facturino", "ne", "neve") e vlerëson privatësinë tuaj. Kjo Politikë e privatësisë shpjegon si i mbledhim, përdorim, ruajmë dhe mbrojmë të dhënat tuaja personale kur përdorni platformën tonë të kontabilitetit të disponueshme në app.facturino.mk dhe shërbimet e lidhura.'
       },
       {
         title: '2. Të dhënat që mbledhim',
@@ -223,7 +223,7 @@ const copy = {
         content: 'Për pyetje lidhur me privatësinë, na kontaktoni:',
         list: [
           'Email: info@facturino.mk',
-          'Kompania: MK Accounting DOOEL',
+          'Kompania: Facturino DOOEL',
           'Adresa: Shkup, Maqedonia e Veriut'
         ]
       }
@@ -235,7 +235,7 @@ const copy = {
     sections: [
       {
         title: '1. Giris',
-        content: 'MK Accounting DOOEL, Üsküp, Kuzey Makedonya ("Facturino", "biz") gizliliginize deger verir. Bu Gizlilik Politikasi, app.facturino.mk adresindeki muhasebe platformumuzu ve ilgili hizmetleri kullanirken kisisel verilerinizi nasil topladigimizi, kullandigimizi, sakladigimizi ve korudigimizi aciklar.'
+        content: 'Facturino DOOEL, Üsküp, Kuzey Makedonya ("Facturino", "biz") gizliliginize deger verir. Bu Gizlilik Politikasi, app.facturino.mk adresindeki muhasebe platformumuzu ve ilgili hizmetleri kullanirken kisisel verilerinizi nasil topladigimizi, kullandigimizi, sakladigimizi ve korudigimizi aciklar.'
       },
       {
         title: '2. Topladigimiz veriler',
@@ -336,7 +336,7 @@ const copy = {
         content: 'Gizlilikle ilgili sorular icin bize ulasin:',
         list: [
           'E-posta: info@facturino.mk',
-          'Sirket: MK Accounting DOOEL',
+          'Sirket: Facturino DOOEL',
           'Adres: Üsküp, Kuzey Makedonya'
         ]
       }
@@ -348,7 +348,7 @@ const copy = {
     sections: [
       {
         title: '1. Introduction',
-        content: 'MK Accounting DOOEL, Skopje, North Macedonia ("Facturino", "we", "us") values your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal data when you use our accounting platform available at app.facturino.mk and related services.'
+        content: 'Facturino DOOEL, Skopje, North Macedonia ("Facturino", "we", "us") values your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal data when you use our accounting platform available at app.facturino.mk and related services.'
       },
       {
         title: '2. Data We Collect',
@@ -451,7 +451,7 @@ const copy = {
         content: 'For privacy-related questions, contact us at:',
         list: [
           'Email: info@facturino.mk',
-          'Company: MK Accounting DOOEL',
+          'Company: Facturino DOOEL',
           'Address: Skopje, North Macedonia'
         ]
       }

@@ -8,7 +8,7 @@
         <h2 class="text-xl font-semibold text-gray-900 mb-3">1. Општи одредби</h2>
         <p class="text-gray-700 leading-relaxed">
           Овие Услови за користење („Услови") го регулираат вашето користење на Facturino платформата
-          обезбедена од MK Accounting ДООЕЛ Скопје. Со регистрација или користење на услугата,
+          обезбедена од Facturino ДООЕЛ Скопје. Со регистрација или користење на услугата,
           се согласувате со овие Услови.
         </p>
       </section>
@@ -75,7 +75,7 @@
         <p class="text-gray-700 leading-relaxed">
           Facturino е изграден врз InvoiceShelf (<strong>AGPL-3.0</strong> лиценца). Изворниот код на
           основната платформа е отворен. Брендот „Facturino", логото и дизајнот се во сопственост
-          на MK Accounting ДООЕЛ. Вашите податоци остануваат ваша сопственост.
+          на Facturino ДООЕЛ. Вашите податоци остануваат ваша сопственост.
         </p>
       </section>
 
@@ -135,7 +135,7 @@
       <section>
         <h2 class="text-xl font-semibold text-gray-900 mb-3">14. Контакт</h2>
         <p class="text-gray-700 leading-relaxed">
-          <strong>MK Accounting ДООЕЛ</strong><br>
+          <strong>Facturino ДООЕЛ</strong><br>
           Е-пошта: <a href="mailto:info@facturino.mk" class="text-primary-600 hover:underline">info@facturino.mk</a><br>
           Скопје, Република Северна Македонија
         </p>

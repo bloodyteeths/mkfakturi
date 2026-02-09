@@ -7,7 +7,7 @@
       <section>
         <h2 class="text-xl font-semibold text-gray-900 mb-3">1. Вовед</h2>
         <p class="text-gray-700 leading-relaxed">
-          MK Accounting ДООЕЛ Скопје („ние", „нас", „Facturino") е контролор на вашите лични податоци.
+          Facturino ДООЕЛ Скопје („ние", „нас", „Facturino") е контролор на вашите лични податоци.
           Оваа политика објаснува кои податоци ги собираме, зошто ги обработуваме и кои се вашите права.
         </p>
       </section>
@@ -104,7 +104,7 @@
           За прашања поврзани со приватност, контактирајте нè на:
         </p>
         <p class="text-gray-700 mt-2">
-          <strong>MK Accounting ДООЕЛ</strong><br>
+          <strong>Facturino ДООЕЛ</strong><br>
           Е-пошта: <a href="mailto:info@facturino.mk" class="text-primary-600 hover:underline">info@facturino.mk</a><br>
           Скопје, Република Северна Македонија
         </p>

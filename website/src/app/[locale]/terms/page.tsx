@@ -7,7 +7,7 @@ const copy = {
     sections: [
       {
         title: '1. Општи одредби',
-        content: 'Овие Услови за користење ("Услови") го регулираат вашиот пристап и користење на платформата Facturino, управувана од MK Accounting DOOEL, Скопје, Северна Македонија ("Facturino", "ние", "нас"). Со користење на нашата платформа, се согласувате со овие Услови. Доколку не се согласувате, ве молиме не ја користете платформата.'
+        content: 'Овие Услови за користење ("Услови") го регулираат вашиот пристап и користење на платформата Facturino, управувана од Facturino DOOEL, Скопје, Северна Македонија ("Facturino", "ние", "нас"). Со користење на нашата платформа, се согласувате со овие Услови. Доколку не се согласувате, ве молиме не ја користете платформата.'
       },
       {
         title: '2. Опис на услугата',
@@ -74,7 +74,7 @@ const copy = {
         list: [
           'Изворниот код на InvoiceShelf е достапен под AGPL-3.0 лиценцата',
           'Модификациите и додатоците специфични за Facturino се предмет на AGPL-3.0 условите',
-          'Брендот "Facturino", логоата и дизајнот се заштитени и се во сопственост на MK Accounting DOOEL',
+          'Брендот "Facturino", логоата и дизајнот се заштитени и се во сопственост на Facturino DOOEL',
           'Корисничкиот содржај (податоци, фактури, извештаи) останува во сопственост на корисникот'
         ]
       },
@@ -128,7 +128,7 @@ const copy = {
         content: 'За прашања поврзани со овие Услови, контактирајте не:',
         list: [
           'Е-пошта: info@facturino.mk',
-          'Компанија: MK Accounting DOOEL',
+          'Компанија: Facturino DOOEL',
           'Адреса: Скопје, Северна Македонија'
         ]
       }
@@ -140,7 +140,7 @@ const copy = {
     sections: [
       {
         title: '1. Dispozita të përgjithshme',
-        content: 'Këto Kushte të shërbimit ("Kushtet") rregullojnë qasjen dhe përdorimin tuaj të platformës Facturino, e menaxhuar nga MK Accounting DOOEL, Shkup, Maqedonia e Veriut ("Facturino", "ne"). Duke përdorur platformën tonë, pranoni këto Kushte.'
+        content: 'Këto Kushte të shërbimit ("Kushtet") rregullojnë qasjen dhe përdorimin tuaj të platformës Facturino, e menaxhuar nga Facturino DOOEL, Shkup, Maqedonia e Veriut ("Facturino", "ne"). Duke përdorur platformën tonë, pranoni këto Kushte.'
       },
       {
         title: '2. Përshkrimi i shërbimit',
@@ -207,7 +207,7 @@ const copy = {
         list: [
           'Kodi burimor i InvoiceShelf është i disponueshëm nën licencën AGPL-3.0',
           'Modifikimet specifike për Facturino janë subjekt i kushteve AGPL-3.0',
-          'Marka "Facturino", logot dhe dizajni janë në pronësi të MK Accounting DOOEL',
+          'Marka "Facturino", logot dhe dizajni janë në pronësi të Facturino DOOEL',
           'Përmbajtja e përdoruesit (të dhëna, fatura, raporte) mbetet pronë e përdoruesit'
         ]
       },
@@ -261,7 +261,7 @@ const copy = {
         content: 'Për pyetje lidhur me këto Kushte:',
         list: [
           'Email: info@facturino.mk',
-          'Kompania: MK Accounting DOOEL',
+          'Kompania: Facturino DOOEL',
           'Adresa: Shkup, Maqedonia e Veriut'
         ]
       }
@@ -273,7 +273,7 @@ const copy = {
     sections: [
       {
         title: '1. Genel hükümler',
-        content: 'Bu Kullanim Kosullari ("Kosullar"), MK Accounting DOOEL, Üsküp, Kuzey Makedonya ("Facturino", "biz") tarafindan yönetilen Facturino platformuna erisinizi ve kullaniminizi düzenler. Platformumuzu kullanarak bu Kosullari kabul edersiniz.'
+        content: 'Bu Kullanim Kosullari ("Kosullar"), Facturino DOOEL, Üsküp, Kuzey Makedonya ("Facturino", "biz") tarafindan yönetilen Facturino platformuna erisinizi ve kullaniminizi düzenler. Platformumuzu kullanarak bu Kosullari kabul edersiniz.'
       },
       {
         title: '2. Hizmet tanimi',
@@ -340,7 +340,7 @@ const copy = {
         list: [
           'InvoiceShelf kaynak kodu AGPL-3.0 lisansi altinda mevcuttur',
           'Facturino\'ya özgü degisiklikler AGPL-3.0 kosullarina tabidir',
-          '"Facturino" markasi, logolar ve tasarim MK Accounting DOOEL\'in mülkiyetindedir',
+          '"Facturino" markasi, logolar ve tasarim Facturino DOOEL\'in mülkiyetindedir',
           'Kullanici icerigi (veriler, faturalar, raporlar) kullanicinin mülkiyetinde kalir'
         ]
       },
@@ -394,7 +394,7 @@ const copy = {
         content: 'Bu Kosullarla ilgili sorular icin:',
         list: [
           'E-posta: info@facturino.mk',
-          'Sirket: MK Accounting DOOEL',
+          'Sirket: Facturino DOOEL',
           'Adres: Üsküp, Kuzey Makedonya'
         ]
       }
@@ -406,7 +406,7 @@ const copy = {
     sections: [
       {
         title: '1. General Provisions',
-        content: 'These Terms of Service ("Terms") govern your access and use of the Facturino platform, operated by MK Accounting DOOEL, Skopje, North Macedonia ("Facturino", "we", "us"). By using our platform, you agree to these Terms. If you do not agree, please do not use the platform.'
+        content: 'These Terms of Service ("Terms") govern your access and use of the Facturino platform, operated by Facturino DOOEL, Skopje, North Macedonia ("Facturino", "we", "us"). By using our platform, you agree to these Terms. If you do not agree, please do not use the platform.'
       },
       {
         title: '2. Service Description',
@@ -473,7 +473,7 @@ const copy = {
         list: [
           'InvoiceShelf source code is available under the AGPL-3.0 license',
           'Modifications and additions specific to Facturino are subject to AGPL-3.0 terms',
-          'The "Facturino" brand, logos, and design are protected and owned by MK Accounting DOOEL',
+          'The "Facturino" brand, logos, and design are protected and owned by Facturino DOOEL',
           'User content (data, invoices, reports) remains the property of the user'
         ]
       },
@@ -527,7 +527,7 @@ const copy = {
         content: 'For questions related to these Terms, contact us:',
         list: [
           'Email: info@facturino.mk',
-          'Company: MK Accounting DOOEL',
+          'Company: Facturino DOOEL',
           'Address: Skopje, North Macedonia'
         ]
       }

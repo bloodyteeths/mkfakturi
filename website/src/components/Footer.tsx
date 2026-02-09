@@ -5,7 +5,7 @@ import { Locale } from '@/i18n/locales'
 
 const footerCopy = {
   mk: {
-    companyInfo: 'Facturino by MK Accounting DOOEL, Скопје, Северна Македонија',
+    companyInfo: 'Facturino by Facturino DOOEL, Скопје, Северна Македонија',
     product: 'Производ',
     features: 'Функции',
     pricing: 'Цени',
@@ -22,7 +22,7 @@ const footerCopy = {
     followUs: 'Следете не',
   },
   sq: {
-    companyInfo: 'Facturino by MK Accounting DOOEL, Shkup, Maqedonia e Veriut',
+    companyInfo: 'Facturino by Facturino DOOEL, Shkup, Maqedonia e Veriut',
     product: 'Produkti',
     features: 'Vecorite',
     pricing: 'Cmimet',
@@ -39,7 +39,7 @@ const footerCopy = {
     followUs: 'Na ndiqni',
   },
   tr: {
-    companyInfo: 'Facturino by MK Accounting DOOEL, Üsküp, Kuzey Makedonya',
+    companyInfo: 'Facturino by Facturino DOOEL, Üsküp, Kuzey Makedonya',
     product: 'Ürün',
     features: 'Özellikler',
     pricing: 'Fiyatlar',
@@ -56,7 +56,7 @@ const footerCopy = {
     followUs: 'Bizi Takip Edin',
   },
   en: {
-    companyInfo: 'Facturino by MK Accounting DOOEL, Skopje, North Macedonia',
+    companyInfo: 'Facturino by Facturino DOOEL, Skopje, North Macedonia',
     product: 'Product',
     features: 'Features',
     pricing: 'Pricing',
