@@ -102,6 +102,26 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
       </div>
 
       {/* Social Proof */}
+      <div className="container relative z-10 mt-12 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-gray-500">
+          <p className="font-semibold text-gray-700">{t.socialProof.stat}</p>
+          <span className="hidden sm:inline text-gray-300">|</span>
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {t.socialProof.freeTrial}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {t.socialProof.noCreditCard}
+            </span>
+          </div>
+        </div>
+      </div>
 
     </section>
   )

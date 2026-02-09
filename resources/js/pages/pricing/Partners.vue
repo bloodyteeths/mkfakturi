@@ -3,25 +3,25 @@
     <div class="container mx-auto px-4 py-12">
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          Partner Program
+          Партнерска програма
         </h1>
         <p class="text-xl text-gray-600">
-          Earn commission by recommending Facturino to your clients
+          Заработувајте провизија со препорака на Facturino на вашите клиенти
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-8">
         <!-- Free Partner -->
         <div class="pricing-card border-2 border-gray-300 rounded-lg p-8 bg-white">
-          <h3 class="text-2xl font-semibold mb-2">Partner (Free)</h3>
+          <h3 class="text-2xl font-semibold mb-2">Partner (Бесплатно)</h3>
           <div class="text-4xl font-bold mb-6">
-            €0<span class="text-sm text-gray-500">/mo</span>
+            €0<span class="text-sm text-gray-500">/мес</span>
           </div>
 
           <div class="mb-6">
             <div class="bg-blue-100 border-l-4 border-blue-500 p-4 mb-4">
-              <p class="text-lg font-semibold text-blue-900">20% Commission Rate</p>
-              <p class="text-sm text-blue-700">On all referred client subscriptions</p>
+              <p class="text-lg font-semibold text-blue-900">20% Провизија</p>
+              <p class="text-sm text-blue-700">На сите препорачани клиентски претплати</p>
             </div>
           </div>
 
@@ -30,31 +30,31 @@
               <svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Recurring monthly commissions</span>
+              <span>Рекурентни месечни провизии</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Partner dashboard</span>
+              <span>Партнер портал</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Commission tracking & reporting</span>
+              <span>Следење на провизија и извештаи</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Referral link generation</span>
+              <span>Генерирање на линк за препорака</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Client management access</span>
+              <span>Пристап за управување со клиенти</span>
             </li>
           </ul>
 
@@ -63,28 +63,28 @@
             :class="{ 'bg-green-600 text-white': currentTier === 'free' }"
             :disabled="currentTier === 'free'"
           >
-            {{ currentTier === 'free' ? 'Current Plan' : 'Already Included' }}
+            {{ currentTier === 'free' ? 'Актуелен план' : 'Веќе вклучено' }}
           </button>
         </div>
 
         <!-- Partner Plus -->
         <div class="pricing-card border-2 border-blue-500 rounded-lg p-8 bg-gradient-to-br from-blue-50 to-white relative">
           <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-bl-lg rounded-tr-lg">
-            RECOMMENDED
+            ПРЕПОРАЧАНО
           </div>
 
           <h3 class="text-2xl font-semibold mb-2">Partner Plus</h3>
           <div class="text-4xl font-bold mb-6">
-            €29<span class="text-sm text-gray-500">/mo</span>
+            €29<span class="text-sm text-gray-500">/мес</span>
           </div>
 
           <div class="mb-6">
             <div class="bg-green-100 border-l-4 border-green-500 p-4 mb-4">
-              <p class="text-lg font-semibold text-green-900">22% Commission Rate</p>
-              <p class="text-sm text-green-700">+2% increase over Free plan</p>
+              <p class="text-lg font-semibold text-green-900">22% Провизија</p>
+              <p class="text-sm text-green-700">+2% зголемување над бесплатниот план</p>
             </div>
             <p class="text-sm text-gray-600 italic">
-              Pays for itself after just €1,450 in monthly client subscriptions
+              Се исплатува после само €1.450 месечни клиентски претплати
             </p>
           </div>
 
@@ -93,37 +93,37 @@
               <svg class="w-6 h-6 text-green-500 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span class="font-semibold">Everything in Free, plus:</span>
+              <span class="font-semibold">Сè од бесплатниот, плус:</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span><strong>22% commission rate</strong> (vs 20%)</span>
+              <span><strong>22% удел во приход</strong> (наспроти 20%)</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Priority partner support</span>
+              <span>Приоритетна партнерска поддршка</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Advanced analytics & insights</span>
+              <span>Напредни аналитики и увиди</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Co-branded marketing materials</span>
+              <span>Ко-брендирани маркетинг материјали</span>
             </li>
             <li class="flex items-start">
               <svg class="w-6 h-6 text-blue-600 mr-3 mt-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Early access to new features</span>
+              <span>Ран пристап до нови функции</span>
             </li>
           </ul>
 
@@ -133,16 +133,16 @@
             :class="{ 'bg-green-600 hover:bg-green-700': currentTier === 'plus' }"
             :disabled="loading || currentTier === 'plus'"
           >
-            {{ currentTier === 'plus' ? 'Current Plan' : 'Upgrade to Plus' }}
+            {{ currentTier === 'plus' ? 'Актуелен план' : 'Надгради на Plus' }}
           </button>
         </div>
       </div>
 
       <!-- Commission Calculator -->
       <div class="max-w-2xl mx-auto bg-gray-50 rounded-lg p-8 mb-8">
-        <h3 class="text-2xl font-bold mb-4 text-center">Commission Calculator</h3>
+        <h3 class="text-2xl font-bold mb-4 text-center">Калкулатор на провизија</h3>
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Monthly client subscriptions:</label>
+          <label class="block text-sm font-medium mb-2">Месечни клиентски претплати:</label>
           <input
             v-model.number="clientRevenue"
             type="number"
@@ -154,22 +154,22 @@
         </div>
         <div class="grid grid-cols-2 gap-4 mt-6">
           <div class="bg-white p-4 rounded-lg border">
-            <p class="text-sm text-gray-600 mb-1">Free Partner (20%)</p>
+            <p class="text-sm text-gray-600 mb-1">Бесплатен Partner (20%)</p>
             <p class="text-2xl font-bold text-gray-900">€{{ (clientRevenue * 0.20).toFixed(2) }}</p>
           </div>
           <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-500">
             <p class="text-sm text-blue-700 mb-1">Partner Plus (22%)</p>
             <p class="text-2xl font-bold text-blue-900">€{{ (clientRevenue * 0.22).toFixed(2) }}</p>
-            <p class="text-xs text-green-600 mt-1">+€{{ ((clientRevenue * 0.22) - (clientRevenue * 0.20)).toFixed(2) }} more</p>
+            <p class="text-xs text-green-600 mt-1">+€{{ ((clientRevenue * 0.22) - (clientRevenue * 0.20)).toFixed(2) }} повеќе</p>
           </div>
         </div>
         <p class="text-center text-sm text-gray-600 mt-4">
-          With €{{ clientRevenue }} in client subscriptions monthly
+          Со €{{ clientRevenue }} месечни клиентски претплати
         </p>
       </div>
 
       <div class="text-center text-sm text-gray-600">
-        <p>Questions about the Partner program? <a href="#" class="text-blue-600 hover:underline">Contact us</a></p>
+        <p>Прашања за партнерската програма? <a href="#" class="text-blue-600 hover:underline">Контактирајте нè</a></p>
       </div>
     </div>
   </div>
@@ -215,7 +215,7 @@ export default {
         }
       } catch (error) {
         console.error('Failed to create checkout session', error)
-        alert('Failed to start subscription process. Please try again.')
+        alert('Грешка при започнување на претплата. Обидете се повторно.')
       } finally {
         this.loading = false
       }

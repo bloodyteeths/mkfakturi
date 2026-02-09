@@ -6,9 +6,14 @@ export default function Partners({ t }: { t: Dictionary }) {
   return (
     <section className="py-6 md:py-8 bg-gray-50/50">
       <div className="container px-4">
-        <h3 className="mb-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <h3 className="mb-1 text-center text-xs font-semibold uppercase tracking-wide text-gray-400">
           {t.partners.title}
         </h3>
+        {t.partners.subtitle && (
+          <p className="mb-4 text-center text-xs text-gray-400">
+            {t.partners.subtitle}
+          </p>
+        )}
         <div className="flex items-center justify-center">
           <Image
             src="/assets/images/bank_logos.png"

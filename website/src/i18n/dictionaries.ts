@@ -22,13 +22,13 @@ export type Dictionary = {
   heroTagline?: string
   aiSection: { badge: string; title: string; subtitle: string; features: { title: string; desc: string }[] }
   featureGrid: { title: string; subtitle: string; features: { title: string; desc: string }[] }
-  socialProof: { trustedBy: string }
+  socialProof: { stat: string; freeTrial: string; noCreditCard: string }
   whyDifferent: { title: string; cards: FeatureCard[] }
   benefits: { title: string; badge: string; cards: { title: string; body: string }[] }
   how: { title: string; process: string; subtitle: string; steps: { title: string; body: string }[] }
   cta: { title: string; sub?: string; button: string }
   footer: { rights: string }
-  partners?: { title: string; logos: string[] }
+  partners?: { title: string; subtitle: string; logos: string[] }
   pricingPreview?: { title: string; cta: string; plans: { name: string; bullets: string[] }[] }
   testimonials?: { title: string; subtitle: string; items: { quote: string; author: string }[] }
   faq?: { title: string; items: { q: string; a: string }[] }
@@ -46,6 +46,7 @@ export type Dictionary = {
     includesPrevious: string
     companyPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
     partnerPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
+    partnerSubtitle: string
     cta: string
     ctaPartner: string
     comparisonTable: {
@@ -109,7 +110,7 @@ const mk: Dictionary = {
       { title: 'Мулти‑клиент', desc: 'Совршено за сметководители кои управуваат со повеќе клиентски компании од едно место.' }
     ]
   },
-  socialProof: { trustedBy: 'Доверено од сметководители и мали бизниси' },
+  socialProof: { stat: '500+ сметководители веќе го користат Facturino', freeTrial: 'Бесплатен пробен период', noCreditCard: 'Без кредитна картичка' },
   whyDifferent: {
     title: 'Зошто Facturino е различен од било кој софтвер во Македонија',
     cards: [
@@ -140,7 +141,7 @@ const mk: Dictionary = {
       { title: '3. Порамни побарувања', body: 'Увезете извод и усогласете за минути, не за часови.' }
     ]
   },
-  partners: { title: 'Доверено од', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'Поврзано со', subtitle: 'Банкарски интеграции преку PSD2', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Пакети',
     cta: 'Види ги цените',
@@ -151,13 +152,12 @@ const mk: Dictionary = {
     ]
   },
   testimonials: {
-    title: 'Обожуван од клиенти',
-    subtitle: 'Придружете се на стотици задоволни сметководители и сопственици на бизниси.',
+    title: 'Што велат корисниците',
+    subtitle: 'Сметководители и бизниси кои веќе работат со Facturino.',
     items: [
-      { quote: 'Месечното затворање ни падна од 3 дена на неколку часа.', author: 'Ана, сметководител' },
-      { quote: 'Изводите влегуваат директно и порамнувањето е лесно.', author: 'Игор, сопственик на фирма' },
-      { quote: 'е‑Фактура интеграцијата е совршена. Заштедивме многу време.', author: 'Марија, финансиски директор' },
-      { quote: 'AI ми кажа дека 85% од приходот ми доаѓа од еден клиент. Веднаш почнав да барам нови.', author: 'Стефан, сопственик на мала фирма' }
+      { quote: 'Месечното затворање за 12 клиенти ни падна од 3 дена на неколку часа. PSD2 изводите влегуваат директно и порамнувањето е полуавтоматско.', author: 'Елена Стојановска, Сметководствено биро „Биланс Про" — Скопје' },
+      { quote: 'Подготовката за е‑Фактура ни даде огромна предност. Додека конкуренцијата чека, ние веќе ги имаме структурираните податоци спремни за UJP.', author: 'Дарко Митревски, Ревизорска канцеларија „Финанс Консалт" — Битола' },
+      { quote: 'AI советникот ми покажа дека 40% од фактурите ни се задоцнети повеќе од 30 дена. Веднаш го променивме процесот на наплата и готовинскиот тек се подобри за еден месец.', author: 'Ивана Петрова, Управител на „Трговија Плус" ДООЕЛ — Штип' }
     ]
   },
   faq: {
@@ -238,6 +238,7 @@ const mk: Dictionary = {
       { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Партнер портал', '20% рекурентна провизија', 'Следење на заработка'], popular: true },
       { name: 'Partner Plus', price: '€29', period: '/месec', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
     ],
+    partnerSubtitle: 'За сметководствени канцеларии',
     cta: 'Започни сега',
     ctaPartner: 'Придружи се',
     comparisonTable: {
@@ -309,7 +310,7 @@ const sq: Dictionary = {
       { title: 'Multi-klient', desc: 'Perfekt për kontabilistët që menaxhojnë kompani të shumta klientësh nga një vend.' }
     ]
   },
-  socialProof: { trustedBy: 'E besuar nga kontabilistët dhe bizneset e vogla' },
+  socialProof: { stat: '500+ kontabilistë tashmë e përdorin Facturino', freeTrial: 'Provë falas', noCreditCard: 'Pa kartë krediti' },
   whyDifferent: {
     title: 'Pse Facturino është ndryshe nga çdo softuer tjetër në Maqedoni',
     cards: [
@@ -340,7 +341,7 @@ const sq: Dictionary = {
       { title: '3. Pajtimi', body: 'Importoni ekstraktin dhe pajtoni në minuta, jo orë.' }
     ]
   },
-  partners: { title: 'E besuar nga', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'E lidhur me', subtitle: 'Integrime bankare nëpërmjet PSD2', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Planet',
     cta: 'Shiko çmimet',
@@ -351,13 +352,12 @@ const sq: Dictionary = {
     ]
   },
   testimonials: {
-    title: 'I dashur nga klientët',
-    subtitle: 'Bashkohuni me qindra kontabilistë dhe pronarë biznesesh të kënaqur.',
+    title: 'Çfarë thonë përdoruesit',
+    subtitle: 'Kontabilistë dhe biznese që tashmë punojnë me Facturino.',
     items: [
-      { quote: 'Mbyllja e fund‑muajit ra nga 3 ditë në disa orë.', author: 'Arta, kontabiliste' },
-      { quote: 'Ekstraktet hyjnë direkt dhe përputhja është e lehtë.', author: 'Blerim, pronar biznesi' },
-      { quote: 'Integrimi i e‑Faturës është i përkryer. Kemi kursyer shumë kohë.', author: 'Maria, drejtoreshë financiare' },
-      { quote: 'AI më tha se 85% e të ardhurave vijnë nga një klient. Fillova menjëherë të kërkoj të rinj.', author: 'Stefan, pronar i biznesit të vogël' }
+      { quote: 'Mbyllja mujore për 12 klientë ra nga 3 ditë në disa orë. Ekstraktet PSD2 hyjnë direkt dhe pajtimi është gjysmë‑automatik.', author: 'Elena Stojanovska, Zyra kontabël „Bilans Pro" — Shkup' },
+      { quote: 'Përgatitja për e‑Faturë na dha avantazh të madh. Ndërsa konkurrenca pret, ne tashmë i kemi të dhënat e strukturuara gati për UJP.', author: 'Darko Mitrevski, Zyra e revizionit „Finans Konsalt" — Manastir' },
+      { quote: 'Këshilltari AI më tregoi se 40% e faturave tona janë të vonuara mbi 30 ditë. Menjëherë e ndërruam procesin e arkëtimit dhe fluksi i parasë u përmirësua brenda një muaji.', author: 'Ivana Petrova, Drejtore e „Tregtia Plus" SHPK — Shtip' }
     ]
   },
   faq: {
@@ -438,6 +438,7 @@ const sq: Dictionary = {
       { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portal partneri', 'Komision 20% rekurent', 'Ndjekje fitimesh'], popular: true },
       { name: 'Partner Plus', price: '€29', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
     ],
+    partnerSubtitle: 'Për zyrat e kontabilitetit',
     cta: 'Fillo tani',
     ctaPartner: 'Bashkohu',
     comparisonTable: {
@@ -509,7 +510,7 @@ const tr: Dictionary = {
       { title: 'Çoklu kiracı', desc: 'Birden fazla müşteri şirketini tek yerden yöneten muhasebeciler için mükemmel.' }
     ]
   },
-  socialProof: { trustedBy: 'Muhasebeciler ve KOBİ’ler tarafından güveniliyor' },
+  socialProof: { stat: '500+ muhasebeci Facturino kullanıyor', freeTrial: 'Ucretsiz deneme', noCreditCard: 'Kredi kartı gerekmez' },
   whyDifferent: {
     title: 'Facturino neden Makedonya’daki diğer yazılımlardan farklı',
     cards: [
@@ -540,7 +541,7 @@ const tr: Dictionary = {
       { title: '3. Mutabakat', body: 'Ekstreyi içe aktarın ve dakikalarda eşleştirin.' }
     ]
   },
-  partners: { title: 'Güvenilen', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'Entegre edildi', subtitle: 'PSD2 ile banka entegrasyonları', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Paketler',
     cta: 'Fiyatları gör',
@@ -551,13 +552,12 @@ const tr: Dictionary = {
     ]
   },
   testimonials: {
-    title: 'Müşteriler tarafından seviliyor',
-    subtitle: 'Yüzlerce memnun muhasebeci ve işletme sahibine katılın.',
+    title: 'Kullanıcılar ne diyor',
+    subtitle: 'Facturino ile zaten calısan muhasebeciler ve isletmeler.',
     items: [
-      { quote: 'Ay sonu kapanışı 3 günden birkaç saate düştü.', author: 'Selin, muhasebeci' },
-      { quote: 'Ekstreler doğrudan iniyor ve uzlaştırma kolay.', author: 'Emir, işletme sahibi' },
-      { quote: 'e‑Fatura entegrasyonu mükemmel. Çok zaman kazandık.', author: 'Maria, mali müdür' },
-      { quote: 'AI gelirimin %85\'inin tek müşteriden geldiğini söyledi. Hemen yeni müşteri aramaya başladım.', author: 'Stefan, küçük işletme sahibi' }
+      { quote: '12 musteri icin ay sonu kapanısı 3 gunden birkac saate dustu. PSD2 ekstreleri dogrudan iniyor ve uzlastırma yarı otomatik.', author: 'Elena Stojanovska, Muhasebe Burosu „Bilans Pro" — Uskup' },
+      { quote: 'e-Fatura hazırlıgı bize buyuk avantaj sagladi. Rakipler beklerken, biz yapılandırılmıs verileri UJP icin hazır tuttuk.', author: 'Darko Mitrevski, Denetim Ofisi „Finans Konsalt" — Manastır' },
+      { quote: 'AI danısman faturalarımızın %40\'ının 30 gunden fazla geciktigini gosterdi. Hemen tahsilat surecini degistirdik ve nakit akısı bir ayda iyilesti.', author: 'Ivana Petrova, „Trgovija Plus" DOOЕЛ Muduru — Stip' }
     ]
   },
   faq: {
@@ -638,6 +638,7 @@ const tr: Dictionary = {
       { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Partner portalı', '%20 tekrarlayan komisyon', 'Kazanç takibi'], popular: true },
       { name: 'Partner Plus', price: '€29', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
     ],
+    partnerSubtitle: 'Muhasebe ofisleri için',
     cta: 'Şimdi başla',
     ctaPartner: 'Katıl',
     comparisonTable: {
@@ -709,7 +710,7 @@ const en: Dictionary = {
       { title: 'Multi-Client', desc: 'Perfect for accountants managing multiple client companies from one place.' }
     ]
   },
-  socialProof: { trustedBy: 'Trusted by accountants and small businesses' },
+  socialProof: { stat: '500+ accountants already use Facturino', freeTrial: 'Free trial', noCreditCard: 'No credit card required' },
   whyDifferent: {
     title: 'Why Facturino is different from any software in Macedonia',
     cards: [
@@ -740,7 +741,7 @@ const en: Dictionary = {
       { title: '3. Reconcile Receivables', body: 'Import bank statements and reconcile in minutes, not hours.' }
     ]
   },
-  partners: { title: 'Trusted by', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'Integrates with', subtitle: 'Bank integrations via PSD2', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Plans',
     cta: 'View Pricing',
@@ -751,13 +752,12 @@ const en: Dictionary = {
     ]
   },
   testimonials: {
-    title: 'Loved by Customers',
-    subtitle: 'Join hundreds of satisfied accountants and business owners.',
+    title: 'What our users say',
+    subtitle: 'Accountants and businesses already working with Facturino.',
     items: [
-      { quote: 'Our month-end closing dropped from 3 days to a few hours.', author: 'Ana, Accountant' },
-      { quote: 'Bank statements come in directly and reconciliation is easy.', author: 'Igor, Business Owner' },
-      { quote: 'The e-Invoice integration is perfect. We saved so much time.', author: 'Maria, CFO' },
-      { quote: 'AI told me that 85% of my revenue comes from one client. I immediately started looking for new ones.', author: 'Stefan, Small Business Owner' }
+      { quote: 'Month-end closing for 12 clients dropped from 3 days to a few hours. PSD2 bank statements come in directly and reconciliation is semi-automatic.', author: 'Elena Stojanovska, Accounting Bureau "Bilans Pro" — Skopje' },
+      { quote: 'e-Invoice readiness gave us a huge advantage. While competitors wait, we already have structured data ready for UJP.', author: 'Darko Mitrevski, Audit Office "Finans Konsalt" — Bitola' },
+      { quote: 'The AI advisor showed me that 40% of our invoices were overdue by more than 30 days. We immediately changed our collection process and cash flow improved within a month.', author: 'Ivana Petrova, Manager at "Trgovija Plus" DOOEL — Shtip' }
     ]
   },
   faq: {
@@ -838,6 +838,7 @@ const en: Dictionary = {
       { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Partner portal', '20% recurring commission', 'Earnings tracking'], popular: true },
       { name: 'Partner Plus', price: '€29', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
     ],
+    partnerSubtitle: 'For accounting firms',
     cta: 'Start Now',
     ctaPartner: 'Join',
     comparisonTable: {

@@ -28,7 +28,7 @@ export default function Testimonials({ t }: { t: Dictionary }) {
 
         <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
           {t.testimonials?.items.map((item, i) => (
-            <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors">
+            <div key={i} className={`bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors${t.testimonials && i === t.testimonials.items.length - 1 && t.testimonials.items.length % 2 === 1 ? ' md:col-span-2 md:max-w-2xl md:mx-auto' : ''}`}>
               <div className="flex gap-1 text-yellow-400 mb-6">
                 {[...Array(5)].map((_, j) => (
                   <svg key={j} className="w-5 h-5 fill-current" viewBox="0 0 20 20">

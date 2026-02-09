@@ -13,7 +13,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const t = await getDictionary(locale)
 
   if (!t.pricingPage) return null
-  const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, companyPlans, partnerPlans, cta, ctaPartner } = t.pricingPage
+  const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, partnerSubtitle, companyPlans, partnerPlans, cta, ctaPartner } = t.pricingPage
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -120,7 +120,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                     <div className="flex justify-between items-start mb-6">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">{p.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">For accounting firms</p>
+                        <p className="text-sm text-gray-500 mt-1">{partnerSubtitle}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-3xl font-extrabold text-gray-900">{p.price}</div>

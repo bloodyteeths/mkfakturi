@@ -1,0 +1,6 @@
+# Facturino - www.facturino.mk
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.facturino.mk/sitemap.xml
