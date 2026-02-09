@@ -2,8 +2,8 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "invoice2data-service/Dockerfile",
-    "watchPatterns": ["invoice2data-service/**"]
+    "dockerfilePath": "Dockerfile",
+    "watchPatterns": ["**"]
   },
   "deploy": {
     "startCommand": "uvicorn main:app --host 0.0.0.0 --port 8000",
@@ -11,5 +11,8 @@
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
+  },
+  "env": {
+    "OCR_LANGS": "mkd+eng+srp"
   }
 }

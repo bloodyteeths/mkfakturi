@@ -2,7 +2,9 @@
 
 namespace App\Services\InvoiceParsing;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -10,6 +12,8 @@ class Invoice2DataClient implements InvoiceParserClient
 {
     /**
      * @return array<string,mixed>
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
      */
     public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
     {
@@ -23,24 +27,42 @@ class Invoice2DataClient implements InvoiceParserClient
             $baseUrl = 'https://'.$baseUrl;
         }
 
-        $timeout = (int) config('services.invoice2data.timeout', 30);
+        $timeout = (int) config('services.invoice2data.timeout', 90);
 
-        $response = Http::timeout($timeout)
-            ->attach('file', file_get_contents($absolutePath), $originalName)
-            ->post($baseUrl.'/parse', [
+        try {
+            $response = Http::timeout($timeout)
+                ->connectTimeout(10)
+                ->attach('file', file_get_contents($absolutePath), $originalName)
+                ->post($baseUrl.'/parse', [
+                    'company_id' => $companyId,
+                    'from' => $from,
+                    'subject' => $subject,
+                    'request_id' => (string) Str::uuid(),
+                ]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (ConnectionException $e) {
+            Log::warning('invoice2data-service unreachable during parse', [
+                'url' => $baseUrl.'/parse',
                 'company_id' => $companyId,
-                'from' => $from,
-                'subject' => $subject,
-                'request_id' => (string) Str::uuid(),
+                'file' => $originalName,
+                'error' => $e->getMessage(),
             ]);
 
-        $response->throw();
-
-        return $response->json();
+            throw new Invoice2DataServiceException(
+                'Invoice parsing service is currently unavailable. Please try again later.',
+                503,
+                $e
+            );
+        }
     }
 
     /**
      * @return array<string,mixed>
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
      */
     public function ocr(int $companyId, string $filePath, string $originalName): array
     {
@@ -54,18 +76,34 @@ class Invoice2DataClient implements InvoiceParserClient
             $baseUrl = 'https://'.$baseUrl;
         }
 
-        $timeout = (int) config('services.invoice2data.timeout', 30);
+        $timeout = (int) config('services.invoice2data.timeout', 90);
 
-        $response = Http::timeout($timeout)
-            ->attach('file', file_get_contents($absolutePath), $originalName)
-            ->post($baseUrl.'/ocr', [
+        try {
+            $response = Http::timeout($timeout)
+                ->connectTimeout(10)
+                ->attach('file', file_get_contents($absolutePath), $originalName)
+                ->post($baseUrl.'/ocr', [
+                    'company_id' => $companyId,
+                    'request_id' => (string) Str::uuid(),
+                    // Use plain text format for better compatibility
+                ]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (ConnectionException $e) {
+            Log::warning('invoice2data-service unreachable during OCR', [
+                'url' => $baseUrl.'/ocr',
                 'company_id' => $companyId,
-                'request_id' => (string) Str::uuid(),
-                // Use plain text format for better compatibility
+                'file' => $originalName,
+                'error' => $e->getMessage(),
             ]);
 
-        $response->throw();
-
-        return $response->json();
+            throw new Invoice2DataServiceException(
+                'Invoice OCR service is currently unavailable. Please try again later.',
+                503,
+                $e
+            );
+        }
     } // CLAUDE-CHECKPOINT
 }

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Bill;
 use App\Models\Supplier;
+use App\Services\InvoiceParsing\Invoice2DataServiceException;
 use App\Services\InvoiceParsing\InvoiceParserClient;
 use App\Services\InvoiceParsing\ParsedInvoiceMapper;
 use Illuminate\Bus\Queueable;
@@ -40,17 +41,43 @@ class ParseInvoicePdfJob implements ShouldQueue
         $this->subject = $subject;
     }
 
+    /**
+     * Number of times the job may be attempted.
+     */
+    public int $tries = 3;
+
+    /**
+     * Seconds to wait before retrying after a failure.
+     *
+     * @var array<int,int>
+     */
+    public array $backoff = [30, 120, 300];
+
     public function handle(InvoiceParserClient $client, ParsedInvoiceMapper $mapper): void
     {
         $disk = config('filesystems.default', 'local');
 
-        $parsed = $client->parse(
-            $this->companyId,
-            $this->filePath,
-            $this->originalName,
-            $this->from,
-            $this->subject
-        );
+        try {
+            $parsed = $client->parse(
+                $this->companyId,
+                $this->filePath,
+                $this->originalName,
+                $this->from,
+                $this->subject
+            );
+        } catch (Invoice2DataServiceException $e) {
+            Log::warning('ParseInvoicePdfJob: invoice2data-service unavailable, will retry', [
+                'company_id' => $this->companyId,
+                'file' => $this->originalName,
+                'attempt' => $this->attempts(),
+                'error' => $e->getMessage(),
+            ]);
+
+            // Release back to queue with backoff so it retries automatically
+            $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+
+            return;
+        }
 
         $components = $mapper->mapToBillComponents($this->companyId, $parsed);
 
