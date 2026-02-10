@@ -560,13 +560,11 @@ export default [
           {
             path: 'company-info',
             name: 'company.info',
-            meta: { isOwner: true },
             component: CompanyInfo,
           },
           {
             path: 'preferences',
             name: 'preferences',
-            meta: { isOwner: true },
             component: Preferences,
           },
           // Removed: AI Insights - no backend implementation
@@ -584,13 +582,11 @@ export default [
           {
             path: 'notifications',
             name: 'notifications',
-            meta: { isOwner: true },
             component: Notifications,
           },
           {
             path: 'roles-settings',
             name: 'roles.settings',
-            meta: { isOwner: true },
             component: RolesSettings,
           },
           // Exchange rate provider settings removed - using free Frankfurter API
@@ -666,7 +662,6 @@ export default [
           {
             path: 'invite-company',
             name: 'settings.invite-company',
-            meta: { isOwner: true },
             component: InviteCompanySettings,
           },
           {
