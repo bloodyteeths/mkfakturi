@@ -3,6 +3,7 @@
 namespace Modules\Mk\Public\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -217,6 +218,40 @@ class SignupController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+    /**
+     * Get available currencies for signup form
+     *
+     * GET /api/v1/public/signup/currencies
+     */
+    public function getCurrencies(): JsonResponse
+    {
+        $currencies = Currency::orderBy('name')->get(['id', 'name', 'code', 'symbol']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $currencies->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => "{$c->code} - {$c->name}",
+                'code' => $c->code,
+                'symbol' => $c->symbol,
+            ]),
+        ]);
+    }
+
+    /**
+     * Get available languages for signup form
+     *
+     * GET /api/v1/public/signup/languages
+     */
+    public function getLanguages(): JsonResponse
+    {
+        $languages = config('invoiceshelf.languages', []);
+
+        return response()->json([
+            'success' => true,
+            'data' => $languages,
+        ]);
     }
 }
 

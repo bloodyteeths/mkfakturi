@@ -5,6 +5,7 @@ namespace Modules\Mk\Public\Services;
 use App\Models\AffiliateLink;
 use App\Models\Company;
 use App\Models\CompanyReferral;
+use App\Models\CompanySetting;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -274,6 +275,18 @@ class SignupService
 
         // Setup default data (roles, payment methods, units, settings)
         $company->setupDefaultData();
+
+        // Override with user-selected currency and language if provided
+        $overrides = [];
+        if (! empty($data['currency'])) {
+            $overrides['currency'] = $data['currency'];
+        }
+        if (! empty($data['language'])) {
+            $overrides['language'] = $data['language'];
+        }
+        if (! empty($overrides)) {
+            CompanySetting::setSettings($overrides, $company->id);
+        }
 
         return $company;
     }

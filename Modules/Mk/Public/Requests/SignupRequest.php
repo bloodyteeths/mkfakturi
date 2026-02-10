@@ -80,6 +80,35 @@ class SignupRequest extends FormRequest
                 'in:monthly,yearly',
             ],
 
+            // Company preferences (optional - defaults to MKD/mk)
+            'currency' => [
+                'nullable',
+                'integer',
+                'exists:currencies,id',
+            ],
+            'language' => [
+                'nullable',
+                'string',
+                'in:ar,nl,en,fr,de,ja,it,lv,pl,pt_BR,sr,ko,es,sv,sk,vi,cs,el,hr,mk,sq,th',
+            ],
+
+            // Company address (optional)
+            'address' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'city' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'zip' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
             // Referral tracking (optional)
             'referral_code' => [
                 'nullable',

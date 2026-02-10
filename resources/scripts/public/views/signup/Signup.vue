@@ -121,6 +121,46 @@
                 />
               </BaseInputGroup>
             </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <BaseInputGroup
+                :label="'Валута'"
+                :error="companyV$.companyForm.currency.$error && companyV$.companyForm.currency.$errors[0]?.$message"
+                required
+              >
+                <BaseMultiselect
+                  v-model="companyForm.currency"
+                  :options="currencies"
+                  label="name"
+                  value-prop="id"
+                  :searchable="true"
+                  track-by="name"
+                  placeholder="Изберете валута"
+                  :invalid="companyV$.companyForm.currency.$error"
+                  class="w-full"
+                  :content-loading="loadingCurrencies"
+                />
+              </BaseInputGroup>
+
+              <BaseInputGroup
+                :label="'Јазик'"
+                :error="companyV$.companyForm.language.$error && companyV$.companyForm.language.$errors[0]?.$message"
+                required
+              >
+                <BaseMultiselect
+                  v-model="companyForm.language"
+                  :options="languages"
+                  label="name"
+                  value-prop="code"
+                  :searchable="true"
+                  track-by="name"
+                  placeholder="Изберете јазик"
+                  :invalid="companyV$.companyForm.language.$error"
+                  class="w-full"
+                  :content-loading="loadingLanguages"
+                />
+              </BaseInputGroup>
+            </div>
           </div>
 
           <div class="flex justify-end">
@@ -475,6 +515,10 @@ const selectedPlan = ref(null)
 const billingPeriod = ref('monthly')
 const isProcessing = ref(false)
 const registrationError = ref('')
+const currencies = ref([])
+const languages = ref([])
+const loadingCurrencies = ref(false)
+const loadingLanguages = ref(false)
 
 // Forms
 const companyForm = reactive({
@@ -483,6 +527,8 @@ const companyForm = reactive({
   address: '',
   city: '',
   zip: '',
+  currency: null,
+  language: 'mk',
 })
 
 const userForm = reactive({
@@ -509,6 +555,12 @@ const companyRules = {
       required: helpers.withMessage('Полето за град е задолжително', required),
     },
     zip: {},
+    currency: {
+      required: helpers.withMessage('Полето за валута е задолжително', required),
+    },
+    language: {
+      required: helpers.withMessage('Полето за јазик е задолжително', required),
+    },
   },
 }
 
@@ -662,6 +714,8 @@ async function completeRegistration() {
       address: companyForm.address,
       city: companyForm.city,
       zip: companyForm.zip,
+      currency: companyForm.currency,
+      language: companyForm.language,
       name: userForm.name,
       email: userForm.email,
       password: userForm.password,
@@ -724,8 +778,41 @@ async function completeRegistration() {
   }
 }
 
+async function loadCurrencies() {
+  loadingCurrencies.value = true
+  try {
+    const response = await axios.get('/public/signup/currencies')
+    currencies.value = response.data.data || []
+    // Pre-select MKD
+    const mkd = currencies.value.find((c) => c.code === 'MKD')
+    if (mkd && !companyForm.currency) {
+      companyForm.currency = mkd.id
+    }
+  } catch (error) {
+    console.error('Failed to load currencies:', error)
+  } finally {
+    loadingCurrencies.value = false
+  }
+}
+
+async function loadLanguages() {
+  loadingLanguages.value = true
+  try {
+    const response = await axios.get('/public/signup/languages')
+    languages.value = response.data.data || []
+  } catch (error) {
+    console.error('Failed to load languages:', error)
+  } finally {
+    loadingLanguages.value = false
+  }
+}
+
 // Lifecycle
 onMounted(() => {
+  // Load currencies and languages for Step 1 form
+  loadCurrencies()
+  loadLanguages()
+
   // Capture partner referral code from URL
   if (route.query.ref) {
     referralCode.value = route.query.ref

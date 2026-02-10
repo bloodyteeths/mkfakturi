@@ -162,10 +162,10 @@ const isSaving = ref(false)
 let isFetchingInitialData = ref(false)
 
 let currentPreferences = reactive({
-  currency: 1,
-  language: 'en',
+  currency: null,
+  language: 'mk',
   carbon_date_format: 'd M Y',
-  time_zone: 'UTC',
+  time_zone: 'Europe/Skopje',
   fiscal_year: '1-12',
 })
 
@@ -224,8 +224,15 @@ Promise.all([
   globalStore.fetchCountries(),
   globalStore.fetchConfig(fiscalYears),
   globalStore.fetchConfig(data),
-]).then(([res1]) => {
+]).then(() => {
   isFetchingInitialData.value = false
+  // Pre-select MKD currency if not already set
+  if (!currentPreferences.currency && globalStore.currencies.length) {
+    const mkd = globalStore.currencies.find((c) => c.code === 'MKD')
+    if (mkd) {
+      currentPreferences.currency = mkd.id
+    }
+  }
 })
 
 const rules = computed(() => {
