@@ -91,6 +91,8 @@ class PartnerScopeMiddleware
         // Skip company access check for partner portal routes that do their own authorization
         $skipCompanyCheck = $request->is('api/*/console/companies') ||
                            $request->is('api/*/console') ||
+                           $request->is('api/*/console/commissions') ||
+                           $request->is('api/*/console/commissions/*') ||
                            $request->is('api/*/partner/dashboard') ||
                            $request->is('api/*/partner/commissions') ||
                            $request->is('api/*/partner/clients') ||

@@ -60,6 +60,27 @@ const isAppLoaded = computed(() => {
 onMounted(() => {
   // Start bootstrap but don't block UI - app will show once isAppLoaded becomes true
   globalStore.bootstrap().then((res) => {
+    // After bootstrap, redirect partner users away from admin dashboard
+    // The nav guard can't catch this on initial load because userStore is empty before bootstrap
+    if (userStore.currentUser?.role === 'partner') {
+      const currentPath = route.path
+      if (!currentPath.startsWith('/admin/partner') && !currentPath.startsWith('/admin/console')) {
+        // Check if selectedCompany in localStorage is actually valid
+        // (bootstrap sets companyStore.selectedCompany only if user has access)
+        const storedCompanyId = window.Ls?.get('selectedCompany')
+        const bootstrapCompany = companyStore.selectedCompany
+        const hasValidCompany = storedCompanyId && bootstrapCompany && String(bootstrapCompany.id) === String(storedCompanyId)
+        if (!hasValidCompany) {
+          // Clear stale company from localStorage to prevent repeated 403s
+          if (storedCompanyId) {
+            window.Ls.remove('selectedCompany')
+          }
+          router.push('/admin/partner/dashboard')
+          return
+        }
+      }
+    }
+
     // Only redirect if abilities are fully loaded AND user lacks the required ability
     if (route.meta.ability && userStore.currentAbilities && userStore.currentAbilities.length > 0) {
       if (!userStore.hasAbilities(route.meta.ability)) {
