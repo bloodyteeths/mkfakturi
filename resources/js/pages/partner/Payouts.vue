@@ -35,7 +35,7 @@
             <div class="flex-grow">
               <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $t('partner.payouts.connect_stripe', 'Поврзете се со Stripe') }}</h3>
               <p class="text-gray-600 mb-4">
-                {{ $t('partner.payouts.connect_description', 'Поврзете ја вашата банкарска сметка преку Stripe за автоматски месечни исплати на провизии во EUR.') }}
+                {{ $t('partner.payouts.connect_description', 'Поврзете ја вашата банкарска сметка преку Stripe за автоматски месечни исплати на провизии во МКД.') }}
               </p>
               <ul class="text-sm text-gray-600 space-y-2 mb-6">
                 <li class="flex items-center gap-2">
@@ -48,7 +48,7 @@
                   <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                   </svg>
-                  {{ $t('partner.payouts.feature_eur_payout', 'Исплата во EUR на вашата македонска сметка') }}
+                  {{ $t('partner.payouts.feature_mkd_payout', 'Исплата во МКД на вашата македонска сметка') }}
                 </li>
                 <li class="flex items-center gap-2">
                   <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -467,7 +467,7 @@ export default {
     const { stripeConnect, stripeConnectLoading } = storeToRefs(partnerStore)
 
     // Get currency from company settings or fallback to EUR
-    const currency = globalStore.companySettings?.currency || { code: 'EUR', symbol: 'EUR' }
+    const currency = globalStore.companySettings?.currency || { code: 'MKD', symbol: 'ден' }
 
     return {
       partnerStore,
@@ -510,7 +510,7 @@ export default {
 
   computed: {
     currencyCode() {
-      return this.currency?.code || 'EUR'
+      return this.currency?.code || 'MKD'
     }
   },
 

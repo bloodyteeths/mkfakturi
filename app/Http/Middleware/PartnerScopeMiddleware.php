@@ -88,14 +88,16 @@ class PartnerScopeMiddleware
             'url' => $request->url(),
         ]);
 
-        // Skip company access check for routes that list all companies
+        // Skip company access check for partner portal routes that do their own authorization
         $skipCompanyCheck = $request->is('api/*/console/companies') ||
                            $request->is('api/*/console') ||
                            $request->is('api/*/partner/dashboard') ||
                            $request->is('api/*/partner/commissions') ||
                            $request->is('api/*/partner/clients') ||
+                           $request->is('api/*/partner/clients/*') ||
                            $request->is('api/*/partner/referrals') ||
                            $request->is('api/*/partner/payouts') ||
+                           $request->is('api/*/partner/payouts/*') ||
                            $request->is('api/*/partner/stripe-connect/*') ||
                            $request->is('api/*/partner/bank-details');
 

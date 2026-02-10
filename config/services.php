@@ -54,8 +54,8 @@ return [
         // Stripe Connect for partner payouts (Cross-border to Macedonia)
         'connect' => [
             'client_id' => env('STRIPE_CONNECT_CLIENT_ID'),
-            // Cross-border payouts support MK (Macedonia) via EUR
-            'payout_currency' => 'eur',
+            // MKD is the required currency for MK country
+            'payout_currency' => 'mkd',
         ],
     ],
 

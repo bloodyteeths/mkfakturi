@@ -76,6 +76,72 @@
           <div class="flex items-center">
             <div class="relative ml-3">
               <div class="flex items-center space-x-4">
+                <!-- Console Switch Button -->
+                <button
+                  @click="goToConsole"
+                  class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {{ t('partner.navigation.console') }}
+                </button>
+
+                <!-- Language Switcher -->
+                <BaseDropdown width-class="w-48">
+                  <template #activator>
+                    <div
+                      class="
+                        flex
+                        items-center
+                        justify-center
+                        w-8
+                        h-8
+                        text-sm text-black
+                        bg-gray-100
+                        rounded
+                        cursor-pointer
+                        hover:bg-gray-200
+                      "
+                    >
+                      <BaseIcon name="LanguageIcon" class="w-5 h-5 text-gray-600" />
+                    </div>
+                  </template>
+
+                  <BaseDropdownItem @click="setLanguage('en')">
+                    <div class="flex items-center">
+                      <span class="mr-3 text-base">🇺🇸</span>
+                      English
+                      <span v-if="currentLocale === 'en'" class="ml-auto text-green-500">✓</span>
+                    </div>
+                  </BaseDropdownItem>
+
+                  <BaseDropdownItem @click="setLanguage('mk')">
+                    <div class="flex items-center">
+                      <span class="mr-3 text-base">🇲🇰</span>
+                      Македонски
+                      <span v-if="currentLocale === 'mk'" class="ml-auto text-green-500">✓</span>
+                    </div>
+                  </BaseDropdownItem>
+
+                  <BaseDropdownItem @click="setLanguage('sq')">
+                    <div class="flex items-center">
+                      <span class="mr-3 text-base">🇦🇱</span>
+                      Shqip
+                      <span v-if="currentLocale === 'sq'" class="ml-auto text-green-500">✓</span>
+                    </div>
+                  </BaseDropdownItem>
+
+                  <BaseDropdownItem @click="setLanguage('tr')">
+                    <div class="flex items-center">
+                      <span class="mr-3 text-base">🇹🇷</span>
+                      Türkçe
+                      <span v-if="currentLocale === 'tr'" class="ml-auto text-green-500">✓</span>
+                    </div>
+                  </BaseDropdownItem>
+                </BaseDropdown>
+
                 <span class="text-sm text-gray-700">
                   {{ userStore.currentUser?.name || 'Partner' }}
                 </span>
@@ -107,15 +173,20 @@ import { onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useAuthStore } from '@/scripts/admin/stores/auth'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useRouter } from 'vue-router'
 
 // i18n
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // Use the MAIN user store (same one used by main login)
 const userStore = useUserStore()
 const authStore = useAuthStore()
+const globalStore = useGlobalStore()
 const router = useRouter()
+
+// Current locale for highlighting the active language
+const currentLocale = computed(() => locale.value)
 
 // Create a computed wrapper for abilities check (partners have specific abilities)
 const hasAbilities = (ability) => {
@@ -131,6 +202,27 @@ const hasAbilities = (ability) => {
   }
 
   return partnerAbilities.includes(ability)
+}
+
+// Navigate to partner console
+// CLAUDE-CHECKPOINT
+const goToConsole = () => {
+  router.push('/admin/console')
+}
+
+/**
+ * Set the active language.
+ * Saves preference to localStorage, updates vue-i18n locale,
+ * and syncs with the global store (same pattern as TheSiteHeader.vue).
+ */
+function setLanguage(newLocale) {
+  locale.value = newLocale
+  localStorage.setItem('invoiceshelf_locale', newLocale)
+  try {
+    globalStore.updateLanguage(newLocale)
+  } catch (error) {
+    console.log('Global store updateLanguage not available, using localStorage only')
+  }
 }
 
 // Override body overflow on mount (fix scroll issue)

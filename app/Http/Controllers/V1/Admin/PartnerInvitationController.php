@@ -244,7 +244,7 @@ class PartnerInvitationController extends Controller
 
         $invitations = DB::table('partner_company_links')
             ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
-            ->join('users', 'users.id', '=', 'partner_company_links.created_by')
+            ->leftJoin('users', 'users.id', '=', 'partner_company_links.created_by')
             ->where('partner_company_links.partner_id', $partner->id)
             ->where('partner_company_links.invitation_status', 'pending')
             ->select([

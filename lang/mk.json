@@ -87,7 +87,7 @@
     "total_amount": "ВКУПЕН ИЗНОС",
     "bill_to": "Наплати на",
     "ship_to": "Испрати на",
-    "due": "Доспева",
+    "due": "Достасува",
     "draft": "Нацрт",
     "sent": "Испратено",
     "all": "Сите",
@@ -225,8 +225,7 @@
     "collapse_sidebar": "Собери странична лента",
     "expand_sidebar": "Прошири странична лента",
     "refresh": "Освежи",
-    "accept": "Прифати",
-    "due": "Достасува"
+    "accept": "Прифати"
   },
   "accounting": {
     "journal_entries": {
@@ -4593,7 +4592,6 @@
     "from": "Од",
     "select_invoice_to_match": "Избери фактура за поврзување",
     "import_csv": "Увези CSV",
-    "import_statement": "Увези извод",
     "select_bank_upload": "Избери банка и прикачи датотека",
     "select_bank": "Избери банка",
     "select_bank_placeholder": "Избери банка или користи автоматско откривање",
@@ -4610,10 +4608,6 @@
     "new_transactions": "Нови трансакции",
     "duplicates": "Дупликати",
     "detected_bank": "Откриена банка",
-    "date": "Датум",
-    "description": "Опис",
-    "amount": "Износ",
-    "status": "Статус",
     "duplicate": "Дупликат",
     "new": "Нова",
     "showing_first_10": "Прикажани се првите 10 од {total} трансакции",
@@ -4931,6 +4925,38 @@
     }
   },
   "partner": {
+    "navigation": {
+      "dashboard": "Контролна табла",
+      "clients": "Клиенти",
+      "commissions": "Провизии",
+      "referrals": "Препораки",
+      "invitations": "Покани",
+      "payouts": "Исплати",
+      "logout": "Одјава",
+      "console": "Конзола"
+    },
+    "commissions": {
+      "description": "Прегледајте ги вашите провизии и исплати",
+      "kpi_summary": "Преглед на провизии",
+      "total_earnings": "Вкупна заработка",
+      "from_start": "Од почеток",
+      "this_month": "Овој месец",
+      "current_month": "Тековен месец",
+      "pending_payout": "Чека исплата",
+      "payout_date": "Датум на следна исплата",
+      "monthly_trend": "Месечен тренд",
+      "no_monthly_trend": "Нема податоци за месечен тренд",
+      "by_company": "По компанија",
+      "company": "Компанија",
+      "rate": "Стапка",
+      "total": "Вкупно",
+      "no_company_data": "Нема податоци за провизии по компанија",
+      "status_active": "Активен",
+      "load_error": "Не можеше да се вчитаат провизиите. Обидете се повторно."
+    },
+    "portal": {
+      "title": "Партнерски портал"
+    },
     "select_company": "Избери компанија",
     "select_company_placeholder": "Избери компанија",
     "console": {
@@ -4973,7 +4999,26 @@
         "manage_settings": "Управување со поставки"
       }
     },
-    "commissions": "Провизии",
+    "commissions": {
+      "by_company": "Провизии по компанија",
+      "company": "Компанија",
+      "current_month": "Тековен календарски месец",
+      "description": "Следете ги вашите провизии, исплати и преглед по компанија.",
+      "from_start": "Од почетокот",
+      "kpi_summary": "Преглед на провизии",
+      "load_error": "Не успеа вчитување на податоците за провизии. Обидете се повторно.",
+      "monthly_trend": "Месечен тренд",
+      "no_company_data": "Сè уште нема податоци за провизии по компанија. Препорачајте компании за да почнете да заработувате!",
+      "no_monthly_trend": "Сè уште нема податоци за месечен тренд.",
+      "payout_date": "Следна исплата на 1-ви",
+      "pending_payout": "Чека исплата",
+      "rate": "Стапка",
+      "status_active": "Активна",
+      "this_month": "Овој месец",
+      "title": "Провизии",
+      "total": "Вкупно",
+      "total_earnings": "Вкупна заработка"
+    },
     "accounting": {
       "title": "Сметководство",
       "chart_of_accounts": "Контен план",
@@ -5293,13 +5338,14 @@
       "never": "Никогаш"
     },
     "navigation": {
-      "dashboard": "Контролна Табла",
+      "dashboard": "Контролна табла",
       "clients": "Клиенти",
       "commissions": "Провизии",
       "referrals": "Препораки",
       "invitations": "Покани",
       "payouts": "Исплати",
-      "logout": "Одјави се"
+      "logout": "Одјава",
+      "console": "Конзола"
     },
     "portal": {
       "title": "Partner Portal",

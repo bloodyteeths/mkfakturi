@@ -79,7 +79,7 @@ class PartnerPayoutService
             $payout = Payout::create([
                 'partner_id' => $partner->id,
                 'amount' => $totalAmount,
-                'currency' => 'EUR', // Cross-border payouts to MK in EUR
+                'currency' => 'MKD', // MKD is the required currency for MK country
                 'status' => 'pending',
                 'payout_date' => Carbon::now()->addDays(5), // 5th of next month
                 'payout_method' => $payoutMethod,
@@ -145,7 +145,7 @@ class PartnerPayoutService
             // Create transfer to connected account
             $transfer = $this->stripe->transfers->create([
                 'amount' => $amountCents,
-                'currency' => 'eur', // Cross-border payouts to MK in EUR
+                'currency' => 'mkd', // MKD is the required currency for MK country
                 'destination' => $partner->stripe_account_id,
                 'description' => "Partner commission payout - {$payout->details['month_ref']}",
                 'metadata' => [

@@ -225,8 +225,7 @@
     "collapse_sidebar": "Mbyll shiritin anësor",
     "expand_sidebar": "Zgjero shiritin anësor",
     "refresh": "Rifresko",
-    "accept": "Prano",
-    "due": "Afati"
+    "accept": "Prano"
   },
   "accounting": {
     "journal_entries": {
@@ -5239,13 +5238,14 @@
       "never": "Нdhekurш"
     },
     "navigation": {
-      "dashboard": "Контролnë Paneli",
-      "clients": "Klientë",
-      "commissions": "Провdheзdhedhe",
-      "referrals": "Преmesazhe",
-      "invitations": "Поканdhe",
-      "payouts": "Dheсплатdhe",
-      "logout": "Dil"
+      "dashboard": "Paneli",
+      "clients": "Klientet",
+      "commissions": "Komisionet",
+      "referrals": "Referime",
+      "invitations": "Ftesa",
+      "payouts": "Pagesat",
+      "logout": "Dilni",
+      "console": "Konsola"
     },
     "portal": {
       "title": "Partner Portal",

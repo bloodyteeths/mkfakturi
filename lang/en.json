@@ -267,7 +267,6 @@
     "upload_mt940": "Upload Mt940",
     "use_suggestion": "Use This",
     "import_csv": "Import CSV",
-    "import_statement": "Import Statement",
     "select_bank_upload": "Select Bank & Upload File",
     "select_bank": "Select Bank",
     "select_bank_placeholder": "Select a bank or use auto-detect",
@@ -284,10 +283,6 @@
     "new_transactions": "New Transactions",
     "duplicates": "Duplicates",
     "detected_bank": "Detected Bank",
-    "date": "Date",
-    "description": "Description",
-    "amount": "Amount",
-    "status": "Status",
     "duplicate": "Duplicate",
     "new": "New",
     "showing_first_10": "Showing first 10 of {total} transactions",
@@ -1298,8 +1293,7 @@
     "yes": "Yes",
     "you_got_lost": "Whoops! You got Lost!",
     "refresh": "Refresh",
-    "accept": "Accept",
-    "due": "Due"
+    "accept": "Accept"
   },
   "global_search": {
     "customers": "Customers",
@@ -2519,6 +2513,38 @@
   "notification_view_estimate": "[Notification] Estimate viewed",
   "notification_view_invoice": "[Notification] Invoice viewed",
   "partner": {
+    "navigation": {
+      "dashboard": "Dashboard",
+      "clients": "Clients",
+      "commissions": "Commissions",
+      "referrals": "Referrals",
+      "invitations": "Invitations",
+      "payouts": "Payouts",
+      "logout": "Logout",
+      "console": "Console"
+    },
+    "commissions": {
+      "description": "View your commission earnings and payouts",
+      "kpi_summary": "Commission Summary",
+      "total_earnings": "Total Earnings",
+      "from_start": "From start",
+      "this_month": "This Month",
+      "current_month": "Current month",
+      "pending_payout": "Pending Payout",
+      "payout_date": "Next payout date",
+      "monthly_trend": "Monthly Trend",
+      "no_monthly_trend": "No monthly trend data available",
+      "by_company": "By Company",
+      "company": "Company",
+      "rate": "Rate",
+      "total": "Total",
+      "no_company_data": "No company commission data available",
+      "status_active": "Active",
+      "load_error": "Failed to load commission data. Please try again."
+    },
+    "portal": {
+      "title": "Partner Portal"
+    },
     "accounting": {
       "accept_all": "Accept All",
       "accept_all_above": "Accept All (>{threshold}%)",
@@ -2748,7 +2774,26 @@
       "unknown": "Unknown"
     },
     "commission": "Commission",
-    "commissions": "Commissions",
+    "commissions": {
+      "by_company": "Commissions by Company",
+      "company": "Company",
+      "current_month": "Current calendar month",
+      "description": "Track your commission earnings, payouts, and per-company breakdown.",
+      "from_start": "Since you joined",
+      "kpi_summary": "Commission summary",
+      "load_error": "Failed to load commission data. Please try again.",
+      "monthly_trend": "Monthly Trend",
+      "no_company_data": "No company commission data yet. Refer companies to start earning!",
+      "no_monthly_trend": "No monthly trend data available yet.",
+      "payout_date": "Next payout on the 1st",
+      "pending_payout": "Pending Payout",
+      "rate": "Rate",
+      "status_active": "Active",
+      "this_month": "This Month",
+      "title": "Commissions",
+      "total": "Total",
+      "total_earnings": "Total Earnings"
+    },
     "companies": "Companies",
     "connect_stripe": "Connect Stripe",
     "console": {
@@ -2806,7 +2851,8 @@
       "invitations": "Invitations",
       "logout": "Logout",
       "payouts": "Payouts",
-      "referrals": "Referrals"
+      "referrals": "Referrals",
+      "console": "Console"
     },
     "no_companies": "No Companies",
     "no_earnings": "No Earnings",

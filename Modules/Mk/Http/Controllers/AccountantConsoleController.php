@@ -286,51 +286,66 @@ class AccountantConsoleController extends Controller
             return response()->json(['error' => 'Not registered as partner'], 403);
         }
 
-        // Get date range from request or default to last 12 months
-        $startDate = $request->input('start_date', now()->subMonths(12));
-        $endDate = $request->input('end_date', now());
+        try {
+            // Get date range from request or default to last 12 months
+            $startDate = $request->input('start_date', now()->subMonths(12));
+            $endDate = $request->input('end_date', now());
 
-        // KPI calculations
-        $totalEarnings = $partner->getLifetimeEarnings();
-        $pendingPayout = $partner->getUnpaidCommissionsTotal();
+            // KPI calculations
+            $totalEarnings = $partner->getLifetimeEarnings();
+            $pendingPayout = $partner->getUnpaidCommissionsTotal();
 
-        // This month earnings
-        $thisMonthEarnings = \DB::table('affiliate_events')
-            ->where('affiliate_partner_id', $partner->id)
-            ->where('is_clawed_back', false)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->sum('amount');
+            // This month earnings
+            $thisMonthEarnings = \DB::table('affiliate_events')
+                ->where('affiliate_partner_id', $partner->id)
+                ->where('is_clawed_back', false)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('amount');
 
-        // Monthly trend
-        $monthlyTrend = \DB::table('affiliate_events')
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(amount) as total')
-            ->where('affiliate_partner_id', $partner->id)
-            ->where('is_clawed_back', false)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('month')
-            ->orderBy('month', 'desc')
-            ->get();
+            // Monthly trend
+            $monthlyTrend = \DB::table('affiliate_events')
+                ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(amount) as total')
+                ->where('affiliate_partner_id', $partner->id)
+                ->where('is_clawed_back', false)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupBy('month')
+                ->orderBy('month', 'desc')
+                ->get();
 
-        // Per-company breakdown
-        $perCompany = \DB::table('affiliate_events')
-            ->join('companies', 'affiliate_events.company_id', '=', 'companies.id')
-            ->selectRaw('companies.id, companies.name, SUM(affiliate_events.amount) as total')
-            ->where('affiliate_events.affiliate_partner_id', $partner->id)
-            ->where('affiliate_events.is_clawed_back', false)
-            ->groupBy('companies.id', 'companies.name')
-            ->orderBy('total', 'desc')
-            ->get();
+            // Per-company breakdown
+            $perCompany = \DB::table('affiliate_events')
+                ->join('companies', 'affiliate_events.company_id', '=', 'companies.id')
+                ->selectRaw('companies.id, companies.name, SUM(affiliate_events.amount) as total')
+                ->where('affiliate_events.affiliate_partner_id', $partner->id)
+                ->where('affiliate_events.is_clawed_back', false)
+                ->groupBy('companies.id', 'companies.name')
+                ->orderBy('total', 'desc')
+                ->get();
 
-        return response()->json([
-            'kpis' => [
-                'total_earnings' => $totalEarnings,
-                'this_month' => $thisMonthEarnings,
-                'pending_payout' => $pendingPayout,
-            ],
-            'monthly_trend' => $monthlyTrend,
-            'per_company' => $perCompany,
-        ]);
+            return response()->json([
+                'kpis' => [
+                    'total_earnings' => $totalEarnings,
+                    'this_month' => $thisMonthEarnings,
+                    'pending_payout' => $pendingPayout,
+                ],
+                'monthly_trend' => $monthlyTrend,
+                'per_company' => $perCompany,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to load commission data', [
+                'partner_id' => $partner->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to load commission data',
+                'message' => config('app.debug') ? $e->getMessage() : 'Internal server error',
+            ], 500);
+        }
+        // CLAUDE-CHECKPOINT
     }
 
     /**

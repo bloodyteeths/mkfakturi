@@ -10,7 +10,7 @@
  * 1. Partner clicks "Connect with Stripe" in Partner Dashboard
  * 2. System creates connected account with controller properties
  * 3. Partner completes onboarding via Stripe-hosted Account Links
- * 4. Monthly payouts are transferred to their connected account in EUR
+ * 4. Monthly payouts are transferred to their connected account in MKD
  *
  * IMPORTANT: Requires these environment variables:
  *   STRIPE_SECRET=sk_live_xxx
@@ -91,7 +91,7 @@ class StripeConnectController extends Controller
                 // Pre-fill from partner/user data
                 'email' => $request->user()->email,
                 'country' => 'MK', // Macedonia - supported for cross-border payouts
-                'default_currency' => 'eur', // Cross-border payouts must be in EUR
+                'default_currency' => 'mkd', // MKD is the required currency for MK country
 
                 // Controller properties define the platform's business model
                 // DO NOT use 'type' at top level - use 'controller' instead
@@ -381,9 +381,9 @@ class StripeConnectController extends Controller
      * Transfer funds to a connected account
      *
      * Called by PartnerPayoutService when processing monthly payouts.
-     * Transfers EUR to the partner's connected account.
+     * Transfers MKD to the partner's connected account.
      *
-     * @param  int  $amountCents  Amount in EUR cents
+     * @param  int  $amountCents  Amount in MKD cents (stotinki)
      * @return \Stripe\Transfer
      *
      * @throws \Exception
@@ -401,7 +401,7 @@ class StripeConnectController extends Controller
         try {
             $transfer = $this->stripe->transfers->create([
                 'amount' => $amountCents,
-                'currency' => 'eur', // Cross-border payouts to MK in EUR
+                'currency' => 'mkd', // MKD is the required currency for MK country
                 'destination' => $partner->stripe_account_id,
                 'description' => $description ?? 'Partner commission payout',
                 'metadata' => [
@@ -460,7 +460,7 @@ class StripeConnectController extends Controller
                     'external_account' => [
                         'object' => 'bank_account',
                         'country' => 'MK',
-                        'currency' => 'eur',
+                        'currency' => 'mkd', // MKD required for MK country
                         'account_holder_name' => $request->account_holder_name,
                         'account_holder_type' => 'individual',
                         'account_number' => $request->iban,

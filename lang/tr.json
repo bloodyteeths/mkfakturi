@@ -78,7 +78,7 @@
     "total_amount": "TOPLAM",
     "bill_to": "Fatura Adresi",
     "ship_to": "Sevkiyat Adresi",
-    "due": "Son Tarih",
+    "due": "Vade",
     "draft": "Taslak",
     "sent": "Gönderildi",
     "all": "Tümü",
@@ -224,8 +224,7 @@
     "expand": "Genişlet",
     "expand_sidebar": "Kenar çubuğunu genişlet",
     "refresh": "Yenile",
-    "accept": "Kabul Et",
-    "due": "Vade"
+    "accept": "Kabul Et"
   },
   "dashboard": {
     "select_year": "Yılı seçin",
@@ -4969,13 +4968,14 @@
       "never": "Нvene zamanш"
     },
     "navigation": {
-      "dashboard": "Контрол Panel",
+      "dashboard": "Panel",
       "clients": "Müşteriler",
       "commissions": "Komisyonlar",
-      "referrals": "Препоракve",
+      "referrals": "Yönlendirmeler",
       "invitations": "Davetler",
-      "payouts": "Исплатve",
-      "logout": "Одвve"
+      "payouts": "Ödemeler",
+      "logout": "Çıkış",
+      "console": "Konsol"
     },
     "portal": {
       "title": "Partner Portal",

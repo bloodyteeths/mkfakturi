@@ -224,20 +224,27 @@ class PartnerClientsController extends Controller
         // Get billing history if available
         $billingHistory = [];
         if ($subscription) {
-            // Get recent invoices for this subscription
-            $billingHistory = \App\Models\Invoice::where('company_id', $company->id)
-                ->where('invoice_type', 'subscription')
-                ->orderBy('created_at', 'desc')
-                ->limit(6)
-                ->get()
-                ->map(function ($invoice) {
-                    return [
-                        'id' => $invoice->id,
-                        'date' => $invoice->invoice_date,
-                        'amount' => $invoice->total,
-                        'status' => $invoice->status,
-                    ];
-                });
+            // Get recent invoices for this company
+            try {
+                $billingHistory = \App\Models\Invoice::where('company_id', $company->id)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(6)
+                    ->get()
+                    ->map(function ($invoice) {
+                        return [
+                            'id' => $invoice->id,
+                            'date' => $invoice->invoice_date,
+                            'amount' => $invoice->total,
+                            'status' => $invoice->status,
+                        ];
+                    });
+            } catch (\Throwable $e) {
+                \Log::warning('Failed to fetch billing history for company', [
+                    'company_id' => $company->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $billingHistory = [];
+            }
         }
 
         return response()->json([
