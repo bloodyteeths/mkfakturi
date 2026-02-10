@@ -2679,6 +2679,7 @@
       "suggestions_refreshed": "Suggestions refreshed successfully",
       "title": "Accounting",
       "trial_balance": "Trial Balance",
+      "partner_dashboard": "Partner Portal",
       "types": {
         "asset": "Asset",
         "equity": "Equity",

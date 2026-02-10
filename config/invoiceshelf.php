@@ -618,6 +618,16 @@ return [
             'ability' => '',
             'model' => '',
         ],
+        [
+            'title' => 'partner.accounting.partner_dashboard',
+            'group' => 'partner.accounting',
+            'link' => '/admin/partner/dashboard',
+            'icon' => 'ArrowUturnLeftIcon',
+            'name' => 'partner.accounting.partner-dashboard',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
     ],
 
     /*
