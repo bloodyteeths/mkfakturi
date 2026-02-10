@@ -65,12 +65,17 @@ class CompanyMiddleware
                             ->exists();
 
                         if (!$hasAccess) {
-                            \Log::warning('Partner attempted to access unauthorized company', [
+                            \Log::warning('Partner attempted to access unauthorized company, clearing company context', [
                                 'user_id' => $user->id,
                                 'partner_id' => $partner->id,
                                 'company_id' => $companyId,
                             ]);
-                            return response()->json(['error' => 'Unauthorized access to company'], 403);
+                            // Gracefully clear invalid company header instead of hard 403
+                            // This allows bootstrap to succeed so the frontend can redirect
+                            // the partner to their dashboard and clear the stale localStorage
+                            $request->headers->remove('company');
+
+                            return $next($request);
                         }
 
                         // Load company with IFRS entity for partner access
