@@ -360,15 +360,29 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         $this->clearCachedComputed('all_settings');
     }
 
+    // CLAUDE-CHECKPOINT
     public function hasCompany($company_id)
     {
         // Use already loaded companies if available to avoid query
         if ($this->relationLoaded('companies')) {
-            return $this->companies->contains('id', $company_id);
+            if ($this->companies->contains('id', $company_id)) {
+                return true;
+            }
+        } else {
+            // Fallback to query if not loaded
+            if ($this->companies()->where('companies.id', $company_id)->exists()) {
+                return true;
+            }
         }
 
-        // Fallback to query if not loaded
-        return $this->companies()->where('companies.id', $company_id)->exists();
+        // Also check partner access via partner_company_links
+        // This allows all policies (Dashboard, Invoice, Payment, etc.) to
+        // authorize partner users who access companies through their partner link
+        if ($this->role === 'partner') {
+            return $this->hasPartnerAccessToCompany((int) $company_id);
+        }
+
+        return false;
     }
 
     /**
