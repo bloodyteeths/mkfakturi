@@ -210,6 +210,7 @@ class Partner extends Model
     /**
      * Get permissions for a specific company
      */
+    // CLAUDE-CHECKPOINT
     public function getPermissionsForCompany(int $companyId): array
     {
         $link = \DB::table('partner_company_links')
@@ -218,14 +219,25 @@ class Partner extends Model
             ->where('is_active', true)
             ->first();
 
-        if (! $link || ! $link->permissions) {
+        if (! $link) {
             return [];
+        }
+
+        // If permissions column is null/empty, default to full_access
+        // Partners with an active link should have full access unless
+        // granular permissions have been explicitly configured
+        if (! $link->permissions) {
+            return [\App\Enums\PartnerPermission::FULL_ACCESS->value];
         }
 
         // Decode JSON permissions
         $permissions = json_decode($link->permissions, true);
 
-        return is_array($permissions) ? $permissions : [];
+        if (! is_array($permissions) || empty($permissions)) {
+            return [\App\Enums\PartnerPermission::FULL_ACCESS->value];
+        }
+
+        return $permissions;
     }
 
     /**
