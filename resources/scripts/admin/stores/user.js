@@ -129,11 +129,21 @@ export const useUserStore = (useWindow = false) => {
       },
 
       hasAbilities(abilities) {
+        // Guard against undefined/null abilities parameter
+        if (!abilities) {
+          return false
+        }
+
         // Owners have all abilities - check if user is owner first
         if (this.currentUser && this.currentUser.is_owner) {
           return true
         }
-        
+
+        // Guard against currentAbilities not being set yet
+        if (!this.currentAbilities || !Array.isArray(this.currentAbilities)) {
+          return false
+        }
+
         // Check abilities array
         return !!this.currentAbilities.find((ab) => {
           if (ab.name === '*') return true
@@ -147,6 +157,9 @@ export const useUserStore = (useWindow = false) => {
       },
 
       hasAllAbilities(abilities) {
+        if (!abilities || !this.currentAbilities || !Array.isArray(this.currentAbilities)) {
+          return false
+        }
         let isAvailable = true
         this.currentAbilities.filter((ab) => {
           let hasContain = !!abilities.find((p) => {

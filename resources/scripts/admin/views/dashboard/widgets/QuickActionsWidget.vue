@@ -70,7 +70,7 @@
 
       <!-- Import Data -->
       <router-link
-        v-if="userStore.hasAbilities(abilities.MANAGE_COMPANY)"
+        v-if="userStore.hasAbilities(abilities.CREATE_ITEM)"
         to="/admin/imports"
         class="group"
       >
@@ -100,7 +100,7 @@
 
       <!-- View Reports -->
       <router-link
-        v-if="userStore.hasAbilities(abilities.VIEW_REPORT)"
+        v-if="userStore.hasAbilities(abilities.VIEW_FINANCIAL_REPORT)"
         to="/admin/reports"
         class="group"
       >
