@@ -145,8 +145,9 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
 import axios from 'axios'
 import {
   ChatBubbleLeftRightIcon,
@@ -157,6 +158,13 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
+const companyStore = useCompanyStore()
+
+// Company-scoped localStorage key prefix
+const storagePrefix = computed(() => {
+  const companyId = companyStore.selectedCompany?.id || 'default'
+  return `ai_chat_${companyId}`
+})
 
 // Reactive data
 const messages = ref([])
@@ -409,10 +417,10 @@ async function copyMessage(content) {
   }
 }
 
-// Load chat history from localStorage
+// Load chat history from localStorage (scoped by company)
 function loadChatHistory() {
   try {
-    const saved = localStorage.getItem('ai_chat_history')
+    const saved = localStorage.getItem(`${storagePrefix.value}_history`)
     if (saved) {
       const parsed = JSON.parse(saved)
       messages.value = parsed.map(msg => ({
@@ -426,19 +434,19 @@ function loadChatHistory() {
   }
 }
 
-// Save chat history to localStorage
+// Save chat history to localStorage (scoped by company)
 function saveChatHistory() {
   try {
-    localStorage.setItem('ai_chat_history', JSON.stringify(messages.value))
+    localStorage.setItem(`${storagePrefix.value}_history`, JSON.stringify(messages.value))
   } catch (err) {
     console.error('Failed to save chat history:', err)
   }
 }
 
-// Load conversation ID from localStorage
+// Load conversation ID from localStorage (scoped by company)
 function loadConversationId() {
   try {
-    const saved = localStorage.getItem('ai_conversation_id')
+    const saved = localStorage.getItem(`${storagePrefix.value}_conversation_id`)
     if (saved) {
       conversationId.value = saved
       console.log('[AI Chat] Loaded conversation ID:', conversationId.value)
@@ -448,13 +456,13 @@ function loadConversationId() {
   }
 }
 
-// Save conversation ID to localStorage
+// Save conversation ID to localStorage (scoped by company)
 function saveConversationId() {
   try {
     if (conversationId.value) {
-      localStorage.setItem('ai_conversation_id', conversationId.value)
+      localStorage.setItem(`${storagePrefix.value}_conversation_id`, conversationId.value)
     } else {
-      localStorage.removeItem('ai_conversation_id')
+      localStorage.removeItem(`${storagePrefix.value}_conversation_id`)
     }
   } catch (err) {
     console.error('Failed to save conversation ID:', err)
