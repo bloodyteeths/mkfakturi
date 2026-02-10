@@ -19,14 +19,13 @@
       :loading="isLoading"
       :disabled="isLoading"
       type="submit"
-      variant="primary"
     >
-      <div v-if="!isSent">
+      <template v-if="!isSent">
         {{ $t('validation.send_reset_link') }}
-      </div>
-      <div v-else>
+      </template>
+      <template v-else>
         {{ $t('validation.not_yet') }}
-      </div>
+      </template>
     </BaseButton>
 
     <div class="mt-4 mb-4 text-sm">

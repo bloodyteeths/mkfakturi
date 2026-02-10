@@ -42,7 +42,7 @@
     <div class="mt-5 mb-8">
       <div class="mb-4">
         <router-link
-          to="forgot-password"
+          to="/forgot-password"
           class="text-sm text-primary-400 hover:text-gray-700"
         >
           {{ $t('login.forgot_password') }}
