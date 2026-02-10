@@ -494,6 +494,12 @@ class AccountantConsoleController extends Controller
             \Bouncer::assign('admin')->to($user);
         }
 
+        // Add partner user to user_company so InvoiceShelf's authorization
+        // policies (DashboardPolicy, InvoicePolicy, etc.) recognize them.
+        // Partners access companies via partner_company_links, but InvoiceShelf
+        // policies check user_company via $user->hasCompany().
+        $user->companies()->syncWithoutDetaching([$companyId]);
+
         // Store the selected company in session for the partner
         session([
             'partner_selected_company_id' => $companyId,
