@@ -131,107 +131,101 @@
           <p class="text-gray-500">Нема додадени ставки. Кликнете "Додај ставка" за да започнете.</p>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-1/3">
-                  Артикл
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">
-                  Количина
-                </th>
-                <th
-                  v-if="form.document_type === 'receipt'"
-                  class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-40"
+        <div v-else class="space-y-4">
+          <div
+            v-for="(item, index) in form.items"
+            :key="index"
+            class="border border-gray-200 rounded-lg p-4 relative"
+          >
+            <!-- Remove button -->
+            <button
+              type="button"
+              class="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+              @click="removeItem(index)"
+            >
+              <BaseIcon name="TrashIcon" class="h-4 w-4" />
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+              <!-- Item selector -->
+              <div class="md:col-span-5">
+                <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Артикл</label>
+                <BaseMultiselect
+                  v-model="item.selectedItem"
+                  :content-loading="isLoadingItems"
+                  value-prop="id"
+                  track-by="name"
+                  label="name"
+                  :filterResults="false"
+                  :delay="300"
+                  :min-chars="0"
+                  searchable
+                  :options="searchItems"
+                  object
+                  placeholder="Пребарај артикл..."
+                  @select="onItemSelected(index, $event)"
                 >
-                  Единечна цена
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-40">
-                  Вкупно
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-48">
-                  Белешка
-                </th>
-                <th class="px-4 py-3 w-12"></th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(item, index) in form.items" :key="index">
-                <td class="px-4 py-2">
-                  <BaseMultiselect
-                    v-model="item.selectedItem"
-                    :content-loading="isLoadingItems"
-                    value-prop="id"
-                    track-by="name"
-                    label="name"
-                    :filterResults="false"
-                    resolve-on-load
-                    :delay="500"
-                    searchable
-                    :options="searchItems"
-                    object
-                    placeholder="Пребарај артикл..."
-                    @change="onItemSelected(index, $event)"
-                  >
-                    <template #singlelabel="{ value }">
-                      <div class="multiselect-single-label">
-                        <span>{{ value.name }}</span>
-                        <span v-if="value.sku" class="text-gray-500 text-xs ml-2">({{ value.sku }})</span>
-                      </div>
-                    </template>
-                    <template #option="{ option }">
-                      <div class="flex justify-between items-center w-full">
-                        <span>{{ option.name }}</span>
-                        <span v-if="option.sku" class="text-gray-500 text-xs">({{ option.sku }})</span>
-                      </div>
-                    </template>
-                  </BaseMultiselect>
-                </td>
-                <td class="px-4 py-2">
-                  <BaseInput
-                    v-model="item.quantity"
-                    type="number"
-                    step="0.0001"
-                    min="0.0001"
-                    class="text-right"
-                    placeholder="0"
-                  />
-                </td>
-                <td v-if="form.document_type === 'receipt'" class="px-4 py-2">
-                  <BaseInput
-                    v-model="item.unit_cost"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    class="text-right"
-                    placeholder="0.00"
-                  />
-                </td>
-                <td class="px-4 py-2 text-right text-sm text-gray-900 font-medium whitespace-nowrap">
+                  <template #singlelabel="{ value }">
+                    <div class="multiselect-single-label">
+                      <span>{{ value.name }}</span>
+                      <span v-if="value.sku" class="text-gray-500 text-xs ml-2">({{ value.sku }})</span>
+                    </div>
+                  </template>
+                  <template #option="{ option }">
+                    <div class="flex justify-between items-center w-full">
+                      <span>{{ option.name }}</span>
+                      <span v-if="option.sku" class="text-gray-500 text-xs">({{ option.sku }})</span>
+                    </div>
+                  </template>
+                </BaseMultiselect>
+              </div>
+
+              <!-- Quantity -->
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Количина</label>
+                <BaseInput
+                  v-model="item.quantity"
+                  type="number"
+                  step="1"
+                  min="1"
+                  class="text-right"
+                  placeholder="0"
+                />
+              </div>
+
+              <!-- Unit Cost (receipt only) -->
+              <div v-if="form.document_type === 'receipt'" class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Ед. цена</label>
+                <BaseInput
+                  v-model="item.unit_cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="text-right"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <!-- Total -->
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Вкупно</label>
+                <div class="h-10 flex items-center justify-end text-sm font-medium text-gray-900">
                   <BaseFormatMoney v-if="getItemTotal(item)" :amount="getItemTotal(item)" />
-                  <span v-else>-</span>
-                </td>
-                <td class="px-4 py-2">
-                  <BaseInput
-                    v-model="item.notes"
-                    type="text"
-                    placeholder="Белешка..."
-                  />
-                </td>
-                <td class="px-4 py-2 text-center">
-                  <BaseButton
-                    variant="danger-outline"
-                    size="sm"
-                    type="button"
-                    @click="removeItem(index)"
-                  >
-                    <BaseIcon name="TrashIcon" class="h-4 w-4" />
-                  </BaseButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <span v-else class="text-gray-400">-</span>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              <div class="md:col-span-12 lg:col-span-5" :class="{ 'lg:col-span-3': form.document_type === 'receipt' }">
+                <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Белешка</label>
+                <BaseInput
+                  v-model="item.notes"
+                  type="text"
+                  placeholder="Белешка..."
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Summary -->
@@ -390,22 +384,24 @@ function removeItem(index) {
  * Handle item selection from the multiselect dropdown.
  * Fetches WAC for non-receipt documents.
  */
-async function onItemSelected(index, selectedItem) {
-  if (selectedItem) {
-    form.items[index].item_id = selectedItem.id
-
-    // Fetch WAC for issue/transfer types
-    if (form.document_type !== 'receipt' && form.warehouse_id) {
-      try {
-        const data = await stockStore.getItemStock(selectedItem.id, form.warehouse_id)
-        form.items[index].wac = data.unit_cost || 0
-      } catch {
-        form.items[index].wac = null
-      }
-    }
-  } else {
+async function onItemSelected(index, option) {
+  if (!option) {
     form.items[index].item_id = null
     form.items[index].wac = null
+    return
+  }
+
+  const itemId = option.id || option
+  form.items[index].item_id = itemId
+
+  // Fetch WAC for issue/transfer types
+  if (form.document_type !== 'receipt' && form.warehouse_id) {
+    try {
+      const data = await stockStore.getItemStock(itemId, form.warehouse_id)
+      form.items[index].wac = data.unit_cost || 0
+    } catch {
+      form.items[index].wac = null
+    }
   }
 }
 
