@@ -436,9 +436,12 @@ const taxes = computed({
   get: () =>
     itemStore?.currentItem?.taxes?.map((tax) => {
       if (tax) {
+        const taxTypeId = tax.tax_type_id || tax.id
         return {
           ...tax,
-          tax_type_id: tax.tax_type_id || tax.id,
+          // Use tax_type_id as id so multiselect can match with getTaxTypes options
+          id: taxTypeId,
+          tax_type_id: taxTypeId,
           tax_name: `${tax.name} (${tax.calculation_type === 'fixed'
             ? new Intl.NumberFormat(undefined, {
                 style: 'currency',
@@ -609,7 +612,7 @@ async function submitItem() {
           tax_type_id: tax.tax_type_id || tax.id,
           calculation_type: tax.calculation_type,
           fixed_amount: tax.fixed_amount,
-          amount: tax.calculation_type === 'fixed' ? tax.fixed_amount : Math.round(price.value * tax.percent / 100),
+          amount: tax.calculation_type === 'fixed' ? tax.fixed_amount : Math.round(itemStore.currentItem.price * tax.percent / 100),
           percent: tax.percent,
           name: tax.name,
           collective_tax: 0,
