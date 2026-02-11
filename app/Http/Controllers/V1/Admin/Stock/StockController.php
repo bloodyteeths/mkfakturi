@@ -437,6 +437,71 @@ class StockController extends Controller
     }
 
     /**
+     * Get stock dashboard summary for the dashboard widget.
+     *
+     * Returns aggregate inventory data: total value, item count, total quantity,
+     * low stock count, and top 5 low stock items for quick dashboard overview.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function dashboardSummary(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        // Get all trackable items
+        $items = Item::where('company_id', $companyId)
+            ->where('track_quantity', true)
+            ->with(['unit'])
+            ->get();
+
+        $totalValue = 0;
+        $totalQuantity = 0;
+        $lowStockItems = [];
+
+        foreach ($items as $item) {
+            $stock = $this->stockService->getItemStock($companyId, $item->id);
+
+            $totalValue += $stock['total_value'];
+            $totalQuantity += $stock['quantity'];
+
+            // Check for low stock: item has minimum_quantity set and current stock is at or below minimum
+            if ($item->minimum_quantity && $item->minimum_quantity > 0 && $stock['quantity'] <= $item->minimum_quantity) {
+                $shortage = $item->minimum_quantity - $stock['quantity'];
+                $shortagePercentage = $item->minimum_quantity > 0
+                    ? round(($shortage / $item->minimum_quantity) * 100, 2)
+                    : 0;
+
+                $lowStockItems[] = [
+                    'item_id' => $item->id,
+                    'item_name' => $item->name,
+                    'item_sku' => $item->sku,
+                    'unit_name' => $item->unit?->name,
+                    'current_quantity' => $stock['quantity'],
+                    'minimum_quantity' => $item->minimum_quantity,
+                    'shortage' => $shortage,
+                    'shortage_percentage' => $shortagePercentage,
+                ];
+            }
+        }
+
+        // Sort low stock items by shortage percentage (most critical first) and take top 5
+        usort($lowStockItems, function ($a, $b) {
+            return $b['shortage_percentage'] <=> $a['shortage_percentage'];
+        });
+
+        $topLowStock = array_slice($lowStockItems, 0, 5);
+
+        return response()->json([
+            'total_value' => $totalValue,
+            'total_items' => $items->count(),
+            'total_quantity' => $totalQuantity,
+            'low_stock_count' => count($lowStockItems),
+            'low_stock_items' => $topLowStock,
+        ]);
+    }
+
+    /**
      * Get low stock items with pagination.
      */
     public function lowStock(Request $request): JsonResponse

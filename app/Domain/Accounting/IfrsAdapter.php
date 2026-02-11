@@ -5,7 +5,9 @@ namespace App\Domain\Accounting;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Invoice;
+use App\Models\Item;
 use App\Models\Payment;
+use App\Models\StockMovement;
 use Carbon\Carbon;
 use IFRS\Models\Account;
 use IFRS\Models\Entity;
@@ -1939,11 +1941,349 @@ class IfrsAdapter
             specificName: 'VAT'
         );
     }
+
+    /**
+     * Post a Stock Movement to the general ledger
+     *
+     * Creates double-entry journal entries based on the movement source type:
+     * - bill_item:     DR Inventory(630) / CR Purchase Calculation(303)
+     * - invoice_item:  DR COGS(702) / CR Inventory(630)
+     * - adjustment:    DR/CR Inventory(630) vs Inventory Adjustment(451)
+     * - initial:       DR Inventory(630) / CR Opening Balance(910)
+     * - transfer_in/transfer_out: Skipped (neutral - same GL account)
+     *
+     * @throws \Exception
+     */
+    public function postStockMovement(StockMovement $movement): void
+    {
+        // Skip if feature is disabled (global or company-level)
+        if (! $this->isEnabled($movement->company_id)) {
+            return;
+        }
+
+        // Idempotency check: don't re-post if already posted
+        if ($movement->ifrs_transaction_id) {
+            return;
+        }
+
+        // Skip transfer movements - they are GL-neutral (same inventory account)
+        if (in_array($movement->source_type, [
+            StockMovement::SOURCE_TRANSFER_IN,
+            StockMovement::SOURCE_TRANSFER_OUT,
+        ])) {
+            return;
+        }
+
+        // Skip zero-cost movements (nothing to post)
+        if (empty($movement->total_cost) || $movement->total_cost == 0) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Load the item relationship
+            $item = $movement->item;
+            if (! $item) {
+                throw new \Exception("StockMovement #{$movement->id} has no associated item");
+            }
+
+            // Get or create IFRS entity for company
+            $entity = $this->getOrCreateEntityForCompany($movement->company);
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
+            }
+
+            // Amount in base currency units (cents to dollars)
+            $amount = abs($movement->total_cost) / 100;
+
+            // Determine debit/credit accounts and narration based on source type
+            $debitAccount = null;
+            $creditAccount = null;
+            $narration = '';
+            $transactionType = Transaction::JN; // Default to Journal Entry
+
+            switch ($movement->source_type) {
+                case StockMovement::SOURCE_BILL_ITEM:
+                    // Purchase: DR Inventory / CR Purchase Calculation
+                    $debitAccount = $this->getInventoryAccount($movement->company_id, $entity->id, $item);
+                    $creditAccount = $this->getPurchaseCalculationAccount($movement->company_id, $entity->id, $item);
+                    $narration = "Stock IN - {$item->name} x " . abs($movement->quantity) . ' @ WAC';
+                    $transactionType = Transaction::JN;
+                    break;
+
+                case StockMovement::SOURCE_INVOICE_ITEM:
+                    // Sale: DR COGS / CR Inventory
+                    $debitAccount = $this->getCogsAccount($movement->company_id, $entity->id, $item);
+                    $creditAccount = $this->getInventoryAccount($movement->company_id, $entity->id, $item);
+                    $narration = "Stock OUT - {$item->name} x " . abs($movement->quantity) . ' @ WAC';
+                    $transactionType = Transaction::JN;
+                    break;
+
+                case StockMovement::SOURCE_ADJUSTMENT:
+                    if ($movement->quantity > 0) {
+                        // Positive adjustment: DR Inventory / CR Inventory Adjustment
+                        $debitAccount = $this->getInventoryAccount($movement->company_id, $entity->id, $item);
+                        $creditAccount = $this->getInventoryAdjustmentAccount($movement->company_id, $entity->id);
+                        $narration = "Stock IN - {$item->name} x " . abs($movement->quantity) . ' @ WAC (adjustment)';
+                    } else {
+                        // Negative adjustment: DR Inventory Adjustment / CR Inventory
+                        $debitAccount = $this->getInventoryAdjustmentAccount($movement->company_id, $entity->id);
+                        $creditAccount = $this->getInventoryAccount($movement->company_id, $entity->id, $item);
+                        $narration = "Stock OUT - {$item->name} x " . abs($movement->quantity) . ' @ WAC (adjustment)';
+                    }
+                    $transactionType = Transaction::JN;
+                    break;
+
+                case StockMovement::SOURCE_INITIAL:
+                    // Initial stock: DR Inventory / CR Opening Balance
+                    $debitAccount = $this->getInventoryAccount($movement->company_id, $entity->id, $item);
+                    $creditAccount = $this->getOpeningBalanceAccount($movement->company_id, $entity->id);
+                    $narration = "Stock IN - {$item->name} x " . abs($movement->quantity) . ' @ WAC (initial)';
+                    $transactionType = Transaction::JN;
+                    break;
+
+                default:
+                    // Unknown source type - skip
+                    DB::rollBack();
+                    Log::warning('StockMovement GL: Unknown source type, skipping', [
+                        'movement_id' => $movement->id,
+                        'source_type' => $movement->source_type,
+                    ]);
+
+                    return;
+            }
+
+            // Create IFRS Transaction (Journal Entry for stock movement)
+            $transaction = Transaction::create([
+                'account_id' => $debitAccount->id,
+                'transaction_date' => $movement->movement_date ?? Carbon::now(),
+                'narration' => $narration,
+                'transaction_type' => $transactionType,
+                'currency_id' => $this->getCurrencyId($movement->company_id),
+                'entity_id' => $entity->id,
+            ]);
+
+            // Line Item: Debit
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $debitAccount->id,
+                'amount' => $amount,
+                'quantity' => 1,
+                'credited' => false,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Line Item: Credit
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $creditAccount->id,
+                'amount' => $amount,
+                'quantity' => 1,
+                'credited' => true,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Reload line items so post() sees them
+            $transaction->load('lineItems');
+
+            // Post the transaction to the ledger
+            $transaction->post();
+
+            // Store the IFRS transaction ID on the stock movement for reference
+            $movement->update(['ifrs_transaction_id' => $transaction->id]);
+
+            DB::commit();
+
+            Log::info('Stock movement posted to ledger', [
+                'movement_id' => $movement->id,
+                'source_type' => $movement->source_type,
+                'item_id' => $movement->item_id,
+                'amount' => $amount,
+                'ifrs_transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post stock movement to ledger', [
+                'movement_id' => $movement->id,
+                'source_type' => $movement->source_type,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Get or create Inventory account (630 - Стока во магацин)
+     *
+     * If the item has a per-item inventory_account_id override, uses that
+     * account's code/name. Otherwise falls back to the company's default.
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int  $entityId  IFRS Entity ID
+     * @param  Item|null  $item  Optional item for per-item account override
+     */
+    protected function getInventoryAccount(int $companyId, int $entityId, ?Item $item = null): Account
+    {
+        // Check for per-item account override
+        if ($item && $item->inventory_account_id) {
+            $userAccount = \App\Models\Account::find($item->inventory_account_id);
+            if ($userAccount) {
+                return Account::firstOrCreate(
+                    [
+                        'account_type' => Account::INVENTORY,
+                        'category_id' => null,
+                        'name' => $userAccount->name,
+                        'entity_id' => $entityId,
+                    ],
+                    [
+                        'code' => $userAccount->code,
+                        'currency_id' => $this->getCurrencyId($companyId),
+                    ]
+                );
+            }
+        }
+
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_ASSET,
+            ifrsAccountType: Account::INVENTORY,
+            fallbackName: 'Стока во магацин',
+            fallbackCode: '630',
+            specificName: 'Стока'
+        );
+    }
+
+    /**
+     * Get or create COGS account (702 - Вредност на продадена стока)
+     *
+     * If the item has a per-item cogs_account_id override, uses that
+     * account's code/name. Otherwise falls back to the company's default.
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int  $entityId  IFRS Entity ID
+     * @param  Item|null  $item  Optional item for per-item account override
+     */
+    protected function getCogsAccount(int $companyId, int $entityId, ?Item $item = null): Account
+    {
+        // Check for per-item account override
+        if ($item && $item->cogs_account_id) {
+            $userAccount = \App\Models\Account::find($item->cogs_account_id);
+            if ($userAccount) {
+                return Account::firstOrCreate(
+                    [
+                        'account_type' => Account::DIRECT_EXPENSE,
+                        'category_id' => null,
+                        'name' => $userAccount->name,
+                        'entity_id' => $entityId,
+                    ],
+                    [
+                        'code' => $userAccount->code,
+                        'currency_id' => $this->getCurrencyId($companyId),
+                    ]
+                );
+            }
+        }
+
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_EXPENSE,
+            ifrsAccountType: Account::DIRECT_EXPENSE,
+            fallbackName: 'Вредност на продадена стока',
+            fallbackCode: '702',
+            specificName: 'продадена стока'
+        );
+    }
+
+    /**
+     * Get or create Purchase Calculation account (303 - Набавка на стока)
+     *
+     * If the item has a per-item purchase_account_id override, uses that
+     * account's code/name. Otherwise falls back to the company's default.
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int  $entityId  IFRS Entity ID
+     * @param  Item|null  $item  Optional item for per-item account override
+     */
+    protected function getPurchaseCalculationAccount(int $companyId, int $entityId, ?Item $item = null): Account
+    {
+        // Check for per-item account override
+        if ($item && $item->purchase_account_id) {
+            $userAccount = \App\Models\Account::find($item->purchase_account_id);
+            if ($userAccount) {
+                return Account::firstOrCreate(
+                    [
+                        'account_type' => Account::CURRENT_ASSET,
+                        'category_id' => null,
+                        'name' => $userAccount->name,
+                        'entity_id' => $entityId,
+                    ],
+                    [
+                        'code' => $userAccount->code,
+                        'currency_id' => $this->getCurrencyId($companyId),
+                    ]
+                );
+            }
+        }
+
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_ASSET,
+            ifrsAccountType: Account::CURRENT_ASSET,
+            fallbackName: 'Набавка на стока',
+            fallbackCode: '303',
+            specificName: 'Набавка'
+        );
+    }
+
+    /**
+     * Get or create Inventory Adjustment account (451 - Оштетување на залихи)
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int  $entityId  IFRS Entity ID
+     */
+    protected function getInventoryAdjustmentAccount(int $companyId, int $entityId): Account
+    {
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_EXPENSE,
+            ifrsAccountType: Account::OPERATING_EXPENSE,
+            fallbackName: 'Оштетување на залихи',
+            fallbackCode: '451',
+            specificName: 'Оштетување'
+        );
+    }
+
+    /**
+     * Get or create Opening Balance account (910 - Почетно салдо)
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int  $entityId  IFRS Entity ID
+     */
+    protected function getOpeningBalanceAccount(int $companyId, int $entityId): Account
+    {
+        return $this->mapUserAccountToIfrs(
+            companyId: $companyId,
+            entityId: $entityId,
+            userAccountType: \App\Models\Account::TYPE_EQUITY,
+            ifrsAccountType: Account::EQUITY,
+            fallbackName: 'Почетно салдо',
+            fallbackCode: '910',
+            specificName: 'Почетно'
+        );
+    }
 }
 
-// CLAUDE-CHECKPOINT: Fixed IFRS integration:
-// 1. Entity currency relationship loading with eager load
-// 2. LineItem field 'entry_type' -> 'credited' (boolean)
-// 3. Transaction type CS -> IN for client invoices
-// 4. ExchangeRate creation for entity currency
-// 5. Added getGeneralLedger() and getJournalEntries() methods for GL and JE reports
+// CLAUDE-CHECKPOINT: WS1 - GL Auto-posting for Stock Movements:
+// Added postStockMovement() method with DR/CR logic for all source types
+// Added getInventoryAccount(), getCogsAccount(), getPurchaseCalculationAccount()
+// Added getInventoryAdjustmentAccount(), getOpeningBalanceAccount()
+// Per-item GL account overrides via inventory_account_id, cogs_account_id, purchase_account_id

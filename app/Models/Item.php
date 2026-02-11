@@ -74,6 +74,30 @@ class Item extends Model
     }
 
     /**
+     * Get the GL inventory account override for this item.
+     */
+    public function inventoryAccount(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Account::class, 'inventory_account_id');
+    }
+
+    /**
+     * Get the GL COGS account override for this item.
+     */
+    public function cogsAccount(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Account::class, 'cogs_account_id');
+    }
+
+    /**
+     * Get the GL purchase/calculation account override for this item.
+     */
+    public function purchaseAccount(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Account::class, 'purchase_account_id');
+    }
+
+    /**
      * Scope a query to search items by name, SKU, barcode, or description.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -90,7 +114,7 @@ class Item extends Model
         });
     }
 
-    // CLAUDE-CHECKPOINT
+    // CLAUDE-CHECKPOINT: WS1 - Added inventoryAccount(), cogsAccount(), purchaseAccount() relationships
 
     public function scopeWherePrice($query, $price)
     {

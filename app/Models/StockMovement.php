@@ -58,6 +58,8 @@ class StockMovement extends Model
 
     public const SOURCE_TRANSFER_OUT = 'transfer_out';
 
+    public const SOURCE_INVENTORY_DOCUMENT = 'inventory_document';
+
     protected function casts(): array
     {
         return [
@@ -210,6 +212,7 @@ class StockMovement extends Model
             self::SOURCE_ADJUSTMENT => 'Adjustment',
             self::SOURCE_TRANSFER_IN => 'Transfer In',
             self::SOURCE_TRANSFER_OUT => 'Transfer Out',
+            self::SOURCE_INVENTORY_DOCUMENT => 'Inventory Document',
         ];
 
         return $labels[$this->source_type] ?? $this->source_type;
