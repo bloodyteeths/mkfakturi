@@ -76,6 +76,8 @@ class ItemsController extends Controller
     {
         $this->authorize('view', $item);
 
+        $item->load('taxes.taxType', 'taxes.currency');
+
         return new ItemResource($item);
     }
 
