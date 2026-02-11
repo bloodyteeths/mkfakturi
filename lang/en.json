@@ -740,7 +740,16 @@
     "recent_payments": "Recent Payments",
     "no_recent_payments": "No recent payments",
     "received_this_month": "Received This Month",
-    "view_all_payments": "View all payments"
+    "view_all_payments": "View all payments",
+    "stock_summary": "Stock Overview",
+    "no_stock_data": "No tracked items in stock",
+    "setup_stock": "Set up stock",
+    "total_inventory_value": "Total Value",
+    "tracked_items": "Tracked Items",
+    "low_stock_alerts": "Low Stock",
+    "stock_ok": "All good",
+    "all_stock_sufficient": "All items have sufficient stock",
+    "view_stock": "View more"
   },
   "dateRange": {
     "custom": "Custom",

@@ -319,7 +319,16 @@
     "recent_payments": "Pagesat e Fundit",
     "no_recent_payments": "Nuk ka pagesa të fundit",
     "received_this_month": "Pranuar Këtë Muaj",
-    "view_all_payments": "Shiko të gjitha pagesat"
+    "view_all_payments": "Shiko të gjitha pagesat",
+    "stock_summary": "Përmbledhja e stokut",
+    "no_stock_data": "Nuk ka artikuj të gjurmuar në stok",
+    "setup_stock": "Vendos stokun",
+    "total_inventory_value": "Vlera totale",
+    "tracked_items": "Artikuj të gjurmuar",
+    "low_stock_alerts": "Stok i ulët",
+    "stock_ok": "Gjithçka në rregull",
+    "all_stock_sufficient": "Të gjithë artikujt kanë stok të mjaftueshëm",
+    "view_stock": "Shiko më shumë"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Komisionet e Fundit",

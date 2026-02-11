@@ -284,7 +284,16 @@
     "recent_payments": "Son Ödemeler",
     "no_recent_payments": "Son ödeme yok",
     "received_this_month": "Bu Ay Alınan",
-    "view_all_payments": "Tüm ödemeleri göster"
+    "view_all_payments": "Tüm ödemeleri göster",
+    "stock_summary": "Stok Özeti",
+    "no_stock_data": "Takip edilen ürün yok",
+    "setup_stock": "Stok ayarla",
+    "total_inventory_value": "Toplam Değer",
+    "tracked_items": "Takip Edilen Ürünler",
+    "low_stock_alerts": "Düşük Stok",
+    "stock_ok": "Her şey yolunda",
+    "all_stock_sufficient": "Tüm ürünlerde yeterli stok var",
+    "view_stock": "Daha fazla göster"
   },
   "tax_types": {
     "name": "İsim",

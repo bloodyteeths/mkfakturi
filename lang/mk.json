@@ -319,7 +319,16 @@
     "recent_payments": "Последни плаќања",
     "no_recent_payments": "Нема последни плаќања",
     "received_this_month": "Примено овој месец",
-    "view_all_payments": "Прикажи сите плаќања"
+    "view_all_payments": "Прикажи сите плаќања",
+    "stock_summary": "Преглед на залихи",
+    "no_stock_data": "Нема следени артикли на залиха",
+    "setup_stock": "Постави залихи",
+    "total_inventory_value": "Вкупна вредност",
+    "tracked_items": "Следени артикли",
+    "low_stock_alerts": "Ниски залихи",
+    "stock_ok": "Сe е в ред",
+    "all_stock_sufficient": "Сите артикли имаат доволно залиха",
+    "view_stock": "Прикажи повеќе"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Најнови Провизии",
