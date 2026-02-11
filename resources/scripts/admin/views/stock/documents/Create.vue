@@ -283,7 +283,6 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStockStore } from '@/scripts/admin/stores/stock'
-import { useItemStore } from '@/scripts/admin/stores/item'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 import axios from 'axios'
@@ -291,7 +290,6 @@ import axios from 'axios'
 const route = useRoute()
 const router = useRouter()
 const stockStore = useStockStore()
-const itemStore = useItemStore()
 const notificationStore = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.id)
@@ -417,8 +415,13 @@ async function onItemSelected(index, selectedItem) {
 async function searchItems(search) {
   isLoadingItems.value = true
   try {
-    const res = await itemStore.fetchItems({ search, track_quantity: true })
-    return res.data.data
+    const res = await axios.get('/items', {
+      params: { search: search || '', track_quantity: true, limit: 'all' },
+    })
+    return res.data?.data || res.data || []
+  } catch (error) {
+    console.error('Failed to search items:', error)
+    return []
   } finally {
     isLoadingItems.value = false
   }

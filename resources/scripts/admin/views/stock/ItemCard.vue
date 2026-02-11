@@ -405,10 +405,10 @@ function exportToCsv() {
     m.description || '',
     m.quantity > 0 ? m.quantity : '',
     m.quantity < 0 ? Math.abs(m.quantity) : '',
-    m.unit_cost || '',
-    m.line_value || '',
+    m.unit_cost ? (m.unit_cost / 100).toFixed(2) : '',
+    m.line_value ? (m.line_value / 100).toFixed(2) : '',
     m.balance_quantity,
-    m.balance_value,
+    m.balance_value ? (m.balance_value / 100).toFixed(2) : '',
   ])
 
   const csvContent = [

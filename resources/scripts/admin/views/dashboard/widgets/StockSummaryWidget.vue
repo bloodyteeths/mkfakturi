@@ -179,7 +179,7 @@ async function fetchDashboardSummary() {
       isLoading.value = false
       return
     }
-    const response = await axios.get(`/api/v1/${companyId}/stock/dashboard-summary`)
+    const response = await axios.get('/stock/dashboard-summary')
     if (response?.data) {
       summaryData.value = {
         total_value: response.data.total_value || 0,
