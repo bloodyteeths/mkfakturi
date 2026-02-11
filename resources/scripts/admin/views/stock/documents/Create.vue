@@ -151,19 +151,15 @@
               <div class="md:col-span-5">
                 <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Артикл</label>
                 <BaseMultiselect
-                  v-model="item.selectedItem"
+                  v-model="item.item_id"
                   :content-loading="isLoadingItems"
                   value-prop="id"
                   track-by="name"
                   label="name"
-                  :filterResults="false"
-                  :delay="300"
-                  :min-chars="0"
                   searchable
-                  :options="searchItems"
-                  object
+                  :options="trackedItems"
                   placeholder="Пребарај артикл..."
-                  @select="onItemSelected(index, $event)"
+                  @change="onItemSelected(index, $event)"
                 >
                   <template #singlelabel="{ value }">
                     <div class="multiselect-single-label">
@@ -293,6 +289,7 @@ const isLoadingItems = ref(false)
 const isSaving = ref(false)
 const saveAction = ref('draft')
 const warehouses = ref([])
+const trackedItems = ref([])
 
 const documentTypes = [
   {
@@ -364,7 +361,6 @@ function getItemTotal(item) {
  */
 function addItem() {
   form.items.push({
-    selectedItem: null,
     item_id: null,
     quantity: null,
     unit_cost: null,
@@ -382,17 +378,22 @@ function removeItem(index) {
 
 /**
  * Handle item selection from the multiselect dropdown.
- * Fetches WAC for non-receipt documents.
+ * Auto-fills unit cost from item price for receipts, fetches WAC for issues/transfers.
  */
-async function onItemSelected(index, option) {
-  if (!option) {
-    form.items[index].item_id = null
+async function onItemSelected(index, itemId) {
+  if (!itemId) {
     form.items[index].wac = null
+    form.items[index].unit_cost = null
     return
   }
 
-  const itemId = option.id || option
-  form.items[index].item_id = itemId
+  // Find the selected item to get its price
+  const selectedItem = trackedItems.value.find(i => i.id === itemId)
+
+  // Auto-fill unit cost from item price for receipts
+  if (form.document_type === 'receipt' && selectedItem?.price) {
+    form.items[index].unit_cost = (selectedItem.price / 100).toFixed(2)
+  }
 
   // Fetch WAC for issue/transfer types
   if (form.document_type !== 'receipt' && form.warehouse_id) {
@@ -406,18 +407,17 @@ async function onItemSelected(index, option) {
 }
 
 /**
- * Search items by name, SKU, or barcode for the multiselect dropdown.
+ * Load all tracked items for the item selector dropdown.
  */
-async function searchItems(search) {
+async function loadTrackedItems() {
   isLoadingItems.value = true
   try {
     const res = await axios.get('/items', {
-      params: { search: search || '', track_quantity: true, limit: 'all' },
+      params: { track_quantity: true, limit: 'all' },
     })
-    return res.data?.data || res.data || []
+    trackedItems.value = res.data?.data || res.data || []
   } catch (error) {
-    console.error('Failed to search items:', error)
-    return []
+    console.error('Failed to load tracked items:', error)
   } finally {
     isLoadingItems.value = false
   }
@@ -449,14 +449,9 @@ async function loadDocument() {
     form.document_date = doc.document_date
     form.notes = doc.notes || ''
     form.items = (doc.items || []).map(item => ({
-      selectedItem: {
-        id: item.item_id,
-        name: item.item_name,
-        sku: item.item_sku,
-      },
       item_id: item.item_id,
       quantity: parseFloat(item.quantity),
-      unit_cost: item.unit_cost ? item.unit_cost / 100 : null,
+      unit_cost: item.unit_cost ? (item.unit_cost / 100).toFixed(2) : null,
       notes: item.notes || '',
       wac: null,
     }))
@@ -602,7 +597,7 @@ watch(() => form.document_type, (newType) => {
 })
 
 onMounted(async () => {
-  await loadWarehouses()
+  await Promise.all([loadWarehouses(), loadTrackedItems()])
   if (isEdit.value) {
     await loadDocument()
   }
