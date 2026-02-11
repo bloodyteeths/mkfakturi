@@ -264,6 +264,10 @@ class AppServiceProvider extends ServiceProvider
         if (\App\Services\StockService::isEnabled()) {
             \App\Models\InvoiceItem::observe(\App\Observers\StockInvoiceItemObserver::class);
             \App\Models\BillItem::observe(\App\Observers\StockBillItemObserver::class);
+
+            // Stock GL observer: posts stock movements to general ledger
+            // Registered inside isEnabled() because stock movements only occur when stock module is active
+            \App\Models\StockMovement::observe(\App\Observers\StockMovementGlObserver::class);
         }
 
         // Company observer - seeds chart of accounts for new companies (Partner Accounting Phase 4)
@@ -286,4 +290,4 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: WS1 - Registered StockMovementGlObserver inside stock isEnabled() block

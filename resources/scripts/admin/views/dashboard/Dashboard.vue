@@ -7,6 +7,7 @@ import AiChatWidget from './widgets/AiChatWidget.vue'
 import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
 import UnpaidSummaryWidget from './widgets/UnpaidSummaryWidget.vue'
 import RecentPaymentsWidget from './widgets/RecentPaymentsWidget.vue'
+import StockSummaryWidget from './widgets/StockSummaryWidget.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { onMounted, computed } from 'vue'
@@ -25,6 +26,12 @@ const showAiInsights = computed(() => {
 // Check if MCP AI Tools feature flag is enabled
 const mcpAiToolsEnabled = computed(() => {
   return globalStore.featureFlags?.['mcp_ai_tools'] === true
+})
+
+// Check if stock module is enabled
+const stockEnabled = computed(() => {
+  const featureFlags = globalStore.featureFlags || {}
+  return featureFlags?.stock?.enabled || featureFlags?.stock || false
 })
 
 onMounted(() => {
@@ -65,6 +72,11 @@ onMounted(() => {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <UnpaidSummaryWidget />
       <RecentPaymentsWidget />
+    </div>
+
+    <!-- Stock Summary Widget (if stock module is enabled) -->
+    <div v-if="stockEnabled" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <StockSummaryWidget />
     </div>
 
     <!-- Quick Actions -->

@@ -1038,6 +1038,18 @@ Route::prefix('/v1')->group(function () {
 
                 // Item stock lookup (for UI validation)
                 Route::get('/items/{item}/stock', [\App\Http\Controllers\V1\Admin\Stock\StockAdjustmentController::class, 'itemStock']);
+
+                // Inventory Documents (приемница/издатница/преносница)
+                Route::get('/documents', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'index']);
+                Route::post('/documents', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'store']);
+                Route::get('/documents/{id}', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'show']);
+                Route::put('/documents/{id}', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'update']);
+                Route::delete('/documents/{id}', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'destroy']);
+                Route::post('/documents/{id}/approve', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'approve']);
+                Route::post('/documents/{id}/void', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'void']);
+
+                // Dashboard Summary
+                Route::get('/dashboard-summary', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'dashboardSummary']);
             });
         });
 

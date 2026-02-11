@@ -47,6 +47,39 @@ const copy = {
         ],
       },
       {
+        icon: '\u{1F4E6}',
+        badge: 'Ново',
+        title: 'Материјално сметководство',
+        subtitle:
+          'Целосно магацинско работење со формални документи, WAC вреднување и автоматско книжење — по македонски стандарди.',
+        features: [
+          {
+            title: 'Повеќе магацини',
+            desc: 'Управувајте со неограничен број магацини со посебни залихи, локации и одговорни лица.',
+          },
+          {
+            title: 'Приемница, издатница, преносница',
+            desc: 'Формални магацински документи кои инспекторите ги бараат — автоматски генерирани со секое движење.',
+          },
+          {
+            title: 'WAC вреднување (пондерирана цена)',
+            desc: 'Автоматско пресметување на пондерирана просечна цена при секој влез — усогласено со МК стандарди.',
+          },
+          {
+            title: 'Автоматско книжење (Класа 3, 6, 7)',
+            desc: 'Секое движење на залиха автоматски го генерира книжењето во главна книга — без рачно контирање.',
+          },
+          {
+            title: 'Известувања за ниски залихи',
+            desc: 'Поставете минимално количество по артикл и добивајте предупредувања кога залихата е критична.',
+          },
+          {
+            title: 'Баркод и SKU следење',
+            desc: 'Скенирајте баркод или внесете SKU за брзо пронаоѓање, приемање и издавање на артикли.',
+          },
+        ],
+      },
+      {
         icon: '\u{1F4DC}',
         badge: '',
         title: 'Е-Фактура и усогласеност',
@@ -196,6 +229,39 @@ const copy = {
           {
             title: 'Analize e moshes se borxheve',
             desc: 'Raport AR Aging me debitoret kryesore, i grupuar 30/60/90 dite, me rekomandime per arketim.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4E6}',
+        badge: 'E re',
+        title: 'Kontabiliteti Material',
+        subtitle:
+          'Menaxhim i plote i magazinave me dokumente formale, vleresim WAC dhe regjistrim automatik — sipas standardeve maqedonase.',
+        features: [
+          {
+            title: 'Shume magazina',
+            desc: 'Menaxhoni numrin e pakufizuar te magazinave me stok, vendndodhje dhe persona pergjegjes te ndara.',
+          },
+          {
+            title: 'Fletehyrje, fletdalje, fletekalim',
+            desc: 'Dokumente formale te magazines qe inspektoret i kerkojne — te gjeneruara automatikisht me cdo levizje.',
+          },
+          {
+            title: 'Vleresim WAC (cmim mesatar i ponderuar)',
+            desc: 'Llogaritje automatike e cmimit mesatar te ponderuar ne cdo hyrje — ne perputhje me standardet MK.',
+          },
+          {
+            title: 'Regjistrim automatik (Klasa 3, 6, 7)',
+            desc: 'Cdo levizje stoku gjeneron automatikisht regjistrimin ne librin e madh — pa kontim manual.',
+          },
+          {
+            title: 'Njoftim per stok te ulet',
+            desc: 'Vendosni sasine minimale per artikull dhe merrni paralajmerime kur stoku eshte kritik.',
+          },
+          {
+            title: 'Gjurmim me barkod dhe SKU',
+            desc: 'Skenoni barkodin ose vendosni SKU per gjetje, pranim dhe leshim te shpejte te artikujve.',
           },
         ],
       },
@@ -353,6 +419,39 @@ const copy = {
         ],
       },
       {
+        icon: '\u{1F4E6}',
+        badge: 'Yeni',
+        title: 'Malzeme Muhasebesi',
+        subtitle:
+          'Resmi belgeler, WAC degerleme ve otomatik muhasebe kaydi ile eksiksiz depo yonetimi — Makedonya standartlarina uygun.',
+        features: [
+          {
+            title: 'Birden fazla depo',
+            desc: 'Sinirsis sayida depoyu ayri stok, konum ve sorumlu kisilerle yonetin.',
+          },
+          {
+            title: 'Giris fisi, cikis fisi, transfer fisi',
+            desc: 'Mufettislerin isteyecegi resmi depo belgeleri — her hareketle otomatik olusturulur.',
+          },
+          {
+            title: 'WAC degerleme (agirlikli ortalama maliyet)',
+            desc: 'Her giriste otomatik agirlikli ortalama maliyet hesaplama — MK standartlarina uygun.',
+          },
+          {
+            title: 'Otomatik muhasebe kaydi (Sinif 3, 6, 7)',
+            desc: 'Her stok hareketi buyuk defterde otomatik muhasebe kaydini olusturur — manuel kayit gerekmez.',
+          },
+          {
+            title: 'Dusuk stok bildirimleri',
+            desc: 'Urun bazinda minimum miktar belirleyin ve stok kritik seviyeye dustugunde uyari alin.',
+          },
+          {
+            title: 'Barkod ve SKU takibi',
+            desc: 'Barkod tarayin veya SKU girin — urunleri hizlica bulun, teslim alin ve sevk edin.',
+          },
+        ],
+      },
+      {
         icon: '\u{1F4DC}',
         badge: '',
         title: 'e-Fatura ve uyum',
@@ -502,6 +601,39 @@ const copy = {
           {
             title: 'Accounts Receivable Aging',
             desc: 'AR Aging report with top debtors, grouped by 30/60/90 days, with collection recommendations.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4E6}',
+        badge: 'New',
+        title: 'Material Accounting',
+        subtitle:
+          'Complete warehouse management with formal documents, WAC valuation, and automatic GL posting — aligned with Macedonian standards.',
+        features: [
+          {
+            title: 'Multi-Warehouse Support',
+            desc: 'Manage unlimited warehouses with separate stock levels, locations, and responsible persons.',
+          },
+          {
+            title: 'Goods Received, Issued & Transfer Notes',
+            desc: 'Formal warehouse documents that inspectors require — automatically generated with every stock movement.',
+          },
+          {
+            title: 'WAC Valuation (Weighted Average Cost)',
+            desc: 'Automatic weighted average cost calculation on every stock-in — compliant with Macedonian accounting standards.',
+          },
+          {
+            title: 'Automatic GL Posting (Class 3, 6, 7)',
+            desc: 'Every inventory movement auto-generates the journal entry in the general ledger — no manual posting needed.',
+          },
+          {
+            title: 'Low Stock Alerts',
+            desc: 'Set minimum quantities per item and get warnings when stock drops to critical levels.',
+          },
+          {
+            title: 'Barcode & SKU Tracking',
+            desc: 'Scan a barcode or enter a SKU to quickly find, receive, and issue items from inventory.',
           },
         ],
       },
@@ -725,6 +857,11 @@ export default async function FeaturesPage({
             <div className="container mx-auto max-w-6xl px-4">
               <div className="mb-10 text-center md:text-left">
                 <span className="mb-2 block text-4xl">{section.icon}</span>
+                {section.badge && (
+                  <span className="mb-3 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    {section.badge}
+                  </span>
+                )}
                 <h2 className="mb-3 text-2xl font-extrabold text-gray-900 md:text-3xl">
                   {section.title}
                 </h2>

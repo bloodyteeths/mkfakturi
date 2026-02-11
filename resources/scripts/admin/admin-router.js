@@ -123,6 +123,11 @@ const StockAdjustments = () => import('@/scripts/admin/views/stock/Adjustments.v
 const WarehousesIndex = () => import('@/scripts/admin/views/stock/warehouses/Index.vue')
 const WarehouseCreate = () => import('@/scripts/admin/views/stock/warehouses/Create.vue')
 
+// Inventory Documents (приемница/издатница/преносница)
+const InventoryDocumentsIndex = () => import('@/scripts/admin/views/stock/documents/Index.vue')
+const InventoryDocumentCreate = () => import('@/scripts/admin/views/stock/documents/Create.vue')
+const InventoryDocumentView = () => import('@/scripts/admin/views/stock/documents/View.vue')
+
 // Bills (Accounts Payable)
 const BillsIndex = () => import('@/scripts/admin/views/bills/Index.vue')
 const BillsCreate = () => import('@/scripts/admin/views/bills/Create.vue')
@@ -462,6 +467,32 @@ export default [
         name: 'warehouses.edit',
         meta: { ability: abilities.EDIT_WAREHOUSE },
         component: WarehouseCreate,
+      },
+
+      // Inventory Documents (приемница/издатница/преносница)
+      {
+        path: 'stock/documents',
+        name: 'stock.documents',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: InventoryDocumentsIndex,
+      },
+      {
+        path: 'stock/documents/create',
+        name: 'stock.documents.create',
+        meta: { requiresAuth: true, ability: abilities.CREATE_ITEM },
+        component: InventoryDocumentCreate,
+      },
+      {
+        path: 'stock/documents/:id',
+        name: 'stock.documents.view',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: InventoryDocumentView,
+      },
+      {
+        path: 'stock/documents/:id/edit',
+        name: 'stock.documents.edit',
+        meta: { requiresAuth: true, ability: abilities.EDIT_ITEM },
+        component: InventoryDocumentCreate,
       },
 
       // Payments

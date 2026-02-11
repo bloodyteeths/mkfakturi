@@ -164,10 +164,19 @@ return [
 
     // CLAUDE-CHECKPOINT
 
+    'invoice_parser_driver' => env('INVOICE_PARSER_DRIVER', 'invoice2data'),
+
     'invoice2data' => [
         'url' => env('INVOICE2DATA_URL', 'http://invoice2data-service:8000'),
         'timeout' => env('INVOICE2DATA_TIMEOUT', 90),
     ],
+
+    'azure_document_intelligence' => [
+        'endpoint' => env('AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT'),
+        'key' => env('AZURE_DOCUMENT_INTELLIGENCE_KEY'),
+        'api_version' => env('AZURE_DOCUMENT_INTELLIGENCE_API_VERSION', '2024-11-30'),
+        'timeout' => (int) env('AZURE_DOCUMENT_INTELLIGENCE_TIMEOUT', 120),
+    ], // CLAUDE-CHECKPOINT
 
     'bitrix' => [
         'webhook_url' => env('BITRIX_WEBHOOK_URL'),

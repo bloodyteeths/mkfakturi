@@ -55,6 +55,11 @@ const copy = {
           body: 'Предлози за конта, ДДВ стапки и книжења. Вие потврдувате, AI забрзува.',
           icon: 'ai',
         },
+        {
+          title: 'Материјално сметководство',
+          body: 'Приемница, издатница, преносница + WAC вреднување + автоматско книжење на Класа 3, 6, 7. Инспекторите ќе бидат задоволни.',
+          icon: 'warehouse',
+        },
       ],
     },
     comparison: {
@@ -68,6 +73,7 @@ const copy = {
         { feature: 'AI контирање и предлози', facturino: true, others: false },
         { feature: 'IFRS извештаи', facturino: true, others: true },
         { feature: 'Мулти‑компанија од еден акаунт', facturino: true, others: false },
+        { feature: 'Материјално сметководство (WAC, GL)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -143,6 +149,11 @@ const copy = {
           body: 'Sugjerime për llogari, TVSH dhe regjistra. Ju konfirmoni, AI shpejton.',
           icon: 'ai',
         },
+        {
+          title: 'Kontabiliteti Material',
+          body: 'Fletëhyrje, fletëdalje, fletëkalim + vlerësim WAC + regjistrim automatik në Klasa 3, 6, 7. Inspektorët do të jenë të kënaqur.',
+          icon: 'warehouse',
+        },
       ],
     },
     comparison: {
@@ -156,6 +167,7 @@ const copy = {
         { feature: 'Kontim dhe sugjerime me AI', facturino: true, others: false },
         { feature: 'Raporte IFRS', facturino: true, others: true },
         { feature: 'Shumë kompani nga një llogari', facturino: true, others: false },
+        { feature: 'Kontabilitet material (WAC, GL)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -231,6 +243,11 @@ const copy = {
           body: 'Hesap, KDV oranı ve muhasebe kaydı önerileri. Siz onaylarsınız, AI hızlandırır.',
           icon: 'ai',
         },
+        {
+          title: 'Malzeme Muhasebesi',
+          body: 'Giriş fişi, çıkış fişi, transfer fişi + WAC değerleme + Sınıf 3, 6, 7 otomatik muhasebe kaydı. Müfettişler memnun kalacak.',
+          icon: 'warehouse',
+        },
       ],
     },
     comparison: {
@@ -244,6 +261,7 @@ const copy = {
         { feature: 'AI muhasebe kaydı ve öneriler', facturino: true, others: false },
         { feature: 'IFRS raporları', facturino: true, others: true },
         { feature: 'Tek hesaptan çok şirket', facturino: true, others: false },
+        { feature: 'Malzeme muhasebesi (WAC, GL)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -319,6 +337,11 @@ const copy = {
           body: 'Suggestions for accounts, VAT rates, and journal entries. You confirm, AI accelerates.',
           icon: 'ai',
         },
+        {
+          title: 'Material Accounting',
+          body: 'Goods received, issued & transfer notes + WAC valuation + automatic GL posting to Class 3, 6, 7 accounts. Inspectors will be satisfied.',
+          icon: 'warehouse',
+        },
       ],
     },
     comparison: {
@@ -332,6 +355,7 @@ const copy = {
         { feature: 'AI journal entries and suggestions', facturino: true, others: false },
         { feature: 'IFRS reports', facturino: true, others: true },
         { feature: 'Multi-company from one account', facturino: true, others: false },
+        { feature: 'Material accounting (WAC, GL)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -412,6 +436,13 @@ function IconAI() {
     </svg>
   )
 }
+function IconWarehouse() {
+  return (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+    </svg>
+  )
+}
 function IconCheck() {
   return (
     <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -446,6 +477,7 @@ const solutionIcons: Record<string, () => React.JSX.Element> = {
   bank: IconBank,
   invoice: IconInvoice,
   ai: IconAI,
+  warehouse: IconWarehouse,
 }
 
 export default async function ForAccountantsPage({ params }: { params: Promise<{ locale: string }> }) {
