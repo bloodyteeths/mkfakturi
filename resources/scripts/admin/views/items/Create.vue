@@ -78,6 +78,19 @@
           </BaseInputGroup>
 
           <BaseInputGroup
+            :label="$t('items.cost_price')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMoney
+              v-model="costPrice"
+              :content-loading="isFetchingInitialData"
+            />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.cost_price_hint') }}
+            </p>
+          </BaseInputGroup>
+
+          <BaseInputGroup
             :content-loading="isFetchingInitialData"
             :label="$t('items.unit')"
           >
@@ -408,13 +421,24 @@ const price = computed({
   },
 })
 
+const costPrice = computed({
+  get: () => {
+    const currentCost = itemStore.currentItem.cost ?? 0
+    return currentCost / 100
+  },
+  set: (value) => {
+    const safeValue = value ?? 0
+    itemStore.currentItem.cost = Math.round(safeValue * 100)
+  },
+})
+
 const taxes = computed({
   get: () =>
     itemStore?.currentItem?.taxes?.map((tax) => {
       if (tax) {
         return {
           ...tax,
-          tax_type_id: tax.id,
+          tax_type_id: tax.tax_type_id || tax.id,
           tax_name: `${tax.name} (${tax.calculation_type === 'fixed'
             ? new Intl.NumberFormat(undefined, {
                 style: 'currency',
@@ -582,10 +606,10 @@ async function submitItem() {
     if (itemStore.currentItem && itemStore.currentItem.taxes) {
       data.taxes = itemStore.currentItem.taxes.map((tax) => {
         return {
-          tax_type_id: tax.tax_type_id,
+          tax_type_id: tax.tax_type_id || tax.id,
           calculation_type: tax.calculation_type,
           fixed_amount: tax.fixed_amount,
-          amount: tax.calculation_type === 'fixed' ? tax.fixed_amount : Math.round(price.value * tax.percent),
+          amount: tax.calculation_type === 'fixed' ? tax.fixed_amount : Math.round(price.value * tax.percent / 100),
           percent: tax.percent,
           name: tax.name,
           collective_tax: 0,

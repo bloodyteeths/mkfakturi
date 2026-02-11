@@ -390,9 +390,12 @@ async function onItemSelected(index, itemId) {
   // Find the selected item to get its price
   const selectedItem = trackedItems.value.find(i => i.id === itemId)
 
-  // Auto-fill unit cost from item price for receipts
-  if (form.document_type === 'receipt' && selectedItem?.price) {
-    form.items[index].unit_cost = (selectedItem.price / 100).toFixed(2)
+  // Auto-fill unit cost from item's cost price (or selling price as fallback) for receipts
+  if (form.document_type === 'receipt') {
+    const costValue = selectedItem?.cost || selectedItem?.price
+    if (costValue) {
+      form.items[index].unit_cost = (costValue / 100).toFixed(2)
+    }
   }
 
   // Fetch WAC for issue/transfer types

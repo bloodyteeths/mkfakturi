@@ -1003,6 +1003,8 @@
     "description": "Përshkrimi",
     "added_on": "Added On",
     "price": "Çmimi",
+    "cost_price": "Çmimi i blerjes",
+    "cost_price_hint": "Çmimi i blerjes nga furnizuesi (për kontabilitetin material)",
     "date_of_creation": "Date Of Creation",
     "not_selected": "No item selected",
     "action": "Opsioni",

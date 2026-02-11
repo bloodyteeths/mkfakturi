@@ -2215,6 +2215,8 @@
     "no_items": "No items yet!",
     "not_selected": "No item selected",
     "price": "Price",
+    "cost_price": "Cost Price",
+    "cost_price_hint": "Purchase price from supplier (for material accounting)",
     "quantity": "Quantity",
     "remove_item": "Remove Item",
     "save_item": "Save Item",

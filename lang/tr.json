@@ -481,6 +481,8 @@
     "description": "Açıklama",
     "added_on": "Eklenme tarihi",
     "price": "Fiyat",
+    "cost_price": "Maliyet Fiyatı",
+    "cost_price_hint": "Tedarikçiden satın alma fiyatı (malzeme muhasebesi için)",
     "date_of_creation": "Oluşturma tarihi",
     "not_selected": "Seçilmiş öğe yok",
     "action": "Eylem",
