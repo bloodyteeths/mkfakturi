@@ -43,6 +43,7 @@ class Item extends Model
     {
         return [
             'price' => 'integer',
+            'cost' => 'integer',
             'track_quantity' => 'boolean',
             'allow_negative_stock' => 'boolean',
         ];
