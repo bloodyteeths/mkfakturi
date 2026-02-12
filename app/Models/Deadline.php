@@ -109,6 +109,10 @@ class Deadline extends Model
             $today = Carbon::today();
             $dueDate = $deadline->due_date;
 
+            if (! $dueDate) {
+                return;
+            }
+
             if ($dueDate->lt($today) && $deadline->status !== self::STATUS_OVERDUE) {
                 $deadline->status = self::STATUS_OVERDUE;
                 $deadline->saveQuietly();

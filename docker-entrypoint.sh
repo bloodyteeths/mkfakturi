@@ -97,20 +97,16 @@ php artisan tinker --execute="echo 'Stock feature from config: ' . (config('feat
 # Run migrations (Railway)
 if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Running migrations..."
-    php artisan migrate --force 2>&1 || echo "Some migrations failed — running critical ones individually..."
+    php artisan migrate --force 2>&1 || echo "Some migrations failed"
 
-    # Run critical migrations individually if batch migrate failed
-    # Each migration is idempotent (uses hasTable/hasColumn checks)
-    for migration in \
-        database/migrations/2026_02_15_000100_add_incoming_einvoice_support.php \
-        database/migrations/2026_02_15_000200_create_leave_management_tables.php \
-        database/migrations/2026_02_15_000300_add_overtime_to_payroll_run_lines.php \
-        database/migrations/2026_02_15_000400_create_client_documents_table.php \
-        database/migrations/2026_02_15_000500_create_deadlines_table.php \
-        database/migrations/2026_02_15_000600_create_fiscal_device_tables.php \
-        database/migrations/2026_02_15_000601_add_connection_fields_to_fiscal_devices.php; do
-        php artisan migrate --force --path="$migration" 2>&1 || echo "Migration $migration skipped or failed"
-    done
+    # Fix ghost migration records: migration recorded as run but table doesn't exist
+    # This happens when a migration batch partially fails
+    echo "Checking for ghost migration records..."
+    php fix-ghost-migrations.php || echo "Ghost check skipped"
+
+    # Re-run migrations to pick up any fixed ghosts
+    echo "Re-running migrations after ghost fix..."
+    php artisan migrate --force 2>&1 || echo "Re-run migrations done"
 
     # Seed Macedonian Chart of Accounts (idempotent - safe to run multiple times)
     echo "Seeding Macedonian Chart of Accounts..."
