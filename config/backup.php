@@ -157,12 +157,12 @@ return [
 
             /*
              * The disk names on which the backups will be stored.
-             * Facturino: Store backups locally and optionally on S3 if configured
+             * Facturino: Primary backup to Cloudflare R2 (r2backup), local as fallback
+             * Railway filesystem is ephemeral — R2 is the real backup destination
              */
             'disks' => array_filter([
+                env('R2_BACKUP_BUCKET') ? 'r2backup' : null,
                 'local',
-                // Add 's3' if AWS credentials are configured in .env
-                env('AWS_BACKUP_BUCKET') ? 's3' : null,
             ]),
         ],
 
@@ -266,7 +266,7 @@ return [
     'monitor_backups' => [
         [
             'name' => env('APP_NAME', 'Facturino'),
-            'disks' => array_filter(['local', env('AWS_BACKUP_BUCKET') ? 's3' : null]),
+            'disks' => array_filter([env('R2_BACKUP_BUCKET') ? 'r2backup' : null, 'local']),
             'health_checks' => [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1, // Alert if backup older than 1 day
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 5000, // Alert if backups exceed 5GB

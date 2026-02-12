@@ -30,6 +30,16 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'r2backup' => [
+            'driver' => 's3',
+            'endpoint' => env('R2_BACKUP_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'key' => env('R2_BACKUP_KEY'),
+            'secret' => env('R2_BACKUP_SECRET'),
+            'region' => env('R2_BACKUP_REGION', 'auto'),
+            'bucket' => env('R2_BACKUP_BUCKET'),
+        ],
+
         'media' => [
             'driver' => 'local',
             'root' => public_path('media'),

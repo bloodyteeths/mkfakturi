@@ -43,6 +43,9 @@ return [
             'prefix_indexes' => true,
             'strict' => false,
             'engine' => null,
+            'dump' => [
+                'add_extra_option' => '--no-tablespaces --ssl=0',
+            ],
         ],
 
         'pgsql' => [
