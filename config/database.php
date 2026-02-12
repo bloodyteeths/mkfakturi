@@ -44,7 +44,7 @@ return [
             'strict' => false,
             'engine' => null,
             'dump' => [
-                'add_extra_option' => '--no-tablespaces --ssl=0',
+                'add_extra_option' => '--no-tablespaces --ssl=0 --default-auth=mysql_native_password',
             ],
         ],
 
