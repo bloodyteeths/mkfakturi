@@ -1,9 +1,9 @@
 <template>
   <div class="kyc-submission">
     <div class="page-header">
-      <h1 class="page-title">KYC Verification</h1>
+      <h1 class="page-title">{{ $t('partner.kyc.title') }}</h1>
       <p class="text-gray-600 mt-2">
-        Submit your documents to enable affiliate payouts. All information is encrypted and secure.
+        {{ $t('partner.kyc.description') }}
       </p>
     </div>
 
@@ -30,16 +30,16 @@
 
     <!-- Upload Form (only show if not verified) -->
     <div v-if="!kycStatus || kycStatus.kyc_status !== 'verified'" class="upload-section bg-white p-6 rounded-lg shadow">
-      <h2 class="text-xl font-semibold mb-4">Upload Documents</h2>
+      <h2 class="text-xl font-semibold mb-4">{{ $t('partner.kyc.upload_documents') }}</h2>
       <p class="text-gray-600 mb-6">
-        Please upload the following documents to complete your KYC verification:
+        {{ $t('partner.kyc.upload_instruction') }}
       </p>
 
       <form @submit.prevent="submitDocuments">
         <!-- ID Card / Passport -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            ID Card or Passport <span class="text-red-500">*</span>
+            {{ $t('partner.kyc.id_document') }} <span class="text-red-500">*</span>
           </label>
           <input
             type="file"
@@ -48,13 +48,13 @@
             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             :required="!hasDocument('id_card')"
           />
-          <p class="text-xs text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 5MB)</p>
+          <p class="text-xs text-gray-500 mt-1">{{ $t('partner.kyc.accepted_formats') }}</p>
         </div>
 
         <!-- Proof of Address -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            Proof of Address <span class="text-red-500">*</span>
+            {{ $t('partner.kyc.proof_of_address') }} <span class="text-red-500">*</span>
           </label>
           <input
             type="file"
@@ -63,13 +63,13 @@
             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             :required="!hasDocument('proof_of_address')"
           />
-          <p class="text-xs text-gray-500 mt-1">Utility bill, bank statement, or rental agreement (last 3 months)</p>
+          <p class="text-xs text-gray-500 mt-1">{{ $t('partner.kyc.proof_of_address_desc') }}</p>
         </div>
 
         <!-- Bank Statement (optional) -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            Bank Statement <span class="text-gray-400">(Optional)</span>
+            {{ $t('partner.kyc.bank_statement') }} <span class="text-gray-400">{{ $t('partner.kyc.optional') }}</span>
           </label>
           <input
             type="file"
@@ -86,10 +86,10 @@
             :disabled="uploading || !canSubmit"
             class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span v-if="uploading">Uploading...</span>
-            <span v-else>Submit Documents</span>
+            <span v-if="uploading">{{ $t('partner.kyc.uploading') }}</span>
+            <span v-else>{{ $t('partner.kyc.submit_documents') }}</span>
           </button>
-          <p class="text-sm text-gray-500">Review time: 24-48 hours</p>
+          <p class="text-sm text-gray-500">{{ $t('partner.kyc.review_time') }}</p>
         </div>
       </form>
 
@@ -106,16 +106,16 @@
 
     <!-- Uploaded Documents List -->
     <div v-if="kycStatus && kycStatus.documents && kycStatus.documents.length > 0" class="documents-list mt-6 bg-white p-6 rounded-lg shadow">
-      <h2 class="text-xl font-semibold mb-4">Submitted Documents</h2>
+      <h2 class="text-xl font-semibold mb-4">{{ $t('partner.kyc.submitted_documents') }}</h2>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Document Type</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Filename</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uploaded</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('partner.kyc.document_type') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('partner.kyc.filename') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('partner.kyc.status') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('partner.kyc.uploaded') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('partner.kyc.actions') }}</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -140,9 +140,9 @@
                   @click="deleteDocument(doc.id)"
                   class="text-red-600 hover:text-red-900"
                 >
-                  Delete
+                  {{ $t('partner.kyc.delete') }}
                 </button>
-                <span v-else class="text-gray-400">Approved</span>
+                <span v-else class="text-gray-400">{{ $t('partner.kyc.approved') }}</span>
               </td>
             </tr>
           </tbody>
@@ -151,7 +151,7 @@
 
       <!-- Rejection Reasons -->
       <div v-for="doc in rejectedDocuments" :key="'rejection-' + doc.id" class="mt-4 p-4 bg-red-50 border border-red-200 rounded">
-        <p class="font-semibold text-red-700">{{ formatDocumentType(doc.document_type) }} - Rejection Reason:</p>
+        <p class="font-semibold text-red-700">{{ formatDocumentType(doc.document_type) }} - {{ $t('partner.kyc.rejection_reason') }}</p>
         <p class="text-red-600 mt-1">{{ doc.rejection_reason }}</p>
       </div>
     </div>
@@ -160,7 +160,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+
+const { t } = useI18n()
 
 const kycStatus = ref(null)
 const uploading = ref(false)
@@ -186,11 +189,11 @@ const statusTitle = computed(() => {
 
   switch (kycStatus.value.kyc_status) {
     case 'verified':
-      return 'KYC Verified'
+      return t('partner.kyc.status_verified')
     case 'rejected':
-      return 'KYC Rejected'
+      return t('partner.kyc.status_rejected')
     default:
-      return 'KYC Pending Review'
+      return t('partner.kyc.status_pending')
   }
 })
 
@@ -199,11 +202,11 @@ const statusMessage = computed(() => {
 
   switch (kycStatus.value.kyc_status) {
     case 'verified':
-      return 'Your account is fully verified and eligible for payouts.'
+      return t('partner.kyc.verified_message')
     case 'rejected':
-      return 'Please review the rejection reasons below and re-submit corrected documents.'
+      return t('partner.kyc.rejected_message')
     default:
-      return 'Your documents are being reviewed. You will receive an email once the review is complete.'
+      return t('partner.kyc.pending_message')
   }
 })
 
@@ -222,7 +225,7 @@ const handleFileUpload = (event, documentType) => {
 
   // Validate file size (5MB)
   if (file.size > 5 * 1024 * 1024) {
-    errorMessage.value = 'File size must be less than 5MB'
+    errorMessage.value = t('partner.kyc.file_size_error')
     event.target.value = ''
     return
   }
@@ -263,21 +266,21 @@ const submitDocuments = async () => {
     await fetchKycStatus()
 
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Failed to upload documents'
+    errorMessage.value = error.response?.data?.message || t('partner.kyc.upload_error')
   } finally {
     uploading.value = false
   }
 }
 
 const deleteDocument = async (documentId) => {
-  if (!confirm('Are you sure you want to delete this document?')) return
+  if (!confirm(t('partner.kyc.confirm_delete'))) return
 
   try {
     await axios.delete(`/partner/kyc/documents/${documentId}`)
-    successMessage.value = 'Document deleted successfully'
+    successMessage.value = t('partner.kyc.delete_success')
     await fetchKycStatus()
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Failed to delete document'
+    errorMessage.value = error.response?.data?.message || t('partner.kyc.delete_error')
   }
 }
 
@@ -286,18 +289,18 @@ const fetchKycStatus = async () => {
     const response = await axios.get('/partner/kyc/status')
     kycStatus.value = response.data
   } catch (error) {
-    errorMessage.value = 'Failed to load KYC status'
+    errorMessage.value = t('partner.kyc.load_error')
   }
 }
 
 const formatDocumentType = (type) => {
   const types = {
-    'id_card': 'ID Card',
-    'passport': 'Passport',
-    'proof_of_address': 'Proof of Address',
-    'bank_statement': 'Bank Statement',
-    'tax_certificate': 'Tax Certificate',
-    'other': 'Other'
+    'id_card': t('partner.kyc.doc_type_id_card'),
+    'passport': t('partner.kyc.doc_type_passport'),
+    'proof_of_address': t('partner.kyc.doc_type_proof_of_address'),
+    'bank_statement': t('partner.kyc.doc_type_bank_statement'),
+    'tax_certificate': t('partner.kyc.doc_type_tax_certificate'),
+    'other': t('partner.kyc.doc_type_other')
   }
   return types[type] || type
 }

@@ -1,0 +1,104 @@
+{
+  "title": "Партнер | Партнери",
+  "name": "Име на партнер",
+  "email": "Email",
+  "phone": "Телефонски број",
+  "company_name": "Име на компанија",
+  "tax_id": "Даночен број",
+  "registration_number": "Матичен број",
+  "bank_account": "Банкарска сметка",
+  "bank_name": "Име на банка",
+  "commission_rate": "Стапка на провизија",
+  "commission_rate_help": "Стандардна стапка на провизија за овој партнер (може да се промени по компанија)",
+  "commission_rate_override": "Промена на стапка на провизија",
+  "commission_rate_override_help": "Оставете празно за да ја користите стандардната стапка на партнерот",
+  "kyc_status": "KYC Статус",
+  "notes": "Внатрешни белешки",
+  "internal_notes": "Внатрешни белешки",
+  "notes_placeholder": "Додајте белешки за овој партнер (видливи само за администратори)",
+
+  "basic_info": "Основни информации",
+  "banking_info": "Банкарски информации",
+  "commission_status": "Провизија и статус",
+  "credentials": "Податоци за најава",
+  "password": "Лозинка",
+  "password_confirmation": "Потврди лозинка",
+
+  "new_partner": "Нов партнер",
+  "add_new_partner": "Додај нов партнер",
+  "edit_partner": "Уреди партнер",
+  "save_partner": "Зачувај партнер",
+  "update_partner": "Ажурирај партнер",
+  "deactivate_partner": "Деактивирај партнер",
+  "confirm_deactivate": "Дали сте сигурни дека сакате да го деактивирате овој партнер?",
+  "created_successfully": "Партнерот е успешно креиран",
+  "updated_successfully": "Партнерот е успешно ажуриран",
+  "deactivated_successfully": "Партнерот е успешно деактивиран",
+  "deactivate_failed": "Неуспешно деактивирање на партнерот",
+  "fetch_failed": "Неуспешно вчитување на партнерот",
+  "save_failed": "Неуспешно зачувување на партнерот",
+
+  "no_partners": "Нема партнери",
+  "list_description": "Креирајте и управувајте со вашите сметководствени партнери",
+  "search_placeholder": "Пребарајте по име, email или име на компанија",
+
+  "total_earnings": "Вкупна заработка",
+  "pending_payout": "Исплата во тек",
+  "companies_managed": "Управувани компании",
+  "effective_commission_rate": "Ефективна стапка на провизија",
+
+  "stats": {
+    "total_partners": "Вкупно партнери",
+    "active_partners": "Активни партнери",
+    "partner_plus": "Partner Plus",
+    "pending_kyc": "KYC во тек"
+  },
+
+  "kyc": {
+    "pending": "Во тек",
+    "under_review": "Во преглед",
+    "approved": "Одобрено",
+    "rejected": "Одбиено"
+  },
+
+  "tabs": {
+    "info": "Информации",
+    "companies": "Компании",
+    "commissions": "Провизии",
+    "payouts": "Исплати"
+  },
+
+  "assign_company": "Додели компанија",
+  "edit_company_assignment": "Уреди доделување на компанија",
+  "unassign": "Отстрани доделување",
+  "confirm_unassign": "Дали сте сигурни дека сакате да го отстраните доделувањето на оваа компанија?",
+  "select_company": "Изберете компанија",
+  "search_company": "Пребарајте компанија",
+  "use_default_rate": "Користи стандардна стапка",
+  "set_as_primary_company": "Постави како примарна компанија",
+  "primary": "Примарна",
+  "edit_permissions": "Уреди дозволи",
+  "update_assignment": "Ажурирај доделување",
+  "assignment_failed": "Неуспешно ажурирање на доделувањето на компанијата",
+  "no_companies_assigned": "Нема доделени компании",
+  "permissions_label": "дозволи",
+
+  "permissions": {
+    "full_access": "Целосен пристап",
+    "full_access_description": "Дајте целосен пристап до сите функции и податоци",
+    "selected_permissions": "Избрани дозволи",
+    "invoices": "Фактури",
+    "customers": "Клиенти",
+    "banking": "Банкарство",
+    "reports": "Извештаи",
+    "payroll": "Плати",
+    "settings": "Поставки"
+  },
+
+  "monthly_commissions": "Месечни провизии",
+  "no_commissions": "Нема податоци за провизии",
+  "month": "Месец",
+  "amount": "Износ",
+  "date": "Датум",
+  "no_payouts": "Нема историја на исплати"
+}

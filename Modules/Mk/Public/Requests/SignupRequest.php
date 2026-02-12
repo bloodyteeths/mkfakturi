@@ -89,7 +89,7 @@ class SignupRequest extends FormRequest
             'language' => [
                 'nullable',
                 'string',
-                'in:ar,nl,en,fr,de,ja,it,lv,pl,pt_BR,sr,ko,es,sv,sk,vi,cs,el,hr,mk,sq,th',
+                'in:ar,nl,en,fr,de,ja,it,lv,pl,pt_BR,sr,ko,es,sv,sk,vi,cs,el,hr,mk,sq,tr,th',
             ],
 
             // Company address (optional)

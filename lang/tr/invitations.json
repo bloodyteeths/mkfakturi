@@ -1,0 +1,47 @@
+{
+  "partner_invitation": {
+    "subject": ":company şirketinden Partner olarak katılma daveti",
+    "greeting": "Merhaba!",
+    "intro": ":company tarafından Facturino'da muhasebe partneri olarak katılmaya davet edildiniz.",
+    "permissions_intro": "Aşağıdaki izinlere erişiminiz olacak:",
+    "instructions": "Daveti kabul etmek ve :company hesabına erişmek için aşağıdaki düğmeye tıklayın.",
+    "accept_button": "Daveti Kabul Et",
+    "ignore_notice": "Bu daveti beklemiyorsanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+  },
+  "company_invitation": {
+    "subject": ":partner tarafından Facturino'ya katılma daveti",
+    "greeting": "Merhaba!",
+    "intro": ":partner sizi kapsamlı bir muhasebe ve faturalama platformu olan Facturino'ya katılmaya davet etti.",
+    "benefits": "Facturino faturaları, müşterileri, giderleri ve daha fazlasını yönetmenize yardımcı olur - hepsi tek bir yerde.",
+    "instructions": "Hesabınızı oluşturmak ve başlamak için aşağıdaki düğmeye tıklayın.",
+    "signup_button": "Hesap Oluştur",
+    "ignore_notice": "Bu daveti beklemiyorsanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+  },
+  "company_referral": {
+    "subject": "Facturino'ya Katılın - :company davet ediyor",
+    "greeting": "Merhaba!",
+    "intro": ":company Facturino kullanıyor ve sizin de kullanmanız gerektiğini düşünüyor!",
+    "benefits": "Facturino, Makedon işletmeleri için tasarlanmış güçlü bir muhasebe ve faturalama platformudur. Bugün başlayın ve muhasebe iş akışınızı kolaylaştırın.",
+    "instructions": "Bu özel referans bağlantısıyla hesabınızı oluşturmak için aşağıdaki düğmeye tıklayın.",
+    "signup_button": "Hesap Oluştur",
+    "ignore_notice": "Bu daveti beklemiyorsanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+  },
+  "partner_referral": {
+    "subject": "Partner Olun - :partner davet ediyor",
+    "greeting": "Merhaba!",
+    "intro": ":partner sizi Facturino'da partner olmaya davet etti.",
+    "benefits": "Partner olarak, birden fazla şirket hesabını yöneterek ve işletmelere muhasebe ihtiyaçlarında yardımcı olarak komisyon kazanabilirsiniz.",
+    "instructions": "Partner olarak kaydolmak ve kazanmaya başlamak için aşağıdaki düğmeye tıklayın.",
+    "signup_button": "Partner Olarak Kaydol",
+    "ignore_notice": "Bu daveti beklemiyorsanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+  },
+  "user_invitation": {
+    "subject": ":company şirketine katılma daveti",
+    "greeting": "Merhaba :name!",
+    "intro": "Facturino'da :company şirketine katılmaya davet edildiniz.",
+    "instructions": "Başlamak için lütfen şifrenizi belirlemek üzere aşağıdaki düğmeye tıklayın:",
+    "set_password_button": "Şifre Belirle",
+    "link_expiry": "Bu bağlantı 24 saat içinde sona erecektir.",
+    "ignore_notice": "Bu daveti beklemiyorsanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+  }
+}

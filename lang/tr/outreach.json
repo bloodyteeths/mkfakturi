@@ -1,0 +1,34 @@
+{
+  "initial": {
+    "subject": ":company için Facturino?",
+    "greeting": "Merhaba,",
+    "intro": "Facturino, Makedon işletmeleri için tasarlanmış bulut tabanlı bir faturalama ve muhasebe platformudur.",
+    "benefit": "E-fatura entegrasyonu ve otomatik banka beslemeleri ile finansal iş akışınızın her bölümünü otomatikleştirir.",
+    "cta": "2 dakikalık demoyu izleyin",
+    "opt_out": "Abonelikten çıkmak için DURDUR yazarak yanıtlayın."
+  },
+  "followup1": {
+    "subject": "Takip: Facturino",
+    "greeting": "Tekrar merhaba,",
+    "reference": "Birkaç gün önce Facturino hakkında iletişime geçmiştim.",
+    "metric": "200'den fazla Makedon şirketi zaten faturalama süreçlerini otomatikleştirmek için Facturino kullanıyor.",
+    "cta": "Demoyu izleyin"
+  },
+  "followup2": {
+    "subject": "Son not: ücretsiz deneme",
+    "greeting": "Merhaba,",
+    "busy": "Meşgul olduğunuzu anlıyorum - sadece kısa bir not.",
+    "offer": "Facturino'yu denemek isterseniz, 30 günlük uzatılmış ücretsiz deneme sunuyoruz.",
+    "cta": "Ücretsiz denemeyi başlatın",
+    "last_email": "Bu bizden gelen son e-postadır. Sizi bir daha rahatsız etmeyeceğiz."
+  },
+  "partner_invite": {
+    "subject": "Facturino Partner Programına Hoş Geldiniz",
+    "greeting": "Merhaba :name,",
+    "congrats": "Tebrikler! Facturino Partner Programına kabul edildiniz.",
+    "benefits": "Partner olarak müşterileri yönetebilir, komisyonları takip edebilir ve özel muhasebe araçlarını kullanabilirsiniz.",
+    "cta": "Şifre belirleyin ve profilinizi tamamlayın",
+    "contact": "Sorularınız için partners@facturino.mk adresinden bize ulaşın"
+  },
+  "unsubscribe": "Abonelikten çık"
+}

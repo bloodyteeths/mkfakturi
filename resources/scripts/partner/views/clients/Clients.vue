@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">
-          Клиенти
+          {{ $t('partner.clients.title') }}
         </h1>
         <p class="mt-2 text-sm text-gray-600">
-          Преглед на компаниите доделени на вашето партнерство
+          {{ $t('partner.clients.description') }}
         </p>
       </div>
 
@@ -15,29 +15,29 @@
       <div class="bg-white shadow rounded-lg p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="md:col-span-2">
-            <label for="search-clients" class="block text-sm font-medium text-gray-700 mb-1">Пребарај</label>
+            <label for="search-clients" class="block text-sm font-medium text-gray-700 mb-1">{{ $t('partner.clients.search') }}</label>
             <input
               id="search-clients"
               v-model="searchQuery"
               type="text"
-              placeholder="Пребарај по име на компанија..."
+              :placeholder="$t('partner.clients.search_placeholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              aria-label="Пребарај клиенти"
+              :aria-label="$t('partner.clients.search')"
               @input="debouncedSearch"
             />
           </div>
           <div>
-            <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Статус</label>
+            <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">{{ $t('partner.clients.status') }}</label>
             <select
               id="status-filter"
               v-model="statusFilter"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              aria-label="Филтрирај по статус"
+              :aria-label="$t('partner.clients.filter_by_status')"
               @change="loadClients"
             >
-              <option value="">Сите</option>
-              <option value="active">Активни</option>
-              <option value="inactive">Неактивни</option>
+              <option value="">{{ $t('partner.clients.all') }}</option>
+              <option value="active">{{ $t('partner.clients.active') }}</option>
+              <option value="inactive">{{ $t('partner.clients.inactive') }}</option>
             </select>
           </div>
         </div>
@@ -57,11 +57,11 @@
                 </div>
                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <h3 id="delete-modal-title" class="text-lg leading-6 font-medium text-gray-900">
-                    Избриши клиент
+                    {{ $t('partner.clients.delete_client') }}
                   </h3>
                   <div class="mt-2">
                     <p class="text-sm text-gray-500">
-                      Дали сте сигурни дека сакате да го избришете клиентот "{{ clientToDelete?.name }}"? Оваа акција не може да се врати.
+                      {{ $t('partner.clients.delete_confirm', { name: clientToDelete?.name }) }}
                     </p>
                   </div>
                 </div>
@@ -74,7 +74,7 @@
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
                 @click="confirmDelete"
               >
-                {{ isDeleting ? 'Се брише...' : 'Избриши' }}
+                {{ isDeleting ? $t('partner.clients.deleting') : $t('partner.clients.delete') }}
               </button>
               <button
                 type="button"
@@ -82,7 +82,7 @@
                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
                 @click="closeDeleteModal"
               >
-                Откажи
+                {{ $t('partner.clients.cancel') }}
               </button>
             </div>
           </div>
@@ -99,7 +99,7 @@
           <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
             <!-- Loading state -->
             <div v-if="loadingDetail" class="p-8 flex justify-center">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" aria-label="Се вчитува..."></div>
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" :aria-label="$t('partner.clients.loading')"></div>
             </div>
 
             <!-- Client details -->
@@ -114,11 +114,11 @@
                       </span>
                     </div>
                     <div class="ml-4">
-                      <h3 class="text-xl font-bold text-gray-900">{{ selectedClient?.name || 'Непознато' }}</h3>
-                      <p class="text-sm text-gray-500">{{ selectedClient?.email || 'Нема е-пошта' }}</p>
+                      <h3 class="text-xl font-bold text-gray-900">{{ selectedClient?.name || $t('partner.clients.unknown') }}</h3>
+                      <p class="text-sm text-gray-500">{{ selectedClient?.email || $t('partner.clients.no_email') }}</p>
                     </div>
                   </div>
-                  <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600" aria-label="Затвори модал">
+                  <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600" :aria-label="$t('partner.clients.close_modal')">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -139,7 +139,7 @@
                     :aria-selected="activeTab === 'info'"
                     aria-controls="info-panel"
                   >
-                    Информации
+                    {{ $t('partner.clients.info') }}
                   </button>
                   <button
                     @click="activeTab = 'accounting'; setDefaultDateRange()"
@@ -153,7 +153,7 @@
                     :aria-selected="activeTab === 'accounting'"
                     aria-controls="accounting-panel"
                   >
-                    Книговодство
+                    {{ $t('partner.clients.accounting') }}
                   </button>
                   <button
                     @click="activeTab = 'documents'"
@@ -167,7 +167,7 @@
                     :aria-selected="activeTab === 'documents'"
                     aria-controls="documents-panel"
                   >
-                    Документи
+                    {{ $t('partner.clients.documents') }}
                   </button>
                 </div>
 
@@ -175,33 +175,33 @@
                 <div v-if="activeTab === 'info'" id="info-panel" role="tabpanel">
                   <!-- Subscription Info -->
                   <div class="mb-6">
-                    <h4 class="text-sm font-medium text-gray-900 mb-3">Претплата</h4>
+                    <h4 class="text-sm font-medium text-gray-900 mb-3">{{ $t('partner.clients.subscription') }}</h4>
                   <div class="bg-gray-50 rounded-lg p-4">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <p class="text-xs text-gray-500">План</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.plan') }}</p>
                         <p class="text-sm font-medium text-gray-900 capitalize">{{ selectedClient?.subscription?.plan || 'Free' }}</p>
                       </div>
                       <div>
-                        <p class="text-xs text-gray-500">Статус</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.status') }}</p>
                         <span :class="getStatusClass(selectedClient?.subscription?.status)">
                           {{ getStatusLabel(selectedClient?.subscription?.status) }}
                         </span>
                       </div>
                       <div>
-                        <p class="text-xs text-gray-500">Период</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.period') }}</p>
                         <p class="text-sm font-medium text-gray-900 capitalize">{{ selectedClient?.subscription?.billing_period || 'N/A' }}</p>
                       </div>
                       <div>
-                        <p class="text-xs text-gray-500">Месечна цена</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.monthly_price') }}</p>
                         <p class="text-sm font-medium text-gray-900">{{ formatCurrency(selectedClient?.subscription?.price || 0) }}</p>
                       </div>
                       <div v-if="selectedClient?.subscription?.trial_ends_at">
-                        <p class="text-xs text-gray-500">Пробен период до</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.trial_until') }}</p>
                         <p class="text-sm font-medium text-gray-900">{{ formatDate(selectedClient?.subscription?.trial_ends_at) }}</p>
                       </div>
                       <div v-if="selectedClient?.subscription?.current_period_end">
-                        <p class="text-xs text-gray-500">Тековен период до</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.current_period_until') }}</p>
                         <p class="text-sm font-medium text-gray-900">{{ formatDate(selectedClient?.subscription?.current_period_end) }}</p>
                       </div>
                     </div>
@@ -210,18 +210,18 @@
 
                 <!-- Commission Info -->
                 <div class="mb-6">
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Провизија</h4>
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">{{ $t('partner.clients.commission') }}</h4>
                   <div class="bg-green-50 rounded-lg p-4">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <p class="text-xs text-gray-500">Стапка</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.rate') }}</p>
                         <p class="text-sm font-medium text-green-700">
                           {{ selectedClient?.commission?.rate || 0 }}%
-                          <span v-if="selectedClient?.commission?.is_override" class="text-xs text-green-600">(прилагодена)</span>
+                          <span v-if="selectedClient?.commission?.is_override" class="text-xs text-green-600">{{ $t('partner.clients.custom_rate') }}</span>
                         </p>
                       </div>
                       <div>
-                        <p class="text-xs text-gray-500">Месечна провизија</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.monthly_commission') }}</p>
                         <p class="text-sm font-medium text-green-700">{{ formatCurrency(selectedClient?.commission?.monthly_amount || 0) }}</p>
                       </div>
                     </div>
@@ -230,15 +230,15 @@
 
                 <!-- Client Info -->
                 <div class="mb-6">
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Информации</h4>
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">{{ $t('partner.clients.info') }}</h4>
                   <div class="bg-gray-50 rounded-lg p-4">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <p class="text-xs text-gray-500">Регистриран</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.registered') }}</p>
                         <p class="text-sm font-medium text-gray-900">{{ formatDate(selectedClient?.signup_date) }}</p>
                       </div>
                       <div v-if="selectedClient?.address">
-                        <p class="text-xs text-gray-500">Локација</p>
+                        <p class="text-xs text-gray-500">{{ $t('partner.clients.location') }}</p>
                         <p class="text-sm font-medium text-gray-900">{{ selectedClient?.address?.city || 'N/A' }}, {{ selectedClient?.address?.country || 'N/A' }}</p>
                       </div>
                     </div>
@@ -247,14 +247,14 @@
 
                   <!-- Billing History -->
                   <div v-if="selectedClient?.billing_history?.length">
-                    <h4 class="text-sm font-medium text-gray-900 mb-3">Историја на плаќања</h4>
+                    <h4 class="text-sm font-medium text-gray-900 mb-3">{{ $t('partner.clients.billing_history') }}</h4>
                     <div class="bg-gray-50 rounded-lg overflow-hidden">
                       <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100">
                           <tr>
-                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500">Датум</th>
-                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500">Износ</th>
-                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500">Статус</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ $t('partner.clients.date') }}</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ $t('partner.clients.amount') }}</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ $t('partner.clients.status') }}</th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -282,30 +282,30 @@
                     <!-- Export Description -->
                     <div class="bg-blue-50 rounded-lg p-4">
                       <p class="text-sm text-blue-700">
-                        Прегледајте и проверете ги книговодствените записи со АИ класификација на сметки, или директно извезете во формат компатибилен со Пантеон, Zonel или CSV.
+                        {{ $t('partner.clients.accounting_description') }}
                       </p>
                     </div>
 
                     <!-- Date Range -->
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label for="export-date-from" class="block text-sm font-medium text-gray-700 mb-1">Датум од</label>
+                        <label for="export-date-from" class="block text-sm font-medium text-gray-700 mb-1">{{ $t('partner.clients.date_from') }}</label>
                         <input
                           id="export-date-from"
                           v-model="exportDateFrom"
                           type="date"
                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          aria-label="Датум од"
+                          :aria-label="$t('partner.clients.date_from')"
                         />
                       </div>
                       <div>
-                        <label for="export-date-to" class="block text-sm font-medium text-gray-700 mb-1">Датум до</label>
+                        <label for="export-date-to" class="block text-sm font-medium text-gray-700 mb-1">{{ $t('partner.clients.date_to') }}</label>
                         <input
                           id="export-date-to"
                           v-model="exportDateTo"
                           type="date"
                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          aria-label="Датум до"
+                          :aria-label="$t('partner.clients.date_to')"
                         />
                       </div>
                     </div>
@@ -319,20 +319,20 @@
                           </svg>
                         </div>
                         <div class="ml-3 flex-1">
-                          <h4 class="text-sm font-medium text-green-800">Препорачано: Преглед пред извоз</h4>
+                          <h4 class="text-sm font-medium text-green-800">{{ $t('partner.clients.recommended_review') }}</h4>
                           <p class="mt-1 text-sm text-green-700">
-                            АИ автоматски класифицира записи (стока, услуга, производ). Прегледајте и потврдете ги сметките пред извоз.
+                            {{ $t('partner.clients.ai_classification_desc') }}
                           </p>
                           <button
                             @click="goToJournalReview"
                             :disabled="!exportDateFrom || !exportDateTo"
                             class="mt-3 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            aria-label="Прегледај записи"
+                            :aria-label="$t('partner.clients.review_entries')"
                           >
                             <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                             </svg>
-                            Прегледај записи
+                            {{ $t('partner.clients.review_entries') }}
                           </button>
                         </div>
                       </div>
@@ -344,14 +344,14 @@
                         <div class="w-full border-t border-gray-300"></div>
                       </div>
                       <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">или директен извоз</span>
+                        <span class="px-2 bg-white text-gray-500">{{ $t('partner.clients.or_direct_export') }}</span>
                       </div>
                     </div>
 
                     <!-- Export Format -->
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Формат на извоз</label>
-                      <div class="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Формат на извоз">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('partner.clients.export_format') }}</label>
+                      <div class="grid grid-cols-3 gap-3" role="radiogroup" :aria-label="$t('partner.clients.export_format')">
                         <label
                           :class="[
                             'relative flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-colors',
@@ -381,7 +381,7 @@
                             <svg class="h-8 w-8 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                             </svg>
-                            <span class="text-sm font-medium">Пантеон</span>
+                            <span class="text-sm font-medium">{{ $t('partner.clients.pantheon') }}</span>
                           </div>
                         </label>
                         <label
@@ -409,7 +409,7 @@
                         @click="exportJournal"
                         :disabled="isExporting || !exportDateFrom || !exportDateTo"
                         class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        aria-label="Директен извоз"
+                        :aria-label="$t('partner.clients.direct_export')"
                       >
                         <svg v-if="isExporting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -418,10 +418,10 @@
                         <svg v-else class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        {{ isExporting ? 'Извезување...' : 'Директен извоз (без преглед)' }}
+                        {{ isExporting ? $t('partner.clients.exporting') : $t('partner.clients.direct_export') }}
                       </button>
                       <p class="mt-2 text-xs text-gray-500 text-center">
-                        Директниот извоз користи АИ класификација, но без рачна проверка
+                        {{ $t('partner.clients.direct_export_note') }}
                       </p>
                     </div>
                   </div>
@@ -430,7 +430,7 @@
 
               <div class="bg-gray-50 px-6 py-3 flex justify-end">
                 <button @click="closeDetailModal" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
-                  Затвори
+                  {{ $t('partner.clients.close') }}
                 </button>
               </div>
             </div>
@@ -488,15 +488,15 @@
           </div>
           <div class="ml-3">
             <h3 class="text-sm font-medium text-red-800">
-              Грешка при вчитување на клиентите
+              {{ $t('partner.clients.load_error') }}
             </h3>
             <p class="mt-1 text-sm text-red-700">{{ error }}</p>
             <button
               @click="loadClients"
               class="mt-2 text-sm font-medium text-red-600 hover:text-red-500"
-              aria-label="Обиди се повторно"
+              :aria-label="$t('partner.clients.retry')"
             >
-              Обиди се повторно
+              {{ $t('partner.clients.retry') }}
             </button>
           </div>
         </div>
@@ -517,7 +517,7 @@
                 <div class="ml-5 w-0 flex-1">
                   <dl>
                     <dt class="text-sm font-medium text-gray-500 truncate">
-                      Вкупно клиенти
+                      {{ $t('partner.clients.total_clients') }}
                     </dt>
                     <dd class="text-lg font-medium text-gray-900">
                       {{ pagination.total }}
@@ -539,7 +539,7 @@
                 <div class="ml-5 w-0 flex-1">
                   <dl>
                     <dt class="text-sm font-medium text-gray-500 truncate">
-                      Активни
+                      {{ $t('partner.clients.active') }}
                     </dt>
                     <dd class="text-lg font-medium text-gray-900">
                       {{ activeClients }}
@@ -561,7 +561,7 @@
                 <div class="ml-5 w-0 flex-1">
                   <dl>
                     <dt class="text-sm font-medium text-gray-500 truncate">
-                      Провизија %
+                      {{ $t('partner.clients.commission_rate') }}
                     </dt>
                     <dd class="text-lg font-medium text-gray-900">
                       {{ userStore?.currentUser?.commission_rate || 0 }}%
@@ -583,7 +583,7 @@
                 <div class="ml-5 w-0 flex-1">
                   <dl>
                     <dt class="text-sm font-medium text-gray-500 truncate">
-                      Месечна провизија
+                      {{ $t('partner.clients.monthly_commission') }}
                     </dt>
                     <dd class="text-lg font-medium text-gray-900">
                       {{ monthlyCommission }}
@@ -599,10 +599,10 @@
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <div class="px-4 py-5 sm:px-6">
             <h3 class="text-lg leading-6 font-medium text-gray-900">
-              Листа на клиенти
+              {{ $t('partner.clients.client_list') }}
             </h3>
             <p class="mt-1 max-w-2xl text-sm text-gray-500">
-              Детални информации за компаниите доделени на вашето партнерство
+              {{ $t('partner.clients.client_list_description') }}
             </p>
           </div>
 
@@ -611,21 +611,21 @@
             <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h10M7 15h10" />
             </svg>
-            <h3 class="mt-4 text-lg font-medium text-gray-900">Нема клиенти</h3>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">{{ $t('partner.clients.no_clients') }}</h3>
             <p class="mt-2 text-sm text-gray-500">
-              {{ searchQuery || statusFilter ? 'Нема резултати за вашето пребарување. Обидете се со различни филтри.' : 'Сеуште нема доделени компании на вашето партнерство.' }}
+              {{ searchQuery || statusFilter ? $t('partner.clients.no_search_results') : $t('partner.clients.no_assigned_companies') }}
             </p>
             <div v-if="searchQuery || statusFilter" class="mt-4">
               <button
                 @click="clearFilters"
                 class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Исчисти филтри
+                {{ $t('partner.clients.clear_filters') }}
               </button>
             </div>
           </div>
 
-          <ul v-else role="list" class="divide-y divide-gray-200" aria-label="Листа на клиенти">
+          <ul v-else role="list" class="divide-y divide-gray-200" :aria-label="$t('partner.clients.client_list')">
             <li v-for="client in clients" :key="client?.id">
               <div class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
@@ -640,20 +640,20 @@
                     <div class="ml-4">
                       <div class="flex items-center">
                         <p class="text-sm font-medium text-gray-900">
-                          {{ client?.name || 'Непознато' }}
+                          {{ client?.name || $t('partner.clients.unknown') }}
                         </p>
                         <span v-if="client?.is_active" class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Активен
+                          {{ $t('partner.clients.active') }}
                         </span>
                         <span v-else class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Неактивен
+                          {{ $t('partner.clients.inactive') }}
                         </span>
                       </div>
                       <p class="text-sm text-gray-500">
-                        {{ client?.address ? `${client?.address?.city || 'N/A'}, ${client?.address?.country || 'N/A'}` : 'Нема адреса' }}
+                        {{ client?.address ? `${client?.address?.city || 'N/A'}, ${client?.address?.country || 'N/A'}` : $t('partner.clients.no_address') }}
                       </p>
                       <p class="text-xs text-gray-400">
-                        Провизија: {{ client?.commission_rate || 0 }}% | Последна активност: {{ formatDate(client?.last_activity) }}
+                        {{ $t('partner.clients.commission_label') }}: {{ client?.commission_rate || 0 }}% | {{ $t('partner.clients.last_activity') }}: {{ formatDate(client?.last_activity) }}
                       </p>
                     </div>
                   </div>
@@ -663,16 +663,16 @@
                         {{ client?.monthly_revenue || formatCurrency(0) }}
                       </p>
                       <p class="text-sm text-gray-500">
-                        месечен приход
+                        {{ $t('partner.clients.monthly_revenue') }}
                       </p>
                     </div>
                     <button
                       @click="viewClientDetails(client)"
                       :disabled="loadingClientId === client?.id"
                       class="ml-4 bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
-                      :aria-label="`Детали за ${client?.name}`"
+                      :aria-label="`${$t('partner.clients.details')} ${client?.name}`"
                     >
-                      {{ loadingClientId === client?.id ? 'Вчитува...' : 'Детали' }}
+                      {{ loadingClientId === client?.id ? $t('partner.clients.loading') : $t('partner.clients.details') }}
                     </button>
                   </div>
                 </div>
@@ -688,30 +688,29 @@
                 :disabled="pagination.currentPage === 1 || isLoading"
                 class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Претходна
+                {{ $t('partner.clients.previous') }}
               </button>
               <button
                 @click="goToPage(pagination.currentPage + 1)"
                 :disabled="pagination.currentPage === pagination.lastPage || isLoading"
                 class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Следна
+                {{ $t('partner.clients.next') }}
               </button>
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p class="text-sm text-gray-700">
-                  Прикажани <span class="font-medium">{{ pagination.from }}</span> до <span class="font-medium">{{ pagination.to }}</span> од
-                  <span class="font-medium">{{ pagination.total }}</span> резултати
+                  {{ $t('partner.clients.showing_results', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
                 </p>
               </div>
               <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Пагинација">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" :aria-label="$t('partner.clients.pagination')">
                   <button
                     @click="goToPage(pagination.currentPage - 1)"
                     :disabled="pagination.currentPage === 1 || isLoading"
                     class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Претходна страна"
+                    :aria-label="$t('partner.clients.previous')"
                   >
                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -740,7 +739,7 @@
                     @click="goToPage(pagination.currentPage + 1)"
                     :disabled="pagination.currentPage === pagination.lastPage || isLoading"
                     class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Следна страна"
+                    :aria-label="$t('partner.clients.next')"
                   >
                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -758,12 +757,15 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import ClientDocumentsTab from './ClientDocumentsTab.vue'
+
+const { t } = useI18n()
 
 // Stores
 const router = useRouter()
@@ -901,7 +903,7 @@ const loadClients = async () => {
     // Transform API data to match component expectations
     clients.value = (data.data || []).map(client => ({
       id: client?.id,
-      name: client?.name || 'Непознато',
+      name: client?.name || t('partner.clients.unknown'),
       is_active: client?.status === 'active',
       commission_rate: client?.commission || 0,
       monthly_revenue: formatCurrency(client?.mrr || 0),
@@ -909,7 +911,7 @@ const loadClients = async () => {
       last_activity: client?.signup_date,
       address: {
         city: client?.city || 'N/A',
-        country: client?.country || 'Македонија'
+        country: client?.country || t('partner.clients.default_country')
       },
       plan: client?.plan
     }))
@@ -918,7 +920,7 @@ const loadClients = async () => {
     if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') {
       return
     }
-    error.value = err?.response?.data?.message || 'Не можеше да се вчитаат клиентите. Обидете се повторно.'
+    error.value = err?.response?.data?.message || t('partner.clients.load_clients_error')
     notificationStore.showNotification({
       type: 'error',
       message: error.value
@@ -965,7 +967,7 @@ const viewClientDetails = async (client) => {
   } catch (err) {
     notificationStore.showNotification({
       type: 'error',
-      message: err?.response?.data?.message || 'Не можеше да се вчитаат деталите за клиентот.'
+      message: err?.response?.data?.message || t('partner.clients.load_details_error')
     })
     showDetailModal.value = false
   } finally {
@@ -1003,14 +1005,14 @@ const confirmDelete = async () => {
     await window.axios.delete(`/partner/clients/${clientToDelete.value.id}`)
     notificationStore.showNotification({
       type: 'success',
-      message: 'Клиентот е успешно избришан.'
+      message: t('partner.clients.delete_success')
     })
     closeDeleteModal()
     loadClients()
   } catch (err) {
     notificationStore.showNotification({
       type: 'error',
-      message: err?.response?.data?.message || 'Не можеше да се избрише клиентот.'
+      message: err?.response?.data?.message || t('partner.clients.delete_error')
     })
   } finally {
     isDeleting.value = false
@@ -1024,7 +1026,7 @@ const exportJournal = async () => {
   if (!exportDateFrom.value || !exportDateTo.value) {
     notificationStore.showNotification({
       type: 'error',
-      message: 'Изберете датум од и до за извоз'
+      message: t('partner.clients.export_date_required')
     })
     return
   }
@@ -1040,12 +1042,12 @@ const exportJournal = async () => {
 
     notificationStore.showNotification({
       type: 'success',
-      message: 'Дневникот е успешно извезен'
+      message: t('partner.clients.export_success')
     })
   } catch (err) {
     notificationStore.showNotification({
       type: 'error',
-      message: err?.response?.data?.message || 'Грешка при извоз на дневникот'
+      message: err?.response?.data?.message || t('partner.clients.export_error')
     })
   } finally {
     isExporting.value = false
@@ -1096,12 +1098,12 @@ const getStatusClass = (status) => {
 
 const getStatusLabel = (status) => {
   const labels = {
-    active: 'Активна',
-    trialing: 'Пробен период',
-    canceled: 'Откажана',
-    suspended: 'Суспендирана',
+    active: t('partner.clients.status_active'),
+    trialing: t('partner.clients.status_trialing'),
+    canceled: t('partner.clients.status_canceled'),
+    suspended: t('partner.clients.status_suspended'),
   }
-  return labels[status] || 'Неактивна'
+  return labels[status] || t('partner.clients.status_inactive')
 }
 
 const getPaymentStatusClass = (status) => {
@@ -1122,7 +1124,7 @@ const formatCurrency = (amount) => {
 }
 
 const formatDate = (dateString) => {
-  if (!dateString) return 'Никогаш'
+  if (!dateString) return t('partner.clients.never')
 
   try {
     return new Date(dateString).toLocaleDateString('mk-MK', {

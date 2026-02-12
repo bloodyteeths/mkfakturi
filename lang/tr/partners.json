@@ -1,0 +1,104 @@
+{
+  "title": "Partner | Partnerler",
+  "name": "Partner Adı",
+  "email": "E-posta",
+  "phone": "Telefon Numarası",
+  "company_name": "Şirket Adı",
+  "tax_id": "Vergi Numarası",
+  "registration_number": "Kayıt Numarası",
+  "bank_account": "Banka Hesabı",
+  "bank_name": "Banka Adı",
+  "commission_rate": "Komisyon Oranı",
+  "commission_rate_help": "Bu partner için varsayılan komisyon oranı (şirket bazında değiştirilebilir)",
+  "commission_rate_override": "Komisyon Oranı Değişikliği",
+  "commission_rate_override_help": "Partnerin varsayılan oranını kullanmak için boş bırakın",
+  "kyc_status": "KYC Durumu",
+  "notes": "Dahili Notlar",
+  "internal_notes": "Dahili Notlar",
+  "notes_placeholder": "Bu partner hakkında notlar ekleyin (yalnızca yöneticiler görebilir)",
+
+  "basic_info": "Temel Bilgiler",
+  "banking_info": "Banka Bilgileri",
+  "commission_status": "Komisyon ve Durum",
+  "credentials": "Giriş Bilgileri",
+  "password": "Şifre",
+  "password_confirmation": "Şifre Onayı",
+
+  "new_partner": "Yeni Partner",
+  "add_new_partner": "Yeni Partner Ekle",
+  "edit_partner": "Partner Düzenle",
+  "save_partner": "Partner Kaydet",
+  "update_partner": "Partner Güncelle",
+  "deactivate_partner": "Partner Deaktive Et",
+  "confirm_deactivate": "Bu partneri deaktive etmek istediğinizden emin misiniz?",
+  "created_successfully": "Partner başarıyla oluşturuldu",
+  "updated_successfully": "Partner başarıyla güncellendi",
+  "deactivated_successfully": "Partner başarıyla deaktive edildi",
+  "deactivate_failed": "Partner deaktive edilemedi",
+  "fetch_failed": "Partner yüklenemedi",
+  "save_failed": "Partner kaydedilemedi",
+
+  "no_partners": "Henüz Partner Yok",
+  "list_description": "Muhasebe partnerlerinizi oluşturun ve yönetin",
+  "search_placeholder": "Ad, e-posta veya şirket adına göre arayın",
+
+  "total_earnings": "Toplam Kazanç",
+  "pending_payout": "Bekleyen Ödeme",
+  "companies_managed": "Yönetilen Şirketler",
+  "effective_commission_rate": "Etkin Komisyon Oranı",
+
+  "stats": {
+    "total_partners": "Toplam Partnerler",
+    "active_partners": "Aktif Partnerler",
+    "partner_plus": "Partner Plus",
+    "pending_kyc": "Bekleyen KYC"
+  },
+
+  "kyc": {
+    "pending": "Beklemede",
+    "under_review": "İncelemede",
+    "approved": "Onaylandı",
+    "rejected": "Reddedildi"
+  },
+
+  "tabs": {
+    "info": "Bilgiler",
+    "companies": "Şirketler",
+    "commissions": "Komisyonlar",
+    "payouts": "Ödemeler"
+  },
+
+  "assign_company": "Şirket Ata",
+  "edit_company_assignment": "Şirket Atamasını Düzenle",
+  "unassign": "Atamayı Kaldır",
+  "confirm_unassign": "Bu şirketin atamasını kaldırmak istediğinizden emin misiniz?",
+  "select_company": "Şirket Seçin",
+  "search_company": "Şirket arayın",
+  "use_default_rate": "Varsayılan oranı kullan",
+  "set_as_primary_company": "Birincil Şirket Olarak Ayarla",
+  "primary": "Birincil",
+  "edit_permissions": "İzinleri Düzenle",
+  "update_assignment": "Atamayı Güncelle",
+  "assignment_failed": "Şirket ataması güncellenemedi",
+  "no_companies_assigned": "Henüz şirket atanmamış",
+  "permissions_label": "izinler",
+
+  "permissions": {
+    "full_access": "Tam Erişim",
+    "full_access_description": "Tüm özellik ve verilere tam erişim sağlayın",
+    "selected_permissions": "Seçili İzinler",
+    "invoices": "Faturalar",
+    "customers": "Müşteriler",
+    "banking": "Bankacılık",
+    "reports": "Raporlar",
+    "payroll": "Bordro",
+    "settings": "Ayarlar"
+  },
+
+  "monthly_commissions": "Aylık Komisyonlar",
+  "no_commissions": "Komisyon verisi yok",
+  "month": "Ay",
+  "amount": "Tutar",
+  "date": "Tarih",
+  "no_payouts": "Ödeme geçmişi yok"
+}

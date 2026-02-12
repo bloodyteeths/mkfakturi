@@ -76,6 +76,7 @@ return [
         ['code' => 'hr', 'name' => 'Crotian'],
         ['code' => 'mk', 'name' => 'Macedonian'],
         ['code' => 'sq', 'name' => 'Albanian'],
+        ['code' => 'tr', 'name' => 'Turkish'],
         ['code' => 'th', 'name' => 'ไทย'],
     ],
 
