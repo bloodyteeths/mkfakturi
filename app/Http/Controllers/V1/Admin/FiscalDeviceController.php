@@ -34,10 +34,16 @@ class FiscalDeviceController extends Controller
     {
         $companyId = $request->header('company');
 
-        $devices = FiscalDevice::forCompany($companyId)
-            ->withCount('receipts')
-            ->orderBy('name')
-            ->get();
+        try {
+            $devices = FiscalDevice::forCompany($companyId)
+                ->withCount('receipts')
+                ->orderBy('name')
+                ->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Table may not exist yet if migration hasn't run
+            Log::warning('Fiscal devices table query failed', ['error' => $e->getMessage()]);
+            $devices = collect();
+        }
 
         return response()->json([
             'data' => $devices,

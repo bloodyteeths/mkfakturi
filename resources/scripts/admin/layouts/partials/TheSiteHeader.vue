@@ -38,27 +38,8 @@
       <!-- CLAUDE-CHECKPOINT -->
     </router-link>
 
-    <!-- toggle button-->
-    <div
-      :class="{ 'is-active': globalStore.isSidebarOpen }"
-      class="
-        flex
-        float-left
-        p-1
-        overflow-visible
-        text-sm
-        ease-linear
-        bg-white
-        border-0
-        rounded
-        cursor-pointer
-        md:hidden md:ml-0
-        hover:bg-gray-100
-      "
-      @click.prevent="onToggle"
-    >
-      <BaseIcon name="Bars3Icon" class="!w-6 !h-6 text-gray-500" />
-    </div>
+    <!-- Mobile menu toggle + slide-out panel -->
+    <MobileMenuToggle />
 
     <ul class="flex float-right h-8 m-0 list-none md:h-9">
       <li
@@ -273,6 +254,7 @@ import { useI18n } from 'vue-i18n'
 import CompanySwitcher from '@/scripts/components/CompanySwitcher.vue'
 import GlobalSearchBar from '@/scripts/components/GlobalSearchBar.vue'
 import MainLogo from '@/scripts/components/icons/MainLogo.vue'
+import MobileMenuToggle from '@/scripts/admin/components/mobile/MobileMenuToggle.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -330,10 +312,6 @@ function hasCreateAbilities() {
 async function logout() {
   await authStore.logout()
   router.push('/login')
-}
-
-function onToggle() {
-  globalStore.setSidebarVisibility(true)
 }
 
 function onLogoError() {

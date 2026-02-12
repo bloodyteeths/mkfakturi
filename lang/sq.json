@@ -5722,5 +5722,18 @@
       "overhead_expense": "Shpenzime të përgjithshme",
       "other_expense": "Shpenzime të tjera"
     }
+  },
+  "deadlines": {
+    "title": "Afatet",
+    "due_date": "Data e afatit",
+    "status": "Statusi",
+    "mark_complete": "Shëno si të përfunduar",
+    "overdue": "Të vonuara",
+    "due_today": "Sot",
+    "upcoming": "Të ardhshme",
+    "completed": "Të përfunduara",
+    "due_this_week": "Këtë javë",
+    "due_this_month": "Këtë muaj",
+    "no_deadlines": "Nuk u gjetën afate"
   }
 }

@@ -183,6 +183,23 @@
             />
           </template>
 
+          <template #cell-overtime_hours="{ row }">
+            {{ row.data.overtime_hours ? `${row.data.overtime_hours}h` : '-' }}
+          </template>
+
+          <template #cell-overtime_multiplier="{ row }">
+            {{ row.data.overtime_multiplier ? `${row.data.overtime_multiplier}x` : '-' }}
+          </template>
+
+          <template #cell-overtime_amount="{ row }">
+            <BaseFormatMoney
+              v-if="row.data.overtime_amount"
+              :amount="row.data.overtime_amount"
+              :currency="companyStore.selectedCompanyCurrency"
+            />
+            <span v-else>-</span>
+          </template>
+
           <template #cell-employee_deductions="{ row }">
             <BaseFormatMoney
               :amount="calculateEmployeeDeductions(row.data)"
@@ -301,6 +318,18 @@ const linesColumns = computed(() => {
     {
       key: 'gross_salary',
       label: t('payroll.gross_salary'),
+    },
+    {
+      key: 'overtime_hours',
+      label: t('payroll.overtime_hours'),
+    },
+    {
+      key: 'overtime_multiplier',
+      label: t('payroll.ot_rate'),
+    },
+    {
+      key: 'overtime_amount',
+      label: t('payroll.overtime_pay'),
     },
     {
       key: 'employee_deductions',
@@ -638,4 +667,4 @@ function deleteRun() {
 }
 </script>
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

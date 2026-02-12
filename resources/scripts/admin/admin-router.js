@@ -210,6 +210,9 @@ const PartnerCreate = () => import('@/scripts/admin/views/partners/Create.vue')
 const PartnerView = () => import('@/scripts/admin/views/partners/View.vue')
 const NetworkGraph = () => import('@/scripts/admin/views/partners/NetworkGraph.vue')
 
+// Company Deadlines
+const CompanyDeadlines = () => import('@/scripts/admin/views/deadlines/CompanyDeadlines.vue')
+
 // Banking
 const BankingDashboard = () => import('@/scripts/admin/views/banking/BankingDashboard.vue')
 const InvoiceReconciliation = () => import('@/scripts/admin/views/banking/InvoiceReconciliation.vue')
@@ -508,6 +511,13 @@ export default [
         name: 'client-documents',
         meta: { requiresAuth: true },
         component: ClientDocuments,
+      },
+
+      // Company Deadlines (P8-02)
+      {
+        path: 'deadlines',
+        name: 'deadlines',
+        component: CompanyDeadlines,
       },
 
       // Payments

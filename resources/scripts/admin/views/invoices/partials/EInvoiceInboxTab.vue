@@ -167,6 +167,12 @@
       </BaseCard>
     </div>
 
+    <!-- E-Invoice Preview Modal -->
+    <EInvoicePreviewModal
+      @accepted="onPreviewAccepted"
+      @rejected="onPreviewRejected"
+    />
+
     <!-- Reject Modal -->
     <teleport to="body">
       <div
@@ -238,12 +244,15 @@ import moment from 'moment'
 
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useModalStore } from '@/scripts/stores/modal'
 import { handleError } from '@/scripts/helpers/error-handling'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
+import EInvoicePreviewModal from '@/scripts/admin/components/modal-components/EInvoicePreviewModal.vue'
 
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()
+const modalStore = useModalStore()
 
 // State
 const isLoading = ref(true)
@@ -397,27 +406,30 @@ async function handleReject() {
 }
 
 /**
- * View the XML content for an incoming e-invoice.
+ * View the e-invoice in a rich preview modal.
  */
-async function handleViewXml(einvoice) {
-  try {
-    const response = await axios.get(`/e-invoices/incoming/${einvoice.id}`)
-    const data = response.data.data
+function handleViewXml(einvoice) {
+  modalStore.openModal({
+    title: t('e_invoice.preview_title'),
+    componentName: 'EInvoicePreviewModal',
+    size: 'lg',
+    data: einvoice,
+    refreshData: () => loadIncoming(currentPage.value),
+  })
+}
 
-    if (data && data.ubl_xml) {
-      // Open XML in new window for viewing
-      const xmlWindow = window.open('', '_blank')
-      xmlWindow.document.write('<pre>' + escapeHtml(data.ubl_xml) + '</pre>')
-      xmlWindow.document.title = `E-Invoice XML - ${einvoice.portal_inbox_id || einvoice.id}`
-    } else {
-      notificationStore.showNotification({
-        type: 'warning',
-        message: t('e_invoice.no_xml_available'),
-      })
-    }
-  } catch (err) {
-    handleError(err)
-  }
+/**
+ * Handle accept event from the preview modal.
+ */
+function onPreviewAccepted() {
+  loadIncoming(currentPage.value)
+}
+
+/**
+ * Handle reject event from the preview modal — open the reject modal.
+ */
+function onPreviewRejected(einvoice) {
+  openRejectModal(einvoice)
 }
 
 /**
@@ -454,13 +466,5 @@ function getStatusLabel(status) {
   return labels[status] || status
 }
 
-/**
- * Escape HTML for safe display in new window.
- */
-function escapeHtml(text) {
-  const div = document.createElement('div')
-  div.appendChild(document.createTextNode(text))
-  return div.innerHTML
-}
 </script>
 // CLAUDE-CHECKPOINT

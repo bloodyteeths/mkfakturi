@@ -6363,5 +6363,18 @@
       "overhead_expense": "Genel Giderler",
       "other_expense": "Diğer Giderler"
     }
+  },
+  "deadlines": {
+    "title": "Son Tarihler",
+    "due_date": "Son Tarih",
+    "status": "Durum",
+    "mark_complete": "Tamamlandı Olarak İşaretle",
+    "overdue": "Gecikmiş",
+    "due_today": "Bugün",
+    "upcoming": "Yaklaşan",
+    "completed": "Tamamlanmış",
+    "due_this_week": "Bu Hafta",
+    "due_this_month": "Bu Ay",
+    "no_deadlines": "Son tarih bulunamadı"
   }
 }
