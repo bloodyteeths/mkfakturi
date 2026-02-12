@@ -259,7 +259,7 @@ class NbrmExchangeRateService implements ExchangeRateProvider
     protected function callNbrmApi(Carbon $date): array
     {
         $formattedDate = $date->format('d.m.Y');
-        $url = $this->getBaseUrl().'/GetExchangeRateD';
+        $url = $this->getBaseUrl().'/GetExchangeRate';
 
         Log::info('NBRM: Fetching exchange rates', [
             'url' => $url,
@@ -271,6 +271,7 @@ class NbrmExchangeRateService implements ExchangeRateProvider
                 ->get($url, [
                     'StartDate' => $formattedDate,
                     'EndDate' => $formattedDate,
+                    'format' => 'xml',
                 ]);
 
             if (! $response->successful()) {
@@ -322,6 +323,9 @@ class NbrmExchangeRateService implements ExchangeRateProvider
      */
     public function parseNbrmXml(string $xml): array
     {
+        // NBRM declares encoding="utf-16" but sends UTF-8 content — fix it
+        $xml = preg_replace('/encoding="utf-16"/i', 'encoding="utf-8"', $xml);
+
         // Suppress XML warnings and parse
         $previousValue = libxml_use_internal_errors(true);
 
@@ -340,9 +344,13 @@ class NbrmExchangeRateService implements ExchangeRateProvider
 
             $rates = [];
 
-            // NBRM returns items in <KursZbirkaNOV> elements
-            // The root element might vary, so we search for rate entries
-            $entries = $doc->xpath('//KursZbirkaNOV') ?: $doc->xpath('//KursZbirka') ?: [];
+            // NBRM returns items in <GetExchangeRate> or <GetExchangeRateD> elements
+            // depending on which endpoint was called
+            $entries = $doc->xpath('//GetExchangeRate')
+                ?: $doc->xpath('//GetExchangeRateD')
+                ?: $doc->xpath('//KursZbirkaNOV')
+                ?: $doc->xpath('//KursZbirka')
+                ?: [];
 
             if (empty($entries)) {
                 // Try direct children if XPath fails
