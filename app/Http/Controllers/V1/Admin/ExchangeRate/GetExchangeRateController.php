@@ -2,25 +2,36 @@
 
 namespace App\Http\Controllers\V1\Admin\ExchangeRate;
 
+use App\Contracts\ExchangeRateProvider;
 use App\Http\Controllers\Controller;
 use App\Models\CompanySetting;
 use App\Models\Currency;
-use App\Services\FrankfurterExchangeRateService;
+use App\Models\ExchangeRateLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Get exchange rate for a currency relative to the company's base currency.
+ *
+ * Uses the configured ExchangeRateProvider (NBRM by default, Frankfurter as fallback).
+ */
 class GetExchangeRateController extends Controller
 {
-    protected FrankfurterExchangeRateService $exchangeRateService;
+    /**
+     * The exchange rate provider.
+     */
+    protected ExchangeRateProvider $provider;
 
-    public function __construct(FrankfurterExchangeRateService $exchangeRateService)
+    /**
+     * @param  ExchangeRateProvider  $provider  Injected via service container
+     */
+    public function __construct(ExchangeRateProvider $provider)
     {
-        $this->exchangeRateService = $exchangeRateService;
+        $this->provider = $provider;
     }
 
     /**
-     * Get exchange rate for a currency relative to company's base currency
-     *
-     * Uses free Frankfurter API (European Central Bank data)
+     * Get exchange rate for a currency relative to company's base currency.
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -30,25 +41,38 @@ class GetExchangeRateController extends Controller
         $settings = CompanySetting::getSettings(['currency'], $companyId);
         $baseCurrency = Currency::findOrFail($settings['currency']);
 
-        // Get rate from Frankfurter (free, no API key needed)
-        $rate = $this->exchangeRateService->getAndLogRate(
-            $companyId,
-            $currency,      // from
-            $baseCurrency   // to
-        );
+        try {
+            $rate = $this->provider->getRate($currency->code, $baseCurrency->code);
 
-        if ($rate !== null) {
+            // Log the rate for historical tracking
+            ExchangeRateLog::updateOrCreate(
+                [
+                    'company_id' => $companyId,
+                    'base_currency_id' => $currency->id,
+                    'currency_id' => $baseCurrency->id,
+                ],
+                [
+                    'exchange_rate' => $rate,
+                ]
+            );
+
             return response()->json([
                 'exchangeRate' => [$rate],
-                'source' => 'frankfurter',
+                'source' => $this->provider->getProviderName(),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::warning('Exchange rate fetch failed', [
+                'provider' => $this->provider->getProviderName(),
+                'from' => $currency->code,
+                'to' => $baseCurrency->code,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'no_exchange_rate_available',
+                'message' => 'Could not fetch exchange rate. Please try again later.',
             ], 200);
         }
-
-        return response()->json([
-            'error' => 'no_exchange_rate_available',
-            'message' => 'Could not fetch exchange rate. Please try again later.',
-        ], 200);
     }
 }
-
 // CLAUDE-CHECKPOINT

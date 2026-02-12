@@ -33,6 +33,12 @@ class MacedonianPayrollTaxService
     private const PENSION_EMPLOYER_RATE = 0.09; // 9%
     private const HEALTH_EMPLOYER_RATE = 0.0375; // 3.75%
 
+    // Contribution base limits (P7-05)
+    // Min: 50% of national average salary (MKD 63,154 / 2 = 31,577)
+    // Max: 16x national average salary (MKD 1,010,464)
+    private const DEFAULT_MIN_CONTRIBUTION_BASE = 3157700;  // MKD 31,577 in cents
+    private const DEFAULT_MAX_CONTRIBUTION_BASE = 101046400; // MKD 1,010,464 in cents
+
     /**
      * Calculate payroll from gross salary
      *
@@ -49,11 +55,14 @@ class MacedonianPayrollTaxService
      */
     public function calculateFromGross(int $grossCents): PayrollCalculationResult
     {
-        // Step 1: Calculate employee contributions
-        $pensionEmployee = $this->calculatePensionEmployee($grossCents);
-        $healthEmployee = $this->calculateHealthEmployee($grossCents);
-        $unemployment = $this->calculateUnemployment($grossCents);
-        $additionalContribution = $this->calculateAdditionalContribution($grossCents);
+        // P7-05: Clamp gross to contribution base limits for social contribution calculations
+        $contributionBase = $this->clampToContributionBase($grossCents);
+
+        // Step 1: Calculate employee contributions (on clamped base)
+        $pensionEmployee = $this->calculatePensionEmployee($contributionBase);
+        $healthEmployee = $this->calculateHealthEmployee($contributionBase);
+        $unemployment = $this->calculateUnemployment($contributionBase);
+        $additionalContribution = $this->calculateAdditionalContribution($contributionBase);
 
         // Step 2: Calculate taxable base (gross - employee contributions)
         $totalEmployeeContributions = $pensionEmployee
@@ -68,9 +77,9 @@ class MacedonianPayrollTaxService
         // Step 4: Calculate net salary (taxable base - income tax)
         $netSalary = $taxableBase - $incomeTax;
 
-        // Step 5: Calculate employer contributions
-        $pensionEmployer = $this->calculatePensionEmployer($grossCents);
-        $healthEmployer = $this->calculateHealthEmployer($grossCents);
+        // Step 5: Calculate employer contributions (on clamped base)
+        $pensionEmployer = $this->calculatePensionEmployer($contributionBase);
+        $healthEmployer = $this->calculateHealthEmployer($contributionBase);
 
         // Step 6: Calculate totals
         $totalEmployeeDeductions = $totalEmployeeContributions + $incomeTax;
@@ -185,6 +194,24 @@ class MacedonianPayrollTaxService
         $providedCheckDigit = (int) $embg[12];
 
         return $checkDigit === $providedCheckDigit;
+    }
+
+    /**
+     * P7-05: Clamp gross salary to contribution base limits.
+     *
+     * Social contributions are calculated on a base that is clamped between
+     * the minimum (50% of national average) and maximum (16x national average).
+     * Income tax is still calculated on actual gross — only contributions are clamped.
+     *
+     * @param int $grossCents Actual gross salary in cents
+     * @return int Clamped contribution base in cents
+     */
+    public function clampToContributionBase(int $grossCents): int
+    {
+        $minBase = (int) config('mk.payroll.min_contribution_base', self::DEFAULT_MIN_CONTRIBUTION_BASE);
+        $maxBase = (int) config('mk.payroll.max_contribution_base', self::DEFAULT_MAX_CONTRIBUTION_BASE);
+
+        return max($minBase, min($maxBase, $grossCents));
     }
 
     /**

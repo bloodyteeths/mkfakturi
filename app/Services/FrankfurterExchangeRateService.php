@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\ExchangeRateProvider;
 use App\Models\Currency;
 use App\Models\ExchangeRateLog;
 use Carbon\Carbon;
@@ -17,40 +18,61 @@ use Illuminate\Support\Facades\Log;
  *
  * @see https://frankfurter.dev/
  */
-class FrankfurterExchangeRateService
+class FrankfurterExchangeRateService implements ExchangeRateProvider
 {
-    protected const API_BASE = 'https://api.frankfurter.dev/v1';
-
-    protected const CACHE_TTL_HOURS = 4; // Cache rates for 4 hours
+    /**
+     * Get the Frankfurter API base URL from config.
+     */
+    protected function getBaseUrl(): string
+    {
+        return config('mk.exchange_rates.frankfurter.base_url', 'https://api.frankfurter.dev/v1');
+    }
 
     /**
-     * Get exchange rate between two currencies
-     *
-     * @param  string  $fromCurrency  Source currency code (e.g., 'EUR')
-     * @param  string  $toCurrency  Target currency code (e.g., 'MKD')
-     * @return float|null Exchange rate or null on failure
+     * Get the cache TTL in seconds from config.
      */
-    public function getRate(string $fromCurrency, string $toCurrency): ?float
+    protected function getCacheTtlSeconds(): int
+    {
+        return (int) config('mk.exchange_rates.frankfurter.cache_ttl', 14400);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRate(string $from, string $to, ?Carbon $date = null): float
     {
         // Same currency = 1
-        if ($fromCurrency === $toCurrency) {
+        if ($from === $to) {
             return 1.0;
         }
 
-        $cacheKey = "exchange_rate_{$fromCurrency}_{$toCurrency}";
+        $dateKey = $date ? $date->format('Y-m-d') : 'latest';
+        $cacheKey = "frankfurter_rate:{$from}:{$to}:{$dateKey}";
 
-        return Cache::remember($cacheKey, now()->addHours(self::CACHE_TTL_HOURS), function () use ($fromCurrency, $toCurrency) {
-            return $this->fetchRate($fromCurrency, $toCurrency);
+        return Cache::remember($cacheKey, $this->getCacheTtlSeconds(), function () use ($from, $to, $date) {
+            $rate = $this->fetchRate($from, $to, $date);
+
+            if ($rate === null) {
+                throw new \RuntimeException("Frankfurter: Could not fetch rate for {$from}/{$to}");
+            }
+
+            return $rate;
         });
     }
 
     /**
-     * Fetch rate from Frankfurter API
+     * Fetch rate from Frankfurter API.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @param  Carbon|null  $date  Date for historical rate
+     * @return float|null Exchange rate or null on failure
      */
-    protected function fetchRate(string $fromCurrency, string $toCurrency): ?float
+    protected function fetchRate(string $fromCurrency, string $toCurrency, ?Carbon $date = null): ?float
     {
         try {
-            $url = self::API_BASE."/latest?base={$fromCurrency}&symbols={$toCurrency}";
+            $endpoint = $date ? $date->format('Y-m-d') : 'latest';
+            $url = $this->getBaseUrl()."/{$endpoint}?base={$fromCurrency}&symbols={$toCurrency}";
 
             $response = Http::timeout(10)->get($url);
 
@@ -62,7 +84,7 @@ class FrankfurterExchangeRateService
                 ]);
 
                 // Try reverse rate if base currency not supported (EUR is always supported)
-                return $this->fetchReverseRate($fromCurrency, $toCurrency);
+                return $this->fetchReverseRate($fromCurrency, $toCurrency, $date);
             }
 
             $data = $response->json();
@@ -92,14 +114,19 @@ class FrankfurterExchangeRateService
     }
 
     /**
-     * Fetch reverse rate when direct rate not available
-     * ECB only publishes rates with EUR as base, so we calculate cross-rates
+     * Fetch reverse rate when direct rate not available.
+     * ECB only publishes rates with EUR as base, so we calculate cross-rates.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @param  Carbon|null  $date  Date for historical rate
+     * @return float|null Exchange rate or null on failure
      */
-    protected function fetchReverseRate(string $fromCurrency, string $toCurrency): ?float
+    protected function fetchReverseRate(string $fromCurrency, string $toCurrency, ?Carbon $date = null): ?float
     {
         try {
-            // Get both currencies relative to EUR
-            $url = self::API_BASE."/latest?base=EUR&symbols={$fromCurrency},{$toCurrency}";
+            $endpoint = $date ? $date->format('Y-m-d') : 'latest';
+            $url = $this->getBaseUrl()."/{$endpoint}?base=EUR&symbols={$fromCurrency},{$toCurrency}";
 
             $response = Http::timeout(10)->get($url);
 
@@ -136,7 +163,10 @@ class FrankfurterExchangeRateService
     }
 
     /**
-     * Get exchange rate and save to log
+     * Get exchange rate and save to log.
+     *
+     * This is a convenience method used by the exchange rate controller.
+     * Not part of the ExchangeRateProvider interface.
      *
      * @param  int  $companyId  Company ID
      * @param  Currency  $fromCurrency  Source currency
@@ -145,29 +175,33 @@ class FrankfurterExchangeRateService
      */
     public function getAndLogRate(int $companyId, Currency $fromCurrency, Currency $toCurrency): ?float
     {
-        $rate = $this->getRate($fromCurrency->code, $toCurrency->code);
+        try {
+            $rate = $this->getRate($fromCurrency->code, $toCurrency->code);
+        } catch (\RuntimeException $e) {
+            Log::warning('Frankfurter: getAndLogRate failed', [
+                'error' => $e->getMessage(),
+            ]);
 
-        if ($rate !== null) {
-            // Save to exchange rate log for historical tracking
-            ExchangeRateLog::updateOrCreate(
-                [
-                    'company_id' => $companyId,
-                    'base_currency_id' => $fromCurrency->id,
-                    'currency_id' => $toCurrency->id,
-                ],
-                [
-                    'exchange_rate' => $rate,
-                ]
-            );
+            return null;
         }
+
+        // Save to exchange rate log for historical tracking
+        ExchangeRateLog::updateOrCreate(
+            [
+                'company_id' => $companyId,
+                'base_currency_id' => $fromCurrency->id,
+                'currency_id' => $toCurrency->id,
+            ],
+            [
+                'exchange_rate' => $rate,
+            ]
+        );
 
         return $rate;
     }
 
     /**
-     * Get all available currencies from Frankfurter
-     *
-     * @return array Currency codes
+     * {@inheritdoc}
      */
     public function getSupportedCurrencies(): array
     {
@@ -175,7 +209,7 @@ class FrankfurterExchangeRateService
 
         return Cache::remember($cacheKey, now()->addDay(), function () {
             try {
-                $response = Http::timeout(10)->get(self::API_BASE.'/currencies');
+                $response = Http::timeout(10)->get($this->getBaseUrl().'/currencies');
 
                 if ($response->successful()) {
                     return array_keys($response->json());
@@ -193,24 +227,60 @@ class FrankfurterExchangeRateService
     }
 
     /**
-     * Get latest rates for multiple currencies
-     *
-     * @param  string  $baseCurrency  Base currency code
-     * @param  array  $targetCurrencies  Array of target currency codes
-     * @return array Rates keyed by currency code
+     * {@inheritdoc}
      */
-    public function getMultipleRates(string $baseCurrency, array $targetCurrencies): array
+    public function getMultipleRates(array $pairs, ?Carbon $date = null): array
     {
-        if (empty($targetCurrencies)) {
+        if (empty($pairs)) {
             return [];
         }
 
-        $symbols = implode(',', $targetCurrencies);
-        $cacheKey = "exchange_rates_{$baseCurrency}_{$symbols}";
+        $results = [];
 
-        return Cache::remember($cacheKey, now()->addHours(self::CACHE_TTL_HOURS), function () use ($baseCurrency, $symbols) {
+        // Group pairs by base currency for efficient API calls
+        $grouped = [];
+        foreach ($pairs as $pair) {
+            $from = $pair['from'];
+            $to = $pair['to'];
+
+            if ($from === $to) {
+                $results["{$from}/{$to}"] = 1.0;
+
+                continue;
+            }
+
+            $grouped[$from][] = $to;
+        }
+
+        foreach ($grouped as $baseCurrency => $targetCurrencies) {
+            $rates = $this->fetchMultipleRatesForBase($baseCurrency, $targetCurrencies, $date);
+
+            foreach ($rates as $targetCurrency => $rate) {
+                $results["{$baseCurrency}/{$targetCurrency}"] = $rate;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Fetch multiple rates for a single base currency.
+     *
+     * @param  string  $baseCurrency  Base currency code
+     * @param  array  $targetCurrencies  Array of target currency codes
+     * @param  Carbon|null  $date  Date for historical rates
+     * @return array Rates keyed by target currency code
+     */
+    protected function fetchMultipleRatesForBase(string $baseCurrency, array $targetCurrencies, ?Carbon $date = null): array
+    {
+        $symbols = implode(',', $targetCurrencies);
+        $dateKey = $date ? $date->format('Y-m-d') : 'latest';
+        $cacheKey = "frankfurter_rates:{$baseCurrency}:{$symbols}:{$dateKey}";
+
+        return Cache::remember($cacheKey, $this->getCacheTtlSeconds(), function () use ($baseCurrency, $symbols, $targetCurrencies, $date) {
             try {
-                $url = self::API_BASE."/latest?base={$baseCurrency}&symbols={$symbols}";
+                $endpoint = $date ? $date->format('Y-m-d') : 'latest';
+                $url = $this->getBaseUrl()."/{$endpoint}?base={$baseCurrency}&symbols={$symbols}";
 
                 $response = Http::timeout(10)->get($url);
 
@@ -219,7 +289,7 @@ class FrankfurterExchangeRateService
                 }
 
                 // Fallback: try with EUR base and calculate cross-rates
-                return $this->getMultipleRatesViaEur($baseCurrency, explode(',', $symbols));
+                return $this->getMultipleRatesViaEur($baseCurrency, $targetCurrencies, $date);
             } catch (\Exception $e) {
                 Log::error('Frankfurter multiple rates error', [
                     'error' => $e->getMessage(),
@@ -231,15 +301,21 @@ class FrankfurterExchangeRateService
     }
 
     /**
-     * Get multiple rates via EUR cross-rate calculation
+     * Get multiple rates via EUR cross-rate calculation.
+     *
+     * @param  string  $baseCurrency  Base currency code
+     * @param  array  $targetCurrencies  Array of target currency codes
+     * @param  Carbon|null  $date  Date for historical rates
+     * @return array Rates keyed by target currency code
      */
-    protected function getMultipleRatesViaEur(string $baseCurrency, array $targetCurrencies): array
+    protected function getMultipleRatesViaEur(string $baseCurrency, array $targetCurrencies, ?Carbon $date = null): array
     {
         try {
             $allCurrencies = array_merge([$baseCurrency], $targetCurrencies);
             $symbols = implode(',', array_unique($allCurrencies));
 
-            $url = self::API_BASE."/latest?base=EUR&symbols={$symbols}";
+            $endpoint = $date ? $date->format('Y-m-d') : 'latest';
+            $url = $this->getBaseUrl()."/{$endpoint}?base=EUR&symbols={$symbols}";
             $response = Http::timeout(10)->get($url);
 
             if (! $response->successful()) {
@@ -266,6 +342,13 @@ class FrankfurterExchangeRateService
             return [];
         }
     }
-}
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getProviderName(): string
+    {
+        return 'frankfurter';
+    }
+}
 // CLAUDE-CHECKPOINT

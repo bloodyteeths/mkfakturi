@@ -21,7 +21,9 @@ class CacheServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton('currency.exchange', function ($app) {
-            return new \App\Services\CurrencyExchangeService;
+            return new \App\Services\CurrencyExchangeService(
+                $app->make(\App\Contracts\ExchangeRateProvider::class)
+            );
         });
 
         $this->app->singleton('performance.monitor', function ($app) {

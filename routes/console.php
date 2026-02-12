@@ -159,6 +159,21 @@ if (InstallUtils::isDbCreated()) {
         ->name('hubspot-sync-partner-activity')
         ->withoutOverlapping();
 
+    // Generate recurring deadline instances - runs on 1st of each month (P8-02)
+    // Creates next month's VAT, MPIN, CIT, annual FS deadlines for all companies
+    Schedule::command('deadlines:generate-recurring')
+        ->monthlyOn(1, '00:00')
+        ->runInBackground()
+        ->withoutOverlapping();
+
+    // Send deadline reminder notifications - runs daily at 09:00 (P8-02)
+    // Reminds company owners and partners about upcoming deadlines
+    // Also updates overdue/due_today statuses
+    Schedule::command('deadlines:send-reminders')
+        ->dailyAt('09:00')
+        ->runInBackground()
+        ->withoutOverlapping();
+
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
     //     ->dailyAt('02:00')

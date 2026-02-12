@@ -14,6 +14,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (! Schema::hasTable('stock_movements')) {
+            return;
+        }
+
         Schema::table('stock_movements', function (Blueprint $table) {
             if (! Schema::hasColumn('stock_movements', 'ifrs_transaction_id')) {
                 $table->unsignedBigInteger('ifrs_transaction_id')->nullable()->after('meta');
@@ -26,6 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasTable('stock_movements')) {
+            return;
+        }
+
         Schema::table('stock_movements', function (Blueprint $table) {
             if (Schema::hasColumn('stock_movements', 'ifrs_transaction_id')) {
                 $table->dropColumn('ifrs_transaction_id');

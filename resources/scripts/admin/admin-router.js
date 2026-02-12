@@ -128,6 +128,9 @@ const InventoryDocumentsIndex = () => import('@/scripts/admin/views/stock/docume
 const InventoryDocumentCreate = () => import('@/scripts/admin/views/stock/documents/Create.vue')
 const InventoryDocumentView = () => import('@/scripts/admin/views/stock/documents/View.vue')
 
+// Client Documents (P8-01)
+const ClientDocuments = () => import('@/scripts/admin/views/documents/ClientDocuments.vue')
+
 // Bills (Accounts Payable)
 const BillsIndex = () => import('@/scripts/admin/views/bills/Index.vue')
 const BillsCreate = () => import('@/scripts/admin/views/bills/Create.vue')
@@ -233,6 +236,8 @@ const PayrollRunCreate = () => import('@/scripts/admin/views/payroll/runs/Create
 const PayrollRunShow = () => import('@/scripts/admin/views/payroll/runs/Show.vue')
 const PayslipView = () => import('@/scripts/admin/views/payroll/payslips/View.vue')
 const TaxSummary = () => import('@/scripts/admin/views/payroll/payslips/TaxSummary.vue')
+const LeaveIndex = () => import('@/scripts/admin/views/payroll/leave/Index.vue')
+const LeaveCreate = () => import('@/scripts/admin/views/payroll/leave/Create.vue')
 
 export default [
   {
@@ -493,6 +498,14 @@ export default [
         name: 'stock.documents.edit',
         meta: { requiresAuth: true, ability: abilities.EDIT_ITEM },
         component: InventoryDocumentCreate,
+      },
+
+      // Client Documents (P8-01)
+      {
+        path: 'documents',
+        name: 'client-documents',
+        meta: { requiresAuth: true },
+        component: ClientDocuments,
       },
 
       // Payments
@@ -1193,6 +1206,18 @@ export default [
         name: 'payroll.payslips.view',
         meta: { requiresAuth: true },
         component: PayslipView,
+      },
+      {
+        path: 'payroll/leave',
+        name: 'payroll.leave',
+        meta: { requiresAuth: true },
+        component: LeaveIndex,
+      },
+      {
+        path: 'payroll/leave/create',
+        name: 'payroll.leave.create',
+        meta: { requiresAuth: true },
+        component: LeaveCreate,
       },
       {
         path: 'payroll/reports/tax-summary',

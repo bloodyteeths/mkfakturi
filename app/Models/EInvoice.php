@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasAuditing;
 use App\Traits\TenantScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,11 +32,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Carbon\Carbon|null $accepted_at
  * @property \Carbon\Carbon|null $rejected_at
  * @property string|null $rejection_reason
+ * @property string $direction Direction: 'outbound' or 'inbound'
+ * @property string|null $sender_vat_id VAT ID of sender (inbound)
+ * @property string|null $sender_name Business name of sender (inbound)
+ * @property string|null $portal_inbox_id Reference ID from UJP portal inbox
+ * @property \Carbon\Carbon|null $received_at When inbound e-invoice was received
+ * @property \Carbon\Carbon|null $reviewed_at When inbound e-invoice was reviewed
+ * @property int|null $reviewed_by User ID who reviewed the inbound e-invoice
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read Invoice $invoice
  * @property-read Company $company
  * @property-read Certificate|null $certificate
+ * @property-read User|null $reviewedBy
  * @property-read \Illuminate\Database\Eloquent\Collection|EInvoiceSubmission[] $submissions
  */
 class EInvoice extends Model
@@ -59,6 +68,15 @@ class EInvoice extends Model
 
     public const STATUS_FAILED = 'FAILED';
 
+    // Inbound e-invoice statuses (P7-02)
+    public const STATUS_RECEIVED = 'RECEIVED';
+
+    public const STATUS_UNDER_REVIEW = 'UNDER_REVIEW';
+
+    public const STATUS_ACCEPTED_INCOMING = 'ACCEPTED_INCOMING';
+
+    public const STATUS_REJECTED_INCOMING = 'REJECTED_INCOMING';
+
     /**
      * The table associated with the model.
      *
@@ -79,11 +97,18 @@ class EInvoice extends Model
         'ubl_file_path',
         'signed_file_path',
         'status',
+        'direction',
+        'sender_vat_id',
+        'sender_name',
+        'portal_inbox_id',
         'subject',
         'issuer',
         'certificate_id',
         'signed_at',
         'submitted_at',
+        'received_at',
+        'reviewed_at',
+        'reviewed_by',
         'accepted_at',
         'rejected_at',
         'rejection_reason',
@@ -101,6 +126,8 @@ class EInvoice extends Model
             'issuer' => 'array',
             'signed_at' => 'datetime',
             'submitted_at' => 'datetime',
+            'received_at' => 'datetime',
+            'reviewed_at' => 'datetime',
             'accepted_at' => 'datetime',
             'rejected_at' => 'datetime',
         ];
@@ -325,6 +352,154 @@ class EInvoice extends Model
     public function scopeRejected($query)
     {
         return $query->where('status', self::STATUS_REJECTED);
+    }
+
+    // ------------------------------------------------------------------
+    // P7-02: Incoming e-invoice scopes
+    // ------------------------------------------------------------------
+
+    /**
+     * Scope: filter to inbound e-invoices only.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInbound(Builder $query): Builder
+    {
+        return $query->where('direction', 'inbound');
+    }
+
+    /**
+     * Scope: filter to outbound e-invoices only.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOutbound(Builder $query): Builder
+    {
+        return $query->where('direction', 'outbound');
+    }
+
+    /**
+     * Scope: filter to inbound e-invoices pending review.
+     * Returns invoices with status RECEIVED or UNDER_REVIEW.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePendingReview(Builder $query): Builder
+    {
+        return $query->where('direction', 'inbound')
+            ->whereIn('status', [self::STATUS_RECEIVED, self::STATUS_UNDER_REVIEW]);
+    }
+
+    // ------------------------------------------------------------------
+    // P7-02: Incoming e-invoice relationships
+    // ------------------------------------------------------------------
+
+    /**
+     * Get the user who reviewed (accepted/rejected) this inbound e-invoice.
+     */
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    // ------------------------------------------------------------------
+    // P7-02: Incoming e-invoice state transitions
+    // ------------------------------------------------------------------
+
+    /**
+     * Mark an inbound e-invoice as received from the portal inbox.
+     *
+     * @return bool
+     */
+    public function markAsReceived(): bool
+    {
+        $this->status = self::STATUS_RECEIVED;
+        $this->direction = 'inbound';
+        $this->received_at = now();
+
+        return $this->save();
+    }
+
+    /**
+     * Place an inbound e-invoice under review by a specific user.
+     *
+     * @param  int  $userId  The ID of the user performing the review
+     * @return bool
+     */
+    public function markUnderReview(int $userId): bool
+    {
+        if (! in_array($this->status, [self::STATUS_RECEIVED, self::STATUS_UNDER_REVIEW])) {
+            return false;
+        }
+
+        $this->status = self::STATUS_UNDER_REVIEW;
+        $this->reviewed_by = $userId;
+
+        return $this->save();
+    }
+
+    /**
+     * Accept an inbound e-invoice.
+     * Only allowed from RECEIVED or UNDER_REVIEW status.
+     *
+     * @return bool
+     */
+    public function acceptIncoming(): bool
+    {
+        if (! in_array($this->status, [self::STATUS_RECEIVED, self::STATUS_UNDER_REVIEW])) {
+            return false;
+        }
+
+        $this->status = self::STATUS_ACCEPTED_INCOMING;
+        $this->reviewed_at = now();
+
+        return $this->save();
+    }
+
+    /**
+     * Reject an inbound e-invoice with a reason.
+     * Only allowed from RECEIVED or UNDER_REVIEW status.
+     *
+     * @param  string  $reason  The rejection reason
+     * @return bool
+     */
+    public function rejectIncoming(string $reason): bool
+    {
+        if (! in_array($this->status, [self::STATUS_RECEIVED, self::STATUS_UNDER_REVIEW])) {
+            return false;
+        }
+
+        $this->status = self::STATUS_REJECTED_INCOMING;
+        $this->reviewed_at = now();
+        $this->rejection_reason = $reason;
+
+        return $this->save();
+    }
+
+    /**
+     * Check if this e-invoice is an inbound (received) invoice.
+     *
+     * @return bool
+     */
+    public function isInbound(): bool
+    {
+        return $this->direction === 'inbound';
+    }
+
+    /**
+     * Check if this inbound e-invoice is pending review.
+     *
+     * @return bool
+     */
+    public function isPendingReview(): bool
+    {
+        return $this->isInbound() && in_array($this->status, [
+            self::STATUS_RECEIVED,
+            self::STATUS_UNDER_REVIEW,
+        ]);
     }
 }
 

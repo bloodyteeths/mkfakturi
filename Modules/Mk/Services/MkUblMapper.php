@@ -386,6 +386,8 @@ class MkUblMapper
             return 'Z'; // Zero rate
         } elseif ($percent == 5) {
             return 'AA'; // Lower rate (Macedonia reduced VAT)
+        } elseif ($percent == 10) {
+            return 'S'; // Restaurant/hospitality rate (Macedonia 10% VAT)
         } elseif ($percent == 18) {
             return 'S'; // Standard rate (Macedonia standard VAT)
         } else {

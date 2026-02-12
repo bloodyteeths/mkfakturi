@@ -95,6 +95,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(\App\Models\PayrollEmployee::class, \App\Policies\PayrollEmployeePolicy::class);
         Gate::policy(\App\Models\PayrollRun::class, \App\Policies\PayrollRunPolicy::class);
         Gate::policy(\App\Models\PayrollRunLine::class, \App\Policies\PayrollRunLinePolicy::class);
+
+        // Client Document Upload Portal (P8-01)
+        Gate::policy(\App\Models\ClientDocument::class, \App\Policies\ClientDocumentPolicy::class);
         // CLAUDE-CHECKPOINT
 
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
@@ -116,6 +119,21 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         BouncerModels::scope(new DefaultScope);
+
+        // Register exchange rate provider based on config (P9-01: NBRM Official Exchange Rates)
+        $this->app->bind(\App\Contracts\ExchangeRateProvider::class, function ($app) {
+            $provider = config('mk.exchange_rates.provider', 'nbrm');
+
+            return match ($provider) {
+                'nbrm' => $app->make(\App\Services\NbrmExchangeRateService::class),
+                'frankfurter' => $app->make(\App\Services\FrankfurterExchangeRateService::class),
+                default => $app->make(\App\Services\NbrmExchangeRateService::class),
+            };
+        });
+
+        // Register Fiscal Device Manager as singleton (P10-02)
+        $this->app->singleton(\Modules\Mk\Services\FiscalDevices\FiscalDeviceManager::class);
+        // CLAUDE-CHECKPOINT
 
         // Register AI services
         $this->app->singleton(McpDataProvider::class, function ($app) {

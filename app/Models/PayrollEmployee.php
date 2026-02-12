@@ -101,6 +101,14 @@ class PayrollEmployee extends Model
     }
 
     /**
+     * Get the leave requests for the employee.
+     */
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class, 'employee_id');
+    }
+
+    /**
      * Get the user who created this employee record.
      */
     public function creator(): BelongsTo

@@ -2,17 +2,44 @@
 
 namespace App\Services;
 
+use App\Contracts\ExchangeRateProvider;
 use App\Models\Currency;
 use App\Models\ExchangeRateLog;
 use App\Providers\CacheServiceProvider;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Currency Exchange Service
+ *
+ * Abstraction layer for fetching and caching exchange rates.
+ * Uses a configured ExchangeRateProvider (NBRM or Frankfurter)
+ * with automatic fallback to the secondary provider on failure.
+ */
 class CurrencyExchangeService
 {
     /**
-     * Get cached exchange rate between two currencies
+     * The primary exchange rate provider.
+     */
+    protected ExchangeRateProvider $provider;
+
+    /**
+     * Create a new CurrencyExchangeService instance.
+     *
+     * @param  ExchangeRateProvider  $provider  The primary exchange rate provider
+     */
+    public function __construct(ExchangeRateProvider $provider)
+    {
+        $this->provider = $provider;
+    }
+
+    /**
+     * Get cached exchange rate between two currencies.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @param  int  $companyId  Company ID for cache scoping
+     * @return float Exchange rate (1.0 as fallback if all providers fail)
      */
     public function getExchangeRate(string $fromCurrency, string $toCurrency, int $companyId): float
     {
@@ -32,7 +59,11 @@ class CurrencyExchangeService
     }
 
     /**
-     * Get multiple exchange rates at once (more efficient)
+     * Get multiple exchange rates at once (more efficient).
+     *
+     * @param  array  $currencyPairs  Array of ['from' => 'EUR', 'to' => 'MKD'] pairs
+     * @param  int  $companyId  Company ID for cache scoping
+     * @return array Rates keyed by "from:to" string
      */
     public function getMultipleExchangeRates(array $currencyPairs, int $companyId): array
     {
@@ -70,7 +101,12 @@ class CurrencyExchangeService
     }
 
     /**
-     * Fetch exchange rate from external API or database
+     * Fetch exchange rate from provider or database.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @param  int  $companyId  Company ID
+     * @return float Exchange rate
      */
     protected function fetchExchangeRate(string $fromCurrency, string $toCurrency, int $companyId): float
     {
@@ -90,28 +126,49 @@ class CurrencyExchangeService
             return $recentRate->exchange_rate;
         }
 
-        // If not found, fetch from external API
+        // If not found, fetch from configured provider
         try {
-            $rate = $this->fetchFromExternalAPI($fromCurrency, $toCurrency);
+            $rate = $this->fetchFromProvider($fromCurrency, $toCurrency);
 
             // Log the exchange rate
             $this->logExchangeRate($fromCurrency, $toCurrency, $rate, $companyId);
 
             return $rate;
         } catch (\Exception $e) {
-            Log::error('Failed to fetch exchange rate', [
+            Log::warning("Primary provider ({$this->provider->getProviderName()}) failed, trying fallback", [
                 'from' => $fromCurrency,
                 'to' => $toCurrency,
                 'error' => $e->getMessage(),
             ]);
 
-            // Return fallback rate of 1.0
-            return 1.0;
+            // Try fallback provider
+            try {
+                $rate = $this->fetchFromFallbackProvider($fromCurrency, $toCurrency);
+
+                // Log the exchange rate
+                $this->logExchangeRate($fromCurrency, $toCurrency, $rate, $companyId);
+
+                return $rate;
+            } catch (\Exception $fallbackException) {
+                Log::error('All exchange rate providers failed', [
+                    'from' => $fromCurrency,
+                    'to' => $toCurrency,
+                    'primary_error' => $e->getMessage(),
+                    'fallback_error' => $fallbackException->getMessage(),
+                ]);
+
+                // Return fallback rate of 1.0
+                return 1.0;
+            }
         }
     }
 
     /**
-     * Fetch multiple exchange rates in batch
+     * Fetch multiple exchange rates in batch.
+     *
+     * @param  array  $currencyPairs  Array of currency pair arrays
+     * @param  int  $companyId  Company ID
+     * @return array Rates keyed by "from:to" string
      */
     protected function fetchMultipleExchangeRates(array $currencyPairs, int $companyId): array
     {
@@ -133,24 +190,57 @@ class CurrencyExchangeService
     }
 
     /**
-     * Fetch exchange rate from external API (e.g., Fixer.io, ExchangeRate-API)
+     * Fetch exchange rate from the primary configured provider.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @return float Exchange rate
+     *
+     * @throws \RuntimeException When provider fails
      */
-    protected function fetchFromExternalAPI(string $fromCurrency, string $toCurrency): float
+    protected function fetchFromProvider(string $fromCurrency, string $toCurrency): float
     {
-        // Using ExchangeRate-API as it's free and reliable
-        $response = Http::timeout(10)->get("https://api.exchangerate-api.com/v4/latest/{$fromCurrency}");
-
-        if ($response->successful()) {
-            $data = $response->json();
-
-            return $data['rates'][$toCurrency] ?? 1.0;
-        }
-
-        throw new \Exception('Failed to fetch exchange rate from API');
+        return $this->provider->getRate($fromCurrency, $toCurrency);
     }
 
     /**
-     * Log exchange rate to database
+     * Fetch exchange rate from the fallback provider.
+     *
+     * If primary is NBRM, fallback is Frankfurter, and vice versa.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @return float Exchange rate
+     *
+     * @throws \RuntimeException When fallback provider also fails
+     */
+    protected function fetchFromFallbackProvider(string $fromCurrency, string $toCurrency): float
+    {
+        $primaryName = $this->provider->getProviderName();
+        $fallbackName = $primaryName === 'nbrm' ? 'frankfurter' : 'nbrm';
+
+        Log::info("Using fallback provider: {$fallbackName}", [
+            'from' => $fromCurrency,
+            'to' => $toCurrency,
+        ]);
+
+        /** @var ExchangeRateProvider $fallback */
+        $fallback = match ($fallbackName) {
+            'nbrm' => app(NbrmExchangeRateService::class),
+            'frankfurter' => app(FrankfurterExchangeRateService::class),
+            default => throw new \RuntimeException("Unknown fallback provider: {$fallbackName}"),
+        };
+
+        return $fallback->getRate($fromCurrency, $toCurrency);
+    }
+
+    /**
+     * Log exchange rate to database.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @param  float  $rate  The exchange rate
+     * @param  int  $companyId  Company ID
      */
     protected function logExchangeRate(string $fromCurrency, string $toCurrency, float $rate, int $companyId): void
     {
@@ -177,7 +267,11 @@ class CurrencyExchangeService
     }
 
     /**
-     * Clear exchange rate cache for a specific currency pair
+     * Clear exchange rate cache for a specific currency pair.
+     *
+     * @param  string  $fromCurrency  Source currency code
+     * @param  string  $toCurrency  Target currency code
+     * @param  int  $companyId  Company ID
      */
     public function clearExchangeRateCache(string $fromCurrency, string $toCurrency, int $companyId): void
     {
@@ -186,7 +280,9 @@ class CurrencyExchangeService
     }
 
     /**
-     * Clear all exchange rate cache for a company
+     * Clear all exchange rate cache for a company.
+     *
+     * @param  int  $companyId  Company ID
      */
     public function clearAllExchangeRateCache(int $companyId): void
     {
@@ -201,7 +297,10 @@ class CurrencyExchangeService
     }
 
     /**
-     * Warm up exchange rate cache for common currency pairs
+     * Warm up exchange rate cache for common currency pairs.
+     *
+     * @param  int  $companyId  Company ID
+     * @param  array  $currencies  Currency codes to warm up
      */
     public function warmUpCache(int $companyId, array $currencies = ['EUR', 'USD', 'MKD']): void
     {
@@ -223,6 +322,18 @@ class CurrencyExchangeService
             'company_id' => $companyId,
             'currencies' => $currencies,
             'pairs_count' => count($pairs),
+            'provider' => $this->provider->getProviderName(),
         ]);
     }
+
+    /**
+     * Get the name of the currently configured provider.
+     *
+     * @return string Provider name
+     */
+    public function getProviderName(): string
+    {
+        return $this->provider->getProviderName();
+    }
 }
+// CLAUDE-CHECKPOINT

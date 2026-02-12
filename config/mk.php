@@ -105,6 +105,17 @@ return [
 
         /*
         |--------------------------------------------------------------------------
+        | Restaurant VAT Rate
+        |--------------------------------------------------------------------------
+        |
+        | The preferential VAT rate for restaurant/hospitality services
+        | in Macedonia (10%) — Закон за данокот на додадена вредност
+        |
+        */
+        'restaurant_vat_rate' => 10,
+
+        /*
+        |--------------------------------------------------------------------------
         | Tax Scheme
         |--------------------------------------------------------------------------
         |
@@ -424,6 +435,49 @@ return [
     | Feature flags for Macedonian-specific features
     |
     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payroll Settings
+    |--------------------------------------------------------------------------
+    |
+    | Macedonian payroll compliance settings
+    |
+    */
+
+    'payroll' => [
+        // Overtime multipliers (Закон за работни односи)
+        'overtime_regular_multiplier' => 1.35,   // Regular overtime: 135%
+        'overtime_holiday_multiplier' => 1.50,   // Holiday/night overtime: 150%
+
+        // Contribution base limits (2024 rates)
+        // Minimum: 50% of national average salary (MKD 63,154 / 2 = 31,577)
+        // Maximum: 16x national average salary
+        'min_contribution_base' => 3157700,      // MKD 31,577 in cents
+        'max_contribution_base' => 101046400,    // MKD 1,010,464 in cents
+        'national_avg_salary' => 6315400,        // MKD 63,154 in cents
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exchange Rate Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for exchange rate providers
+    |
+    */
+
+    'exchange_rates' => [
+        'provider' => env('EXCHANGE_RATE_PROVIDER', 'nbrm'),
+        'nbrm' => [
+            'base_url' => env('NBRM_API_URL', 'https://www.nbrm.mk/KLServiceNOV'),
+            'cache_ttl' => env('NBRM_CACHE_TTL', 86400), // 24 hours
+        ],
+        'frankfurter' => [
+            'base_url' => 'https://api.frankfurter.dev/v1',
+            'cache_ttl' => 14400, // 4 hours
+        ],
+    ],
 
     'features' => [
         'advanced_payments' => env('FEATURE_ADVANCED_PAYMENTS', false),

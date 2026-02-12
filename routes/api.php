@@ -95,14 +95,18 @@ use App\Http\Controllers\V1\Admin\Update\MigrateUpdateController;
 use App\Http\Controllers\V1\Admin\Update\UnzipUpdateController;
 use App\Http\Controllers\V1\Admin\Users\UsersController;
 use App\Http\Controllers\V1\Customer\Auth\ForgotPasswordController as AuthForgotPasswordController;
+use App\Http\Controllers\V1\Partner\BulkReportController;
 use App\Http\Controllers\V1\Partner\PartnerAccountController;
 use App\Http\Controllers\V1\Partner\PartnerAccountMappingController;
 use App\Http\Controllers\V1\Partner\PartnerJournalExportController;
+use App\Http\Controllers\V1\Admin\Payroll\LeaveRequestController;
+use App\Http\Controllers\V1\Admin\Payroll\LeaveTypeController;
 use App\Http\Controllers\V1\Admin\Payroll\PayrollEmployeeController;
 use App\Http\Controllers\V1\Admin\Payroll\PayrollReportController;
 use App\Http\Controllers\V1\Admin\Payroll\PayrollRunController;
 use App\Http\Controllers\V1\Admin\Payroll\PayslipController;
 use App\Http\Controllers\V1\Admin\Payroll\SalaryStructureController;
+use App\Http\Controllers\V1\Admin\FiscalDeviceController;
 use App\Http\Controllers\V1\Customer\Auth\ResetPasswordController as AuthResetPasswordController;
 use App\Http\Controllers\V1\Customer\Estimate\AcceptEstimateController as CustomerAcceptEstimateController;
 use App\Http\Controllers\V1\Customer\Estimate\EstimatesController as CustomerEstimatesController;
@@ -256,6 +260,14 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::get('/dashboard', DashboardController::class);
+
+            // Company Deadlines (P8-02)
+            // ----------------------------------
+
+            Route::prefix('deadlines')->group(function () {
+                Route::get('/', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'index']);
+                Route::post('/{id}/complete', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'complete']);
+            });
 
             // Auth check
             // ----------------------------------
@@ -453,6 +465,36 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/payroll-reports/export-tax-summary', [PayrollReportController::class, 'exportTaxSummary']);
                 Route::get('/payroll-reports/download-mpin-xml', [PayrollReportController::class, 'downloadMpinXml']);
                 Route::get('/payroll-reports/download-ddv04-xml', [PayrollReportController::class, 'downloadDdv04Xml']);
+
+                // Leave Management
+                Route::prefix('leave-types')->group(function () {
+                    Route::get('/', [LeaveTypeController::class, 'index']);
+                });
+                Route::prefix('leave-requests')->group(function () {
+                    Route::get('/', [LeaveRequestController::class, 'index']);
+                    Route::post('/', [LeaveRequestController::class, 'store']);
+                    Route::get('/balance/{employee}', [LeaveRequestController::class, 'balance']);
+                    Route::get('/{id}', [LeaveRequestController::class, 'show']);
+                    Route::patch('/{id}', [LeaveRequestController::class, 'update']);
+                    Route::delete('/{id}', [LeaveRequestController::class, 'destroy']);
+                    Route::post('/{id}/approve', [LeaveRequestController::class, 'approve']);
+                    Route::post('/{id}/reject', [LeaveRequestController::class, 'reject']);
+                });
+            });
+
+            // Fiscal Devices (P10-02)
+            // ----------------------------------
+
+            Route::prefix('fiscal-devices')->group(function () {
+                Route::get('/', [FiscalDeviceController::class, 'index']);
+                Route::post('/', [FiscalDeviceController::class, 'store']);
+                Route::get('/{id}', [FiscalDeviceController::class, 'show']);
+                Route::patch('/{id}', [FiscalDeviceController::class, 'update']);
+                Route::delete('/{id}', [FiscalDeviceController::class, 'destroy']);
+                Route::get('/{id}/status', [FiscalDeviceController::class, 'status']);
+                Route::post('/{id}/send-invoice', [FiscalDeviceController::class, 'sendInvoice']);
+                Route::get('/{id}/daily-report', [FiscalDeviceController::class, 'dailyReport']);
+                Route::get('/{id}/receipts', [FiscalDeviceController::class, 'receipts']);
             });
 
             // Exports (Phase 4)
@@ -596,6 +638,15 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/{id}/simulate', [EInvoiceController::class, 'simulate']);
                 Route::get('/{id}/download-xml', [EInvoiceController::class, 'downloadXml']);
                 Route::post('/{submissionId}/resubmit', [EInvoiceController::class, 'resubmit']);
+
+                // P7-02: Incoming e-invoice endpoints
+                Route::prefix('incoming')->group(function () {
+                    Route::get('/', [EInvoiceController::class, 'listIncoming']);
+                    Route::post('/poll', [EInvoiceController::class, 'pollPortalInbox']);
+                    Route::get('/{id}', [EInvoiceController::class, 'showIncoming']);
+                    Route::post('/{id}/accept', [EInvoiceController::class, 'acceptIncoming']);
+                    Route::post('/{id}/reject', [EInvoiceController::class, 'rejectIncoming']);
+                });
             });
             // CLAUDE-CHECKPOINT
 
@@ -851,6 +902,16 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/pending', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'pending']);
                     Route::post('/bulk-confirm', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'bulkConfirm']);
                 });
+            });
+            // CLAUDE-CHECKPOINT
+
+            // Client Document Upload Portal (P8-01)
+            // ----------------------------------
+            Route::prefix('client-documents')->group(function () {
+                Route::post('/upload', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'upload']);
+                Route::get('/', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'index']);
+                Route::get('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'show']);
+                Route::delete('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'destroy']);
             });
             // CLAUDE-CHECKPOINT
 
@@ -1446,6 +1507,34 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
         Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);
         Route::get('/income-statement', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'incomeStatement']);
+    });
+
+    // Client Document Upload Portal - Partner Review (P8-01)
+    // ----------------------------------
+    Route::prefix('/companies/{company}/documents')->group(function () {
+        Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'index']);
+        Route::get('/download-all', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'bulkDownload']);
+        Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'show']);
+        Route::post('/{id}/review', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'markReviewed']);
+        Route::post('/{id}/reject', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'reject']);
+        Route::get('/{id}/download', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'download']);
+    });
+
+    // Partner Deadline Tracking (P8-02)
+    Route::prefix('/deadlines')->group(function () {
+        Route::get('/', [\App\Http\Controllers\V1\Partner\DeadlineController::class, 'index']);
+        Route::get('/summary', [\App\Http\Controllers\V1\Partner\DeadlineController::class, 'summary']);
+        Route::post('/', [\App\Http\Controllers\V1\Partner\DeadlineController::class, 'store'])->middleware('throttle:strict');
+        Route::patch('/{id}', [\App\Http\Controllers\V1\Partner\DeadlineController::class, 'update']);
+        Route::post('/{id}/complete', [\App\Http\Controllers\V1\Partner\DeadlineController::class, 'complete']);
+        Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\DeadlineController::class, 'destroy'])->middleware('throttle:strict');
+    });
+
+    // P8-03: Bulk Reporting Across Clients
+    Route::prefix('/reports')->group(function () {
+        Route::post('/multi-company', [BulkReportController::class, 'multiCompany']);
+        Route::post('/consolidated', [BulkReportController::class, 'consolidated']);
+        Route::post('/export', [BulkReportController::class, 'export']);
     });
     // CLAUDE-CHECKPOINT
 });

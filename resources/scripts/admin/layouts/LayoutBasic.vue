@@ -1,5 +1,6 @@
 <template>
   <div v-if="isAppLoaded" class="h-full">
+    <OfflineBanner />
     <NotificationRoot />
 
     <SiteHeader />
@@ -16,10 +17,14 @@
         globalStore.isSidebarCollapsed ? 'md:pl-16' : 'md:pl-56 xl:pl-64'
       ]"
     >
-      <div class="pt-16 pb-16">
-        <router-view />
-      </div>
+      <PullToRefresh @refresh="handleRefresh">
+        <div class="pt-16 pb-16">
+          <router-view />
+        </div>
+      </PullToRefresh>
     </main>
+
+    <PwaInstallPrompt />
   </div>
 
   <!-- Show minimal loader only briefly - don't block entire app -->
@@ -43,6 +48,9 @@ import SiteSidebar from '@/scripts/admin/layouts/partials/TheSiteSidebar.vue'
 import NotificationRoot from '@/scripts/components/notifications/NotificationRoot.vue'
 import ExchangeRateBulkUpdateModal from '@/scripts/admin/components/modal-components/ExchangeRateBulkUpdateModal.vue'
 import LimitExceededModal from '@/scripts/admin/components/LimitExceededModal.vue'
+import PwaInstallPrompt from '@/scripts/admin/components/mobile/PwaInstallPrompt.vue'
+import OfflineBanner from '@/scripts/admin/components/mobile/OfflineBanner.vue'
+import PullToRefresh from '@/scripts/admin/components/mobile/PullToRefresh.vue'
 
 const globalStore = useGlobalStore()
 const route = useRoute()
@@ -56,6 +64,10 @@ const companyStore = useCompanyStore()
 const isAppLoaded = computed(() => {
   return globalStore.isAppLoaded
 })
+
+function handleRefresh() {
+  window.location.reload()
+}
 
 onMounted(() => {
   // Start bootstrap but don't block UI - app will show once isAppLoaded becomes true

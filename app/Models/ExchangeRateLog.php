@@ -26,6 +26,11 @@ class ExchangeRateLog extends Model
         return $this->belongsTo(Currency::class);
     }
 
+    public function baseCurrency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'base_currency_id');
+    }
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);

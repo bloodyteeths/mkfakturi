@@ -24,9 +24,13 @@ class PayrollCalculationService
 {
     /**
      * @param MacedonianPayrollTaxService $taxService
+     * @param LeaveCalculationService $leaveService
+     * @param OvertimeCalculationService $overtimeService
      */
     public function __construct(
-        private MacedonianPayrollTaxService $taxService
+        private MacedonianPayrollTaxService $taxService,
+        private LeaveCalculationService $leaveService,
+        private OvertimeCalculationService $overtimeService
     ) {
     }
 
@@ -61,10 +65,32 @@ class PayrollCalculationService
                 // Get employee's current salary (in cents)
                 $grossSalary = $employee->gross_salary ?? 0;
 
-                // Calculate taxes
-                $calculation = $this->taxService->calculateFromGross($grossSalary);
+                // Calculate leave deductions for the period
+                $leaveResult = $this->leaveService->calculateLeaveDeduction(
+                    $employee,
+                    $run->period_start,
+                    $run->period_end
+                );
+                $adjustedGross = $grossSalary - $leaveResult['leave_deduction_amount'];
 
-                // Create payroll run line
+                // Calculate overtime premium (P7-04)
+                $overtimeHours = $employee->overtime_hours ?? 0;
+                $overtimeMultiplier = $employee->overtime_multiplier
+                    ?? $this->overtimeService->getMultiplier('regular');
+                $overtimeResult = $this->overtimeService->calculate(
+                    $adjustedGross,
+                    $overtimeHours,
+                    $overtimeMultiplier,
+                    $run->working_days ?? 22
+                );
+
+                // Add overtime premium to gross before tax calculation
+                $grossWithOvertime = $adjustedGross + $overtimeResult['overtime_amount'];
+
+                // Calculate taxes on the adjusted gross (after leave deductions + overtime)
+                $calculation = $this->taxService->calculateFromGross($grossWithOvertime);
+
+                // Create payroll run line (includes leave + overtime data)
                 $line = $run->lines()->create([
                     'employee_id' => $employee->id,
                     'gross_salary' => $calculation->grossSalary,
@@ -81,6 +107,11 @@ class PayrollCalculationService
                     'total_employer_cost' => $calculation->totalEmployerCost,
                     'allowances' => 0,
                     'deductions' => 0,
+                    'leave_days_taken' => $leaveResult['leave_days_taken'],
+                    'leave_deduction_amount' => $leaveResult['leave_deduction_amount'],
+                    'overtime_hours' => $overtimeResult['overtime_hours'],
+                    'overtime_multiplier' => $overtimeResult['multiplier'],
+                    'overtime_amount' => $overtimeResult['overtime_amount'],
                 ]);
 
                 // Accumulate totals

@@ -52,6 +52,18 @@ export default [
         component: Commissions,
         meta: { isPartner: true }
       },
+      {
+        path: 'deadlines',
+        name: 'partner.deadlines',
+        component: () => import('@/scripts/partner/views/deadlines/DeadlinesDashboard.vue'),
+        meta: { isPartner: true }
+      },
+      {
+        path: 'reports',
+        name: 'partner.reports',
+        component: () => import('@/scripts/partner/views/reports/BulkReports.vue'),
+        meta: { isPartner: true }
+      },
     ]
   }
 ]

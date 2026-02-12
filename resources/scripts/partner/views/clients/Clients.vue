@@ -155,6 +155,20 @@
                   >
                     Книговодство
                   </button>
+                  <button
+                    @click="activeTab = 'documents'"
+                    :class="[
+                      'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+                      activeTab === 'documents'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ]"
+                    role="tab"
+                    :aria-selected="activeTab === 'documents'"
+                    aria-controls="documents-panel"
+                  >
+                    Документи
+                  </button>
                 </div>
 
                 <!-- Info Tab Content -->
@@ -255,6 +269,11 @@
                       </table>
                     </div>
                   </div>
+                </div>
+
+                <!-- Documents Tab Content (P8-01) -->
+                <div v-if="activeTab === 'documents'" id="documents-panel" role="tabpanel">
+                  <ClientDocumentsTab :company-id="selectedClient?.id" />
                 </div>
 
                 <!-- Accounting Tab Content -->
@@ -744,6 +763,7 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import ClientDocumentsTab from './ClientDocumentsTab.vue'
 
 // Stores
 const router = useRouter()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1\Admin\EInvoice;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\PollEInvoiceInboxJob;
 use App\Models\Certificate;
 use App\Models\EInvoice;
 use App\Models\EInvoiceSubmission;
@@ -608,6 +609,238 @@ class EInvoiceController extends Controller
                 'message' => 'Failed to resubmit: '.$e->getMessage(),
             ], 500);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // P7-02: Incoming e-invoice endpoints
+    // ------------------------------------------------------------------
+
+    /**
+     * List incoming e-invoices for the company.
+     *
+     * GET /api/v1/e-invoices/incoming
+     *
+     * Filters: status, date_from, date_to, sender (name or VAT ID)
+     * Returns paginated inbound e-invoices.
+     */
+    public function listIncoming(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', EInvoice::class);
+
+        $limit = $request->input('limit', 10);
+
+        $query = EInvoice::whereCompany()
+            ->inbound()
+            ->with([
+                'company:id,name',
+                'reviewedBy:id,name,email',
+            ]);
+
+        // Apply status filter
+        if ($request->has('status')) {
+            $query->whereStatus($request->input('status'));
+        }
+
+        // Apply date range filters on received_at
+        if ($request->has('date_from')) {
+            $query->where('received_at', '>=', $request->input('date_from'));
+        }
+
+        if ($request->has('date_to')) {
+            $query->where('received_at', '<=', $request->input('date_to'));
+        }
+
+        // Apply sender filter (searches name and VAT ID)
+        if ($request->has('sender')) {
+            $sender = $request->input('sender');
+            $query->where(function ($q) use ($sender) {
+                $q->where('sender_name', 'LIKE', "%{$sender}%")
+                    ->orWhere('sender_vat_id', 'LIKE', "%{$sender}%");
+            });
+        }
+
+        $eInvoices = $query->latest('received_at')->paginateData($limit);
+
+        return response()->json($eInvoices);
+    }
+
+    /**
+     * Show a single incoming e-invoice with UBL preview.
+     *
+     * GET /api/v1/e-invoices/incoming/{id}
+     *
+     * Returns the inbound e-invoice with its UBL XML preview data.
+     */
+    public function showIncoming(int $id): JsonResponse
+    {
+        $this->authorize('viewAny', EInvoice::class);
+
+        $eInvoice = EInvoice::whereCompany()
+            ->inbound()
+            ->with([
+                'company:id,name',
+                'submissions',
+                'reviewedBy:id,name,email',
+            ])
+            ->findOrFail($id);
+
+        // Parse UBL XML for preview if available
+        $ublPreview = null;
+        if (! empty($eInvoice->ubl_xml)) {
+            try {
+                $ublPreview = $this->formatXmlPreview($eInvoice->ubl_xml);
+            } catch (Exception $e) {
+                Log::warning('Failed to parse UBL XML preview for incoming e-invoice', [
+                    'e_invoice_id' => $id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return response()->json([
+            'data' => $eInvoice,
+            'ubl_preview' => $ublPreview,
+            'submissions' => $eInvoice->submissions->toArray(),
+        ]);
+    }
+
+    /**
+     * Accept an incoming e-invoice.
+     *
+     * POST /api/v1/e-invoices/incoming/{id}/accept
+     *
+     * Validates that the e-invoice is in RECEIVED or UNDER_REVIEW status,
+     * then marks it as ACCEPTED_INCOMING.
+     */
+    public function acceptIncoming(int $id): JsonResponse
+    {
+        $this->authorize('create', EInvoice::class);
+
+        try {
+            $eInvoice = EInvoice::whereCompany()
+                ->inbound()
+                ->findOrFail($id);
+
+            // Validate status allows acceptance
+            if (! in_array($eInvoice->status, [EInvoice::STATUS_RECEIVED, EInvoice::STATUS_UNDER_REVIEW])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'E-invoice cannot be accepted in its current status: '.$eInvoice->status,
+                ], 422);
+            }
+
+            $eInvoice->reviewed_by = auth()->id();
+            $eInvoice->acceptIncoming();
+
+            // TODO: P7-03 — Optionally create a supplier bill/expense from UBL data
+            // This would parse the UBL XML and create an AccountsPayable\Bill record
+            // linked back to this inbound e-invoice.
+
+            Log::info('Incoming e-invoice accepted', [
+                'e_invoice_id' => $eInvoice->id,
+                'reviewed_by' => auth()->id(),
+                'sender_vat_id' => $eInvoice->sender_vat_id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Incoming e-invoice accepted successfully.',
+                'data' => $eInvoice->fresh(['company:id,name', 'reviewedBy:id,name,email']),
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to accept incoming e-invoice', [
+                'e_invoice_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to accept e-invoice: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject an incoming e-invoice with a reason.
+     *
+     * POST /api/v1/e-invoices/incoming/{id}/reject
+     *
+     * Requires a rejection_reason in the request body.
+     */
+    public function rejectIncoming(Request $request, int $id): JsonResponse
+    {
+        $this->authorize('create', EInvoice::class);
+
+        $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $eInvoice = EInvoice::whereCompany()
+                ->inbound()
+                ->findOrFail($id);
+
+            // Validate status allows rejection
+            if (! in_array($eInvoice->status, [EInvoice::STATUS_RECEIVED, EInvoice::STATUS_UNDER_REVIEW])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'E-invoice cannot be rejected in its current status: '.$eInvoice->status,
+                ], 422);
+            }
+
+            $eInvoice->reviewed_by = auth()->id();
+            $eInvoice->rejectIncoming($request->input('rejection_reason'));
+
+            Log::info('Incoming e-invoice rejected', [
+                'e_invoice_id' => $eInvoice->id,
+                'reviewed_by' => auth()->id(),
+                'rejection_reason' => $request->input('rejection_reason'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Incoming e-invoice rejected.',
+                'data' => $eInvoice->fresh(['company:id,name', 'reviewedBy:id,name,email']),
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to reject incoming e-invoice', [
+                'e_invoice_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject e-invoice: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Trigger a manual poll of the UJP portal inbox for new invoices.
+     *
+     * POST /api/v1/e-invoices/incoming/poll
+     *
+     * Dispatches the PollEInvoiceInboxJob asynchronously.
+     * Returns 202 Accepted immediately.
+     */
+    public function pollPortalInbox(): JsonResponse
+    {
+        $this->authorize('create', EInvoice::class);
+
+        $companyId = auth()->user()->company_id ?? auth()->user()->company->id;
+
+        dispatch(new PollEInvoiceInboxJob($companyId, auth()->id()))
+            ->onQueue('einvoice');
+
+        Log::info('Portal inbox poll dispatched', [
+            'company_id' => $companyId,
+            'user_id' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Portal inbox poll has been queued. New invoices will appear shortly.',
+        ], 202);
     }
 
     /**
