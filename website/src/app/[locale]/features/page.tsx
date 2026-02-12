@@ -1,8 +1,28 @@
 import Link from 'next/link'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
 
-// Force dynamic rendering to ensure locale is resolved on each navigation
-export const dynamic = 'force-dynamic'
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/features', {
+    title: {
+      mk: 'Функции — Facturino',
+      sq: 'Vecorite — Facturino',
+      tr: 'Ozellikler — Facturino',
+      en: 'Features — Facturino',
+    },
+    description: {
+      mk: 'AI фактурирање, е-Фактура, PSD2 банки, IFRS извештаи и повеќе. Откријте ги сите функции на Facturino.',
+      sq: 'Faturim me AI, e-Fature, banka PSD2, raporte IFRS dhe me shume. Zbuloni te gjitha vecorite e Facturino.',
+      tr: 'AI faturalama, e-Fatura, PSD2 bankalar, IFRS raporlari ve dahasi. Facturino ozelliklerini kesfedin.',
+      en: 'AI invoicing, e-Invoice, PSD2 banks, IFRS reports and more. Discover all Facturino features.',
+    },
+  })
+}
 
 /* ------------------------------------------------------------------ */
 /*  Inline copy – all 4 locales, no dictionary dependency             */
@@ -769,7 +789,7 @@ export default async function FeaturesPage({
   const t = copy[locale]
 
   return (
-    <main>
+    <main id="main-content">
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}

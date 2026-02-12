@@ -23,9 +23,10 @@ export default function AIShowcase({ t }: { t: Dictionary }) {
                         <div className="relative bg-white rounded-3xl shadow-xl border border-gray-100 p-2 overflow-hidden">
                             <Image
                                 src="/assets/images/ai_workflow_diagram_1763567032376.png"
-                                alt="AI Workflow Diagram"
+                                alt="Facturino AI workflow diagram showing automated invoice processing steps"
                                 width={600}
                                 height={400}
+                                sizes="(max-width: 1024px) 100vw, 50vw"
                                 className="w-full h-auto rounded-2xl"
                             />
                         </div>
@@ -37,9 +38,10 @@ export default function AIShowcase({ t }: { t: Dictionary }) {
                                 <div className="hidden md:flex w-12 h-12 rounded-lg bg-indigo-50 items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                     <Image
                                         src="/assets/images/icon_ai_automation_1763567058570.png"
-                                        alt="AI Icon"
+                                        alt={feature.title}
                                         width={28}
                                         height={28}
+                                        sizes="28px"
                                         className="w-7 h-7"
                                     />
                                 </div>

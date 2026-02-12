@@ -80,10 +80,11 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 backdrop-blur-sm">
             <Image
               src="/assets/images/hero_skopje.png"
-              alt="Facturino Dashboard"
+              alt="Facturino AI accounting dashboard showing invoices and financial reports"
               width={700}
               height={500}
               priority
+              sizes="(max-width: 768px) 100vw, 700px"
               className="w-full h-auto"
             />
           </div>

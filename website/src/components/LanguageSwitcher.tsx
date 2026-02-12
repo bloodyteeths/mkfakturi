@@ -23,6 +23,7 @@ export default function LanguageSwitcher({ current }: { current: Locale }) {
       className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
       value={current}
       onChange={handleChange}
+      aria-label="Select language"
     >
       {locales.map((l) => (
         <option key={l} value={l}>

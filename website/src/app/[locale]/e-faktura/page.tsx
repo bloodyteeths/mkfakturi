@@ -1,4 +1,27 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
+
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/e-faktura', {
+    title: {
+      mk: 'е-Фактура (e-Faktura) — Facturino',
+      sq: 'e-Fatura — Facturino',
+      tr: 'e-Fatura — Facturino',
+      en: 'e-Invoice (e-Faktura) — Facturino',
+    },
+    description: {
+      mk: 'Подготвени за UJP е-Фактура со QES потпис и структурирани UBL податоци. Бидете први кога системот ќе стане задолжителен.',
+      sq: 'Gati per UJP e-Fature me nenshkrim QES dhe te dhena te strukturuara UBL. Behuni te paret kur sistemi behet i detyrueshem.',
+      tr: 'UJP e-Fatura\'ya hazir: QES imza ve yapilandirilmis UBL verileri. Sistem zorunlu oldugunda ilk sirada olun.',
+      en: 'UJP e-Invoice ready with QES signature and structured UBL data. Be first in line when the system becomes mandatory.',
+    },
+  })
+}
 
 const copy = {
   mk: {
@@ -474,7 +497,7 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
   const t = copy[locale]
 
   return (
-    <main className="overflow-x-hidden">
+    <main id="main-content" className="overflow-x-hidden">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28">

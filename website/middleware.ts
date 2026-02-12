@@ -40,7 +40,7 @@ export function middleware(request: Request) {
   if (!locale) {
     const r = new URL(request.url)
     r.pathname = `/${defaultLocale}${pathname}`
-    return NextResponse.redirect(r)
+    return NextResponse.redirect(r, 301)
   }
 
   return NextResponse.next()

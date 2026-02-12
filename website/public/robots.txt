@@ -1,6 +1,8 @@
 # Facturino - www.facturino.mk
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /health
 
 # Sitemap
 Sitemap: https://www.facturino.mk/sitemap.xml

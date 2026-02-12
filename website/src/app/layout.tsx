@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
   display: "swap",
 });
+
+const SUPPORTED_LOCALES = ["mk", "sq", "tr", "en"];
 
 const BASE_URL = "https://www.facturino.mk";
 
@@ -30,10 +39,10 @@ export const metadata: Metadata = {
     alternateLocale: ["sq_AL", "tr_TR", "en_US"],
     images: [
       {
-        url: "/brand/facturino_logo.png",
-        width: 512,
-        height: 512,
-        alt: "Facturino Logo",
+        url: "/brand/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Facturino — AI accounting platform for North Macedonia",
       },
     ],
   },
@@ -42,7 +51,7 @@ export const metadata: Metadata = {
     title: "Facturino — AI + e\u2011Faktura platform",
     description:
       "Most advanced AI\u2011powered, e\u2011Faktura\u2011ready accounting platform for North Macedonia.",
-    images: ["/brand/facturino_logo.png"],
+    images: ["/brand/og-image.jpg"],
   },
   alternates: {
     canonical: BASE_URL,
@@ -60,16 +69,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read locale from the x-locale header set by middleware.ts
+  const hdrs = await headers();
+  const localeHeader = hdrs.get("x-locale") ?? "mk";
+  const lang = SUPPORTED_LOCALES.includes(localeHeader) ? localeHeader : "mk";
+
   return (
-    <html lang="mk">
+    <html lang={lang}>
       <body
-        className={`${inter.variable} antialiased font - sans`}
+        className={`${inter.variable} ${spaceGrotesk.variable} antialiased font-sans`}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:text-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:rounded-md"
+        >
+          Skip to content
+        </a>
         {children}
       </body>
     </html>

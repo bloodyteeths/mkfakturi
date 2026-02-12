@@ -1,4 +1,27 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
+
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/terms', {
+    title: {
+      mk: 'Услови за користење — Facturino',
+      sq: 'Kushtet e shërbimit — Facturino',
+      tr: 'Kullanim Kosullari — Facturino',
+      en: 'Terms of Service — Facturino',
+    },
+    description: {
+      mk: 'Правни услови за користење на Facturino платформата. Кориснички договор, плаќања, партнерска програма и одговорност.',
+      sq: 'Kushtet ligjore te perdorimit te platformes Facturino. Marreveshja e perdoruesit, pagesat, programi i partneritetit dhe pergjegjesise.',
+      tr: 'Facturino platformunu kullanim kosullari. Kullanici sozlesmesi, odemeler, ortaklik programi ve sorumluluk.',
+      en: 'Legal terms for using the Facturino platform. User agreement, payments, partner program, and liability terms.',
+    },
+  })
+}
 
 const copy = {
   mk: {
@@ -548,7 +571,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
   const t = copy[locale]
 
   return (
-    <main className="section">
+    <main id="main-content" className="section">
       <div className="container max-w-3xl">
         <h1 className="mb-2 text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>
           {t.h1}

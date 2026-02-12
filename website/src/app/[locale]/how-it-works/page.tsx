@@ -1,4 +1,27 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
+
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/how-it-works', {
+    title: {
+      mk: 'Како работи — Facturino',
+      sq: 'Si funksionon — Facturino',
+      tr: 'Nasil calisir — Facturino',
+      en: 'How It Works — Facturino',
+    },
+    description: {
+      mk: 'Три едноставни чекори до целосна контрола на финансиите. Без обука, без инсталација — започнете за минути, не за денови.',
+      sq: 'Tri hapa te thjeshte deri ne kontroll te plote te financave. Pa trajnim, pa instalim — filloni per minuta, jo per dite.',
+      tr: 'Uc basit adimda finanslarinizin tam kontrolu. Egitim yok, kurulum yok — dakikalarda baslayin, gunlerde degil.',
+      en: 'Three simple steps to full financial control. No training, no installation — get started in minutes, not days.',
+    },
+  })
+}
 
 /* ------------------------------------------------------------------ */
 /*  Inline copy – 4 locales (mk, sq, tr, en)                         */
@@ -299,7 +322,7 @@ export default async function HowItWorksPage({
   const t = copy[locale]
 
   return (
-    <main>
+    <main id="main-content">
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}

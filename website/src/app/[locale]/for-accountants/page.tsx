@@ -1,8 +1,32 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
+
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/for-accountants', {
+    title: {
+      mk: 'За сметководители — Facturino',
+      sq: 'Per kontabiliste — Facturino',
+      tr: 'Muhasebeciler icin — Facturino',
+      en: 'For Accountants — Facturino',
+    },
+    description: {
+      mk: 'Мулти-клиент платформа за сметководители. Партнерска програма со 20% провизија. Управувајте со десетици клиенти од едно место.',
+      sq: 'Platforme shume-klientesh per kontabiliste. Program partneriteti me 20% komision. Menaxhoni dhjetera kliente nga nje vend.',
+      tr: 'Muhasebeciler icin coklu musteri platformu. %20 komisyonlu partner programi. Onlarca musteriyi tek yerden yonetin.',
+      en: 'Multi-client platform for accountants. Partner program with 20% commission. Manage dozens of clients from one place.',
+    },
+  })
+}
 
 const copy = {
   mk: {
     hero: {
+      badge: 'Партнерска програма',
       headline: 'Една пријава → десетици клиенти',
       sub: 'Завршете ја работата за 10 клиенти за времето кое сега ви треба за 3. Facturino е изграден за сметководствени канцеларии.',
       cta: 'Регистрирај се како партнер',
@@ -88,6 +112,10 @@ const copy = {
         'Приоритетна техничка поддршка',
       ],
       cta: 'Стани партнер',
+      visualRecurring: 'рекурентна провизија',
+      visualDashboard: 'Контролен панел',
+      visualAnalytics: 'статистики и препораки',
+      visualSupport: 'Приоритетна поддршка',
     },
     bottomCta: {
       title: 'Пробај бесплатно 14 дена',
@@ -97,6 +125,7 @@ const copy = {
   },
   sq: {
     hero: {
+      badge: 'Programi i partneritetit',
       headline: 'Një hyrje → dhjetëra klientë',
       sub: 'Kryeni punën për 10 klientë në kohën që tani ju duhet për 3. Facturino është ndërtuar për zyra kontabiliteti.',
       cta: 'Regjistrohu si partner',
@@ -182,6 +211,10 @@ const copy = {
         'Mbështetje teknike me prioritet',
       ],
       cta: 'Bëhu partner',
+      visualRecurring: 'komision periodik',
+      visualDashboard: 'Paneli i kontrollit',
+      visualAnalytics: 'statistika dhe referime',
+      visualSupport: 'Mbështetje me prioritet',
     },
     bottomCta: {
       title: 'Provoni falas 14 ditë',
@@ -191,6 +224,7 @@ const copy = {
   },
   tr: {
     hero: {
+      badge: 'Partner programi',
       headline: 'Tek giriş → onlarca müşteri',
       sub: '10 müşterinin işini, şu an 3 müşteriye harcadığınız sürede bitirin. Facturino muhasebe ofisleri için tasarlandı.',
       cta: 'Partner olarak kaydol',
@@ -276,6 +310,10 @@ const copy = {
         'Öncelikli teknik destek',
       ],
       cta: 'Partner ol',
+      visualRecurring: 'tekrarlayan komisyon',
+      visualDashboard: 'Kontrol paneli',
+      visualAnalytics: 'istatistikler ve referanslar',
+      visualSupport: 'Öncelikli destek',
     },
     bottomCta: {
       title: '14 gün ücretsiz deneyin',
@@ -285,6 +323,7 @@ const copy = {
   },
   en: {
     hero: {
+      badge: 'Partner Program',
       headline: 'One login → dozens of clients',
       sub: 'Complete the work for 10 clients in the time it now takes you for 3. Facturino is built for accounting firms.',
       cta: 'Sign up as a partner',
@@ -370,6 +409,10 @@ const copy = {
         'Priority technical support',
       ],
       cta: 'Become a partner',
+      visualRecurring: 'recurring commission',
+      visualDashboard: 'Dashboard',
+      visualAnalytics: 'analytics & referrals',
+      visualSupport: 'Priority support',
     },
     bottomCta: {
       title: 'Try free for 14 days',
@@ -486,7 +529,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
   const t = copy[locale]
 
   return (
-    <main className="overflow-x-hidden">
+    <main id="main-content" className="overflow-x-hidden">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28">
@@ -502,7 +545,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
             </span>
-            Partner Program
+            {t.hero.badge}
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-gray-900 mb-6">
             {t.hero.headline.split('→')[0]}
@@ -660,7 +703,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                     <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl">%</div>
                     <div>
                       <p className="text-2xl font-extrabold text-gray-900">20%</p>
-                      <p className="text-sm text-gray-500">recurring commission</p>
+                      <p className="text-sm text-gray-500">{t.partner.visualRecurring}</p>
                     </div>
                   </div>
                   <div className="h-px bg-gray-200"></div>
@@ -669,8 +712,8 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                       <IconGrid />
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-gray-900">Dashboard</p>
-                      <p className="text-sm text-gray-500">analytics &amp; referrals</p>
+                      <p className="text-lg font-bold text-gray-900">{t.partner.visualDashboard}</p>
+                      <p className="text-sm text-gray-500">{t.partner.visualAnalytics}</p>
                     </div>
                   </div>
                   <div className="h-px bg-gray-200"></div>
@@ -680,7 +723,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                         <span key={i}><IconStar /></span>
                       ))}
                     </div>
-                    <p className="text-sm text-gray-500 font-medium">Priority support</p>
+                    <p className="text-sm text-gray-500 font-medium">{t.partner.visualSupport}</p>
                   </div>
                 </div>
               </div>

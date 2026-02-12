@@ -1,4 +1,27 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
+
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/privacy', {
+    title: {
+      mk: 'Политика за приватност — Facturino',
+      sq: 'Politika e privatësisë — Facturino',
+      tr: 'Gizlilik Politikasi — Facturino',
+      en: 'Privacy Policy — Facturino',
+    },
+    description: {
+      mk: 'Како Facturino ги собира, чува и штити вашите лични податоци. GDPR усогласеност и транспарентност за вашата приватност.',
+      sq: 'Si Facturino mbledh, ruan dhe mbron te dhenat tuaja personale. Perputhje GDPR dhe transparence per privatësine tuaj.',
+      tr: 'Facturino kisisel verilerinizi nasil toplar, saklar ve korur. GDPR uyumlulugu ve gizliliginiz icin seffaflik.',
+      en: 'How Facturino collects, stores, and protects your personal data. GDPR compliance and transparency for your privacy.',
+    },
+  })
+}
 
 const copy = {
   mk: {
@@ -472,7 +495,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
   const t = copy[locale]
 
   return (
-    <main className="section">
+    <main id="main-content" className="section">
       <div className="container max-w-3xl">
         <h1 className="mb-2 text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>
           {t.h1}

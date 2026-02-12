@@ -1,5 +1,28 @@
 import Link from 'next/link'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
+
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/security', {
+    title: {
+      mk: 'Безбедност — Facturino',
+      sq: 'Siguria — Facturino',
+      tr: 'Guvenlik — Facturino',
+      en: 'Security — Facturino',
+    },
+    description: {
+      mk: 'ЕУ хостинг, AES-256 енкрипција, GDPR усогласеност и аудит логови. Вашите финансиски податоци се безбедни со Facturino.',
+      sq: 'Strehim ne BE, enkriptim AES-256, perputhje GDPR dhe gjurme auditimi. Te dhenat tuaja financiare jane te sigurta me Facturino.',
+      tr: 'AB barindirma, AES-256 sifreleme, GDPR uyumlulugu ve denetim kayitlari. Finansal verileriniz Facturino ile guvende.',
+      en: 'EU hosting, AES-256 encryption, GDPR compliance, and audit logs. Your financial data is safe with Facturino.',
+    },
+  })
+}
 
 const copy = {
   mk: {
@@ -283,7 +306,7 @@ export default async function SecurityPage({ params }: { params: Promise<{ local
   ]
 
   return (
-    <main className="min-h-screen">
+    <main id="main-content" className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-32 pb-24 bg-slate-900 text-white">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900"></div>

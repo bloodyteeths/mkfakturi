@@ -60,9 +60,9 @@ export type Dictionary = {
 // Dictionaries per locale
 const mk: Dictionary = {
   meta: {
-    title: 'Facturino — Најнапредна AI сметководствена платформа во Македонија',
+    title: 'Facturino — AI сметководство и е-Фактура за Македонија',
     description:
-      'AI + е‑Фактура подготвен систем за македонски сметководители. Мулти‑клиент, PSD2 банки, IFRS извештаи.'
+      'AI сметководствена платформа подготвена за е-Фактура. Повеќе клиенти, PSD2 банки, IFRS извештаи. Започнете бесплатно за 14 дена.'
   },
   nav: {
     features: 'Функции',
@@ -261,9 +261,9 @@ const mk: Dictionary = {
 
 const sq: Dictionary = {
   meta: {
-    title: 'Facturino — Platforma më e avancuar me AI dhe gati për e‑Faturë',
+    title: 'Facturino — Platformë AI kontabiliteti, gati për e-Faturë',
     description:
-      'AI + e‑Faturë për kontabilistët në Maqedoni. Shumë‑klientë, banka PSD2, raporte IFRS.'
+      'Platformë kontabiliteti me AI, gati për e-Faturë. Shumë-klientë, banka PSD2, raporte IFRS. Filloni provën falas 14-ditore tani.'
   },
   nav: {
     features: 'Veçoritë',
@@ -462,9 +462,9 @@ const sq: Dictionary = {
 
 const tr: Dictionary = {
   meta: {
-    title: 'Facturino — Makedonya için en gelişmiş yapay zekâ ve e‑Fatura hazır platform',
+    title: 'Facturino — AI Muhasebe ve e-Fatura Platformu',
     description:
-      'AI + e‑Fatura hazır, muhasebeciler için. Çoklu müşteri, PSD2 bankalar, IFRS raporları.'
+      'AI destekli muhasebe platformu, e-Fatura\'ya hazır. Çoklu müşteri, PSD2 bankalar, IFRS raporları. 14 gün ücretsiz deneyin.'
   },
   nav: {
     features: 'Özellikler',
@@ -663,9 +663,9 @@ const tr: Dictionary = {
 
 const en: Dictionary = {
   meta: {
-    title: 'Facturino — The Most Advanced AI Accounting Platform in Macedonia',
+    title: 'Facturino — AI Accounting Platform for Macedonia',
     description:
-      'AI + e-Invoice ready system for Macedonian accountants. Multi-client, PSD2 banks, IFRS reports.'
+      'AI-powered accounting platform ready for e-Invoice. Multi-client management, PSD2 bank feeds, IFRS reports. Start your free 14-day trial today.'
   },
   nav: {
     features: 'Features',

@@ -49,7 +49,7 @@
   --color-primary: var(--color-primary);
   --color-accent: var(--color-accent);
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter);
+  --font-heading: var(--font-space-grotesk);
   --radius-lg: var(--radius);
 
   /* Animation Keyframes */
@@ -134,7 +134,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading, 'Inter', sans-serif);
   letter-spacing: -0.02em;
 }
 

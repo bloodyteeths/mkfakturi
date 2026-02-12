@@ -1,10 +1,30 @@
 import { getDictionary } from '@/i18n/dictionaries'
 import { isLocale, Locale, defaultLocale } from '@/i18n/locales'
+import { buildPageMetadata } from '@/lib/metadata'
 import FAQ from '@/components/FAQ'
 import ComparisonTable from '@/components/ComparisonTable'
 
-// Force dynamic rendering to ensure dictionary is fetched on each navigation
-export const dynamic = 'force-dynamic'
+export function generateStaticParams() {
+  return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  return buildPageMetadata(locale, '/pricing', {
+    title: {
+      mk: 'Цени и пакети — Facturino',
+      sq: 'Cmimet dhe Planet — Facturino',
+      tr: 'Fiyatlar ve Paketler — Facturino',
+      en: 'Pricing & Plans — Facturino',
+    },
+    description: {
+      mk: 'Бесплатен план, Pro од €12/месец, без кредитна картичка. Споредете ги сите пакети на Facturino и започнете бесплатно 14 дена.',
+      sq: 'Plan falas, Pro nga €12/muaj, pa karte krediti. Krahasoni te gjitha paketat e Facturino dhe filloni falas per 14 dite.',
+      tr: 'Ucretsiz plan, Pro €12/ay\'dan baslayan fiyatlar, kredi karti gerekmez. Facturino paketlerini karsilastirin, 14 gun ucretsiz deneyin.',
+      en: 'Free plan, Pro from €12/month, no credit card required. Compare all Facturino plans and start your free 14-day trial today.',
+    },
+  })
+}
 
 export default async function PricingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await params
@@ -14,8 +34,28 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   if (!t.pricingPage) return null
   const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, partnerSubtitle, companyPlans, partnerPlans, cta, ctaPartner } = t.pricingPage
 
+  const softwareAppLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Facturino',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: 'https://www.facturino.mk',
+    offers: companyPlans.map((p) => ({
+      '@type': 'Offer',
+      name: p.name,
+      price: p.price.replace('€', ''),
+      priceCurrency: 'EUR',
+      description: p.bullets.join(', '),
+    })),
+  }
+
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main id="main-content" className="min-h-screen bg-slate-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
+      />
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900"></div>

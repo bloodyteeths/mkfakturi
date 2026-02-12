@@ -47,6 +47,7 @@ export default function Testimonials({ t }: { t: Dictionary }) {
                     src={avatars[i % avatars.length]}
                     alt={item.author}
                     fill
+                    sizes="48px"
                     className="object-cover"
                   />
                 </div>
