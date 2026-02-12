@@ -31,7 +31,10 @@
     "tax_reports": "Poночнdhe raporte",
     "support_tickets": "Kërkesat për Mbështetje",
     "all_support_tickets": "Të Gjitha Kërkesat",
-    "payroll": "Pagat"
+    "payroll": "Pagat",
+    "deadlines": "Afatet",
+    "documents": "Dokumente",
+    "leave": "Menaxhimi i pushimeve"
   },
   "general": {
     "company_name": "Emri në kompania",
@@ -328,7 +331,11 @@
     "low_stock_alerts": "Stok i ulët",
     "stock_ok": "Gjithçka në rregull",
     "all_stock_sufficient": "Të gjithë artikujt kanë stok të mjaftueshëm",
-    "view_stock": "Shiko më shumë"
+    "view_stock": "Shiko më shumë",
+    "upcoming_deadlines": "Afatet e ardhshme",
+    "no_upcoming_deadlines": "Nuk ka afate të ardhshme",
+    "view_all_deadlines": "Shiko të gjitha afatet",
+    "deadlines_summary": "{overdue} të vonuara, {week} këtë javë"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Komisionet e Fundit",
@@ -5685,7 +5692,30 @@
     "download_ddv04_xml": "Преземdhe TVSH-04 XML",
     "select_month_for_mpin": "Dheзберете muaji për po геjoрdheрате МПDheН XML",
     "mpin_xml_downloaded": "МПDheН XML е me sukses преземен",
-    "ddv04_xml_downloaded": "TVSH-04 XML е me sukses преземен"
+    "ddv04_xml_downloaded": "TVSH-04 XML е me sukses преземен",
+    "business_days": "Ditë pune",
+    "create_first_leave_request": "Dorëzoni kërkesën tuaj të parë për pushim",
+    "days_remaining": "Ditë të mbetura",
+    "end_date": "Data e përfundimit",
+    "leave_requests": "Kërkesat për pushim",
+    "leave_status": {
+      "approved": "Aprovuar",
+      "cancelled": "Anuluar",
+      "pending": "Në pritje",
+      "rejected": "Refuzuar"
+    },
+    "leave_type": "Lloji i pushimit",
+    "new_leave_request": "Kërkesë e re për pushim",
+    "no_leave_requests": "Nuk ka kërkesa për pushim",
+    "ot_rate": "Norma",
+    "overtime_hours": "Orë jashtë orarit",
+    "overtime_pay": "Paga jashtë orarit",
+    "reason": "Arsyeja",
+    "reject": "Refuzo",
+    "select_employee": "Zgjidhni punonjësin",
+    "select_leave_type": "Zgjidhni llojin e pushimit",
+    "start_date": "Data e fillimit",
+    "submit_leave_request": "Dorëzo kërkesën për pushim"
   },
   "months": {
     "january": "Janar",

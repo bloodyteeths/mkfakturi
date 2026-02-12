@@ -70,6 +70,22 @@
       {{ $t('payments.send_payment') }}
     </BaseDropdownItem>
 
+    <!-- refund payment (CaSys/cPay) -->
+    <BaseDropdownItem
+      v-if="
+        row.payment_method === 'cpay' &&
+        row.status !== 'REFUNDED' &&
+        userStore.hasAbilities(abilities.EDIT_PAYMENT)
+      "
+      @click="refundPayment(row)"
+    >
+      <BaseIcon
+        name="ArrowUturnLeftIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      Refund Payment
+    </BaseDropdownItem>
+
     <!-- delete payment  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.DELETE_PAYMENT)"
@@ -162,5 +178,35 @@ async function sendPayment(payment) {
     data: payment,
     variant: 'lg',
   })
+}
+
+function refundPayment(payment) {
+  dialogStore
+    .openDialog({
+      title: 'Refund Payment',
+      message: `Are you sure you want to refund ${payment.amount || ''} for this payment? This action cannot be undone.`,
+      yesLabel: 'Confirm Refund',
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      size: 'lg',
+      hideNoButton: false,
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await paymentStore.refundPayment(payment.id)
+          notificationStore.showNotification({
+            type: 'success',
+            message: 'Payment refund initiated',
+          })
+          props.table && props.table.refresh()
+        } catch (err) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: err.response?.data?.message || 'Refund failed',
+          })
+        }
+      }
+    })
 }
 </script>

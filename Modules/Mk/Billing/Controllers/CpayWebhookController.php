@@ -61,6 +61,9 @@ class CpayWebhookController extends Controller
                 case 'subscription_cancelled':
                     return $this->handleSubscriptionCancelled($data);
 
+                case 'refund_completed':
+                    return $this->handleRefundCompleted($data);
+
                 default:
                     Log::info('Unhandled CPAY subscription event', ['event_type' => $eventType]);
 
@@ -221,6 +224,60 @@ class CpayWebhookController extends Controller
                     'subscription_ref' => $subscriptionRef,
                 ]);
             }
+        }
+
+        return response('OK', 200);
+    }
+
+    /**
+     * Handle refund completed event
+     */
+    protected function handleRefundCompleted(array $data): Response
+    {
+        $transactionId = $data['transaction_id'] ?? null;
+        $refundId = $data['refund_id'] ?? null;
+        $amount = $data['amount'] ?? 0;
+
+        if (! $transactionId) {
+            Log::error('Transaction ID missing in refund callback', $data);
+
+            return response('Bad Request', 400);
+        }
+
+        // Find the original payment by gateway transaction ID
+        $payment = \App\Models\Payment::where('gateway_transaction_id', $transactionId)->first();
+
+        if ($payment) {
+            $payment->update([
+                'gateway_status' => \App\Models\Payment::GATEWAY_STATUS_REFUNDED ?? 'refunded',
+                'gateway_response' => array_merge(
+                    $payment->gateway_response ?? [],
+                    ['refund' => $data]
+                ),
+            ]);
+
+            // If invoice was fully refunded, update invoice status
+            $invoice = $payment->invoice;
+            if ($invoice) {
+                $totalPaid = $invoice->payments()
+                    ->where('gateway_status', '!=', 'refunded')
+                    ->sum('amount');
+
+                if ($totalPaid < $invoice->total) {
+                    $invoice->update(['status' => \App\Models\Invoice::STATUS_SENT]);
+                }
+            }
+
+            Log::info('CPAY refund processed via webhook', [
+                'transaction_id' => $transactionId,
+                'refund_id' => $refundId,
+                'amount' => $amount,
+                'payment_id' => $payment->id,
+            ]);
+        } else {
+            Log::warning('Payment not found for refund callback', [
+                'transaction_id' => $transactionId,
+            ]);
         }
 
         return response('OK', 200);

@@ -102,7 +102,15 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     # Seed Macedonian Chart of Accounts (idempotent - safe to run multiple times)
     echo "Seeding Macedonian Chart of Accounts..."
     php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force
-    echo "✅ Macedonian Chart of Accounts seeder completed"
+    echo "Macedonian Chart of Accounts seeder completed"
+
+    # Seed Leave Types (idempotent - safe to run multiple times)
+    echo "Seeding Leave Types..."
+    php artisan db:seed --class=LeaveTypesSeeder --force || echo "LeaveTypesSeeder failed or table not ready"
+
+    # Seed Deadline Templates (idempotent - safe to run multiple times)
+    echo "Seeding Deadline Templates..."
+    php artisan db:seed --class=DeadlineTemplatesSeeder --force || echo "DeadlineTemplatesSeeder failed or table not ready"
 
     # Check if installation already complete (like commit 09c2afc)
     PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)

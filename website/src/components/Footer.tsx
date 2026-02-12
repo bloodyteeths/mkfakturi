@@ -126,7 +126,7 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
               </li>
               <li>
                 <Link
-                  href={`/${locale}/e-faktura`}
+                  href={`/${locale}/integrations`}
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {f.integrations}

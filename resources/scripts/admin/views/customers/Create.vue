@@ -30,6 +30,40 @@
       </BasePageHeader>
 
       <BaseCard class="mt-5">
+        <!-- Central Registry Lookup (MK only) -->
+        <div v-if="!isEdit" class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+          <label class="block text-sm font-semibold text-indigo-800 mb-2">
+            Search Central Registry
+          </label>
+          <div class="relative">
+            <BaseInput
+              v-model="registryQuery"
+              type="text"
+              placeholder="Type company name or EMBS..."
+              @input="onRegistrySearch"
+            />
+            <div
+              v-if="registryResults.length > 0"
+              class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
+            >
+              <button
+                v-for="(result, idx) in registryResults"
+                :key="idx"
+                type="button"
+                class="w-full px-4 py-3 text-left hover:bg-indigo-50 border-b border-gray-100 last:border-0"
+                @click="selectRegistryResult(result)"
+              >
+                <span class="text-xs font-mono text-gray-500">{{ result.embs }}</span>
+                <span class="mx-2 text-gray-300">|</span>
+                <span class="text-sm font-medium text-gray-900">{{ result.name }}</span>
+                <span v-if="result.city" class="mx-2 text-gray-300">|</span>
+                <span v-if="result.city" class="text-xs text-gray-500">{{ result.city }}</span>
+              </button>
+            </div>
+          </div>
+          <p v-if="registrySearching" class="mt-1 text-xs text-indigo-600">Searching...</p>
+        </div>
+
         <!-- Basic Info -->
         <div class="grid grid-cols-5 gap-4 mb-8">
           <h6 class="col-span-5 text-lg font-semibold text-left lg:col-span-1">
@@ -513,6 +547,7 @@ import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import CustomerCustomFields from '@/scripts/admin/components/custom-fields/CreateCustomFields.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import axios from 'axios'
 
 const customerStore = useCustomerStore()
 const customFieldStore = useCustomFieldStore()
@@ -605,6 +640,45 @@ const rules = computed(() => {
 const v$ = useVuelidate(rules, customerStore, {
   $scope: customFieldValidationScope,
 })
+
+// Central Registry lookup
+const registryQuery = ref('')
+const registryResults = ref([])
+const registrySearching = ref(false)
+let registryDebounce = null
+
+function onRegistrySearch() {
+  clearTimeout(registryDebounce)
+  if (registryQuery.value.length < 2) {
+    registryResults.value = []
+    return
+  }
+  registrySearching.value = true
+  registryDebounce = setTimeout(async () => {
+    try {
+      const { data } = await axios.get('/api/v1/company-lookup', {
+        params: { q: registryQuery.value },
+      })
+      registryResults.value = data.data || []
+    } catch (e) {
+      registryResults.value = []
+    } finally {
+      registrySearching.value = false
+    }
+  }, 300)
+}
+
+function selectRegistryResult(result) {
+  customerStore.currentCustomer.name = result.name || ''
+  customerStore.currentCustomer.tax_id = result.edb || result.embs || ''
+  if (customerStore.currentCustomer.billing) {
+    customerStore.currentCustomer.billing.name = result.name || ''
+    customerStore.currentCustomer.billing.address_street_1 = result.address || ''
+    customerStore.currentCustomer.billing.city = result.city || ''
+  }
+  registryResults.value = []
+  registryQuery.value = ''
+}
 
 customerStore.resetCurrentCustomer()
 

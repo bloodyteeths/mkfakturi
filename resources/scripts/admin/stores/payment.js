@@ -204,6 +204,20 @@ export const usePaymentStore = (useWindow = false) => {
         })
       },
 
+      refundPayment(id) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/payments/${id}/refund`)
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       deleteMultiplePayments() {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {

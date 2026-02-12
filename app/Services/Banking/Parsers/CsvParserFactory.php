@@ -19,6 +19,12 @@ class CsvParserFactory
         NlbCsvParser::class,
         StopanskaСsvParser::class,
         KomercijalnaCsvParser::class,
+        SparkasseCsvParser::class,
+        HalkCsvParser::class,
+        ProCreditCsvParser::class,
+        TtkCsvParser::class,
+        SilkRoadCsvParser::class,
+        OhridskaCsvParser::class,
         GenericCsvParser::class, // Fallback always last
     ];
 

@@ -479,10 +479,64 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Central Registry (crm.com.mk)
+    |--------------------------------------------------------------------------
+    |
+    | Public company lookup service. No API key needed.
+    |
+    */
+
+    'central_registry' => [
+        'base_url' => env('CRM_BASE_URL', 'https://www.crm.com.mk'),
+        'cache_ttl' => env('CRM_CACHE_TTL', 300), // 5 minutes
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Viber Business Notifications
+    |--------------------------------------------------------------------------
+    |
+    | Registration at partners.viber.com (free, self-service).
+    |
+    */
+
+    'viber' => [
+        'enabled' => env('VIBER_ENABLED', false),
+        'auth_token' => env('VIBER_AUTH_TOKEN'),
+        'sender_name' => env('VIBER_SENDER_NAME', 'Facturino'),
+        'sender_avatar' => env('VIBER_SENDER_AVATAR'),
+        'notifications' => [
+            'invoice_sent' => env('VIBER_NOTIFY_INVOICE_SENT', true),
+            'payment_received' => env('VIBER_NOTIFY_PAYMENT_RECEIVED', true),
+            'overdue_reminder' => env('VIBER_NOTIFY_OVERDUE_REMINDER', false),
+            'overdue_days' => env('VIBER_OVERDUE_DAYS', 7),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | WooCommerce Integration
+    |--------------------------------------------------------------------------
+    |
+    | Per-company settings stored in company_settings table.
+    | These are global defaults only.
+    |
+    */
+
+    'woocommerce' => [
+        'default_sync_frequency' => env('WOOCOMMERCE_SYNC_FREQUENCY', 60), // minutes
+        'max_orders_per_sync' => env('WOOCOMMERCE_MAX_ORDERS', 50),
+    ],
+
     'features' => [
         'advanced_payments' => env('FEATURE_ADVANCED_PAYMENTS', false),
         'psd2_banking' => env('FEATURE_PSD2_BANKING', false),
         'e_invoicing' => env('FEATURE_E_INVOICING', false),
+        'central_registry_lookup' => env('FEATURE_CENTRAL_REGISTRY', true),
+        'viber_notifications' => env('FEATURE_VIBER_NOTIFICATIONS', false),
+        'woocommerce_sync' => env('FEATURE_WOOCOMMERCE_SYNC', false),
     ],
 
 ];

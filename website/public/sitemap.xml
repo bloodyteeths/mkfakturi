@@ -278,6 +278,52 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Integrations -->
+  <url>
+    <loc>https://www.facturino.mk/mk/integrations</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/integrations" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/integrations" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/integrations" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/integrations" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/integrations" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/integrations</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/integrations" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/integrations" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/integrations" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/integrations" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/integrations" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/integrations</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/integrations" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/integrations" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/integrations" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/integrations" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/integrations" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/integrations</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/integrations" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/integrations" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/integrations" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/integrations" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/integrations" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Security -->
   <url>
     <loc>https://www.facturino.mk/mk/security</loc>

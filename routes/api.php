@@ -497,6 +497,23 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/receipts', [FiscalDeviceController::class, 'receipts']);
             });
 
+            // Company Lookup (Central Registry)
+            // ----------------------------------
+
+            Route::get('/company-lookup', [\App\Http\Controllers\V1\Admin\CompanyLookupController::class, 'lookup']);
+
+            // WooCommerce Integration
+            // ----------------------------------
+
+            Route::prefix('woocommerce')->middleware(['tier:business'])->group(function () {
+                Route::get('/settings', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'getSettings']);
+                Route::post('/settings', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'saveSettings']);
+                Route::post('/test-connection', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'testConnection']);
+                Route::post('/sync', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'syncNow']);
+                Route::get('/sync-history', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'syncHistory']);
+            });
+            // CLAUDE-CHECKPOINT
+
             // Exports (Phase 4)
             // ----------------------------------
 
@@ -910,6 +927,7 @@ Route::prefix('/v1')->group(function () {
             Route::prefix('client-documents')->group(function () {
                 Route::post('/upload', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'upload']);
                 Route::get('/', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'index']);
+                Route::get('/{id}/download', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'download']);
                 Route::get('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'show']);
                 Route::delete('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'destroy']);
             });

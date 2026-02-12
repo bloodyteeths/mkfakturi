@@ -196,6 +196,37 @@ class ClientDocumentController extends Controller
     }
 
     /**
+     * Download a document file.
+     */
+    public function download(Request $request, int $id)
+    {
+        $user = $request->user();
+        $companyId = (int) $request->header('company');
+
+        $document = ClientDocument::where('company_id', $companyId)->findOrFail($id);
+
+        if (! $user->isOwner() && ! $user->hasCompany($document->company_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have access to this document.',
+            ], 403);
+        }
+
+        if (! $document->file_path || ! Storage::exists($document->file_path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found.',
+            ], 404);
+        }
+
+        return Storage::download(
+            $document->file_path,
+            $document->original_filename,
+            ['Content-Type' => $document->mime_type]
+        );
+    }
+
+    /**
      * Get the active partner ID for a company.
      */
     private function getActivePartnerId(int $companyId): ?int

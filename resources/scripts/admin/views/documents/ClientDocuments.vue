@@ -201,6 +201,25 @@
         </div>
       </div>
 
+      <!-- Preview Modal -->
+      <div v-if="showPreviewModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="preview-modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showPreviewModal = false"></div>
+          <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+              <h3 id="preview-modal-title" class="text-lg font-medium text-gray-900 truncate">{{ previewDoc?.original_filename }}</h3>
+              <button @click="showPreviewModal = false" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="p-6 overflow-auto" style="max-height: calc(90vh - 80px)">
+              <img v-if="previewDoc?.mime_type?.startsWith('image/')" :src="previewUrl" class="max-w-full mx-auto" :alt="previewDoc?.original_filename" />
+              <iframe v-else-if="previewDoc?.mime_type === 'application/pdf'" :src="previewUrl" class="w-full" style="height: 70vh" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Loading State -->
       <div v-if="isLoading" class="space-y-4">
         <div v-for="i in 5" :key="i" class="bg-white shadow rounded-lg p-4 animate-pulse">
@@ -296,7 +315,21 @@
                     {{ doc.rejection_reason }}
                   </div>
                 </td>
-                <td class="px-6 py-4 text-right text-sm">
+                <td class="px-6 py-4 text-right text-sm space-x-2">
+                  <button
+                    @click="downloadDocument(doc)"
+                    class="text-blue-600 hover:text-blue-800 font-medium"
+                    :title="doc.original_filename"
+                  >
+                    Преземи
+                  </button>
+                  <button
+                    v-if="isPreviewable(doc)"
+                    @click="previewDocument(doc)"
+                    class="text-green-600 hover:text-green-800 font-medium"
+                  >
+                    Прегледај
+                  </button>
                   <button
                     v-if="doc.status === 'pending_review'"
                     @click="openDeleteModal(doc)"
@@ -375,6 +408,11 @@ const fileInput = ref(null)
 const showDeleteModal = ref(false)
 const documentToDelete = ref(null)
 const isDeleting = ref(false)
+
+// Preview modal state
+const showPreviewModal = ref(false)
+const previewDoc = ref(null)
+const previewUrl = ref('')
 
 // Pagination
 const pagination = ref({
@@ -547,6 +585,26 @@ const confirmDelete = async () => {
   } finally {
     isDeleting.value = false
   }
+}
+
+const downloadDocument = (doc) => {
+  const url = `/api/v1/client-documents/${doc.id}/download`
+  const link = document.createElement('a')
+  link.href = url
+  link.download = doc.original_filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+const isPreviewable = (doc) => {
+  return doc.mime_type?.startsWith('image/') || doc.mime_type === 'application/pdf'
+}
+
+const previewDocument = (doc) => {
+  previewDoc.value = doc
+  previewUrl.value = `/api/v1/client-documents/${doc.id}/download`
+  showPreviewModal.value = true
 }
 
 const goToPage = (page) => {

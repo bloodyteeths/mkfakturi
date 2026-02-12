@@ -61,6 +61,15 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
                             >
                                 {t.nav.efaktura}
                             </Link>
+                            {t.nav.integrations && (
+                                <Link
+                                    href={`/${locale}/integrations`}
+                                    className="text-gray-700 hover:text-indigo-600 font-medium py-3 px-4"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {t.nav.integrations}
+                                </Link>
+                            )}
                             <Link
                                 href={`/${locale}/pricing`}
                                 className="text-gray-700 hover:text-indigo-600 font-medium py-3 px-4"

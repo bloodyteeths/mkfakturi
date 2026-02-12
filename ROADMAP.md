@@ -7,36 +7,52 @@
 
 ## Overview
 
-| Phase | Theme | Tickets | Est. Effort | Priority |
-|-------|-------|---------|-------------|----------|
-| **P7** | Compliance Critical | P7-01 … P7-05 | 9–13 days | MUST — blocks revenue / legal compliance |
-| **P8** | Bureau Distribution | P8-01 … P8-03 | 6–9 days | SHOULD — blocks accountant GTM channel |
-| **P9** | Data Accuracy | P9-01 | 1–2 days | SHOULD — replaces interim solution |
-| **P10** | Mobile & Hardware | P10-01 … P10-02 | 8–12 days | COULD — competitive differentiator |
+| Phase | Theme | Tickets | Est. Effort | Priority | Status |
+|-------|-------|---------|-------------|----------|--------|
+| **P7** | Compliance Critical | P7-01 … P7-05 | 9–13 days | MUST — blocks revenue / legal compliance | ✅ COMPLETED |
+| **P8** | Bureau Distribution | P8-01 … P8-03 | 6–9 days | SHOULD — blocks accountant GTM channel | ✅ COMPLETED |
+| **P9** | Data Accuracy | P9-01 | 1–2 days | SHOULD — replaces interim solution | ✅ COMPLETED |
+| **P10** | Mobile & Hardware | P10-01 … P10-02 | 8–12 days | COULD — competitive differentiator | ✅ COMPLETED |
+| **P11** | Integration Quick Wins | P11-01 … P11-03 | 4–6 days | MUST — bank coverage + marketing | Pending |
+| **P12** | External API Integrations | P12-01 … P12-04 | 13–17 days | SHOULD — new integration channels | Pending |
+| **P13** | Bank & Auth Expansion | P13-01 … P13-03 | 11–15 days | SHOULD — requires sandbox credentials | Pending |
+| **P14** | Hardware & Deferred | P14-01 | 7–14 days | COULD — blocked by UJP specs | Deferred |
 
-**Total estimated effort: 24–36 days**
+**Phases P7–P10 completed: 24–36 days** ✅
+**Remaining effort (P11–P14): 35–52 days**
 
 ### Dependency Graph
 
 ```
-P7-01 (10% VAT)          ─── independent, start immediately
-P7-02 (Incoming e-invoice) ─── independent, start immediately
-P7-03 (Leave management)  ─── independent, start immediately
-P7-04 (Overtime)           ─── depends on P7-03 (leave affects gross before overtime calc)
-P7-05 (Contribution caps)  ─── depends on P7-04 (caps apply after overtime gross)
-P8-01 (Client doc portal)  ─── independent, start after P7 stabilises
-P8-02 (Deadline tracking)  ─── independent
-P8-03 (Bulk reporting)     ─── independent
-P9-01 (NBRM rates)         ─── independent
-P10-01 (PWA mobile)        ─── independent
-P10-02 (Fiscal devices)    ─── deferred until UJP publishes device API specs
+P7-01 (10% VAT)            ─── ✅ COMPLETED
+P7-02 (Incoming e-invoice)  ─── ✅ COMPLETED
+P7-03 (Leave management)    ─── ✅ COMPLETED
+P7-04 (Overtime)             ─── ✅ COMPLETED
+P7-05 (Contribution caps)   ─── ✅ COMPLETED
+P8-01 (Client doc portal)   ─── ✅ COMPLETED
+P8-02 (Deadline tracking)   ─── ✅ COMPLETED
+P8-03 (Bulk reporting)      ─── ✅ COMPLETED
+P9-01 (NBRM rates)          ─── ✅ COMPLETED
+P10-01 (PWA mobile)         ─── ✅ COMPLETED
+P10-02 (Fiscal devices)     ─── ✅ COMPLETED (stubs — awaiting UJP device API specs)
+P11-01 (Bank CSV parsers)   ─── independent, start immediately
+P11-02 (CaSys refund)       ─── independent, start immediately
+P11-03 (Integrations page)  ─── independent, start immediately
+P12-01 (Central Registry)   ─── independent
+P12-02 (Viber notifications)─── independent
+P12-03 (WooCommerce sync)   ─── independent
+P12-04 (Incoming e-invoice) ─── extends P7-02
+P13-01 (Komercijalna PSD2)  ─── needs sandbox credentials
+P13-02 (UJP e-Invoice API)  ─── needs UJP API credentials
+P13-03 (eID/OneID login)    ─── needs eID registration
+P14-01 (Fiscal devices)     ─── deferred until UJP publishes device API specs
 ```
 
 ---
 
-## Phase 7 — Compliance Critical
+## Phase 7 — Compliance Critical ✅ COMPLETED
 
-### P7-01: Add 10% Restaurant VAT Rate
+### P7-01: Add 10% Restaurant VAT Rate ✅
 
 **Why:** Macedonian VAT has three tiers — 18% standard, 10% restaurant services, 5% reduced.
 The 10% rate is missing from config, seeder, and UBL mapper. Restaurants using Facturino
@@ -68,7 +84,7 @@ None — tax type selector already renders all seeded rates dynamically.
 
 ---
 
-### P7-02: Incoming E-Invoice Acceptance Workflow
+### P7-02: Incoming E-Invoice Acceptance Workflow ✅
 
 **Why:** The e-Faktura mandate requires businesses to both **send and receive** e-invoices.
 Current implementation is outbound-only. When mandatory B2B e-invoicing goes live (Q3 2026),
@@ -139,7 +155,7 @@ Middleware: `tier:standard` (same as outbound e-invoicing)
 
 ---
 
-### P7-03: Leave Management (Annual, Sick, Maternity)
+### P7-03: Leave Management (Annual, Sick, Maternity) ✅
 
 **Why:** Macedonian labor law mandates 20-day minimum annual leave, sick leave at 70–100% of gross
 for first 30 days (employer-funded), and 9-month maternity leave at full pay. Current payroll
@@ -255,7 +271,7 @@ Middleware: `tier:payroll` (Business tier minimum, same as payroll)
 
 ---
 
-### P7-04: Overtime Calculations (135–150%)
+### P7-04: Overtime Calculations (135–150%) ✅
 
 **Why:** Macedonian labor law requires overtime at 135% for regular overtime and 150% for
 holidays/night work. Current payroll has no overtime tracking.
@@ -301,7 +317,7 @@ if (!Schema::hasColumn('payroll_run_lines', 'overtime_hours')) {
 
 ---
 
-### P7-05: Minimum/Maximum Contribution Base Caps
+### P7-05: Minimum/Maximum Contribution Base Caps ✅
 
 **Why:** Macedonian social contributions have a minimum base of MKD 31,577/month (50% of national
 average MKD 63,154) and maximum base of MKD 1,010,464. Current payroll applies flat percentages
@@ -329,9 +345,9 @@ None.
 
 ---
 
-## Phase 8 — Bureau Distribution (GTM-Critical)
+## Phase 8 — Bureau Distribution (GTM-Critical) ✅ COMPLETED
 
-### P8-01: Client Document Upload Portal
+### P8-01: Client Document Upload Portal ✅
 
 **Why:** Accounting bureaus need clients to digitally upload invoices, receipts, and contracts
 instead of delivering paper. Currently only partner KYC document upload exists. No client-facing
@@ -411,7 +427,7 @@ GET    /api/v1/partner/clients/{company}/documents/download-all → bulkDownload
 
 ---
 
-### P8-02: Deadline Tracking Dashboard
+### P8-02: Deadline Tracking Dashboard ✅
 
 **Why:** Accounting bureaus managing 10–130+ clients need centralized deadline tracking.
 Key deadlines: VAT returns (25th monthly), MPIN payroll (10th monthly), CIT advance (15th monthly),
@@ -500,7 +516,7 @@ $schedule->command('deadlines:send-reminders')->dailyAt('09:00');
 
 ---
 
-### P8-03: Bulk Reporting Across Clients
+### P8-03: Bulk Reporting Across Clients ✅
 
 **Why:** Partners managing 50+ clients need aggregated views — not one-by-one reports.
 Current reports are per-company. Partners need: multi-company comparison, consolidated
@@ -553,9 +569,9 @@ POST   /api/v1/partner/reports/export            → export()
 
 ---
 
-## Phase 9 — Data Accuracy
+## Phase 9 — Data Accuracy ✅ COMPLETED
 
-### P9-01: NBRM Official Exchange Rates
+### P9-01: NBRM Official Exchange Rates ✅
 
 **Why:** Current implementation uses Frankfurter (ECB) for exchange rates. For legal compliance,
 Macedonian businesses should use official NBRM (National Bank of Macedonia) rates.
@@ -602,9 +618,9 @@ NBRM_CACHE_TTL=86400          # 24 hours (rates are daily)
 
 ---
 
-## Phase 10 — Mobile & Hardware
+## Phase 10 — Mobile & Hardware ✅ COMPLETED
 
-### P10-01: PWA Mobile Experience
+### P10-01: PWA Mobile Experience ✅
 
 **Why:** 32% digital skills rate in Macedonia demands radically simple mobile access.
 No competitor has mobile. A PWA (Progressive Web App) gives install-to-homescreen,
@@ -647,7 +663,7 @@ None.
 
 ---
 
-### P10-02: Fiscal Device Integration (DEFERRED)
+### P10-02: Fiscal Device Integration (DEFERRED) ✅ (stubs completed)
 
 **Why:** Macedonian fiscal devices (Daisy FX 1300, Synergy PF-500, Expert SX, Severec)
 require direct hardware protocol integration. UJP has not published standardized device
@@ -700,12 +716,675 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 
 ---
 
+## Phase 11 — Integration Quick Wins
+
+> Bank coverage expansion, payment completeness, and marketing visibility.
+> All items use publicly exposed APIs — zero vendor permission required.
+
+### P11-01: Add 6 Missing Bank CSV Parsers
+
+**Why:** Current CSV import supports 3 banks (NLB, Stopanska, Komercijalna = ~55% market share).
+Adding 6 more banks covers ~95%+ of Macedonian businesses. Each parser is a single PHP file
+extending the existing `AbstractCsvParser` — pure copy-paste pattern.
+
+**Effort:** 1–2 days
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/Banking/Parsers/SparkasseCsvParser.php` | Шпаркасе Банка (12.7% market share). Extends `AbstractCsvParser`. |
+| `app/Services/Banking/Parsers/HalkCsvParser.php` | Халк Банка (12.3%). Extends `AbstractCsvParser`. |
+| `app/Services/Banking/Parsers/ProCreditCsvParser.php` | ПроКредит Банка (5.2%). Extends `AbstractCsvParser`. |
+| `app/Services/Banking/Parsers/TtkCsvParser.php` | ТТК Банка (3.8%). Extends `AbstractCsvParser`. |
+| `app/Services/Banking/Parsers/SilkRoadCsvParser.php` | Силк Роуд Банка (2.1%). Extends `AbstractCsvParser`. |
+| `app/Services/Banking/Parsers/OhridskaCsvParser.php` | Охридска Банка (1.9%). Extends `AbstractCsvParser`. |
+
+Each parser implements: `getBankCode()`, `getBankName()`, `getDelimiter()`, `getEncoding()`,
+`getRequiredColumns()`, `canParse()`, `mapRecord()`.
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `app/Services/Banking/Parsers/CsvParserFactory.php` | Register 6 new parsers in `$parsers` array (before GenericCsvParser) |
+
+#### Reuse
+
+- **Template:** `app/Services/Banking/Parsers/KomercijalnaCsvParser.php` (most recent, cleanest)
+- **Base class:** `app/Services/Banking/Parsers/AbstractCsvParser.php`
+- **Factory:** `app/Services/Banking/Parsers/CsvParserFactory.php` (`getSupportedBanks()` auto-populates UI)
+
+#### DB changes
+None.
+
+#### Vue changes
+None — banking dashboard bank selector auto-populates from `CsvParserFactory::getSupportedBanks()`.
+
+#### Prerequisites
+Need sample CSV export from each bank to identify: column names (Macedonian/English),
+delimiter (comma vs semicolon), encoding (UTF-8 vs Windows-1251), date format, amount format.
+
+#### Test plan
+1. Unit test per parser with 5-10 row CSV fixture
+2. Test `canParse()` auto-detection returns correct parser for each bank format
+3. Test `mapRecord()` returns normalized transaction data with correct debit/credit signs
+
+---
+
+### P11-02: CaSys/cPay Refund Method
+
+**Why:** CaSys payment gateway integration is complete for checkout, webhooks, and subscriptions
+but has no refund capability. The CaSys API supports refunds via the same POST endpoint with
+`tran_type=REFUND` and HMAC signing.
+
+**Effort:** 0.5 day
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `Modules/Mk/Services/CpayDriver.php` | Add `refund(string $transactionId, int $amount): array` method. Same POST endpoint, `tran_type=REFUND`, HMAC-signed. |
+| `Modules/Mk/Billing/Controllers/CpayWebhookController.php` | Add `REFUND` event type handling in webhook switch statement. Update payment record status. |
+
+#### Vue changes
+
+| Component | Change |
+|-----------|--------|
+| Payment detail dropdown (invoice view) | Add "Refund Payment" action to existing `BaseDropdown`. Follow `FiscalDeviceIndexDropdown.vue` pattern. |
+| New: `RefundConfirmationModal.vue` | Confirmation modal: shows original amount, refund amount input, reason dropdown, warning text. Uses `BaseModal` + `BaseInput`. |
+
+#### Reuse
+- **Reference:** [`c0nevski/CaSys-php-implementation`](https://github.com/c0nevski/CaSys-php-implementation) (GitHub) for refund flow
+
+#### DB changes
+None — existing payment records table supports status updates.
+
+#### Test plan
+1. Unit test: `CpayDriver::refund()` generates correct HMAC signature and POST body
+2. Feature test: Webhook with `tran_type=REFUND` updates payment status
+3. Manual: Issue test refund via CaSys sandbox
+
+---
+
+### P11-03: Marketing Website — Integrations Page
+
+**Why:** Facturino's marketing site has no integrations page. Potential customers cannot see what
+banks, government systems, and e-commerce platforms are supported. This is the #1 way SaaS
+companies signal maturity and reduce sales friction.
+
+**Effort:** 2–3 days
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `website/src/app/[locale]/integrations/page.tsx` | Full integrations page with 5 sections (see below). Inline `copy` object with all 4 locales (mk, sq, tr, en). |
+
+#### Page sections
+
+**Section 1 — Hero:** Gradient background, headline "Connected to Everything Macedonian Businesses Need",
+subtitle "9 banks, government systems, e-commerce, and more", CTA button, animated logo strip.
+
+**Section 2 — Category Grid (5 cards):**
+
+| Category | Icon | Items |
+|----------|------|-------|
+| Banking & Payments | BanknotesIcon | 9 MK banks (NLB, Stopanska, Komercijalna, Шпаркасе, Халк, ПроКредит, ТТК, Силк Роуд, Охридска), PSD2 Open Banking, CaSys/cPay, Paddle, MT940 & CSV |
+| Government & Tax | BuildingLibraryIcon | UJP e-Faktura (QES-signed), DDV-04 VAT returns, NBRM exchange rates, Central Registry lookup, KIBS certificates |
+| E-Commerce | ShoppingCartIcon | WooCommerce order sync, "Coming soon": Shopify, Magento, Ananas.mk |
+| Notifications | ChatBubbleIcon | Viber Business, Email (SMTP/Mailgun/SES), "Coming soon": SMS |
+| AI & Automation | SparklesIcon | AI insights (GPT-4/Claude/Gemini), OCR scanning, intelligent import, fiscal receipt DataMatrix |
+
+**Section 3 — Comparison Table:** "With Facturino" (green checks) vs "Without Facturino" (red X).
+Reuse pattern from `e-faktura/page.tsx`.
+
+**Section 4 — Status Timeline:** LIVE (green) / COMING SOON (yellow) / PLANNED (gray).
+Reuse timeline pattern from `e-faktura/page.tsx`.
+
+**Section 5 — Bottom CTA:** "Ready to Connect Your Business?", two buttons.
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `website/src/i18n/dictionaries.ts` | Add `nav.integrations` key to all 4 locale objects (mk: "Интеграции", sq: "Integrimet", tr: "Entegrasyonlar", en: "Integrations") |
+| `website/src/components/Navbar.tsx` | Add "Integrations" link after "Features" in nav links array |
+| `website/src/components/MobileMenu.tsx` | Add "Integrations" link to mobile menu |
+| `website/src/components/Footer.tsx` | Add "Integrations" link to footer product section |
+| `website/public/sitemap.xml` | Add `<url>` blocks for `/mk/integrations`, `/sq/integrations`, `/tr/integrations`, `/en/integrations` with hreflang alternates |
+
+#### Assets needed
+- Bank logos: already have `bank_logos.webp` in `website/public/assets/images/`
+- Government logos: UJP, NBRM, KIBS (source from official websites, convert to WebP)
+- Category icons: Heroicons (already used throughout)
+
+#### SEO
+```
+title: "Integrations | Facturino"
+description: "Connect Facturino to 9 Macedonian banks, UJP e-Faktura, NBRM exchange rates, WooCommerce, Viber, and more."
+```
+
+#### Test plan
+1. Verify page loads at all 4 locale URLs: `/mk/integrations`, `/sq/integrations`, `/tr/integrations`, `/en/integrations`
+2. All nav links, footer links, and sitemap entries point to correct URLs
+3. Mobile responsive: all sections stack correctly on mobile
+4. `npm run build` passes without errors
+
+---
+
+## Phase 12 — External API Integrations
+
+> New integrations using publicly exposed APIs. Self-service registration only.
+
+### P12-01: Central Registry Company Auto-Lookup (crm.com.mk)
+
+**Why:** When creating a customer/vendor, Macedonian accountants manually look up company data
+(EMBS, tax ID, legal name, address) on crm.com.mk, then type it into the form. Auto-lookup
+eliminates manual entry errors and saves 2-3 minutes per customer.
+
+**Effort:** 3 days
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/CentralRegistryService.php` | HTTP client for crm.com.mk public search. `lookup(string $query): array` — searches by company name or EMBS. Parses HTML response with DOMDocument + XPath. Returns: EMBS, legal name, tax ID (EDB), address, city, activity code, status. 5-minute cache per query. Rate-limited: max 2 req/sec. |
+| `app/Http/Controllers/V1/Admin/CompanyLookupController.php` | `lookup(Request $request)` — validates query, calls service, returns JSON. |
+| `resources/scripts/admin/composables/useCentralRegistryLookup.js` | Vue composable: debounced search (300ms), result formatting, keyboard navigation (arrow keys + enter). |
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `routes/api.php` | Add `GET /api/v1/company-lookup?q={query}` inside authenticated group |
+| Customer create/edit Vue component | Add search bar above form: "Search Central Registry". When country=MK, show typeahead. Selecting a result auto-fills: company name, tax ID, address, city, activity code. Green checkmark badge on auto-filled fields. |
+
+#### DB changes
+None.
+
+#### Vue wireframe
+
+```
+┌─── Search Central Registry ──────────┐
+│ 🔍 Type company name or EMBS...      │
+│  ┌─────────────────────────────────┐  │
+│  │ 1234567 │ Фактурино ДООЕЛ│Скопје│  │
+│  │ 1234568 │ Фактурино ДОО  │Битола│  │
+│  └─────────────────────────────────┘  │
+└───────────────────────────────────────┘
+Company Name: [Фактурино ДООЕЛ     ] ✓ Central Registry
+Tax ID (EDB): [4030012345678       ] ✓ Central Registry
+Address:      [ул. Македонија 12   ] ✓ Central Registry
+```
+
+#### API
+No auth required — crm.com.mk is public data (Open Government Partnership).
+
+#### Test plan
+1. Unit test: Mock HTML response → service parses EMBS, name, address correctly
+2. Feature test: `GET /api/v1/company-lookup?q=facturino` returns structured JSON
+3. Unit test: crm.com.mk unreachable → graceful fallback (empty result, no error)
+4. Manual: Type real company name → verify auto-fill works
+
+---
+
+### P12-02: Viber Business Notifications
+
+**Why:** Viber is the #1 messaging app in Macedonia (far bigger than WhatsApp). Invoice
+notifications and payment reminders via Viber have much higher open rates than email.
+No Macedonian accounting software offers this.
+
+**Effort:** 3–4 days
+
+#### Package
+`composer require alserom/viber-php` — needs NX ticket per whitelist rules (or add to whitelist)
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/ViberNotificationService.php` | Wraps `alserom/viber-php`. Methods: `sendMessage(string $phone, string $text)`, `sendInvoiceNotification(Invoice $invoice)`, `sendPaymentConfirmation(Payment $payment)`, `sendOverdueReminder(Invoice $invoice)`. |
+| `app/Notifications/Channels/ViberChannel.php` | Custom Laravel notification channel. Implements `send()` method that delegates to ViberNotificationService. |
+| `app/Notifications/ViberInvoiceSent.php` | Laravel notification: "Invoice #INV-2024-042 for MKD 12,500 has been sent" |
+| `app/Notifications/ViberPaymentReceived.php` | Laravel notification: "Payment of MKD 12,500 received for Invoice #INV-2024-042" |
+| `app/Notifications/ViberOverdueReminder.php` | Laravel notification: "Invoice #INV-2024-042 for MKD 12,500 is overdue by 7 days" |
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `config/mk.php` | Add `viber` section: `auth_token`, `sender_name` (default "Facturino"), `sender_avatar` (logo URL) |
+| `routes/api.php` | Add `POST /api/v1/webhooks/viber` (CSRF exempt) for Viber webhook callbacks |
+| `resources/scripts/admin/views/settings/NotificationsSetting.vue` | Add "Viber Notifications" card with: master toggle, auth token input (masked), sender name input, "Test Connection" button, per-event toggles (invoice sent, payment received, overdue reminder with days config) |
+| Customer create/edit Vue component | Add "Viber Phone" field next to existing phone. Helper text: "Used for invoice delivery notifications" |
+| Invoice send modal (`SendInvoiceModal.vue`) | Add "Send via Viber" checkbox alongside existing email option |
+
+#### Vue wireframe (Settings)
+
+```
+┌── Viber Notifications ───────────────┐
+│ Send invoice notifications via Viber  │
+├───────────────────────────────────────┤
+│ Enable Viber     ○───────●  ON       │
+│                                       │
+│ Auth Token: [••••••••••••••] 👁️       │
+│ Sender Name: [Facturino        ]     │
+│ [Test Connection]  ✅ Connected      │
+│                                       │
+│ ── Notification Events ──            │
+│ Invoice Sent        ○──●  ON         │
+│ Payment Received    ○──●  ON         │
+│ Overdue Reminder    ●──○  OFF        │
+│   Remind after: [7 days ▼]          │
+│                                       │
+│                      [Save Settings] │
+└───────────────────────────────────────┘
+```
+
+#### API
+- Registration: Self-service at `https://partners.viber.com/` (free)
+- Auth: Bearer token
+- Format: REST API with JSON payloads
+
+#### Env
+```
+VIBER_AUTH_TOKEN=
+VIBER_SENDER_NAME=Facturino
+VIBER_SENDER_AVATAR=https://app.facturino.mk/logo.png
+```
+
+#### Test plan
+1. Unit test: `ViberNotificationService::sendMessage()` calls correct API endpoint with correct payload
+2. Feature test: Viber webhook endpoint handles incoming message events
+3. Unit test: Notification channel formats message correctly per notification type
+4. Manual: Send test Viber message from settings page
+
+---
+
+### P12-03: WooCommerce Order-to-Invoice Sync
+
+**Why:** 2,160+ Macedonian online stores use WooCommerce. Auto-syncing orders into Facturino
+as invoices, with DDV calculations and e-Faktura submission, serves thousands of online sellers.
+No MK accounting software offers this.
+
+**Effort:** 4–5 days
+
+#### Package
+`composer require automattic/woocommerce-api-php` — already in CLAUDE.md whitelist (WOO-01)
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/WooCommerce/WooCommerceClient.php` | Wraps REST API SDK. Connection test, order fetching with pagination, status push. |
+| `app/Services/WooCommerce/WooCommerceOrderMapper.php` | Maps WC order → Facturino invoice: products → line items, WC tax classes → MK tax types, customer → Facturino customer (create if new), shipping → line item. |
+| `app/Services/WooCommerce/WooCommerceSyncService.php` | Orchestrates pull/push: fetch new orders since last sync, create invoices, update WC order status. Idempotent (tracks `wc_order_id` to prevent duplicates). |
+| `app/Jobs/SyncWooCommerceOrdersJob.php` | Queued job: 3 retries, backoff [60, 300, 900]. Calls WooCommerceSyncService. |
+| `app/Http/Controllers/V1/Admin/Integration/WooCommerceController.php` | CRUD for connection settings, manual sync trigger, sync history. |
+| `app/Models/WooCommerceConnection.php` | Model: company_id, store_url, consumer_key (encrypted), consumer_secret (encrypted), is_active, last_synced_at, sync_frequency, tax_mapping (JSON), default_payment_method_id. |
+| `resources/scripts/admin/views/settings/WooCommerceSetting.vue` | Full settings page (see wireframe below). |
+| `resources/scripts/admin/stores/woocommerce.js` | Pinia store for WooCommerce state management. |
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `config/mk.php` | Add `woocommerce` section: `sync_frequencies` array, `default_tax_mapping` |
+| `routes/api.php` | Add WooCommerce endpoints inside authenticated group |
+| `resources/scripts/admin/stores/global.js` | Add WooCommerce entry to `settingMenu` |
+| `resources/scripts/admin/admin-router.js` | Add route for WooCommerce settings page |
+
+#### DB changes
+
+**Migration:** `database/migrations/2026_02_15_001000_create_woocommerce_connections_table.php`
+
+```php
+Schema::create('woocommerce_connections', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedInteger('company_id');
+    $table->string('store_url', 500);
+    $table->text('consumer_key'); // encrypted
+    $table->text('consumer_secret'); // encrypted
+    $table->boolean('is_active')->default(true);
+    $table->timestamp('last_synced_at')->nullable();
+    $table->string('sync_frequency', 20)->default('1h'); // 15m, 1h, 4h, manual
+    $table->json('tax_mapping')->nullable(); // { "standard": 18, "reduced": 5 }
+    $table->unsignedBigInteger('default_payment_method_id')->nullable();
+    $table->unsignedBigInteger('last_order_id')->default(0); // for incremental sync
+    $table->timestamps();
+    $table->foreign('company_id')->references('id')->on('companies')->onDelete('restrict');
+    $table->unique('company_id');
+}) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+Schema::create('woocommerce_sync_logs', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('connection_id');
+    $table->enum('status', ['success', 'partial', 'failed'])->default('success');
+    $table->unsignedInteger('orders_fetched')->default(0);
+    $table->unsignedInteger('invoices_created')->default(0);
+    $table->unsignedInteger('errors')->default(0);
+    $table->json('error_details')->nullable();
+    $table->timestamps();
+    $table->foreign('connection_id')->references('id')->on('woocommerce_connections')->onDelete('cascade');
+    $table->index(['connection_id', 'created_at']);
+}) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+#### Vue wireframe (Settings)
+
+```
+┌── WooCommerce Integration ───────────┐
+│ Sync orders from your WooCommerce     │
+├───────────────────────────────────────┤
+│ ┌── Connection ────────────────────┐  │
+│ │ Store URL:    [https://myshop.mk]│  │
+│ │ Consumer Key: [ck_••••••••••••]  │  │
+│ │ Consumer Sec: [cs_••••••••••••]  │  │
+│ │ [Test Connection] ✅ Connected   │  │
+│ └──────────────────────────────────┘  │
+│                                       │
+│ ┌── Sync Settings ─────────────────┐  │
+│ │ Auto-sync      ○──●  ON         │  │
+│ │ Frequency: [Every hour  ▼]      │  │
+│ │ Tax Mapping:                     │  │
+│ │   WC "Standard" → [ДДВ 18%  ▼] │  │
+│ │   WC "Reduced"  → [ДДВ 5%   ▼] │  │
+│ │ Payment: [CaSys/cPay ▼]        │  │
+│ └──────────────────────────────────┘  │
+│                                       │
+│ ┌── Sync History ──────────────────┐  │
+│ │ Time     │ Orders │ Status       │  │
+│ │ 14:30    │ 3      │ ✅ Success   │  │
+│ │ 13:30    │ 0      │ ✅ No new    │  │
+│ │ 12:30    │ 1      │ ⚠️ 1 error   │  │
+│ └──────────────────────────────────┘  │
+│                                       │
+│    [Sync Now]        [Save Settings] │
+└───────────────────────────────────────┘
+```
+
+#### API endpoints
+
+```
+GET    /api/v1/integrations/woocommerce              → show()        (connection details)
+POST   /api/v1/integrations/woocommerce              → store()       (create/update connection)
+DELETE /api/v1/integrations/woocommerce              → destroy()     (disconnect)
+POST   /api/v1/integrations/woocommerce/test         → testConnection()
+POST   /api/v1/integrations/woocommerce/sync         → syncNow()     (trigger manual sync)
+GET    /api/v1/integrations/woocommerce/logs         → logs()        (sync history)
+```
+
+#### Test plan
+1. Unit test: `WooCommerceOrderMapper` maps WC order JSON to invoice data correctly
+2. Unit test: Idempotency — same `wc_order_id` does not create duplicate invoice
+3. Feature test: `POST /sync` creates invoices from mock WC API response
+4. Feature test: Connection test endpoint validates credentials
+5. Manual: Connect real WooCommerce sandbox store → verify orders sync
+
+---
+
+### P12-04: Incoming E-Invoice Workflow (extends P7-02)
+
+**Why:** Mandatory for B2B e-invoicing compliance (Q3 2026). `PollEInvoiceInboxJob.handle()`
+is currently an empty no-op. Businesses need to receive, review, accept, and reject supplier
+invoices through the UJP portal.
+
+**Effort:** 3–5 days
+
+See P7-02 above for full specification. This ticket covers the implementation
+using existing UJP portal credentials.
+
+#### Key additions beyond P7-02
+
+| File | Description |
+|------|-------------|
+| `resources/scripts/admin/components/modal-components/EInvoicePreviewModal.vue` | Renders UBL XML as human-readable invoice: supplier info, line items table, tax breakdown, totals. Uses existing `BaseModal`. |
+
+#### Vue wireframe (Inbox Tab)
+
+```
+[Invoices] [Incoming E-Invoices] [2 new]
+──────────────────────────────────────────
+[Poll Now 🔄]          Filter: [All ▼]
+
+Sender        │ Invoice# │ Amount  │ ⋮
+Status        │ Date     │         │
+──────────────┼──────────┼─────────┼──
+АД Фирма      │ F-2024-42│ 12,500  │ Review
+🔵 RECEIVED   │ 12.02.26 │         │ Accept
+              │          │         │ Reject
+──────────────┼──────────┼─────────┼──
+ДОО Сервис    │ S-1234   │ 5,800   │
+🟢 ACCEPTED   │ 11.02.26 │         │
+```
+
+---
+
+## Phase 13 — Bank & Authentication Expansion
+
+> Requires external sandbox credentials or registration.
+
+### P13-01: Komercijalna Banka PSD2 Activation
+
+**Why:** Komercijalna Banka has 22% market share — the largest bank in Macedonia.
+The gateway implementation already exists (`KomerGateway.php`, 29KB) and is registered
+in `Psd2GatewayClient::getGateway()`. Just needs sandbox testing and config wiring.
+
+**Effort:** 3 days
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `config/mk.php` | Add `komercijalna` section: `client_id`, `client_secret`, `sandbox_base_url`, `production_base_url`, `mtls_cert_path`, `mtls_key_path` |
+| `config/mk.php` | Update `banks.supported` array to include `'komercijalna'` |
+| `Modules/Mk/Services/KomerGateway.php` | Fix any issues found during sandbox testing |
+
+#### Requires
+Self-service sandbox registration at Komercijalna developer portal.
+
+#### Vue changes
+None — `ConnectBank.vue` dynamically reads bank providers from config.
+
+#### Test plan
+1. Integration test: OAuth2 flow with Komercijalna sandbox credentials
+2. Integration test: Fetch accounts, fetch transactions for date range
+3. Verify rate limiting (15 req/min) is respected
+
+---
+
+### P13-02: UJP E-Invoice Official API
+
+**Why:** Current e-invoice submission uses portal scraping (`tools/efaktura_upload.php`)
+which is fragile — `portalCheckStatus()` returns hardcoded success on non-200 HTTP codes.
+UJP launched an official API pilot (Jan 2026, mandatory July 2026). Config already has
+`efaktura.mode => 'portal' | 'api'` with API key placeholders.
+
+**Effort:** 1 week
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/EFaktura/UjpApiClient.php` | REST API client for UJP e-Faktura. Methods: `submitInvoice()`, `checkStatus()`, `pollInbox()`, `acceptIncoming()`, `rejectIncoming()`. HMAC/signature auth. |
+| `app/Services/EFaktura/UjpPortalClient.php` | Refactor `tools/efaktura_upload.php` into proper Laravel service class. Same portal-scraping logic but testable and injectable. |
+| `app/Jobs/CheckEInvoiceDeliveryStatusJob.php` | Queued job: polls delivery status for submitted invoices. Updates `EInvoiceSubmission` status. |
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `app/Jobs/SubmitEInvoiceJob.php` | Use service class based on `config('mk.efaktura.mode')`: `'api'` → UjpApiClient, `'portal'` → UjpPortalClient |
+| `app/Jobs/PollEInvoiceInboxJob.php` | Implement `handle()` using same mode-based dispatch |
+| `routes/api.php` | Add `POST /api/v1/webhooks/ujp` (CSRF exempt) for delivery status callbacks |
+| `config/mk.php` | Add delivery status check config: poll interval, retry count |
+
+#### Requires
+API credentials from UJP developer portal.
+
+#### Vue changes
+
+| Component | Change |
+|-----------|--------|
+| E-Faktura settings page | Add "Submission Mode" toggle: Portal (legacy) / API (recommended). Show connection status badge (green/red). API key input fields (masked). |
+
+#### Test plan
+1. Unit test: `UjpApiClient::submitInvoice()` generates correct request payload
+2. Feature test: Mode toggle correctly dispatches to Portal vs API client
+3. Integration test (when API available): Submit test invoice → verify EUID received
+4. Manual: Toggle mode in settings → verify correct submission path used
+
+---
+
+### P13-03: eID/OneID Login
+
+**Why:** eID is Macedonia's national electronic identity system. Integrating it as an
+alternative login method eliminates password management for businesses already using eID
+for government services. OneID uses standard OpenID Connect (OIDC).
+
+**Effort:** 1 week
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/Auth/OneIdProvider.php` | Custom Laravel Socialite provider implementing OIDC protocol. Handles: authorize URL generation, callback token exchange, user info fetching. |
+| `app/Http/Controllers/Auth/OneIdAuthController.php` | `redirect()` — redirects to OneID login page. `callback()` — handles OIDC callback, finds or creates user, logs in. First-time login: prompt to link to existing account or create new. |
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `routes/web.php` | Add `GET /auth/oneid/redirect` and `GET /auth/oneid/callback` |
+| `config/services.php` | Add OneID OIDC config: `client_id`, `client_secret`, `redirect_uri`, `authorize_url`, `token_url`, `userinfo_url` |
+| `resources/scripts/admin/layouts/LayoutLogin.vue` | Add "Sign in with eID" button below email/password form. Government blue style (`bg-blue-700`). Divider: "──── or ────" |
+
+#### Requires
+Registration at eid.mk or via eID Easy (eideasy.com) as OIDC wrapper.
+
+#### No new packages needed
+Laravel Socialite already installed — just needs custom provider.
+
+#### DB changes
+
+**Migration:** `database/migrations/2026_02_15_001100_add_oneid_to_users.php`
+
+```php
+if (!Schema::hasColumn('users', 'oneid_sub')) {
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('oneid_sub', 100)->nullable()->after('email'); // OIDC subject identifier
+        $table->unique('oneid_sub');
+    });
+}
+```
+
+#### Vue wireframe (Login)
+
+```
+          FACTURINO
+    Sign in to your account
+
+Email:    [                         ]
+Password: [                         ]
+[Forgot password?]
+
+        [    Sign In    ]
+
+        ──── or ────
+
+ [🏛️ Sign in with eID / OneID]
+
+Don't have an account? [Sign up]
+```
+
+#### Test plan
+1. Unit test: OneIdProvider generates correct authorize URL
+2. Feature test: OIDC callback creates user with `oneid_sub`
+3. Feature test: Second login with same `oneid_sub` finds existing user
+4. Manual: Click eID button → redirect → callback → logged in
+
+---
+
+## Phase 14 — Hardware & Deferred
+
+> Items blocked by external dependencies.
+
+### P14-01: Fiscal Device Protocols via ErpNet.FP Sidecar
+
+**Why:** 7 fiscal device drivers exist as architecture-only stubs (all `sendInvoice()` throw
+"not yet implemented"). Full UI exists (`FiscalDevicesSetting.vue`, `FiscalDeviceController.php`).
+Need actual protocol implementation.
+
+**Effort:** 1–2 weeks
+
+**Status:** DEFERRED per P10-02 — awaiting UJP device API specs.
+
+#### Fastest path when unblocked
+
+Deploy [`erpnet/ErpNet.FP`](https://github.com/erpnet/ErpNet.FP) as Docker sidecar.
+ErpNet.FP is a .NET application that communicates with all major fiscal printers
+(Daisy, David, Expert) and exposes a REST API.
+
+**Alternative:** Fork [`tinodj/mk-fiscal-printer-driver`](https://github.com/tinodj/mk-fiscal-printer-driver)
+(PHP-native, tested with Synergy PF-500 + Expert SX). Covers 2-3 devices without Docker.
+
+#### Files to create
+
+| File | Description |
+|------|-------------|
+| `app/Services/FiscalDevices/ErpNetFpClient.php` | HTTP client to sidecar REST API: `POST /printers/{id}/receipt`, `GET /printers/{id}/status` |
+| `Modules/Mk/Services/FiscalDevices/ErpNetFpDriver.php` | Implements existing `FiscalDeviceDriver` interface, wraps ErpNetFpClient |
+| `docker/erpnet-fp/Dockerfile` | ErpNet.FP Docker image |
+
+#### Files to modify
+
+| File | Change |
+|------|--------|
+| `Modules/Mk/Services/FiscalDevices/FiscalDeviceManager.php` | Add `'erpnet-fp' => ErpNetFpDriver::class` to driver registry |
+| `config/mk.php` | Add `fiscal_devices.erpnet_fp.base_url` (default `http://erpnet-fp:8001`) |
+| `docker/docker-compose-prod.yml` | Add erpnet-fp service |
+
+#### Blocking dependency
+- UJP device API specification publication
+- Physical test devices or ErpNet.FP emulator mode
+- Vendor SDK access (Daisy, Synergy)
+
+---
+
+## Backlog / Future Considerations
+
+These items surfaced during the audit but are not gaps — they are enhancement opportunities:
+
+| ID | Item | Notes |
+|----|------|-------|
+| NX-20 | UJP e-Tax portal filing (VAT/CIT) | Beyond e-Faktura, direct tax return submission |
+| NX-21 | Central Register annual FS submission | Automate March 15 filing |
+| NX-22 | WooCommerce integration | Install `automattic/woocommerce-api-php`, ticket WOO-01 |
+| NX-23 | Macedonian Credit Bureau integration | Receivables risk scoring |
+| NX-24 | Micro-business CIT exemptions (3M/6M) | Tax engine enhancement |
+| NX-25 | Pillar Two QDMTT (15% minimum tax) | Only affects qualifying multinationals |
+| NX-26 | SAF-T specific export format | When UJP publishes SAF-T spec |
+| NX-27 | SEPA Direct Debit for subscriptions | After Oct 2025 SEPA launch |
+| NX-28 | Native mobile app (React Native) | If PWA proves insufficient |
+| NX-29 | Ananas.mk marketplace | No public API exists — wait for release |
+| NX-30 | MPIN payroll auto-submission | Requires UJP e-Tax portal API |
+| NX-31 | Fiscal receipt UJP validation | API key not publicly available |
+| NX-32 | DHL Shipping integration | Low priority for accounting app |
+| NX-33 | SMS gateway notifications | After Viber integration proves demand |
+
+---
+
 ## Summary
 
-| Phase | Tickets | Est. Days | Key Outcome |
-|-------|---------|-----------|-------------|
-| P7 | 5 tickets | 9–13 | Full legal compliance (VAT, payroll, e-Faktura) |
-| P8 | 3 tickets | 6–9 | Bureau distribution channel unblocked |
-| P9 | 1 ticket | 1–2 | Official exchange rates for MKD |
-| P10 | 2 tickets | 8–12 | Mobile access + fiscal device readiness |
-| **Total** | **11 tickets** | **24–36 days** | **Codebase → 95%+ market research coverage** |
+| Phase | Tickets | Est. Days | Key Outcome | Status |
+|-------|---------|-----------|-------------|--------|
+| P7 | 5 tickets | 9–13 | Full legal compliance (VAT, payroll, e-Faktura) | ✅ COMPLETED |
+| P8 | 3 tickets | 6–9 | Bureau distribution channel unblocked | ✅ COMPLETED |
+| P9 | 1 ticket | 1–2 | Official exchange rates for MKD | ✅ COMPLETED |
+| P10 | 2 tickets | 8–12 | Mobile access + fiscal device readiness | ✅ COMPLETED |
+| P11 | 3 tickets | 4–6 | Bank coverage 95%+, payment refunds, marketing visibility | Pending |
+| P12 | 4 tickets | 13–17 | Central Registry, Viber, WooCommerce, incoming e-invoice | Pending |
+| P13 | 3 tickets | 11–15 | Komercijalna PSD2, UJP API, eID login | Pending |
+| P14 | 1 ticket | 7–14 | Fiscal device protocols (deferred) | Deferred |
+| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **11/22 done** |

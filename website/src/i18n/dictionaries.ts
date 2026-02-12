@@ -9,6 +9,7 @@ export type Dictionary = {
     forAccountants?: string
     how: string
     efaktura: string
+    integrations?: string
     pricing: string
     security: string
     contact: string
@@ -69,6 +70,7 @@ const mk: Dictionary = {
     forAccountants: 'За сметководители',
     how: 'Како работи',
     efaktura: 'Е‑Фактура',
+    integrations: 'Интеграции',
     pricing: 'Цени',
     security: 'Безбедност',
     contact: 'Контакт',
@@ -270,6 +272,7 @@ const sq: Dictionary = {
     forAccountants: 'Për kontabilistë',
     how: 'Si funksionon',
     efaktura: 'e‑Faturë',
+    integrations: 'Integrimet',
     pricing: 'Çmimet',
     security: 'Siguria',
     contact: 'Kontakti',
@@ -471,6 +474,7 @@ const tr: Dictionary = {
     forAccountants: 'Muhasebeciler için',
     how: 'Nasıl çalışır',
     efaktura: 'e‑Fatura',
+    integrations: 'Entegrasyonlar',
     pricing: 'Fiyatlar',
     security: 'Güvenlik',
     contact: 'İletişim',
@@ -672,6 +676,7 @@ const en: Dictionary = {
     forAccountants: 'For Accountants',
     how: 'How It Works',
     efaktura: 'e-Invoice',
+    integrations: 'Integrations',
     pricing: 'Pricing',
     security: 'Security',
     contact: 'Contact',

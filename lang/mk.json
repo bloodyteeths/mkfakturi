@@ -31,7 +31,10 @@
     "tax_reports": "Даночни извештаи",
     "support_tickets": "Поддршка",
     "all_support_tickets": "Сите тикети за поддршка",
-    "payroll": "Плати"
+    "payroll": "Плати",
+    "deadlines": "Рокови",
+    "documents": "Документи",
+    "leave": "Управување со отсуства"
   },
   "general": {
     "company_name": "Име на компанија",
@@ -328,7 +331,11 @@
     "low_stock_alerts": "Ниски залихи",
     "stock_ok": "Сe е в ред",
     "all_stock_sufficient": "Сите артикли имаат доволно залиха",
-    "view_stock": "Прикажи повеќе"
+    "view_stock": "Прикажи повеќе",
+    "upcoming_deadlines": "Претстојни рокови",
+    "no_upcoming_deadlines": "Нема претстојни рокови",
+    "view_all_deadlines": "Прикажи ги сите рокови",
+    "deadlines_summary": "{overdue} задоцнети, {week} оваа недела"
   },
   "partner_dashboard": {
     "recent_commissions_title": "Најнови Провизии",
@@ -5826,7 +5833,30 @@
     "download_ddv04_xml": "Преземи ДДВ-04 XML",
     "select_month_for_mpin": "Изберете месец за да генерирате МПИН XML",
     "mpin_xml_downloaded": "МПИН XML е успешно преземен",
-    "ddv04_xml_downloaded": "ДДВ-04 XML е успешно преземен"
+    "ddv04_xml_downloaded": "ДДВ-04 XML е успешно преземен",
+    "business_days": "Работни денови",
+    "create_first_leave_request": "Поднесете го вашето прво барање за отсуство",
+    "days_remaining": "Преостанати денови",
+    "end_date": "Краен датум",
+    "leave_requests": "Барања за отсуство",
+    "leave_status": {
+      "approved": "Одобрено",
+      "cancelled": "Откажано",
+      "pending": "Во чекање",
+      "rejected": "Одбиено"
+    },
+    "leave_type": "Тип на отсуство",
+    "new_leave_request": "Ново барање за отсуство",
+    "no_leave_requests": "Нема барања за отсуство",
+    "ot_rate": "Стапка",
+    "overtime_hours": "Прекувремени часови",
+    "overtime_pay": "Прекувремена плата",
+    "reason": "Причина",
+    "reject": "Одбиј",
+    "select_employee": "Изберете вработен",
+    "select_leave_type": "Изберете тип на отсуство",
+    "start_date": "Почетен датум",
+    "submit_leave_request": "Поднеси барање за отсуство"
   },
   "months": {
     "january": "Јануари",

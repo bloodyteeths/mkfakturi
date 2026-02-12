@@ -8,6 +8,7 @@ import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
 import UnpaidSummaryWidget from './widgets/UnpaidSummaryWidget.vue'
 import RecentPaymentsWidget from './widgets/RecentPaymentsWidget.vue'
 import StockSummaryWidget from './widgets/StockSummaryWidget.vue'
+import DeadlinesWidget from './widgets/DeadlinesWidget.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { onMounted, computed } from 'vue'
@@ -74,9 +75,10 @@ onMounted(() => {
       <RecentPaymentsWidget />
     </div>
 
-    <!-- Stock Summary Widget (if stock module is enabled) -->
-    <div v-if="stockEnabled" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <StockSummaryWidget />
+    <!-- Deadlines & Stock Widgets -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <DeadlinesWidget />
+      <StockSummaryWidget v-if="stockEnabled" />
     </div>
 
     <!-- Quick Actions -->

@@ -16,6 +16,7 @@ import ExportXmlModal from '@/scripts/admin/components/modal-components/ExportXm
 import InvoiceDropdown from '@/scripts/admin/components/dropdowns/InvoiceIndexDropdown.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 import EInvoiceTab from '@/scripts/admin/views/invoices/partials/EInvoiceTab.vue'
+import EInvoiceInboxTab from '@/scripts/admin/views/invoices/partials/EInvoiceInboxTab.vue'
 import ProfitTab from '@/scripts/admin/views/invoices/partials/ProfitTab.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
@@ -569,6 +570,13 @@ onSearched = debounce(onSearched, 500)
           :title="$t('e_invoice.title')"
         >
           <EInvoiceTab :invoice="invoiceData" />
+        </BaseTab>
+
+        <BaseTab
+          tab-panel-container="py-4 mt-px"
+          :title="$t('e_invoice.incoming_inbox')"
+        >
+          <EInvoiceInboxTab />
         </BaseTab>
 
         <!-- Profit Tab (only shown when stock is enabled) -->

@@ -146,6 +146,96 @@ class CpayDriver
     } // CLAUDE-CHECKPOINT: Added subscription management methods
 
     /**
+     * Refund a CPAY payment
+     *
+     * Sends a refund request to the CPAY gateway using the same POST endpoint
+     * with tran_type=REFUND and HMAC-signed parameters.
+     *
+     * @param  string  $transactionId  Original CPAY transaction ID
+     * @param  int  $amount  Refund amount in cents (e.g., 10000 = 100.00 MKD)
+     * @param  string|null  $reason  Optional refund reason
+     * @return array Contains 'success', 'refund_id', and 'message'
+     *
+     * @throws \Exception If feature is disabled or configuration is missing
+     */
+    public function refund(string $transactionId, int $amount, ?string $reason = null): array
+    {
+        // Check feature flag
+        if (! config('mk.features.advanced_payments', false)) {
+            throw new \Exception('Advanced payments feature is disabled');
+        }
+
+        // Get CPAY configuration
+        $merchantId = config('mk.payment_gateways.cpay.merchant_id');
+        $apiUrl = config('mk.payment_gateways.cpay.api_url');
+
+        if (! $merchantId || ! $apiUrl) {
+            throw new \Exception('CPAY API configuration is missing');
+        }
+
+        // Convert amount from cents to decimal
+        $amountDecimal = number_format($amount / 100, 2, '.', '');
+
+        // Build refund parameters
+        $params = [
+            'merchant_id' => $merchantId,
+            'transaction_id' => $transactionId,
+            'amount' => $amountDecimal,
+            'currency' => 'MKD',
+            'tran_type' => 'REFUND',
+        ];
+
+        if ($reason) {
+            $params['reason'] = $reason;
+        }
+
+        // Generate signature
+        $params['signature'] = $this->generateSignature($params);
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::post($apiUrl.'/refund', $params);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+
+                Log::info('CPAY refund processed', [
+                    'original_transaction_id' => $transactionId,
+                    'refund_amount' => $amountDecimal,
+                    'refund_id' => $responseData['refund_id'] ?? null,
+                    'reason' => $reason,
+                ]);
+
+                return [
+                    'success' => true,
+                    'refund_id' => $responseData['refund_id'] ?? null,
+                    'message' => 'Refund processed successfully',
+                ];
+            }
+
+            Log::error('CPAY refund failed', [
+                'transaction_id' => $transactionId,
+                'amount' => $amountDecimal,
+                'response' => $response->body(),
+                'status' => $response->status(),
+            ]);
+
+            return [
+                'success' => false,
+                'refund_id' => null,
+                'message' => 'Refund request failed: '.$response->body(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('CPAY refund error', [
+                'transaction_id' => $transactionId,
+                'amount' => $amountDecimal,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
      * Create checkout URL for invoice payment
      *
      * Generates a payment URL with all required parameters and signature.

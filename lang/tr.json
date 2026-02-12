@@ -30,7 +30,10 @@
     "stock_adjustments": "Stok Düzeltmeleri",
     "support": "Destek",
     "tax_tools": "Vergi Araçları",
-    "tax_reports": "Vergi Raporları"
+    "tax_reports": "Vergi Raporları",
+    "deadlines": "Son Tarihler",
+    "documents": "Belgeler",
+    "leave": "İzin Yönetimi"
   },
   "general": {
     "add_company": "Firma ekle",
@@ -293,7 +296,11 @@
     "low_stock_alerts": "Düşük Stok",
     "stock_ok": "Her şey yolunda",
     "all_stock_sufficient": "Tüm ürünlerde yeterli stok var",
-    "view_stock": "Daha fazla göster"
+    "view_stock": "Daha fazla göster",
+    "upcoming_deadlines": "Yaklaşan Son Tarihler",
+    "no_upcoming_deadlines": "Yaklaşan son tarih yok",
+    "view_all_deadlines": "Tüm son tarihleri görüntüle",
+    "deadlines_summary": "{overdue} gecikmiş, {week} bu hafta"
   },
   "tax_types": {
     "name": "İsim",
@@ -6305,7 +6312,30 @@
     "download_ddv04_xml": "DDV-04 XML İndir",
     "select_month_for_mpin": "MPIN XML oluşturmak için ay seçin",
     "mpin_xml_downloaded": "MPIN XML başarıyla indirildi",
-    "ddv04_xml_downloaded": "DDV-04 XML başarıyla indirildi"
+    "ddv04_xml_downloaded": "DDV-04 XML başarıyla indirildi",
+    "business_days": "İş Günleri",
+    "create_first_leave_request": "İlk izin talebinizi gönderin",
+    "days_remaining": "Kalan Günler",
+    "end_date": "Bitiş Tarihi",
+    "leave_requests": "İzin Talepleri",
+    "leave_status": {
+      "approved": "Onaylandı",
+      "cancelled": "İptal Edildi",
+      "pending": "Beklemede",
+      "rejected": "Reddedildi"
+    },
+    "leave_type": "İzin Türü",
+    "new_leave_request": "Yeni İzin Talebi",
+    "no_leave_requests": "İzin Talebi Yok",
+    "ot_rate": "FMÜ Oranı",
+    "overtime_hours": "Fazla Mesai Saatleri",
+    "overtime_pay": "Fazla Mesai Ücreti",
+    "reason": "Sebep",
+    "reject": "Reddet",
+    "select_employee": "Çalışan Seçin",
+    "select_leave_type": "İzin Türü Seçin",
+    "start_date": "Başlangıç Tarihi",
+    "submit_leave_request": "İzin Talebini Gönder"
   },
   "months": {
     "january": "Ocak",

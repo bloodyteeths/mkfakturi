@@ -82,6 +82,10 @@ const AccountReviewSetting = () =>
   import('@/scripts/admin/views/settings/AccountReviewSetting.vue')
 const FiscalDevicesSetting = () =>
   import('@/scripts/admin/views/settings/FiscalDevicesSetting.vue')
+const ViberNotificationsSetting = () =>
+  import('@/scripts/admin/views/settings/ViberNotificationsSetting.vue')
+const WooCommerceSetting = () =>
+  import('@/scripts/admin/views/settings/WooCommerceSetting.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -774,6 +778,18 @@ export default [
             name: 'settings.fiscal-devices',
             meta: { isOwner: true },
             component: FiscalDevicesSetting,
+          },
+          {
+            path: 'viber-notifications',
+            name: 'settings.viber-notifications',
+            meta: { isOwner: true, requiresSuperAdmin: true },
+            component: ViberNotificationsSetting,
+          },
+          {
+            path: 'woocommerce',
+            name: 'settings.woocommerce',
+            meta: { isOwner: true },
+            component: WooCommerceSetting,
           },
         ],
       },

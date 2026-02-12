@@ -107,28 +107,27 @@ class PollEInvoiceInboxJob implements ShouldQueue
         ]);
 
         try {
-            // TODO: Replace with actual UJP portal API call or efaktura_download.php tool.
-            // For now, this is a placeholder that logs the intent.
-            //
-            // Future implementation:
-            // 1. Call tools/efaktura_download.php --company_id=$this->companyId
-            //    OR use the UJP portal SOAP/REST API to fetch inbox items
-            // 2. Parse each returned XML
-            // 3. Create EInvoice records
-            //
-            // Example of what the real implementation would look like:
-            // $inboxItems = $this->fetchFromPortal();
-            // foreach ($inboxItems as $item) {
-            //     $this->processInboxItem($item);
-            // }
+            $portalClient = app(\App\Services\EFaktura\EFakturaPortalClient::class);
+
+            $inboxItems = $portalClient->pollInbox();
 
             $importedCount = 0;
+            $skippedCount = 0;
 
-            // Placeholder: simulate checking the portal
-            // In production, this would call the actual portal API
-            Log::info('PollEInvoiceInboxJob: Portal inbox poll completed (no-op placeholder)', [
+            foreach ($inboxItems as $item) {
+                $eInvoice = $this->processInboxItem($item);
+                if ($eInvoice) {
+                    $importedCount++;
+                } else {
+                    $skippedCount++;
+                }
+            }
+
+            Log::info('PollEInvoiceInboxJob: Portal inbox poll completed', [
                 'company_id' => $this->companyId,
+                'total_items' => count($inboxItems),
                 'imported_count' => $importedCount,
+                'skipped_count' => $skippedCount,
             ]);
 
         } catch (Throwable $exception) {

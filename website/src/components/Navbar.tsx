@@ -30,6 +30,11 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
             <Link href={`/${locale}/e-faktura`} className="hover:underline">
               {t.nav.efaktura}
             </Link>
+            {t.nav.integrations && (
+              <Link href={`/${locale}/integrations`} className="hover:underline">
+                {t.nav.integrations}
+              </Link>
+            )}
             <Link href={`/${locale}/pricing`} className="hover:underline">
               {t.nav.pricing}
             </Link>
