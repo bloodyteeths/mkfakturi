@@ -33,14 +33,16 @@ class CompanyLookupController extends Controller
         ]);
 
         $query = $request->input('q');
-        $results = $this->registryService->search($query);
+        $response = $this->registryService->search($query);
 
         return response()->json([
-            'data' => $results,
+            'data' => $response['results'],
             'meta' => [
                 'query' => $query,
-                'count' => count($results),
+                'count' => count($response['results']),
                 'source' => 'crm.com.mk',
+                'captcha_required' => $response['captcha_required'],
+                'lookup_url' => $response['lookup_url'],
             ],
         ]);
     }
