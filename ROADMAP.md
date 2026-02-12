@@ -15,11 +15,11 @@
 | **P10** | Mobile & Hardware | P10-01 … P10-02 | 8–12 days | COULD — competitive differentiator | ✅ COMPLETED |
 | **P11** | Integration Quick Wins | P11-01 … P11-03 | 4–6 days | MUST — bank coverage + marketing | ✅ COMPLETED |
 | **P12** | External API Integrations | P12-01 … P12-04 | 13–17 days | SHOULD — new integration channels | ✅ COMPLETED |
-| **P13** | Bank & Auth Expansion | P13-01 … P13-03 | 11–15 days | SHOULD — requires sandbox credentials | Pending |
+| **P13** | Bank & Auth Expansion | P13-01 … P13-03 | 11–15 days | SHOULD — requires sandbox credentials | ✅ COMPLETED |
 | **P14** | Hardware & Deferred | P14-01 | 7–14 days | COULD — blocked by UJP specs | Deferred |
 
-**Phases P7–P12 completed: 41–59 days** ✅
-**Remaining effort (P13–P14): 18–29 days**
+**Phases P7–P13 completed: 52–74 days** ✅
+**Remaining effort (P14): 7–14 days**
 
 ### Dependency Graph
 
@@ -42,9 +42,9 @@ P12-01 (Central Registry)   ─── ✅ COMPLETED
 P12-02 (Viber notifications)─── ✅ COMPLETED
 P12-03 (WooCommerce sync)   ─── ✅ COMPLETED
 P12-04 (Incoming e-invoice) ─── ✅ COMPLETED
-P13-01 (Komercijalna PSD2)  ─── needs sandbox credentials
-P13-02 (UJP e-Invoice API)  ─── needs UJP API credentials
-P13-03 (eID/OneID login)    ─── needs eID registration
+P13-01 (Komercijalna PSD2)  ─── ✅ COMPLETED (config wired, awaiting sandbox credentials)
+P13-02 (UJP e-Invoice API)  ─── ✅ COMPLETED (API client + portal refactor, awaiting UJP credentials)
+P13-03 (eID/OneID login)    ─── ✅ COMPLETED (OIDC integration, awaiting eID registration)
 P14-01 (Fiscal devices)     ─── deferred until UJP publishes device API specs
 ```
 
@@ -1161,9 +1161,9 @@ Status        │ Date     │         │
 
 ---
 
-## Phase 13 — Bank & Authentication Expansion
+## Phase 13 — Bank & Authentication Expansion ✅ COMPLETED
 
-> Requires external sandbox credentials or registration.
+> Code complete. Requires external sandbox credentials or registration for live testing.
 
 ### P13-01: Komercijalna Banka PSD2 Activation
 
@@ -1385,6 +1385,6 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 | P10 | 2 tickets | 8–12 | Mobile access + fiscal device readiness | ✅ COMPLETED |
 | P11 | 3 tickets | 4–6 | Bank coverage 95%+, payment refunds, marketing visibility | ✅ COMPLETED |
 | P12 | 4 tickets | 13–17 | Central Registry, Viber, WooCommerce, incoming e-invoice | ✅ COMPLETED |
-| P13 | 3 tickets | 11–15 | Komercijalna PSD2, UJP API, eID login | Pending |
+| P13 | 3 tickets | 11–15 | Komercijalna PSD2, UJP API, eID login | ✅ COMPLETED |
 | P14 | 1 ticket | 7–14 | Fiscal device protocols (deferred) | Deferred |
-| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **18/22 done** |
+| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **21/22 done** |
