@@ -236,8 +236,9 @@ class Item extends Model
         $data = $request->validated();
         $data['company_id'] = $request->header('company');
         $data['creator_id'] = Auth::id();
-        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
-        $data['currency_id'] = $company_currency;
+        if (empty($data['currency_id'])) {
+            $data['currency_id'] = CompanySetting::getSetting('currency', $request->header('company'));
+        }
         $item = self::create($data);
 
         if ($request->has('taxes') && count($request->taxes) > 0) {

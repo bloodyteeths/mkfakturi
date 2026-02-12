@@ -2350,6 +2350,7 @@
     "price": "Price",
     "cost_price": "Cost Price",
     "cost_price_hint": "Purchase price from supplier (for material accounting)",
+    "currency": "Currency",
     "quantity": "Quantity",
     "remove_item": "Remove Item",
     "save_item": "Save Item",

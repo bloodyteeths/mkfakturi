@@ -69,6 +69,11 @@ class ItemsRequest extends FormRequest
                 'integer',
                 'exists:item_categories,id',
             ],
+            'currency_id' => [
+                'nullable',
+                'integer',
+                'exists:currencies,id',
+            ],
         ];
     }
 

@@ -68,12 +68,31 @@
           </BaseInputGroup>
 
           <BaseInputGroup
+            :label="$t('items.currency')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMultiselect
+              v-model="itemStore.currentItem.currency_id"
+              value-prop="id"
+              label="name"
+              track-by="name"
+              :content-loading="isFetchingInitialData"
+              :options="globalStore.currencies"
+              searchable
+              :can-deselect="false"
+              :placeholder="$t('customers.select_currency')"
+              class="w-full"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
             :label="$t('items.price')"
             :content-loading="isFetchingInitialData"
           >
             <BaseMoney
               v-model="price"
               :content-loading="isFetchingInitialData"
+              :currency="selectedCurrency"
             />
           </BaseInputGroup>
 
@@ -84,6 +103,7 @@
             <BaseMoney
               v-model="costPrice"
               :content-loading="isFetchingInitialData"
+              :currency="selectedCurrency"
             />
             <p class="mt-1 text-xs text-gray-400">
               {{ $t('items.cost_price_hint') }}
@@ -314,6 +334,7 @@
               <BaseMoney
                 v-model="initialStock.unit_cost"
                 :content-loading="isFetchingInitialData"
+                :currency="selectedCurrency"
               />
               <p class="mt-1 text-xs text-gray-400">
                 {{ $t('items.unit_cost_hint') }}
@@ -475,6 +496,15 @@ const getTaxTypes = computed(() => {
   })
 })
 
+const selectedCurrency = computed(() => {
+  if (itemStore.currentItem.currency_id) {
+    return globalStore.currencies.find(
+      (c) => c.id === itemStore.currentItem.currency_id
+    )
+  }
+  return companyStore.selectedCompanyCurrency
+})
+
 const isTaxPerItem = computed(() => taxPerItem.value === 'YES')
 
 // Custom validator for requiring at least one tax when tax_per_item is enabled
@@ -562,6 +592,7 @@ async function loadData() {
   const loadPromises = [
     itemStore.fetchItemUnits({ limit: 'all' }),
     itemStore.fetchItemCategories({ limit: 'all' }),
+    globalStore.fetchCurrencies(),
   ]
 
   if (userStore.hasAbilities(abilities.VIEW_TAX_TYPE)) {
@@ -582,6 +613,10 @@ async function loadData() {
       ? (taxPerItem.value = 'YES')
       : (taxPerItem.value = 'NO')
   } else {
+    // For new items, set default currency to company currency
+    if (companyStore.selectedCompanyCurrency) {
+      itemStore.currentItem.currency_id = companyStore.selectedCompanyCurrency.id
+    }
     // For new items, set default warehouse if available
     if (warehouseStore.defaultWarehouse) {
       initialStock.value.warehouse_id = warehouseStore.defaultWarehouse.id

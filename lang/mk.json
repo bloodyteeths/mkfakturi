@@ -1031,6 +1031,7 @@
     "price": "Цена",
     "cost_price": "Набавна цена",
     "cost_price_hint": "Цена на набавка од добавувач (за материјално сметководство)",
+    "currency": "Валута",
     "date_of_creation": "Date Of Creation",
     "not_selected": "No item selected",
     "action": "Опција",

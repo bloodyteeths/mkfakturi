@@ -491,6 +491,7 @@
     "price": "Fiyat",
     "cost_price": "Maliyet Fiyatı",
     "cost_price_hint": "Tedarikçiden satın alma fiyatı (malzeme muhasebesi için)",
+    "currency": "Para Birimi",
     "date_of_creation": "Oluşturma tarihi",
     "not_selected": "Seçilmiş öğe yok",
     "action": "Eylem",

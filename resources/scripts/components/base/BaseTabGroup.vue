@@ -22,12 +22,12 @@
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
             ]"
           >
-            {{ tab.title }}
+            {{ tab?.title }}
 
             <BaseBadge
-              v-if="tab.count"
+              v-if="tab?.count"
               class="!rounded-full overflow-hidden ml-2"
-              :variant="tab['count-variant']"
+              :variant="tab?.['count-variant']"
               default-class="flex items-center justify-center w-5 h-5 p-1 rounded-full text-medium"
             >
               {{ tab.count }}
@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { computed, useSlots } from 'vue'
+import { computed, useSlots, Fragment } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels } from '@headlessui/vue'
 
 const props = defineProps({
@@ -64,9 +64,31 @@ const emit = defineEmits(['change'])
 
 const slots = useSlots()
 
-const tabs = computed(() => slots.default().map((tab) => tab.props))
+/**
+ * Flatten Fragment VNodes and filter out VNodes with null props
+ * (comment nodes, text nodes, whitespace, v-if=false placeholders).
+ * This prevents "Cannot read properties of null (reading 'title')"
+ * when accessing tab.title / tab.count in the template.
+ */
+function flattenSlotVNodes(vnodes) {
+  const result = []
+  for (const node of vnodes) {
+    if (node.type === Fragment && Array.isArray(node.children)) {
+      result.push(...flattenSlotVNodes(node.children))
+    } else if (node.props != null) {
+      result.push(node)
+    }
+  }
+  return result
+}
+
+const tabs = computed(() => {
+  const vnodes = slots.default?.() || []
+  return flattenSlotVNodes(vnodes).map((tab) => tab.props)
+})
 
 function onChange(d) {
   emit('change', tabs.value[d])
 }
+// CLAUDE-CHECKPOINT
 </script>
