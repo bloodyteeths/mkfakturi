@@ -37,6 +37,11 @@ class CustomerRequest extends FormRequest
             'phone' => [
                 'nullable',
             ],
+            'viber_phone' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
             'company_name' => [
                 'nullable',
             ],
@@ -134,6 +139,7 @@ class CustomerRequest extends FormRequest
                 'currency_id',
                 'password',
                 'phone',
+                'viber_phone',
                 'prefix',
                 'tax_id',
                 'company_name',

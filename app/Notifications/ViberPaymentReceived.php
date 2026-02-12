@@ -22,23 +22,18 @@ class ViberPaymentReceived extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $channels = [];
-
-        if (config('mk.viber.notifications.payment_received', true)) {
-            $channels[] = ViberChannel::class;
-        }
-
-        return $channels;
+        return [ViberChannel::class];
     }
 
     /**
-     * @return array{text: string}
+     * @return array{text: string, event_type: string}
      */
     public function toViber(object $notifiable): array
     {
         return [
             'text' => "Примена уплата од {$this->amount} {$this->currency} за фактура {$this->invoiceNumber}. Ви благодариме!",
             'tracking_data' => "payment_received:{$this->invoiceNumber}",
+            'event_type' => 'payment_received',
         ];
     }
 

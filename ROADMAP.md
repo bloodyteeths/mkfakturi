@@ -13,13 +13,13 @@
 | **P8** | Bureau Distribution | P8-01 … P8-03 | 6–9 days | SHOULD — blocks accountant GTM channel | ✅ COMPLETED |
 | **P9** | Data Accuracy | P9-01 | 1–2 days | SHOULD — replaces interim solution | ✅ COMPLETED |
 | **P10** | Mobile & Hardware | P10-01 … P10-02 | 8–12 days | COULD — competitive differentiator | ✅ COMPLETED |
-| **P11** | Integration Quick Wins | P11-01 … P11-03 | 4–6 days | MUST — bank coverage + marketing | Pending |
-| **P12** | External API Integrations | P12-01 … P12-04 | 13–17 days | SHOULD — new integration channels | Pending |
+| **P11** | Integration Quick Wins | P11-01 … P11-03 | 4–6 days | MUST — bank coverage + marketing | ✅ COMPLETED |
+| **P12** | External API Integrations | P12-01 … P12-04 | 13–17 days | SHOULD — new integration channels | ✅ COMPLETED |
 | **P13** | Bank & Auth Expansion | P13-01 … P13-03 | 11–15 days | SHOULD — requires sandbox credentials | Pending |
 | **P14** | Hardware & Deferred | P14-01 | 7–14 days | COULD — blocked by UJP specs | Deferred |
 
-**Phases P7–P10 completed: 24–36 days** ✅
-**Remaining effort (P11–P14): 35–52 days**
+**Phases P7–P12 completed: 41–59 days** ✅
+**Remaining effort (P13–P14): 18–29 days**
 
 ### Dependency Graph
 
@@ -35,13 +35,13 @@ P8-03 (Bulk reporting)      ─── ✅ COMPLETED
 P9-01 (NBRM rates)          ─── ✅ COMPLETED
 P10-01 (PWA mobile)         ─── ✅ COMPLETED
 P10-02 (Fiscal devices)     ─── ✅ COMPLETED (stubs — awaiting UJP device API specs)
-P11-01 (Bank CSV parsers)   ─── independent, start immediately
-P11-02 (CaSys refund)       ─── independent, start immediately
-P11-03 (Integrations page)  ─── independent, start immediately
-P12-01 (Central Registry)   ─── independent
-P12-02 (Viber notifications)─── independent
-P12-03 (WooCommerce sync)   ─── independent
-P12-04 (Incoming e-invoice) ─── extends P7-02
+P11-01 (Bank CSV parsers)   ─── ✅ COMPLETED
+P11-02 (CaSys refund)       ─── ✅ COMPLETED
+P11-03 (Integrations page)  ─── ✅ COMPLETED
+P12-01 (Central Registry)   ─── ✅ COMPLETED
+P12-02 (Viber notifications)─── ✅ COMPLETED
+P12-03 (WooCommerce sync)   ─── ✅ COMPLETED
+P12-04 (Incoming e-invoice) ─── ✅ COMPLETED
 P13-01 (Komercijalna PSD2)  ─── needs sandbox credentials
 P13-02 (UJP e-Invoice API)  ─── needs UJP API credentials
 P13-03 (eID/OneID login)    ─── needs eID registration
@@ -706,7 +706,7 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 |----|------|-------|
 | NX-20 | UJP e-Tax portal filing (VAT/CIT) | Beyond e-Faktura, direct tax return submission |
 | NX-21 | Central Register annual FS submission | Automate March 15 filing |
-| NX-22 | WooCommerce integration | Install `automattic/woocommerce-api-php`, ticket WOO-01 |
+| NX-22 | ~~WooCommerce integration~~ | ✅ Completed in P12-03 |
 | NX-23 | Macedonian Credit Bureau integration | Receivables risk scoring |
 | NX-24 | Micro-business CIT exemptions (3M/6M) | Tax engine enhancement |
 | NX-25 | Pillar Two QDMTT (15% minimum tax) | Only affects qualifying multinationals |
@@ -716,12 +716,12 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 
 ---
 
-## Phase 11 — Integration Quick Wins
+## Phase 11 — Integration Quick Wins ✅ COMPLETED
 
 > Bank coverage expansion, payment completeness, and marketing visibility.
 > All items use publicly exposed APIs — zero vendor permission required.
 
-### P11-01: Add 6 Missing Bank CSV Parsers
+### P11-01: Add 6 Missing Bank CSV Parsers ✅
 
 **Why:** Current CSV import supports 3 banks (NLB, Stopanska, Komercijalna = ~55% market share).
 Adding 6 more banks covers ~95%+ of Macedonian businesses. Each parser is a single PHP file
@@ -772,7 +772,7 @@ delimiter (comma vs semicolon), encoding (UTF-8 vs Windows-1251), date format, a
 
 ---
 
-### P11-02: CaSys/cPay Refund Method
+### P11-02: CaSys/cPay Refund Method ✅
 
 **Why:** CaSys payment gateway integration is complete for checkout, webhooks, and subscriptions
 but has no refund capability. The CaSys API supports refunds via the same POST endpoint with
@@ -807,7 +807,7 @@ None — existing payment records table supports status updates.
 
 ---
 
-### P11-03: Marketing Website — Integrations Page
+### P11-03: Marketing Website — Integrations Page ✅
 
 **Why:** Facturino's marketing site has no integrations page. Potential customers cannot see what
 banks, government systems, and e-commerce platforms are supported. This is the #1 way SaaS
@@ -873,11 +873,11 @@ description: "Connect Facturino to 9 Macedonian banks, UJP e-Faktura, NBRM excha
 
 ---
 
-## Phase 12 — External API Integrations
+## Phase 12 — External API Integrations ✅ COMPLETED
 
 > New integrations using publicly exposed APIs. Self-service registration only.
 
-### P12-01: Central Registry Company Auto-Lookup (crm.com.mk)
+### P12-01: Central Registry Company Auto-Lookup (crm.com.mk) ✅
 
 **Why:** When creating a customer/vendor, Macedonian accountants manually look up company data
 (EMBS, tax ID, legal name, address) on crm.com.mk, then type it into the form. Auto-lookup
@@ -929,7 +929,7 @@ No auth required — crm.com.mk is public data (Open Government Partnership).
 
 ---
 
-### P12-02: Viber Business Notifications
+### P12-02: Viber Business Notifications ✅
 
 **Why:** Viber is the #1 messaging app in Macedonia (far bigger than WhatsApp). Invoice
 notifications and payment reminders via Viber have much higher open rates than email.
@@ -1002,7 +1002,7 @@ VIBER_SENDER_AVATAR=https://app.facturino.mk/logo.png
 
 ---
 
-### P12-03: WooCommerce Order-to-Invoice Sync
+### P12-03: WooCommerce Order-to-Invoice Sync ✅
 
 **Why:** 2,160+ Macedonian online stores use WooCommerce. Auto-syncing orders into Facturino
 as invoices, with DDV calculations and e-Faktura submission, serves thousands of online sellers.
@@ -1124,7 +1124,7 @@ GET    /api/v1/integrations/woocommerce/logs         → logs()        (sync his
 
 ---
 
-### P12-04: Incoming E-Invoice Workflow (extends P7-02)
+### P12-04: Incoming E-Invoice Workflow (extends P7-02) ✅
 
 **Why:** Mandatory for B2B e-invoicing compliance (Q3 2026). `PollEInvoiceInboxJob.handle()`
 is currently an empty no-op. Businesses need to receive, review, accept, and reject supplier
@@ -1360,7 +1360,7 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 |----|------|-------|
 | NX-20 | UJP e-Tax portal filing (VAT/CIT) | Beyond e-Faktura, direct tax return submission |
 | NX-21 | Central Register annual FS submission | Automate March 15 filing |
-| NX-22 | WooCommerce integration | Install `automattic/woocommerce-api-php`, ticket WOO-01 |
+| NX-22 | ~~WooCommerce integration~~ | ✅ Completed in P12-03 |
 | NX-23 | Macedonian Credit Bureau integration | Receivables risk scoring |
 | NX-24 | Micro-business CIT exemptions (3M/6M) | Tax engine enhancement |
 | NX-25 | Pillar Two QDMTT (15% minimum tax) | Only affects qualifying multinationals |
@@ -1383,8 +1383,8 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 | P8 | 3 tickets | 6–9 | Bureau distribution channel unblocked | ✅ COMPLETED |
 | P9 | 1 ticket | 1–2 | Official exchange rates for MKD | ✅ COMPLETED |
 | P10 | 2 tickets | 8–12 | Mobile access + fiscal device readiness | ✅ COMPLETED |
-| P11 | 3 tickets | 4–6 | Bank coverage 95%+, payment refunds, marketing visibility | Pending |
-| P12 | 4 tickets | 13–17 | Central Registry, Viber, WooCommerce, incoming e-invoice | Pending |
+| P11 | 3 tickets | 4–6 | Bank coverage 95%+, payment refunds, marketing visibility | ✅ COMPLETED |
+| P12 | 4 tickets | 13–17 | Central Registry, Viber, WooCommerce, incoming e-invoice | ✅ COMPLETED |
 | P13 | 3 tickets | 11–15 | Komercijalna PSD2, UJP API, eID login | Pending |
 | P14 | 1 ticket | 7–14 | Fiscal device protocols (deferred) | Deferred |
-| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **11/22 done** |
+| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **18/22 done** |

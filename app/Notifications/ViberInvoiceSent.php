@@ -23,17 +23,11 @@ class ViberInvoiceSent extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $channels = [];
-
-        if (config('mk.viber.notifications.invoice_sent', true)) {
-            $channels[] = ViberChannel::class;
-        }
-
-        return $channels;
+        return [ViberChannel::class];
     }
 
     /**
-     * @return array{text: string, button_text: string, button_url: string}
+     * @return array{text: string, button_text: string, button_url: string, event_type: string}
      */
     public function toViber(object $notifiable): array
     {
@@ -42,6 +36,7 @@ class ViberInvoiceSent extends Notification implements ShouldQueue
             'button_text' => 'Преглед на фактура',
             'button_url' => $this->viewUrl,
             'tracking_data' => "invoice_sent:{$this->invoiceNumber}",
+            'event_type' => 'invoice_sent',
         ];
     }
 

@@ -512,6 +512,18 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/sync', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'syncNow']);
                 Route::get('/sync-history', [\App\Http\Controllers\V1\Admin\Integration\WooCommerceController::class, 'syncHistory']);
             });
+            // Viber Platform Settings (super-admin only)
+            // ----------------------------------
+
+            Route::middleware('super-admin')->prefix('admin/viber')->group(function () {
+                Route::get('/settings', [\App\Http\Controllers\V1\Admin\ViberSettingsController::class, 'getSettings']);
+                Route::post('/settings', [\App\Http\Controllers\V1\Admin\ViberSettingsController::class, 'saveSettings']);
+                Route::post('/test-connection', [\App\Http\Controllers\V1\Admin\ViberSettingsController::class, 'testConnection']);
+            });
+
+            // Viber availability check (any authenticated user)
+            Route::get('/viber/availability', [\App\Http\Controllers\V1\Admin\ViberSettingsController::class, 'checkAvailability']);
+
             // CLAUDE-CHECKPOINT
 
             // Exports (Phase 4)

@@ -134,6 +134,22 @@
             </BaseInputGroup>
 
             <BaseInputGroup
+              label="Viber Phone"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model.trim="customerStore.currentCustomer.viber_phone"
+                :content-loading="isFetchingInitialData"
+                type="tel"
+                name="viber_phone"
+                placeholder="+389 7X XXX XXX"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                Used for Viber invoice notifications (optional).
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
               :label="$t('customers.primary_currency')"
               :content-loading="isFetchingInitialData"
               :error="

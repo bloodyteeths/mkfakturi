@@ -6,6 +6,7 @@ export default function () {
     contact_name: '',
     email: '',
     phone: null,
+    viber_phone: null,
     password: '',
     confirm_password:'',
     currency_id: null,

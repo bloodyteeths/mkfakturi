@@ -52,6 +52,14 @@ class Customer extends Authenticatable implements HasMedia
         ];
     }
 
+    /**
+     * Route Viber notifications to the customer's Viber phone number.
+     */
+    public function routeNotificationForViber(): ?string
+    {
+        return $this->viber_phone;
+    }
+
     public function getFormattedCreatedAtAttribute($value)
     {
         return $this->cacheComputed('formatted_created_at', function () {

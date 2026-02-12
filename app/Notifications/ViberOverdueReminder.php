@@ -24,17 +24,11 @@ class ViberOverdueReminder extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $channels = [];
-
-        if (config('mk.viber.notifications.overdue_reminder', false)) {
-            $channels[] = ViberChannel::class;
-        }
-
-        return $channels;
+        return [ViberChannel::class];
     }
 
     /**
-     * @return array{text: string, button_text: string, button_url: string}
+     * @return array{text: string, button_text: string, button_url: string, event_type: string}
      */
     public function toViber(object $notifiable): array
     {
@@ -43,6 +37,7 @@ class ViberOverdueReminder extends Notification implements ShouldQueue
             'button_text' => 'Преглед на фактура',
             'button_url' => $this->viewUrl,
             'tracking_data' => "overdue_reminder:{$this->invoiceNumber}",
+            'event_type' => 'overdue_reminder',
         ];
     }
 

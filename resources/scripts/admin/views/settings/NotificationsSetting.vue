@@ -57,6 +57,59 @@
         :description="$t('settings.notification.estimate_viewed_desc')"
       />
     </ul>
+
+    <!-- Viber Notifications opt-in (visible when platform has Viber enabled) -->
+    <template v-if="viberAvailable">
+      <BaseDivider class="mt-6 mb-2" />
+
+      <div class="mt-4">
+        <h6 class="text-sm font-semibold text-gray-700 mb-1">
+          Viber Notifications
+        </h6>
+        <p class="text-xs text-gray-500 mb-4">
+          Receive invoice and payment notifications via Viber.
+        </p>
+
+        <BaseSwitchSection
+          v-model="viberOptInField"
+          title="Enable Viber Notifications"
+          description="Receive Viber messages for invoice deliveries, payment confirmations, and overdue reminders."
+        />
+
+        <BaseInputGroup
+          v-if="viberOptInField"
+          label="Viber Phone Number"
+          class="my-2 max-w-sm"
+        >
+          <BaseInput
+            v-model="settingsForm.viber_phone"
+            type="tel"
+            placeholder="+389 7X XXX XXX"
+          />
+          <p class="mt-1 text-xs text-gray-500">
+            The phone number registered with your Viber account.
+          </p>
+        </BaseInputGroup>
+
+        <BaseButton
+          v-if="viberOptInField"
+          :disabled="isSavingViber"
+          :loading="isSavingViber"
+          variant="primary-outline"
+          class="mt-2"
+          @click="saveViberPreferences"
+        >
+          <template #left="slotProps">
+            <BaseIcon
+              v-if="!isSavingViber"
+              :class="slotProps.class"
+              name="ArrowDownOnSquareIcon"
+            />
+          </template>
+          Save Viber Preferences
+        </BaseButton>
+      </div>
+    </template>
   </BaseSettingCard>
 </template>
 
@@ -66,11 +119,28 @@ import { useI18n } from 'vue-i18n'
 import { required, email, helpers } from '@vuelidate/validators'
 import useVuelidate from '@vuelidate/core'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import axios from 'axios'
 
 const companyStore = useCompanyStore()
+const notificationStore = useNotificationStore()
 
 let isSaving = ref(false)
+let isSavingViber = ref(false)
 const { t } = useI18n()
+
+// Check if Viber is enabled platform-wide
+const viberAvailable = ref(false)
+checkViberAvailability()
+
+async function checkViberAvailability() {
+  try {
+    const { data } = await axios.get('/api/v1/viber/availability')
+    viberAvailable.value = data.available === true
+  } catch (e) {
+    viberAvailable.value = false
+  }
+}
 
 const settingsForm = reactive({
   notify_invoice_viewed:
@@ -78,6 +148,8 @@ const settingsForm = reactive({
   notify_estimate_viewed:
     companyStore.selectedCompanySettings.notify_estimate_viewed,
   notification_email: companyStore.selectedCompanySettings.notification_email,
+  viber_opt_in: companyStore.selectedCompanySettings.viber_opt_in || 'NO',
+  viber_phone: companyStore.selectedCompanySettings.viber_phone || '',
 })
 
 const rules = computed(() => {
@@ -137,6 +209,35 @@ const estimateViewedField = computed({
     })
   },
 })
+
+const viberOptInField = computed({
+  get: () => settingsForm.viber_opt_in === 'YES',
+  set: async (newValue) => {
+    const value = newValue ? 'YES' : 'NO'
+    settingsForm.viber_opt_in = value
+
+    await companyStore.updateCompanySettings({
+      data: { settings: { viber_opt_in: value } },
+      message: 'general.setting_updated',
+    })
+  },
+})
+
+async function saveViberPreferences() {
+  isSavingViber.value = true
+
+  await companyStore.updateCompanySettings({
+    data: {
+      settings: {
+        viber_opt_in: settingsForm.viber_opt_in,
+        viber_phone: settingsForm.viber_phone,
+      },
+    },
+    message: 'general.setting_updated',
+  })
+
+  isSavingViber.value = false
+}
 
 async function submitForm() {
   v$.value.$touch()

@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Viber Business Notification Service.
  *
- * Sends messages via the Viber REST API.
- * Registration at partners.viber.com (free, self-service).
+ * Sends messages via the Viber REST API using platform-wide credentials
+ * stored in the global `settings` table (managed by super-admin).
+ *
+ * Tenants opt-in via company_settings: viber_opt_in, viber_phone.
  *
  * @see https://developers.viber.com/docs/api/rest-bot-api/
  */
@@ -25,17 +28,29 @@ class ViberNotificationService
 
     public function __construct()
     {
-        $this->authToken = config('mk.viber.auth_token');
-        $this->senderName = config('mk.viber.sender_name', 'Facturino');
-        $this->senderAvatar = config('mk.viber.sender_avatar');
+        // Platform-wide credentials from global settings (super-admin managed)
+        $this->authToken = Setting::getSetting('viber_auth_token');
+        $this->senderName = Setting::getSetting('viber_sender_name') ?: 'Facturino';
+        $this->senderAvatar = null;
     }
 
     /**
-     * Check if Viber notifications are enabled and configured.
+     * Check if Viber notifications are enabled platform-wide and configured.
      */
     public function isEnabled(): bool
     {
-        return config('mk.viber.enabled', false) && ! empty($this->authToken);
+        return Setting::getSetting('viber_platform_enabled') === 'YES'
+            && ! empty($this->authToken);
+    }
+
+    /**
+     * Check if a specific event type is allowed platform-wide.
+     */
+    public function isEventAllowed(string $eventType): bool
+    {
+        $key = 'viber_allow_'.$eventType;
+
+        return Setting::getSetting($key) !== 'NO';
     }
 
     /**
