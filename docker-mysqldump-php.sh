@@ -64,7 +64,6 @@ $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
 ];
 
 if ($skipSsl) {
@@ -108,24 +107,22 @@ foreach ($tables as $table) {
     fwrite($out, "DROP TABLE IF EXISTS {$quotedTable};\n");
     fwrite($out, $create['Create Table'] . ";\n\n");
 
-    // Data — extended insert format, batched
-    $countStmt = $pdo->query("SELECT COUNT(*) FROM {$quotedTable}");
-    $rowCount = (int) $countStmt->fetchColumn();
-
-    if ($rowCount === 0) continue;
-
     // Get column list for INSERT statement
     $columns = $pdo->query("SHOW COLUMNS FROM {$quotedTable}")->fetchAll();
     $colNames = array_map(fn($c) => "`{$c['Field']}`", $columns);
     $colList = implode(', ', $colNames);
 
-    $stmt = $pdo->query("SELECT * FROM {$quotedTable}", PDO::FETCH_NUM);
-    $batchSize = 500;
-    $batch = [];
+    // Data — extended insert format, batched
+    $rows = $pdo->query("SELECT * FROM {$quotedTable}", PDO::FETCH_NUM)->fetchAll();
+
+    if (empty($rows)) continue;
 
     fwrite($out, "LOCK TABLES {$quotedTable} WRITE;\n");
 
-    while ($row = $stmt->fetch()) {
+    $batchSize = 500;
+    $batch = [];
+
+    foreach ($rows as $row) {
         $values = [];
         foreach ($row as $val) {
             if ($val === null) {
@@ -147,6 +144,7 @@ foreach ($tables as $table) {
     }
 
     fwrite($out, "UNLOCK TABLES;\n\n");
+    unset($rows);
 }
 
 // Dump views
