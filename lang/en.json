@@ -3386,6 +3386,7 @@
     },
     "leave_type": "Leave Type",
     "manage_employees": "Manage employee records",
+    "manage_leave": "Manage leave requests and balances",
     "mark_as_paid": "Mark as Paid",
     "mark_as_paid_confirm": "Are you sure you want to mark this payroll run as paid?",
     "meal_allowance": "Meal Allowance",
@@ -6585,16 +6586,20 @@
     }
   },
   "deadlines": {
-    "title": "Deadlines",
-    "due_date": "Due Date",
-    "status": "Status",
-    "mark_complete": "Mark Complete",
-    "overdue": "Overdue",
-    "due_today": "Due Today",
-    "upcoming": "Upcoming",
+    "add_deadline": "Add Deadline",
     "completed": "Completed",
-    "due_this_week": "Due This Week",
+    "confirm_delete": "Are you sure you want to delete this deadline?",
+    "deadline_created": "Deadline created successfully",
+    "deadline_deleted": "Deadline deleted successfully",
+    "due_date": "Due Date",
     "due_this_month": "Due This Month",
-    "no_deadlines": "No deadlines found"
+    "due_this_week": "Due This Week",
+    "due_today": "Due Today",
+    "mark_complete": "Mark Complete",
+    "no_deadlines": "No deadlines found",
+    "overdue": "Overdue",
+    "status": "Status",
+    "title": "Deadlines",
+    "upcoming": "Upcoming"
   }
 }

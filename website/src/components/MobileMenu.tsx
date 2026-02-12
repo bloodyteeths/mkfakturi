@@ -9,10 +9,10 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <div className="md:hidden">
+        <div className="lg:hidden">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-3 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg"
                 aria-label="Toggle menu"
                 aria-expanded={isOpen}
             >

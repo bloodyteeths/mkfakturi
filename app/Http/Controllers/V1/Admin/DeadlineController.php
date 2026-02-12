@@ -12,9 +12,9 @@ use Illuminate\Validation\Rule;
 /**
  * Admin (Company) Deadline Controller (P8-02)
  *
- * Allows company users to view their own deadlines and mark
- * them as completed. Company users cannot create or delete
- * system deadlines -- only partners/admins can manage those.
+ * Allows company users to view their deadlines, mark them as
+ * completed, and create/delete custom deadlines.
+ * System recurring deadlines cannot be deleted by company users.
  */
 class DeadlineController extends Controller
 {
@@ -104,6 +104,85 @@ class DeadlineController extends Controller
             'data' => $deadline,
             'message' => 'Deadline marked as completed.',
         ]);
+    }
+    /**
+     * Create a custom deadline for the company.
+     *
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $companyId = $user->company_id ?? $user->companies()->first()?->id;
+
+        if (! $companyId) {
+            return response()->json(['error' => 'No company found for user'], 404);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'title_mk' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'due_date' => 'required|date|after_or_equal:today',
+            'deadline_type' => ['nullable', Rule::in(['vat_return', 'mpin', 'cit_advance', 'annual_fs', 'custom'])],
+        ]);
+
+        $deadline = Deadline::create([
+            'company_id' => $companyId,
+            'title' => $validated['title'],
+            'title_mk' => $validated['title_mk'] ?? $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'deadline_type' => $validated['deadline_type'] ?? Deadline::TYPE_CUSTOM,
+            'due_date' => $validated['due_date'],
+            'status' => Deadline::STATUS_UPCOMING,
+            'reminder_days_before' => [7, 3, 1],
+            'is_recurring' => false,
+        ]);
+
+        $deadline->append(['days_remaining', 'type_label', 'type_label_en']);
+
+        Log::info('Company user created deadline', [
+            'user_id' => $user->id,
+            'deadline_id' => $deadline->id,
+            'company_id' => $companyId,
+        ]);
+
+        return response()->json(['data' => $deadline], 201);
+    }
+
+    /**
+     * Delete a custom (non-recurring) deadline.
+     *
+     * @return JsonResponse
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $companyId = $user->company_id ?? $user->companies()->first()?->id;
+
+        if (! $companyId) {
+            return response()->json(['error' => 'No company found for user'], 404);
+        }
+
+        $deadline = Deadline::forCompany($companyId)->find($id);
+
+        if (! $deadline) {
+            return response()->json(['error' => 'Deadline not found'], 404);
+        }
+
+        if ($deadline->is_recurring) {
+            return response()->json(['error' => 'System recurring deadlines cannot be deleted'], 422);
+        }
+
+        $deadline->delete();
+
+        Log::info('Company user deleted deadline', [
+            'user_id' => $user->id,
+            'deadline_id' => $id,
+            'company_id' => $companyId,
+        ]);
+
+        return response()->json(['message' => 'Deadline deleted successfully']);
     }
 }
 // CLAUDE-CHECKPOINT

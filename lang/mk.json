@@ -5726,6 +5726,7 @@
     "this_month_net": "Нето плата овој месец",
     "pending_runs": "Нерешени исплати",
     "manage_employees": "Управувај со евиденција на вработени",
+    "manage_leave": "Управувај со барања за отсуство и салда",
     "view_payroll_runs": "Преглед и управување со исплати",
     "view_reports": "Преглед на даночни и платни извештаи",
     "recent_runs": "Последни исплати",
@@ -5895,16 +5896,20 @@
     }
   },
   "deadlines": {
-    "title": "Рокови",
-    "due_date": "Краен рок",
-    "status": "Статус",
-    "mark_complete": "Означи завршено",
-    "overdue": "Задоцнети",
-    "due_today": "Денес",
-    "upcoming": "Претстојни",
+    "add_deadline": "Додај рок",
     "completed": "Завршени",
-    "due_this_week": "Оваа недела",
+    "confirm_delete": "Дали сте сигурни дека сакате да го избришете овој рок?",
+    "deadline_created": "Рокот е успешно креиран",
+    "deadline_deleted": "Рокот е успешно избришан",
+    "due_date": "Краен рок",
     "due_this_month": "Овој месец",
-    "no_deadlines": "Нема пронајдени рокови"
+    "due_this_week": "Оваа недела",
+    "due_today": "Денес",
+    "mark_complete": "Означи завршено",
+    "no_deadlines": "Нема пронајдени рокови",
+    "overdue": "Задоцнети",
+    "status": "Статус",
+    "title": "Рокови",
+    "upcoming": "Претстојни"
   }
 }

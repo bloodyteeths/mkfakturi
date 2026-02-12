@@ -98,7 +98,7 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-4">
       <!-- Employees -->
       <BaseCard class="p-6 cursor-pointer hover:shadow-lg transition-shadow" @click="$router.push('/admin/payroll/employees')">
         <div class="flex items-center">
@@ -145,6 +145,23 @@
             </h3>
             <p class="text-sm text-gray-600">
               {{ $t('payroll.view_reports') }}
+            </p>
+          </div>
+        </div>
+      </BaseCard>
+
+      <!-- Leave Management -->
+      <BaseCard class="p-6 cursor-pointer hover:shadow-lg transition-shadow" @click="$router.push('/admin/payroll/leave')">
+        <div class="flex items-center">
+          <div class="p-3 bg-orange-100 rounded-lg">
+            <BaseIcon name="CalendarDaysIcon" class="w-6 h-6 text-orange-600" />
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ $t('navigation.leave') }}
+            </h3>
+            <p class="text-sm text-gray-600">
+              {{ $t('payroll.manage_leave') }}
             </p>
           </div>
         </div>

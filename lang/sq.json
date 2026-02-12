@@ -5585,6 +5585,7 @@
     "this_month_net": "Neto плата ky muaji",
     "pending_runs": "Joрешенdhe dheсплатdhe",
     "manage_employees": "Управувај me евdheditaцdheја në вработенdhe",
+    "manage_leave": "Menaxhoni kërkesat për pushim dhe bilancet",
     "view_payroll_runs": "Shikim dhe управување me dheсплатdhe",
     "view_reports": "Shikim në poночнdhe dhe платнdhe raporte",
     "recent_runs": "Pasднdhe dheсплатdhe",
@@ -5754,16 +5755,20 @@
     }
   },
   "deadlines": {
-    "title": "Afatet",
-    "due_date": "Data e afatit",
-    "status": "Statusi",
-    "mark_complete": "Shëno si të përfunduar",
-    "overdue": "Të vonuara",
-    "due_today": "Sot",
-    "upcoming": "Të ardhshme",
+    "add_deadline": "Shto afat",
     "completed": "Të përfunduara",
-    "due_this_week": "Këtë javë",
+    "confirm_delete": "Jeni të sigurt që doni ta fshini këtë afat?",
+    "deadline_created": "Afati u krijua me sukses",
+    "deadline_deleted": "Afati u fshi me sukses",
+    "due_date": "Data e afatit",
     "due_this_month": "Këtë muaj",
-    "no_deadlines": "Nuk u gjetën afate"
+    "due_this_week": "Këtë javë",
+    "due_today": "Sot",
+    "mark_complete": "Shëno si të përfunduar",
+    "no_deadlines": "Nuk u gjetën afate",
+    "overdue": "Të vonuara",
+    "status": "Statusi",
+    "title": "Afatet",
+    "upcoming": "Të ardhshme"
   }
 }

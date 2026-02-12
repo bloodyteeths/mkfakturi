@@ -5,6 +5,14 @@
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
         <BaseBreadcrumbItem :title="$t('deadlines.title')" to="#" active />
       </BaseBreadcrumb>
+      <template #actions>
+        <BaseButton variant="primary" @click="showCreateModal = true">
+          <template #left="slotProps">
+            <BaseIcon name="PlusIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('deadlines.add_deadline') }}
+        </BaseButton>
+      </template>
     </BasePageHeader>
 
     <!-- KPI Summary Cards -->
@@ -112,26 +120,114 @@
         </template>
 
         <template #cell-actions="{ row }">
-          <BaseButton
-            v-if="row.data.status !== 'completed'"
-            variant="primary-outline"
-            size="sm"
-            :disabled="completingId === row.data.id"
-            @click="completeDeadline(row.data)"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="CheckIcon" :class="slotProps.class" />
-            </template>
-            {{ completingId === row.data.id ? '...' : $t('deadlines.mark_complete') }}
-          </BaseButton>
-          <span
-            v-else
-            class="text-sm text-gray-400 italic"
-          >
-            {{ $t('deadlines.completed') }}
-          </span>
+          <div class="flex items-center gap-2">
+            <BaseButton
+              v-if="row.data.status !== 'completed'"
+              variant="primary-outline"
+              size="sm"
+              :disabled="completingId === row.data.id"
+              @click="completeDeadline(row.data)"
+            >
+              <template #left="slotProps">
+                <BaseIcon name="CheckIcon" :class="slotProps.class" />
+              </template>
+              {{ completingId === row.data.id ? '...' : $t('deadlines.mark_complete') }}
+            </BaseButton>
+            <span
+              v-else
+              class="text-sm text-gray-400 italic"
+            >
+              {{ $t('deadlines.completed') }}
+            </span>
+            <BaseButton
+              v-if="!row.data.is_recurring"
+              variant="danger"
+              size="sm"
+              @click="deleteDeadline(row.data)"
+            >
+              <template #left="slotProps">
+                <BaseIcon name="TrashIcon" :class="slotProps.class" />
+              </template>
+            </BaseButton>
+          </div>
         </template>
       </BaseTable>
+    </div>
+
+    <!-- Create Deadline Modal -->
+    <div v-if="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeCreateModal"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
+          <div class="px-6 pt-5 pb-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('deadlines.add_deadline') }}</h3>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.title') }} *</label>
+                <input
+                  v-model="createForm.title"
+                  type="text"
+                  maxlength="255"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                  :placeholder="$t('deadlines.title')"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('general.type') }}</label>
+                <select
+                  v-model="createForm.deadline_type"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="custom">Custom</option>
+                  <option value="vat_return">VAT Return / ДДВ</option>
+                  <option value="mpin">MPIN</option>
+                  <option value="cit_advance">CIT / Данок на добивка</option>
+                  <option value="annual_fs">Annual FS / Годишна сметка</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.due_date') }} *</label>
+                <input
+                  v-model="createForm.due_date"
+                  type="date"
+                  :min="todayString"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('general.description') }}</label>
+                <textarea
+                  v-model="createForm.description"
+                  rows="3"
+                  maxlength="1000"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                ></textarea>
+              </div>
+
+              <div v-if="createError" class="bg-red-50 border border-red-200 rounded-md p-3">
+                <p class="text-sm text-red-700">{{ createError }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-6 py-3 flex justify-end space-x-3 rounded-b-lg">
+            <BaseButton variant="primary-outline" :disabled="isCreating" @click="closeCreateModal">
+              {{ $t('general.cancel') }}
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              :disabled="!createForm.title || !createForm.due_date || isCreating"
+              @click="submitCreate"
+            >
+              {{ isCreating ? '...' : $t('general.save') }}
+            </BaseButton>
+          </div>
+        </div>
+      </div>
     </div>
   </BasePage>
 </template>
@@ -148,6 +244,21 @@ const notificationStore = useNotificationStore()
 const deadlines = ref([])
 const isLoading = ref(true)
 const completingId = ref(null)
+
+// Create modal state
+const showCreateModal = ref(false)
+const isCreating = ref(false)
+const createError = ref(null)
+const createForm = reactive({
+  title: '',
+  deadline_type: 'custom',
+  due_date: '',
+  description: '',
+})
+const todayString = computed(() => {
+  const d = new Date()
+  return d.toISOString().split('T')[0]
+})
 
 // KPI Summary
 const summary = reactive({
@@ -276,6 +387,72 @@ const completeDeadline = async (deadline) => {
     })
   } finally {
     completingId.value = null
+  }
+}
+
+/**
+ * Submit the create deadline form.
+ */
+const submitCreate = async () => {
+  isCreating.value = true
+  createError.value = null
+
+  try {
+    await window.axios.post('/deadlines', {
+      title: createForm.title,
+      deadline_type: createForm.deadline_type,
+      due_date: createForm.due_date,
+      description: createForm.description || null,
+    })
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('deadlines.deadline_created'),
+    })
+
+    closeCreateModal()
+    loadDeadlines()
+  } catch (err) {
+    const errors = err?.response?.data?.errors
+    if (errors) {
+      const firstError = Object.values(errors)[0]
+      createError.value = Array.isArray(firstError) ? firstError[0] : firstError
+    } else {
+      createError.value = err?.response?.data?.error || 'Failed to create deadline.'
+    }
+  } finally {
+    isCreating.value = false
+  }
+}
+
+const closeCreateModal = () => {
+  showCreateModal.value = false
+  createForm.title = ''
+  createForm.deadline_type = 'custom'
+  createForm.due_date = ''
+  createForm.description = ''
+  createError.value = null
+}
+
+/**
+ * Delete a custom (non-recurring) deadline.
+ */
+const deleteDeadline = async (deadline) => {
+  if (!confirm(t('deadlines.confirm_delete'))) return
+
+  try {
+    await window.axios.delete(`/deadlines/${deadline.id}`)
+    deadlines.value = deadlines.value.filter((d) => d.id !== deadline.id)
+    computeSummary(deadlines.value)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('deadlines.deadline_deleted'),
+    })
+  } catch (err) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: err?.response?.data?.error || 'Failed to delete deadline.',
+    })
   }
 }
 

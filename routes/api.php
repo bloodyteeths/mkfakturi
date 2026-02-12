@@ -266,7 +266,9 @@ Route::prefix('/v1')->group(function () {
 
             Route::prefix('deadlines')->group(function () {
                 Route::get('/', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'index']);
+                Route::post('/', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'store']);
                 Route::post('/{id}/complete', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'complete']);
+                Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'destroy']);
             });
 
             // Auth check

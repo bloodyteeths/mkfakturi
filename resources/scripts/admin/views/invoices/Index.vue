@@ -125,162 +125,194 @@
     </BaseEmptyPlaceholder>
 
     <div v-show="!showEmptyScreen" class="relative table-container">
-      <div
-        class="
-          relative
-          flex
-          items-center
-          justify-between
-          h-10
-          mt-5
-          list-none
-          border-b-2 border-gray-200 border-solid
-        "
-      >
-        <!-- Tabs -->
-        <BaseTabGroup class="-mb-5" @change="setStatusFilter">
-          <BaseTab :title="$t('general.all')" filter="" />
-          <BaseTab :title="$t('general.draft')" filter="DRAFT" />
-          <BaseTab :title="$t('general.sent')" filter="SENT" />
-          <BaseTab :title="$t('general.due')" filter="DUE" />
-        </BaseTabGroup>
-
-        <BaseDropdown
-          v-if="
-            invoiceStore.selectedInvoices.length &&
-            userStore.hasAbilities(abilities.DELETE_INVOICE)
-          "
-          class="absolute float-right"
+      <!-- Top-level view switcher -->
+      <div class="flex items-center gap-1 mt-5 mb-2 border-b border-gray-200">
+        <button
+          :class="[
+            'px-4 py-2 text-sm font-medium rounded-t-lg transition-colors',
+            activeView === 'outgoing'
+              ? 'bg-white border border-b-white border-gray-200 text-primary-500 -mb-px'
+              : 'text-gray-500 hover:text-gray-700'
+          ]"
+          @click="activeView = 'outgoing'"
         >
-          <template #activator>
-            <span
-              class="
-                flex
-                text-sm
-                font-medium
-                cursor-pointer
-                select-none
-                text-primary-400
-              "
-            >
-              {{ $t('general.actions') }}
-              <BaseIcon name="ChevronDownIcon" />
-            </span>
+          {{ $t('invoices.title') }}
+        </button>
+        <button
+          :class="[
+            'px-4 py-2 text-sm font-medium rounded-t-lg transition-colors',
+            activeView === 'incoming'
+              ? 'bg-white border border-b-white border-gray-200 text-primary-500 -mb-px'
+              : 'text-gray-500 hover:text-gray-700'
+          ]"
+          @click="activeView = 'incoming'"
+        >
+          {{ $t('e_invoice.incoming_tab') || 'Incoming E-Invoices' }}
+        </button>
+      </div>
+
+      <!-- Outgoing Invoices -->
+      <div v-show="activeView === 'outgoing'">
+        <div
+          class="
+            relative
+            flex
+            items-center
+            justify-between
+            h-10
+            mt-5
+            list-none
+            border-b-2 border-gray-200 border-solid
+          "
+        >
+          <!-- Tabs -->
+          <BaseTabGroup class="-mb-5" @change="setStatusFilter">
+            <BaseTab :title="$t('general.all')" filter="" />
+            <BaseTab :title="$t('general.draft')" filter="DRAFT" />
+            <BaseTab :title="$t('general.sent')" filter="SENT" />
+            <BaseTab :title="$t('general.due')" filter="DUE" />
+          </BaseTabGroup>
+
+          <BaseDropdown
+            v-if="
+              invoiceStore.selectedInvoices.length &&
+              userStore.hasAbilities(abilities.DELETE_INVOICE)
+            "
+            class="absolute float-right"
+          >
+            <template #activator>
+              <span
+                class="
+                  flex
+                  text-sm
+                  font-medium
+                  cursor-pointer
+                  select-none
+                  text-primary-400
+                "
+              >
+                {{ $t('general.actions') }}
+                <BaseIcon name="ChevronDownIcon" />
+              </span>
+            </template>
+
+            <BaseDropdownItem @click="removeMultipleInvoices">
+              <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
+              {{ $t('general.delete') }}
+            </BaseDropdownItem>
+          </BaseDropdown>
+        </div>
+
+        <!-- Mobile: Card View (< 768px) -->
+        <div v-if="invoiceListData.length" class="block md:hidden mt-6">
+          <InvoiceCard
+            v-for="invoice in invoiceListData"
+            :key="invoice.id"
+            :invoice="invoice"
+            :selectable="userStore.hasAbilities(abilities.DELETE_INVOICE)"
+            :is-selected="invoiceStore.selectedInvoices.includes(invoice.id)"
+            @toggle-select="toggleInvoiceSelection"
+          />
+        </div>
+
+        <!-- Desktop: Table View (>= 768px) -->
+        <BaseTable
+          ref="table"
+          :data="fetchData"
+          :columns="invoiceColumns"
+          :placeholder-count="invoiceStore.invoiceTotalCount >= 20 ? 10 : 5"
+          :key="tableKey"
+          class="mt-10 hidden md:block"
+        >
+          <!-- Select All Checkbox -->
+          <template #header>
+            <div class="absolute items-center left-6 top-2.5 select-none">
+              <BaseCheckbox
+                v-model="invoiceStore.selectAllField"
+                variant="primary"
+                @change="invoiceStore.selectAllInvoices"
+              />
+            </div>
           </template>
 
-          <BaseDropdownItem @click="removeMultipleInvoices">
-            <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
-            {{ $t('general.delete') }}
-          </BaseDropdownItem>
-        </BaseDropdown>
-      </div>
+          <template #cell-checkbox="{ row }">
+            <div class="relative block">
+              <BaseCheckbox
+                :id="row.id"
+                v-model="selectField"
+                :value="row.data.id"
+              />
+            </div>
+          </template>
 
-      <!-- Mobile: Card View (< 768px) -->
-      <div v-if="invoiceListData.length" class="block md:hidden mt-6">
-        <InvoiceCard
-          v-for="invoice in invoiceListData"
-          :key="invoice.id"
-          :invoice="invoice"
-          :selectable="userStore.hasAbilities(abilities.DELETE_INVOICE)"
-          :is-selected="invoiceStore.selectedInvoices.includes(invoice.id)"
-          @toggle-select="toggleInvoiceSelection"
-        />
-      </div>
+          <template #cell-name="{ row }">
+            <BaseText :text="row.data.customer.name" />
+          </template>
 
-      <!-- Desktop: Table View (>= 768px) -->
-      <BaseTable
-        ref="table"
-        :data="fetchData"
-        :columns="invoiceColumns"
-        :placeholder-count="invoiceStore.invoiceTotalCount >= 20 ? 10 : 5"
-        :key="tableKey"
-        class="mt-10 hidden md:block"
-      >
-        <!-- Select All Checkbox -->
-        <template #header>
-          <div class="absolute items-center left-6 top-2.5 select-none">
-            <BaseCheckbox
-              v-model="invoiceStore.selectAllField"
-              variant="primary"
-              @change="invoiceStore.selectAllInvoices"
-            />
-          </div>
-        </template>
+          <!-- Invoice Number  -->
+          <template #cell-invoice_number="{ row }">
+            <router-link
+              :to="{ path: `invoices/${row.data.id}/view` }"
+              class="font-medium text-primary-500"
+            >
+              {{ row.data.invoice_number }}
+            </router-link>
+          </template>
 
-        <template #cell-checkbox="{ row }">
-          <div class="relative block">
-            <BaseCheckbox
-              :id="row.id"
-              v-model="selectField"
-              :value="row.data.id"
-            />
-          </div>
-        </template>
+          <!-- Invoice date  -->
+          <template #cell-invoice_date="{ row }">
+            {{ row.data.formatted_invoice_date }}
+          </template>
 
-        <template #cell-name="{ row }">
-          <BaseText :text="row.data.customer.name" />
-        </template>
-
-        <!-- Invoice Number  -->
-        <template #cell-invoice_number="{ row }">
-          <router-link
-            :to="{ path: `invoices/${row.data.id}/view` }"
-            class="font-medium text-primary-500"
-          >
-            {{ row.data.invoice_number }}
-          </router-link>
-        </template>
-
-        <!-- Invoice date  -->
-        <template #cell-invoice_date="{ row }">
-          {{ row.data.formatted_invoice_date }}
-        </template>
-
-        <!-- Invoice Total  -->
-        <template #cell-total="{ row }">
-          <BaseFormatMoney
-            :amount="row.data.total"
-            :currency="row.data.customer.currency"
-          />
-        </template>
-
-        <!-- Invoice status  -->
-        <template #cell-status="{ row }">
-          <BaseInvoiceStatusBadge :status="row.data.status" class="px-3 py-1">
-            <BaseInvoiceStatusLabel :status="row.data.status" />
-          </BaseInvoiceStatusBadge>
-        </template>
-
-        <!-- Due Amount + Paid Status  -->
-        <template #cell-due_amount="{ row }">
-          <div class="flex justify-between">
+          <!-- Invoice Total  -->
+          <template #cell-total="{ row }">
             <BaseFormatMoney
-              :amount="row.data.due_amount"
-              :currency="row.data.currency"
+              :amount="row.data.total"
+              :currency="row.data.customer.currency"
             />
+          </template>
 
-            <BasePaidStatusBadge
-              v-if="row.data.overdue"
-              status="OVERDUE"
-              class="px-1 py-0.5 ml-2"
-            >
-              {{ $t('invoices.overdue') }}
-            </BasePaidStatusBadge>
+          <!-- Invoice status  -->
+          <template #cell-status="{ row }">
+            <BaseInvoiceStatusBadge :status="row.data.status" class="px-3 py-1">
+              <BaseInvoiceStatusLabel :status="row.data.status" />
+            </BaseInvoiceStatusBadge>
+          </template>
 
-            <BasePaidStatusBadge
-              :status="row.data.paid_status"
-              class="px-1 py-0.5 ml-2"
-            >
-              <BaseInvoiceStatusLabel :status="row.data.paid_status" />
-            </BasePaidStatusBadge>
-          </div>
-        </template>
+          <!-- Due Amount + Paid Status  -->
+          <template #cell-due_amount="{ row }">
+            <div class="flex justify-between">
+              <BaseFormatMoney
+                :amount="row.data.due_amount"
+                :currency="row.data.currency"
+              />
 
-        <!-- Actions -->
-        <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
-          <InvoiceDropdown :row="row.data" :table="table" />
-        </template>
-      </BaseTable>
+              <BasePaidStatusBadge
+                v-if="row.data.overdue"
+                status="OVERDUE"
+                class="px-1 py-0.5 ml-2"
+              >
+                {{ $t('invoices.overdue') }}
+              </BasePaidStatusBadge>
+
+              <BasePaidStatusBadge
+                :status="row.data.paid_status"
+                class="px-1 py-0.5 ml-2"
+              >
+                <BaseInvoiceStatusLabel :status="row.data.paid_status" />
+              </BasePaidStatusBadge>
+            </div>
+          </template>
+
+          <!-- Actions -->
+          <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
+            <InvoiceDropdown :row="row.data" :table="table" />
+          </template>
+        </BaseTable>
+      </div>
+
+      <!-- Incoming E-Invoices -->
+      <EInvoiceInboxTab v-if="activeView === 'incoming'" />
     </div>
   </BasePage>
 </template>
@@ -303,6 +335,7 @@ import ExportXmlModal from '@/scripts/admin/components/modal-components/ExportXm
 import BaseInvoiceStatusLabel from "@/scripts/components/base/BaseInvoiceStatusLabel.vue"
 import InvoiceCard from '@/scripts/admin/components/InvoiceCard.vue'
 import ExportButton from '@/scripts/admin/components/ExportButton.vue'
+import EInvoiceInboxTab from '@/scripts/admin/views/invoices/partials/EInvoiceInboxTab.vue'
 // Stores
 const invoiceStore = useInvoiceStore()
 const dialogStore = useDialogStore()
@@ -315,6 +348,7 @@ const utils = inject('$utils')
 const table = ref(null)
 const tableKey = ref(0)
 const showFilters = ref(false)
+const activeView = ref('outgoing')
 
 const status = ref([
   {

@@ -6205,6 +6205,7 @@
     "this_month_net": "Bu ayın net maaşı",
     "pending_runs": "Bekleyen işlemler",
     "manage_employees": "Çalışan kayıtlarını yönet",
+    "manage_leave": "İzin taleplerini ve bakiyeleri yönetin",
     "view_payroll_runs": "Bordro işlemlerini görüntüle ve yönet",
     "view_reports": "Vergi ve bordro raporlarını görüntüle",
     "recent_runs": "Son işlemler",
@@ -6395,16 +6396,20 @@
     }
   },
   "deadlines": {
-    "title": "Son Tarihler",
-    "due_date": "Son Tarih",
-    "status": "Durum",
-    "mark_complete": "Tamamlandı Olarak İşaretle",
-    "overdue": "Gecikmiş",
-    "due_today": "Bugün",
-    "upcoming": "Yaklaşan",
+    "add_deadline": "Son Tarih Ekle",
     "completed": "Tamamlanmış",
-    "due_this_week": "Bu Hafta",
+    "confirm_delete": "Bu son tarihi silmek istediğinizden emin misiniz?",
+    "deadline_created": "Son tarih başarıyla oluşturuldu",
+    "deadline_deleted": "Son tarih başarıyla silindi",
+    "due_date": "Son Tarih",
     "due_this_month": "Bu Ay",
-    "no_deadlines": "Son tarih bulunamadı"
+    "due_this_week": "Bu Hafta",
+    "due_today": "Bugün",
+    "mark_complete": "Tamamlandı Olarak İşaretle",
+    "no_deadlines": "Son tarih bulunamadı",
+    "overdue": "Gecikmiş",
+    "status": "Durum",
+    "title": "Son Tarihler",
+    "upcoming": "Yaklaşan"
   }
 }

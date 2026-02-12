@@ -112,6 +112,10 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Seeding Deadline Templates..."
     php artisan db:seed --class=DeadlineTemplatesSeeder --force || echo "DeadlineTemplatesSeeder failed or table not ready"
 
+    # Generate recurring deadline instances from templates
+    echo "Generating recurring deadline instances..."
+    php artisan deadlines:generate-recurring || echo "Deadline generation failed or table not ready"
+
     # Check if installation already complete (like commit 09c2afc)
     PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
     echo "Profile status: $PROFILE_STATUS"

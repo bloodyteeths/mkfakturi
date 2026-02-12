@@ -98,38 +98,61 @@ class DeadlineTemplatesSeeder extends Seeder
     /**
      * Get the standard MK accounting deadline templates.
      *
+     * Based on Macedonian tax calendar (UJP / Управа за јавни приходи):
+     * - MPIN filing: 10th of each month
+     * - MPIN + CIT payment: 15th of each month
+     * - VAT return filing: 25th of each month
+     * - VAT payment: 30th of each month
+     * - CIT annual return (electronic): March 15th
+     * - Annual financial statements (Central Registry): March 31st
+     * - Personal income tax confirmation: May 31st
+     *
      * @return array<array<string, mixed>>
      */
     protected function getTemplates(): array
     {
         return [
             [
-                'title' => 'VAT Return',
-                'title_mk' => 'ДДВ пријава',
-                'description' => 'Monthly VAT return submission to the tax authority (UJP). Due on the 25th of each month for the previous month.',
-                'deadline_type' => Deadline::TYPE_VAT,
-                'recurrence_rule' => 'monthly_25',
-            ],
-            [
                 'title' => 'MPIN Filing',
                 'title_mk' => 'МПИН пријава',
-                'description' => 'Monthly payroll tax filing (MPIN) to the tax authority. Due on the 10th of each month for the previous month.',
+                'description' => 'Monthly payroll tax filing (MPIN) — gross salaries, social contributions, withheld PIT. Submit electronically to UJP by the 10th.',
                 'deadline_type' => Deadline::TYPE_MPIN,
                 'recurrence_rule' => 'monthly_10',
             ],
             [
-                'title' => 'CIT Advance Payment',
-                'title_mk' => 'Аконтација на данок на добивка',
-                'description' => 'Monthly Corporate Income Tax advance payment. Due on the 15th of each month.',
+                'title' => 'MPIN Payment & CIT Advance',
+                'title_mk' => 'Уплата МПИН и аконтација данок на добивка',
+                'description' => 'Payment of social contributions + withheld PIT from MPIN, and monthly CIT advance (1/12 of prior year CIT). Due 15th of each month.',
                 'deadline_type' => Deadline::TYPE_CIT,
                 'recurrence_rule' => 'monthly_15',
             ],
             [
-                'title' => 'Annual Financial Statement',
-                'title_mk' => 'Годишна сметка',
-                'description' => 'Annual financial statement submission to the Central Registry and tax authority. Due on March 15th each year.',
-                'deadline_type' => Deadline::TYPE_ANNUAL_FS,
+                'title' => 'VAT Return Filing',
+                'title_mk' => 'ДДВ-04 пријава',
+                'description' => 'Monthly VAT return (DDV-04) submission to UJP. Due on the 25th of the month following the tax period.',
+                'deadline_type' => Deadline::TYPE_VAT,
+                'recurrence_rule' => 'monthly_25',
+            ],
+            [
+                'title' => 'CIT Annual Return',
+                'title_mk' => 'Годишен данок на добивка (ДБ)',
+                'description' => 'Annual Corporate Income Tax return (electronic filing). Due March 15th. Final CIT payment due within 30 days.',
+                'deadline_type' => Deadline::TYPE_CIT,
                 'recurrence_rule' => 'annual_03_15',
+            ],
+            [
+                'title' => 'Annual Financial Statement',
+                'title_mk' => 'Годишна сметка (Централен Регистар)',
+                'description' => 'Annual financial statement submission to the Central Registry of North Macedonia. Due March 31st each year.',
+                'deadline_type' => Deadline::TYPE_ANNUAL_FS,
+                'recurrence_rule' => 'annual_03_31',
+            ],
+            [
+                'title' => 'Personal Income Tax Confirmation',
+                'title_mk' => 'Годишна даночна пријава (ПДД-ГДП)',
+                'description' => 'Confirm or correct the pre-filled annual personal income tax return from UJP. Deadline May 31st — auto-confirmed if no action taken.',
+                'deadline_type' => Deadline::TYPE_ANNUAL_FS,
+                'recurrence_rule' => 'annual_05_31',
             ],
         ];
     }

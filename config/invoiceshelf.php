@@ -520,17 +520,6 @@ return [
             'feature_flag' => 'payroll',
         ],
         [
-            'title' => 'navigation.leave',
-            'group' => 2,
-            'link' => '/admin/payroll/leave',
-            'icon' => 'CalendarDaysIcon',
-            'name' => 'Leave',
-            'owner_only' => false,
-            'ability' => 'view-payroll-employee',
-            'model' => \App\Models\PayrollEmployee::class,
-            'feature_flag' => 'payroll',
-        ],
-        [
             'title' => 'navigation.deadlines',
             'group' => 2,
             'link' => '/admin/deadlines',
