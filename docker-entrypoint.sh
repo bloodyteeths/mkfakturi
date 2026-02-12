@@ -99,12 +99,11 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Running migrations..."
     php artisan migrate --force 2>&1 || echo "Some migrations failed"
 
-    # Fix ghost migration records: migration recorded as run but table doesn't exist
-    # This happens when a migration batch partially fails
-    echo "Checking for ghost migration records..."
-    php fix-ghost-migrations.php || echo "Ghost check skipped"
+    # Fix ghost migration records + failsafe table creation
+    echo "Running ghost migration fix and failsafe..."
+    php fix-ghost-migrations.php 2>&1
 
-    # Re-run migrations to pick up any fixed ghosts
+    # Re-run migrations after ghost fix
     echo "Re-running migrations after ghost fix..."
     php artisan migrate --force 2>&1 || echo "Re-run migrations done"
 

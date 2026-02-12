@@ -77,6 +77,16 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URL'),
     ],
 
+    // eID / OneID — Macedonian national identity OIDC provider (P13-03)
+    'oneid' => [
+        'client_id' => env('ONEID_CLIENT_ID'),
+        'client_secret' => env('ONEID_CLIENT_SECRET'),
+        'redirect' => env('ONEID_REDIRECT_URL', env('APP_URL') . '/auth/oneid/callback'),
+        'authorize_url' => env('ONEID_AUTHORIZE_URL', 'https://eid.mk/connect/authorize'),
+        'token_url' => env('ONEID_TOKEN_URL', 'https://eid.mk/connect/token'),
+        'userinfo_url' => env('ONEID_USERINFO_URL', 'https://eid.mk/connect/userinfo'),
+    ], // CLAUDE-CHECKPOINT
+
     'cron_job' => [
         'auth_token' => env('CRON_JOB_AUTH_TOKEN', 0),
     ],

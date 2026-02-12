@@ -86,6 +86,8 @@ const ViberNotificationsSetting = () =>
   import('@/scripts/admin/views/settings/ViberNotificationsSetting.vue')
 const WooCommerceSetting = () =>
   import('@/scripts/admin/views/settings/WooCommerceSetting.vue')
+const EFakturaSetting = () =>
+  import('@/scripts/admin/views/settings/EFakturaSetting.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -790,6 +792,12 @@ export default [
             name: 'settings.woocommerce',
             meta: { isOwner: true },
             component: WooCommerceSetting,
+          },
+          {
+            path: 'efaktura',
+            name: 'settings.efaktura',
+            meta: { isOwner: true },
+            component: EFakturaSetting,
           },
         ],
       },

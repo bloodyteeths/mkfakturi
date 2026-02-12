@@ -5,6 +5,8 @@ namespace App\Jobs;
 use App\Models\Certificate;
 use App\Models\EInvoice;
 use App\Models\EInvoiceSubmission;
+use App\Services\EFaktura\UjpApiClient;
+use App\Services\EFaktura\UjpPortalClient;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +14,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Process;
 use Modules\Mk\Services\MkUblMapper;
 use Modules\Mk\Services\MkXmlSigner;
 use Throwable;
@@ -406,120 +407,51 @@ class SubmitEInvoiceJob implements ShouldQueue
     }
 
     /**
-     * Submit to tax authority portal using efaktura_upload.php tool.
+     * Submit to tax authority using the configured submission mode.
      *
-     * @return array Upload result
+     * Dispatches to either UjpApiClient (API mode) or UjpPortalClient
+     * (portal scraping mode) based on config('mk.efaktura.mode').
+     * Both clients return the same array shape for transparent switching.
+     *
+     * @return array Upload result with keys: success, status, receipt_number, response
      *
      * @throws Exception
      */
     protected function submitToPortal(EInvoice $eInvoice, string $signedXml): array
     {
-        Log::info('SubmitEInvoiceJob: Submitting to tax authority portal', [
+        $mode = config('mk.efaktura.mode', 'portal');
+
+        Log::info('SubmitEInvoiceJob: Submitting to tax authority', [
             'e_invoice_id' => $eInvoice->id,
             'submission_id' => $this->submission->id,
+            'mode' => $mode,
         ]);
 
         try {
-            // Save signed XML to temporary file
-            $tempXmlPath = $this->saveToTempFile($signedXml, 'einvoice', '.xml');
-
-            // Path to efaktura_upload.php tool
-            $uploadToolPath = base_path('tools/efaktura_upload.php');
-
-            if (! file_exists($uploadToolPath)) {
-                throw new Exception("E-faktura upload tool not found: {$uploadToolPath}");
+            if ($mode === 'api') {
+                // API mode: use UjpApiClient for REST API submission
+                $uploadResult = app(UjpApiClient::class)->submitInvoice($signedXml);
+            } else {
+                // Portal mode (default): use UjpPortalClient for legacy portal scraping
+                $uploadResult = app(UjpPortalClient::class)->submitInvoice($signedXml);
             }
 
-            // Execute upload tool via Process facade
-            $result = Process::timeout($this->timeout)
-                ->run([
-                    'php',
-                    $uploadToolPath,
-                    '--xml='.$tempXmlPath,
-                    '--mode='.config('mk.efaktura.mode', 'portal'),
-                ]);
-
-            // Clean up temporary file
-            @unlink($tempXmlPath);
-
-            // Check if process was successful
-            if (! $result->successful()) {
-                throw new Exception(
-                    'Upload tool execution failed: '.$result->errorOutput()
-                );
-            }
-
-            // Parse output from upload tool
-            $output = $result->output();
-            $uploadResult = $this->parseUploadToolOutput($output);
-
-            Log::info('SubmitEInvoiceJob: Portal submission completed', [
+            Log::info('SubmitEInvoiceJob: Submission completed', [
                 'e_invoice_id' => $eInvoice->id,
+                'mode' => $mode,
                 'upload_result' => $uploadResult,
             ]);
 
             return $uploadResult;
 
         } catch (Exception $e) {
-            Log::error('SubmitEInvoiceJob: Portal submission failed', [
+            Log::error('SubmitEInvoiceJob: Submission failed', [
                 'e_invoice_id' => $eInvoice->id,
+                'mode' => $mode,
                 'error' => $e->getMessage(),
             ]);
-            throw new Exception('Portal submission failed: '.$e->getMessage());
+            throw new Exception("Submission failed ({$mode} mode): ".$e->getMessage());
         }
-    }
-
-    /**
-     * Save content to temporary file.
-     *
-     * @return string File path
-     */
-    protected function saveToTempFile(string $content, string $prefix = 'temp', string $extension = '.tmp'): string
-    {
-        $tempDir = sys_get_temp_dir();
-        $tempFile = tempnam($tempDir, $prefix).$extension;
-
-        file_put_contents($tempFile, $content);
-
-        return $tempFile;
-    }
-
-    /**
-     * Parse output from efaktura_upload.php tool.
-     *
-     * @return array Parsed result
-     */
-    protected function parseUploadToolOutput(string $output): array
-    {
-        $result = [
-            'success' => false,
-            'status' => 'unknown',
-            'upload_id' => null,
-            'receipt_number' => null,
-            'raw_output' => $output,
-        ];
-
-        // Look for success indicators
-        if (preg_match('/Success:\s*(Yes|true)/i', $output)) {
-            $result['success'] = true;
-        }
-
-        // Extract status
-        if (preg_match('/Status:\s*(\w+)/i', $output, $matches)) {
-            $result['status'] = strtolower(trim($matches[1]));
-        }
-
-        // Extract upload ID
-        if (preg_match('/Upload ID:\s*([^\s\n]+)/i', $output, $matches)) {
-            $result['upload_id'] = trim($matches[1]);
-        }
-
-        // Extract receipt number
-        if (preg_match('/Receipt:\s*([^\s\n]+)/i', $output, $matches)) {
-            $result['receipt_number'] = trim($matches[1]);
-        }
-
-        return $result;
     }
 
     /**

@@ -228,7 +228,7 @@ return [
         | List of supported banks for PSD2 integration
         |
         */
-        'supported' => ['stopanska', 'nlb'],
+        'supported' => ['stopanska', 'nlb', 'komercijalna'],
 
         /*
         |--------------------------------------------------------------------------
@@ -239,8 +239,9 @@ return [
         |
         */
         'rate_limits' => [
-            'stopanska' => 15, // 15 requests per minute
-            'nlb' => 15,       // 15 requests per minute
+            'stopanska' => 15,     // 15 requests per minute
+            'nlb' => 15,           // 15 requests per minute
+            'komercijalna' => 15,  // 15 requests per minute
         ],
 
         /*
@@ -307,6 +308,33 @@ return [
         'mtls_cert_path' => env('NLB_MTLS_CERT_PATH', null), // Path to client certificate (.pem or .crt)
         'mtls_key_path' => env('NLB_MTLS_KEY_PATH', null),   // Path to private key (.key)
         'mtls_key_password' => env('NLB_MTLS_KEY_PASSWORD', null), // Password for encrypted key (optional)
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Komercijalna Banka PSD2 Settings
+    |--------------------------------------------------------------------------
+    |
+    | OAuth2 configuration for Komercijalna Banka PSD2 API
+    | BIC/SWIFT: KOBSMK2X
+    |
+    */
+    'komercijalna' => [
+        'client_id' => env('MK_KOMER_CLIENT_ID', ''),
+        'client_secret' => env('MK_KOMER_CLIENT_SECRET', ''),
+        'environment' => env('MK_KOMER_ENVIRONMENT', 'sandbox'),
+        'sandbox_base_url' => env('MK_KOMER_SANDBOX_URL', 'https://api-sandbox.kb.com.mk'),
+        'production_base_url' => env('MK_KOMER_API_URL', 'https://api.kb.com.mk'),
+        'auth_base_url' => env('MK_KOMER_AUTH_URL', 'https://auth.kb.com.mk'),
+        'redirect_uri' => env('MK_KOMER_REDIRECT_URI', null), // Must be registered in Komercijalna developer portal
+        'scopes' => env('MK_KOMER_SCOPES', 'accounts transactions'), // OAuth scopes for PSD2 access
+
+        // mTLS Certificate Configuration (required for PSD2 API access)
+        // Certificates must be obtained from Komercijalna Banka developer portal
+        // Paths can be absolute or relative to storage/certificates/ directory
+        'mtls_cert_path' => env('MK_KOMER_MTLS_CERT', null), // Path to client certificate (.pem or .crt)
+        'mtls_key_path' => env('MK_KOMER_MTLS_KEY', null),   // Path to private key (.key)
+        'mtls_key_password' => env('MK_KOMER_MTLS_KEY_PASSWORD', null), // Password for encrypted key (optional)
     ],
 
     /*

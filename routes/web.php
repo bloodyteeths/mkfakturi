@@ -22,6 +22,7 @@ use App\Http\Controllers\V1\PDF\InvoicePdfController;
 use App\Http\Controllers\V1\PDF\PaymentPdfController;
 use App\Http\Controllers\V1\PDF\ProformaInvoicePdfController;
 // use App\Http\Controllers\PrometheusController; // Disabled - dependency not installed
+use App\Http\Controllers\Auth\OneIdAuthController;
 use App\Models\Company;
 use Illuminate\Support\Facades\Route;
 
@@ -200,6 +201,13 @@ Route::middleware('feature:monitoring')->group(function () {
     Route::get('/metrics', [PrometheusController::class, 'metrics'])->name('metrics');
     Route::get('/metrics/health', [PrometheusController::class, 'health'])->name('prometheus.health');
 });
+
+// eID / OneID OpenID Connect Login (P13-03)
+// ----------------------------------------------
+Route::get('/auth/oneid/redirect', [OneIdAuthController::class, 'redirect'])->name('auth.oneid.redirect');
+Route::get('/auth/oneid/callback', [OneIdAuthController::class, 'callback'])->name('auth.oneid.callback');
+
+// CLAUDE-CHECKPOINT
 
 // Setup for installation of app
 // ----------------------------------------------

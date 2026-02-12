@@ -18,7 +18,7 @@
       </p>
 
       <!-- Bank Selection -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Stopanska Banka -->
         <div
           class="border-2 border-gray-200 rounded-lg p-6 hover:border-primary-500 hover:shadow-md transition-all cursor-pointer"
@@ -59,6 +59,28 @@
             </h4>
             <p class="text-sm text-gray-500 text-center">
               {{ $t('banking.nlb_description') }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Komercijalna Banka -->
+        <div
+          class="border-2 border-gray-200 rounded-lg p-6 hover:border-primary-500 hover:shadow-md transition-all cursor-pointer"
+          :class="{ 'border-primary-500 bg-primary-50': selectedBank === 'komercijalna' }"
+          @click="selectBank('komercijalna')"
+        >
+          <div class="flex flex-col items-center">
+            <img
+              src="/images/banks/komercijalna-logo.png"
+              alt="Комерцијална Банка (KOBSMK2X)"
+              class="h-16 w-auto mb-4"
+              @error="handleImageError"
+            />
+            <h4 class="text-md font-semibold text-gray-900 mb-2">
+              {{ $t('banking.komercijalna') }}
+            </h4>
+            <p class="text-sm text-gray-500 text-center">
+              {{ $t('banking.komercijalna_description') }}
             </p>
           </div>
         </div>
