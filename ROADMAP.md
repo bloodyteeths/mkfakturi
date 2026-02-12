@@ -18,8 +18,8 @@
 | **P13** | Bank & Auth Expansion | P13-01 … P13-03 | 11–15 days | SHOULD — requires sandbox credentials | ✅ COMPLETED |
 | **P14** | Hardware & Deferred | P14-01 | 7–14 days | COULD — blocked by UJP specs | Deferred |
 
-**Phases P7–P13 completed: 52–74 days** ✅
-**Remaining effort (P14): 7–14 days**
+**All phases P7–P14 completed: 59–88 days** ✅
+**22/22 tickets done — full roadmap complete**
 
 ### Dependency Graph
 
@@ -45,7 +45,7 @@ P12-04 (Incoming e-invoice) ─── ✅ COMPLETED
 P13-01 (Komercijalna PSD2)  ─── ✅ COMPLETED (config wired, awaiting sandbox credentials)
 P13-02 (UJP e-Invoice API)  ─── ✅ COMPLETED (API client + portal refactor, awaiting UJP credentials)
 P13-03 (eID/OneID login)    ─── ✅ COMPLETED (OIDC integration, awaiting eID registration)
-P14-01 (Fiscal devices)     ─── deferred until UJP publishes device API specs
+P14-01 (Fiscal devices)     ─── ✅ COMPLETED (ErpNet.FP sidecar, awaiting physical devices)
 ```
 
 ---
@@ -1306,9 +1306,9 @@ Don't have an account? [Sign up]
 
 ---
 
-## Phase 14 — Hardware & Deferred
+## Phase 14 — Hardware & Deferred ✅ COMPLETED
 
-> Items blocked by external dependencies.
+> ErpNet.FP sidecar integration complete. Physical device testing requires hardware.
 
 ### P14-01: Fiscal Device Protocols via ErpNet.FP Sidecar
 
@@ -1318,7 +1318,7 @@ Need actual protocol implementation.
 
 **Effort:** 1–2 weeks
 
-**Status:** DEFERRED per P10-02 — awaiting UJP device API specs.
+**Status:** ✅ COMPLETED — ErpNet.FP driver, client, config, and Docker sidecar implemented. Awaiting physical devices for live testing.
 
 #### Fastest path when unblocked
 
@@ -1386,5 +1386,5 @@ These items surfaced during the audit but are not gaps — they are enhancement 
 | P11 | 3 tickets | 4–6 | Bank coverage 95%+, payment refunds, marketing visibility | ✅ COMPLETED |
 | P12 | 4 tickets | 13–17 | Central Registry, Viber, WooCommerce, incoming e-invoice | ✅ COMPLETED |
 | P13 | 3 tickets | 11–15 | Komercijalna PSD2, UJP API, eID login | ✅ COMPLETED |
-| P14 | 1 ticket | 7–14 | Fiscal device protocols (deferred) | Deferred |
-| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **21/22 done** |
+| P14 | 1 ticket | 7–14 | Fiscal device protocols (ErpNet.FP) | ✅ COMPLETED |
+| **Total** | **22 tickets** | **59–88 days** | **Full Macedonian integration ecosystem** | **22/22 done** |

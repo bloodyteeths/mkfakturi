@@ -32,6 +32,7 @@ class FiscalDeviceManager
         'expert-sx' => ExpertSxDriver::class,
         'pelisterec' => PelisterecDriver::class,
         'alpha' => AlphaDriver::class,
+        'erpnet-fp' => ErpNetFpDriver::class,
     ];
 
     /** @var array<string, string> Human-readable device names (Macedonian) */
@@ -43,6 +44,7 @@ class FiscalDeviceManager
         'expert-sx' => 'Expert SX',
         'pelisterec' => 'Пелистерец',
         'alpha' => 'Alpha',
+        'erpnet-fp' => 'ErpNet.FP (Universal)',
     ];
 
     /** @var array<string, string> Default connection type per device */
@@ -54,6 +56,7 @@ class FiscalDeviceManager
         'expert-sx' => 'serial',
         'pelisterec' => 'bluetooth',
         'alpha' => 'serial',
+        'erpnet-fp' => 'tcp',
     ];
 
     /**

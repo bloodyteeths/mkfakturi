@@ -558,6 +558,26 @@ return [
         'max_orders_per_sync' => env('WOOCOMMERCE_MAX_ORDERS', 50),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Fiscal Devices — ErpNet.FP Sidecar
+    |--------------------------------------------------------------------------
+    |
+    | ErpNet.FP is an open-source .NET fiscal printer server that handles
+    | vendor-specific protocols (Daisy, David, Expert, etc.) and exposes
+    | a unified REST API. Runs as a Docker sidecar service.
+    |
+    | GitHub: https://github.com/erpnet/ErpNet.FP
+    |
+    */
+    'fiscal_devices' => [
+        'erpnet_fp' => [
+            'base_url' => env('ERPNET_FP_BASE_URL', 'http://erpnet-fp:8001'),
+            'timeout' => env('ERPNET_FP_TIMEOUT', 15),
+            'connect_timeout' => env('ERPNET_FP_CONNECT_TIMEOUT', 5),
+        ],
+    ],
+
     'features' => [
         'advanced_payments' => env('FEATURE_ADVANCED_PAYMENTS', false),
         'psd2_banking' => env('FEATURE_PSD2_BANKING', false),
@@ -565,6 +585,7 @@ return [
         'central_registry_lookup' => env('FEATURE_CENTRAL_REGISTRY', true),
         'viber_notifications' => env('FEATURE_VIBER_NOTIFICATIONS', false),
         'woocommerce_sync' => env('FEATURE_WOOCOMMERCE_SYNC', false),
+        'fiscal_devices' => env('FEATURE_FISCAL_DEVICES', false),
     ],
 
 ];
