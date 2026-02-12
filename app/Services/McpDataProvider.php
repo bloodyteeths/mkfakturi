@@ -3,13 +3,19 @@
 namespace App\Services;
 
 use App\Models\Bill;
+use App\Models\ClientDocument;
 use App\Models\Company;
 use App\Models\CreditNote;
 use App\Models\Customer;
+use App\Models\Deadline;
 use App\Models\EInvoice;
 use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Item;
+use App\Models\LeaveRequest;
+use App\Models\LeaveType;
+use App\Models\PayrollRun;
+use App\Models\PayrollRunLine;
 use App\Models\ProformaInvoice;
 use App\Models\Project;
 use App\Models\RecurringInvoice;
@@ -990,9 +996,9 @@ class McpDataProvider
     }
 
     /**
-     * Get e-invoices statistics
+     * Get e-invoices statistics (outgoing + incoming)
      *
-     * @return array{einvoices_sent: int, einvoices_pending: int, einvoices_failed: int}
+     * @return array{einvoices_sent: int, einvoices_pending: int, einvoices_failed: int, incoming_total: int, incoming_pending_review: int, incoming_accepted: int, incoming_rejected: int}
      */
     public function getEInvoiceStats(Company $company): array
     {
@@ -1001,20 +1007,45 @@ class McpDataProvider
                 'company_id' => $company->id,
             ]);
 
+            // Outgoing e-invoices
             $einvoicesSent = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'outbound')
                 ->whereIn('status', [EInvoice::STATUS_SUBMITTED, EInvoice::STATUS_ACCEPTED])
                 ->count();
             $einvoicesPending = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'outbound')
                 ->whereIn('status', [EInvoice::STATUS_DRAFT, EInvoice::STATUS_SIGNED])
                 ->count();
             $einvoicesFailed = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'outbound')
                 ->whereIn('status', [EInvoice::STATUS_FAILED, EInvoice::STATUS_REJECTED])
+                ->count();
+
+            // Incoming e-invoices (P7-02)
+            $incomingTotal = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'inbound')
+                ->count();
+            $incomingPendingReview = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'inbound')
+                ->where('status', EInvoice::STATUS_DRAFT)
+                ->count();
+            $incomingAccepted = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'inbound')
+                ->where('status', EInvoice::STATUS_ACCEPTED)
+                ->count();
+            $incomingRejected = EInvoice::where('company_id', $company->id)
+                ->where('direction', 'inbound')
+                ->where('status', EInvoice::STATUS_REJECTED)
                 ->count();
 
             $stats = [
                 'einvoices_sent' => $einvoicesSent,
                 'einvoices_pending' => $einvoicesPending,
                 'einvoices_failed' => $einvoicesFailed,
+                'incoming_total' => $incomingTotal,
+                'incoming_pending_review' => $incomingPendingReview,
+                'incoming_accepted' => $incomingAccepted,
+                'incoming_rejected' => $incomingRejected,
             ];
 
             Log::info('[McpDataProvider] E-invoices stats calculated', $stats);
@@ -1032,6 +1063,10 @@ class McpDataProvider
                 'einvoices_sent' => 0,
                 'einvoices_pending' => 0,
                 'einvoices_failed' => 0,
+                'incoming_total' => 0,
+                'incoming_pending_review' => 0,
+                'incoming_accepted' => 0,
+                'incoming_rejected' => 0,
             ];
         }
     }
@@ -2365,6 +2400,293 @@ class McpDataProvider
     }
 
     /**
+     * Get payroll statistics including overtime
+     *
+     * @return array{total_runs: int, latest_run_status: string|null, total_employees: int, total_gross_salary: float, total_net_salary: float, total_overtime_hours: float, total_overtime_amount: float, total_leave_deductions: float}
+     */
+    public function getPayrollStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching payroll stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $totalRuns = PayrollRun::where('company_id', $company->id)->count();
+            $latestRun = PayrollRun::where('company_id', $company->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $totalEmployees = PayrollRunLine::whereHas('payrollRun', function ($q) use ($company) {
+                $q->where('company_id', $company->id);
+            })->distinct('employee_id')->count('employee_id');
+
+            // Aggregate from latest 3 months of payroll runs
+            $recentRunIds = PayrollRun::where('company_id', $company->id)
+                ->where('created_at', '>=', now()->subMonths(3))
+                ->pluck('id');
+
+            $totalGross = (float) PayrollRunLine::whereIn('payroll_run_id', $recentRunIds)
+                ->sum('gross_salary');
+            $totalNet = (float) PayrollRunLine::whereIn('payroll_run_id', $recentRunIds)
+                ->sum('net_salary');
+            $totalOvertimeHours = (float) PayrollRunLine::whereIn('payroll_run_id', $recentRunIds)
+                ->sum('overtime_hours');
+            $totalOvertimeAmount = (float) PayrollRunLine::whereIn('payroll_run_id', $recentRunIds)
+                ->sum('overtime_amount');
+            $totalLeaveDeductions = (float) PayrollRunLine::whereIn('payroll_run_id', $recentRunIds)
+                ->sum('leave_deduction_amount');
+
+            $stats = [
+                'total_runs' => $totalRuns,
+                'latest_run_status' => $latestRun?->status,
+                'total_employees' => $totalEmployees,
+                'total_gross_salary' => $totalGross,
+                'total_net_salary' => $totalNet,
+                'total_overtime_hours' => $totalOvertimeHours,
+                'total_overtime_amount' => $totalOvertimeAmount,
+                'total_leave_deductions' => $totalLeaveDeductions,
+            ];
+
+            Log::info('[McpDataProvider] Payroll stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get payroll stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'total_runs' => 0,
+                'latest_run_status' => null,
+                'total_employees' => 0,
+                'total_gross_salary' => 0.0,
+                'total_net_salary' => 0.0,
+                'total_overtime_hours' => 0.0,
+                'total_overtime_amount' => 0.0,
+                'total_leave_deductions' => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Get leave management statistics
+     *
+     * @return array{leave_types_count: int, pending_requests: int, approved_requests: int, rejected_requests: int, total_leave_days_taken: float, leave_by_type: array}
+     */
+    public function getLeaveStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching leave stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $leaveTypesCount = LeaveType::where('company_id', $company->id)
+                ->where('is_active', true)
+                ->count();
+
+            $pendingRequests = LeaveRequest::where('company_id', $company->id)
+                ->where('status', LeaveRequest::STATUS_PENDING)
+                ->count();
+            $approvedRequests = LeaveRequest::where('company_id', $company->id)
+                ->where('status', LeaveRequest::STATUS_APPROVED)
+                ->count();
+            $rejectedRequests = LeaveRequest::where('company_id', $company->id)
+                ->where('status', LeaveRequest::STATUS_REJECTED)
+                ->count();
+
+            // Total leave days taken this year
+            $totalDaysTaken = (float) LeaveRequest::where('company_id', $company->id)
+                ->where('status', LeaveRequest::STATUS_APPROVED)
+                ->where('start_date', '>=', now()->startOfYear())
+                ->sum('business_days');
+
+            // Leave by type breakdown
+            $leaveByType = LeaveRequest::where('leave_requests.company_id', $company->id)
+                ->where('leave_requests.status', LeaveRequest::STATUS_APPROVED)
+                ->where('leave_requests.start_date', '>=', now()->startOfYear())
+                ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
+                ->selectRaw('leave_types.name as type_name, COUNT(*) as request_count, SUM(leave_requests.business_days) as total_days')
+                ->groupBy('leave_types.name')
+                ->get()
+                ->map(fn ($row) => [
+                    'type' => $row->type_name,
+                    'requests' => (int) $row->request_count,
+                    'days' => (float) $row->total_days,
+                ])
+                ->toArray();
+
+            $stats = [
+                'leave_types_count' => $leaveTypesCount,
+                'pending_requests' => $pendingRequests,
+                'approved_requests' => $approvedRequests,
+                'rejected_requests' => $rejectedRequests,
+                'total_leave_days_taken' => $totalDaysTaken,
+                'leave_by_type' => $leaveByType,
+            ];
+
+            Log::info('[McpDataProvider] Leave stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get leave stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'leave_types_count' => 0,
+                'pending_requests' => 0,
+                'approved_requests' => 0,
+                'rejected_requests' => 0,
+                'total_leave_days_taken' => 0.0,
+                'leave_by_type' => [],
+            ];
+        }
+    }
+
+    /**
+     * Get deadline tracking statistics
+     *
+     * @return array{total_deadlines: int, overdue_count: int, due_today_count: int, upcoming_count: int, completed_count: int, deadlines_by_type: array, next_deadlines: array}
+     */
+    public function getDeadlineStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching deadline stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $totalDeadlines = Deadline::where('company_id', $company->id)->count();
+            $overdueCount = Deadline::where('company_id', $company->id)
+                ->where('status', Deadline::STATUS_OVERDUE)
+                ->count();
+            $dueTodayCount = Deadline::where('company_id', $company->id)
+                ->where('status', Deadline::STATUS_DUE_TODAY)
+                ->count();
+            $upcomingCount = Deadline::where('company_id', $company->id)
+                ->where('status', Deadline::STATUS_UPCOMING)
+                ->count();
+            $completedCount = Deadline::where('company_id', $company->id)
+                ->where('status', Deadline::STATUS_COMPLETED)
+                ->count();
+
+            // Breakdown by type
+            $byType = Deadline::where('company_id', $company->id)
+                ->where('status', '!=', Deadline::STATUS_COMPLETED)
+                ->selectRaw('deadline_type, COUNT(*) as count')
+                ->groupBy('deadline_type')
+                ->pluck('count', 'deadline_type')
+                ->toArray();
+
+            // Next 5 upcoming deadlines
+            $nextDeadlines = Deadline::where('company_id', $company->id)
+                ->where('status', '!=', Deadline::STATUS_COMPLETED)
+                ->orderBy('due_date', 'asc')
+                ->limit(5)
+                ->get()
+                ->map(fn ($d) => [
+                    'title' => $d->title,
+                    'type' => $d->deadline_type,
+                    'due_date' => $d->due_date?->format('Y-m-d'),
+                    'status' => $d->status,
+                    'days_remaining' => $d->days_remaining,
+                ])
+                ->toArray();
+
+            $stats = [
+                'total_deadlines' => $totalDeadlines,
+                'overdue_count' => $overdueCount,
+                'due_today_count' => $dueTodayCount,
+                'upcoming_count' => $upcomingCount,
+                'completed_count' => $completedCount,
+                'deadlines_by_type' => $byType,
+                'next_deadlines' => $nextDeadlines,
+            ];
+
+            Log::info('[McpDataProvider] Deadline stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get deadline stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'total_deadlines' => 0,
+                'overdue_count' => 0,
+                'due_today_count' => 0,
+                'upcoming_count' => 0,
+                'completed_count' => 0,
+                'deadlines_by_type' => [],
+                'next_deadlines' => [],
+            ];
+        }
+    }
+
+    /**
+     * Get client document statistics
+     *
+     * @return array{total_documents: int, pending_review: int, reviewed: int, rejected: int, documents_by_category: array}
+     */
+    public function getClientDocumentStats(Company $company): array
+    {
+        try {
+            Log::info('[McpDataProvider] Fetching client document stats', [
+                'company_id' => $company->id,
+            ]);
+
+            $totalDocuments = ClientDocument::where('company_id', $company->id)->count();
+            $pendingReview = ClientDocument::where('company_id', $company->id)
+                ->where('status', ClientDocument::STATUS_PENDING)
+                ->count();
+            $reviewed = ClientDocument::where('company_id', $company->id)
+                ->where('status', ClientDocument::STATUS_REVIEWED)
+                ->count();
+            $rejected = ClientDocument::where('company_id', $company->id)
+                ->where('status', ClientDocument::STATUS_REJECTED)
+                ->count();
+
+            // Breakdown by category
+            $byCategory = ClientDocument::where('company_id', $company->id)
+                ->selectRaw('category, COUNT(*) as count')
+                ->groupBy('category')
+                ->pluck('count', 'category')
+                ->toArray();
+
+            $stats = [
+                'total_documents' => $totalDocuments,
+                'pending_review' => $pendingReview,
+                'reviewed' => $reviewed,
+                'rejected' => $rejected,
+                'documents_by_category' => $byCategory,
+            ];
+
+            Log::info('[McpDataProvider] Client document stats calculated', $stats);
+
+            return $stats;
+
+        } catch (\Exception $e) {
+            Log::error('[McpDataProvider] Failed to get client document stats', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'total_documents' => 0,
+                'pending_review' => 0,
+                'reviewed' => 0,
+                'rejected' => 0,
+                'documents_by_category' => [],
+            ];
+        }
+    }
+
+    /**
      * Get comprehensive statistics across all financial modules
      *
      * @return array
@@ -2401,6 +2723,11 @@ class McpDataProvider
                 'ar_aging' => $this->getARAgingReport($company),
                 'ap_aging' => $this->getAPAgingReport($company),
                 'working_capital' => $this->getWorkingCapitalAnalysis($company),
+                // P7-P8 features
+                'payroll' => $this->getPayrollStats($company),
+                'leave' => $this->getLeaveStats($company),
+                'deadlines' => $this->getDeadlineStats($company),
+                'client_documents' => $this->getClientDocumentStats($company),
             ];
 
             Log::info('[McpDataProvider] Comprehensive stats calculated');

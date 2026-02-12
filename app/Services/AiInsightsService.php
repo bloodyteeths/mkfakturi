@@ -287,6 +287,11 @@ Categories:
 - trends: Questions about revenue trends, cash flow patterns, growth over time
 - payment_timing: Questions about late payments, payment speed, average payment time
 - top_customers: Questions about best customers, customer rankings, biggest clients
+- payroll: Questions about salaries, payroll runs, gross/net pay, contributions, overtime hours/pay
+- leave: Questions about leave requests, vacation days, sick leave, annual leave, maternity leave
+- deadlines: Questions about tax deadlines, VAT returns, MPIN, CIT, annual financial statements, due dates
+- documents: Questions about uploaded documents, client documents, receipts, contracts, document review status
+- einvoices: Questions about e-invoices, electronic invoices, incoming/outgoing e-faktura, UJP submissions
 - basic: General questions about company stats
 
 Question: {$question}
@@ -316,7 +321,7 @@ PROMPT;
             $contexts = array_filter($contexts); // Remove empty values
 
             // Validate against known categories
-            $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'basic'];
+            $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'payroll', 'leave', 'deadlines', 'documents', 'einvoices', 'basic'];
             $contexts = array_intersect($contexts, $validCategories);
 
             // Default to 'basic' if no valid contexts found
@@ -483,6 +488,81 @@ PROMPT;
             }
         }
 
+        // Payroll queries - salaries, overtime, contributions
+        $payrollPatterns = [
+            '/\b(payroll|salary|salaries|wages?|gross|net\s+pay|overtime|contribution)\b/iu',
+            '/\b(плата|плати|бруто|нето|прековремен[аие]|придонес[аие])\b/iu',
+            '/\b(paga|pagat|bruto|neto|orë shtesë|kontribut)\b/iu',
+            '/\b(maaş|brüt|net|fazla mesai|katkı)\b/iu',
+        ];
+
+        foreach ($payrollPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'payroll';
+                break;
+            }
+        }
+
+        // Leave queries - vacation, sick leave, annual leave
+        $leavePatterns = [
+            '/\b(leave|vacation|sick\s+leave|annual\s+leave|maternity|absence|day[s]?\s+off)\b/iu',
+            '/\b(одмор|боледување|годишен\s+одмор|породилно|отсуств[оа]|слободен ден)\b/iu',
+            '/\b(pushim|leje|mungesë|pushim vjetor|lehoni)\b/iu',
+            '/\b(izin|yıllık izin|hastalık|doğum izni|devamsızlık)\b/iu',
+        ];
+
+        foreach ($leavePatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'leave';
+                break;
+            }
+        }
+
+        // Deadline queries - tax deadlines, VAT, MPIN, due dates
+        $deadlinePatterns = [
+            '/\b(deadline|due\s+date|vat\s+return|mpin|cit|annual\s+(financial|statement)|tax\s+filing)\b/iu',
+            '/\b(рок|крајн[аие]\s+рок|ддв\s+пријава|мпин|данок|годишна\s+сметка)\b/iu',
+            '/\b(afat|afati|deklaratë\s+tvsh|deklarim|tatim)\b/iu',
+            '/\b(son\s+tarih|vade|kdv\s+beyanname|vergi|mali\s+tablo)\b/iu',
+        ];
+
+        foreach ($deadlinePatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'deadlines';
+                break;
+            }
+        }
+
+        // Document queries - uploaded documents, receipts
+        $documentPatterns = [
+            '/\b(document|upload|receipt|contract|bank\s+statement|file[s]?\s+(upload|review))\b/iu',
+            '/\b(документ[аие]|прикачен[аие]|фискална|сметка|договор|извод)\b/iu',
+            '/\b(dokument|ngarkuar|faturë|kontratë|ekstrakt)\b/iu',
+            '/\b(belge|yükle|makbuz|sözleşme|hesap\s+özeti)\b/iu',
+        ];
+
+        foreach ($documentPatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'documents';
+                break;
+            }
+        }
+
+        // E-invoice queries - electronic invoices, incoming/outgoing
+        $einvoicePatterns = [
+            '/\b(e[\-\s]?invoice|e[\-\s]?faktura|electronic\s+invoice|incoming\s+invoice|ujp)\b/iu',
+            '/\b(е[\-\s]?фактур[аие]|електронск[аие]\s+фактур[аие]|влезн[аие]\s+фактур[аие]|ујп)\b/iu',
+            '/\b(e[\-\s]?faturë|faturë\s+elektronike|faturë\s+hyrëse)\b/iu',
+            '/\b(e[\-\s]?fatura|elektronik\s+fatura|gelen\s+fatura)\b/iu',
+        ];
+
+        foreach ($einvoicePatterns as $pattern) {
+            if (preg_match($pattern, $questionLower)) {
+                $contexts[] = 'einvoices';
+                break;
+            }
+        }
+
         // If no specific context detected, use basic stats
         if (empty($contexts)) {
             $contexts[] = 'basic';
@@ -585,6 +665,31 @@ PROMPT;
                         Log::info('[AiInsightsService] Top customers data fetched', [
                             'top_customers_count' => count($data['top_customers'] ?? []),
                         ]);
+                        break;
+
+                    case 'payroll':
+                        $data['payroll_stats'] = $this->dataProvider->getPayrollStats($company);
+                        Log::info('[AiInsightsService] Payroll data fetched');
+                        break;
+
+                    case 'leave':
+                        $data['leave_stats'] = $this->dataProvider->getLeaveStats($company);
+                        Log::info('[AiInsightsService] Leave data fetched');
+                        break;
+
+                    case 'deadlines':
+                        $data['deadline_stats'] = $this->dataProvider->getDeadlineStats($company);
+                        Log::info('[AiInsightsService] Deadline data fetched');
+                        break;
+
+                    case 'documents':
+                        $data['document_stats'] = $this->dataProvider->getClientDocumentStats($company);
+                        Log::info('[AiInsightsService] Document data fetched');
+                        break;
+
+                    case 'einvoices':
+                        $data['einvoice_stats'] = $this->dataProvider->getEInvoiceStats($company);
+                        Log::info('[AiInsightsService] E-invoice data fetched');
                         break;
 
                     case 'basic':
@@ -821,6 +926,23 @@ PROMPT;
             $estimatesCount = $comprehensiveStats['estimates']['estimates_count'] ?? 0;
             $billsCount = $comprehensiveStats['bills']['bills_count'] ?? 0;
             $projectsCount = $comprehensiveStats['projects']['projects_count'] ?? 0;
+
+            // Inject P7-P8 feature data into contextualData for prompt sections
+            if (! empty($comprehensiveStats['payroll'])) {
+                $contextualData['payroll_stats'] = $contextualData['payroll_stats'] ?? $comprehensiveStats['payroll'];
+            }
+            if (! empty($comprehensiveStats['leave'])) {
+                $contextualData['leave_stats'] = $contextualData['leave_stats'] ?? $comprehensiveStats['leave'];
+            }
+            if (! empty($comprehensiveStats['deadlines'])) {
+                $contextualData['deadline_stats'] = $contextualData['deadline_stats'] ?? $comprehensiveStats['deadlines'];
+            }
+            if (! empty($comprehensiveStats['client_documents'])) {
+                $contextualData['document_stats'] = $contextualData['document_stats'] ?? $comprehensiveStats['client_documents'];
+            }
+            if (! empty($comprehensiveStats['einvoices'])) {
+                $contextualData['einvoice_stats'] = $contextualData['einvoice_stats'] ?? $comprehensiveStats['einvoices'];
+            }
         } else {
             // Fallback to flat company_stats
             $stats = $contextualData['company_stats'] ?? [];
@@ -929,6 +1051,86 @@ PROMPT;
         if (! empty($contextualData['top_customers'])) {
             $topCustomersText = $this->formatTopCustomers($contextualData['top_customers'], $currency);
             $prompt .= "\nТоп клиенти:\n{$topCustomersText}\n";
+        }
+
+        // Payroll data
+        if (! empty($contextualData['payroll_stats'])) {
+            $ps = $contextualData['payroll_stats'];
+            $prompt .= "\nПлатен список (последни 3 месеци):\n";
+            $prompt .= "- Вкупно пресметки: {$ps['total_runs']}\n";
+            $prompt .= "- Вработени: {$ps['total_employees']}\n";
+            $prompt .= "- Бруто плати: " . number_format($ps['total_gross_salary'], 2) . " {$currency}\n";
+            $prompt .= "- Нето плати: " . number_format($ps['total_net_salary'], 2) . " {$currency}\n";
+            $prompt .= "- Прековремени часови: {$ps['total_overtime_hours']}\n";
+            $prompt .= "- Прековремена работа (износ): " . number_format($ps['total_overtime_amount'], 2) . " {$currency}\n";
+            $prompt .= "- Одбитоци за одсуство: " . number_format($ps['total_leave_deductions'], 2) . " {$currency}\n";
+        }
+
+        // Leave data
+        if (! empty($contextualData['leave_stats'])) {
+            $ls = $contextualData['leave_stats'];
+            $prompt .= "\nОдсуства од работа:\n";
+            $prompt .= "- Типови одсуство: {$ls['leave_types_count']}\n";
+            $prompt .= "- Барања на чекање: {$ls['pending_requests']}\n";
+            $prompt .= "- Одобрени барања: {$ls['approved_requests']}\n";
+            $prompt .= "- Одбиени барања: {$ls['rejected_requests']}\n";
+            $prompt .= "- Вкупно искористени денови (годинава): {$ls['total_leave_days_taken']}\n";
+            if (! empty($ls['leave_by_type'])) {
+                $prompt .= "- По тип:\n";
+                foreach ($ls['leave_by_type'] as $lt) {
+                    $prompt .= "  - {$lt['type']}: {$lt['requests']} барања, {$lt['days']} денови\n";
+                }
+            }
+        }
+
+        // Deadline data
+        if (! empty($contextualData['deadline_stats'])) {
+            $ds = $contextualData['deadline_stats'];
+            $prompt .= "\nРокови:\n";
+            $prompt .= "- Вкупно рокови: {$ds['total_deadlines']}\n";
+            $prompt .= "- Задоцнети: {$ds['overdue_count']}\n";
+            $prompt .= "- Денес: {$ds['due_today_count']}\n";
+            $prompt .= "- Претстојни: {$ds['upcoming_count']}\n";
+            $prompt .= "- Завршени: {$ds['completed_count']}\n";
+            if (! empty($ds['deadlines_by_type'])) {
+                $prompt .= "- По тип: " . json_encode($ds['deadlines_by_type']) . "\n";
+            }
+            if (! empty($ds['next_deadlines'])) {
+                $prompt .= "- Следни рокови:\n";
+                foreach ($ds['next_deadlines'] as $nd) {
+                    $prompt .= "  - {$nd['title']} ({$nd['type']}): {$nd['due_date']} — {$nd['status']}";
+                    if (isset($nd['days_remaining'])) {
+                        $prompt .= " ({$nd['days_remaining']} дена)";
+                    }
+                    $prompt .= "\n";
+                }
+            }
+        }
+
+        // Client documents data
+        if (! empty($contextualData['document_stats'])) {
+            $dcs = $contextualData['document_stats'];
+            $prompt .= "\nДокументи од клиенти:\n";
+            $prompt .= "- Вкупно документи: {$dcs['total_documents']}\n";
+            $prompt .= "- На преглед: {$dcs['pending_review']}\n";
+            $prompt .= "- Прегледани: {$dcs['reviewed']}\n";
+            $prompt .= "- Одбиени: {$dcs['rejected']}\n";
+            if (! empty($dcs['documents_by_category'])) {
+                $prompt .= "- По категорија: " . json_encode($dcs['documents_by_category']) . "\n";
+            }
+        }
+
+        // E-invoice data
+        if (! empty($contextualData['einvoice_stats'])) {
+            $es = $contextualData['einvoice_stats'];
+            $prompt .= "\nЕ-фактури:\n";
+            $prompt .= "- Испратени (излезни): {$es['einvoices_sent']}\n";
+            $prompt .= "- На чекање (излезни): {$es['einvoices_pending']}\n";
+            $prompt .= "- Неуспешни (излезни): {$es['einvoices_failed']}\n";
+            $prompt .= "- Влезни вкупно: {$es['incoming_total']}\n";
+            $prompt .= "- Влезни на преглед: {$es['incoming_pending_review']}\n";
+            $prompt .= "- Влезни прифатени: {$es['incoming_accepted']}\n";
+            $prompt .= "- Влезни одбиени: {$es['incoming_rejected']}\n";
         }
 
         // Add app documentation for "how to" queries
