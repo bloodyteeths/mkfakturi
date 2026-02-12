@@ -50,10 +50,10 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
-    // Database and file backup - runs daily at 2:00 AM
-    Schedule::command('backup:run')
-        ->daily()
-        ->at('02:00')
+    // Database and file backup - runs every 6 hours (00:00, 06:00, 12:00, 18:00)
+    // ~300 KB per backup, ~36 MB/year on R2
+    Schedule::command('backup:run --only-db')
+        ->everySixHours()
         ->runInBackground()
         ->withoutOverlapping();
 
