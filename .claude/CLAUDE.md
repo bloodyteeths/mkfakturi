@@ -308,4 +308,52 @@ Config: `config/subscriptions.php` (409 lines)
 
 ---
 
+## 15 Backup system (Cloudflare R2)
+
+### Architecture
+* **Storage**: Cloudflare R2 bucket `facturino-backups` via `r2backup` filesystem disk
+* **Dump tool**: PHP PDO-based (`docker-mysqldump-php.sh` → `/usr/local/bin/mysqldump` in container)
+  — Alpine only has MariaDB client which can't auth to MySQL 8.4's `caching_sha2_password`
+* **Env vars**: `R2_BACKUP_ENDPOINT`, `R2_BACKUP_KEY`, `R2_BACKUP_SECRET`, `R2_BACKUP_REGION`, `R2_BACKUP_BUCKET`
+  — separate from `S3_COMPAT_*` vars (those are for media on `facturino-media` bucket)
+
+### Schedule (`routes/console.php`)
+| Command | Frequency | Purpose |
+|---------|-----------|---------|
+| `backup:run --only-db` | Every 6 hours | DB dump → R2 + local |
+| `backup:clean` | Daily at 01:00 | Prune old backups per retention policy |
+| `backup:monitor` | Every 6 hours | Alert if backup older than 1 day |
+
+### Testing backup commands via Railway SSH
+**IMPORTANT**: Railway SSH does not inherit the container's env vars.
+You must source them from PID 1 and manually set the DB connection:
+```sh
+railway ssh --project=68289408-e121-49d3-b4ee-c24529e57641 \
+  --environment=04d5e439-c700-4502-987f-812546b2c3c1 \
+  --service=8c6e11da-cc83-4f27-bcec-99325a203892 \
+  -- 'export $(cat /proc/1/environ | tr "\0" "\n" | grep -v "^$" | grep "=" | grep -v "+" | grep -v "(" | grep -v " " | head -100) 2>/dev/null; export DB_CONNECTION=mysql DB_HOST=$MYSQLHOST DB_PORT=${MYSQLPORT:-3306} DB_DATABASE=$MYSQLDATABASE DB_USERNAME=${MYSQLUSER:-root} DB_PASSWORD=$MYSQLPASSWORD; php artisan backup:run --only-db 2>&1'
+```
+Replace `backup:run --only-db` with `backup:clean` or `backup:monitor` to test the other commands.
+
+### Key files
+| Purpose | Path |
+|---------|------|
+| Backup config | `config/backup.php` |
+| R2 backup disk | `config/filesystems.php` → `r2backup` |
+| mysqldump dump options | `config/database.php` → `mysql.dump` |
+| PHP mysqldump replacement | `docker-mysqldump-php.sh` |
+| Cron schedule | `routes/console.php` (lines 46–64) |
+
+### Retention policy (`config/backup.php`)
+| Period | Kept |
+|--------|------|
+| Last 7 days | All backups |
+| 8–30 days | 1 per day |
+| 1–3 months | 1 per week |
+| 3–12 months | 1 per month |
+| 1–3 years | 1 per year |
+| Hard cap | 5 GB total |
+
+---
+
 # End rules
