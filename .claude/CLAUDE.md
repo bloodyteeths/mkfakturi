@@ -328,10 +328,9 @@ Config: `config/subscriptions.php` (409 lines)
 **IMPORTANT**: Railway SSH does not inherit the container's env vars.
 You must source them from PID 1 and manually set the DB connection:
 ```sh
-railway ssh --project=68289408-e121-49d3-b4ee-c24529e57641 \
-  --environment=04d5e439-c700-4502-987f-812546b2c3c1 \
-  --service=8c6e11da-cc83-4f27-bcec-99325a203892 \
-  -- 'export $(cat /proc/1/environ | tr "\0" "\n" | grep -v "^$" | grep "=" | grep -v "+" | grep -v "(" | grep -v " " | head -100) 2>/dev/null; export DB_CONNECTION=mysql DB_HOST=$MYSQLHOST DB_PORT=${MYSQLPORT:-3306} DB_DATABASE=$MYSQLDATABASE DB_USERNAME=${MYSQLUSER:-root} DB_PASSWORD=$MYSQLPASSWORD; php artisan backup:run --only-db 2>&1'
+# First link to the project (one-time): railway link
+# Then SSH into the web service:
+railway ssh -- 'export $(cat /proc/1/environ | tr "\0" "\n" | grep -v "^$" | grep "=" | grep -v "+" | grep -v "(" | grep -v " " | head -100) 2>/dev/null; export DB_CONNECTION=mysql DB_HOST=$MYSQLHOST DB_PORT=${MYSQLPORT:-3306} DB_DATABASE=$MYSQLDATABASE DB_USERNAME=${MYSQLUSER:-root} DB_PASSWORD=$MYSQLPASSWORD; php artisan backup:run --only-db 2>&1'
 ```
 Replace `backup:run --only-db` with `backup:clean` or `backup:monitor` to test the other commands.
 
