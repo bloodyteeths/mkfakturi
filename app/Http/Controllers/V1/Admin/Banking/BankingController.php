@@ -8,6 +8,11 @@ use App\Models\BankTransaction;
 use App\Models\Company;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Services\AiProvider\AiProviderInterface;
+use App\Services\AiProvider\ClaudeProvider;
+use App\Services\AiProvider\GeminiProvider;
+use App\Services\AiProvider\NullAiProvider;
+use App\Services\AiProvider\OpenAiProvider;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -579,6 +584,312 @@ class BankingController extends Controller
         // Only return asset path if we have a specific logo
         return asset($logos[$bankCode]);
     }
+
+    /**
+     * Suggest an expense category for a bank transaction using AI or keyword matching.
+     *
+     * Called by TransactionCategorization.vue to provide an AI-powered suggestion
+     * before the user manually selects a category.
+     *
+     * @param  Request  $request  Expects: description, amount, counterparty (optional: transaction_id)
+     * @return JsonResponse  { suggestion: { category_id, category_name, confidence } }
+     */
+    public function suggestCategory(Request $request): JsonResponse
+    {
+        try {
+            $company = $this->resolveCompany($request);
+
+            if (! $company) {
+                return response()->json([
+                    'suggestion' => null,
+                    'message' => 'No company found for user',
+                ], 200);
+            }
+
+            $request->validate([
+                'description' => 'nullable|string|max:1000',
+                'amount' => 'nullable|numeric',
+                'counterparty' => 'nullable|string|max:500',
+                'transaction_id' => 'nullable|integer',
+            ]);
+
+            $description = $request->input('description', '');
+            $amount = $request->input('amount', 0);
+            $counterparty = $request->input('counterparty', '');
+
+            // Fetch available expense categories for this company
+            $categories = ExpenseCategory::where('company_id', $company->id)->get();
+
+            if ($categories->isEmpty()) {
+                return response()->json([
+                    'suggestion' => null,
+                    'message' => 'No expense categories configured',
+                ], 200);
+            }
+
+            // Try AI-based suggestion first, fall back to keyword matching
+            $suggestion = $this->tryAiCategorySuggestion(
+                $description,
+                $amount,
+                $counterparty,
+                $categories
+            );
+
+            if (! $suggestion) {
+                $suggestion = $this->keywordCategorySuggestion(
+                    $description,
+                    $amount,
+                    $counterparty,
+                    $categories
+                );
+            }
+
+            Log::info('Category suggestion generated', [
+                'company_id' => $company->id,
+                'description' => $description,
+                'suggestion' => $suggestion,
+                'method' => $suggestion ? ($suggestion['method'] ?? 'unknown') : 'none',
+            ]);
+
+            // Remove internal 'method' key before sending to client
+            if ($suggestion && isset($suggestion['method'])) {
+                unset($suggestion['method']);
+            }
+
+            return response()->json([
+                'suggestion' => $suggestion,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to suggest category', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'suggestion' => null,
+                'message' => config('app.debug') ? $e->getMessage() : 'Failed to generate suggestion',
+            ], 200);
+        }
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
+     * Attempt AI-based category suggestion using the configured AI provider.
+     *
+     * @param  string  $description  Transaction description
+     * @param  float  $amount  Transaction amount
+     * @param  string  $counterparty  Counterparty name
+     * @param  \Illuminate\Support\Collection  $categories  Available expense categories
+     * @return array|null  { category_id, category_name, confidence, method } or null
+     */
+    private function tryAiCategorySuggestion(
+        string $description,
+        float $amount,
+        string $counterparty,
+        $categories
+    ): ?array {
+        try {
+            $aiProvider = $this->resolveAiProvider();
+
+            // If AI is not configured (NullAiProvider), skip
+            if ($aiProvider instanceof NullAiProvider) {
+                return null;
+            }
+
+            $categoryList = $categories->map(fn ($c) => "{$c->id}: {$c->name}")->implode("\n");
+
+            $prompt = <<<PROMPT
+You are a Macedonian accounting assistant. Categorize the following bank transaction into ONE of the expense categories listed below.
+
+Transaction details:
+- Description: {$description}
+- Amount: {$amount}
+- Counterparty: {$counterparty}
+
+Available categories:
+{$categoryList}
+
+Respond with ONLY a JSON object in this exact format (no markdown, no explanation):
+{"category_id": <number>, "category_name": "<name>", "confidence": <0.0 to 1.0>}
+
+Choose the most appropriate category. Set confidence between 0.5 and 0.95 based on how certain you are.
+PROMPT;
+
+            $response = $aiProvider->generate($prompt, [
+                'max_tokens' => 150,
+                'temperature' => 0.2,
+            ]);
+
+            // Parse JSON from AI response
+            $response = trim($response);
+            // Strip markdown code fences if present
+            $response = preg_replace('/^```(?:json)?\s*/i', '', $response);
+            $response = preg_replace('/\s*```$/', '', $response);
+            $response = trim($response);
+
+            $parsed = json_decode($response, true);
+
+            if (
+                $parsed
+                && isset($parsed['category_id'], $parsed['category_name'], $parsed['confidence'])
+                && $categories->contains('id', $parsed['category_id'])
+            ) {
+                return [
+                    'category_id' => (int) $parsed['category_id'],
+                    'category_name' => (string) $parsed['category_name'],
+                    'confidence' => (float) min(0.95, max(0.0, $parsed['confidence'])),
+                    'method' => 'ai',
+                ];
+            }
+
+            Log::warning('AI category suggestion returned unparseable response', [
+                'response' => $response,
+            ]);
+
+            return null;
+        } catch (\Throwable $e) {
+            Log::warning('AI category suggestion failed, falling back to keywords', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Keyword-based fallback for category suggestion.
+     *
+     * Maps common Macedonian and English transaction keywords to expense categories.
+     *
+     * @param  string  $description  Transaction description
+     * @param  float  $amount  Transaction amount
+     * @param  string  $counterparty  Counterparty name
+     * @param  \Illuminate\Support\Collection  $categories  Available expense categories
+     * @return array|null  { category_id, category_name, confidence, method } or null
+     */
+    private function keywordCategorySuggestion(
+        string $description,
+        float $amount,
+        string $counterparty,
+        $categories
+    ): ?array {
+        $text = mb_strtolower($description . ' ' . $counterparty);
+
+        // Keyword → category name patterns (supports both Macedonian and English terms)
+        $keywordMap = [
+            // Utilities / Комунални услуги
+            'евн|evn|електрична|electricity|струја|stream' => ['Utilities', 'Комунални', 'Комунални услуги'],
+            'водовод|water|вода' => ['Utilities', 'Комунални', 'Комунални услуги'],
+            'топлинска|heating|греење|парно' => ['Utilities', 'Комунални', 'Комунални услуги'],
+            'телеком|telecom|а1|a1|мобилен|mobile|phone|интернет|internet' => ['Telecommunications', 'Телекомуникации', 'Телефон'],
+
+            // Rent / Кирија
+            'кирија|наем|rent|закуп' => ['Rent', 'Кирија', 'Наем'],
+
+            // Office supplies / Канцелариски материјали
+            'канцелариски|office supplies|тонер|toner|хартија|paper|пенкало' => ['Office Supplies', 'Канцелариски материјали', 'Канцелариски'],
+
+            // Transport / Транспорт
+            'горив|fuel|бензин|petrol|дизел|diesel|паркинг|parking|такси|taxi|транспорт|transport' => ['Transport', 'Транспорт', 'Горива', 'Fuel'],
+
+            // Food / Храна
+            'ресторан|restaurant|кафе|cafe|coffee|храна|food|угостител|catering' => ['Meals', 'Храна', 'Угостителство', 'Food & Dining'],
+
+            // Insurance / Осигурување
+            'осигурување|insurance|полиса' => ['Insurance', 'Осигурување'],
+
+            // Bank fees / Банкарски провизии
+            'провизија|commission|fee|банкарски|bank fee|maintenance fee' => ['Bank Fees', 'Банкарски провизии', 'Провизии'],
+
+            // Salary / Плата
+            'плата|salary|плати|wages|придонес|contribution|пензиско|pension|здравствено|health' => ['Salaries', 'Плата', 'Плати', 'Payroll'],
+
+            // Software / Софтвер
+            'software|софтвер|лиценца|license|subscription|претплата|saas|cloud' => ['Software', 'Софтвер', 'Лиценци'],
+
+            // Legal & Accounting / Правни и сметководствени
+            'адвокат|lawyer|legal|нотар|notar|сметководство|accounting|ревизија|audit' => ['Professional Services', 'Правни услуги', 'Сметководство'],
+
+            // Marketing / Маркетинг
+            'маркетинг|marketing|реклама|advertising|google ads|facebook|промоција|promo' => ['Marketing', 'Маркетинг', 'Реклама'],
+
+            // Equipment / Опрема
+            'опрема|equipment|компјутер|computer|лаптоп|laptop|монитор|monitor|печатач|printer' => ['Equipment', 'Опрема', 'IT Equipment'],
+
+            // Taxes / Даноци
+            'данок|tax|ддв|vat|ujp|управа за јавни приходи' => ['Taxes', 'Даноци', 'ДДВ'],
+
+            // Travel / Патување
+            'хотел|hotel|авион|flight|патување|travel|booking|airbnb' => ['Travel', 'Патување'],
+        ];
+
+        $categoryIndex = $categories->keyBy(function ($cat) {
+            return mb_strtolower($cat->name);
+        });
+
+        foreach ($keywordMap as $pattern => $possibleNames) {
+            if (preg_match('/(' . $pattern . ')/iu', $text)) {
+                // Try to find a matching category from the company's categories
+                foreach ($possibleNames as $name) {
+                    $lowerName = mb_strtolower($name);
+                    if ($categoryIndex->has($lowerName)) {
+                        $matched = $categoryIndex->get($lowerName);
+
+                        return [
+                            'category_id' => $matched->id,
+                            'category_name' => $matched->name,
+                            'confidence' => 0.65,
+                            'method' => 'keyword',
+                        ];
+                    }
+                }
+
+                // If no exact match, try partial match on category names
+                foreach ($possibleNames as $name) {
+                    $lowerName = mb_strtolower($name);
+                    foreach ($categoryIndex as $catLower => $cat) {
+                        if (str_contains($catLower, $lowerName) || str_contains($lowerName, $catLower)) {
+                            return [
+                                'category_id' => $cat->id,
+                                'category_name' => $cat->name,
+                                'confidence' => 0.55,
+                                'method' => 'keyword',
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the configured AI provider for category suggestions.
+     *
+     * @return AiProviderInterface
+     */
+    private function resolveAiProvider(): AiProviderInterface
+    {
+        $provider = strtolower((string) config('ai.default_provider', 'claude'));
+
+        try {
+            return match ($provider) {
+                'claude' => new ClaudeProvider,
+                'openai' => new OpenAiProvider,
+                'gemini' => new GeminiProvider,
+                default => throw new \RuntimeException("Unsupported AI provider: {$provider}"),
+            };
+        } catch (\Throwable $e) {
+            Log::warning('AI provider unavailable for category suggestion', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+            ]);
+
+            return new NullAiProvider($provider, $e->getMessage());
+        }
+    }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Resolve the active company for the authenticated user

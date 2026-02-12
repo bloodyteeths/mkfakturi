@@ -5,6 +5,51 @@
   >
     <FiscalDeviceModal />
 
+    <!-- ErpNet.FP Sidecar Status Banner -->
+    <div
+      v-if="erpnetStatus !== null"
+      class="mb-4 rounded-lg border p-4"
+      :class="erpnetStatus.connected
+        ? 'border-green-200 bg-green-50'
+        : 'border-gray-200 bg-gray-50'"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <span
+            class="mr-2 inline-block h-3 w-3 rounded-full"
+            :class="erpnetStatus.connected ? 'bg-green-400' : 'bg-gray-400'"
+          ></span>
+          <span class="text-sm font-medium" :class="erpnetStatus.connected ? 'text-green-800' : 'text-gray-600'">
+            ErpNet.FP
+          </span>
+          <span class="ml-2 text-sm" :class="erpnetStatus.connected ? 'text-green-700' : 'text-gray-500'">
+            {{ erpnetStatus.message }}
+          </span>
+        </div>
+        <BaseButton
+          type="button"
+          variant="primary-outline"
+          class="text-xs"
+          @click="checkErpnetStatus"
+        >
+          {{ $t('settings.fiscal_devices.check_status') }}
+        </BaseButton>
+      </div>
+      <!-- Show discovered printers -->
+      <div v-if="erpnetStatus.connected && erpnetStatus.printers.length > 0" class="mt-3 space-y-1">
+        <div
+          v-for="printer in erpnetStatus.printers"
+          :key="printer.id"
+          class="flex items-center text-sm text-green-700"
+        >
+          <svg class="mr-1.5 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          {{ printer.model || 'Unknown' }} — SN: {{ printer.serialNumber || printer.id }}
+        </div>
+      </div>
+    </div>
+
     <template #action>
       <BaseButton type="submit" variant="primary-outline" @click="openAddModal">
         <template #left="slotProps">
@@ -55,8 +100,9 @@
 <script setup>
 import { useFiscalDeviceStore } from '@/scripts/admin/stores/fiscal-device'
 import { useModalStore } from '@/scripts/stores/modal'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 
 import FiscalDeviceDropdown from '@/scripts/admin/components/dropdowns/FiscalDeviceIndexDropdown.vue'
 import FiscalDeviceModal from '@/scripts/admin/components/modal-components/FiscalDeviceModal.vue'
@@ -66,6 +112,24 @@ const { t } = useI18n()
 const fiscalDeviceStore = useFiscalDeviceStore()
 const modalStore = useModalStore()
 const table = ref(null)
+const erpnetStatus = ref(null)
+
+async function checkErpnetStatus() {
+  try {
+    const response = await axios.get('/fiscal-devices/erpnet-status')
+    erpnetStatus.value = response.data.data
+  } catch (e) {
+    erpnetStatus.value = {
+      connected: false,
+      printers: [],
+      message: 'Could not check ErpNet.FP status',
+    }
+  }
+}
+
+onMounted(() => {
+  checkErpnetStatus()
+})
 
 const deviceColumns = computed(() => {
   return [
@@ -114,7 +178,7 @@ function getDeviceLabel(deviceType) {
 }
 
 function connectionLabel(type) {
-  const labels = { tcp: 'TCP/IP', serial: 'RS232', bluetooth: 'Bluetooth' }
+  const labels = { tcp: 'TCP/IP', serial: 'RS232', bluetooth: 'Bluetooth', 'erpnet-fp': 'ErpNet.FP' }
   return labels[type] || type
 }
 
@@ -123,6 +187,7 @@ function connectionBadgeClass(type) {
     tcp: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10',
     serial: 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
     bluetooth: 'bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10',
+    'erpnet-fp': 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-700/10',
   }
   return classes[type] || 'bg-gray-50 text-gray-600'
 }

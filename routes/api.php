@@ -490,6 +490,7 @@ Route::prefix('/v1')->group(function () {
             Route::prefix('fiscal-devices')->group(function () {
                 Route::get('/', [FiscalDeviceController::class, 'index']);
                 Route::post('/', [FiscalDeviceController::class, 'store']);
+                Route::get('/erpnet-status', [FiscalDeviceController::class, 'erpnetStatus']);
                 Route::get('/{id}', [FiscalDeviceController::class, 'show']);
                 Route::patch('/{id}', [FiscalDeviceController::class, 'update']);
                 Route::delete('/{id}', [FiscalDeviceController::class, 'destroy']);
@@ -961,6 +962,8 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/transactions', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'transactions']);
                 Route::post('/sync/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'syncAccount']);
                 Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
+                Route::post('/transactions/suggest-category', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'suggestCategory']);
+                // CLAUDE-CHECKPOINT
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
 
                 // CSV Import

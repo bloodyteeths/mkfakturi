@@ -9,6 +9,7 @@ use App\Models\FiscalReceipt;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Services\FiscalDevices\ErpNetFpClient;
 use Modules\Mk\Services\FiscalDevices\FiscalDeviceManager;
 
 /**
@@ -18,7 +19,8 @@ use Modules\Mk\Services\FiscalDevices\FiscalDeviceManager;
  * and daily reconciliation for Macedonian fiscal compliance.
  *
  * Supports all Macedonian fiscal devices: Daisy FX, Давид, Развигорец,
- * Северец, Expert SX, Пелистерец, Alpha — via TCP/IP, serial, or Bluetooth.
+ * Северец, Expert SX, Пелистерец, Alpha — via TCP/IP, serial, Bluetooth,
+ * or the ErpNet.FP universal sidecar (auto-discovery).
  */
 class FiscalDeviceController extends Controller
 {
@@ -60,7 +62,7 @@ class FiscalDeviceController extends Controller
             'device_type' => 'required|string|max:50',
             'name' => 'nullable|string|max:100',
             'serial_number' => 'required|string|max:100',
-            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth',
+            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth,erpnet-fp',
             'ip_address' => 'nullable|ip',
             'port' => 'nullable|integer|min:1|max:65535',
             'serial_port' => 'nullable|string|max:100',
@@ -134,7 +136,7 @@ class FiscalDeviceController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:100',
-            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth',
+            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth,erpnet-fp',
             'ip_address' => 'nullable|ip',
             'port' => 'nullable|integer|min:1|max:65535',
             'serial_port' => 'nullable|string|max:100',
@@ -292,6 +294,52 @@ class FiscalDeviceController extends Controller
                 'error' => $e->getMessage(),
                 'device_type' => $e->getDeviceType(),
             ], 503);
+        }
+    }
+
+    /**
+     * Check ErpNet.FP sidecar health and list discovered printers.
+     *
+     * Returns sidecar connectivity status and any auto-discovered fiscal
+     * printers, so the UI can show a plug-and-play experience.
+     */
+    public function erpnetStatus(): JsonResponse
+    {
+        try {
+            $client = app(ErpNetFpClient::class);
+            $healthy = $client->isHealthy();
+
+            if (! $healthy) {
+                return response()->json([
+                    'data' => [
+                        'connected' => false,
+                        'printers' => [],
+                        'message' => 'ErpNet.FP sidecar is not reachable',
+                    ],
+                ]);
+            }
+
+            $printers = $client->listPrinters();
+
+            return response()->json([
+                'data' => [
+                    'connected' => true,
+                    'printers' => $printers,
+                    'message' => count($printers) > 0
+                        ? count($printers).' printer(s) discovered'
+                        : 'Sidecar running, no printers connected',
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('ErpNet.FP status check failed', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'data' => [
+                    'connected' => false,
+                    'printers' => [],
+                    'message' => 'Could not reach ErpNet.FP sidecar',
+                ],
+            ]);
         }
     }
 
