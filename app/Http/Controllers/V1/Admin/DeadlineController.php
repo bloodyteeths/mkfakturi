@@ -27,8 +27,7 @@ class DeadlineController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $companyId = $user->company_id ?? $user->companies()->first()?->id;
+        $companyId = $request->header('company');
 
         if (! $companyId) {
             return response()->json(['error' => 'No company found for user'], 404);
@@ -73,7 +72,7 @@ class DeadlineController extends Controller
     public function complete(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        $companyId = $user->company_id ?? $user->companies()->first()?->id;
+        $companyId = $request->header('company');
 
         if (! $companyId) {
             return response()->json(['error' => 'No company found for user'], 404);
@@ -113,7 +112,7 @@ class DeadlineController extends Controller
     public function store(Request $request): JsonResponse
     {
         $user = $request->user();
-        $companyId = $user->company_id ?? $user->companies()->first()?->id;
+        $companyId = $request->header('company');
 
         if (! $companyId) {
             return response()->json(['error' => 'No company found for user'], 404);
@@ -158,7 +157,7 @@ class DeadlineController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        $companyId = $user->company_id ?? $user->companies()->first()?->id;
+        $companyId = $request->header('company');
 
         if (! $companyId) {
             return response()->json(['error' => 'No company found for user'], 404);
