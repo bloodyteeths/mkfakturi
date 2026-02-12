@@ -77,6 +77,13 @@ class ProformaInvoicesController extends Controller
     {
         $this->authorize('create', ProformaInvoice::class);
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'proformas_per_month')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'proformas_per_month'), 402);
+        }
+
         $proformaInvoice = ProformaInvoice::createProformaInvoice($request);
         $proformaInvoice->load($this->proformaInvoiceResourceRelations());
 
@@ -85,6 +92,9 @@ class ProformaInvoicesController extends Controller
         }
 
         GenerateProformaInvoicePdfJob::dispatchAfterResponse($proformaInvoice->id);
+
+        // Increment usage after successful creation
+        $usageService->incrementUsage($company, 'proformas_per_month');
 
         return (new ProformaInvoiceResource($proformaInvoice))
             ->response()

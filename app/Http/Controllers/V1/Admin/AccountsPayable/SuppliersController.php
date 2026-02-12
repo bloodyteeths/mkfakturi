@@ -38,6 +38,13 @@ class SuppliersController extends Controller
     {
         $this->authorize('create', Supplier::class);
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'suppliers_total')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'suppliers_total'), 402);
+        }
+
         $supplier = Supplier::create($request->getSupplierPayload());
 
         return (new SupplierResource($supplier))

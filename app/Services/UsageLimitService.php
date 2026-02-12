@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\Deadline;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -193,11 +194,32 @@ class UsageLimitService
                     ->count();
 
             case 'payroll_employees':
-                // Count active payroll employees
                 return DB::table('payroll_employees')
                     ->where('company_id', $company->id)
                     ->where('is_active', true)
                     ->whereNull('deleted_at')
+                    ->count();
+
+            case 'suppliers_total':
+                return DB::table('suppliers')
+                    ->where('company_id', $company->id)
+                    ->whereNull('deleted_at')
+                    ->count();
+
+            case 'projects_total':
+                return DB::table('projects')
+                    ->where('company_id', $company->id)
+                    ->whereNull('deleted_at')
+                    ->count();
+
+            case 'warehouses_total':
+                return DB::table('warehouses')
+                    ->where('company_id', $company->id)
+                    ->count();
+
+            case 'deadlines_custom':
+                return Deadline::where('company_id', $company->id)
+                    ->where('is_recurring', false)
                     ->count();
 
             default:
@@ -224,6 +246,11 @@ class UsageLimitService
             'expenses_per_month',
             'estimates_per_month',
             'ai_queries_per_month',
+            'bills_per_month',
+            'credit_notes_per_month',
+            'proformas_per_month',
+            'client_documents_per_month',
+            'efaktura_per_month',
         ];
 
         return in_array($feature, $monthlyFeatures);
@@ -321,6 +348,15 @@ class UsageLimitService
             'estimates_per_month',
             'ai_queries_per_month',
             'payroll_employees',
+            'bills_per_month',
+            'suppliers_total',
+            'credit_notes_per_month',
+            'proformas_per_month',
+            'projects_total',
+            'warehouses_total',
+            'deadlines_custom',
+            'client_documents_per_month',
+            'efaktura_per_month',
         ];
 
         $usage = [];
@@ -380,6 +416,15 @@ class UsageLimitService
             'recurring_invoices_active' => 'Recurring Invoices',
             'ai_queries_per_month' => 'AI Insights',
             'payroll_employees' => 'Payroll Employees',
+            'bills_per_month' => 'Bills',
+            'suppliers_total' => 'Suppliers',
+            'credit_notes_per_month' => 'Credit Notes',
+            'proformas_per_month' => 'Proforma Invoices',
+            'projects_total' => 'Projects',
+            'warehouses_total' => 'Warehouses',
+            'deadlines_custom' => 'Custom Deadlines',
+            'client_documents_per_month' => 'Document Uploads',
+            'efaktura_per_month' => 'E-Faktura',
         ];
 
         // Map feature keys to config upgrade message keys
@@ -390,6 +435,15 @@ class UsageLimitService
             'recurring_invoices_active' => 'recurring_invoices',
             'ai_queries_per_month' => 'ai_suggestions',
             'payroll_employees' => 'payroll_employees',
+            'bills_per_month' => 'bills_per_month',
+            'suppliers_total' => 'suppliers_total',
+            'credit_notes_per_month' => 'credit_notes_per_month',
+            'proformas_per_month' => 'proformas_per_month',
+            'projects_total' => 'projects_total',
+            'warehouses_total' => 'warehouses_total',
+            'deadlines_custom' => 'deadlines_custom',
+            'client_documents_per_month' => 'client_documents_per_month',
+            'efaktura_per_month' => 'efaktura_per_month',
         ];
 
         $featureName = $featureNames[$feature] ?? $feature;

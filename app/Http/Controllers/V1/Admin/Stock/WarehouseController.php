@@ -95,6 +95,13 @@ class WarehouseController extends Controller
             return $error;
         }
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'warehouses_total')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'warehouses_total'), 402);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50',

@@ -334,9 +334,8 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/invoices/{invoice}/status', ChangeInvoiceStatusController::class);
 
-            // FG-01-10: E-Faktura (UBL XML export) requires Standard+ tier
-            Route::post('/invoices/{invoice}/export-xml', [\App\Http\Controllers\V1\Admin\Invoice\ExportXmlController::class, 'export'])
-                ->middleware('tier:standard');
+            // FG-01-10: E-Faktura (UBL XML export) — usage-limited via controller
+            Route::post('/invoices/{invoice}/export-xml', [\App\Http\Controllers\V1\Admin\Invoice\ExportXmlController::class, 'export']);
 
             Route::post('/invoices/{invoice}/payment/cpay', [InvoicesController::class, 'initiateCpayPayment']);
 
@@ -432,8 +431,8 @@ Route::prefix('/v1')->group(function () {
 
             // Payroll Module (MK Tax Compliance)
             // ----------------------------------
-            // Requires Business tier or higher (see config/subscriptions.php)
-            Route::middleware(['tier:payroll'])->group(function () {
+            // Usage-limited: free tier gets 2 employees, paid tiers get more (see config/subscriptions.php)
+            Route::group([], function () {
                 // Payroll Employees
                 Route::get('/payroll-employees/departments', [PayrollEmployeeController::class, 'departments']);
                 Route::post('/payroll-employees/{payrollEmployee}/terminate', [PayrollEmployeeController::class, 'terminate']);
@@ -657,8 +656,8 @@ Route::prefix('/v1')->group(function () {
             // E-Invoices
             // ----------------------------------
 
-            // FG-01-11: E-Invoice operations require Standard+ tier
-            Route::prefix('e-invoices')->middleware(['throttle:60,1', 'tier:standard'])->group(function () {
+            // FG-01-11: E-Invoice operations (usage-limited, see UsageLimitService)
+            Route::prefix('e-invoices')->middleware(['throttle:60,1'])->group(function () {
                 Route::get('/', [EInvoiceController::class, 'index']);
                 Route::get('/portal-status', [EInvoiceController::class, 'checkPortalStatus']);
                 Route::get('/submission-queue', [EInvoiceController::class, 'getSubmissionQueue']);

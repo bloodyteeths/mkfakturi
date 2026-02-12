@@ -118,6 +118,13 @@ class DeadlineController extends Controller
             return response()->json(['error' => 'No company found for user'], 404);
         }
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($companyId);
+        if ($company && ! $usageService->canUse($company, 'deadlines_custom')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'deadlines_custom'), 402);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'title_mk' => 'nullable|string|max:255',

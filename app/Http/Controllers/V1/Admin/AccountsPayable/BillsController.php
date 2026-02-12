@@ -68,6 +68,13 @@ class BillsController extends Controller
         try {
             $this->authorize('create', Bill::class);
 
+            // Check usage limit
+            $usageService = app(\App\Services\UsageLimitService::class);
+            $company = \App\Models\Company::find($request->header('company'));
+            if ($company && ! $usageService->canUse($company, 'bills_per_month')) {
+                return response()->json($usageService->buildLimitExceededResponse($company, 'bills_per_month'), 402);
+            }
+
             \Log::info('BillsController::store - Authorization passed');
 
             $billPayload = $request->getBillPayload();
@@ -100,6 +107,9 @@ class BillsController extends Controller
 
             GenerateBillPdfJob::dispatchAfterResponse($bill->id);
             \Log::info('BillsController::store - PDF generation job dispatched');
+
+            // Increment usage after successful creation
+            $usageService->incrementUsage($company, 'bills_per_month');
 
             return (new BillResource($bill))
                 ->response()

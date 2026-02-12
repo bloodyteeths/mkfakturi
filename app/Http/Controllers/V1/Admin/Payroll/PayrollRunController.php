@@ -76,6 +76,13 @@ class PayrollRunController extends Controller
     {
         $this->authorize('create', PayrollRun::class);
 
+        // Check usage limit for payroll employees
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'payroll_employees')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'payroll_employees'), 402);
+        }
+
         $validated = $request->validate([
             'period_year' => 'required|integer|min:2020|max:2100',
             'period_month' => 'required|integer|min:1|max:12',

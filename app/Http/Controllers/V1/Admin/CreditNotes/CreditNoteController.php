@@ -91,6 +91,13 @@ class CreditNoteController extends Controller
     {
         $this->authorize('create', CreditNote::class);
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'credit_notes_per_month')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'credit_notes_per_month'), 402);
+        }
+
         $creditNote = CreditNote::createCreditNote($request);
         $creditNote->load($this->creditNoteResourceRelations());
 
@@ -99,6 +106,9 @@ class CreditNoteController extends Controller
         }
 
         GenerateCreditNotePdfJob::dispatchAfterResponse($creditNote->id);
+
+        // Increment usage after successful creation
+        $usageService->incrementUsage($company, 'credit_notes_per_month');
 
         return new CreditNoteResource($creditNote);
     }

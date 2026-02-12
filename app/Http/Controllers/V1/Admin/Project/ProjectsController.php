@@ -59,6 +59,13 @@ class ProjectsController extends Controller
     {
         $this->authorize('create', Project::class);
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'projects_total')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'projects_total'), 402);
+        }
+
         $project = Project::createProject($request);
         $project->load(['customer', 'currency', 'company', 'creator']);
 

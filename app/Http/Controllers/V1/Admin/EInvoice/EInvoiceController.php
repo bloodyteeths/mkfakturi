@@ -212,6 +212,13 @@ class EInvoiceController extends Controller
                 ])
                 ->findOrFail($invoiceId);
 
+            // Check usage limit for e-faktura
+            $usageService = app(\App\Services\UsageLimitService::class);
+            $company = $invoice->company;
+            if ($company && ! $usageService->canUse($company, 'efaktura_per_month')) {
+                return response()->json($usageService->buildLimitExceededResponse($company, 'efaktura_per_month'), 402);
+            }
+
             // Check if invoice is already sent/finalized
             if ($invoice->status !== 'SENT') {
                 return response()->json([
@@ -234,6 +241,9 @@ class EInvoiceController extends Controller
                     'ubl_xml' => $ublXml,
                     'status' => EInvoice::STATUS_DRAFT,
                 ]);
+
+                // Increment usage after first e-invoice creation (not re-generation)
+                $usageService->incrementUsage($company, 'efaktura_per_month');
             } else {
                 // Update draft UBL XML
                 $eInvoice->update([

@@ -31,6 +31,13 @@ class ClientDocumentController extends Controller
             ], 403);
         }
 
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($companyId);
+        if ($company && ! $usageService->canUse($company, 'client_documents_per_month')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'client_documents_per_month'), 402);
+        }
+
         $file = $request->file('file');
 
         // Generate secure filename
@@ -64,6 +71,9 @@ class ClientDocumentController extends Controller
                     'ip_address' => $request->ip(),
                 ],
             ]);
+
+            // Increment usage after successful creation
+            $usageService->incrementUsage($company, 'client_documents_per_month');
 
             return response()->json([
                 'success' => true,
