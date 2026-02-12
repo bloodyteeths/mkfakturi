@@ -126,6 +126,8 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # ===== Stage 4: Production Image =====
+FROM mysql:8.4 AS mysql-donor
+
 FROM php:8.2-fpm-alpine AS production
 
 # Install runtime dependencies only
@@ -137,6 +139,7 @@ RUN apk add --no-cache \
     sqlite \
     mysql-client \
     postgresql-client \
+    gcompat \
     # Image optimization tools
     jpegoptim \
     optipng \
@@ -153,6 +156,11 @@ RUN apk add --no-cache \
     postgresql-libs \
     imagemagick \
     && rm -rf /var/cache/apk/*
+
+# Copy MySQL 8.4 mysqldump (overrides MariaDB's version which can't handle
+# MySQL 8.4's caching_sha2_password auth — required for database backups)
+COPY --from=mysql-donor /usr/bin/mysqldump /usr/local/bin/mysqldump
+COPY --from=mysql-donor /usr/lib64/mysql/libmysqlclient.so.21 /usr/lib/libmysqlclient.so.21
 
 # Copy PHP extensions from base stage
 COPY --from=php-base /usr/local/lib/php/extensions /usr/local/lib/php/extensions
