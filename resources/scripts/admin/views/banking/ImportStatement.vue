@@ -149,7 +149,7 @@
 
         <!-- Actions -->
         <div class="flex justify-end space-x-3">
-          <BaseButton variant="gray" :to="{ name: 'banking.dashboard' }">
+          <BaseButton variant="gray" @click="router.push({ name: 'banking.dashboard' })">
             {{ $t('general.cancel') }}
           </BaseButton>
           <BaseButton
@@ -262,7 +262,7 @@
             {{ $t('general.back') }}
           </BaseButton>
           <div class="space-x-3">
-            <BaseButton variant="gray" :to="{ name: 'banking.dashboard' }">
+            <BaseButton variant="gray" @click="router.push({ name: 'banking.dashboard' })">
               {{ $t('general.cancel') }}
             </BaseButton>
             <BaseButton
@@ -308,7 +308,7 @@
           <BaseButton variant="primary-outline" @click="startNewImport">
             {{ $t('banking.import_another') }}
           </BaseButton>
-          <BaseButton variant="primary" :to="{ name: 'banking.reconciliation' }">
+          <BaseButton variant="primary" @click="router.push({ name: 'banking.reconciliation' })">
             {{ $t('banking.go_to_reconciliation') }}
           </BaseButton>
         </div>
@@ -319,6 +319,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
@@ -329,6 +330,7 @@ import {
   CheckCircleIcon,
 } from '@heroicons/vue/24/outline'
 
+const router = useRouter()
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
 

@@ -15,7 +15,7 @@
         <div class="flex items-center justify-end space-x-5">
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.import' }"
+            @click="router.push({ name: 'banking.import' })"
           >
             <template #left="slotProps">
               <BaseIcon name="ArrowUpTrayIcon" :class="slotProps.class" />
@@ -24,7 +24,7 @@
           </BaseButton>
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.import-history' }"
+            @click="router.push({ name: 'banking.import-history' })"
           >
             <template #left="slotProps">
               <BaseIcon name="ClockIcon" :class="slotProps.class" />
@@ -33,7 +33,7 @@
           </BaseButton>
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.reconciliation' }"
+            @click="router.push({ name: 'banking.reconciliation' })"
           >
             <template #left="slotProps">
               <BaseIcon name="ArrowsRightLeftIcon" :class="slotProps.class" />
@@ -42,7 +42,7 @@
           </BaseButton>
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.analytics' }"
+            @click="router.push({ name: 'banking.analytics' })"
           >
             <template #left="slotProps">
               <BaseIcon name="ChartBarIcon" :class="slotProps.class" />
@@ -51,7 +51,7 @@
           </BaseButton>
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.matching-rules' }"
+            @click="router.push({ name: 'banking.matching-rules' })"
           >
             <template #left="slotProps">
               <BaseIcon name="AdjustmentsHorizontalIcon" :class="slotProps.class" />
@@ -259,6 +259,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
@@ -268,6 +269,7 @@ import TransactionsList from './TransactionsList.vue'
 import TransactionCategorization from './TransactionCategorization.vue'
 import { BanknotesIcon } from '@heroicons/vue/24/outline'
 
+const router = useRouter()
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()

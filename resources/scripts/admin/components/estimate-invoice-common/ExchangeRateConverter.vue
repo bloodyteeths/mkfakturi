@@ -7,7 +7,7 @@
     required
   >
     <template #labelRight>
-      <div v-if="hasActiveProvider && isEdit">
+      <div v-if="hasActiveProvider">
         <BaseIcon
           v-tooltip="{ content: 'Fetch Latest Exchange rate' }"
           name="ArrowPathIcon"
@@ -116,7 +116,7 @@ watch(
 watch(
   () => props.customerCurrency,
   (v) => {
-    if (v && props.isEdit) {
+    if (v) {
       checkForActiveProvider(v)
     }
   },

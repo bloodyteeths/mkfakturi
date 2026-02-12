@@ -15,7 +15,7 @@
         <div class="flex items-center justify-end space-x-4">
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.dashboard' }"
+            @click="router.push({ name: 'banking.dashboard' })"
           >
             <template #left="slotProps">
               <BaseIcon name="ArrowLeftIcon" :class="slotProps.class" />
@@ -337,10 +337,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
+const router = useRouter()
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
 

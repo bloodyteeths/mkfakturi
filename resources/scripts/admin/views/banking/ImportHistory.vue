@@ -12,7 +12,7 @@
         <div class="flex items-center justify-end space-x-3">
           <BaseButton
             variant="primary-outline"
-            :to="{ name: 'banking.import' }"
+            @click="router.push({ name: 'banking.import' })"
           >
             <template #left="slotProps">
               <BaseIcon name="ArrowUpTrayIcon" :class="slotProps.class" />
@@ -203,7 +203,7 @@
         <BaseButton
           variant="primary-outline"
           class="mt-4"
-          :to="{ name: 'banking.import' }"
+          @click="router.push({ name: 'banking.import' })"
         >
           {{ $t('banking.import_csv') || 'Import CSV' }}
         </BaseButton>
@@ -319,10 +319,12 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
+const router = useRouter()
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
 

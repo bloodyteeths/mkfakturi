@@ -1165,7 +1165,9 @@
     "amount": "Amount",
     "attachment": "Attachment",
     "cancel_duplicate": "Cancel",
-    "categories": "Categories",
+    "categories": {
+      "select_a_category": "Select a Category"
+    },
     "category": "Category",
     "category_created": "Category Created",
     "category_deleted": "Category Deleted",
@@ -5472,7 +5474,11 @@
       "timezone": "Timezone",
       "title": "Title",
       "update_status": "Update Status",
-      "updated_message": "Preferences updated successfully"
+      "updated_message": "Preferences updated successfully",
+      "exchange_rate_provider": "Exchange Rate Provider",
+      "exchange_rate_provider_help": "Choose where exchange rates are fetched from. NBRM is the official Macedonian national bank rate.",
+      "exchange_rate_nbrm": "NBRM — National Bank of Macedonia (Official)",
+      "exchange_rate_frankfurter": "Frankfurter — ECB European Central Bank"
     },
     "primary_currency": "Primary Currency",
     "privacy_data": {
@@ -5613,7 +5619,8 @@
       "deleted_message": "Fiscal device deleted successfully",
       "ip_required": "IP address is required for TCP/IP connection",
       "serial_port_required": "Serial port path is required for this connection type",
-      "no_devices": "No fiscal devices registered"
+      "no_devices": "No fiscal devices registered",
+      "check_status": "Check Status"
     },
     "taxations": {
       "add_address": "Add Address for fetching sales tax.",

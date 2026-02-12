@@ -28,6 +28,24 @@
         </BaseInputGroup>
 
         <BaseInputGroup
+          :content-loading="isFetchingInitialData"
+          :label="$t('settings.preferences.exchange_rate_provider')"
+          :help-text="$t('settings.preferences.exchange_rate_provider_help')"
+        >
+          <BaseMultiselect
+            v-model="settingsForm.exchange_rate_provider"
+            :content-loading="isFetchingInitialData"
+            :options="exchangeRateProviders"
+            label="label"
+            value-prop="id"
+            track-by="label"
+            :searchable="false"
+            class="w-full"
+            @update:modelValue="onExchangeRateProviderChange"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup
           :label="$t('settings.preferences.default_language')"
           :content-loading="isFetchingInitialData"
           :error="v$.language.$error && v$.language.$errors[0].$message"
@@ -245,7 +263,26 @@ let isSaving = ref(false)
 let isDataSaving = ref(false)
 let isFetchingInitialData = ref(false)
 
-const settingsForm = reactive({ ...companyStore.selectedCompanySettings })
+const settingsForm = reactive({
+  ...companyStore.selectedCompanySettings,
+  exchange_rate_provider: companyStore.selectedCompanySettings.exchange_rate_provider || 'nbrm',
+})
+
+const exchangeRateProviders = [
+  { id: 'nbrm', label: t('settings.preferences.exchange_rate_nbrm') },
+  { id: 'frankfurter', label: t('settings.preferences.exchange_rate_frankfurter') },
+]
+
+async function onExchangeRateProviderChange(value) {
+  await companyStore.updateCompanySettings({
+    data: {
+      settings: {
+        exchange_rate_provider: value,
+      },
+    },
+    message: 'general.setting_updated',
+  })
+}
 
 const retrospectiveEditOptions = computed(() => {
   return globalStore.config.retrospective_edits.map((option) => {

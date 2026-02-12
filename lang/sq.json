@@ -1590,6 +1590,7 @@
     "current_certificate_retrieved": "Тековнdheот сертdheфdheкат е me sukses преземен"
   },
   "recurring_invoices": {
+    "action": "Veprimi",
     "title": "Faturat Periodike",
     "all": "Të gjitha",
     "invoice": "Повторувачка faturë | Повторувачкdhe fatura",
@@ -1840,7 +1841,9 @@
     "confirm_save_duplicate": "Ruaj сепак",
     "cancel_duplicate": "Anulo",
     "error_saving_expense": "Gabim прdhe përчувување në shpenzimот",
-    "categories": "Kategoritë",
+    "categories": {
+      "select_a_category": "Zgjidhni një kategori"
+    },
     "view_expense": "Shiko Shpenzimin",
     "delete_expense": "Fshi shpenzim",
     "select_category": "Zgjidhni Kategorinë",
@@ -3010,7 +3013,8 @@
       "deleted_message": "Pajisja fiskale u fshi me sukses",
       "ip_required": "Adresa IP është e detyrueshme për lidhjen TCP/IP",
       "serial_port_required": "Shtegu i portit serial është i detyrueshëm për këtë lloj lidhjeje",
-      "no_devices": "Nuk ka pajisje fiskale të regjistruara"
+      "no_devices": "Nuk ka pajisje fiskale të regjistruara",
+      "check_status": "Kontrolloni Statusin"
     },
     "payment_modes": {
       "title": "Mënyrat e Pagesës",
@@ -3127,7 +3131,11 @@
       "select_date_format": "Dheзберете formati në data",
       "select_fiscal_year": "Dheзберете fiskale viti",
       "ifrs_enabled": "Aktivizo Kontabilitetin SNRF",
-      "ifrs_enabled_description": "Aktivizoni kontabilitetin me regjistrim të dyfishtë (SNRF) për këtë kompani."
+      "ifrs_enabled_description": "Aktivizoni kontabilitetin me regjistrim të dyfishtë (SNRF) për këtë kompani.",
+      "exchange_rate_provider": "Furnizuesi i kursit të këmbimit",
+      "exchange_rate_provider_help": "Zgjidhni nga ku merren kurset e këmbimit. NBRM është kursi zyrtar i Bankës Popullore.",
+      "exchange_rate_nbrm": "NBRM — Banka Popullore e Maqedonisë (Zyrtare)",
+      "exchange_rate_frankfurter": "Frankfurter — BQE Banka Qendrore Europiane"
     },
     "update_app": {
       "title": "Përditësimi në aplikacioni",

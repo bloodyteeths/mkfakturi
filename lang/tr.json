@@ -889,6 +889,7 @@
     "reminder_sent": "Поттнveкот başarıyla gönderildi"
   },
   "recurring_invoices": {
+    "action": "Eylem",
     "title": "Tekrarlayan Faturalar",
     "invoices_list": "Tekrarlayan Fatura Listesi",
     "days": "{days} Günler",
@@ -1200,7 +1201,9 @@
     "created_message": "Harcama başarıyla oluşturuldu",
     "updated_message": "Harcama başarıyla güncellendi",
     "deleted_message": "Harcama başarıyla silindi | Harcamalar başarıyla silindi",
-    "categories": "Kategoriler",
+    "categories": {
+      "select_a_category": "Bir kategori seçin"
+    },
     "supplier": "Tedarikçi",
     "select_supplier": "Seç tedarikçi",
     "invoice_number": "Numara fatura",
@@ -2354,7 +2357,8 @@
       "deleted_message": "Mali cihaz başarıyla silindi",
       "ip_required": "TCP/IP bağlantısı için IP adresi gereklidir",
       "serial_port_required": "Bu bağlantı türü için seri port yolu gereklidir",
-      "no_devices": "Kayıtlı mali cihaz yok"
+      "no_devices": "Kayıtlı mali cihaz yok",
+      "check_status": "Durumu Kontrol Et"
     },
     "payment_modes": {
       "title": "Ödeme Yöntemleri",
@@ -2503,7 +2507,11 @@
       "allow_negative_stock": "Negatif Stoka İzin Ver",
       "allow_negative_stock_description": "Yetersiz stok olsa bile fatura oluşturulmasına izin verir.",
       "ifrs_enabled": "UFRS Muhasebesini Etkinleştir",
-      "ifrs_enabled_description": "Bu şirket için çift taraflı muhasebe (UFRS) etkinleştirin."
+      "ifrs_enabled_description": "Bu şirket için çift taraflı muhasebe (UFRS) etkinleştirin.",
+      "exchange_rate_provider": "Döviz kuru sağlayıcısı",
+      "exchange_rate_provider_help": "Döviz kurlarının nereden alınacağını seçin. NBRM, Makedonya Ulusal Bankası resmi kurudur.",
+      "exchange_rate_nbrm": "NBRM — Makedonya Ulusal Bankası (Resmi)",
+      "exchange_rate_frankfurter": "Frankfurter — ECB Avrupa Merkez Bankası"
     },
     "update_app": {
       "title": "Uygulamayı Güncelle",
@@ -4794,6 +4802,7 @@
       "daily_closing": "Günlük Kapanış",
       "general_ledger": "Defteri Kebir",
       "trial_balance": "Mizan",
+      "partner_dashboard": "Ortak Paneli",
       "title": "Muhasebe",
       "account_mappings": "Hesap Eşleştirme",
       "journal_entries": "Kayıtlar",
