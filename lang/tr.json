@@ -1644,7 +1644,8 @@
       "account_review": "Önizleme hesaplar",
       "two_factor": "Дфакторска автентveкацve",
       "partner_settings": "Управување ile partnerler",
-      "privacy_data": "Прveватamaст ve altındaатоцve"
+      "privacy_data": "Прveватamaст ve altındaатоцve",
+      "fiscal_devices": "Mali Cihazlar"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -2321,6 +2322,30 @@
       "active": "Актveвен",
       "inactive": "Hayırактveвен",
       "taxes_attached": "Evetamaцveте каченve."
+    },
+    "fiscal_devices": {
+      "title": "Mali Cihazlar",
+      "description": "Mali yazıcılarınızı ve yazar kasalarınızı yönetin. Tüm Makedon mali cihazları desteklenir: Daisy FX, Давид, Развигорец, Северец, Expert SX, Пелистерец, Alpha.",
+      "add_device": "Cihaz Ekle",
+      "edit_device": "Cihazı Düzenle",
+      "device_type": "Cihaz Türü",
+      "name": "Ad",
+      "name_placeholder": "örn. Ofis Yazıcısı",
+      "serial_number": "Seri Numarası",
+      "connection_type": "Bağlantı",
+      "ip_address": "IP Adresi",
+      "port": "Port",
+      "serial_port": "Seri Port",
+      "status": "Durum",
+      "active": "Aktif",
+      "inactive": "Pasif",
+      "confirm_delete": "Bu mali cihazı kaldırmak istediğinizden emin misiniz? Mevcut fişleri olan cihazlar silinemez.",
+      "created_message": "Mali cihaz başarıyla kaydedildi",
+      "updated_message": "Mali cihaz başarıyla güncellendi",
+      "deleted_message": "Mali cihaz başarıyla silindi",
+      "ip_required": "TCP/IP bağlantısı için IP adresi gereklidir",
+      "serial_port_required": "Bu bağlantı türü için seri port yolu gereklidir",
+      "no_devices": "Kayıtlı mali cihaz yok"
     },
     "payment_modes": {
       "title": "Ödeme Yöntemleri",

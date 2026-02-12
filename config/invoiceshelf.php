@@ -306,6 +306,16 @@ return [
             'ability' => '',
             'model' => '',
         ],
+        [
+            'title' => 'settings.menu_title.fiscal_devices',
+            'group' => '',
+            'name' => 'Fiscal Devices',
+            'link' => '/admin/settings/fiscal-devices',
+            'icon' => 'PrinterIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
         // NOTE: Chart of Accounts, Period Lock, Daily Closing, and Journal Export
         // have been moved to Partner Accounting section (partner-only features)
     ],

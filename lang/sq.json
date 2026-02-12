@@ -2265,7 +2265,8 @@
       "account_review": "Shikim në llogaritë",
       "two_factor": "Dy-faktorësh autentifikimi",
       "partner_settings": "Управување me партjoрdhe",
-      "privacy_data": "Privatësia dhe поpoтоцdhe"
+      "privacy_data": "Privatësia dhe поpoтоцdhe",
+      "fiscal_devices": "Pajisjet Fiskale"
     },
     "invite_company_description": "Покаjoте kompania po се поврзе me juajата llogaria.",
     "privacy_data": {
@@ -2974,6 +2975,30 @@
       "active": "Aktiv",
       "inactive": "Joaktiv",
       "taxes_attached": "Poноцdheте се прdheкаченdhe."
+    },
+    "fiscal_devices": {
+      "title": "Pajisjet Fiskale",
+      "description": "Menaxhoni printerët fiskalë dhe kasat tuaja. Mbështeten të gjitha pajisjet fiskale maqedonase: Daisy FX, Давид, Развигорец, Северец, Expert SX, Пелистерец, Alpha.",
+      "add_device": "Shto Pajisje",
+      "edit_device": "Redakto Pajisjen",
+      "device_type": "Lloji i Pajisjes",
+      "name": "Emri",
+      "name_placeholder": "p.sh. Printeri i zyrës",
+      "serial_number": "Numri Serial",
+      "connection_type": "Lidhja",
+      "ip_address": "Adresa IP",
+      "port": "Porti",
+      "serial_port": "Porti Serial",
+      "status": "Statusi",
+      "active": "Aktiv",
+      "inactive": "Joaktiv",
+      "confirm_delete": "A jeni i sigurt që dëshironi ta hiqni këtë pajisje fiskale? Pajisjet me fatura ekzistuese nuk mund të fshihen.",
+      "created_message": "Pajisja fiskale u regjistrua me sukses",
+      "updated_message": "Pajisja fiskale u përditësua me sukses",
+      "deleted_message": "Pajisja fiskale u fshi me sukses",
+      "ip_required": "Adresa IP është e detyrueshme për lidhjen TCP/IP",
+      "serial_port_required": "Shtegu i portit serial është i detyrueshëm për këtë lloj lidhjeje",
+      "no_devices": "Nuk ka pajisje fiskale të regjistruara"
     },
     "payment_modes": {
       "title": "Mënyrat e Pagesës",

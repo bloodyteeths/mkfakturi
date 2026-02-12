@@ -80,6 +80,8 @@ const JournalExportSetting = () =>
   import('@/scripts/admin/views/settings/JournalExportSetting.vue')
 const AccountReviewSetting = () =>
   import('@/scripts/admin/views/settings/AccountReviewSetting.vue')
+const FiscalDevicesSetting = () =>
+  import('@/scripts/admin/views/settings/FiscalDevicesSetting.vue')
 
 // Items
 const ItemsIndex = () => import('@/scripts/admin/views/items/Index.vue')
@@ -756,6 +758,12 @@ export default [
             name: 'settings.billing',
             meta: { isOwner: true },
             component: PricingPage,
+          },
+          {
+            path: 'fiscal-devices',
+            name: 'settings.fiscal-devices',
+            meta: { isOwner: true },
+            component: FiscalDevicesSetting,
           },
         ],
       },
