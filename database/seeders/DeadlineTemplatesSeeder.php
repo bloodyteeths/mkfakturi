@@ -55,9 +55,9 @@ class DeadlineTemplatesSeeder extends Seeder
                 ->value('partner_id');
 
             foreach ($templates as $template) {
-                // Check if this type of recurring deadline already exists for this company
+                // Check if this specific recurring deadline already exists for this company
                 $exists = Deadline::where('company_id', $company->id)
-                    ->where('deadline_type', $template['deadline_type'])
+                    ->where('recurrence_rule', $template['recurrence_rule'])
                     ->where('is_recurring', true)
                     ->exists();
 
