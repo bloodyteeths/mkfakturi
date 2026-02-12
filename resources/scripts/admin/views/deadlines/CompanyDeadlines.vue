@@ -88,7 +88,7 @@
       >
         <template #cell-title="{ row }">
           <div class="font-medium text-gray-900">
-            {{ row.data.title_mk || row.data.title }}
+            {{ locale === 'mk' ? (row.data.title_mk || row.data.title) : row.data.title }}
           </div>
           <div v-if="row.data.description" class="text-xs text-gray-500 truncate max-w-xs">
             {{ row.data.description }}
@@ -100,7 +100,7 @@
             :class="getTypeBadgeClass(row.data.deadline_type)"
             class="px-2 py-1 text-xs font-medium rounded-full"
           >
-            {{ row.data.type_label || getTypeLabel(row.data.deadline_type) }}
+            {{ getTypeLabel(row.data.deadline_type) }}
           </span>
         </template>
 
@@ -180,11 +180,11 @@
                   v-model="createForm.deadline_type"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 >
-                  <option value="custom">Custom</option>
-                  <option value="vat_return">VAT Return / ДДВ</option>
-                  <option value="mpin">MPIN</option>
-                  <option value="cit_advance">CIT / Данок на добивка</option>
-                  <option value="annual_fs">Annual FS / Годишна сметка</option>
+                  <option value="custom">{{ $t('deadlines.type_custom') }}</option>
+                  <option value="vat_return">{{ $t('deadlines.type_vat_return') }}</option>
+                  <option value="mpin">{{ $t('deadlines.type_mpin') }}</option>
+                  <option value="cit_advance">{{ $t('deadlines.type_cit_advance') }}</option>
+                  <option value="annual_fs">{{ $t('deadlines.type_annual_fs') }}</option>
                 </select>
               </div>
 
@@ -237,7 +237,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const notificationStore = useNotificationStore()
 
 // State
@@ -459,14 +459,7 @@ const deleteDeadline = async (deadline) => {
 // Display helpers
 
 const getTypeLabel = (type) => {
-  const labels = {
-    vat_return: 'VAT Return',
-    mpin: 'MPIN',
-    cit_advance: 'CIT Advance',
-    annual_fs: 'Annual FS',
-    custom: 'Custom',
-  }
-  return labels[type] || type
+  return t(`deadlines.type_${type}`) || type
 }
 
 const getTypeBadgeClass = (type) => {

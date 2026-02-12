@@ -78,7 +78,7 @@
             to="/admin/deadlines"
             class="text-sm font-medium text-primary-500 hover:text-primary-600 truncate block"
           >
-            {{ deadline.title }}
+            {{ getLocalizedTitle(deadline) }}
           </router-link>
           <div class="flex items-center gap-2 mt-1">
             <span
@@ -118,9 +118,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import LoadingSkeleton from '@/scripts/admin/components/LoadingSkeleton.vue'
 
+const { t, locale } = useI18n()
 const notificationStore = useNotificationStore()
 
 const isLoading = ref(true)
@@ -158,7 +160,15 @@ function getTypeBadgeClass(type) {
   return classes[type] || 'bg-gray-100 text-gray-700'
 }
 
+function getLocalizedTitle(deadline) {
+  if (locale.value === 'mk' && deadline.title_mk) return deadline.title_mk
+  return deadline.title
+}
+
 function getTypeLabel(deadline) {
+  const key = `deadlines.type_${deadline.deadline_type}`
+  const translated = t(key)
+  if (translated !== key) return translated
   return deadline.type_label_en || deadline.type_label || deadline.deadline_type
 }
 
@@ -173,9 +183,9 @@ function formatDueDate(deadline) {
   if (days === undefined || days === null) {
     return deadline.due_date
   }
-  if (days < 0) return `${Math.abs(days)}d overdue`
-  if (days === 0) return 'Due today'
-  return `${days}d remaining`
+  if (days < 0) return `${Math.abs(days)}d ${t('deadlines.overdue').toLowerCase()}`
+  if (days === 0) return t('deadlines.due_today')
+  return `${days}d ${t('deadlines.upcoming').toLowerCase()}`
 }
 
 async function fetchDeadlines() {

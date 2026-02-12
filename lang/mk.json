@@ -5910,6 +5910,11 @@
     "overdue": "Задоцнети",
     "status": "Статус",
     "title": "Рокови",
+    "type_annual_fs": "Годишна сметка",
+    "type_cit_advance": "Аконтација данок на добивка",
+    "type_custom": "Прилагодено",
+    "type_mpin": "МПИН пријава",
+    "type_vat_return": "ДДВ пријава",
     "upcoming": "Претстојни"
   }
 }

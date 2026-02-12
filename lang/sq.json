@@ -5769,6 +5769,11 @@
     "overdue": "Të vonuara",
     "status": "Statusi",
     "title": "Afatet",
+    "type_annual_fs": "Pasqyra financiare vjetore",
+    "type_cit_advance": "Akontacion tatimi mbi fitimin",
+    "type_custom": "E personalizuar",
+    "type_mpin": "Deklaratë MPIN",
+    "type_vat_return": "Deklaratë TVSH",
     "upcoming": "Të ardhshme"
   }
 }

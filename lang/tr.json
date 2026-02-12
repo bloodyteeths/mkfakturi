@@ -6410,6 +6410,11 @@
     "overdue": "Gecikmiş",
     "status": "Durum",
     "title": "Son Tarihler",
+    "type_annual_fs": "Yıllık Mali Tablo",
+    "type_cit_advance": "Kurumlar Vergisi Avansı",
+    "type_custom": "Özel",
+    "type_mpin": "MPIN Bildirimi",
+    "type_vat_return": "KDV Beyannamesi",
     "upcoming": "Yaklaşan"
   }
 }

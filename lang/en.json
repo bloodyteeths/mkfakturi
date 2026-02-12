@@ -6600,6 +6600,11 @@
     "overdue": "Overdue",
     "status": "Status",
     "title": "Deadlines",
+    "type_annual_fs": "Annual FS",
+    "type_cit_advance": "CIT Advance",
+    "type_custom": "Custom",
+    "type_mpin": "MPIN",
+    "type_vat_return": "VAT Return",
     "upcoming": "Upcoming"
   }
 }
