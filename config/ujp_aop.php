@@ -88,8 +88,8 @@ return [
     */
     'ifrs_to_aop_fallback' => [
         // Balance Sheet — Assets
-        'NON_CURRENT_ASSET' => '002',  // Entire balance to subtotal if no sub-split
-        'CONTRA_ASSET'      => '002',  // Subtracted from non-current assets
+        'NON_CURRENT_ASSET' => '010',  // Default to Материјални средства (leaf node)
+        'CONTRA_ASSET'      => '010',  // Subtracted from non-current assets
         'INVENTORY'         => '031',
         'BANK'              => '050',
         'CURRENT_ASSET'     => '040',
@@ -100,7 +100,7 @@ return [
         'CURRENT_LIABILITY'     => '086',
         'PAYABLE'               => '090',
         'RECONCILIATION'        => '075',
-        'EQUITY'                => '061',  // Entire equity to subtotal
+        'EQUITY'                => '062',  // Default to Основен капитал (leaf node)
         // Income Statement — Revenue
         'OPERATING_REVENUE'     => '201',
         'NON_OPERATING_REVENUE' => '210',
