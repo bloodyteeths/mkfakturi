@@ -17,6 +17,7 @@ export type Dictionary = {
     start: string
     login: string
     language: string
+    blog?: string
   }
   hero: { h1: string; sub: string; primaryCta: string; secondaryCta: string; claim: string; onlyPlatform: string }
   // extra tagline line for hero
@@ -77,7 +78,8 @@ const mk: Dictionary = {
     contactSales: 'Контакт со продажба',
     start: 'Започни бесплатно',
     login: 'Пријава',
-    language: 'Јазик'
+    language: 'Јазик',
+    blog: 'Блог',
   },
   hero: {
     h1: 'Најмоќната AI сметководствена платформа во Македонија, подготвена за е‑Фактура.',
@@ -279,7 +281,8 @@ const sq: Dictionary = {
     contactSales: 'Kontakto shitjet',
     start: 'Fillo falas',
     login: 'Hyr',
-    language: 'Gjuha'
+    language: 'Gjuha',
+    blog: 'Blog',
   },
   hero: {
     h1: 'Platforma më e fuqishme kontabiliteti me AI në Maqedoni, gati për e‑Faturë.',
@@ -481,7 +484,8 @@ const tr: Dictionary = {
     contactSales: 'Satışla İletişime Geçin',
     start: 'Ücretsiz başla',
     login: 'Giriş',
-    language: 'Dil'
+    language: 'Dil',
+    blog: 'Blog',
   },
   hero: {
     h1: 'Makedonya’daki en güçlü yapay zekâ destekli ve e‑Fatura’ya hazır muhasebe platformu.',
@@ -683,7 +687,8 @@ const en: Dictionary = {
     contactSales: 'Contact Sales',
     start: 'Start Free',
     login: 'Login',
-    language: 'Language'
+    language: 'Language',
+    blog: 'Blog'
   },
   hero: {
     h1: 'The most powerful AI accounting platform in Macedonia, ready for e-Invoice.',

@@ -5316,6 +5316,7 @@
         "income_tax_rate": "Tatimi mbi fitimin ({rate}%)",
         "net_profit": "Fitimi neto",
         "db_vp_instructions": "Vendosni këto vlera në formularin DB-VP në",
+        "gov_ssl_note": "mund të ketë probleme SSL",
         "step6_title": "Hapi 6: Mbyll vitin",
         "step6_desc": "Ky është hapi i fundit. Viti do të mbyllet dhe askush nuk do të mund të ndryshojë dokumentet për {year}.",
         "warning": "Kujdes",

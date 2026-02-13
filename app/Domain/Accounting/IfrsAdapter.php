@@ -757,6 +757,11 @@ class IfrsAdapter
                 continue;
             }
 
+            // Translate account type name to Macedonian
+            $translationKey = 'ifrs.account_types.' . strtolower($accountType);
+            $translatedType = __($translationKey);
+            $fallbackType = str_replace('_', ' ', ucwords(strtolower($accountType), '_'));
+
             foreach ($categories as $categoryName => $categoryData) {
                 if (! is_array($categoryData)) {
                     continue;
@@ -772,8 +777,14 @@ class IfrsAdapter
                     continue;
                 }
 
+                // Use Macedonian translation if available, otherwise original name
+                $displayName = ($translatedType !== $translationKey)
+                    ? $translatedType
+                    : $categoryName;
+
                 $flattened[] = [
-                    'name' => $categoryName,
+                    'name' => $displayName,
+                    'code' => $accountType,
                     'balance' => $balance,
                     'id' => $categoryData['id'] ?? 0,
                 ];

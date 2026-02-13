@@ -58,16 +58,26 @@ class JournalExportController extends Controller
             $request->input('to')
         );
 
-        // Generate CSV based on format
+        $from = Carbon::parse($request->input('from'))->format('Ymd');
+        $to = Carbon::parse($request->input('to'))->format('Ymd');
+
+        // Pantheon exports as XML
+        if ($format === JournalExportService::FORMAT_PANTHEON) {
+            $xml = $service->toPantheonXML();
+            $filename = "journals_pantheon_{$from}_{$to}.xml";
+
+            return response($xml, 200)
+                ->header('Content-Type', 'application/xml; charset=UTF-8')
+                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
+                ->header('Content-Length', strlen($xml));
+        }
+
+        // CSV-based formats
         $csv = match ($format) {
-            JournalExportService::FORMAT_PANTHEON => $service->toPantheonCSV(),
             JournalExportService::FORMAT_ZONEL => $service->toZonelCSV(),
             default => $service->toCSV(),
         };
 
-        // Generate filename
-        $from = Carbon::parse($request->input('from'))->format('Ymd');
-        $to = Carbon::parse($request->input('to'))->format('Ymd');
         $filename = "journals_{$format}_{$from}_{$to}.csv";
 
         return response($csv, 200)

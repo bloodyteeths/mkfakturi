@@ -78,7 +78,7 @@
       <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
         <p class="text-sm text-blue-700">
           {{ t('partner.accounting.year_end.upload_export_to') }}
-          <a href="https://e-submit.crm.com.mk" target="_blank" rel="noopener" class="font-medium underline">
+          <a href="https://e-submit.crm.com.mk/sso/login.aspx" target="_blank" rel="noopener" class="font-medium underline">
             e-submit.crm.com.mk
           </a>
         </p>
@@ -149,6 +149,7 @@
           <a href="https://etax.ujp.gov.mk" target="_blank" rel="noopener" class="font-medium underline">
             etax.ujp.gov.mk
           </a>
+          <span class="text-xs text-yellow-600 ml-1">({{ t('partner.accounting.year_end.gov_ssl_note') }})</span>
         </p>
       </div>
     </div>
@@ -209,12 +210,11 @@ async function downloadReport(type) {
 async function exportJournal(format) {
   isDownloading.value = format
   try {
-    const formatMap = { pantheon: 'pantheon_xml', zonel: 'zonel_csv' }
     const response = await axios.get('/accounting/journals/export', {
       params: {
         from: `${store.year}-01-01`,
         to: `${store.year}-12-31`,
-        format: formatMap[format] || format,
+        format: format,
       },
       responseType: 'blob',
     })

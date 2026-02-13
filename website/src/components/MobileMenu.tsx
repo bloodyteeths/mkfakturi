@@ -91,6 +91,15 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
                             >
                                 {t.nav.contact}
                             </Link>
+                            {t.nav.blog && (
+                                <Link
+                                    href={`/${locale}/blog`}
+                                    className="text-gray-700 hover:text-indigo-600 font-medium py-3 px-4"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {t.nav.blog}
+                                </Link>
+                            )}
                         </div>
                     </nav>
                     <div className="h-px bg-gray-100 my-2"></div>

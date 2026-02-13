@@ -4993,6 +4993,7 @@
         "income_tax_rate": "Gelir vergisi ({rate}%)",
         "net_profit": "Net kâr",
         "db_vp_instructions": "Bu değerleri DB-VP formuna girin:",
+        "gov_ssl_note": "SSL sorunu olabilir",
         "step6_title": "Adım 6: Yılı kilitle",
         "step6_desc": "Bu son adımdır. Yıl kilitlenecek ve {year} için hiç kimse belgeleri değiştiremeyecek.",
         "warning": "Uyarı",

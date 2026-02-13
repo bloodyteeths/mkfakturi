@@ -3010,6 +3010,7 @@
         "income_tax_rate": "Income tax ({rate}%)",
         "net_profit": "Net profit",
         "db_vp_instructions": "Enter these values in the DB-VP form on",
+        "gov_ssl_note": "may have SSL issues",
         "step6_title": "Step 6: Lock year",
         "step6_desc": "This is the last step. The year will be locked and no one will be able to change documents for {year}.",
         "warning": "Warning",

@@ -217,7 +217,7 @@
             </tr>
         </table>
         <p class="sub-heading-text">БИЛАНС НА СОСТОЈБА</p>
-        <p class="form-label">Образец 36 — состојба на 31.12.{{ date('Y') }}</p>
+        <p class="form-label">Образец 36 — состојба на {{ $as_of_date }}</p>
 
         <!-- АКТИВА (ASSETS) -->
         <p class="section-title">АКТИВА</p>

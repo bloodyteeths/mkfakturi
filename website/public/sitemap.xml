@@ -508,4 +508,188 @@
     <priority>0.4</priority>
   </url>
 
+  <!-- Blog -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog: Годишна сметка 2025 -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/godishna-smetka-2025</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/godishna-smetka-2025</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/godishna-smetka-2025</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/godishna-smetka-2025</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishna-smetka-2025" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishna-smetka-2025" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: Биланс на состојба -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/bilans-na-sostojba</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/bilans-na-sostojba</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/bilans-na-sostojba</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/bilans-na-sostojba</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/bilans-na-sostojba" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/bilans-na-sostojba" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: Годишно затворање со Facturino -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/godishno-zatvoranje-facturino</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/godishno-zatvoranje-facturino</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/godishno-zatvoranje-facturino</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/godishno-zatvoranje-facturino" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/godishno-zatvoranje-facturino" />
+    <lastmod>2026-02-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>

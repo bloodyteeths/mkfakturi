@@ -165,6 +165,14 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
                   {f.contact}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href={`/${locale}/blog`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.blog}
+                </Link>
+              </li>
             </ul>
           </div>
 
