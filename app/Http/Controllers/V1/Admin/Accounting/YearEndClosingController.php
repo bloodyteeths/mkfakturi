@@ -112,73 +112,55 @@ class YearEndClosingController extends Controller
 
         $format = $request->input('format', 'json');
 
-        // Use pre-closing financial data if available (stored during closing entry generation)
-        // After closing entries, P&L accounts are zeroed — UJP reports need pre-closing figures
-        $summary = null;
-        $fiscalYear = \App\Models\FiscalYear::where('company_id', $company->id)
-            ->where('year', $year)
-            ->first();
+        // Income-related reports need pre-closing P&L data.
+        // After year-end closing, P&L accounts are zeroed by closing entries.
+        // We temporarily soft-delete closing entries so IFRS queries see original balances.
+        // Balance sheet uses POST-closing state (equity includes transferred P&L) — no removal.
+        $needsPreClosing = in_array($type, ['income-statement', 'tax-summary', 'notes']);
+        $closingIds = [];
 
-        if ($fiscalYear && $fiscalYear->notes) {
-            $notes = json_decode($fiscalYear->notes, true);
-            if (isset($notes['pre_closing_summary'])) {
-                $summary = $notes['pre_closing_summary'];
-            } elseif (! empty($notes['closing_transaction_ids'])) {
-                // Closing entries exist but pre-closing data wasn't stored (legacy)
-                // Temporarily remove closing entries, calculate, then restore
-                $closingIds = $notes['closing_transaction_ids'];
-                \Illuminate\Support\Facades\DB::table('ifrs_transactions')
-                    ->whereIn('id', $closingIds)
-                    ->update(['deleted_at' => now()]);
+        if ($needsPreClosing) {
+            $fiscalYear = \App\Models\FiscalYear::where('company_id', $company->id)
+                ->where('year', $year)
+                ->first();
 
-                $summary = $this->service->getFinancialSummary($company, $year);
-
-                \Illuminate\Support\Facades\DB::table('ifrs_transactions')
-                    ->whereIn('id', $closingIds)
-                    ->update(['deleted_at' => null]);
-
-                // Store for future requests
-                $notes['pre_closing_summary'] = $summary;
-                $fiscalYear->update(['notes' => json_encode($notes)]);
+            if ($fiscalYear && $fiscalYear->notes) {
+                $notes = json_decode($fiscalYear->notes, true);
+                $closingIds = $notes['closing_transaction_ids'] ?? [];
             }
         }
 
-        // Fallback to live calculation if no pre-closing data stored
-        if (! $summary) {
-            $summary = $this->service->getFinancialSummary($company, $year);
+        // Temporarily soft-delete closing entries for income-related reports
+        if (! empty($closingIds)) {
+            \Illuminate\Support\Facades\DB::table('ifrs_transactions')
+                ->whereIn('id', $closingIds)
+                ->whereNull('deleted_at')
+                ->update(['deleted_at' => now()]);
         }
 
-        // Translate account names to Macedonian (cached data may have English names)
+        try {
+            return $this->generateReport($company, $year, $type, $format);
+        } finally {
+            // Always restore closing entries
+            if (! empty($closingIds)) {
+                \Illuminate\Support\Facades\DB::table('ifrs_transactions')
+                    ->whereIn('id', $closingIds)
+                    ->update(['deleted_at' => null]);
+            }
+        }
+    }
+
+    /**
+     * Generate the actual report (called with or without closing entries removed).
+     */
+    private function generateReport(Company $company, int $year, string $type, string $format)
+    {
+        $summary = $this->service->getFinancialSummary($company, $year);
         $summary = $this->translateAccountNames($summary);
 
         if ($type === 'tax-summary') {
             $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
             $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
-
-            // If summary totals are zero, use AOP service as fallback (more reliable)
-            if ($totalRevenue == 0 && $totalExpenses == 0) {
-                try {
-                    $aopIs = $this->aopService->getIncomeStatementAop($company, $year);
-                    $aopRevenue = 0;
-                    $aopExpenses = 0;
-                    foreach ($aopIs['prihodi'] ?? [] as $row) {
-                        if ($row['aop'] === '246') {
-                            $aopRevenue = $row['current'];
-                        }
-                    }
-                    foreach ($aopIs['rashodi'] ?? [] as $row) {
-                        if ($row['aop'] === '293') {
-                            $aopExpenses = $row['current'];
-                        }
-                    }
-                    if ($aopRevenue > 0 || $aopExpenses > 0) {
-                        $totalRevenue = $aopRevenue;
-                        $totalExpenses = $aopExpenses;
-                    }
-                } catch (\Exception $e) {
-                    // AOP fallback failed, keep original values
-                }
-            }
 
             $profitBeforeTax = $totalRevenue - $totalExpenses;
             $incomeTax = $profitBeforeTax > 0 ? round($profitBeforeTax * 0.10, 2) : 0;
@@ -299,27 +281,10 @@ class YearEndClosingController extends Controller
 
     private function downloadGenericCsv(array $summary, string $type, int $year, Company $company): Response
     {
+        // Closing entries are already soft-deleted by reports() for income-related types,
+        // so getFinancialSummary returns pre-closing data with correct revenue/expenses.
         $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
         $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
-
-        // AOP fallback if summary totals are zero (same as tax-summary endpoint)
-        if ($totalRevenue == 0 && $totalExpenses == 0) {
-            try {
-                $aopIs = $this->aopService->getIncomeStatementAop($company, $year);
-                foreach ($aopIs['prihodi'] ?? [] as $row) {
-                    if ($row['aop'] === '246') {
-                        $totalRevenue = $row['current'];
-                    }
-                }
-                foreach ($aopIs['rashodi'] ?? [] as $row) {
-                    if ($row['aop'] === '293') {
-                        $totalExpenses = $row['current'];
-                    }
-                }
-            } catch (\Exception $e) {
-                // Keep original values
-            }
-        }
 
         $profitBeforeTax = $totalRevenue - $totalExpenses;
         $incomeTax = $profitBeforeTax > 0 ? round($profitBeforeTax * 0.10, 2) : 0;

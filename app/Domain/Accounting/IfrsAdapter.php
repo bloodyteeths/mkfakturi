@@ -686,11 +686,12 @@ class IfrsAdapter
                 $this->flattenIfrsAccounts($sections['accounts']['NON_OPERATING_EXPENSES'] ?? [], false)
             );
 
-            // Calculate totals (flip sign for revenues - credits are negative in ledger)
-            $totalRevenue = abs(($sections['totals']['OPERATING_REVENUES'] ?? 0) +
-                               ($sections['totals']['NON_OPERATING_REVENUES'] ?? 0));
-            $totalExpenses = abs(($sections['totals']['OPERATING_EXPENSES'] ?? 0) +
-                                ($sections['totals']['NON_OPERATING_EXPENSES'] ?? 0));
+            // Calculate totals from flattened accounts (absolute values).
+            // IFRS sections['totals'] can net opposite-signed entries within a section
+            // (e.g., OPERATING_EXPENSE +271 debit + DIRECT_EXPENSE -271 credit = 0),
+            // producing wrong totals. Sum absolute values from individual accounts instead.
+            $totalRevenue = array_reduce($revenues, fn ($carry, $a) => $carry + abs($a['balance'] ?? 0), 0.0);
+            $totalExpenses = array_reduce($expenses, fn ($carry, $a) => $carry + abs($a['balance'] ?? 0), 0.0);
 
             // Return in structure expected by blade template
             return [
