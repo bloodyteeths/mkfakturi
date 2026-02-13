@@ -302,9 +302,11 @@ class YearEndClosingService
     }
 
     /**
-     * Temporarily soft-delete existing closing entries, run callback, then restore.
-     * Used by preview, summary, and report endpoints to show pre-closing state.
-     * Finds both tracked IDs (in notes) and orphaned entries (by narration pattern).
+     * Temporarily hide closing entries, run callback, then restore via rollback.
+     *
+     * Uses a DB transaction with hard-delete + rollback so each concurrent request
+     * gets its own isolated view. This avoids the race condition where multiple
+     * parallel report downloads interfere with each other's soft-delete/restore.
      */
     public function withPreClosingState(Company $company, int $year, callable $callback): mixed
     {
@@ -319,31 +321,24 @@ class YearEndClosingService
 
         $allIds = array_values(array_unique(array_merge($trackedIds, $orphanedIds)));
 
-        if (! empty($allIds)) {
-            $now = now();
-            // Must soft-delete BOTH transactions AND ledger entries.
-            // Balance calculations query ifrs_ledgers (Ledger model has own SoftDeletes).
-            DB::table('ifrs_ledgers')
-                ->whereIn('transaction_id', $allIds)
-                ->whereNull('deleted_at')
-                ->update(['deleted_at' => $now]);
-            DB::table('ifrs_transactions')
-                ->whereIn('id', $allIds)
-                ->whereNull('deleted_at')
-                ->update(['deleted_at' => $now]);
+        if (empty($allIds)) {
+            return $callback();
         }
 
+        // Use a transaction: hard-delete entries, run callback, then rollback.
+        // The deletes are only visible to THIS request's DB connection.
+        // Concurrent requests see the original (undeleted) data.
+        DB::beginTransaction();
         try {
-            return $callback();
+            DB::table('ifrs_ledgers')->whereIn('transaction_id', $allIds)->delete();
+            DB::table('ifrs_line_items')->whereIn('transaction_id', $allIds)->delete();
+            DB::table('ifrs_transactions')->whereIn('id', $allIds)->delete();
+
+            $result = $callback();
+
+            return $result;
         } finally {
-            if (! empty($allIds)) {
-                DB::table('ifrs_ledgers')
-                    ->whereIn('transaction_id', $allIds)
-                    ->update(['deleted_at' => null]);
-                DB::table('ifrs_transactions')
-                    ->whereIn('id', $allIds)
-                    ->update(['deleted_at' => null]);
-            }
+            DB::rollBack();
         }
     }
 
