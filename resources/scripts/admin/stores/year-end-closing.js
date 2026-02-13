@@ -44,6 +44,9 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     try {
       const { data } = await axios.get(`/year-end/${year.value}/preflight`)
       preflightData.value = data
+      if (data.already_closed) {
+        fiscalYearStatus.value = 'CLOSED'
+      }
       return data
     } catch (error) {
       lastError.value = error.response?.data?.error || error.message || 'Failed to load preflight checks'
