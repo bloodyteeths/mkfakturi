@@ -480,16 +480,10 @@ class IfrsAdapter
                             continue;
                         }
 
-                        // Get friendly name from IFRS config or use account type
-                        $friendlyName = $accountTypeNames[$accountType] ?? str_replace('_', ' ', ucwords(strtolower($accountType), '_'));
-
-                        // Translate account type name using translation key
-                        $translationKey = 'ifrs.account_types.' . strtolower($accountType);
-                        $translatedName = __($translationKey);
-                        // If translation not found, fall back to English name
-                        if ($translatedName === $translationKey) {
-                            $translatedName = $friendlyName;
-                        }
+                        // Use hardcoded Macedonian name (API locale is 'en', reports always Macedonian)
+                        $translatedName = self::MK_ACCOUNT_TYPES[$accountType]
+                            ?? $accountTypeNames[$accountType]
+                            ?? str_replace('_', ' ', ucwords(strtolower($accountType), '_'));
 
                         $accounts[] = [
                             'name' => $translatedName,
@@ -748,6 +742,31 @@ class IfrsAdapter
      *
      * We flatten to: [['name' => 'Category Name', 'balance' => X], ...]
      */
+    /**
+     * Macedonian account type names for UJP financial reports.
+     * Hardcoded because API locale is 'en' and reports must always be Macedonian.
+     */
+    protected const MK_ACCOUNT_TYPES = [
+        'NON_CURRENT_ASSET' => 'Нетековни средства',
+        'CONTRA_ASSET' => 'Контра средства',
+        'INVENTORY' => 'Залихи',
+        'BANK' => 'Банка',
+        'CURRENT_ASSET' => 'Тековни средства',
+        'RECEIVABLE' => 'Побарувања',
+        'NON_CURRENT_LIABILITY' => 'Нетековни обврски',
+        'CONTROL' => 'Контролни сметки',
+        'CURRENT_LIABILITY' => 'Тековни обврски',
+        'PAYABLE' => 'Обврски кон добавувачи',
+        'RECONCILIATION' => 'Порамнување',
+        'EQUITY' => 'Капитал',
+        'OPERATING_REVENUE' => 'Оперативни приходи',
+        'OPERATING_EXPENSE' => 'Оперативни расходи',
+        'NON_OPERATING_REVENUE' => 'Неоперативни приходи',
+        'DIRECT_EXPENSE' => 'Директни трошоци',
+        'OVERHEAD_EXPENSE' => 'Режиски трошоци',
+        'OTHER_EXPENSE' => 'Други трошоци',
+    ];
+
     protected function flattenIfrsAccounts(array $sectionAccounts, bool $absBalance = false): array
     {
         $flattened = [];
@@ -756,11 +775,6 @@ class IfrsAdapter
             if (! is_array($categories)) {
                 continue;
             }
-
-            // Translate account type name to Macedonian
-            $translationKey = 'ifrs.account_types.' . strtolower($accountType);
-            $translatedType = __($translationKey);
-            $fallbackType = str_replace('_', ' ', ucwords(strtolower($accountType), '_'));
 
             foreach ($categories as $categoryName => $categoryData) {
                 if (! is_array($categoryData)) {
@@ -777,10 +791,8 @@ class IfrsAdapter
                     continue;
                 }
 
-                // Use Macedonian translation if available, otherwise original name
-                $displayName = ($translatedType !== $translationKey)
-                    ? $translatedType
-                    : $categoryName;
+                // Use hardcoded Macedonian name (API locale is 'en', reports always Macedonian)
+                $displayName = self::MK_ACCOUNT_TYPES[$accountType] ?? $categoryName;
 
                 $flattened[] = [
                     'name' => $displayName,

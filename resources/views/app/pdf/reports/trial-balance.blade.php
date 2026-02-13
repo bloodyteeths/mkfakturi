@@ -172,11 +172,8 @@
         <table class="accounts-table">
             <thead>
                 <tr class="table-header">
-                    <th style="text-align: left; width: 30%;">
+                    <th style="text-align: left; width: 40%;">
                         <p class="table-header-text" style="text-align: left;">Назив на сметка</p>
-                    </th>
-                    <th style="width: 10%;">
-                        <p class="table-header-text">Шифра</p>
                     </th>
                     <th style="width: 15%;">
                         <p class="table-header-text">Дугува</p>
@@ -198,9 +195,6 @@
                     <tr class="account-row">
                         <td>
                             <p class="account-name">{{ $account['name'] ?? $account['account_name'] ?? 'N/A' }}</p>
-                        </td>
-                        <td>
-                            <p class="account-amount" style="font-family: monospace; font-size: 9px; color: #718096;">{{ $account['code'] ?? '' }}</p>
                         </td>
                         <td>
                             <p class="account-amount">
@@ -247,7 +241,6 @@
                     <td>
                         <p class="total-label">ВКУПНО</p>
                     </td>
-                    <td></td>
                     <td>
                         <p class="total-amount">
                             {!! format_money_pdf(($trialBalance['trial_balance']['total_debits'] ?? 0) * 100, $currency) !!}
