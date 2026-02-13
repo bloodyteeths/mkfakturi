@@ -6,7 +6,7 @@
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
-            font-size: 11px;
+            font-size: 10px;
             color: #333;
         }
 
@@ -25,7 +25,7 @@
 
         .heading-text {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
             color: #1a1a1a;
             width: 100%;
             text-align: left;
@@ -35,7 +35,7 @@
 
         .heading-date {
             font-weight: normal;
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
             width: 100%;
             text-align: right;
@@ -54,121 +54,96 @@
         }
 
         .form-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #888;
             text-align: center;
-            margin: 2px 0 15px 0;
+            margin: 2px 0 12px 0;
         }
 
         .section-title {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             color: #1a1a1a;
-            margin-top: 20px;
-            margin-bottom: 8px;
-            padding: 6px 10px;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            padding: 5px 8px;
             background: #f0f4f8;
             border-left: 3px solid #2c5282;
         }
 
-        .subsection-title {
-            font-weight: bold;
-            font-size: 11px;
-            color: #2c5282;
-            padding: 4px 10px;
-            margin: 0;
-        }
-
-        .accounts-table {
+        .aop-table {
             width: 100%;
+            border: 1px solid #cbd5e0;
             margin-bottom: 5px;
         }
 
-        .accounts-table th {
+        .aop-table th {
             background: #e2e8f0;
-            padding: 6px 10px;
-            font-size: 10px;
+            padding: 6px 6px;
+            font-size: 9px;
             font-weight: bold;
-            color: #4a5568;
+            color: #2d3748;
             text-align: center;
-            border-bottom: 1px solid #cbd5e0;
+            border-bottom: 2px solid #a0aec0;
         }
 
-        .accounts-table th:first-child {
-            text-align: left;
+        .aop-table th:first-child {
+            text-align: center;
         }
 
-        .account-row {
+        .aop-row {
             border-bottom: 1px solid #edf2f7;
         }
 
-        .account-name {
-            padding: 5px 10px;
-            margin: 0px;
-            font-size: 11px;
+        .aop-row:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .aop-row td {
+            padding: 4px 6px;
+            font-size: 10px;
             color: #2d3748;
         }
 
-        .account-amount {
-            padding: 5px 10px;
-            margin: 0px;
-            font-size: 11px;
-            text-align: right;
-            color: #2d3748;
+        .aop-code {
+            text-align: center;
+            color: #718096;
+            font-size: 9px;
+            width: 8%;
         }
 
-        .section-total {
-            background: #edf2f7;
-            border-top: 1px solid #cbd5e0;
-        }
-
-        .section-total-label {
-            padding: 8px 10px;
-            margin: 0px;
-            font-weight: bold;
-            font-size: 12px;
-            color: #1a202c;
-        }
-
-        .section-total-amount {
-            padding: 8px 10px;
-            margin: 0px;
-            font-weight: bold;
-            font-size: 12px;
-            text-align: right;
-            color: #2c5282;
-        }
-
-        .report-footer {
-            width: 100%;
-            margin-top: 25px;
-            padding: 10px 15px;
-            background: #ebf8ff;
-            box-sizing: border-box;
-            border-top: 2px solid #2c5282;
-        }
-
-        .report-footer-label {
-            padding: 0px;
-            margin: 0px;
+        .aop-label {
             text-align: left;
+            width: 52%;
+        }
+
+        .aop-amount {
+            text-align: right;
+            width: 20%;
+        }
+
+        .total-row {
+            background: #e2e8f0 !important;
+            border-top: 1px solid #a0aec0;
+        }
+
+        .total-row td {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 10px;
             color: #1a202c;
         }
 
-        .report-footer-value {
-            padding: 0px;
-            margin: 0px;
-            text-align: right;
-            font-weight: bold;
-            font-size: 15px;
-            color: #2c5282;
+        .indent-1 {
+            padding-left: 15px !important;
+        }
+
+        .indent-2 {
+            padding-left: 30px !important;
         }
 
         .balance-check {
-            margin-top: 15px;
-            padding: 8px 15px;
+            margin-top: 12px;
+            padding: 8px 12px;
             text-align: center;
             font-size: 10px;
             font-weight: bold;
@@ -184,18 +159,6 @@
             background: #fed7d7;
             color: #742a2a;
             border: 1px solid #fc8181;
-        }
-
-        .col-prev {
-            width: 20%;
-        }
-
-        .col-current {
-            width: 20%;
-        }
-
-        .col-name {
-            width: 60%;
         }
     </style>
 
@@ -219,143 +182,70 @@
         <p class="sub-heading-text">БИЛАНС НА СОСТОЈБА</p>
         <p class="form-label">Образец 36 — состојба на {{ $as_of_date }}</p>
 
-        <!-- АКТИВА (ASSETS) -->
+        <!-- АКТИВА -->
         <p class="section-title">АКТИВА</p>
-
-        <table class="accounts-table">
+        <table class="aop-table">
             <thead>
                 <tr>
-                    <th class="col-name" style="text-align: left;">Позиција</th>
-                    <th class="col-current">Тековна година</th>
+                    <th style="width: 8%;">АОП</th>
+                    <th style="text-align: left; width: 52%;">Позиција</th>
+                    <th style="width: 20%;">Тековна година</th>
+                    <th style="width: 20%;">Претходна година</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- А. НЕТЕКОВНИ СРЕДСТВА (NON-CURRENT ASSETS) -->
-                <tr>
-                    <td colspan="2"><p class="subsection-title">А. НЕТЕКОВНИ СРЕДСТВА</p></td>
-                </tr>
-                @if(isset($balanceSheet['balance_sheet']['assets']))
-                    @foreach($balanceSheet['balance_sheet']['assets'] as $asset)
-                    <tr class="account-row">
-                        <td>
-                            <p class="account-name">{{ $asset['name'] ?? $asset['account_name'] ?? 'N/A' }}</p>
-                        </td>
-                        <td>
-                            <p class="account-amount">
-                                {!! format_money_pdf(($asset['balance'] ?? 0) * 100, $currency) !!}
-                            </p>
-                        </td>
-                    </tr>
-                    @endforeach
-                @endif
-                <tr class="section-total">
-                    <td>
-                        <p class="section-total-label">ВКУПНО АКТИВА (А + Б)</p>
+                @foreach($aopData['aktiva'] as $row)
+                <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
+                    <td class="aop-code">{{ $row['aop'] }}</td>
+                    <td class="aop-label {{ $row['indent'] == 1 ? 'indent-1' : ($row['indent'] == 2 ? 'indent-2' : '') }}">
+                        {{ $row['label'] }}
                     </td>
-                    <td>
-                        <p class="section-total-amount">
-                            {!! format_money_pdf(($balanceSheet['balance_sheet']['totals']['assets'] ?? 0) * 100, $currency) !!}
-                        </p>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['current'] * 100, $currency) !!}
+                    </td>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['previous'] * 100, $currency) !!}
                     </td>
                 </tr>
+                @endforeach
             </tbody>
         </table>
 
-        <!-- ПАСИВА (EQUITY & LIABILITIES) -->
+        <!-- ПАСИВА -->
         <p class="section-title">ПАСИВА</p>
-
-        <table class="accounts-table">
+        <table class="aop-table">
             <thead>
                 <tr>
-                    <th class="col-name" style="text-align: left;">Позиција</th>
-                    <th class="col-current">Тековна година</th>
+                    <th style="width: 8%;">АОП</th>
+                    <th style="text-align: left; width: 52%;">Позиција</th>
+                    <th style="width: 20%;">Тековна година</th>
+                    <th style="width: 20%;">Претходна година</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- А. ГЛАВНИНА И РЕЗЕРВИ (EQUITY) -->
-                <tr>
-                    <td colspan="2"><p class="subsection-title">А. ГЛАВНИНА И РЕЗЕРВИ</p></td>
-                </tr>
-                @if(isset($balanceSheet['balance_sheet']['equity']))
-                    @foreach($balanceSheet['balance_sheet']['equity'] as $equity)
-                    <tr class="account-row">
-                        <td>
-                            <p class="account-name">{{ $equity['name'] ?? $equity['account_name'] ?? 'N/A' }}</p>
-                        </td>
-                        <td>
-                            <p class="account-amount">
-                                {!! format_money_pdf(($equity['balance'] ?? 0) * 100, $currency) !!}
-                            </p>
-                        </td>
-                    </tr>
-                    @endforeach
-                @endif
-                <tr class="section-total">
-                    <td>
-                        <p class="section-total-label">Вкупно главнина и резерви</p>
+                @foreach($aopData['pasiva'] as $row)
+                <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
+                    <td class="aop-code">{{ $row['aop'] }}</td>
+                    <td class="aop-label {{ $row['indent'] == 1 ? 'indent-1' : ($row['indent'] == 2 ? 'indent-2' : '') }}">
+                        {{ $row['label'] }}
                     </td>
-                    <td>
-                        <p class="section-total-amount">
-                            {!! format_money_pdf(($balanceSheet['balance_sheet']['totals']['equity'] ?? 0) * 100, $currency) !!}
-                        </p>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['current'] * 100, $currency) !!}
+                    </td>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['previous'] * 100, $currency) !!}
                     </td>
                 </tr>
-
-                <!-- Б. ОБВРСКИ (LIABILITIES) -->
-                <tr>
-                    <td colspan="2"><p class="subsection-title">Б. ДОЛГОРОЧНИ И КРАТКОРОЧНИ ОБВРСКИ</p></td>
-                </tr>
-                @if(isset($balanceSheet['balance_sheet']['liabilities']))
-                    @foreach($balanceSheet['balance_sheet']['liabilities'] as $liability)
-                    <tr class="account-row">
-                        <td>
-                            <p class="account-name">{{ $liability['name'] ?? $liability['account_name'] ?? 'N/A' }}</p>
-                        </td>
-                        <td>
-                            <p class="account-amount">
-                                {!! format_money_pdf(($liability['balance'] ?? 0) * 100, $currency) !!}
-                            </p>
-                        </td>
-                    </tr>
-                    @endforeach
-                @endif
-                <tr class="section-total">
-                    <td>
-                        <p class="section-total-label">Вкупно обврски</p>
-                    </td>
-                    <td>
-                        <p class="section-total-amount">
-                            {!! format_money_pdf(($balanceSheet['balance_sheet']['totals']['liabilities'] ?? 0) * 100, $currency) !!}
-                        </p>
-                    </td>
-                </tr>
+                @endforeach
             </tbody>
         </table>
 
-        <!-- ВКУПНО ПАСИВА -->
-        <table class="report-footer">
-            <tr>
-                <td>
-                    <p class="report-footer-label">ВКУПНО ПАСИВА (А + Б)</p>
-                </td>
-                <td>
-                    <p class="report-footer-value">
-                        {!! format_money_pdf((($balanceSheet['balance_sheet']['totals']['liabilities'] ?? 0) + ($balanceSheet['balance_sheet']['totals']['equity'] ?? 0)) * 100, $currency) !!}
-                    </p>
-                </td>
-            </tr>
-        </table>
-
-        @php
-            $totalAssets = $balanceSheet['balance_sheet']['totals']['assets'] ?? 0;
-            $totalPassiva = ($balanceSheet['balance_sheet']['totals']['liabilities'] ?? 0) + ($balanceSheet['balance_sheet']['totals']['equity'] ?? 0);
-            $isBalanced = abs($totalAssets - $totalPassiva) < 0.01;
-        @endphp
-        <div class="balance-check {{ $isBalanced ? 'balanced' : 'unbalanced' }}">
-            @if($isBalanced)
-                ✓ Актива = Пасива ({{ number_format($totalAssets, 2) }})
+        <!-- Balance check -->
+        <div class="balance-check {{ $aopData['is_balanced'] ? 'balanced' : 'unbalanced' }}">
+            @if($aopData['is_balanced'])
+                ✓ Актива = Пасива ({{ number_format($aopData['total_aktiva'], 2) }})
             @else
-                ✗ Актива ({{ number_format($totalAssets, 2) }}) ≠ Пасива ({{ number_format($totalPassiva, 2) }})
+                ✗ Актива ({{ number_format($aopData['total_aktiva'], 2) }}) ≠ Пасива ({{ number_format($aopData['total_pasiva'], 2) }})
             @endif
         </div>
     </div>

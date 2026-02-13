@@ -6,7 +6,7 @@
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
-            font-size: 11px;
+            font-size: 10px;
             color: #333;
         }
 
@@ -25,7 +25,7 @@
 
         .heading-text {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
             color: #1a1a1a;
             width: 100%;
             text-align: left;
@@ -35,7 +35,7 @@
 
         .heading-date-range {
             font-weight: normal;
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
             width: 100%;
             text-align: right;
@@ -54,106 +54,108 @@
         }
 
         .form-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #888;
             text-align: center;
-            margin: 2px 0 15px 0;
+            margin: 2px 0 12px 0;
         }
 
         .section-title {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             color: #1a1a1a;
-            margin-top: 20px;
-            margin-bottom: 8px;
-            padding: 6px 10px;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            padding: 5px 8px;
             background: #f0f4f8;
             border-left: 3px solid #2c5282;
         }
 
-        .accounts-table {
+        .aop-table {
             width: 100%;
+            border: 1px solid #cbd5e0;
             margin-bottom: 5px;
         }
 
-        .accounts-table th {
+        .aop-table th {
             background: #e2e8f0;
-            padding: 6px 10px;
-            font-size: 10px;
+            padding: 6px 6px;
+            font-size: 9px;
             font-weight: bold;
-            color: #4a5568;
+            color: #2d3748;
             text-align: center;
-            border-bottom: 1px solid #cbd5e0;
+            border-bottom: 2px solid #a0aec0;
         }
 
-        .accounts-table th:first-child {
-            text-align: left;
-        }
-
-        .account-row {
+        .aop-row {
             border-bottom: 1px solid #edf2f7;
         }
 
-        .account-name {
-            padding: 5px 10px;
-            margin: 0px;
-            font-size: 11px;
+        .aop-row:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .aop-row td {
+            padding: 4px 6px;
+            font-size: 10px;
             color: #2d3748;
         }
 
-        .account-amount {
-            padding: 5px 10px;
-            margin: 0px;
-            font-size: 11px;
+        .aop-code {
+            text-align: center;
+            color: #718096;
+            font-size: 9px;
+            width: 8%;
+        }
+
+        .aop-label {
+            text-align: left;
+            width: 52%;
+        }
+
+        .aop-amount {
             text-align: right;
-            color: #2d3748;
+            width: 20%;
         }
 
-        .section-total {
-            background: #edf2f7;
-            border-top: 1px solid #cbd5e0;
+        .total-row {
+            background: #e2e8f0 !important;
+            border-top: 1px solid #a0aec0;
         }
 
-        .section-total-label {
-            padding: 8px 10px;
-            margin: 0px;
+        .total-row td {
             font-weight: bold;
-            font-size: 12px;
+            font-size: 10px;
             color: #1a202c;
         }
 
-        .section-total-amount {
-            padding: 8px 10px;
-            margin: 0px;
-            font-weight: bold;
-            font-size: 12px;
-            text-align: right;
-            color: #2c5282;
+        .indent-1 {
+            padding-left: 15px !important;
         }
 
-        .report-footer {
+        .result-table {
             width: 100%;
-            margin-top: 25px;
-            padding: 10px 15px;
-            box-sizing: border-box;
+            margin-top: 20px;
             border-top: 2px solid #2c5282;
         }
 
-        .report-footer-label {
-            padding: 5px 0;
-            margin: 0px;
-            text-align: left;
-            font-weight: bold;
-            font-size: 12px;
-            color: #1a202c;
+        .result-row {
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .report-footer-value {
-            padding: 5px 0;
-            margin: 0px;
-            text-align: right;
+        .result-row td {
+            padding: 6px 6px;
+            font-size: 10px;
+        }
+
+        .result-highlight {
+            background: #ebf8ff;
+            border-top: 2px solid #2c5282;
+        }
+
+        .result-highlight td {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .profit-positive {
@@ -162,15 +164,6 @@
 
         .profit-negative {
             color: #c53030 !important;
-        }
-
-        .result-row {
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .result-highlight {
-            background: #ebf8ff;
-            border-top: 2px solid #2c5282;
         }
     </style>
 
@@ -194,151 +187,91 @@
         <p class="sub-heading-text">БИЛАНС НА УСПЕХ</p>
         <p class="form-label">Образец 37 — за период од {{ $from_date }} до {{ $to_date }}</p>
 
-        <!-- I. ПРИХОДИ ОД РАБОТЕЊЕТО (OPERATING REVENUE) -->
+        <!-- I. ПРИХОДИ ОД РАБОТЕЊЕТО -->
         <p class="section-title">I. ПРИХОДИ ОД РАБОТЕЊЕТО</p>
-        <table class="accounts-table">
+        <table class="aop-table">
             <thead>
                 <tr>
-                    <th style="text-align: left; width: 60%;">Позиција</th>
+                    <th style="width: 8%;">АОП</th>
+                    <th style="text-align: left; width: 52%;">Позиција</th>
                     <th style="width: 20%;">Тековна година</th>
+                    <th style="width: 20%;">Претходна година</th>
                 </tr>
             </thead>
             <tbody>
-                @if(isset($incomeStatement['income_statement']['revenues']))
-                    @foreach($incomeStatement['income_statement']['revenues'] as $revenue)
-                    <tr class="account-row">
-                        <td>
-                            <p class="account-name">{{ $revenue['name'] ?? $revenue['account_name'] ?? 'N/A' }}</p>
-                        </td>
-                        <td>
-                            <p class="account-amount">
-                                {!! format_money_pdf(($revenue['balance'] ?? 0) * 100, $currency) !!}
-                            </p>
-                        </td>
-                    </tr>
-                    @endforeach
-                @endif
-                <tr class="section-total">
-                    <td>
-                        <p class="section-total-label">ВКУПНИ ПРИХОДИ (AOP 246)</p>
+                @foreach($aopData['prihodi'] as $row)
+                <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
+                    <td class="aop-code">{{ $row['aop'] }}</td>
+                    <td class="aop-label {{ ($row['indent'] ?? 0) == 1 ? 'indent-1' : '' }}">
+                        {{ $row['label'] }}
                     </td>
-                    <td>
-                        <p class="section-total-amount">
-                            {!! format_money_pdf(($incomeStatement['income_statement']['totals']['revenue'] ?? 0) * 100, $currency) !!}
-                        </p>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['current'] * 100, $currency) !!}
+                    </td>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['previous'] * 100, $currency) !!}
                     </td>
                 </tr>
+                @endforeach
             </tbody>
         </table>
 
-        <!-- II. РАСХОДИ ОД РАБОТЕЊЕТО (OPERATING EXPENSES) -->
+        <!-- II. РАСХОДИ ОД РАБОТЕЊЕТО -->
         <p class="section-title">II. РАСХОДИ ОД РАБОТЕЊЕТО</p>
-        <table class="accounts-table">
+        <table class="aop-table">
             <thead>
                 <tr>
-                    <th style="text-align: left; width: 60%;">Позиција</th>
+                    <th style="width: 8%;">АОП</th>
+                    <th style="text-align: left; width: 52%;">Позиција</th>
                     <th style="width: 20%;">Тековна година</th>
+                    <th style="width: 20%;">Претходна година</th>
                 </tr>
             </thead>
             <tbody>
-                @if(isset($incomeStatement['income_statement']['expenses']))
-                    @foreach($incomeStatement['income_statement']['expenses'] as $expense)
-                    <tr class="account-row">
-                        <td>
-                            <p class="account-name">{{ $expense['name'] ?? $expense['account_name'] ?? 'N/A' }}</p>
-                        </td>
-                        <td>
-                            <p class="account-amount">
-                                {!! format_money_pdf(($expense['balance'] ?? 0) * 100, $currency) !!}
-                            </p>
-                        </td>
-                    </tr>
-                    @endforeach
-                @endif
-                <tr class="section-total">
-                    <td>
-                        <p class="section-total-label">ВКУПНИ РАСХОДИ (AOP 247)</p>
+                @foreach($aopData['rashodi'] as $row)
+                <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
+                    <td class="aop-code">{{ $row['aop'] }}</td>
+                    <td class="aop-label {{ ($row['indent'] ?? 0) == 1 ? 'indent-1' : '' }}">
+                        {{ $row['label'] }}
                     </td>
-                    <td>
-                        <p class="section-total-amount">
-                            {!! format_money_pdf(($incomeStatement['income_statement']['totals']['expenses'] ?? 0) * 100, $currency) !!}
-                        </p>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['current'] * 100, $currency) !!}
+                    </td>
+                    <td class="aop-amount">
+                        {!! format_money_pdf($row['previous'] * 100, $currency) !!}
                     </td>
                 </tr>
+                @endforeach
             </tbody>
         </table>
 
-        <!-- РЕЗУЛТАТ (RESULT) -->
-        @php
-            $revenue = $incomeStatement['income_statement']['totals']['revenue'] ?? 0;
-            $expenses = $incomeStatement['income_statement']['totals']['expenses'] ?? 0;
-            $operatingResult = $revenue - $expenses;
-            $isProfit = $operatingResult >= 0;
-            $incomeTax = $isProfit ? $operatingResult * 0.10 : 0;
-            $netResult = $operatingResult - $incomeTax;
-        @endphp
-
-        <table class="report-footer">
-            <tr class="result-row">
-                <td style="width: 60%;">
-                    <p class="report-footer-label">
-                        @if($isProfit)
-                            ДОБИВКА ОД РАБОТЕЊЕТО (AOP 244)
-                        @else
-                            ЗАГУБА ОД РАБОТЕЊЕТО (AOP 245)
-                        @endif
-                    </p>
+        <!-- III. РЕЗУЛТАТ -->
+        <table class="result-table">
+            @foreach($aopData['rezultat'] as $row)
+            @php
+                $isNetResult = in_array($row['aop'], ['255', '256']);
+                $isLoss = in_array($row['aop'], ['245', '249', '256']);
+                $valueClass = $isLoss ? 'profit-negative' : 'profit-positive';
+            @endphp
+            <tr class="{{ $isNetResult ? 'result-highlight' : 'result-row' }}">
+                <td class="aop-code" style="width: 8%;">{{ $row['aop'] }}</td>
+                <td class="aop-label" style="width: 52%;">{{ $row['label'] }}</td>
+                <td class="aop-amount {{ $valueClass }}" style="width: 20%;">
+                    @if($row['current'] > 0)
+                        {!! format_money_pdf($row['current'] * 100, $currency) !!}
+                    @else
+                        -
+                    @endif
                 </td>
-                <td style="width: 20%;">
-                    <p class="report-footer-value {{ $isProfit ? 'profit-positive' : 'profit-negative' }}">
-                        {!! format_money_pdf(abs($operatingResult) * 100, $currency) !!}
-                    </p>
-                </td>
-            </tr>
-            <tr class="result-row">
-                <td>
-                    <p class="report-footer-label">
-                        @if($isProfit)
-                            ДОБИВКА ПРЕД ОДАНОЧУВАЊЕ (AOP 248)
-                        @else
-                            ЗАГУБА ПРЕД ОДАНОЧУВАЊЕ (AOP 249)
-                        @endif
-                    </p>
-                </td>
-                <td>
-                    <p class="report-footer-value {{ $isProfit ? 'profit-positive' : 'profit-negative' }}">
-                        {!! format_money_pdf(abs($operatingResult) * 100, $currency) !!}
-                    </p>
+                <td class="aop-amount {{ $valueClass }}" style="width: 20%;">
+                    @if($row['previous'] > 0)
+                        {!! format_money_pdf($row['previous'] * 100, $currency) !!}
+                    @else
+                        -
+                    @endif
                 </td>
             </tr>
-            @if($isProfit && $incomeTax > 0)
-            <tr class="result-row">
-                <td>
-                    <p class="report-footer-label">ДАНОК НА ДОБИВКА 10% (AOP 250)</p>
-                </td>
-                <td>
-                    <p class="report-footer-value" style="color: #c53030;">
-                        {!! format_money_pdf($incomeTax * 100, $currency) !!}
-                    </p>
-                </td>
-            </tr>
-            @endif
-            <tr class="result-highlight">
-                <td>
-                    <p class="report-footer-label" style="font-size: 14px;">
-                        @if($netResult >= 0)
-                            НЕТО ДОБИВКА (AOP 255)
-                        @else
-                            НЕТО ЗАГУБА (AOP 256)
-                        @endif
-                    </p>
-                </td>
-                <td>
-                    <p class="report-footer-value {{ $netResult >= 0 ? 'profit-positive' : 'profit-negative' }}" style="font-size: 16px;">
-                        {!! format_money_pdf(abs($netResult) * 100, $currency) !!}
-                    </p>
-                </td>
-            </tr>
+            @endforeach
         </table>
     </div>
 </body>

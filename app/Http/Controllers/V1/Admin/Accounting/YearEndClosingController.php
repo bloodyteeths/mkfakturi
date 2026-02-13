@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Currency;
+use App\Services\AopReportService;
 use App\Services\YearEndClosingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,9 +24,12 @@ class YearEndClosingController extends Controller
 {
     protected YearEndClosingService $service;
 
-    public function __construct(YearEndClosingService $service)
+    protected AopReportService $aopService;
+
+    public function __construct(YearEndClosingService $service, AopReportService $aopService)
     {
         $this->service = $service;
+        $this->aopService = $aopService;
     }
 
     /**
@@ -213,20 +217,20 @@ class YearEndClosingController extends Controller
         ]);
 
         return match ($type) {
-            'balance-sheet' => $this->downloadBalanceSheetPdf($summary, $company, $year, $dateFormat),
-            'income-statement' => $this->downloadIncomeStatementPdf($summary, $company, $year, $dateFormat),
+            'balance-sheet' => $this->downloadBalanceSheetPdf($company, $year, $dateFormat),
+            'income-statement' => $this->downloadIncomeStatementPdf($company, $year, $dateFormat),
             'trial-balance' => $this->downloadTrialBalancePdf($summary, $company, $year, $dateFormat),
             default => $this->downloadGenericCsv($summary, $type, $year),
         };
     }
 
-    private function downloadBalanceSheetPdf(array $summary, Company $company, int $year, string $dateFormat): Response
+    private function downloadBalanceSheetPdf(Company $company, int $year, string $dateFormat): Response
     {
         $asOfDate = \Carbon\Carbon::create($year, 12, 31)->translatedFormat($dateFormat);
+        $aopData = $this->aopService->getBalanceSheetAop($company, $year);
 
-        // Blade template expects $balanceSheet['balance_sheet']['assets'] (double-nested)
         view()->share([
-            'balanceSheet' => ['balance_sheet' => $summary['balance_sheet'] ?? []],
+            'aopData' => $aopData,
             'as_of_date' => $asOfDate,
         ]);
 
@@ -235,14 +239,14 @@ class YearEndClosingController extends Controller
         return $pdf->download("balance_sheet_{$year}.pdf");
     }
 
-    private function downloadIncomeStatementPdf(array $summary, Company $company, int $year, string $dateFormat): Response
+    private function downloadIncomeStatementPdf(Company $company, int $year, string $dateFormat): Response
     {
         $fromDate = \Carbon\Carbon::create($year, 1, 1)->translatedFormat($dateFormat);
         $toDate = \Carbon\Carbon::create($year, 12, 31)->translatedFormat($dateFormat);
+        $aopData = $this->aopService->getIncomeStatementAop($company, $year);
 
-        // Blade template expects $incomeStatement['income_statement']['revenues'] (double-nested)
         view()->share([
-            'incomeStatement' => ['income_statement' => $summary['income_statement'] ?? []],
+            'aopData' => $aopData,
             'from_date' => $fromDate,
             'to_date' => $toDate,
         ]);
