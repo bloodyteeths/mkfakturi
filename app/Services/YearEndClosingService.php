@@ -607,8 +607,8 @@ class YearEndClosingService
                 ->where('status', TaxReportPeriod::STATUS_OPEN)
                 ->update([
                     'status' => TaxReportPeriod::STATUS_CLOSED,
-                    'closed_at' => now(),
-                    'closed_by_id' => $userId,
+                    'locked_at' => now(),
+                    'locked_by' => $userId,
                 ]);
 
             // Mark fiscal year as closed
@@ -664,7 +664,7 @@ class YearEndClosingService
                 ->update([
                     'status' => TaxReportPeriod::STATUS_OPEN,
                     'reopened_at' => now(),
-                    'reopened_by_id' => $userId,
+                    'reopened_by' => $userId,
                     'reopen_reason' => 'Поништено годишно затворање',
                 ]);
 
