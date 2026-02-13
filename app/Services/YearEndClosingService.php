@@ -284,6 +284,60 @@ class YearEndClosingService
     }
 
     /**
+     * Get existing closing transaction IDs from fiscal year notes.
+     */
+    private function getExistingClosingIds(Company $company, int $year): array
+    {
+        $fiscalYear = FiscalYear::where('company_id', $company->id)
+            ->where('year', $year)
+            ->first();
+
+        if (! $fiscalYear || ! $fiscalYear->notes) {
+            return [];
+        }
+
+        $notes = json_decode($fiscalYear->notes, true);
+
+        return $notes['closing_transaction_ids'] ?? [];
+    }
+
+    /**
+     * Temporarily soft-delete existing closing entries, run callback, then restore.
+     * Used by preview, summary, and report endpoints to show pre-closing state.
+     * Finds both tracked IDs (in notes) and orphaned entries (by narration pattern).
+     */
+    public function withPreClosingState(Company $company, int $year, callable $callback): mixed
+    {
+        $trackedIds = $this->getExistingClosingIds($company, $year);
+
+        // Also find orphaned closing entries not tracked in notes
+        $orphanedIds = DB::table('ifrs_transactions')
+            ->where('narration', 'LIKE', "[Year-End {$year}]%")
+            ->whereNull('deleted_at')
+            ->pluck('id')
+            ->toArray();
+
+        $allIds = array_values(array_unique(array_merge($trackedIds, $orphanedIds)));
+
+        if (! empty($allIds)) {
+            DB::table('ifrs_transactions')
+                ->whereIn('id', $allIds)
+                ->whereNull('deleted_at')
+                ->update(['deleted_at' => now()]);
+        }
+
+        try {
+            return $callback();
+        } finally {
+            if (! empty($allIds)) {
+                DB::table('ifrs_transactions')
+                    ->whereIn('id', $allIds)
+                    ->update(['deleted_at' => null]);
+            }
+        }
+    }
+
+    /**
      * Generate closing entries preview (does not commit).
      *
      * MK Chart of Accounts closing flow:
@@ -295,7 +349,10 @@ class YearEndClosingService
      */
     public function previewClosingEntries(Company $company, int $year): array
     {
-        $summary = $this->getFinancialSummary($company, $year);
+        // Temporarily hide existing closing entries so preview sees pre-closing state
+        $summary = $this->withPreClosingState($company, $year, function () use ($company, $year) {
+            return $this->getFinancialSummary($company, $year);
+        });
         $netProfit = $summary['summary']['net_profit_before_tax'];
         $incomeTax = $summary['summary']['income_tax'];
         $netAfterTax = $summary['summary']['net_profit_after_tax'];
@@ -408,6 +465,9 @@ class YearEndClosingService
 
     /**
      * Commit closing entries to the ledger.
+     *
+     * Safe for re-runs: removes any existing closing entries from previous
+     * partial runs before generating fresh ones.
      */
     public function generateClosingEntries(Company $company, int $year): array
     {
@@ -415,6 +475,35 @@ class YearEndClosingService
         $fiscalYear = FiscalYear::getOrCreate($company->id, $year);
         if ($fiscalYear->isClosed()) {
             throw new \Exception("Фискалната година {$year} е веќе затворена.");
+        }
+
+        // Remove existing closing entries from previous partial runs (prevents stacking).
+        // Find both tracked IDs (in notes) and orphaned entries (by narration pattern).
+        $existingNotes = json_decode($fiscalYear->notes ?? '{}', true);
+        $trackedIds = $existingNotes['closing_transaction_ids'] ?? [];
+
+        // Also find orphaned closing entries not tracked in notes (from overwritten runs)
+        $orphanedIds = DB::table('ifrs_transactions')
+            ->where('narration', 'LIKE', "[Year-End {$year}]%")
+            ->pluck('id')
+            ->toArray();
+
+        $allOldIds = array_values(array_unique(array_merge($trackedIds, $orphanedIds)));
+
+        if (! empty($allOldIds)) {
+            Log::info('Removing previous closing entries before re-generation', [
+                'company_id' => $company->id,
+                'year' => $year,
+                'tracked_count' => count($trackedIds),
+                'orphaned_count' => count($orphanedIds),
+                'total_removed' => count($allOldIds),
+            ]);
+
+            // Hard-delete old entries (bypasses soft-delete) so IFRS sees clean pre-closing state
+            DB::table('ifrs_line_items')->whereIn('transaction_id', $allOldIds)->delete();
+            DB::table('ifrs_transactions')->whereIn('id', $allOldIds)->delete();
+
+            $fiscalYear->update(['notes' => null]);
         }
 
         // Mark as closing

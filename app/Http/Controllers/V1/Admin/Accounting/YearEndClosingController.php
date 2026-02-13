@@ -53,6 +53,7 @@ class YearEndClosingController extends Controller
      * GET /api/v1/year-end/{year}/summary
      *
      * Step 2: Get financial statement summaries for review.
+     * Uses pre-closing state to exclude any existing closing entries.
      */
     public function summary(Request $request, int $year): JsonResponse
     {
@@ -61,7 +62,9 @@ class YearEndClosingController extends Controller
             return response()->json(['error' => 'Company not found'], 404);
         }
 
-        $result = $this->service->getFinancialSummary($company, $year);
+        $result = $this->service->withPreClosingState($company, $year, function () use ($company, $year) {
+            return $this->service->getFinancialSummary($company, $year);
+        });
 
         return response()->json($result);
     }
@@ -114,40 +117,16 @@ class YearEndClosingController extends Controller
 
         // Income-related reports need pre-closing P&L data.
         // After year-end closing, P&L accounts are zeroed by closing entries.
-        // We temporarily soft-delete closing entries so IFRS queries see original balances.
-        // Balance sheet uses POST-closing state (equity includes transferred P&L) — no removal.
+        // Balance sheet uses POST-closing state (equity includes transferred P&L).
         $needsPreClosing = in_array($type, ['income-statement', 'tax-summary', 'notes']);
-        $closingIds = [];
 
         if ($needsPreClosing) {
-            $fiscalYear = \App\Models\FiscalYear::where('company_id', $company->id)
-                ->where('year', $year)
-                ->first();
-
-            if ($fiscalYear && $fiscalYear->notes) {
-                $notes = json_decode($fiscalYear->notes, true);
-                $closingIds = $notes['closing_transaction_ids'] ?? [];
-            }
+            return $this->service->withPreClosingState($company, $year, function () use ($company, $year, $type, $format) {
+                return $this->generateReport($company, $year, $type, $format);
+            });
         }
 
-        // Temporarily soft-delete closing entries for income-related reports
-        if (! empty($closingIds)) {
-            \Illuminate\Support\Facades\DB::table('ifrs_transactions')
-                ->whereIn('id', $closingIds)
-                ->whereNull('deleted_at')
-                ->update(['deleted_at' => now()]);
-        }
-
-        try {
-            return $this->generateReport($company, $year, $type, $format);
-        } finally {
-            // Always restore closing entries
-            if (! empty($closingIds)) {
-                \Illuminate\Support\Facades\DB::table('ifrs_transactions')
-                    ->whereIn('id', $closingIds)
-                    ->update(['deleted_at' => null]);
-            }
-        }
+        return $this->generateReport($company, $year, $type, $format);
     }
 
     /**
