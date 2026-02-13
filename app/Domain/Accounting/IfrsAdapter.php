@@ -2305,7 +2305,7 @@ class IfrsAdapter
 
         $this->setUserEntityContext($entity);
 
-        // Find or create debit account
+        // Find or create debit and credit accounts
         $debitAccount = $this->findAccountByCode($entity->id, $entry['debit_code'], $entry['debit_name']);
         $creditAccount = $this->findAccountByCode($entity->id, $entry['credit_code'], $entry['credit_name']);
 
@@ -2318,23 +2318,31 @@ class IfrsAdapter
             'entity_id' => $entity->id,
         ]);
 
-        LineItem::create([
+        // Use DB::table to bypass Eloquent global scopes (proven pattern from invoice posting)
+        DB::table('ifrs_line_items')->insert([
             'transaction_id' => $transaction->id,
             'account_id' => $debitAccount->id,
             'amount' => $entry['amount'],
             'quantity' => 1,
             'credited' => false,
             'entity_id' => $entity->id,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        LineItem::create([
+        DB::table('ifrs_line_items')->insert([
             'transaction_id' => $transaction->id,
             'account_id' => $creditAccount->id,
             'amount' => $entry['amount'],
             'quantity' => 1,
             'credited' => true,
             'entity_id' => $entity->id,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
+
+        // Reload line items so post() sees them
+        $transaction->load('lineItems');
 
         $transaction->post();
 
