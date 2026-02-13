@@ -221,8 +221,17 @@ async function exportJournal(format) {
 
     const ext = format === 'pantheon' ? 'xml' : 'csv'
     triggerBlobDownload(response.data, `journal-${format}-${store.year}.${ext}`, response.headers['content-type'])
-  } catch {
-    notificationStore.showNotification({ type: 'error', message: t('partner.accounting.year_end.export_error') })
+  } catch (error) {
+    let message = t('partner.accounting.year_end.export_error')
+    // Try to read error from blob response
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        if (json.error) message = `${message}: ${json.error}`
+      } catch { /* use default message */ }
+    }
+    notificationStore.showNotification({ type: 'error', message })
   } finally {
     isDownloading.value = null
   }

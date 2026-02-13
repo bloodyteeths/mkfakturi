@@ -154,9 +154,35 @@ class YearEndClosingController extends Controller
         if ($type === 'tax-summary') {
             $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
             $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
-            $profitBeforeTax = $summary['summary']['net_profit_before_tax'] ?? 0;
-            $incomeTax = $summary['summary']['income_tax'] ?? 0;
-            $netProfit = $summary['summary']['net_profit_after_tax'] ?? 0;
+
+            // If summary totals are zero, use AOP service as fallback (more reliable)
+            if ($totalRevenue == 0 && $totalExpenses == 0) {
+                try {
+                    $aopIs = $this->aopService->getIncomeStatementAop($company, $year);
+                    $aopRevenue = 0;
+                    $aopExpenses = 0;
+                    foreach ($aopIs['prihodi'] ?? [] as $row) {
+                        if ($row['aop'] === '246') {
+                            $aopRevenue = $row['current'];
+                        }
+                    }
+                    foreach ($aopIs['rashodi'] ?? [] as $row) {
+                        if ($row['aop'] === '293') {
+                            $aopExpenses = $row['current'];
+                        }
+                    }
+                    if ($aopRevenue > 0 || $aopExpenses > 0) {
+                        $totalRevenue = $aopRevenue;
+                        $totalExpenses = $aopExpenses;
+                    }
+                } catch (\Exception $e) {
+                    // AOP fallback failed, keep original values
+                }
+            }
+
+            $profitBeforeTax = $totalRevenue - $totalExpenses;
+            $incomeTax = $profitBeforeTax > 0 ? round($profitBeforeTax * 0.10, 2) : 0;
+            $netProfit = $profitBeforeTax - $incomeTax;
 
             return response()->json([
                 'year' => $year,
@@ -220,7 +246,7 @@ class YearEndClosingController extends Controller
             'balance-sheet' => $this->downloadBalanceSheetPdf($company, $year, $dateFormat),
             'income-statement' => $this->downloadIncomeStatementPdf($company, $year, $dateFormat),
             'trial-balance' => $this->downloadTrialBalancePdf($summary, $company, $year, $dateFormat),
-            default => $this->downloadGenericCsv($summary, $type, $year),
+            default => $this->downloadGenericCsv($summary, $type, $year, $company),
         };
     }
 
@@ -271,13 +297,33 @@ class YearEndClosingController extends Controller
         return $pdf->download("trial_balance_{$year}.pdf");
     }
 
-    private function downloadGenericCsv(array $summary, string $type, int $year): Response
+    private function downloadGenericCsv(array $summary, string $type, int $year, Company $company): Response
     {
         $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
         $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
-        $profitBeforeTax = $summary['summary']['net_profit_before_tax'] ?? 0;
-        $incomeTax = $summary['summary']['income_tax'] ?? 0;
-        $netProfit = $summary['summary']['net_profit_after_tax'] ?? 0;
+
+        // AOP fallback if summary totals are zero (same as tax-summary endpoint)
+        if ($totalRevenue == 0 && $totalExpenses == 0) {
+            try {
+                $aopIs = $this->aopService->getIncomeStatementAop($company, $year);
+                foreach ($aopIs['prihodi'] ?? [] as $row) {
+                    if ($row['aop'] === '246') {
+                        $totalRevenue = $row['current'];
+                    }
+                }
+                foreach ($aopIs['rashodi'] ?? [] as $row) {
+                    if ($row['aop'] === '293') {
+                        $totalExpenses = $row['current'];
+                    }
+                }
+            } catch (\Exception $e) {
+                // Keep original values
+            }
+        }
+
+        $profitBeforeTax = $totalRevenue - $totalExpenses;
+        $incomeTax = $profitBeforeTax > 0 ? round($profitBeforeTax * 0.10, 2) : 0;
+        $netProfit = $profitBeforeTax - $incomeTax;
 
         // ДБ-ВП format (Даночен биланс на вкупен приход)
         $csvContent = "\xEF\xBB\xBF"; // UTF-8 BOM for Macedonian characters
