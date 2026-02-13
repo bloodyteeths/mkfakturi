@@ -176,7 +176,9 @@
           <BaseDropdown
             v-if="
               invoiceStore.selectedInvoices.length &&
-              userStore.hasAbilities(abilities.DELETE_INVOICE)
+              (userStore.hasAbilities(abilities.DELETE_INVOICE) ||
+               userStore.hasAbilities(abilities.SEND_INVOICE) ||
+               userStore.hasAbilities(abilities.CREATE_INVOICE))
             "
             class="absolute float-right"
           >
@@ -196,7 +198,34 @@
               </span>
             </template>
 
-            <BaseDropdownItem @click="removeMultipleInvoices">
+            <BaseDropdownItem
+              v-if="userStore.hasAbilities(abilities.SEND_INVOICE)"
+              @click="bulkMarkAsSent"
+            >
+              <BaseIcon name="CheckCircleIcon" class="mr-3 text-gray-600" />
+              {{ $t('invoices.mark_as_sent') }}
+            </BaseDropdownItem>
+
+            <BaseDropdownItem
+              v-if="userStore.hasAbilities(abilities.SEND_INVOICE)"
+              @click="bulkSendInvoice"
+            >
+              <BaseIcon name="PaperAirplaneIcon" class="mr-3 text-gray-600" />
+              {{ $t('invoices.send_invoice') }}
+            </BaseDropdownItem>
+
+            <BaseDropdownItem
+              v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
+              @click="bulkCloneInvoices"
+            >
+              <BaseIcon name="DocumentDuplicateIcon" class="mr-3 text-gray-600" />
+              {{ $t('invoices.clone_invoice') }}
+            </BaseDropdownItem>
+
+            <BaseDropdownItem
+              v-if="userStore.hasAbilities(abilities.DELETE_INVOICE)"
+              @click="removeMultipleInvoices"
+            >
               <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
               {{ $t('general.delete') }}
             </BaseDropdownItem>
@@ -475,6 +504,10 @@ function refreshTable() {
   table.value && table.value.refresh()
 }
 
+function refreshTablePreservePage() {
+  table.value && table.value.refresh(true)
+}
+
 async function fetchData({ page, filter, sort }) {
   let data = {
     customer_id: filters.customer_id,
@@ -573,12 +606,78 @@ async function removeMultipleInvoices() {
       if (res) {
         await invoiceStore.deleteMultipleInvoices().then((res) => {
           if (res.data.success) {
-            refreshTable()
+            refreshTablePreservePage()
 
             invoiceStore.$patch((state) => {
               state.selectedInvoices = []
               state.selectAllField = false
             })
+          }
+        })
+      }
+    })
+}
+
+async function bulkMarkAsSent() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('invoices.invoice_mark_as_sent'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await invoiceStore.bulkMarkAsSent().then((res) => {
+          if (res.data.success) {
+            refreshTablePreservePage()
+          }
+        })
+      }
+    })
+}
+
+async function bulkSendInvoice() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('invoices.confirm_send'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await invoiceStore.bulkSendInvoices().then((res) => {
+          if (res.data.success) {
+            refreshTablePreservePage()
+          }
+        })
+      }
+    })
+}
+
+async function bulkCloneInvoices() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('invoices.confirm_clone'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await invoiceStore.bulkCloneInvoices().then((res) => {
+          if (res.data.success) {
+            refreshTablePreservePage()
           }
         })
       }

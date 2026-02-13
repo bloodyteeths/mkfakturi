@@ -215,7 +215,7 @@ async function removeInvoice(id) {
         invoiceStore.deleteInvoice({ ids: [id] }).then((res) => {
           if (res.data.success) {
             router.push('/admin/invoices')
-            props.table && props.table.refresh()
+            props.table && props.table.refresh(true)
 
             invoiceStore.$patch((state) => {
               state.selectedInvoices = []
@@ -265,7 +265,7 @@ async function onMarkAsSent(id) {
       }
       if (response) {
         invoiceStore.markAsSent(data).then((response) => {
-          props.table && props.table.refresh()
+          props.table && props.table.refresh(true)
         })
       }
     })

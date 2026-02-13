@@ -339,6 +339,8 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/invoices/{invoice}/payment/cpay', [InvoicesController::class, 'initiateCpayPayment']);
 
+            Route::post('/invoices/bulk-action', [InvoicesController::class, 'bulkAction']);
+
             Route::post('/invoices/delete', [InvoicesController::class, 'delete'])->middleware('throttle:strict');
 
             Route::get('/invoices/templates', InvoiceTemplatesController::class);

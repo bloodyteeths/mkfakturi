@@ -314,6 +314,75 @@ export const useInvoiceStore = (useWindow = false) => {
         })
       },
 
+      bulkMarkAsSent() {
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/invoices/bulk-action', {
+              ids: this.selectedInvoices,
+              action: 'mark_as_sent',
+            })
+            .then((response) => {
+              this.selectedInvoices = []
+
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('invoices.mark_as_sent_successfully'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      bulkSendInvoices() {
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/invoices/bulk-action', {
+              ids: this.selectedInvoices,
+              action: 'send',
+            })
+            .then((response) => {
+              this.selectedInvoices = []
+
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('invoices.invoice_sent_successfully'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      bulkCloneInvoices() {
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/invoices/bulk-action', {
+              ids: this.selectedInvoices,
+              action: 'clone',
+            })
+            .then((response) => {
+              this.selectedInvoices = []
+
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('invoices.cloned_successfully'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       cloneInvoice(data) {
         return new Promise((resolve, reject) => {
           axios

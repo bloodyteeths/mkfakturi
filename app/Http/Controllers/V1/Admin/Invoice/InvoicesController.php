@@ -74,7 +74,8 @@ class InvoicesController extends Controller
                 'search',
                 'customer_id',
                 'status',
-                'date_range',
+                'from_date',
+                'to_date',
                 'orderByField',
                 'orderBy',
             ]))
@@ -174,6 +175,55 @@ class InvoicesController extends Controller
         return response()->json([
             'success' => true,
         ]);
+    }
+
+    /**
+     * Perform a bulk action on multiple invoices.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkAction(Request $request)
+    {
+        $this->authorize('send invoice');
+
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+            'action' => 'required|in:mark_as_sent,send,clone',
+        ]);
+
+        $invoices = Invoice::whereIn('id', $validated['ids'])->whereCompany()->get();
+        $processed = 0;
+
+        switch ($validated['action']) {
+            case 'mark_as_sent':
+                foreach ($invoices as $invoice) {
+                    if ($invoice->status === Invoice::STATUS_DRAFT) {
+                        $invoice->status = Invoice::STATUS_SENT;
+                        $invoice->sent = true;
+                        $invoice->save();
+                        $processed++;
+                    }
+                }
+                break;
+            case 'send':
+                foreach ($invoices as $invoice) {
+                    if ($invoice->status === Invoice::STATUS_DRAFT) {
+                        $invoice->send($request->all());
+                        $processed++;
+                    }
+                }
+                break;
+            case 'clone':
+                $this->authorize('create', Invoice::class);
+                foreach ($invoices as $invoice) {
+                    app(CloneInvoiceController::class)->__invoke($request, $invoice);
+                    $processed++;
+                }
+                break;
+        }
+
+        return response()->json(['success' => true, 'processed' => $processed]);
     }
 
     /**
