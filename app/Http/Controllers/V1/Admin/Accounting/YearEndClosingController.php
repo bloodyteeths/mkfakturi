@@ -115,10 +115,11 @@ class YearEndClosingController extends Controller
 
         $format = $request->input('format', 'json');
 
-        // Income-related reports need pre-closing P&L data.
+        // Most reports need pre-closing P&L data.
         // After year-end closing, P&L accounts are zeroed by closing entries.
         // Balance sheet uses POST-closing state (equity includes transferred P&L).
-        $needsPreClosing = in_array($type, ['income-statement', 'tax-summary', 'notes']);
+        // Trial balance (бруто биланс) uses pre-closing to show the year's full activity.
+        $needsPreClosing = in_array($type, ['income-statement', 'tax-summary', 'notes', 'trial-balance']);
 
         if ($needsPreClosing) {
             return $this->service->withPreClosingState($company, $year, function () use ($company, $year, $type, $format) {
@@ -137,13 +138,20 @@ class YearEndClosingController extends Controller
         $summary = $this->service->getFinancialSummary($company, $year);
         $summary = $this->translateAccountNames($summary);
 
-        if ($type === 'tax-summary') {
-            $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
-            $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
+        // For tax-summary and notes/CSV, use AOP service totals (AOP 246 / 293)
+        // to avoid the double-counting bug in getFinancialSummary().total_expenses.
+        if ($type === 'tax-summary' || $type === 'notes') {
+            $aopData = $this->aopService->getIncomeStatementAop($company, $year);
+            $totalRevenue = $this->findAopRowValue($aopData['prihodi'], '246');
+            $totalExpenses = $this->findAopRowValue($aopData['rashodi'], '293');
 
             $profitBeforeTax = $totalRevenue - $totalExpenses;
             $incomeTax = $profitBeforeTax > 0 ? round($profitBeforeTax * 0.10, 2) : 0;
             $netProfit = $profitBeforeTax - $incomeTax;
+
+            if ($type === 'notes') {
+                return $this->downloadDbVpCsv($totalRevenue, $totalExpenses, $profitBeforeTax, $incomeTax, $netProfit, $year);
+            }
 
             return response()->json([
                 'year' => $year,
@@ -207,7 +215,7 @@ class YearEndClosingController extends Controller
             'balance-sheet' => $this->downloadBalanceSheetPdf($company, $year, $dateFormat),
             'income-statement' => $this->downloadIncomeStatementPdf($company, $year, $dateFormat),
             'trial-balance' => $this->downloadTrialBalancePdf($summary, $company, $year, $dateFormat),
-            default => $this->downloadGenericCsv($summary, $type, $year, $company),
+            default => response()->json(['error' => "Unknown report type: {$type}"], 400),
         };
     }
 
@@ -258,17 +266,11 @@ class YearEndClosingController extends Controller
         return $pdf->download("trial_balance_{$year}.pdf");
     }
 
-    private function downloadGenericCsv(array $summary, string $type, int $year, Company $company): Response
-    {
-        // Closing entries are already soft-deleted by reports() for income-related types,
-        // so getFinancialSummary returns pre-closing data with correct revenue/expenses.
-        $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
-        $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
-
-        $profitBeforeTax = $totalRevenue - $totalExpenses;
-        $incomeTax = $profitBeforeTax > 0 ? round($profitBeforeTax * 0.10, 2) : 0;
-        $netProfit = $profitBeforeTax - $incomeTax;
-
+    private function downloadDbVpCsv(
+        float $totalRevenue, float $totalExpenses,
+        float $profitBeforeTax, float $incomeTax, float $netProfit,
+        int $year
+    ): Response {
         // ДБ-ВП format (Даночен биланс на вкупен приход)
         $csvContent = "\xEF\xBB\xBF"; // UTF-8 BOM for Macedonian characters
         $csvContent .= "Образец,ДБ-ВП\n";
@@ -276,19 +278,29 @@ class YearEndClosingController extends Controller
         $csvContent .= "Портал,etax.ujp.gov.mk\n\n";
         $csvContent .= "Ред.бр.,Позиција,Износ\n";
         $csvContent .= "1,Вкупни приходи (AOP 246),{$totalRevenue}\n";
-        $csvContent .= "2,Вкупни расходи (AOP 247),{$totalExpenses}\n";
+        $csvContent .= "2,Вкупни расходи (AOP 293),{$totalExpenses}\n";
         $csvContent .= "3,Добивка/загуба пред оданочување (AOP 248/249),{$profitBeforeTax}\n";
         $csvContent .= "4,Данок на добивка 10% (AOP 250),{$incomeTax}\n";
         $csvContent .= "5,Нето добивка/загуба (AOP 255/256),{$netProfit}\n";
 
-        $filename = $type === 'notes'
-            ? "beleshki_{$year}.csv"
-            : "db_vp_{$year}.csv";
-
         return response($csvContent, 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Disposition' => "attachment; filename=\"beleshki_{$year}.csv\"",
         ]);
+    }
+
+    /**
+     * Find the current value for an AOP code in a rows array.
+     */
+    private function findAopRowValue(array $rows, string $aop): float
+    {
+        foreach ($rows as $row) {
+            if (($row['aop'] ?? '') === $aop) {
+                return $row['current'] ?? 0;
+            }
+        }
+
+        return 0;
     }
 
     /**
