@@ -11,15 +11,15 @@
     <div class="border border-gray-200 rounded-lg p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <BaseInputGroup :label="t('partner.accounting.year_end.debit_account')">
-          <BaseInput
-            v-model="newEntry.debitAccount"
-            :placeholder="t('partner.accounting.year_end.debit_placeholder')"
+          <AccountDropdown
+            v-model="newEntry.debitAccountId"
+            :accounts="store.accounts"
           />
         </BaseInputGroup>
         <BaseInputGroup :label="t('partner.accounting.year_end.credit_account')">
-          <BaseInput
-            v-model="newEntry.creditAccount"
-            :placeholder="t('partner.accounting.year_end.credit_placeholder')"
+          <AccountDropdown
+            v-model="newEntry.creditAccountId"
+            :accounts="store.accounts"
           />
         </BaseInputGroup>
         <BaseInputGroup :label="t('partner.accounting.year_end.amount_mkd')">
@@ -63,8 +63,8 @@
           <tbody class="divide-y divide-gray-200">
             <tr v-for="(entry, i) in entries" :key="i">
               <td class="px-4 py-2 text-sm text-gray-900">{{ entry.description }}</td>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ entry.debitAccount }}</td>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ entry.creditAccount }}</td>
+              <td class="px-4 py-2 text-sm text-gray-600">{{ entry.debitDisplay }}</td>
+              <td class="px-4 py-2 text-sm text-gray-600">{{ entry.creditDisplay }}</td>
               <td class="px-4 py-2 text-sm text-right text-gray-900">{{ formatMoney(entry.amount) }}</td>
               <td class="px-4 py-2 text-right">
                 <button class="text-red-500 hover:text-red-700" @click="removeEntry(i)">
@@ -87,31 +87,44 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useYearEndClosingStore } from '@/scripts/admin/stores/year-end-closing'
+import AccountDropdown from '@/scripts/admin/components/accounting/AccountDropdown.vue'
 
 const { t } = useI18n()
+const store = useYearEndClosingStore()
 const entries = ref([])
 
 const newEntry = ref({
-  debitAccount: '',
-  creditAccount: '',
+  debitAccountId: null,
+  creditAccountId: null,
   amount: '',
   description: '',
 })
 
 const isEntryValid = computed(() => {
-  return newEntry.value.debitAccount && newEntry.value.creditAccount &&
+  return newEntry.value.debitAccountId && newEntry.value.creditAccountId &&
     newEntry.value.amount && parseFloat(newEntry.value.amount) > 0
 })
+
+function getAccountDisplay(accountId) {
+  const account = store.accounts.find((a) => a.id === accountId)
+  if (!account) return String(accountId)
+  return `${account.code} - ${account.name}`
+}
 
 function addEntry() {
   if (!isEntryValid.value) return
   entries.value.push({
-    ...newEntry.value,
+    debitAccountId: newEntry.value.debitAccountId,
+    creditAccountId: newEntry.value.creditAccountId,
+    debitDisplay: getAccountDisplay(newEntry.value.debitAccountId),
+    creditDisplay: getAccountDisplay(newEntry.value.creditAccountId),
     amount: parseFloat(newEntry.value.amount),
+    description: newEntry.value.description,
   })
-  newEntry.value = { debitAccount: '', creditAccount: '', amount: '', description: '' }
+  newEntry.value = { debitAccountId: null, creditAccountId: null, amount: '', description: '' }
 }
 
 function removeEntry(index) {
@@ -125,5 +138,11 @@ function formatMoney(amount) {
     maximumFractionDigits: 2,
   }).format(amount) + ' МКД'
 }
+
+onMounted(() => {
+  if (store.accounts.length === 0) {
+    store.fetchAccounts()
+  }
+})
 </script>
 // CLAUDE-CHECKPOINT

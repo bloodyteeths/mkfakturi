@@ -14,6 +14,8 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
   const closingPreview = ref(null)
   const closingResult = ref(null)
   const fiscalYearStatus = ref(null)
+  const lastError = ref(null)
+  const accounts = ref([])
 
   // Computed
   const totalSteps = computed(() => 6)
@@ -36,10 +38,14 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
   // Actions
   async function fetchPreflight() {
     isLoading.value = true
+    lastError.value = null
     try {
-      const { data } = await axios.get(`/api/v1/year-end/${year.value}/preflight`)
+      const { data } = await axios.get(`/year-end/${year.value}/preflight`)
       preflightData.value = data
       return data
+    } catch (error) {
+      lastError.value = error.response?.data?.error || error.message || 'Failed to load preflight checks'
+      throw error
     } finally {
       isLoading.value = false
     }
@@ -47,10 +53,14 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
 
   async function fetchSummary() {
     isLoading.value = true
+    lastError.value = null
     try {
-      const { data } = await axios.get(`/api/v1/year-end/${year.value}/summary`)
+      const { data } = await axios.get(`/year-end/${year.value}/summary`)
       summaryData.value = data
       return data
+    } catch (error) {
+      lastError.value = error.response?.data?.error || error.message || 'Failed to load financial summary'
+      throw error
     } finally {
       isLoading.value = false
     }
@@ -58,10 +68,14 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
 
   async function fetchClosingPreview() {
     isLoading.value = true
+    lastError.value = null
     try {
-      const { data } = await axios.post(`/api/v1/year-end/${year.value}/closing`, { mode: 'preview' })
+      const { data } = await axios.post(`/year-end/${year.value}/closing`, { mode: 'preview' })
       closingPreview.value = data
       return data
+    } catch (error) {
+      lastError.value = error.response?.data?.error || error.message || 'Failed to generate closing preview'
+      throw error
     } finally {
       isLoading.value = false
     }
@@ -70,7 +84,7 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
   async function commitClosingEntries() {
     isLoading.value = true
     try {
-      const { data } = await axios.post(`/api/v1/year-end/${year.value}/closing`, { mode: 'commit' })
+      const { data } = await axios.post(`/year-end/${year.value}/closing`, { mode: 'commit' })
       closingResult.value = data
       return data
     } finally {
@@ -78,15 +92,25 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     }
   }
 
+  async function fetchAccounts() {
+    try {
+      const { data } = await axios.get('/accounting/accounts')
+      accounts.value = data.data || data || []
+      return accounts.value
+    } catch {
+      accounts.value = []
+    }
+  }
+
   async function fetchTaxSummary() {
-    const { data } = await axios.get(`/api/v1/year-end/${year.value}/reports/tax-summary`)
+    const { data } = await axios.get(`/year-end/${year.value}/reports/tax-summary`)
     return data
   }
 
   async function finalize() {
     isLoading.value = true
     try {
-      const { data } = await axios.post(`/api/v1/year-end/${year.value}/finalize`)
+      const { data } = await axios.post(`/year-end/${year.value}/finalize`)
       fiscalYearStatus.value = 'CLOSED'
       return data
     } finally {
@@ -97,7 +121,7 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
   async function undoClosing() {
     isLoading.value = true
     try {
-      const { data } = await axios.post(`/api/v1/year-end/${year.value}/undo`)
+      const { data } = await axios.post(`/year-end/${year.value}/undo`)
       fiscalYearStatus.value = 'OPEN'
       return data
     } finally {
@@ -130,6 +154,8 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     closingPreview.value = null
     closingResult.value = null
     fiscalYearStatus.value = null
+    lastError.value = null
+    accounts.value = []
   }
 
   return {
@@ -142,6 +168,8 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     closingPreview,
     closingResult,
     fiscalYearStatus,
+    lastError,
+    accounts,
     // Computed
     totalSteps,
     canProceed,
@@ -151,6 +179,7 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     fetchSummary,
     fetchClosingPreview,
     commitClosingEntries,
+    fetchAccounts,
     fetchTaxSummary,
     finalize,
     undoClosing,

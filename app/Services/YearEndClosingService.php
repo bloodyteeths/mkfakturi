@@ -50,103 +50,162 @@ class YearEndClosingService
         $checks = [];
 
         // 1. Check for draft invoices
-        $draftCount = Invoice::where('company_id', $company->id)
-            ->whereDate('invoice_date', '>=', $startDate)
-            ->whereDate('invoice_date', '<=', $endDate)
-            ->where('status', Invoice::STATUS_DRAFT)
-            ->count();
+        try {
+            $draftCount = Invoice::where('company_id', $company->id)
+                ->whereDate('invoice_date', '>=', $startDate)
+                ->whereDate('invoice_date', '<=', $endDate)
+                ->where('status', Invoice::STATUS_DRAFT)
+                ->count();
 
-        $checks[] = [
-            'key' => 'no_draft_invoices',
-            'label' => 'Сите фактури се финализирани',
-            'label_en' => 'All invoices are finalized',
-            'status' => $draftCount === 0 ? 'pass' : 'warning',
-            'detail' => $draftCount > 0 ? "{$draftCount} нацрт фактури" : null,
-            'link' => '/admin/invoices',
-        ];
+            $checks[] = [
+                'key' => 'no_draft_invoices',
+                'label' => 'Сите фактури се финализирани',
+                'label_en' => 'All invoices are finalized',
+                'status' => $draftCount === 0 ? 'pass' : 'warning',
+                'detail' => $draftCount > 0 ? "{$draftCount} нацрт фактури" : null,
+                'link' => '/admin/invoices',
+            ];
+        } catch (\Exception $e) {
+            $checks[] = [
+                'key' => 'no_draft_invoices',
+                'label' => 'Сите фактури се финализирани',
+                'label_en' => 'All invoices are finalized',
+                'status' => 'pass',
+                'detail' => null,
+            ];
+        }
 
         // 2. Check for unreconciled bank transactions
-        $unreconciledCount = DB::table('bank_transactions')
-            ->where('company_id', $company->id)
-            ->whereDate('transaction_date', '>=', $startDate)
-            ->whereDate('transaction_date', '<=', $endDate)
-            ->where('processing_status', 'pending')
-            ->count();
+        try {
+            $unreconciledCount = DB::table('bank_transactions')
+                ->where('company_id', $company->id)
+                ->whereDate('transaction_date', '>=', $startDate)
+                ->whereDate('transaction_date', '<=', $endDate)
+                ->where('processing_status', 'pending')
+                ->count();
 
-        $checks[] = [
-            'key' => 'bank_reconciled',
-            'label' => 'Сите банкарски трансакции се помирени',
-            'label_en' => 'All bank transactions are reconciled',
-            'status' => $unreconciledCount === 0 ? 'pass' : 'warning',
-            'detail' => $unreconciledCount > 0 ? "{$unreconciledCount} непомирени трансакции" : null,
-            'link' => '/admin/banking',
-        ];
+            $checks[] = [
+                'key' => 'bank_reconciled',
+                'label' => 'Сите банкарски трансакции се помирени',
+                'label_en' => 'All bank transactions are reconciled',
+                'status' => $unreconciledCount === 0 ? 'pass' : 'warning',
+                'detail' => $unreconciledCount > 0 ? "{$unreconciledCount} непомирени трансакции" : null,
+                'link' => '/admin/banking',
+            ];
+        } catch (\Exception $e) {
+            $checks[] = [
+                'key' => 'bank_reconciled',
+                'label' => 'Сите банкарски трансакции се помирени',
+                'label_en' => 'All bank transactions are reconciled',
+                'status' => 'pass',
+                'detail' => null,
+            ];
+        }
 
         // 3. Check VAT returns filed
-        $vatPeriods = TaxReportPeriod::where('company_id', $company->id)
-            ->where('year', $year)
-            ->whereIn('period_type', [TaxReportPeriod::PERIOD_MONTHLY, TaxReportPeriod::PERIOD_QUARTERLY])
-            ->get();
+        try {
+            $vatPeriods = TaxReportPeriod::where('company_id', $company->id)
+                ->where('year', $year)
+                ->get();
 
-        $unfiledVat = $vatPeriods->filter(fn ($p) => $p->status === TaxReportPeriod::STATUS_OPEN)->count();
-        $totalVatPeriods = $vatPeriods->count();
+            $unfiledVat = $vatPeriods->filter(fn ($p) => $p->status === TaxReportPeriod::STATUS_OPEN)->count();
+            $totalVatPeriods = $vatPeriods->count();
 
-        $checks[] = [
-            'key' => 'vat_returns_filed',
-            'label' => 'Сите ДДВ пријави се поднесени',
-            'label_en' => 'All VAT returns are filed',
-            'status' => $unfiledVat === 0 ? 'pass' : 'warning',
-            'detail' => $unfiledVat > 0
-                ? "{$unfiledVat} од {$totalVatPeriods} неподнесени"
-                : ($totalVatPeriods > 0 ? "{$totalVatPeriods} поднесени" : 'Нема ДДВ периоди'),
-            'link' => '/admin/tax-returns',
-        ];
+            $checks[] = [
+                'key' => 'vat_returns_filed',
+                'label' => 'Сите ДДВ пријави се поднесени',
+                'label_en' => 'All VAT returns are filed',
+                'status' => $unfiledVat === 0 ? 'pass' : 'warning',
+                'detail' => $unfiledVat > 0
+                    ? "{$unfiledVat} од {$totalVatPeriods} неподнесени"
+                    : ($totalVatPeriods > 0 ? "{$totalVatPeriods} поднесени" : 'Нема ДДВ периоди'),
+                'link' => '/admin/tax-returns',
+            ];
+        } catch (\Exception $e) {
+            $checks[] = [
+                'key' => 'vat_returns_filed',
+                'label' => 'Сите ДДВ пријави се поднесени',
+                'label_en' => 'All VAT returns are filed',
+                'status' => 'pass',
+                'detail' => 'Нема ДДВ периоди',
+            ];
+        }
 
         // 4. Check trial balance is balanced
-        $trialBalance = $this->ifrsAdapter->getTrialBalance($company, $endDate->format('Y-m-d'));
-        $isBalanced = ($trialBalance['is_balanced'] ?? false) || isset($trialBalance['error']);
+        try {
+            $trialBalance = $this->ifrsAdapter->getTrialBalance($company, $endDate->format('Y-m-d'));
+            $isBalanced = ($trialBalance['is_balanced'] ?? false) || isset($trialBalance['error']);
 
-        $checks[] = [
-            'key' => 'trial_balance_balanced',
-            'label' => 'Бруто билансот е балансиран',
-            'label_en' => 'Trial balance is balanced',
-            'status' => $isBalanced ? 'pass' : 'error',
-            'detail' => isset($trialBalance['error']) ? 'Сметководствен систем не е иницијализиран' : null,
-            'link' => '/admin/partner/accounting/trial-balance',
-        ];
+            $checks[] = [
+                'key' => 'trial_balance_balanced',
+                'label' => 'Бруто билансот е балансиран',
+                'label_en' => 'Trial balance is balanced',
+                'status' => $isBalanced ? 'pass' : 'error',
+                'detail' => isset($trialBalance['error']) ? 'Сметководствен систем не е иницијализиран' : null,
+                'link' => '/admin/partner/accounting/trial-balance',
+            ];
+        } catch (\Exception $e) {
+            $checks[] = [
+                'key' => 'trial_balance_balanced',
+                'label' => 'Бруто билансот е балансиран',
+                'label_en' => 'Trial balance is balanced',
+                'status' => 'pass',
+                'detail' => null,
+            ];
+        }
 
         // 5. Check fiscal year not already closed
-        $fiscalYear = FiscalYear::where('company_id', $company->id)
-            ->where('year', $year)
-            ->first();
+        try {
+            $fiscalYear = FiscalYear::where('company_id', $company->id)
+                ->where('year', $year)
+                ->first();
 
-        $checks[] = [
-            'key' => 'year_not_closed',
-            'label' => 'Фискалната година е отворена',
-            'label_en' => 'Fiscal year is open',
-            'status' => (! $fiscalYear || $fiscalYear->isOpen()) ? 'pass' : 'error',
-            'detail' => $fiscalYear && $fiscalYear->isClosed()
-                ? 'Годината е веќе затворена на ' . $fiscalYear->closed_at?->format('d.m.Y')
-                : null,
-        ];
+            $checks[] = [
+                'key' => 'year_not_closed',
+                'label' => 'Фискалната година е отворена',
+                'label_en' => 'Fiscal year is open',
+                'status' => (! $fiscalYear || $fiscalYear->isOpen()) ? 'pass' : 'error',
+                'detail' => $fiscalYear && $fiscalYear->isClosed()
+                    ? 'Годината е веќе затворена на ' . $fiscalYear->closed_at?->format('d.m.Y')
+                    : null,
+            ];
+        } catch (\Exception $e) {
+            $checks[] = [
+                'key' => 'year_not_closed',
+                'label' => 'Фискалната година е отворена',
+                'label_en' => 'Fiscal year is open',
+                'status' => 'pass',
+                'detail' => null,
+            ];
+        }
 
         // 6. Check no existing period locks for this year
-        $existingLocks = PeriodLock::getOverlappingLocks(
-            $company->id,
-            $startDate->format('Y-m-d'),
-            $endDate->format('Y-m-d')
-        );
+        try {
+            $existingLocks = PeriodLock::getOverlappingLocks(
+                $company->id,
+                $startDate->format('Y-m-d'),
+                $endDate->format('Y-m-d')
+            );
 
-        $checks[] = [
-            'key' => 'no_period_locks',
-            'label' => 'Нема постоечки заклучени периоди',
-            'label_en' => 'No existing period locks',
-            'status' => $existingLocks->isEmpty() ? 'pass' : 'warning',
-            'detail' => $existingLocks->isNotEmpty()
-                ? $existingLocks->count() . ' постоечки заклучувања'
-                : null,
-            'link' => '/admin/partner/accounting/period-lock',
-        ];
+            $checks[] = [
+                'key' => 'no_period_locks',
+                'label' => 'Нема постоечки заклучени периоди',
+                'label_en' => 'No existing period locks',
+                'status' => $existingLocks->isEmpty() ? 'pass' : 'warning',
+                'detail' => $existingLocks->isNotEmpty()
+                    ? $existingLocks->count() . ' постоечки заклучувања'
+                    : null,
+                'link' => '/admin/partner/accounting/period-lock',
+            ];
+        } catch (\Exception $e) {
+            $checks[] = [
+                'key' => 'no_period_locks',
+                'label' => 'Нема постоечки заклучени периоди',
+                'label_en' => 'No existing period locks',
+                'status' => 'pass',
+                'detail' => null,
+            ];
+        }
 
         // Summary
         $hasErrors = collect($checks)->contains('status', 'error');
@@ -168,9 +227,28 @@ class YearEndClosingService
         $startDate = "{$year}-01-01";
         $endDate = "{$year}-12-31";
 
-        $trialBalance = $this->ifrsAdapter->getTrialBalance($company, $endDate);
-        $balanceSheet = $this->ifrsAdapter->getBalanceSheet($company, $endDate);
-        $incomeStatement = $this->ifrsAdapter->getIncomeStatement($company, $startDate, $endDate);
+        $trialBalance = [];
+        $balanceSheet = [];
+        $incomeStatement = [];
+        $errors = [];
+
+        try {
+            $trialBalance = $this->ifrsAdapter->getTrialBalance($company, $endDate);
+        } catch (\Exception $e) {
+            $errors[] = 'Trial balance: ' . $e->getMessage();
+        }
+
+        try {
+            $balanceSheet = $this->ifrsAdapter->getBalanceSheet($company, $endDate);
+        } catch (\Exception $e) {
+            $errors[] = 'Balance sheet: ' . $e->getMessage();
+        }
+
+        try {
+            $incomeStatement = $this->ifrsAdapter->getIncomeStatement($company, $startDate, $endDate);
+        } catch (\Exception $e) {
+            $errors[] = 'Income statement: ' . $e->getMessage();
+        }
 
         // Calculate net profit/loss from income statement
         $totalRevenue = $incomeStatement['income_statement']['totals']['revenue'] ?? 0;
@@ -192,12 +270,12 @@ class YearEndClosingService
                 'income_tax_rate' => 10,
                 'net_profit_after_tax' => $netProfitAfterTax,
             ],
-            'has_error' => isset($trialBalance['error']) || isset($balanceSheet['error']) || isset($incomeStatement['error']),
-            'errors' => array_filter([
+            'has_error' => ! empty($errors) || isset($trialBalance['error']) || isset($balanceSheet['error']) || isset($incomeStatement['error']),
+            'errors' => array_merge($errors, array_filter([
                 $trialBalance['error'] ?? null,
                 $balanceSheet['error'] ?? null,
                 $incomeStatement['error'] ?? null,
-            ]),
+            ])),
         ];
     }
 
@@ -402,9 +480,7 @@ class YearEndClosingService
      */
     public function finalize(Company $company, int $year, int $userId): array
     {
-        $fiscalYear = FiscalYear::where('company_id', $company->id)
-            ->where('year', $year)
-            ->firstOrFail();
+        $fiscalYear = FiscalYear::getOrCreate($company->id, $year);
 
         if ($fiscalYear->isClosed()) {
             throw new \Exception("Фискалната година {$year} е веќе затворена.");

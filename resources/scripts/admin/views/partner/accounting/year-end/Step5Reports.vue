@@ -136,6 +136,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 import { useI18n } from 'vue-i18n'
 import { useYearEndClosingStore } from '@/scripts/admin/stores/year-end-closing'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -144,6 +145,7 @@ const { t } = useI18n()
 const store = useYearEndClosingStore()
 const notificationStore = useNotificationStore()
 const taxSummary = ref(null)
+const isDownloading = ref(null)
 
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
@@ -153,21 +155,55 @@ function formatMoney(amount) {
   }).format(Math.abs(amount)) + ' МКД'
 }
 
+function triggerBlobDownload(data, filename, contentType) {
+  const blob = new Blob([data], { type: contentType })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}
+
 async function downloadReport(type) {
-  // Use existing report export endpoint
+  isDownloading.value = type
   try {
-    const companyId = window.axios.defaults.headers?.common?.company
-    window.open(`/api/v1/year-end/${store.year}/reports/${type}`, '_blank')
+    const response = await axios.get(`/year-end/${store.year}/reports/${type}`, {
+      params: { format: 'pdf' },
+      responseType: 'blob',
+    })
+
+    const contentType = response.headers['content-type'] || 'application/pdf'
+    const ext = contentType.includes('pdf') ? 'pdf' : 'csv'
+    triggerBlobDownload(response.data, `${type}-${store.year}.${ext}`, contentType)
   } catch {
     notificationStore.showNotification({ type: 'error', message: t('partner.accounting.year_end.download_error') })
+  } finally {
+    isDownloading.value = null
   }
 }
 
 async function exportJournal(format) {
+  isDownloading.value = format
   try {
-    window.open(`/api/v1/accounting/journals/export?format=${format}&start_date=${store.year}-01-01&end_date=${store.year}-12-31`, '_blank')
+    const formatMap = { pantheon: 'pantheon_xml', zonel: 'zonel_csv' }
+    const response = await axios.get('/accounting/journals/export', {
+      params: {
+        from: `${store.year}-01-01`,
+        to: `${store.year}-12-31`,
+        format: formatMap[format] || format,
+      },
+      responseType: 'blob',
+    })
+
+    const ext = format === 'pantheon' ? 'xml' : 'csv'
+    triggerBlobDownload(response.data, `journal-${format}-${store.year}.${ext}`, response.headers['content-type'])
   } catch {
     notificationStore.showNotification({ type: 'error', message: t('partner.accounting.year_end.export_error') })
+  } finally {
+    isDownloading.value = null
   }
 }
 

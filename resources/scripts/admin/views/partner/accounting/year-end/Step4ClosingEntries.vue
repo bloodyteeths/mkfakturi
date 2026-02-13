@@ -15,6 +15,25 @@
       </div>
     </div>
 
+    <!-- Error state -->
+    <div v-else-if="store.lastError" class="space-y-4">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+          <div>
+            <p class="text-sm font-medium text-red-800">{{ t('partner.accounting.year_end.entries_error') }}</p>
+            <p class="text-sm text-red-600 mt-1">{{ store.lastError }}</p>
+          </div>
+        </div>
+      </div>
+      <BaseButton variant="primary-outline" :loading="store.isLoading" @click="retryPreview">
+        <template #left="slotProps">
+          <BaseIcon :class="slotProps.class" name="ArrowPathIcon" />
+        </template>
+        {{ t('partner.accounting.year_end.recheck') }}
+      </BaseButton>
+    </div>
+
     <!-- Preview Table -->
     <div v-else-if="store.closingPreview" class="space-y-6">
       <!-- Result badge -->
@@ -108,6 +127,14 @@ async function commitEntries() {
   }
 }
 
+async function retryPreview() {
+  try {
+    await store.fetchClosingPreview()
+  } catch {
+    // Error is stored in store.lastError
+  }
+}
+
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   return new Intl.NumberFormat('mk-MK', {
@@ -116,9 +143,13 @@ function formatMoney(amount) {
   }).format(Math.abs(amount)) + ' МКД'
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!store.closingPreview) {
-    store.fetchClosingPreview()
+    try {
+      await store.fetchClosingPreview()
+    } catch {
+      // Error is stored in store.lastError
+    }
   }
 })
 </script>

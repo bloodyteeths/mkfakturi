@@ -71,6 +71,19 @@
       </div>
     </div>
 
+    <!-- Error state -->
+    <div v-else-if="store.lastError" class="space-y-4">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+          <div>
+            <p class="text-sm font-medium text-red-800">{{ t('partner.accounting.year_end.cannot_proceed') }}</p>
+            <p class="text-sm text-red-600 mt-1">{{ store.lastError }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Reload button -->
     <div class="mt-6">
       <BaseButton variant="primary-outline" :loading="store.isLoading" @click="loadChecks">
@@ -92,7 +105,11 @@ const { t } = useI18n()
 const store = useYearEndClosingStore()
 
 async function loadChecks() {
-  await store.fetchPreflight()
+  try {
+    await store.fetchPreflight()
+  } catch {
+    // Error is stored in store.lastError
+  }
 }
 
 onMounted(() => {

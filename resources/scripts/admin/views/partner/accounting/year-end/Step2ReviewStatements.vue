@@ -12,6 +12,27 @@
       </div>
     </div>
 
+    <!-- Error state -->
+    <div v-else-if="store.lastError" class="bg-white rounded-lg shadow p-6">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+          <div>
+            <p class="text-sm font-medium text-red-800">{{ t('partner.accounting.year_end.reports_unavailable') }}</p>
+            <p class="text-sm text-red-600 mt-1">{{ store.lastError }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <BaseButton variant="primary-outline" :loading="store.isLoading" @click="store.fetchSummary()">
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ArrowPathIcon" />
+          </template>
+          {{ t('partner.accounting.year_end.recheck') }}
+        </BaseButton>
+      </div>
+    </div>
+
     <template v-else-if="store.summaryData">
       <!-- Profit/Loss Summary Card -->
       <div :class="[
@@ -109,9 +130,13 @@ function formatMoney(amount) {
   return `${sign}${formatted} МКД`
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!store.summaryData) {
-    store.fetchSummary()
+    try {
+      await store.fetchSummary()
+    } catch {
+      // Error is stored in store.lastError
+    }
   }
 })
 </script>
