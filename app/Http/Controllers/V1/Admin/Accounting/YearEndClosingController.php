@@ -106,21 +106,77 @@ class YearEndClosingController extends Controller
         }
 
         $format = $request->input('format', 'json');
-        $summary = $this->service->getFinancialSummary($company, $year);
+
+        // Use pre-closing financial data if available (stored during closing entry generation)
+        // After closing entries, P&L accounts are zeroed — UJP reports need pre-closing figures
+        $summary = null;
+        $fiscalYear = \App\Models\FiscalYear::where('company_id', $company->id)
+            ->where('year', $year)
+            ->first();
+
+        if ($fiscalYear && $fiscalYear->notes) {
+            $notes = json_decode($fiscalYear->notes, true);
+            if (isset($notes['pre_closing_summary'])) {
+                $summary = $notes['pre_closing_summary'];
+            } elseif (! empty($notes['closing_transaction_ids'])) {
+                // Closing entries exist but pre-closing data wasn't stored (legacy)
+                // Temporarily remove closing entries, calculate, then restore
+                $closingIds = $notes['closing_transaction_ids'];
+                \Illuminate\Support\Facades\DB::table('ifrs_transactions')
+                    ->whereIn('id', $closingIds)
+                    ->update(['deleted_at' => now()]);
+
+                $summary = $this->service->getFinancialSummary($company, $year);
+
+                \Illuminate\Support\Facades\DB::table('ifrs_transactions')
+                    ->whereIn('id', $closingIds)
+                    ->update(['deleted_at' => null]);
+
+                // Store for future requests
+                $notes['pre_closing_summary'] = $summary;
+                $fiscalYear->update(['notes' => json_encode($notes)]);
+            }
+        }
+
+        // Fallback to live calculation if no pre-closing data stored
+        if (! $summary) {
+            $summary = $this->service->getFinancialSummary($company, $year);
+        }
 
         if ($type === 'tax-summary') {
+            $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
+            $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
+            $profitBeforeTax = $summary['summary']['net_profit_before_tax'] ?? 0;
+            $incomeTax = $summary['summary']['income_tax'] ?? 0;
+            $netProfit = $summary['summary']['net_profit_after_tax'] ?? 0;
+
             return response()->json([
                 'year' => $year,
-                'company' => $company->name,
-                'tax_id' => $company->tax_id ?? '',
-                'revenue' => $summary['summary']['total_revenue'],
-                'expenses' => $summary['summary']['total_expenses'],
-                'profit_before_tax' => $summary['summary']['net_profit_before_tax'],
-                'income_tax_rate' => $summary['summary']['income_tax_rate'],
-                'income_tax' => $summary['summary']['income_tax'],
-                'net_profit' => $summary['summary']['net_profit_after_tax'],
                 'form' => 'ДБ-ВП',
+                'form_name' => 'Даночен биланс на вкупен приход',
                 'portal' => 'etax.ujp.gov.mk',
+                'company' => $company->name,
+                'embs' => $company->tax_id ?? '',
+                'edb' => $company->vat_number ?? '',
+                'period' => "01.01.{$year} - 31.12.{$year}",
+                'rows' => [
+                    ['row' => 1, 'label' => 'Вкупни приходи', 'value' => $totalRevenue],
+                    ['row' => 2, 'label' => 'Приходи од дејноста', 'value' => $totalRevenue],
+                    ['row' => 3, 'label' => 'Останати приходи', 'value' => 0],
+                    ['row' => 4, 'label' => 'Финансиски приходи', 'value' => 0],
+                    ['row' => 5, 'label' => 'Основица за оданочување', 'value' => max($profitBeforeTax, 0)],
+                    ['row' => 6, 'label' => 'Стапка на данок', 'value' => '10%'],
+                    ['row' => 7, 'label' => 'Пресметан данок', 'value' => $incomeTax],
+                    ['row' => 8, 'label' => 'Уплатен аконтативен данок', 'value' => 0],
+                    ['row' => 9, 'label' => 'Разлика за доплата', 'value' => $incomeTax],
+                ],
+                'summary' => [
+                    'total_revenue' => $totalRevenue,
+                    'total_expenses' => $totalExpenses,
+                    'profit_before_tax' => $profitBeforeTax,
+                    'income_tax' => $incomeTax,
+                    'net_profit' => $netProfit,
+                ],
             ]);
         }
 
@@ -164,8 +220,9 @@ class YearEndClosingController extends Controller
     {
         $asOfDate = \Carbon\Carbon::create($year, 12, 31)->translatedFormat($dateFormat);
 
+        // Blade template expects $balanceSheet['balance_sheet']['assets'] (double-nested)
         view()->share([
-            'balanceSheet' => $summary['balance_sheet'] ?? [],
+            'balanceSheet' => ['balance_sheet' => $summary['balance_sheet'] ?? []],
             'as_of_date' => $asOfDate,
         ]);
 
@@ -179,8 +236,9 @@ class YearEndClosingController extends Controller
         $fromDate = \Carbon\Carbon::create($year, 1, 1)->translatedFormat($dateFormat);
         $toDate = \Carbon\Carbon::create($year, 12, 31)->translatedFormat($dateFormat);
 
+        // Blade template expects $incomeStatement['income_statement']['revenues'] (double-nested)
         view()->share([
-            'incomeStatement' => $summary['income_statement'] ?? [],
+            'incomeStatement' => ['income_statement' => $summary['income_statement'] ?? []],
             'from_date' => $fromDate,
             'to_date' => $toDate,
         ]);
@@ -194,8 +252,9 @@ class YearEndClosingController extends Controller
     {
         $asOfDate = \Carbon\Carbon::create($year, 12, 31)->translatedFormat($dateFormat);
 
+        // Blade template expects $trialBalance['trial_balance']['accounts'] (double-nested)
         view()->share([
-            'trialBalance' => $summary['trial_balance'] ?? [],
+            'trialBalance' => ['trial_balance' => $summary['trial_balance'] ?? []],
             'as_of_date' => $asOfDate,
         ]);
 
@@ -206,16 +265,31 @@ class YearEndClosingController extends Controller
 
     private function downloadGenericCsv(array $summary, string $type, int $year): Response
     {
-        $csvContent = "Type,{$type}\nYear,{$year}\n\n";
-        $csvContent .= "Revenue," . ($summary['summary']['total_revenue'] ?? 0) . "\n";
-        $csvContent .= "Expenses," . ($summary['summary']['total_expenses'] ?? 0) . "\n";
-        $csvContent .= "Net Profit Before Tax," . ($summary['summary']['net_profit_before_tax'] ?? 0) . "\n";
-        $csvContent .= "Income Tax," . ($summary['summary']['income_tax'] ?? 0) . "\n";
-        $csvContent .= "Net Profit After Tax," . ($summary['summary']['net_profit_after_tax'] ?? 0) . "\n";
+        $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
+        $totalExpenses = $summary['summary']['total_expenses'] ?? 0;
+        $profitBeforeTax = $summary['summary']['net_profit_before_tax'] ?? 0;
+        $incomeTax = $summary['summary']['income_tax'] ?? 0;
+        $netProfit = $summary['summary']['net_profit_after_tax'] ?? 0;
+
+        // ДБ-ВП format (Даночен биланс на вкупен приход)
+        $csvContent = "\xEF\xBB\xBF"; // UTF-8 BOM for Macedonian characters
+        $csvContent .= "Образец,ДБ-ВП\n";
+        $csvContent .= "Даночен период,01.01.{$year} - 31.12.{$year}\n";
+        $csvContent .= "Портал,etax.ujp.gov.mk\n\n";
+        $csvContent .= "Ред.бр.,Позиција,Износ\n";
+        $csvContent .= "1,Вкупни приходи (AOP 246),{$totalRevenue}\n";
+        $csvContent .= "2,Вкупни расходи (AOP 247),{$totalExpenses}\n";
+        $csvContent .= "3,Добивка/загуба пред оданочување (AOP 248/249),{$profitBeforeTax}\n";
+        $csvContent .= "4,Данок на добивка 10% (AOP 250),{$incomeTax}\n";
+        $csvContent .= "5,Нето добивка/загуба (AOP 255/256),{$netProfit}\n";
+
+        $filename = $type === 'notes'
+            ? "beleshki_{$year}.csv"
+            : "db_vp_{$year}.csv";
 
         return response($csvContent, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$type}_{$year}.csv\"",
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
 

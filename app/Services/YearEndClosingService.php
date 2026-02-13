@@ -416,6 +416,10 @@ class YearEndClosingService
         // Mark as closing
         $fiscalYear->update(['status' => FiscalYear::STATUS_CLOSING]);
 
+        // Capture pre-closing financial data BEFORE generating closing entries
+        // (after closing, P&L accounts will be zeroed — UJP reports need pre-closing figures)
+        $preClosingSummary = $this->getFinancialSummary($company, $year);
+
         $preview = $this->previewClosingEntries($company, $year);
 
         try {
@@ -439,11 +443,12 @@ class YearEndClosingService
                 }
             }
 
-            // Store transaction IDs on fiscal year for undo
+            // Store transaction IDs + pre-closing financial data on fiscal year
             $fiscalYear->update([
                 'notes' => json_encode([
                     'closing_transaction_ids' => $transactionIds,
                     'generated_at' => now()->toISOString(),
+                    'pre_closing_summary' => $preClosingSummary,
                 ]),
             ]);
 

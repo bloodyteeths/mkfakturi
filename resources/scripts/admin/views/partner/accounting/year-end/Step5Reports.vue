@@ -96,28 +96,49 @@
       </p>
 
       <div v-if="taxSummary" class="overflow-x-auto">
+        <div class="mb-3 text-xs text-gray-500">
+          {{ taxSummary.form_name || 'Даночен биланс на вкупен приход' }} ({{ taxSummary.form }})
+        </div>
         <table class="min-w-full divide-y divide-gray-200">
-          <tbody class="divide-y divide-gray-200">
-            <tr>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ t('partner.accounting.year_end.total_revenue') }}</td>
-              <td class="px-4 py-2 text-sm text-right font-medium text-gray-900">{{ formatMoney(taxSummary.revenue) }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ t('partner.accounting.year_end.total_expenses') }}</td>
-              <td class="px-4 py-2 text-sm text-right font-medium text-gray-900">{{ formatMoney(taxSummary.expenses) }}</td>
-            </tr>
+          <thead>
             <tr class="bg-gray-50">
-              <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ t('partner.accounting.year_end.profit_before_tax') }}</td>
-              <td class="px-4 py-2 text-sm text-right font-bold text-gray-900">{{ formatMoney(taxSummary.profit_before_tax) }}</td>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Ред.</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Позиција</th>
+              <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Износ</th>
             </tr>
-            <tr>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ t('partner.accounting.year_end.income_tax_rate', { rate: taxSummary.income_tax_rate }) }}</td>
-              <td class="px-4 py-2 text-sm text-right font-medium text-red-600">{{ formatMoney(taxSummary.income_tax) }}</td>
-            </tr>
-            <tr class="bg-green-50">
-              <td class="px-4 py-2 text-sm font-medium text-green-900">{{ t('partner.accounting.year_end.net_profit') }}</td>
-              <td class="px-4 py-2 text-sm text-right font-bold text-green-700">{{ formatMoney(taxSummary.net_profit) }}</td>
-            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <template v-if="taxSummary.rows">
+              <tr v-for="row in taxSummary.rows" :key="row.row" :class="[5, 7, 9].includes(row.row) ? 'bg-gray-50 font-medium' : ''">
+                <td class="px-4 py-2 text-sm text-gray-500">{{ row.row }}</td>
+                <td class="px-4 py-2 text-sm text-gray-900">{{ row.label }}</td>
+                <td class="px-4 py-2 text-sm text-right font-medium" :class="row.row === 9 && row.value > 0 ? 'text-red-600' : 'text-gray-900'">
+                  {{ typeof row.value === 'string' ? row.value : formatMoney(row.value) }}
+                </td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-600" colspan="2">{{ t('partner.accounting.year_end.total_revenue') }}</td>
+                <td class="px-4 py-2 text-sm text-right font-medium text-gray-900">{{ formatMoney(taxSummary.summary?.total_revenue ?? taxSummary.revenue) }}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-600" colspan="2">{{ t('partner.accounting.year_end.total_expenses') }}</td>
+                <td class="px-4 py-2 text-sm text-right font-medium text-gray-900">{{ formatMoney(taxSummary.summary?.total_expenses ?? taxSummary.expenses) }}</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="px-4 py-2 text-sm font-medium text-gray-900" colspan="2">{{ t('partner.accounting.year_end.profit_before_tax') }}</td>
+                <td class="px-4 py-2 text-sm text-right font-bold text-gray-900">{{ formatMoney(taxSummary.summary?.profit_before_tax ?? taxSummary.profit_before_tax) }}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-600" colspan="2">{{ t('partner.accounting.year_end.income_tax_rate', { rate: 10 }) }}</td>
+                <td class="px-4 py-2 text-sm text-right font-medium text-red-600">{{ formatMoney(taxSummary.summary?.income_tax ?? taxSummary.income_tax) }}</td>
+              </tr>
+              <tr class="bg-green-50">
+                <td class="px-4 py-2 text-sm font-medium text-green-900" colspan="2">{{ t('partner.accounting.year_end.net_profit') }}</td>
+                <td class="px-4 py-2 text-sm text-right font-bold text-green-700">{{ formatMoney(taxSummary.summary?.net_profit ?? taxSummary.net_profit) }}</td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
