@@ -84,6 +84,23 @@ const copy = {
           body: 'Приемница, издатница, преносница + WAC вреднување + автоматско книжење на Класа 3, 6, 7. Инспекторите ќе бидат задоволни.',
           icon: 'warehouse',
         },
+        {
+          title: 'Волшебник за годишно затворање',
+          body: '6 чекори: проверка → преглед → корекции → затворачки книжења → извештаи → заклучување. PDF за ЦРРМ, XML/CSV за е-поднесување, пресметка за ДБ-ВП.',
+          icon: 'yearend',
+        },
+      ],
+    },
+    yearEnd: {
+      title: 'Годишно затворање за 30 минути',
+      sub: 'Волшебникот ве води чекор по чекор — од проверка до заклучување. Без стрес, без грешки.',
+      steps: [
+        { num: '1', label: 'Проверка', desc: 'Автоматска проверка: дали сите фактури се финализирани, банките порамнети, ДДВ пријавите поднесени.' },
+        { num: '2', label: 'Преглед', desc: 'Биланс на состојба, биланс на успех и бруто биланс — на еден екран.' },
+        { num: '3', label: 'Корекции', desc: 'Амортизација, резервирања, временски разграничувања — или прескокнете ако сè е книжено.' },
+        { num: '4', label: 'Затворање', desc: 'Автоматски затворачки книжења: класа 5/6 → задржана добивка. Данок 10% пресметан.' },
+        { num: '5', label: 'Извештаи', desc: 'PDF за ЦРРМ, Pantheon XML / Zonel CSV за е-поднесување, пресметка за ДБ-ВП.' },
+        { num: '6', label: 'Заклучи', desc: 'Период заклучен. Рок до 15 март — вие завршивте. Поништување достапно 24 часа.' },
       ],
     },
     comparison: {
@@ -98,6 +115,7 @@ const copy = {
         { feature: 'IFRS извештаи', facturino: true, others: true },
         { feature: 'Мулти‑компанија од еден акаунт', facturino: true, others: false },
         { feature: 'Материјално сметководство (WAC, GL)', facturino: true, others: false },
+        { feature: 'Волшебник за годишно затворање (6 чекори)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -183,6 +201,23 @@ const copy = {
           body: 'Fletëhyrje, fletëdalje, fletëkalim + vlerësim WAC + regjistrim automatik në Klasa 3, 6, 7. Inspektorët do të jenë të kënaqur.',
           icon: 'warehouse',
         },
+        {
+          title: 'Magjistari i mbylljes vjetore',
+          body: '6 hapa: kontrolli → rishikim → korrigjim → regjistrimet mbyllëse → raporte → mbyllje. PDF për QKRM, XML/CSV për dorëzim elektronik, llogaritje DB-VP.',
+          icon: 'yearend',
+        },
+      ],
+    },
+    yearEnd: {
+      title: 'Mbyllja vjetore për 30 minuta',
+      sub: 'Magjistari ju udhëzon hap pas hapi — nga kontrolli deri në mbyllje. Pa stres, pa gabime.',
+      steps: [
+        { num: '1', label: 'Kontrolli', desc: 'Kontroll automatik: a janë finalizuar të gjitha faturat, bankat të pajtuara, deklaratat e TVSH-së të dorëzuara.' },
+        { num: '2', label: 'Rishikim', desc: 'Bilanci i gjendjes, bilanci i suksesit dhe bilanci verifikues — në një ekran.' },
+        { num: '3', label: 'Korrigjim', desc: 'Amortizim, provigjione, akruale — ose kapërceni nëse gjithçka është regjistruar.' },
+        { num: '4', label: 'Mbyllje', desc: 'Regjistrimet mbyllëse automatike: klasa 5/6 → fitime të mbajtura. Tatimi 10% i llogaritur.' },
+        { num: '5', label: 'Raporte', desc: 'PDF për QKRM, Pantheon XML / Zonel CSV për dorëzim elektronik, llogaritje DB-VP.' },
+        { num: '6', label: 'Mbyll', desc: 'Periudha e mbyllur. Afati deri 15 mars — ju keni mbaruar. Anulim i disponueshëm 24 orë.' },
       ],
     },
     comparison: {
@@ -197,6 +232,7 @@ const copy = {
         { feature: 'Raporte IFRS', facturino: true, others: true },
         { feature: 'Shumë kompani nga një llogari', facturino: true, others: false },
         { feature: 'Kontabilitet material (WAC, GL)', facturino: true, others: false },
+        { feature: 'Magjistari i mbylljes vjetore (6 hapa)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -282,6 +318,23 @@ const copy = {
           body: 'Giriş fişi, çıkış fişi, transfer fişi + WAC değerleme + Sınıf 3, 6, 7 otomatik muhasebe kaydı. Müfettişler memnun kalacak.',
           icon: 'warehouse',
         },
+        {
+          title: 'Yıl sonu kapanış sihirbazı',
+          body: '6 adım: kontrol → inceleme → düzeltme → kapanış kayıtları → raporlar → kilitleme. CRMS için PDF, e-başvuru için XML/CSV, DB-VP hesaplama.',
+          icon: 'yearend',
+        },
+      ],
+    },
+    yearEnd: {
+      title: 'Yıl sonu kapanışı 30 dakikada',
+      sub: 'Sihirbaz sizi adım adım yönlendirir — kontrolden kilitlemeye. Stressiz, hatasız.',
+      steps: [
+        { num: '1', label: 'Kontrol', desc: 'Otomatik kontrol: tüm faturalar tamamlanmış mı, bankalar mutabık mı, KDV beyannameleri verilmiş mi.' },
+        { num: '2', label: 'İnceleme', desc: 'Bilanço, gelir tablosu ve mizan — tek ekranda.' },
+        { num: '3', label: 'Düzeltme', desc: 'Amortisman, karşılık, tahakkuk — veya hepsi kaydedilmişse atlayın.' },
+        { num: '4', label: 'Kapanış', desc: 'Otomatik kapanış kayıtları: sınıf 5/6 → dağıtılmamış kâr. %10 vergi hesaplanır.' },
+        { num: '5', label: 'Raporlar', desc: 'CRMS için PDF, Pantheon XML / Zonel CSV e-başvuru için, DB-VP hesaplaması.' },
+        { num: '6', label: 'Kilitle', desc: 'Dönem kilitlendi. 15 Mart\'a kadar süre var — siz bitirdiniz. 24 saat geri alma mümkün.' },
       ],
     },
     comparison: {
@@ -296,6 +349,7 @@ const copy = {
         { feature: 'IFRS raporları', facturino: true, others: true },
         { feature: 'Tek hesaptan çok şirket', facturino: true, others: false },
         { feature: 'Malzeme muhasebesi (WAC, GL)', facturino: true, others: false },
+        { feature: 'Yıl sonu kapanış sihirbazı (6 adım)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -381,6 +435,23 @@ const copy = {
           body: 'Goods received, issued & transfer notes + WAC valuation + automatic GL posting to Class 3, 6, 7 accounts. Inspectors will be satisfied.',
           icon: 'warehouse',
         },
+        {
+          title: 'Year-End Closing Wizard',
+          body: '6 steps: checklist → review → adjustments → closing entries → reports → lock. PDF for CRMS, XML/CSV for e-filing, DB-VP tax calculation.',
+          icon: 'yearend',
+        },
+      ],
+    },
+    yearEnd: {
+      title: 'Year-end closing in 30 minutes',
+      sub: 'The wizard guides you step by step — from checklist to lock. No stress, no errors.',
+      steps: [
+        { num: '1', label: 'Checklist', desc: 'Automatic checks: are all invoices finalized, banks reconciled, VAT returns filed.' },
+        { num: '2', label: 'Review', desc: 'Balance sheet, income statement, and trial balance — on one screen.' },
+        { num: '3', label: 'Adjust', desc: 'Depreciation, provisions, accruals — or skip if everything is already recorded.' },
+        { num: '4', label: 'Close', desc: 'Automatic closing entries: class 5/6 → retained earnings. 10% tax calculated.' },
+        { num: '5', label: 'Reports', desc: 'PDF for CRMS, Pantheon XML / Zonel CSV for e-filing, DB-VP tax calculation.' },
+        { num: '6', label: 'Lock', desc: 'Period locked. Deadline March 15 — you\'re done. Undo available for 24 hours.' },
       ],
     },
     comparison: {
@@ -395,6 +466,7 @@ const copy = {
         { feature: 'IFRS reports', facturino: true, others: true },
         { feature: 'Multi-company from one account', facturino: true, others: false },
         { feature: 'Material accounting (WAC, GL)', facturino: true, others: false },
+        { feature: 'Year-end closing wizard (6 steps)', facturino: true, others: false },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / MiniMax',
@@ -486,6 +558,13 @@ function IconWarehouse() {
     </svg>
   )
 }
+function IconYearEnd() {
+  return (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  )
+}
 function IconCheck() {
   return (
     <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -521,6 +600,7 @@ const solutionIcons: Record<string, () => React.JSX.Element> = {
   invoice: IconInvoice,
   ai: IconAI,
   warehouse: IconWarehouse,
+  yearend: IconYearEnd,
 }
 
 export default async function ForAccountantsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -622,6 +702,39 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                 </div>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── YEAR-END CLOSING WIZARD ─────────────────────────── */}
+      <section className="section bg-gradient-to-br from-emerald-50 to-cyan-50">
+        <div className="container px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700 mb-6">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+              NEW
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.yearEnd.title}</h2>
+            <p className="text-lg text-gray-600">{t.yearEnd.sub}</p>
+            <div className="h-1 w-20 bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto rounded-full mt-4"></div>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {t.yearEnd.steps.map((step, i) => (
+                <div key={i} className="relative bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold">
+                      {step.num}
+                    </div>
+                    <h3 className="font-bold text-gray-900">{step.label}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed">{step.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

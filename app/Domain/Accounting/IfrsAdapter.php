@@ -2280,7 +2280,107 @@ class IfrsAdapter
             specificName: 'Почетно'
         );
     }
+
+    /**
+     * Post a year-end closing journal entry to the ledger.
+     *
+     * Used by YearEndClosingService to create closing entries
+     * (P&L → retained earnings transfer).
+     *
+     * @param  array  $entry  ['debit_code' => string, 'debit_name' => string,
+     *                         'credit_code' => string, 'credit_name' => string,
+     *                         'amount' => float, 'date' => string, 'narration' => string]
+     * @return int|null  Transaction ID or null on failure
+     */
+    public function postClosingEntry(Company $company, array $entry): ?int
+    {
+        if (! $this->isEnabled($company->id)) {
+            return null;
+        }
+
+        $entity = $this->getOrCreateEntityForCompany($company);
+        if (! $entity) {
+            return null;
+        }
+
+        $this->setUserEntityContext($entity);
+
+        // Find or create debit account
+        $debitAccount = $this->findAccountByCode($entity->id, $entry['debit_code'], $entry['debit_name']);
+        $creditAccount = $this->findAccountByCode($entity->id, $entry['credit_code'], $entry['credit_name']);
+
+        $transaction = Transaction::create([
+            'account_id' => $debitAccount->id,
+            'transaction_date' => Carbon::parse($entry['date']),
+            'narration' => $entry['narration'],
+            'transaction_type' => Transaction::JN,
+            'currency_id' => $this->getCurrencyId($company->id),
+            'entity_id' => $entity->id,
+        ]);
+
+        LineItem::create([
+            'transaction_id' => $transaction->id,
+            'account_id' => $debitAccount->id,
+            'amount' => $entry['amount'],
+            'quantity' => 1,
+            'credited' => false,
+            'entity_id' => $entity->id,
+        ]);
+
+        LineItem::create([
+            'transaction_id' => $transaction->id,
+            'account_id' => $creditAccount->id,
+            'amount' => $entry['amount'],
+            'quantity' => 1,
+            'credited' => true,
+            'entity_id' => $entity->id,
+        ]);
+
+        $transaction->post();
+
+        return $transaction->id;
+    }
+
+    /**
+     * Find an IFRS Account by code, or create it.
+     */
+    protected function findAccountByCode(int $entityId, string $code, string $name): Account
+    {
+        // Handle range codes like "600-699"
+        $accountCode = explode('-', $code)[0];
+
+        $account = Account::where('entity_id', $entityId)
+            ->where('code', $accountCode)
+            ->first();
+
+        if ($account) {
+            return $account;
+        }
+
+        $prefix = (int) substr($accountCode, 0, 1);
+        $accountType = match ($prefix) {
+            0, 9 => Account::EQUITY,
+            1 => Account::NON_CURRENT_ASSET,
+            2 => Account::RECEIVABLE,
+            3 => Account::CURRENT_ASSET,
+            4 => Account::CURRENT_LIABILITY,
+            5 => Account::DIRECT_EXPENSE,
+            6 => Account::OPERATING_REVENUE,
+            7 => Account::OPERATING_EXPENSE,
+            8 => Account::OPERATING_REVENUE,
+            default => Account::OPERATING_EXPENSE,
+        };
+
+        return Account::create([
+            'entity_id' => $entityId,
+            'code' => $accountCode,
+            'name' => $name,
+            'account_type' => $accountType,
+            'currency_id' => 1,
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
 
 // CLAUDE-CHECKPOINT: WS1 - GL Auto-posting for Stock Movements:
 // Added postStockMovement() method with DR/CR logic for all source types

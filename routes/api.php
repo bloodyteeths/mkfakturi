@@ -936,6 +936,18 @@ Route::prefix('/v1')->group(function () {
             });
             // CLAUDE-CHECKPOINT
 
+            // Year-End Closing Wizard
+            // ----------------------------------
+            Route::prefix('year-end/{year}')->group(function () {
+                Route::get('/preflight', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'preflight']);
+                Route::get('/summary', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'summary']);
+                Route::post('/closing', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'closing']);
+                Route::get('/reports/{type}', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'reports']);
+                Route::post('/finalize', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'finalize']);
+                Route::post('/undo', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'undo']);
+            });
+            // CLAUDE-CHECKPOINT
+
             // Client Document Upload Portal (P8-01)
             // ----------------------------------
             Route::prefix('client-documents')->group(function () {

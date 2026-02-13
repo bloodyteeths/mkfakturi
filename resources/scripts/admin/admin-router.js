@@ -1094,6 +1094,12 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/TrialBalance.vue'),
       },
+      {
+        path: 'partner/accounting/year-end',
+        name: 'partner.accounting.year-end',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/YearEndWizard.vue'),
+      },
 
       // Banking
       {

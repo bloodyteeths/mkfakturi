@@ -681,6 +681,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'partner.accounting.year_end_closing',
+            'group' => 'partner.accounting',
+            'link' => '/admin/partner/accounting/year-end',
+            'icon' => 'CalendarIcon',
+            'name' => 'partner.accounting.year-end',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'partner.accounting.partner_dashboard',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/dashboard',
