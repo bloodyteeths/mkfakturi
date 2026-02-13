@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useYearEndClosingStore } from '@/scripts/admin/stores/year-end-closing'
 import Step1Preflight from './year-end/Step1Preflight.vue'
@@ -122,6 +122,13 @@ const yearOptions = computed(() => {
 function onYearChange() {
   store.reset()
 }
+
+// Auto-skip to Step 5 when fiscal year is already closed
+watch(() => store.alreadyClosed, (closed) => {
+  if (closed && store.currentStep === 1) {
+    store.goToStep(5)
+  }
+})
 
 onMounted(() => {
   store.reset()

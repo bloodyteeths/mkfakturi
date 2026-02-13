@@ -26,6 +26,8 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     return true
   })
 
+  const alreadyClosed = computed(() => preflightData.value?.already_closed === true)
+
   const stepLabels = computed(() => [
     { num: 1, key: 'partner.accounting.year_end.step_checklist' },
     { num: 2, key: 'partner.accounting.year_end.step_review' },
@@ -173,6 +175,7 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     // Computed
     totalSteps,
     canProceed,
+    alreadyClosed,
     stepLabels,
     // Actions
     fetchPreflight,

@@ -160,13 +160,15 @@ class YearEndClosingService
                 ->where('year', $year)
                 ->first();
 
+            $alreadyClosed = $fiscalYear && $fiscalYear->isClosed();
+
             $checks[] = [
                 'key' => 'year_not_closed',
                 'label' => 'Фискалната година е отворена',
                 'label_en' => 'Fiscal year is open',
-                'status' => (! $fiscalYear || $fiscalYear->isOpen()) ? 'pass' : 'error',
-                'detail' => $fiscalYear && $fiscalYear->isClosed()
-                    ? 'Годината е веќе затворена на ' . $fiscalYear->closed_at?->format('d.m.Y')
+                'status' => $alreadyClosed ? 'warning' : 'pass',
+                'detail' => $alreadyClosed
+                    ? 'Годината е веќе затворена на ' . $fiscalYear->closed_at?->format('d.m.Y') . ' — можете да ги преземете извештаите'
                     : null,
             ];
         } catch (\Exception $e) {
@@ -210,11 +212,13 @@ class YearEndClosingService
         // Summary
         $hasErrors = collect($checks)->contains('status', 'error');
         $hasWarnings = collect($checks)->contains('status', 'warning');
+        $yearAlreadyClosed = isset($alreadyClosed) && $alreadyClosed;
 
         return [
             'checks' => $checks,
             'can_proceed' => ! $hasErrors,
             'has_warnings' => $hasWarnings,
+            'already_closed' => $yearAlreadyClosed,
             'year' => $year,
         ];
     }
