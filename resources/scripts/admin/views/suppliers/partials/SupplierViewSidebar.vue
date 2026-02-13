@@ -1,19 +1,9 @@
 <template>
   <div
-    class="
-      fixed
-      top-0
-      left-0
-      hidden
-      h-full
-      pt-16
-      pb-[6.6rem]
-      ml-56
-      bg-white
-      xl:ml-64
-      w-88
-      xl:block
-    "
+    :class="[
+      'fixed top-0 left-0 hidden h-full pt-16 pb-[6.6rem] bg-white w-88 xl:block',
+      globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
+    ]"
   >
     <div
       class="
@@ -188,8 +178,10 @@ import { useRoute } from 'vue-router'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 import { debounce } from 'lodash'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const suppliersStore = useSuppliersStore()
+const globalStore = useGlobalStore()
 const route = useRoute()
 const { t } = useI18n()
 

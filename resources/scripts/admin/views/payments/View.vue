@@ -22,20 +22,10 @@
 
     <!-- Sidebar -->
     <div
-      class="
-        fixed
-        top-0
-        left-0
-        hidden
-        h-full
-        pt-16
-        pb-[6rem]
-        ml-56
-        bg-white
-        xl:ml-64
-        w-88
-        xl:block
-      "
+      :class="[
+        'fixed top-0 left-0 hidden h-full pt-16 pb-[6rem] bg-white w-88 xl:block',
+        globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
+      ]"
     >
       <div
         class="
@@ -258,6 +248,7 @@ import { useDialogStore } from '@/scripts/stores/dialog'
 import { usePaymentStore } from '@/scripts/admin/stores/payment'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 import PaymentDropdown from '@/scripts/admin/components/dropdowns/PaymentIndexDropdown.vue'
 import SendPaymentModal from '@/scripts/admin/components/modal-components/SendPaymentModal.vue'
@@ -281,6 +272,7 @@ let isFetching = ref(false)
 const paymentStore = usePaymentStore()
 const modalStore = useModalStore()
 const userStore = useUserStore()
+const globalStore = useGlobalStore()
 
 const paymentList = ref(null)
 const currentPageNumber = ref(1)

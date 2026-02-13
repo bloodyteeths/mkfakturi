@@ -45,7 +45,7 @@
     </Transition>
 
     <div
-      :style="{ transform: `translateY(${Math.min(pullDistance, maxPull)}px)`, transition: isTouching ? 'none' : 'transform 0.3s ease' }"
+      :style="pullDistance > 0 ? { transform: `translateY(${Math.min(pullDistance, maxPull)}px)`, transition: isTouching ? 'none' : 'transform 0.3s ease' } : {}"
     >
       <slot />
     </div>

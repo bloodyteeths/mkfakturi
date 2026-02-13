@@ -7,8 +7,10 @@ import { debounce } from 'lodash'
 import { useRecurringInvoiceStore } from '@/scripts/admin/stores/recurring-invoice'
 
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const recurringInvoiceStore = useRecurringInvoiceStore()
+const globalStore = useGlobalStore()
 
 const { t } = useI18n()
 const route = useRoute()
@@ -139,20 +141,10 @@ onSearched = debounce(onSearched, 500)
 <template>
   <!-- sidebar -->
   <div
-    class="
-      fixed
-      top-0
-      left-0
-      hidden
-      h-full
-      pt-16
-      pb-[6.4rem]
-      ml-56
-      bg-white
-      xl:ml-64
-      w-88
-      xl:block
-    "
+    :class="[
+      'fixed top-0 left-0 hidden h-full pt-16 pb-[6.4rem] bg-white w-88 xl:block',
+      globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
+    ]"
   >
     <div
       class="

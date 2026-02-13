@@ -9,6 +9,7 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 import ProformaInvoiceDropdown from '@/scripts/admin/components/dropdowns/ProformaInvoiceIndexDropdown.vue'
 import SendProformaInvoiceModal from '@/scripts/admin/components/modal-components/SendProformaInvoiceModal.vue'
@@ -21,6 +22,7 @@ const userStore = useUserStore()
 const dialogStore = useDialogStore()
 const modalStore = useModalStore()
 const notificationStore = useNotificationStore()
+const globalStore = useGlobalStore()
 
 const { t } = useI18n()
 const proformaInvoiceData = ref(null)
@@ -364,20 +366,10 @@ loadProformaInvoice()
 
     <!-- sidebar -->
     <div
-      class="
-        fixed
-        top-0
-        left-0
-        hidden
-        h-full
-        pt-16
-        pb-[6.4rem]
-        ml-56
-        bg-white
-        xl:ml-64
-        w-88
-        xl:block
-      "
+      :class="[
+        'fixed top-0 left-0 hidden h-full pt-16 pb-[6.4rem] bg-white w-88 xl:block',
+        globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
+      ]"
     >
       <div
         class="

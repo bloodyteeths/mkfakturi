@@ -37,20 +37,10 @@
 
     <!-- Sidebar -->
     <div
-      class="
-        fixed
-        top-0
-        left-0
-        hidden
-        h-full
-        pt-16
-        pb-[6.4rem]
-        ml-56
-        bg-white
-        xl:ml-64
-        w-88
-        xl:block
-      "
+      :class="[
+        'fixed top-0 left-0 hidden h-full pt-16 pb-[6.4rem] bg-white w-88 xl:block',
+        globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
+      ]"
     >
       <div
         class="
@@ -285,6 +275,7 @@ import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 import EstimateDropDown from '@/scripts/admin/components/dropdowns/EstimateIndexDropdown.vue'
 import SendEstimateModal from '@/scripts/admin/components/modal-components/SendEstimateModal.vue'
@@ -296,6 +287,7 @@ const modalStore = useModalStore()
 const estimateStore = useEstimateStore()
 const dialogStore = useDialogStore()
 const userStore = useUserStore()
+const globalStore = useGlobalStore()
 
 const { t } = useI18n()
 const estimateData = ref(null)
