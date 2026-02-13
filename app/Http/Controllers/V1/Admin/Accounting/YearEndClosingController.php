@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Accounting;
 
+use App\Domain\Accounting\IfrsAdapter;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanySetting;
@@ -142,6 +143,9 @@ class YearEndClosingController extends Controller
         if (! $summary) {
             $summary = $this->service->getFinancialSummary($company, $year);
         }
+
+        // Translate account names to Macedonian (cached data may have English names)
+        $summary = $this->translateAccountNames($summary);
 
         if ($type === 'tax-summary') {
             $totalRevenue = $summary['summary']['total_revenue'] ?? 0;
@@ -333,6 +337,74 @@ class YearEndClosingController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+    /**
+     * Translate account names to Macedonian in the financial summary.
+     *
+     * Cached pre-closing summaries may have English names from the IFRS library.
+     * This post-processes all account name fields to ensure Macedonian output.
+     */
+    private function translateAccountNames(array $summary): array
+    {
+        $map = IfrsAdapter::MK_ACCOUNT_TYPES;
+
+        // Build reverse lookup: English name → Macedonian name
+        // IFRS library uses names like "Receivable", "Equity", "Operating Expense"
+        $reverseMap = [];
+        foreach ($map as $constant => $mkName) {
+            // "OPERATING_EXPENSE" → "Operating Expense"
+            $englishName = str_replace('_', ' ', ucwords(strtolower($constant), '_'));
+            $reverseMap[$englishName] = $mkName;
+            // Also map by raw constant key
+            $reverseMap[$constant] = $mkName;
+            // Also map common variations (title case without underscores)
+            $reverseMap[ucfirst(strtolower(str_replace('_', ' ', $constant)))] = $mkName;
+        }
+
+        $translateList = function (array &$items) use ($reverseMap, $map) {
+            foreach ($items as &$item) {
+                if (! isset($item['name'])) {
+                    continue;
+                }
+                $name = $item['name'];
+                // Already Macedonian (contains Cyrillic)
+                if (preg_match('/[\x{0400}-\x{04FF}]/u', $name)) {
+                    continue;
+                }
+                // Try direct match by code field (IFRS constant)
+                if (isset($item['code']) && isset($map[$item['code']])) {
+                    $item['name'] = $map[$item['code']];
+                } elseif (isset($reverseMap[$name])) {
+                    $item['name'] = $reverseMap[$name];
+                }
+            }
+        };
+
+        // Balance sheet sections
+        if (isset($summary['balance_sheet']['assets'])) {
+            $translateList($summary['balance_sheet']['assets']);
+        }
+        if (isset($summary['balance_sheet']['equity'])) {
+            $translateList($summary['balance_sheet']['equity']);
+        }
+        if (isset($summary['balance_sheet']['liabilities'])) {
+            $translateList($summary['balance_sheet']['liabilities']);
+        }
+
+        // Income statement sections
+        if (isset($summary['income_statement']['revenues'])) {
+            $translateList($summary['income_statement']['revenues']);
+        }
+        if (isset($summary['income_statement']['expenses'])) {
+            $translateList($summary['income_statement']['expenses']);
+        }
+
+        // Trial balance
+        if (isset($summary['trial_balance']['accounts'])) {
+            $translateList($summary['trial_balance']['accounts']);
+        }
+
+        return $summary;
     }
 }
 // CLAUDE-CHECKPOINT

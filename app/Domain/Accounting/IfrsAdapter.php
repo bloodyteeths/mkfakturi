@@ -746,7 +746,7 @@ class IfrsAdapter
      * Macedonian account type names for UJP financial reports.
      * Hardcoded because API locale is 'en' and reports must always be Macedonian.
      */
-    protected const MK_ACCOUNT_TYPES = [
+    public const MK_ACCOUNT_TYPES = [
         'NON_CURRENT_ASSET' => 'Нетековни средства',
         'CONTRA_ASSET' => 'Контра средства',
         'INVENTORY' => 'Залихи',
