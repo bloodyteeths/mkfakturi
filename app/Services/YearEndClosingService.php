@@ -320,16 +320,26 @@ class YearEndClosingService
         $allIds = array_values(array_unique(array_merge($trackedIds, $orphanedIds)));
 
         if (! empty($allIds)) {
+            $now = now();
+            // Must soft-delete BOTH transactions AND ledger entries.
+            // Balance calculations query ifrs_ledgers (Ledger model has own SoftDeletes).
+            DB::table('ifrs_ledgers')
+                ->whereIn('transaction_id', $allIds)
+                ->whereNull('deleted_at')
+                ->update(['deleted_at' => $now]);
             DB::table('ifrs_transactions')
                 ->whereIn('id', $allIds)
                 ->whereNull('deleted_at')
-                ->update(['deleted_at' => now()]);
+                ->update(['deleted_at' => $now]);
         }
 
         try {
             return $callback();
         } finally {
             if (! empty($allIds)) {
+                DB::table('ifrs_ledgers')
+                    ->whereIn('transaction_id', $allIds)
+                    ->update(['deleted_at' => null]);
                 DB::table('ifrs_transactions')
                     ->whereIn('id', $allIds)
                     ->update(['deleted_at' => null]);
@@ -500,6 +510,7 @@ class YearEndClosingService
             ]);
 
             // Hard-delete old entries (bypasses soft-delete) so IFRS sees clean pre-closing state
+            DB::table('ifrs_ledgers')->whereIn('transaction_id', $allOldIds)->delete();
             DB::table('ifrs_line_items')->whereIn('transaction_id', $allOldIds)->delete();
             DB::table('ifrs_transactions')->whereIn('id', $allOldIds)->delete();
 
@@ -667,7 +678,8 @@ class YearEndClosingService
             $transactionIds = $notes['closing_transaction_ids'] ?? [];
 
             if (! empty($transactionIds)) {
-                // Delete line items first, then transactions
+                // Delete ledger entries, line items, then transactions
+                DB::table('ifrs_ledgers')->whereIn('transaction_id', $transactionIds)->delete();
                 LineItem::whereIn('transaction_id', $transactionIds)->delete();
                 Transaction::whereIn('id', $transactionIds)->delete();
             }
