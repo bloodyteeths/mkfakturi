@@ -307,6 +307,91 @@ test('delete multiple invoices', function () {
     }
 });
 
+test('bulk mark as sent', function () {
+    $invoices = Invoice::factory()->count(3)->create([
+        'invoice_date' => '1988-07-18',
+        'due_date' => '1988-08-18',
+        'status' => Invoice::STATUS_DRAFT,
+    ]);
+
+    $ids = $invoices->pluck('id')->toArray();
+
+    $response = postJson('api/v1/invoices/bulk-action', [
+        'ids' => $ids,
+        'action' => 'mark_as_sent',
+    ]);
+
+    $response
+        ->assertOk()
+        ->assertJson([
+            'success' => true,
+            'processed' => 3,
+        ]);
+
+    foreach ($invoices as $invoice) {
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => Invoice::STATUS_SENT,
+        ]);
+    }
+});
+
+test('bulk mark as sent skips non-draft invoices', function () {
+    $draft = Invoice::factory()->create([
+        'invoice_date' => '1988-07-18',
+        'due_date' => '1988-08-18',
+        'status' => Invoice::STATUS_DRAFT,
+    ]);
+
+    $sent = Invoice::factory()->create([
+        'invoice_date' => '1988-07-18',
+        'due_date' => '1988-08-18',
+        'status' => Invoice::STATUS_SENT,
+    ]);
+
+    $response = postJson('api/v1/invoices/bulk-action', [
+        'ids' => [$draft->id, $sent->id],
+        'action' => 'mark_as_sent',
+    ]);
+
+    $response
+        ->assertOk()
+        ->assertJson([
+            'success' => true,
+            'processed' => 1,
+        ]);
+
+    $this->assertDatabaseHas('invoices', [
+        'id' => $draft->id,
+        'status' => Invoice::STATUS_SENT,
+    ]);
+});
+
+test('bulk clone invoices', function () {
+    $invoices = Invoice::factory()->count(2)->create([
+        'invoice_date' => '1988-07-18',
+        'due_date' => '1988-08-18',
+    ]);
+
+    $countBefore = Invoice::count();
+
+    $ids = $invoices->pluck('id')->toArray();
+
+    $response = postJson('api/v1/invoices/bulk-action', [
+        'ids' => $ids,
+        'action' => 'clone',
+    ]);
+
+    $response
+        ->assertOk()
+        ->assertJson([
+            'success' => true,
+            'processed' => 2,
+        ]);
+
+    $this->assertEquals($countBefore + 2, Invoice::count());
+});
+
 test('clone invoice', function () {
     $invoices = Invoice::factory()->create([
         'invoice_date' => '1988-07-18',

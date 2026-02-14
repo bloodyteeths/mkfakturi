@@ -184,7 +184,7 @@ class InvoicesController extends Controller
      */
     public function bulkAction(Request $request)
     {
-        $this->authorize('send invoice');
+        $this->authorize('viewAny', Invoice::class);
 
         $validated = $request->validate([
             'ids' => 'required|array',
