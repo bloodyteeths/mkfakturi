@@ -29,7 +29,9 @@ class RelationNotExist implements ValidationRule
     {
         $relation = $this->relation;
 
-        if ($this->class::find($value)->$relation()->exists()) {
+        $model = $this->class::find($value);
+
+        if ($model && $model->$relation()->exists()) {
             $fail("Relation {$this->relation} exists.");
         }
 
