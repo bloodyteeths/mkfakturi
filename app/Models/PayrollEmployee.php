@@ -35,6 +35,7 @@ class PayrollEmployee extends Model
         'employment_type',
         'department',
         'position',
+        'occupation_code',
         'base_salary_amount',
         'currency_id',
         'is_active',
@@ -53,6 +54,7 @@ class PayrollEmployee extends Model
     {
         return [
             'base_salary_amount' => 'integer',
+            'occupation_code' => 'string',
             'is_active' => 'boolean',
             'employment_date' => 'date',
             'termination_date' => 'date',
@@ -149,4 +151,4 @@ class PayrollEmployee extends Model
     }
 }
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

@@ -143,7 +143,14 @@
         <!-- Header -->
         <div class="header">
             <h1>ПЛАТЕН ЛИСТ</h1>
-            <div class="period">{{ $periodName }}</div>
+            <div style="font-size: 8px; color: #95a5a6;">Бр. {{ $payrollRunLine->id }}/{{ $payrollRun->period_year }}</div>
+            <div class="period">
+                @php
+                    $mkMonths = [1=>'Јануари',2=>'Февруари',3=>'Март',4=>'Април',5=>'Мај',6=>'Јуни',7=>'Јули',8=>'Август',9=>'Септември',10=>'Октомври',11=>'Ноември',12=>'Декември'];
+                    $mkPeriod = ($mkMonths[$payrollRun->period_month] ?? $periodName) . ' ' . $payrollRun->period_year;
+                @endphp
+                {{ $mkPeriod }}
+            </div>
         </div>
 
         <!-- Company & Employee Information -->
@@ -187,11 +194,15 @@
                     @if($employee->department)
                         <div class="info-value">Оддел: {{ $employee->department }}</div>
                     @endif
+                    @if($employee->occupation_code)
+                        <div class="info-value">Шифра на занимање: {{ $employee->occupation_code }}</div>
+                    @endif
                     <div class="info-value" style="margin-top: 5px;">
                         <strong>Период:</strong> {{ $payrollRun->period_start->format('d.m.Y') }} - {{ $payrollRun->period_end->format('d.m.Y') }}
                     </div>
                     <div class="info-value">
                         <strong>Работни денови:</strong> {{ $payrollRunLine->worked_days }} / {{ $payrollRunLine->working_days }}
+                        ({{ $payrollRunLine->worked_days * 8 }} / {{ $payrollRunLine->working_days * 8 }} часови)
                     </div>
                 </div>
             </div>
@@ -214,6 +225,18 @@
                     <td>Основна плата (Бруто)</td>
                     <td class="amount money-format">{{ number_format($payrollRunLine->gross_salary / 100, 2, '.', ',') }}</td>
                 </tr>
+                @php
+                    $minBase = config('mk.payroll.min_contribution_base', 3157700);
+                    $maxBase = config('mk.payroll.max_contribution_base', 101046400);
+                    $contributionBase = max($minBase, min($maxBase, $payrollRunLine->gross_salary));
+                    $showContributionBase = ($contributionBase !== $payrollRunLine->gross_salary);
+                @endphp
+                @if($showContributionBase)
+                <tr>
+                    <td style="font-style: italic; color: #666;">Основица за придонеси (минимум/максимум)</td>
+                    <td class="amount money-format" style="font-style: italic; color: #666;">{{ number_format($contributionBase / 100, 2, '.', ',') }}</td>
+                </tr>
+                @endif
                 @if($payrollRunLine->transport_allowance > 0)
                 <tr>
                     <td>Надомест за превоз</td>
@@ -325,3 +348,4 @@
     </div>
 </body>
 </html>
+{{-- CLAUDE-CHECKPOINT --}}

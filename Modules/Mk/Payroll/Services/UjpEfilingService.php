@@ -36,6 +36,14 @@ class UjpEfilingService
      */
     public function generateMpinXml(PayrollRun $payrollRun, Company $company): string
     {
+        // Validate required company data for UJP filing
+        $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
+        if (empty($edb)) {
+            throw new \InvalidArgumentException(
+                'Компанијата нема поставено ЕДБ. ЕДБ е задолжителен за МПИН поднесување.'
+            );
+        }
+
         $dom = new DOMDocument('1.0', 'UTF-8');
         $dom->formatOutput = true;
 
@@ -220,7 +228,8 @@ class UjpEfilingService
     {
         $employer = $dom->createElement('Employer');
 
-        $this->appendElement($dom, $employer, 'TaxID', $company->unique_hash ?? '');
+        $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
+        $this->appendElement($dom, $employer, 'TaxID', $edb ?? '');
         $this->appendElement($dom, $employer, 'CompanyName', $company->name);
 
         // Address
@@ -518,14 +527,14 @@ class UjpEfilingService
     }
 
     /**
-     * Helper: Append a monetary amount element (values are in MKD, not cents)
+     * Helper: Append a monetary amount element (converts cents to MKD)
      */
     private function appendMonetaryElement(DOMDocument $dom, \DOMElement $parent, string $name, int|float $amount): void
     {
-        $value = number_format($amount, 2, '.', '');
+        $value = number_format($amount / 100, 2, '.', '');
         $element = $dom->createElement($name, $value);
         $parent->appendChild($element);
     }
 }
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

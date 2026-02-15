@@ -110,12 +110,17 @@ class PayrollRun extends Model
     }
 
     /**
-     * Get the period name (e.g., "January 2025").
+     * Get localized period name (Macedonian).
      */
     public function getPeriodNameAttribute(): string
     {
-        $monthName = date('F', mktime(0, 0, 0, $this->period_month, 1));
-        return "{$monthName} {$this->period_year}";
+        $mkMonths = [
+            1 => 'Јануари', 2 => 'Февруари', 3 => 'Март', 4 => 'Април',
+            5 => 'Мај', 6 => 'Јуни', 7 => 'Јули', 8 => 'Август',
+            9 => 'Септември', 10 => 'Октомври', 11 => 'Ноември', 12 => 'Декември',
+        ];
+
+        return ($mkMonths[$this->period_month] ?? "Month {$this->period_month}") . ' ' . $this->period_year;
     }
 
     /**
@@ -184,4 +189,4 @@ class PayrollRun extends Model
     }
 }
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

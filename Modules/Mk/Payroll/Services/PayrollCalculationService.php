@@ -45,6 +45,26 @@ class PayrollCalculationService
      */
     public function calculatePayrollRun($run)
     {
+        // Validate company has required tax identifiers for UJP/MPIN filing
+        $company = $run->company;
+        $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
+        $embs = \App\Models\CompanySetting::getSetting('registration_number', $company->id);
+
+        $missing = [];
+        if (empty($edb)) {
+            $missing[] = 'ЕДБ (Единствен Даночен Број)';
+        }
+        if (empty($embs)) {
+            $missing[] = 'ЕМБС (Единствен Матичен Број на Субјектот)';
+        }
+
+        if (!empty($missing)) {
+            throw new \InvalidArgumentException(
+                'Компанијата нема поставено: ' . implode(', ', $missing) .
+                '. Овие податоци се задолжителни за пресметка на плата и поднесување на МПИН до УЈП.'
+            );
+        }
+
         try {
             DB::beginTransaction();
 
@@ -95,18 +115,13 @@ class PayrollCalculationService
                     'employee_id' => $employee->id,
                     'gross_salary' => $calculation->grossSalary,
                     'net_salary' => $calculation->netSalary,
-                    'taxable_base' => $calculation->taxableBase,
-                    'pension_employee' => $calculation->pensionEmployee,
-                    'pension_employer' => $calculation->pensionEmployer,
-                    'health_employee' => $calculation->healthEmployee,
-                    'health_employer' => $calculation->healthEmployer,
-                    'unemployment' => $calculation->unemployment,
+                    'pension_contribution_employee' => $calculation->pensionEmployee,
+                    'pension_contribution_employer' => $calculation->pensionEmployer,
+                    'health_contribution_employee' => $calculation->healthEmployee,
+                    'health_contribution_employer' => $calculation->healthEmployer,
+                    'unemployment_contribution' => $calculation->unemployment,
                     'additional_contribution' => $calculation->additionalContribution,
-                    'income_tax' => $calculation->incomeTax,
-                    'total_employee_deductions' => $calculation->totalEmployeeDeductions,
-                    'total_employer_cost' => $calculation->totalEmployerCost,
-                    'allowances' => 0,
-                    'deductions' => 0,
+                    'income_tax_amount' => $calculation->incomeTax,
                     'leave_days_taken' => $leaveResult['leave_days_taken'],
                     'leave_deduction_amount' => $leaveResult['leave_deduction_amount'],
                     'overtime_hours' => $overtimeResult['overtime_hours'],
@@ -174,17 +189,14 @@ class PayrollCalculationService
             // Update line
             $line->update([
                 'gross_salary' => $calculation->grossSalary,
-                'net_salary' => $calculation->netSalary - ($line->deductions ?? 0),
-                'taxable_base' => $calculation->taxableBase,
-                'pension_employee' => $calculation->pensionEmployee,
-                'pension_employer' => $calculation->pensionEmployer,
-                'health_employee' => $calculation->healthEmployee,
-                'health_employer' => $calculation->healthEmployer,
-                'unemployment' => $calculation->unemployment,
+                'net_salary' => $calculation->netSalary - ($line->deductions_total ?? 0),
+                'pension_contribution_employee' => $calculation->pensionEmployee,
+                'pension_contribution_employer' => $calculation->pensionEmployer,
+                'health_contribution_employee' => $calculation->healthEmployee,
+                'health_contribution_employer' => $calculation->healthEmployer,
+                'unemployment_contribution' => $calculation->unemployment,
                 'additional_contribution' => $calculation->additionalContribution,
-                'income_tax' => $calculation->incomeTax,
-                'total_employee_deductions' => $calculation->totalEmployeeDeductions,
-                'total_employer_cost' => $calculation->totalEmployerCost,
+                'income_tax_amount' => $calculation->incomeTax,
             ]);
 
             Log::info('Payroll line recalculated', [
@@ -286,4 +298,4 @@ class PayrollCalculationService
     }
 }
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT (payroll tax-identifier validation added)
