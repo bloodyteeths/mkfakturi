@@ -47,14 +47,12 @@ class PayrollCalculationService
     {
         // Validate company has required tax identifiers for UJP/MPIN filing
         $company = $run->company;
-        $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
-        $embs = \App\Models\CompanySetting::getSetting('registration_number', $company->id);
 
         $missing = [];
-        if (empty($edb)) {
+        if (empty($company->vat_number)) {
             $missing[] = 'ЕДБ (Единствен Даночен Број)';
         }
-        if (empty($embs)) {
+        if (empty($company->registration_number)) {
             $missing[] = 'ЕМБС (Единствен Матичен Број на Субјектот)';
         }
 

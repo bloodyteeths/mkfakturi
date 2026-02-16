@@ -32,6 +32,7 @@ class Company extends Model implements HasMedia
         'slug',
         'vat_id',
         'vat_number',
+        'registration_number',
         'tax_id',
         'ifrs_entity_id',
         'paddle_id',

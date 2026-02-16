@@ -31,6 +31,11 @@ class CompanyRequest extends FormRequest
             'tax_id' => [
                 'nullable',
             ],
+            'registration_number' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
             'slug' => [
                 'nullable',
             ],
@@ -48,6 +53,7 @@ class CompanyRequest extends FormRequest
                 'slug',
                 'vat_id',
                 'tax_id',
+                'registration_number',
             ])
             ->toArray();
 

@@ -93,6 +93,10 @@
           <BaseInputGroup :label="$t('settings.company_info.vat_id')">
             <BaseInput v-model="companyForm.vat_id" type="text" />
           </BaseInputGroup>
+
+          <BaseInputGroup label="ЕМБС (Матичен број)">
+            <BaseInput v-model="companyForm.registration_number" type="text" />
+          </BaseInputGroup>
         </div>
       </BaseInputGrid>
 
@@ -156,6 +160,7 @@ const companyForm = reactive({
   logo: null,
   tax_id: null,
   vat_id: null,
+  registration_number: null,
   address: {
     address_street_1: '',
     address_street_2: '',

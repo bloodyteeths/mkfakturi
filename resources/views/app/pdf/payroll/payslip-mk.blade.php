@@ -173,15 +173,11 @@
                             <div class="info-value">Тел: {{ $company->address->phone }}</div>
                         @endif
                     @endif
-                    @php
-                        $edb = \App\Models\CompanySetting::getSetting('vat_number', $company->id);
-                        $embs = \App\Models\CompanySetting::getSetting('registration_number', $company->id);
-                    @endphp
-                    @if($edb)
-                        <div class="info-value">ЕДБ: {{ $edb }}</div>
+                    @if($company->vat_number)
+                        <div class="info-value">ЕДБ: {{ $company->vat_number }}</div>
                     @endif
-                    @if($embs)
-                        <div class="info-value">ЕМБС: {{ $embs }}</div>
+                    @if($company->registration_number)
+                        <div class="info-value">ЕМБС: {{ $company->registration_number }}</div>
                     @endif
                 </div>
                 <div class="info-col">
