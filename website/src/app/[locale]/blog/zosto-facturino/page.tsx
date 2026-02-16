@@ -71,7 +71,7 @@ const copy = {
     ],
     relatedTitle: 'Поврзани статии',
     related: [
-      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
+      { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Годишно затворање на книги: 6 чекори со Facturino' },
     ],
@@ -127,7 +127,7 @@ const copy = {
     ],
     relatedTitle: 'Related articles',
     related: [
-      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Are Not Enough' },
+      { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Year-End Closing: 6 Steps with Facturino' },
     ],
@@ -183,7 +183,7 @@ const copy = {
     ],
     relatedTitle: 'Artikuj të ngjashëm',
     related: [
-      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
+      { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Mbyllja e vitit: 6 hapa me Facturino' },
     ],
@@ -239,7 +239,7 @@ const copy = {
     ],
     relatedTitle: 'İlgili makaleler',
     related: [
-      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yetmez' },
+      { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geçiyor' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Yıl sonu kapanışı: Facturino ile 6 adım' },
     ],

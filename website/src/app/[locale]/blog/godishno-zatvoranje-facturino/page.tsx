@@ -144,7 +144,7 @@ const copy = {
     relatedTitle: 'Поврзани статии',
     related: [
       { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич за поднесување до ЦРСМ' },
-      { slug: 'bilans-na-sostojba', title: 'Биланс на состојба и биланс на успех: AOP ознаки и структура' },
+      { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
       { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
     ],
     ctaSection: {
@@ -270,7 +270,7 @@ const copy = {
     relatedTitle: 'Related articles',
     related: [
       { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide for CRMS' },
-      { slug: 'bilans-na-sostojba', title: 'Balance Sheet & Income Statement: AOP Codes and Structure' },
+      { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
       { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
     ],
     ctaSection: {
@@ -396,7 +396,7 @@ const copy = {
     relatedTitle: 'Artikuj t\u00eb ngjash\u00ebm',
     related: [
       { slug: 'godishna-smetka-2025', title: 'Llogarit\u00eb vjetore 2025: Udh\u00ebzues i plot\u00eb p\u00ebr dor\u00ebzim n\u00eb QRMK' },
-      { slug: 'bilans-na-sostojba', title: 'Bilanci dhe pasqyra e t\u00eb ardhurave: Kodet AOP dhe struktura' },
+      { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
       { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
     ],
     ctaSection: {
@@ -522,7 +522,7 @@ const copy = {
     relatedTitle: '\u0130lgili makaleler',
     related: [
       { slug: 'godishna-smetka-2025', title: 'Y\u0131ll\u0131k hesaplar 2025: CRMS dosyalama rehberi' },
-      { slug: 'bilans-na-sostojba', title: 'Bilan\u00e7o ve gelir tablosu: AOP kodlar\u0131 ve yap\u0131' },
+      { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geçiyor' },
       { slug: 'zosto-facturino', title: "Makedon i\u015fletmelerin Facturino'yu se\u00e7mesinin 10 nedeni" },
     ],
     ctaSection: {

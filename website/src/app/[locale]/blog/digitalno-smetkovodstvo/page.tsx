@@ -97,7 +97,7 @@ const copy = {
     relatedTitle: 'Поврзани статии',
     related: [
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
-      { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
+      { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
       { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
     ],
     cta: {
@@ -175,7 +175,7 @@ const copy = {
     relatedTitle: 'Related articles',
     related: [
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Are Not Enough' },
-      { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
+      { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
       { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
     ],
     cta: {
@@ -253,7 +253,7 @@ const copy = {
     relatedTitle: 'Artikuj të ngjashëm',
     related: [
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
-      { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
+      { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
       { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
     ],
     cta: {
@@ -331,7 +331,7 @@ const copy = {
     relatedTitle: 'İlgili makaleler',
     related: [
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yetmez' },
-      { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
+      { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geçiyor' },
       { slug: 'zosto-facturino', title: "Makedon işletmelerin Facturino'yu seçmesinin 10 nedeni" },
     ],
     cta: {
