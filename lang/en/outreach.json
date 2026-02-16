@@ -47,6 +47,42 @@
     "cta": "Set password and complete profile",
     "contact": "For questions, contact us at partners@facturino.mk"
   },
+  "company_initial": {
+    "subject": "Is your company ready for e-Faktura?",
+    "greeting": "Hello,",
+    "pain_point": "E-Faktura is becoming mandatory soon. If you are still using Excel or outdated invoicing software — it is time for a change.",
+    "solution": "Facturino is a cloud invoicing platform built for Macedonia: Macedonian VAT rates, automatic e-Faktura (UBL 2.1), bank connections with NLB/Stopanska/Komercijalna/Sparkasse, and MPIN payroll.",
+    "cta": "Watch 2-minute demo"
+  },
+  "company_followup1": {
+    "subject": "Automatic bank statements — no copy-paste",
+    "greeting": "Hello again,",
+    "bank_intro": "Imagine not having to manually enter bank statements. Facturino automatically pulls transactions and reconciles them with invoices.",
+    "banks_list": "Direct PSD2 connection: NLB, Stopanska, Komercijalna, Sparkasse. For other banks — CSV import in 30 seconds.",
+    "cta": "Try free for 14 days"
+  },
+  "company_followup2": {
+    "subject": "Starter plan: only €12/month",
+    "greeting": "Hello,",
+    "trial_offer": "14 days free Standard plan — no credit card, no commitment. After the trial, decide for yourself.",
+    "pricing": "Starter: €12/mo (50 invoices) | Standard: €29/mo (200 invoices + e-Faktura + bank) | Business: €59/mo (payroll + API + 1000 invoices)",
+    "cta": "Start for free"
+  },
+  "company_followup3": {
+    "subject": "E-Faktura is becoming mandatory — get ready",
+    "greeting": "Hello,",
+    "efaktura_urgency": "When e-Faktura becomes mandatory, you will not have time to prepare. Facturino generates UBL 2.1 XML with QES digital signing — with one click.",
+    "ready": "Over 200 companies already invoice through Facturino. Recurring invoices, estimates, credit notes, VAT calculations — all automatic.",
+    "cta": "Sign up for free"
+  },
+  "company_followup4": {
+    "subject": "Final message from Facturino",
+    "greeting": "Hello,",
+    "last_chance": "This is our last message. If Excel or your current software works for you — no problem.",
+    "comparison": "But if you want: automatic e-Faktura, bank feeds, professional PDFs with QR codes, recurring invoices and mobile access — Facturino is here for you.",
+    "cta": "Try for free",
+    "final_note": "We wish you success! If you ever need us — facturino.mk"
+  },
   "directory": {
     "subject": "Facturino — new Macedonian software for :directory",
     "greeting": "Hello :name,",

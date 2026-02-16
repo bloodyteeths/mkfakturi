@@ -36,7 +36,8 @@ class OutreachSendBatchCommand extends Command
     protected $signature = 'outreach:send-batch
                             {--limit=20 : Maximum emails to send in this batch}
                             {--dry-run : Show what would be sent without sending}
-                            {--template= : Force specific template (first_touch, followup_1, followup_2, followup_3, followup_4)}';
+                            {--template= : Force specific template (first_touch, followup_1, followup_2, followup_3, followup_4)}
+                            {--type= : Lead type filter (accountant, company). Default: all}';
 
     /**
      * The console command description.
@@ -82,7 +83,10 @@ class OutreachSendBatchCommand extends Command
      *
      * @var array<string>
      */
-    protected array $validTemplates = ['first_touch', 'followup_1', 'followup_2', 'followup_3', 'followup_4'];
+    protected array $validTemplates = [
+        'first_touch', 'followup_1', 'followup_2', 'followup_3', 'followup_4',
+        'company_initial', 'company_followup_1', 'company_followup_2', 'company_followup_3', 'company_followup_4',
+    ];
 
     /**
      * HubSpot service instance.
@@ -109,6 +113,7 @@ class OutreachSendBatchCommand extends Command
         $limit = (int) $this->option('limit');
         $dryRun = $this->option('dry-run');
         $forcedTemplate = $this->option('template');
+        $leadType = $this->option('type');
 
         $this->info('Outreach Batch Send');
         $this->line('===================');
@@ -117,6 +122,18 @@ class OutreachSendBatchCommand extends Command
         if ($dryRun) {
             $this->warn('DRY RUN MODE - No emails will be sent');
             $this->newLine();
+        }
+
+        if ($leadType) {
+            $this->info("Lead type filter: {$leadType}");
+            $this->newLine();
+        }
+
+        // Validate lead type if provided
+        if ($leadType && !in_array($leadType, [OutreachLead::TYPE_ACCOUNTANT, OutreachLead::TYPE_COMPANY])) {
+            $this->error("Invalid lead type: {$leadType}");
+            $this->line('Valid types: accountant, company');
+            return self::FAILURE;
         }
 
         // Validate forced template if provided
@@ -156,7 +173,7 @@ class OutreachSendBatchCommand extends Command
         $this->newLine();
 
         // Step 2: Find eligible leads
-        $leads = $this->findEligibleLeads($effectiveLimit, $forcedTemplate);
+        $leads = $this->findEligibleLeads($effectiveLimit, $forcedTemplate, $leadType);
 
         if ($leads->isEmpty()) {
             $this->info('No eligible leads found for outreach.');
@@ -206,7 +223,7 @@ class OutreachSendBatchCommand extends Command
      * @param string|null $forcedTemplate
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    protected function findEligibleLeads(int $limit, ?string $forcedTemplate)
+    protected function findEligibleLeads(int $limit, ?string $forcedTemplate, ?string $leadType = null)
     {
         $query = OutreachLead::query()
             // Has HubSpot mapping with deal in sendable stage
@@ -218,6 +235,13 @@ class OutreachSendBatchCommand extends Command
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('suppressions');
             });
+
+        // Apply lead type filter
+        if ($leadType === OutreachLead::TYPE_ACCOUNTANT) {
+            $query->accountants();
+        } elseif ($leadType === OutreachLead::TYPE_COMPANY) {
+            $query->companies();
+        }
 
         if ($forcedTemplate) {
             // Apply template-specific filtering
@@ -319,6 +343,33 @@ class OutreachSendBatchCommand extends Command
                 ->whereIn('status', [OutreachLead::STATUS_EMAILED, OutreachLead::STATUS_FOLLOWUP]);
         }
 
+        // Company templates
+        if ($template === 'company_initial') {
+            return $query->companies()
+                ->whereDoesntHave('sends')
+                ->where('status', OutreachLead::STATUS_NEW);
+        }
+
+        if (str_starts_with($template, 'company_followup_')) {
+            $followupNum = (int) str_replace('company_followup_', '', $template);
+            $scheduleKey = "followup_{$followupNum}";
+            $daysAfter = $this->followUpSchedule[$scheduleKey] ?? 0;
+            $prevKey = $followupNum === 1 ? 'company_initial' : 'company_followup_' . ($followupNum - 1);
+
+            return $query->companies()
+                ->whereHas('sends', function ($q) use ($daysAfter) {
+                    $q->where('template_key', 'company_initial')
+                      ->where('sent_at', '<=', now()->subDays($daysAfter));
+                })
+                ->whereHas('sends', function ($q) use ($prevKey) {
+                    $q->where('template_key', $prevKey);
+                })
+                ->whereDoesntHave('sends', function ($q) use ($template) {
+                    $q->where('template_key', $template);
+                })
+                ->whereIn('status', [OutreachLead::STATUS_EMAILED, OutreachLead::STATUS_FOLLOWUP]);
+        }
+
         return $query;
     }
 
@@ -330,56 +381,42 @@ class OutreachSendBatchCommand extends Command
      */
     protected function getTemplateKey(OutreachLead $lead): ?string
     {
+        $isCompany = $lead->lead_type === OutreachLead::TYPE_COMPANY;
+        $prefix = $isCompany ? 'company_' : '';
+
         $sendCount = $lead->sends()->count();
 
         if ($sendCount === 0) {
-            return 'first_touch';
+            return $isCompany ? 'company_initial' : 'first_touch';
         }
 
-        // Check if first_touch was sent and enough time has passed for followup_1
-        $firstTouchSend = $lead->sends()->where('template_key', 'first_touch')->first();
-        if (!$firstTouchSend) {
-            // Legacy: check for 'initial' template key
-            $firstTouchSend = $lead->sends()->where('template_key', 'initial')->first();
-        }
+        // Check if the initial email was sent and enough time has passed
+        $initialKeys = $isCompany
+            ? ['company_initial']
+            : ['first_touch', 'initial']; // 'initial' = legacy key
+
+        $firstTouchSend = $lead->sends()->whereIn('template_key', $initialKeys)->first();
 
         if (!$firstTouchSend) {
-            return 'first_touch';
+            return $isCompany ? 'company_initial' : 'first_touch';
         }
 
         $daysSinceFirst = $firstTouchSend->sent_at->diffInDays(now());
 
-        $hasFollowup1 = $lead->sends()->where('template_key', 'followup_1')->exists();
-        $hasFollowup2 = $lead->sends()->where('template_key', 'followup_2')->exists();
-        $hasFollowup3 = $lead->sends()->where('template_key', 'followup_3')->exists();
-        $hasFollowup4 = $lead->sends()->where('template_key', 'followup_4')->exists();
+        $followupKeys = $isCompany
+            ? ['company_followup_1', 'company_followup_2', 'company_followup_3', 'company_followup_4']
+            : ['followup_1', 'followup_2', 'followup_3', 'followup_4'];
 
-        if (!$hasFollowup1) {
-            if ($daysSinceFirst >= $this->followUpSchedule['followup_1']) {
-                return 'followup_1';
-            }
-            return null;
-        }
+        $scheduleKeys = ['followup_1', 'followup_2', 'followup_3', 'followup_4'];
 
-        if (!$hasFollowup2) {
-            if ($daysSinceFirst >= $this->followUpSchedule['followup_2']) {
-                return 'followup_2';
+        foreach ($followupKeys as $i => $key) {
+            $hasThisFollowup = $lead->sends()->where('template_key', $key)->exists();
+            if (!$hasThisFollowup) {
+                if ($daysSinceFirst >= $this->followUpSchedule[$scheduleKeys[$i]]) {
+                    return $key;
+                }
+                return null;
             }
-            return null;
-        }
-
-        if (!$hasFollowup3) {
-            if ($daysSinceFirst >= $this->followUpSchedule['followup_3']) {
-                return 'followup_3';
-            }
-            return null;
-        }
-
-        if (!$hasFollowup4) {
-            if ($daysSinceFirst >= $this->followUpSchedule['followup_4']) {
-                return 'followup_4';
-            }
-            return null;
         }
 
         // Max 5 emails reached
@@ -446,6 +483,7 @@ class OutreachSendBatchCommand extends Command
                 $unsubUrl = $unsubToken->getUnsubscribeUrl();
 
                 // Map template key for PostmarkService (first_touch -> initial)
+                // Company templates pass through as-is (company_initial, company_followup_1, etc.)
                 $postmarkTemplateKey = $templateKey === 'first_touch' ? 'initial' : $templateKey;
 
                 // Send via Postmark
@@ -519,21 +557,27 @@ class OutreachSendBatchCommand extends Command
      */
     protected function calculateNextFollowup(string $templateKey): Carbon
     {
-        if ($templateKey === 'first_touch') {
+        // Normalize company templates to standard schedule keys
+        $normalized = str_replace('company_', '', $templateKey);
+        if ($normalized === 'initial') {
+            $normalized = 'first_touch';
+        }
+
+        if ($normalized === 'first_touch') {
             return now()->addDays($this->followUpSchedule['followup_1']);
         }
 
-        if ($templateKey === 'followup_1') {
+        if ($normalized === 'followup_1') {
             $daysUntil = $this->followUpSchedule['followup_2'] - $this->followUpSchedule['followup_1'];
             return now()->addDays($daysUntil);
         }
 
-        if ($templateKey === 'followup_2') {
+        if ($normalized === 'followup_2') {
             $daysUntil = $this->followUpSchedule['followup_3'] - $this->followUpSchedule['followup_2'];
             return now()->addDays($daysUntil);
         }
 
-        if ($templateKey === 'followup_3') {
+        if ($normalized === 'followup_3') {
             $daysUntil = $this->followUpSchedule['followup_4'] - $this->followUpSchedule['followup_3'];
             return now()->addDays($daysUntil);
         }
@@ -651,6 +695,11 @@ class OutreachSendBatchCommand extends Command
             'followup_2' => 'Free Trial - Facturino',
             'followup_3' => '14 Days Free - Facturino',
             'followup_4' => 'Final Message - e-Faktura Deadline',
+            'company_initial' => 'Is your company ready for e-Faktura?',
+            'company_followup_1' => 'Automatic bank statements - Facturino',
+            'company_followup_2' => 'Starter plan: only €12/month',
+            'company_followup_3' => 'e-Faktura is becoming mandatory',
+            'company_followup_4' => 'Final message from Facturino',
             default => "Facturino Outreach: {$templateKey}",
         };
     }

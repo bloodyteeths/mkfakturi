@@ -130,16 +130,27 @@ if (InstallUtils::isDbCreated()) {
         ->name('process-data-exports')
         ->withoutOverlapping();
 
-    // Outreach email batch send - runs every 15 minutes during business hours
+    // Outreach email batch send - accountant leads
+    // Runs every 15 minutes during business hours (Tue-Thu 09:00-11:00 optimal)
     // Sends up to 10 emails per batch, respects daily/hourly limits
-    // Only runs on weekdays between 08:00-18:00 Macedonia time
-    Schedule::command('outreach:send-batch --limit=10')
+    Schedule::command('outreach:send-batch --limit=10 --type=accountant')
         ->everyFifteenMinutes()
         ->between('08:00', '18:00')
         ->weekdays()
         ->timezone('Europe/Skopje')
         ->runInBackground()
-        ->name('outreach-batch-send')
+        ->name('outreach-batch-accountant')
+        ->withoutOverlapping();
+
+    // Outreach email batch send - company leads
+    // Runs every 15 minutes during business hours, separate from accountant batch
+    Schedule::command('outreach:send-batch --limit=10 --type=company')
+        ->everyFifteenMinutes()
+        ->between('08:00', '18:00')
+        ->weekdays()
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->name('outreach-batch-company')
         ->withoutOverlapping();
 
     // Poll HubSpot for deals in "interested" stage and create partner accounts

@@ -11,6 +11,11 @@ use Modules\Mk\Bitrix\Mail\OutreachFollowUp1Mail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp2Mail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp3Mail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp4Mail;
+use Modules\Mk\Bitrix\Mail\CompanyOutreachInitialMail;
+use Modules\Mk\Bitrix\Mail\CompanyFollowUp1Mail;
+use Modules\Mk\Bitrix\Mail\CompanyFollowUp2Mail;
+use Modules\Mk\Bitrix\Mail\CompanyFollowUp3Mail;
+use Modules\Mk\Bitrix\Mail\CompanyFollowUp4Mail;
 use Modules\Mk\Bitrix\Mail\PartnerInviteMail;
 
 /**
@@ -333,11 +338,18 @@ class PostmarkOutreachService
         $signupUrl = config('app.url') . '/signup';
 
         return match ($templateKey) {
+            // Accountant templates
             'initial' => new OutreachInitialMail($companyName, $email, $demoUrl, $unsubscribeUrl),
             'followup_1' => new OutreachFollowUp1Mail($companyName, $email, $demoUrl, $unsubscribeUrl),
             'followup_2' => new OutreachFollowUp2Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'followup_3' => new OutreachFollowUp3Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'followup_4' => new OutreachFollowUp4Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            // Company templates
+            'company_initial' => new CompanyOutreachInitialMail($companyName, $email, $demoUrl, $unsubscribeUrl),
+            'company_followup_1' => new CompanyFollowUp1Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'company_followup_2' => new CompanyFollowUp2Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'company_followup_3' => new CompanyFollowUp3Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'company_followup_4' => new CompanyFollowUp4Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             default => null,
         };
     }

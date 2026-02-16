@@ -54,6 +54,8 @@ class OutreachLead extends Model
         'website',
         'source',
         'source_url',
+        'lead_type',
+        'sector',
         'status',
         'partner_id',
         'next_followup_at',
@@ -71,11 +73,19 @@ class OutreachLead extends Model
     ];
 
     /**
+     * Lead type constants.
+     */
+    public const TYPE_ACCOUNTANT = 'accountant';
+    public const TYPE_COMPANY = 'company';
+
+    /**
      * Lead source constants.
      */
     public const SOURCE_ISOS = 'isos';
     public const SOURCE_SMETKOVODITELI = 'smetkovoditeli';
     public const SOURCE_MANUAL = 'manual';
+    public const SOURCE_SCRAPE = 'scrape';
+    public const SOURCE_POSTMARK_IMPORT = 'postmark_import';
 
     /**
      * Lead status constants.
@@ -156,6 +166,30 @@ class OutreachLead extends Model
     public function getHubspotCompanyIdAttribute(): ?string
     {
         return $this->hubspotMapping?->hubspot_company_id;
+    }
+
+    /**
+     * Scope to accountant leads only.
+     */
+    public function scopeAccountants($query)
+    {
+        return $query->where('lead_type', self::TYPE_ACCOUNTANT);
+    }
+
+    /**
+     * Scope to company leads only.
+     */
+    public function scopeCompanies($query)
+    {
+        return $query->where('lead_type', self::TYPE_COMPANY);
+    }
+
+    /**
+     * Scope to a specific sector.
+     */
+    public function scopeInSector($query, string $sector)
+    {
+        return $query->where('sector', $sector);
     }
 
     /**

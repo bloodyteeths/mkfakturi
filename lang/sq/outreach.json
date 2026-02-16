@@ -47,6 +47,42 @@
     "cta": "Vendosni fjalekalimin dhe perfundoni profilin",
     "contact": "Per pyetje, na kontaktoni ne partners@facturino.mk"
   },
+  "company_initial": {
+    "subject": "A eshte firma juaj e pergatitur per e-Fakture?",
+    "greeting": "Pershendetje,",
+    "pain_point": "E-Faktura se shpejti behet e detyrueshme. Nese ende perdorni Excel ose softuer te vjeter per faturim — eshte koha per ndryshim.",
+    "solution": "Facturino eshte platforme cloud per faturim e ndertuar per Maqedoni: norma maqedonase te TVSH-se, e-Fakture automatike (UBL 2.1), lidhje bankare me NLB/Stopanska/Komercijalna/Sparkasse, dhe paga sipas MPIN.",
+    "cta": "Shikoni demon 2-minutesh"
+  },
+  "company_followup1": {
+    "subject": "Ekstraktet bankare automatike — pa copy-paste",
+    "greeting": "Pershendetje perseri,",
+    "bank_intro": "Imagjinoni te mos keni nevoje te fusni manualisht ekstraktet bankare. Facturino automatikisht i terheq transaksionet dhe i perputh me faturat.",
+    "banks_list": "Lidhje direkte PSD2: NLB, Stopanska, Komercijalna, Sparkasse. Per bankat e tjera — import CSV ne 30 sekonda.",
+    "cta": "Provoni falas per 14 dite"
+  },
+  "company_followup2": {
+    "subject": "Plani Starter: vetem €12/muaj",
+    "greeting": "Pershendetje,",
+    "trial_offer": "14 dite falas plani Standard — pa karte krediti, pa detyrim. Pas proves, vendosni vete.",
+    "pricing": "Starter: €12/muaj (50 fatura) | Standard: €29/muaj (200 fatura + e-Fakture + banke) | Business: €59/muaj (paga + API + 1000 fatura)",
+    "cta": "Filloni falas"
+  },
+  "company_followup3": {
+    "subject": "E-Faktura behet e detyrueshme — pergatituni",
+    "greeting": "Pershendetje,",
+    "efaktura_urgency": "Kur e-Faktura te behet e detyrueshme, nuk do te keni kohe per pergatitje. Facturino gjeneron UBL 2.1 XML me nenshkrim dixhital QES — me nje klik.",
+    "ready": "Mbi 200 kompani tashme faturojne permes Facturino. Fatura rekurente, oferta, nota krediti, llogaritje TVSH — gjithcka automatike.",
+    "cta": "Regjistrohuni falas"
+  },
+  "company_followup4": {
+    "subject": "Mesazhi i fundit nga Facturino",
+    "greeting": "Pershendetje,",
+    "last_chance": "Ky eshte mesazhi yne i fundit. Nese Excel ose softueri juaj aktual ju pershtatet — asnje problem.",
+    "comparison": "Por nese doni: e-Fakture automatike, feed-e bankare, PDF profesionale me kod QR, fatura rekurente dhe akses mobil — Facturino eshte ketu per ju.",
+    "cta": "Provoni falas",
+    "final_note": "Ju urojme sukses! Nese ndonjehere keni nevoje — facturino.mk"
+  },
   "directory": {
     "subject": "Facturino — softuer i ri maqedonas per :directory",
     "greeting": "Pershendetje :name,",
