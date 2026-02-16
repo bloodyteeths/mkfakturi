@@ -226,11 +226,6 @@ class OutreachSendBatchCommand extends Command
     protected function findEligibleLeads(int $limit, ?string $forcedTemplate, ?string $leadType = null)
     {
         $query = OutreachLead::query()
-            // Has HubSpot mapping with deal in sendable stage
-            ->whereHas('hubspotMapping', function ($q) {
-                $q->whereIn('deal_stage', ['new_lead', 'new', 'emailed', 'followup_due', 'followup'])
-                  ->whereNotNull('hubspot_deal_id');
-            })
             // Not suppressed (check by email in suppressions table)
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('suppressions');
@@ -241,6 +236,12 @@ class OutreachSendBatchCommand extends Command
             $query->accountants();
         } elseif ($leadType === OutreachLead::TYPE_COMPANY) {
             $query->companies();
+        } else {
+            // Without explicit type, require HubSpot mapping (legacy behavior)
+            $query->whereHas('hubspotMapping', function ($q) {
+                $q->whereIn('deal_stage', ['new_lead', 'new', 'emailed', 'followup_due', 'followup'])
+                  ->whereNotNull('hubspot_deal_id');
+            });
         }
 
         if ($forcedTemplate) {
