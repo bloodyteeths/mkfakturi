@@ -131,6 +131,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
+      { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
+      { slug: 'personalen-danok-na-dohod', title: 'Персонален данок на доход во Македонија' },
+    ],
     cta: {
       title: 'Бидете усогласени со трудовото право',
       desc: 'Facturino ви помага автоматски да ги почитувате сите законски обврски кон вработените.',
@@ -242,6 +248,12 @@ const copy = {
           'Records ready for inspection audits',
         ],
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
+      { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
+      { slug: 'personalen-danok-na-dohod', title: 'Personal Income Tax in Macedonia' },
     ],
     cta: {
       title: 'Stay Compliant With Labor Law',
@@ -355,6 +367,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
+      { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
+      { slug: 'personalen-danok-na-dohod', title: 'Tatimi personal mbi të ardhurat në Maqedoni' },
+    ],
     cta: {
       title: 'Qëndroni në përputhje me ligjin e punës',
       desc: 'Facturino ju ndihmon automatikisht të përmbushni të gjitha detyrimet ligjore ndaj punonjësve.',
@@ -467,6 +485,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: "Makedonya'da maaş hesaplama: Primler ve vergiler" },
+      { slug: 'mpin-obrazec', title: 'MPIN formu: Aylık hesaplama rehberi' },
+      { slug: 'personalen-danok-na-dohod', title: "Makedonya'da kişisel gelir vergisi" },
+    ],
     cta: {
       title: 'İş Hukukuyla Uyumlu Kalın',
       desc: 'Facturino, çalışanlara yönelik tüm yasal yükümlülükleri otomatik olarak yerine getirmenize yardımcı olur.',
@@ -523,6 +547,27 @@ export default async function TrudovoPravoOsnoviPage({
                   </ul>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

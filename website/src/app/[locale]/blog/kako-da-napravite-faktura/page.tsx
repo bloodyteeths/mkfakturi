@@ -102,6 +102,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
+      { slug: 'faktura-vs-proforma', title: 'Фактура vs профактура: Клучни разлики' },
+      { slug: 'recurring-invoices-mk', title: 'Повторувачки фактури: Автоматизирајте ја наплатата' },
+    ],
     cta: {
       title: 'Креирајте ја вашата прва фактура за 2 минути',
       desc: 'Без комплицирани поставки, без рачно пресметување. Facturino автоматски ги пополнува сите задолжителни полиња и генерира валидна фактура.',
@@ -181,6 +187,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'faktura-vs-proforma', title: 'Invoice vs Proforma: Key Differences' },
+      { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
     ],
     cta: {
       title: 'Create your first invoice in 2 minutes',
@@ -262,6 +274,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
+      { slug: 'faktura-vs-proforma', title: 'Fatura vs profatura: Dallimet kryesore' },
+      { slug: 'recurring-invoices-mk', title: 'Faturat e përsëritura: Automatizoni arkëtimin' },
+    ],
     cta: {
       title: 'Krijoni faturën tuaj të parë në 2 minuta',
       desc: 'Pa konfigurime të ndërlikuara, pa llogaritje manuale. Facturino plotëson automatikisht fushat e detyrueshme dhe gjeneron faturë valide.',
@@ -341,6 +359,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'zadolzitelni-elementi-faktura', title: "Makedonya'da faturanın zorunlu unsurları" },
+      { slug: 'faktura-vs-proforma', title: 'Fatura vs proforma: Temel farklar' },
+      { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Tahsilatı otomatikleştirin' },
     ],
     cta: {
       title: 'İlk faturanızı 2 dakikada oluşturun',
@@ -486,6 +510,27 @@ export default async function KakoDaNapraviteFakturaPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

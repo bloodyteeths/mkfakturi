@@ -86,6 +86,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
+      { slug: 'danok-na-dobivka', title: 'Данок на добивка: Стапки, рокови и пресметка' },
+      { slug: 'rokovi-ujp-2026', title: 'Даночен календар 2026: Сите рокови за УЈП' },
+    ],
     cta: {
       title: 'Поедноставете го пресметувањето на данокот',
       desc: 'Facturino автоматски го пресметува данокот на доход и генерира извештаи за УЈП.',
@@ -152,6 +158,12 @@ const copy = {
         items: null,
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
+      { slug: 'danok-na-dobivka', title: 'Corporate Income Tax: Rates, Deadlines and Calculation' },
+      { slug: 'rokovi-ujp-2026', title: 'Tax Calendar 2026: All UJP Deadlines' },
     ],
     cta: {
       title: 'Simplify your tax calculations',
@@ -220,6 +232,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
+      { slug: 'danok-na-dobivka', title: 'Tatimi mbi fitimin: Normat, afatet dhe llogaritja' },
+      { slug: 'rokovi-ujp-2026', title: 'Kalendari tatimor 2026: Të gjitha afatet për DAP' },
+    ],
     cta: {
       title: 'Thjeshtoni llogaritjet tuaja tatimore',
       desc: 'Facturino automatikisht llogarit tatimin mbi të ardhurat dhe gjeneron raporte për UJP.',
@@ -287,6 +305,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: "Makedonya'da maaş hesaplama: Primler ve vergiler" },
+      { slug: 'danok-na-dobivka', title: 'Kurumlar vergisi: Oranlar, tarihler ve hesaplama' },
+      { slug: 'rokovi-ujp-2026', title: 'Vergi takvimi 2026: Tüm UJP tarihleri' },
+    ],
     cta: {
       title: 'Vergi hesaplamalarınızı basitleştirin',
       desc: 'Facturino gelir vergisini otomatik hesaplar ve UJP için raporlar oluşturur.',
@@ -353,6 +377,27 @@ export default async function PersonalenDanokNaDohodPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

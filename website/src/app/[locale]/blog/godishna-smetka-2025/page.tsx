@@ -113,6 +113,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'bilans-na-sostojba', title: 'Биланс на состојба и биланс на успех: AOP ознаки и структура' },
+      { slug: 'rokovi-ujp-2026', title: 'Даночен календар 2026: Сите рокови за УЈП' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+    ],
     cta: {
       title: 'Facturino ги генерира сите извештаи автоматски',
       desc: 'Биланс на состојба, биланс на успех, бруто биланс и ДБ-ВП — во UJP формат, спремни за поднесување. Без рачно пресметување, без стрес.',
@@ -203,6 +209,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'bilans-na-sostojba', title: 'Balance Sheet & Income Statement: AOP Codes and Structure' },
+      { slug: 'rokovi-ujp-2026', title: 'Tax Calendar 2026: All UJP Deadlines' },
+      { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
     ],
     cta: {
       title: 'Facturino generates all reports automatically',
@@ -295,6 +307,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'bilans-na-sostojba', title: 'Bilanci dhe pasqyra e të ardhurave: Kodet AOP dhe struktura' },
+      { slug: 'rokovi-ujp-2026', title: 'Kalendari tatimor 2026: Të gjitha afatet për DAP' },
+      { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+    ],
     cta: {
       title: 'Facturino i gjeneron të gjitha raportet automatikisht',
       desc: 'Bilanci, pasqyra e të ardhurave, bilanci provues dhe DB-VP — në format UJP. Pa llogaritje manuale.',
@@ -385,6 +403,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'bilans-na-sostojba', title: 'Bilanço ve gelir tablosu: AOP kodları ve yapı' },
+      { slug: 'rokovi-ujp-2026', title: 'Vergi takvimi 2026: Tüm UJP tarihleri' },
+      { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
     ],
     cta: {
       title: 'Facturino tüm raporları otomatik oluşturur',
@@ -530,6 +554,27 @@ export default async function GodishnaSmetka2025Page({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

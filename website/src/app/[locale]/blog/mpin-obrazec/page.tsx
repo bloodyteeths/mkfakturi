@@ -106,6 +106,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи што секој работодавач мора да ги знае' },
+      { slug: 'rokovi-ujp-2026', title: 'Даночен календар 2026: Сите рокови за УЈП' },
+    ],
     cta: {
       title: 'Автоматизирајте го МПИН процесот',
       desc: 'Заштедете време и избегнете грешки со автоматско генерирање на МПИН образци.',
@@ -192,6 +198,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
+      { slug: 'rokovi-ujp-2026', title: 'Tax Calendar 2026: All UJP Deadlines' },
     ],
     cta: {
       title: 'Automate Your MPIN Process',
@@ -280,6 +292,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
+      { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra që çdo punëdhënës duhet t'i dijë" },
+      { slug: 'rokovi-ujp-2026', title: 'Kalendari tatimor 2026: Të gjitha afatet për DAP' },
+    ],
     cta: {
       title: 'Automatizoni procesin tuaj MPIN',
       desc: 'Kurseni kohë dhe shmangni gabimet me gjenerim automatik të formularëve MPIN.',
@@ -367,6 +385,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'presmetka-na-plata-mk', title: "Makedonya'da maaş hesaplama: Primler ve vergiler" },
+      { slug: 'trudovo-pravo-osnovi', title: 'İş hukuku: Her işverenin bilmesi gereken 10 şey' },
+      { slug: 'rokovi-ujp-2026', title: 'Vergi takvimi 2026: Tüm UJP tarihleri' },
+    ],
     cta: {
       title: 'MPIN Sürecinizi Otomatikleştirin',
       desc: 'Otomatik MPIN form oluşturma ile zaman kazanın ve hatalardan kaçının.',
@@ -433,6 +457,27 @@ export default async function MpinObrazecPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

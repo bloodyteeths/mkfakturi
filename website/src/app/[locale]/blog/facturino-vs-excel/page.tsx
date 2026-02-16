@@ -95,6 +95,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+      { slug: 'recurring-invoices-mk', title: 'Повторувачки фактури: Автоматизирајте ја наплатата' },
+    ],
     cta: {
       title: 'Преминете од Excel кон Facturino',
       desc: 'Започнете бесплатно и видете зошто илјадници бизниси веќе го направија преминот.',
@@ -170,6 +176,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
+      { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
     ],
     cta: {
       title: 'Switch From Excel to Facturino',
@@ -247,6 +259,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+      { slug: 'recurring-invoices-mk', title: 'Faturat e përsëritura: Automatizoni arkëtimin' },
+    ],
     cta: {
       title: 'Kaloni nga Excel në Facturino',
       desc: 'Filloni falas dhe shihni pse mijëra biznese e kanë bërë tashmë kalimin.',
@@ -323,6 +341,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'zosto-facturino', title: "Makedon işletmelerin Facturino'yu seçmesinin 10 nedeni" },
+      { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+      { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Tahsilatı otomatikleştirin' },
+    ],
     cta: {
       title: 'Excel\'den Facturino\'ya Geçin',
       desc: 'Ücretsiz başlayın ve binlerce işletmenin neden zaten geçiş yaptığını görün.',
@@ -389,6 +413,27 @@ export default async function FacturinoVsExcelPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

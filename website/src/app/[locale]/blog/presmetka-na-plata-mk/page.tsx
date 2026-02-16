@@ -138,6 +138,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи што секој работодавач мора да ги знае' },
+      { slug: 'personalen-danok-na-dohod', title: 'Персонален данок на доход во Македонија' },
+    ],
     cta: {
       title: 'Автоматизирајте ги платите со Facturino',
       desc: 'Точна пресметка, МПИН образец и платни листи — автоматски, без грешки, усогласено со македонските прописи.',
@@ -253,6 +259,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
+      { slug: 'personalen-danok-na-dohod', title: 'Personal Income Tax in Macedonia' },
     ],
     cta: {
       title: 'Automate payroll with Facturino',
@@ -370,6 +382,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
+      { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra që çdo punëdhënës duhet t'i dijë" },
+      { slug: 'personalen-danok-na-dohod', title: 'Tatimi personal mbi të ardhurat në Maqedoni' },
+    ],
     cta: {
       title: 'Automatizoni pagat me Facturino',
       desc: 'Llogaritje e saktë, formularë MPIN dhe fletëpagesa — automatikisht, pa gabime, në pajtim me rregulloret maqedonase.',
@@ -486,6 +504,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'mpin-obrazec', title: 'MPIN formu: Aylık hesaplama rehberi' },
+      { slug: 'trudovo-pravo-osnovi', title: 'İş hukuku: Her işverenin bilmesi gereken 10 şey' },
+      { slug: 'personalen-danok-na-dohod', title: "Makedonya'da kişisel gelir vergisi" },
+    ],
     cta: {
       title: 'Facturino ile bordroyu otomatikleştirin',
       desc: 'Doğru hesaplamalar, MPIN formları ve bordro belgeleri — otomatik, hatasız, Makedon düzenlemelerine uygun.',
@@ -559,6 +583,27 @@ export default async function PresmetkaNaPlataMkPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

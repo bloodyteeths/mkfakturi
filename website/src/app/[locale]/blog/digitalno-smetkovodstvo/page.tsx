@@ -94,6 +94,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
+      { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
+    ],
     cta: {
       title: 'Преминете на дигитално сметководство денес',
       desc: 'Facturino го прави преминот лесен. Македонски интерфејс, автоматско книжење и облак пристап — спремен за вашиот бизнис.',
@@ -165,6 +171,12 @@ const copy = {
           'Free migration — our team helps you transfer existing data',
         ],
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Are Not Enough' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
+      { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
     ],
     cta: {
       title: 'Switch to digital accounting today',
@@ -238,6 +250,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
+      { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
+    ],
     cta: {
       title: 'Kaloni në kontabilitet dixhital sot',
       desc: 'Facturino e bën kalimin të lehtë. Ndërfaqe maqedonase, kontabilitet automatik dhe qasje cloud — gati për biznesin tuaj.',
@@ -310,6 +328,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yetmez' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
+      { slug: 'zosto-facturino', title: "Makedon işletmelerin Facturino'yu seçmesinin 10 nedeni" },
+    ],
     cta: {
       title: 'Bugün dijital muhasebeye geçin',
       desc: 'Facturino geçişi kolaylaştırır. Makedonca arayüz, otomatik muhasebe ve bulut erişimi — işletmeniz için hazır.',
@@ -373,6 +397,27 @@ export default async function DigitalnoSmetkovodstvoPage({
                   </ul>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

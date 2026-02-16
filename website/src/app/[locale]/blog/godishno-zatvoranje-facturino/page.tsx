@@ -141,6 +141,12 @@ const copy = {
         'Можете да направите корекции и повторно да затворите',
       ],
     },
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич за поднесување до ЦРСМ' },
+      { slug: 'bilans-na-sostojba', title: 'Биланс на состојба и биланс на успех: AOP ознаки и структура' },
+      { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
+    ],
     ctaSection: {
       title: 'Годишна сметка за 30 минути, не за 3 дена',
       desc: 'Facturino го автоматизира целиот процес — од предпроверка до UJP извештаи. Без рачно пресметување, без стрес.',
@@ -261,6 +267,12 @@ const copy = {
         'You can make corrections and close again',
       ],
     },
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide for CRMS' },
+      { slug: 'bilans-na-sostojba', title: 'Balance Sheet & Income Statement: AOP Codes and Structure' },
+      { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
+    ],
     ctaSection: {
       title: 'Annual accounts in 30 minutes, not 3 days',
       desc: 'Facturino automates the entire process \u2014 from preflight to UJP reports. No manual calculations, no stress.',
@@ -381,6 +393,12 @@ const copy = {
         'Mund t\u00eb b\u00ebni korrigjime dhe t\u00eb mbyllni p\u00ebrs\u00ebri',
       ],
     },
+    relatedTitle: 'Artikuj t\u00eb ngjash\u00ebm',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Llogarit\u00eb vjetore 2025: Udh\u00ebzues i plot\u00eb p\u00ebr dor\u00ebzim n\u00eb QRMK' },
+      { slug: 'bilans-na-sostojba', title: 'Bilanci dhe pasqyra e t\u00eb ardhurave: Kodet AOP dhe struktura' },
+      { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
+    ],
     ctaSection: {
       title: 'Llogarit\u00eb vjetore n\u00eb 30 minuta, jo n\u00eb 3 dit\u00eb',
       desc: 'Facturino e automatizon t\u00eb gjith\u00eb procesin \u2014 nga parakontrolli deri te raportet UJP. Pa llogaritje manuale, pa stres.',
@@ -501,6 +519,12 @@ const copy = {
         'D\u00fczeltmeler yapabilir ve tekrar kapatabilirsiniz',
       ],
     },
+    relatedTitle: '\u0130lgili makaleler',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Y\u0131ll\u0131k hesaplar 2025: CRMS dosyalama rehberi' },
+      { slug: 'bilans-na-sostojba', title: 'Bilan\u00e7o ve gelir tablosu: AOP kodlar\u0131 ve yap\u0131' },
+      { slug: 'zosto-facturino', title: "Makedon i\u015fletmelerin Facturino'yu se\u00e7mesinin 10 nedeni" },
+    ],
     ctaSection: {
       title: 'Y\u0131ll\u0131k hesaplar 30 dakikada, 3 g\u00fcnde de\u011fil',
       desc: 'Facturino t\u00fcm s\u00fcreci otomatikle\u015ftirir \u2014 \u00f6n kontrolden UJP raporlar\u0131na. Manuel hesaplama yok, stres yok.',
@@ -787,6 +811,27 @@ export default async function YearEndClosingPage({
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

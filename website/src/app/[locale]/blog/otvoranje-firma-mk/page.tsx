@@ -96,6 +96,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
+      { slug: 'paushalen-danochnik', title: 'Паушалец во Македонија: Услови, ограничувања и обврски' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+    ],
     cta: {
       title: 'Започнете го вашиот бизнис правилно',
       desc: 'Facturino е вашиот партнер од првиот ден. Издавајте фактури, следете расходи и бидете во тек со даночните обврски.',
@@ -172,6 +178,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
+      { slug: 'paushalen-danochnik', title: 'Lump-Sum Taxation in Macedonia: Conditions and Obligations' },
+      { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
     ],
     cta: {
       title: 'Start your business the right way',
@@ -250,6 +262,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
+      { slug: 'paushalen-danochnik', title: 'Tatimpaguesi paushall në Maqedoni: Kushtet dhe detyrimet' },
+      { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+    ],
     cta: {
       title: 'Niseni biznesin tuaj si duhet',
       desc: 'Facturino është partneri juaj nga dita e parë. Lëshoni fatura, ndiqni shpenzimet dhe qëndroni në kontroll me detyrimet tatimore.',
@@ -327,6 +345,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
+      { slug: 'paushalen-danochnik', title: "Makedonya'da götürü vergi mükellefi: Koşullar ve yükümlülükler" },
+      { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
+    ],
     cta: {
       title: 'İşletmenizi doğru şekilde başlatın',
       desc: 'Facturino ilk günden ortağınızdır. Fatura düzenleyin, giderleri takip edin ve vergi yükümlülüklerinizin kontrolünde olun.',
@@ -393,6 +417,27 @@ export default async function OtvoranjeFirmaMkPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

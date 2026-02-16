@@ -52,6 +52,8 @@ type LocaleCopy = {
   tag: string
   intro: string
   sections: Section[]
+  relatedTitle: string
+  related: { slug: string; title: string }[]
   ctaSection: { title: string; desc: string; cta: string }
   backLink: string
   tableHeaders: { aop: string; name: string; desc: string }
@@ -168,6 +170,12 @@ const copy: Record<Locale, LocaleCopy> = {
         ],
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич за поднесување до ЦРСМ' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Годишно затворање на книги: 6 чекори со Facturino' },
+    ],
     ctaSection: {
       title: 'Facturino автоматски ги пополнува AOP ознаките',
       desc: 'Не треба рачно да ги пребарувате AOP кодовите. Facturino автоматски ги мапира сметките од контниот план на точните AOP позиции во Образец 36, 37 и ДБ-ВП.',
@@ -282,6 +290,12 @@ const copy: Record<Locale, LocaleCopy> = {
           'Filing deadline: March 15 at etax.ujp.gov.mk',
         ],
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide for CRMS' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Year-End Closing: 6 Steps with Facturino' },
     ],
     ctaSection: {
       title: 'Facturino automatically fills AOP codes',
@@ -398,6 +412,12 @@ const copy: Record<Locale, LocaleCopy> = {
         ],
       },
     ],
+    relatedTitle: 'Artikuj t\u00eb ngjash\u00ebm',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Llogarit\u00eb vjetore 2025: Udh\u00ebzues i plot\u00eb p\u00ebr dor\u00ebzim n\u00eb QRMK' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti p\u00ebr fillestar\u00eb: Bazat q\u00eb \u00e7do biznes i njeh' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Mbyllja e vitit: 6 hapa me Facturino' },
+    ],
     ctaSection: {
       title: 'Facturino i plot\u00ebson automatikisht kodet AOP',
       desc: 'Pa k\u00ebrkim manual t\u00eb kodeve AOP. Facturino i harton llogaritë nga plani kontab\u00ebl n\u00eb pozicionet e sakta AOP n\u00eb Formularin 36, 37 dhe DB-VP.',
@@ -512,6 +532,12 @@ const copy: Record<Locale, LocaleCopy> = {
           'Ba\u015fvuru tarihi: 15 Mart\'a kadar etax.ujp.gov.mk adresinde',
         ],
       },
+    ],
+    relatedTitle: '\u0130lgili makaleler',
+    related: [
+      { slug: 'godishna-smetka-2025', title: 'Y\u0131ll\u0131k hesaplar 2025: CRMS dosyalama rehberi' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni ba\u015flanyanlar i\u00e7in muhasebe: Her i\u015fletmenin bilmesi gerekenler' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Y\u0131l sonu kapan\u0131\u015f\u0131: Facturino ile 6 ad\u0131m' },
     ],
     ctaSection: {
       title: 'Facturino AOP kodlar\u0131n\u0131 otomatik doldurur',
@@ -706,6 +732,27 @@ export default async function BilansNaSostojbaPage({
           </div>
         </section>
       ))}
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ============================================================ */}
       {/*  CTA SECTION                                                 */}

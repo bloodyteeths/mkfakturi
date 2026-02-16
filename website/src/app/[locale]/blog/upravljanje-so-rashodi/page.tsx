@@ -107,6 +107,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'cash-flow-mk', title: 'Cash Flow: Зошто е позначаен од профитот' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+    ],
     cta: {
       title: 'Преземете ја контролата врз вашите расходи',
       desc: 'Со Facturino секој денар е евидентиран. Автоматско категоризирање, скенирање на фактури и извештаи спремни за УЈП.',
@@ -191,6 +197,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'cash-flow-mk', title: 'Cash Flow: Why It Matters More Than Profit' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
     ],
     cta: {
       title: 'Take control of your expenses',
@@ -277,6 +289,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'cash-flow-mk', title: 'Cash Flow: Pse është më i rëndësishëm se fitimi' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+    ],
     cta: {
       title: 'Merrni kontrollin e shpenzimeve tuaja',
       desc: 'Me Facturino çdo denar është i regjistruar. Kategorizim automatik, skanim faturash dhe raporte gati për UJP.',
@@ -362,6 +380,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'cash-flow-mk', title: 'Nakit akışı: Neden kârdan daha önemli' },
+      { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+    ],
     cta: {
       title: 'Giderlerinizin kontrolünü elinize alın',
       desc: 'Facturino ile her denar kayıt altında. Otomatik sınıflandırma, fatura tarama ve UJP\'ye hazır raporlar.',
@@ -435,6 +459,27 @@ export default async function UpravuvanjeSoRashodiPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

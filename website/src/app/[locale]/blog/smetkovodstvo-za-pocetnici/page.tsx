@@ -99,6 +99,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: 'Како да отворите фирма во Македонија: Комплетен водич' },
+      { slug: 'bilans-na-sostojba', title: 'Биланс на состојба и биланс на успех: AOP ознаки и структура' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+    ],
     cta: {
       title: 'Сметководството не мора да биде тешко',
       desc: 'Facturino ги автоматизира основните сметководствени задачи. Вие се фокусирате на бизнисот, ние на бројките.',
@@ -178,6 +184,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: 'How to Register a Company in Macedonia: Complete Guide' },
+      { slug: 'bilans-na-sostojba', title: 'Balance Sheet & Income Statement: AOP Codes and Structure' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
     ],
     cta: {
       title: 'Accounting does not have to be hard',
@@ -259,6 +271,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: 'Si të hapni firmë në Maqedoni: Udhëzues i plotë' },
+      { slug: 'bilans-na-sostojba', title: 'Bilanci dhe pasqyra e të ardhurave: Kodet AOP dhe struktura' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+    ],
     cta: {
       title: 'Kontabiliteti nuk duhet të jetë i vështirë',
       desc: 'Facturino automatizon detyrat themelore kontabël. Ju fokusoheni te biznesi, ne kujdesemi për numrat.',
@@ -339,6 +357,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: "Makedonya'da şirket nasıl kurulur: Eksiksiz rehber" },
+      { slug: 'bilans-na-sostojba', title: 'Bilanço ve gelir tablosu: AOP kodları ve yapı' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+    ],
     cta: {
       title: 'Muhasebe zor olmak zorunda değil',
       desc: 'Facturino temel muhasebe görevlerini otomatikleştirir. Siz işletmeye odaklanın, biz rakamlarla ilgilenelim.',
@@ -405,6 +429,27 @@ export default async function SmetkovodstvoZaPocetniciPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

@@ -88,6 +88,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: 'Како да отворите фирма во Македонија: Комплетен водич' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+      { slug: 'personalen-danok-na-dohod', title: 'Персонален данок на доход во Македонија' },
+    ],
     cta: {
       title: 'Издавајте фактури едноставно',
       desc: 'Без разлика дали сте паушалец или редовен даночник, Facturino го прави фактурирањето лесно и брзо.',
@@ -156,6 +162,12 @@ const copy = {
         ],
         steps: null,
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: 'How to Register a Company in Macedonia: Complete Guide' },
+      { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
+      { slug: 'personalen-danok-na-dohod', title: 'Personal Income Tax in Macedonia' },
     ],
     cta: {
       title: 'Issue invoices the easy way',
@@ -226,6 +238,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: 'Si të hapni firmë në Maqedoni: Udhëzues i plotë' },
+      { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+      { slug: 'personalen-danok-na-dohod', title: 'Tatimi personal mbi të ardhurat në Maqedoni' },
+    ],
     cta: {
       title: 'Lëshoni fatura thjesht',
       desc: 'Pavarësisht nëse jeni tatimpagues i përgjithshëm apo i rregullt, Facturino e bën faturimin të shpejtë dhe të lehtë.',
@@ -295,6 +313,12 @@ const copy = {
         steps: null,
       },
     ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'otvoranje-firma-mk', title: "Makedonya'da şirket nasıl kurulur: Eksiksiz rehber" },
+      { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
+      { slug: 'personalen-danok-na-dohod', title: "Makedonya'da kişisel gelir vergisi" },
+    ],
     cta: {
       title: 'Faturaları kolay düzenleyin',
       desc: 'Götürü veya normal vergi mükellefi olun, Facturino faturalamayı hızlı ve kolay hale getirir.',
@@ -361,6 +385,27 @@ export default async function PaushalenDanochnikPage({
                   </ol>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

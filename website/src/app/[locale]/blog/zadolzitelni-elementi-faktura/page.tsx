@@ -102,6 +102,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
+      { slug: 'sto-e-e-faktura', title: 'Што е е-фактура и зошто е задолжителна?' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+    ],
     cta: {
       title: 'Facturino гарантира комплетна фактура',
       desc: 'Секоја фактура издадена преку Facturino ги содржи сите задолжителни елементи. Системот валидира пред испраќање — нема ризик од казни.',
@@ -181,6 +187,12 @@ const copy = {
           'UJP may require invoice correction (credit note) and re-issuance',
         ],
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
+      { slug: 'sto-e-e-faktura', title: 'What Is E-Invoice and Why Is It Mandatory?' },
+      { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
     ],
     cta: {
       title: 'Facturino guarantees a complete invoice',
@@ -262,6 +274,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
+      { slug: 'sto-e-e-faktura', title: 'Çfarë është e-fatura dhe pse është e detyrueshme?' },
+      { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+    ],
     cta: {
       title: 'Facturino garanton faturë të plotë',
       desc: 'Çdo faturë e lëshuar përmes Facturino përmban të gjitha elementet e detyrueshme. Sistemi validon para dërgimit — pa rrezik gjobash.',
@@ -341,6 +359,12 @@ const copy = {
           'UJP fatura düzeltmesi (alacak dekontu) ve yeniden düzenleme talep edebilir',
         ],
       },
+    ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
+      { slug: 'sto-e-e-faktura', title: 'E-fatura nedir ve neden zorunludur?' },
+      { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
     ],
     cta: {
       title: 'Facturino eksiksiz fatura garantisi verir',
@@ -465,6 +489,27 @@ export default async function ZadolzitelniElementiFakturaPage({
                   </ul>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

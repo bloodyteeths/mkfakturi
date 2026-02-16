@@ -88,6 +88,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
+      { slug: 'recurring-invoices-mk', title: 'Повторувачки фактури: Автоматизирајте ја наплатата' },
+    ],
     cta: {
       title: 'Фактури и профактури — сe на едно место',
       desc: 'Facturino автоматски ги раздвојува фактурите од профактурите, ги води во посебни регистри и обезбедува точна ДДВ евиденција.',
@@ -153,6 +159,12 @@ const copy = {
           'Use software that distinguishes them — Facturino automatically separates them into different registers',
         ],
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
     ],
     cta: {
       title: 'Invoices and proformas — all in one place',
@@ -220,6 +232,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
+      { slug: 'recurring-invoices-mk', title: 'Faturat e përsëritura: Automatizoni arkëtimin' },
+    ],
     cta: {
       title: 'Fatura dhe profatura — të gjitha në një vend',
       desc: 'Facturino i ndan automatikisht faturat nga profaturat, mban regjistra të veçantë dhe siguron evidencë të saktë të TVSH-së.',
@@ -285,6 +303,12 @@ const copy = {
           'Ayırt eden yazılım kullanın — Facturino otomatik olarak farklı kayıtlara ayırır',
         ],
       },
+    ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
+      { slug: 'zadolzitelni-elementi-faktura', title: "Makedonya'da faturanın zorunlu unsurları" },
+      { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Tahsilatı otomatikleştirin' },
     ],
     cta: {
       title: 'Faturalar ve proformalar — hepsi tek yerde',
@@ -409,6 +433,27 @@ export default async function FakturaVsProformaPage({
                   </ul>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

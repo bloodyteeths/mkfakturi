@@ -87,6 +87,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Поврзани статии',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+    ],
     cta: {
       title: 'Преминете на е-фактура со Facturino',
       desc: 'UBL формат, дигитален потпис и автоматска валидација — сe во една платформа. Бидете усогласени со закон без компликации.',
@@ -151,6 +157,12 @@ const copy = {
           'Archiving and storage in compliance with legal requirements',
         ],
       },
+    ],
+    relatedTitle: 'Related articles',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
     ],
     cta: {
       title: 'Switch to e-invoicing with Facturino',
@@ -217,6 +229,12 @@ const copy = {
         ],
       },
     ],
+    relatedTitle: 'Artikuj të ngjashëm',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
+      { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+    ],
     cta: {
       title: 'Kaloni në e-faturim me Facturino',
       desc: 'Format UBL, nënshkrim digjital dhe validim automatik — të gjitha në një platformë. Qëndroni në pajtueshmëri pa komplikime.',
@@ -281,6 +299,12 @@ const copy = {
           'Yasal gereksinimlere uygun arşivleme ve saklama',
         ],
       },
+    ],
+    relatedTitle: 'İlgili makaleler',
+    related: [
+      { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
+      { slug: 'zadolzitelni-elementi-faktura', title: "Makedonya'da faturanın zorunlu unsurları" },
+      { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
     ],
     cta: {
       title: 'Facturino ile e-faturaya geçin',
@@ -405,6 +429,27 @@ export default async function StoEEFakturaPage({
                   </ul>
                 )}
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RELATED ARTICLES */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.relatedTitle}</h2>
+          <div className="grid gap-4">
+            {t.related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/${locale}/blog/${r.slug}`}
+                className="group flex items-center justify-between bg-white rounded-xl border border-gray-100 px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">{r.title}</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0 ml-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>
