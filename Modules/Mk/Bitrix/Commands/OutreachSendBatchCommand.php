@@ -229,6 +229,10 @@ class OutreachSendBatchCommand extends Command
             // Not suppressed (check by email in suppressions table)
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('suppressions');
+            })
+            // Skip leads who already registered as users
+            ->whereNotIn('email', function ($subQuery) {
+                $subQuery->select('email')->from('users');
             });
 
         // Apply lead type filter
