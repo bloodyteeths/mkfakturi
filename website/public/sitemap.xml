@@ -1566,6 +1566,52 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Blog: За сметководители -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/za-smetkovoditeli</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <lastmod>2026-02-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/za-smetkovoditeli</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <lastmod>2026-02-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/za-smetkovoditeli</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <lastmod>2026-02-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/za-smetkovoditeli</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/za-smetkovoditeli" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/za-smetkovoditeli" />
+    <lastmod>2026-02-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Blog: Зошто Facturino -->
   <url>
     <loc>https://www.facturino.mk/mk/blog/zosto-facturino</loc>
