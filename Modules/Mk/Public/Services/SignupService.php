@@ -260,7 +260,7 @@ class SignupService
         $company = Company::create([
             'name' => $data['company_name'],
             'slug' => $slug,
-            'vat_number' => $data['vat_number'] ?? null,
+            'vat_number' => $data['vat_number'] ?? $data['tax_id'] ?? null,
             'tax_id' => $data['tax_id'] ?? null,
         ]);
 

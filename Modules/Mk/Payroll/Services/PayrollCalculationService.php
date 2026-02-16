@@ -49,7 +49,7 @@ class PayrollCalculationService
         $company = $run->company;
 
         $missing = [];
-        if (empty($company->vat_number)) {
+        if (empty($company->vat_number) && empty($company->tax_id)) {
             $missing[] = 'ЕДБ (Единствен Даночен Број)';
         }
         if (empty($company->registration_number)) {

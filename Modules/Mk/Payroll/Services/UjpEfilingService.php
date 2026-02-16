@@ -37,7 +37,7 @@ class UjpEfilingService
     public function generateMpinXml(PayrollRun $payrollRun, Company $company): string
     {
         // Validate required company data for UJP filing
-        if (empty($company->vat_number)) {
+        if (empty($company->vat_number) && empty($company->tax_id)) {
             throw new \InvalidArgumentException(
                 'Компанијата нема поставено ЕДБ. ЕДБ е задолжителен за МПИН поднесување.'
             );
@@ -227,7 +227,7 @@ class UjpEfilingService
     {
         $employer = $dom->createElement('Employer');
 
-        $this->appendElement($dom, $employer, 'TaxID', $company->vat_number ?? '');
+        $this->appendElement($dom, $employer, 'TaxID', $company->vat_number ?: ($company->tax_id ?? ''));
         $this->appendElement($dom, $employer, 'CompanyName', $company->name);
 
         // Address

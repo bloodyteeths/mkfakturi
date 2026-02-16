@@ -66,7 +66,7 @@
             </BaseInputGroup>
 
             <BaseInputGroup
-              :label="'Даночен број (ЕМБС)'"
+              :label="'ЕДБ (Единствен Даночен Број)'"
               :error="companyV$.companyForm.tax_id.$error && companyV$.companyForm.tax_id.$errors[0]?.$message"
               required
             >
@@ -545,8 +545,8 @@ const companyRules = {
       required: helpers.withMessage('Полето за име на компанија е задолжително', required),
     },
     tax_id: {
-      required: helpers.withMessage('Полето за даночен број е задолжително', required),
-      minLength: helpers.withMessage('Даночниот број мора да содржи најмалку 13 знаци', minLength(13)),
+      required: helpers.withMessage('Полето за ЕДБ е задолжително', required),
+      minLength: helpers.withMessage('ЕДБ мора да содржи најмалку 13 знаци', minLength(13)),
     },
     address: {
       required: helpers.withMessage('Полето за адреса е задолжително', required),

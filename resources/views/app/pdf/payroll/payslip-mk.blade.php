@@ -173,8 +173,8 @@
                             <div class="info-value">Тел: {{ $company->address->phone }}</div>
                         @endif
                     @endif
-                    @if($company->vat_number)
-                        <div class="info-value">ЕДБ: {{ $company->vat_number }}</div>
+                    @if($company->vat_number || $company->tax_id)
+                        <div class="info-value">ЕДБ: {{ $company->vat_number ?: $company->tax_id }}</div>
                     @endif
                     @if($company->registration_number)
                         <div class="info-value">ЕМБС: {{ $company->registration_number }}</div>
