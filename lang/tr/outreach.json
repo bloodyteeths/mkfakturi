@@ -1,43 +1,43 @@
 {
   "initial": {
-    "subject": ":company için Facturino?",
+    "subject": "Facturino ortakligi — %20 komisyon",
     "greeting": "Merhaba,",
-    "intro": "Facturino, Makedon işletmeleri için tasarlanmış bulut tabanlı bir faturalama ve muhasebe platformudur.",
-    "benefit": "E-fatura entegrasyonu ve otomatik banka beslemeleri ile finansal iş akışınızın her bölümünü otomatikleştirir.",
-    "cta": "2 dakikalık demoyu izleyin",
-    "opt_out": "Abonelikten çıkmak için DURDUR yazarak yanıtlayın."
+    "intro": "Facturino, Makedon isletmeleri icin tasarlanmis bulut tabanli bir faturalama ve muhasebe platformudur. Muhasebe burolari icin — erisim tamamen ucretsizdir.",
+    "benefit": "Partner olarak, Facturino uzerinden yonettiginiz her musteri icin aylik %20 komisyon kazanirsiniz, ayrca tum ozelliklere ucretsiz erisim: e-Fatura, banka baglantilari, MPIN bordro ve coklu sirket yonetimi.",
+    "cta": "2 dakikalik demoyu izleyin",
+    "opt_out": "Abonelikten cikmak icin DURDUR yazarak yanitlayin."
   },
   "followup1": {
-    "subject": "Takip: Facturino",
+    "subject": "Takip: Facturino partner programi",
     "greeting": "Tekrar merhaba,",
-    "reference": "Birkaç gün önce Facturino hakkında iletişime geçmiştim.",
-    "metric": "200'den fazla Makedon şirketi zaten faturalama süreçlerini otomatikleştirmek için Facturino kullanıyor.",
+    "reference": "Birkac gun once Facturino partner programi hakkinda iletisime gecmistim.",
+    "metric": "50'den fazla muhasebe burosu zaten partner. Tum musterilerinizi tek bir panelden yonetin — ucretsiz.",
     "cta": "Demoyu izleyin"
   },
   "followup2": {
-    "subject": "Son not: ücretsiz deneme",
+    "subject": "Muhasebeciler icin ucretsiz erisim",
     "greeting": "Merhaba,",
-    "busy": "Meşgul olduğunuzu anlıyorum - sadece kısa bir not.",
-    "offer": "Facturino'yu denemek isterseniz, 30 günlük uzatılmış ücretsiz deneme sunuyoruz.",
-    "cta": "Ücretsiz denemeyi başlatın",
-    "last_email": "Bu bizden gelen son e-postadır. Sizi bir daha rahatsız etmeyeceğiz."
+    "busy": "Mesgul oldugunuzu anliyorum — sadece kisa bir not.",
+    "offer": "Facturino muhasebe burolari icin tamamen ucretsizdir. Deneme suresi yok, kredi karti yok — sonsuza kadar ucretsiz. Ayrica her musteri icin %20 komisyon.",
+    "cta": "Ucretsiz kaydolun",
+    "last_email": "Bu bizden gelen son e-postadir. Sizi bir daha rahatsiz etmeyecegiz."
   },
   "followup3": {
-    "subject": "14 gün ücretsiz — kredi kartı gerekmez",
+    "subject": "50+ buro zaten partner — neden?",
     "greeting": "Merhaba,",
-    "trial_offer": "Standart planın 14 günlük ücretsiz denemesini sunuyoruz — kredi kartı yok, taahhüt yok.",
-    "features": "Standart planla: UJP için e-Fatura, banka bağlantıları (NLB, Stopanska, Komercijalna, Sparkasse), otomatik KDV hesaplamaları ve ayda 200'e kadar fatura.",
-    "pricing": "Deneme sonrası, Başlangıç planı sadece €12/ay ve Standart €29/ay. Makedon işletmeleri için en uygun fiyatlı çözüm.",
-    "cta": "Ücretsiz denemeyi başlatın",
-    "no_card": "Kredi kartı gerekmez. İstediğiniz zaman iptal edin."
+    "trial_offer": "50'den fazla muhasebe burosu zaten Facturino'yu partner olarak kullaniyor. Neden?",
+    "features": "Tum ozelliklere ucretsiz erisim: UJP icin e-Fatura (UBL 2.1 + QES imzasi), PSD2 banka baglantilari (NLB, Stopanska, Komercijalna, Sparkasse), MPIN bordro ve tek panelden coklu sirket yonetimi.",
+    "pricing": "Her musteri icin aylik %20 komisyon. Musterileriniz aylik €12'den basliyor — siz ekstra caba harcamadan kazanirsiniz.",
+    "cta": "Partner olun",
+    "no_card": "Kredi karti yok. Taahhut yok. Sonsuza kadar ucretsiz."
   },
   "followup4": {
     "subject": "Son mesaj: e-Fatura zorunlu hale geliyor",
     "greeting": "Merhaba,",
-    "urgency": "E-Fatura yakında Makedonya'da zorunlu hale geliyor. Facturino, otomatik UBL 2.1 XML oluşturma ve QES dijital imza ile tek platform — tek tıkla hazırsınız.",
-    "partner_offer": "Muhasebe bürosuyseniz, her müşteri için aylık %20 komisyon + tüm özelliklere ücretsiz erişim sunuyoruz. 50'den fazla büro zaten partner.",
-    "cta": "Ücretsiz kaydolun",
-    "final_note": "Bu gerçekten son mesajımız. Başarılar diliyoruz! İhtiyacınız olursa — facturino.mk"
+    "urgency": "E-Fatura yakinda Makedonya'da zorunlu hale geliyor. Facturino, otomatik UBL 2.1 XML olusturma ve QES dijital imza ile tek platform — tek tikla hazirsiniz.",
+    "partner_offer": "Partner buro olarak, tum ozelliklere ucretsiz erisim + her musteri icin aylik %20 komisyon alirsiniz. 50'den fazla buro zaten partner.",
+    "cta": "Ucretsiz kaydolun",
+    "final_note": "Bu gercekten son mesajimiz. Basarilar diliyoruz! Ihtiyaciniz olursa — facturino.mk"
   },
   "partner_invite": {
     "subject": "Facturino Partner Programına Hoş Geldiniz",

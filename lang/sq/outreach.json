@@ -1,41 +1,41 @@
 {
   "initial": {
-    "subject": "Facturino per :company?",
+    "subject": "Partneritet me Facturino — 20% komision",
     "greeting": "Pershendetje,",
-    "intro": "Facturino eshte nje platforme faturimi dhe kontabiliteti ne cloud e projektuar per bizneset maqedonase.",
-    "benefit": "Me integrimin e e-faktures dhe perditesimet automatike bankare, ai automatizon cdo pjese te fluksit tuaj financiar.",
+    "intro": "Facturino eshte nje platforme faturimi dhe kontabiliteti ne cloud e projektuar per bizneset maqedonase. Per zyrat e kontabilitetit — aksesi eshte plotesisht falas.",
+    "benefit": "Si partner, fitoni 20% komision mujor per cdo klient qe e menaxhoni permes Facturino, plus akses falas ne te gjitha funksionet: e-Fakture, lidhje bankare, MPIN paga dhe menaxhim multi-kompanish.",
     "cta": "Shikoni demon 2-minutesh",
     "opt_out": "Pergjigjuni NDALO per te hequr doreshkrimin."
   },
   "followup1": {
-    "subject": "Ndjekje: Facturino",
+    "subject": "Ndjekje: Programi i partnereve Facturino",
     "greeting": "Pershendetje perseri,",
-    "reference": "Ju kontaktova disa dite me pare per Facturino.",
-    "metric": "Mbi 200 kompani maqedonase tashme perdorin Facturino per te automatizuar faturimin e tyre.",
+    "reference": "Ju kontaktova disa dite me pare per programin e partnereve Facturino.",
+    "metric": "Mbi 50 zyra kontabiliteti jane tashme partnere. Menaxhoni te gjithe klientet nga nje dashboard — falas.",
     "cta": "Shikoni demon"
   },
   "followup2": {
-    "subject": "Shenim i fundit: prove falas",
+    "subject": "Akses falas per kontabilistet",
     "greeting": "Pershendetje,",
-    "busy": "E kuptoj qe jeni te zene - vetem nje shenim i shpejte.",
-    "offer": "Nese doni te provoni Facturino, po ofrojme nje prove falas te zgjatur 30-ditore.",
-    "cta": "Filloni proven falas",
+    "busy": "E kuptoj qe jeni te zene — vetem nje shenim i shpejte.",
+    "offer": "Facturino eshte plotesisht falas per zyrat e kontabilitetit. Pa prove, pa karte krediti — falas pergjithmone. Plus 20% komision per cdo klient.",
+    "cta": "Regjistrohuni falas",
     "last_email": "Ky eshte email-i i fundit nga ne. Nuk do t'ju kontaktojme perseri."
   },
   "followup3": {
-    "subject": "14 dite falas — pa karte krediti",
+    "subject": "50+ zyra jane tashme partnere — pse?",
     "greeting": "Pershendetje,",
-    "trial_offer": "Po ofrojme nje prove falas 14-ditore te planit Standard — pa karte krediti, pa detyrim.",
-    "features": "Me planin Standard merrni: e-Fakture per UJP, lidhje bankare (NLB, Stopanska, Komercijalna, Sparkasse), llogaritje automatike te TVSH-se dhe deri ne 200 fatura ne muaj.",
-    "pricing": "Pas proves, plani Starter eshte vetem €12/muaj dhe Standard €29/muaj. Zgjidhja me e perballueshme per bizneset maqedonase.",
-    "cta": "Filloni proven falas",
-    "no_card": "Pa karte krediti. Anuloni ne cdo kohe."
+    "trial_offer": "Mbi 50 zyra kontabiliteti tashme e perdorin Facturino si partnere. Pse?",
+    "features": "Akses falas ne te gjitha funksionet: e-Fakture per UJP (UBL 2.1 + nenshkrim QES), lidhje bankare PSD2 (NLB, Stopanska, Komercijalna, Sparkasse), MPIN paga dhe menaxhim multi-kompanish nga nje dashboard.",
+    "pricing": "20% komision mujor per cdo klient. Klientet tuaj paguajne nga €12/muaj — ju fitoni pa mundim shtese.",
+    "cta": "Behuni partner",
+    "no_card": "Pa karte krediti. Pa detyrim. Falas pergjithmone."
   },
   "followup4": {
     "subject": "Mesazhi i fundit: e-Faktura behet e detyrueshme",
     "greeting": "Pershendetje,",
     "urgency": "E-Faktura se shpejti behet e detyrueshme ne Maqedoni. Facturino eshte platforma e vetme me gjenerim automatik te UBL 2.1 XML dhe nenshkrim dixhital QES — jeni gati me nje klik.",
-    "partner_offer": "Nese jeni zyra kontabiliteti, ofrojme 20% komision mujor per cdo klient + akses falas ne te gjitha funksionet. Mbi 50 zyra jane tashme partnere.",
+    "partner_offer": "Si zyra partner, merrni akses falas ne te gjitha funksionet + 20% komision mujor per cdo klient. Mbi 50 zyra jane tashme partnere.",
     "cta": "Regjistrohuni falas",
     "final_note": "Ky eshte me te vertete mesazhi yne i fundit. Ju urojme sukses! Nese ndonjehere keni nevoje — facturino.mk"
   },

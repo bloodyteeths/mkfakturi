@@ -1,41 +1,41 @@
 {
   "initial": {
-    "subject": "Facturino for :company?",
+    "subject": "Facturino partnership — 20% commission",
     "greeting": "Hello,",
-    "intro": "Facturino is a cloud invoicing and accounting platform designed for Macedonian businesses.",
-    "benefit": "With e-faktura integration and automatic bank feeds, it automates every part of your financial workflow.",
+    "intro": "Facturino is a cloud invoicing and accounting platform designed for Macedonian businesses. For accounting bureaus — access is completely free.",
+    "benefit": "As a partner, you earn 20% monthly commission for every client you manage through Facturino, plus free access to all features: e-Faktura, bank connections, MPIN payroll, and multi-company management.",
     "cta": "Watch 2-minute demo",
     "opt_out": "Reply STOP to opt out."
   },
   "followup1": {
-    "subject": "Following up: Facturino",
+    "subject": "Following up: Facturino partner program",
     "greeting": "Hello again,",
-    "reference": "I reached out a few days ago about Facturino.",
-    "metric": "Over 200 Macedonian companies already use Facturino to automate their invoicing.",
+    "reference": "I reached out a few days ago about the Facturino partner program.",
+    "metric": "Over 50 accounting bureaus are already partners. Manage all your clients from one dashboard — for free.",
     "cta": "Watch demo"
   },
   "followup2": {
-    "subject": "Last note: free trial",
+    "subject": "Free access for accountants",
     "greeting": "Hello,",
-    "busy": "I understand you are busy - just a quick note.",
-    "offer": "If you would like to try Facturino, we are offering an extended 30-day free trial.",
-    "cta": "Start free trial",
+    "busy": "I understand you are busy — just a quick note.",
+    "offer": "Facturino is completely free for accounting bureaus. No trial period, no credit card — free forever. Plus 20% commission for every client.",
+    "cta": "Sign up for free",
     "last_email": "This is the last email from us. We will not contact you again."
   },
   "followup3": {
-    "subject": "14 days free — no credit card",
+    "subject": "50+ bureaus are already partners — why?",
     "greeting": "Hello,",
-    "trial_offer": "We are offering a 14-day free trial of the Standard plan — no credit card, no commitment.",
-    "features": "With the Standard plan you get: e-Faktura for UJP, bank connections (NLB, Stopanska, Komercijalna, Sparkasse), automatic VAT calculations, and up to 200 invoices per month.",
-    "pricing": "After the trial, the Starter plan is just €12/month and Standard is €29/month. The most affordable solution for Macedonian businesses.",
-    "cta": "Start free trial",
-    "no_card": "No credit card required. Cancel anytime."
+    "trial_offer": "Over 50 accounting bureaus already use Facturino as partners. Why?",
+    "features": "Free access to all features: e-Faktura for UJP (UBL 2.1 + QES signing), PSD2 bank connections (NLB, Stopanska, Komercijalna, Sparkasse), MPIN payroll, and multi-company management from one dashboard.",
+    "pricing": "20% monthly commission for every client. Your clients pay from €12/month — you earn without extra effort.",
+    "cta": "Become a partner",
+    "no_card": "No credit card. No commitment. Free forever."
   },
   "followup4": {
     "subject": "Final message: e-Faktura is becoming mandatory",
     "greeting": "Hello,",
     "urgency": "E-Faktura is becoming mandatory in Macedonia soon. Facturino is the only platform with automatic UBL 2.1 XML generation and QES digital signing — you are ready with one click.",
-    "partner_offer": "If you are an accounting bureau, we offer 20% monthly commission for every client + free access to all features. Over 50 bureaus are already partners.",
+    "partner_offer": "As a partner bureau, you get free access to all features + 20% monthly commission for every client. Over 50 bureaus are already partners.",
     "cta": "Sign up for free",
     "final_note": "This is truly our last message. We wish you success! If you ever need us — facturino.mk"
   },
