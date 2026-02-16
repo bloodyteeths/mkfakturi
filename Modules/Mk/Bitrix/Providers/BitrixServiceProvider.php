@@ -18,6 +18,8 @@ use Modules\Mk\Bitrix\Commands\HubSpotCreatePartnerCommand;
 use Modules\Mk\Bitrix\Commands\HubSpotGeneratePartnerLinksCommand;
 use Modules\Mk\Bitrix\Commands\HubSpotSyncPartnerActivityCommand;
 use Modules\Mk\Bitrix\Commands\OutreachSendBatchCommand;
+use Modules\Mk\Bitrix\Commands\DirectoryOutreachCommand;
+use Modules\Mk\Bitrix\Commands\ImportPostmarkContactsCommand;
 use Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware;
 use Modules\Mk\Bitrix\Services\PartnerMetricsService;
 
@@ -66,6 +68,8 @@ class BitrixServiceProvider extends ServiceProvider
 
                 // Outreach commands
                 OutreachSendBatchCommand::class,
+                DirectoryOutreachCommand::class,
+                ImportPostmarkContactsCommand::class,
             ]);
         }
 

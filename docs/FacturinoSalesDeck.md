@@ -1,558 +1,534 @@
-# FACTURINO MACEDONIA
+# FACTURINO DOOEL VELES
 ## Professional Sales Presentation for Partner Bureau Outreach
 
-**Version**: 1.0  
-**Date**: July 26, 2025  
-**Target Audience**: Partner Accounting Bureaus, Business Decision Makers  
+**Version**: 2.0
+**Date**: February 2026
+**Target Audience**: Partner Accounting Bureaus, Business Decision Makers
 **Presentation Duration**: 20-30 minutes
 
 ---
 
-## 📊 SLIDE 1: TITLE SLIDE
+## SLIDE 1: TITLE SLIDE
 
-### **FACTURINO MACEDONIA**
-### *The Only Accounting Platform That Eliminates Switching Friction*
+### **FACTURINO DOOEL VELES**
+### *The Complete Accounting Platform Built for Macedonia*
 
 **Professional Partner Bureau Presentation**
 
-*Making Macedonia Business Migration Effortless*
+*Invoicing, Payroll, Inventory, Banking, and E-Faktura -- All in One Place*
 
-**Contact**: partnerships@facturino.mk  
-**Demo**: staging.facturino.mk  
-**Date**: July 2025
+**Contact**: info@facturino.mk
+**App**: app.facturino.mk
+**Website**: www.facturino.mk
+**Date**: February 2026
 
 ---
 
-## 🎯 SLIDE 2: EXECUTIVE SUMMARY
+## SLIDE 2: EXECUTIVE SUMMARY
 
 ### **The Macedonia Accounting Software Problem**
 
-**❌ Current Market Reality:**
+**Current Market Reality:**
 - Businesses trapped with outdated competitors (Onivo, Megasoft, Pantheon)
 - Migration takes 3-6 months of manual work
-- Partner bureaus lose clients due to switching friction
-- No platform supports multiple clients professionally
+- No platform covers invoicing + payroll + inventory + banking together
+- No multi-client partner console for accounting bureaus
+- No platform supports Macedonian, Albanian, Turkish, and English
 
-**✅ Facturino Solution:**
-- **ONLY** platform with automated competitor migration
-- **ONLY** multi-client partner console in Macedonia
-- **ONLY** complete tax compliance automation (ДДВ-04)
-- **ONLY** platform with all 3 major bank integrations
+**Facturino Solution:**
+- Automated competitor migration (CSV, Excel, XML imports)
+- Multi-client partner console with commission tracking
+- Full tax compliance automation (DDV-04, MPIN, E-Faktura)
+- 4 bank integrations via PSD2 + CSV import for all other banks
+- Payroll with MPIN XML export for UJP
+- Inventory/warehouse management with automatic journal entries
+- AI assistant for cash flow forecasting and receivables analysis
+- 4 languages: Macedonian, Albanian, Turkish, English
 
-**🏆 Result: Market Domination Through Effortless Switching**
+**Result: One platform that replaces 3-4 separate tools.**
 
 ---
 
-## 🇲🇰 SLIDE 3: MACEDONIA MARKET OPPORTUNITY
+## SLIDE 3: MACEDONIA MARKET OPPORTUNITY
 
 ### **Target Market Analysis**
 
-**📈 Market Size:**
+**Market Size:**
 - 70,000+ registered businesses in Macedonia
 - 200+ accounting bureaus managing multiple clients
-- €15M+ annual accounting software market
-- 85% still using legacy systems
+- 85% still using legacy desktop systems
 
-**🎯 Target Segments:**
+**Target Segments:**
 - **Primary**: Partner accounting bureaus (5-50 clients each)
-- **Secondary**: Mid-size businesses (50-500 employees)
-- **Tertiary**: Small businesses seeking modern solutions
+- **Secondary**: Small and mid-size businesses (1-500 employees)
+- **Tertiary**: Sole traders and freelancers seeking a modern solution
 
-**💰 Revenue Potential:**
-- Average €50/month per client
-- Partner bureaus: 10-20 clients average
-- Commission model: 20% recurring revenue (22% for Partner Plus)
-- Market penetration goal: 25% in 24 months
+**Revenue Potential:**
+- 5 subscription tiers from Free to EUR 149/month
+- Commission model: 20% recurring revenue (22% for Partner Plus with 10+ clients)
+- Free tier lets every prospect try the platform before committing
 
 ---
 
-## 🏆 SLIDE 4: UNIQUE COMPETITIVE ADVANTAGES
+## SLIDE 4: WHAT MAKES FACTURINO DIFFERENT
 
-### **Why Facturino Wins - The "Big 3" Advantages**
+### **Core Advantages Over Every Competitor**
 
-#### **🔥 #1: Universal Migration Wizard**
-- **ONLY** platform with automated competitor import
-- 10 minutes vs. 3-6 months manual migration
-- 95%+ accuracy for Macedonia business data
-- Supports Onivo, Megasoft, Pantheon, CSV, Excel, XML
+#### **1. Universal Migration Wizard**
+- Automated competitor import from Onivo, Megasoft, Pantheon, CSV, Excel, XML
+- Field mapping with high accuracy
+- Migration in minutes instead of months
 
-#### **🔥 #2: Professional Partner Console**
-- **ONLY** multi-client management in Macedonia
+#### **2. Professional Partner Console**
+- Multi-client management from a single login
 - Commission tracking with real-time reporting
-- Company switching with enterprise security
-- White-label capabilities for bureau branding
+- Company switching with data isolation
+- Deadline dashboard showing DDV-04, MPIN, and income tax dates for all clients
 
-#### **🔥 #3: Complete Tax Compliance**
-- **ONLY** automated ДДВ-04 VAT return generation
-- Digital signature support with QES certificates
-- UBL 2.1 XML export for tax authority compliance
-- Macedonia-specific rates (18%, 5%, 0%, exempt)
+#### **3. Complete Tax and Payroll Compliance**
+- Automated DDV-04 VAT return generation
+- QES digital signing with qualified electronic signatures
+- UBL 2.1 XML export for E-Faktura
+- Full payroll: personal tax, health insurance, pension, contributions, overtime (135%, 150%), annual leave, sick leave, maternity
+- MPIN XML export for UJP government submissions
+- PDF payslips with min/max contribution base enforcement
+
+#### **4. Banking -- 4 Banks via PSD2 + CSV for the Rest**
+- PSD2 integration: NLB, Stopanska, Komercijalna, Sparkasse
+- CSV import for banks without PSD2: Halk, ProCredit, TTK, Silk Road, Ohridska
+- Automatic payment matching and reconciliation
+
+#### **5. "Taste Everything" Free Tier**
+- Free users get a limited preview of every feature, including payroll and E-Faktura
+- No credit card required to sign up
+- 14-day Standard tier trial for all new accounts
 
 ---
 
-## 💪 SLIDE 5: COMPREHENSIVE FEATURE ADVANTAGE
+## SLIDE 5: FULL FEATURE LIST
 
-### **Complete Platform Superiority**
+### **Everything the Platform Offers**
 
-#### **📊 Business Management**
-- Professional invoice creation with Cyrillic support
-- Multi-currency (MKD, EUR, USD) with auto-conversion
-- Comprehensive customer and item management
-- Real-time financial reporting and analytics
+#### **Invoicing and Sales**
+- Professional invoice creation with Cyrillic/Latin support
+- Recurring invoices with automatic scheduling
+- Proforma invoices for sales pipeline management
+- Credit notes with full workflow
+- QR payment code on PDF invoices
+- E-Faktura (UBL 2.1 XML) with QES digital signing
+- CASYS/cPay payment links -- clients pay invoices via link
+- Multi-currency (MKD, EUR, USD) with NBRM exchange rate auto-import
 
-#### **🏦 Banking Integration Excellence**
-- All 3 major banks: Stopanska, NLB, Komercijalna
-- PSD2 automatic transaction sync
-- Intelligent payment matching (95% accuracy)
+#### **Accounts Payable**
+- Bills / inbound invoice tracking from suppliers
+- Supplier registry
+- OCR invoice parsing (PDF and image) via Tesseract (Macedonian + English + Serbian)
+
+#### **Payroll and MPIN**
+- Full Macedonian payroll calculation
+- Personal tax, health insurance, pension contributions
+- Overtime at 135% and 150%, annual leave, sick leave, maternity leave
+- MPIN XML export for UJP
+- PDF payslips
+- Min/max contribution base enforcement
+- Up to 50 employees on Business tier, unlimited on Max
+
+#### **Inventory and Warehouse Management**
+- Multiple warehouses with receipts, dispatches, and transfers
+- Weighted average cost (WAC) calculation
+- Automatic journal entries (account classes 3, 6, 7)
+- Barcode and SKU tracking
+- Low stock alerts
+
+#### **Projects**
+- Revenue and expense tracking per project
+- Profitability analysis per project
+- Link invoices, expenses, and payments to projects
+
+#### **AI Assistant**
+- "Who owes me the most?" -- natural language queries
+- 90-day cash flow forecasts
+- Risk warnings (client concentration alerts)
+- Aging analysis of receivables
+
+#### **Banking**
+- PSD2 connections to NLB, Stopanska, Komercijalna, Sparkasse
+- CSV import for Halk, ProCredit, TTK, Silk Road, Ohridska
+- Automatic payment matching
 - Real-time account balance monitoring
 
-#### **🌐 Technical Superiority**
-- Laravel 12 + Vue 3 architecture
-- Enterprise-grade security and performance
-- Mobile-responsive design
-- API-first architecture for integrations
+#### **Accounting**
+- Macedonian Chart of Accounts (built in, auto-seeded)
+- Expenses with receipt attachment
+- Estimates
+- Custom fields
+- Financial reports
 
-#### **🗣️ Language & Localization**
-- 95% Macedonian interface translation
-- Complete Albanian language support
-- Localized business workflows
-- Cultural adaptation for Macedonia market
+#### **Client and Partner Tools**
+- Client document portal -- clients upload scanned invoices and bank statements
+- Deadline dashboard -- automatic tracking of DDV-04, MPIN, income tax deadlines for all clients
+- Central Registry lookup -- auto-search companies from the Central Registry of Macedonia
+- Partner console with commission tracking
+
+#### **Integrations**
+- CASYS/cPay payment links on invoices
+- WooCommerce integration (online orders become invoices)
+- ErpNet.FP fiscal receipt integration
+- NBRM exchange rates (automatic daily import from National Bank)
+
+#### **Technical**
+- Laravel 10 + Vue 3 + Vite (SPA architecture)
+- PWA mobile app -- works on any phone via browser
+- 4 languages: Macedonian, Albanian, Turkish, English
+- Cloudflare R2 backups every 6 hours
+- Company-scoped data isolation
+- API access (Business tier and above)
 
 ---
 
-## 📱 SLIDE 6: LIVE DEMO CAPABILITIES
+## SLIDE 6: LIVE DEMO HIGHLIGHTS
 
-### **Real-Time Demonstration Points**
+### **Key Demonstration Points**
 
-#### **🎬 Universal Migration Wizard**
+#### **Migration Wizard**
 1. Upload competitor CSV/Excel file
-2. Watch automatic field mapping (95% accuracy)
-3. Complete business migration in under 10 minutes
+2. Watch automatic field mapping
+3. Complete business migration in minutes
 4. Show preserved relationships and data integrity
 
-#### **🏢 Partner Console Management**
+#### **Partner Console**
 1. Switch between multiple client companies
 2. View commission tracking dashboard
-3. Manage client permissions and access
+3. Deadline dashboard with DDV-04 and MPIN dates for all clients
 4. Generate multi-client reports
 
-#### **🧾 Tax Compliance Automation**
-1. Generate ДДВ-04 VAT return in one click
-2. Export UBL XML with digital signatures
-3. Preview tax-compliant invoice formatting
-4. Show Macedonia-specific VAT calculations
+#### **Invoicing and E-Faktura**
+1. Create invoice with QR payment code
+2. Generate CASYS/cPay payment link
+3. Sign with QES and export UBL XML
+4. Send E-Faktura to government portal
 
-#### **💳 Banking Integration**
-1. Real-time transaction sync demonstration
-2. Automatic invoice payment matching
-3. Multi-bank account management
-4. Payment reconciliation workflow
+#### **Payroll**
+1. Add employees with contract details
+2. Calculate monthly payroll (tax, insurance, pension)
+3. Generate MPIN XML for UJP submission
+4. Print PDF payslips
+
+#### **Banking**
+1. Connect bank account via PSD2 (or import CSV)
+2. Automatic transaction sync
+3. Invoice payment matching
+4. Reconciliation workflow
+
+#### **AI Assistant**
+1. Ask "Who owes me the most?"
+2. View 90-day cash flow forecast
+3. Receivables aging analysis
 
 ---
 
-## 📊 SLIDE 7: COMPETITIVE ANALYSIS
+## SLIDE 7: COMPETITIVE ANALYSIS
 
-### **Facturino vs. Market Leaders**
+### **Facturino vs. Market Alternatives**
 
 | Feature | **Facturino** | Onivo | Megasoft | Pantheon |
 |---------|---------------|-------|----------|----------|
-| **Migration Wizard** | ✅ **Automated** | ❌ Manual | ❌ Manual | ❌ Manual |
-| **Multi-Client Console** | ✅ **Professional** | ❌ None | ❌ Basic | ❌ None |
-| **ДДВ-04 Automation** | ✅ **One-Click** | ❌ Manual | ❌ Manual | ❌ Manual |
-| **Banking Integration** | ✅ **All 3 Banks** | ❌ Limited | ❌ None | ❌ Limited |
-| **Modern Interface** | ✅ **Vue 3** | ❌ Legacy | ❌ Legacy | ❌ Legacy |
-| **Albanian Support** | ✅ **Complete** | ❌ None | ❌ None | ❌ None |
-| **Partner Commissions** | ✅ **Built-in** | ❌ None | ❌ None | ❌ None |
-| **Cloud Architecture** | ✅ **Enterprise** | ❌ Basic | ❌ Legacy | ❌ Basic |
-
-**🎯 Result: Facturino has 8/8 advantages vs. 0-2/8 for competitors**
-
----
-
-## 💼 SLIDE 8: PARTNER BUREAU VALUE PROPOSITION
-
-### **Immediate Business Benefits for Your Bureau**
-
-#### **💰 Revenue Growth**
-- **20% recurring commission** on all client payments
-- **New client acquisition** through effortless migration
-- **Upselling opportunities** with advanced features
-- **Retention improvement** with superior platform
-
-#### **⚡ Operational Efficiency**
-- **50% reduction** in manual data entry
-- **90% faster** new client onboarding
-- **Automated compliance** reduces error risk
-- **Multi-client dashboard** increases productivity
-
-#### **🏆 Competitive Advantage**
-- **ONLY bureau** offering universal migration
-- **Professional image** with modern platform
-- **Client satisfaction** through superior UX
-- **Market differentiation** vs. legacy-stuck competitors
-
-#### **📈 Growth Acceleration**
-- **Rapid client acquisition** through migration
-- **Scalable platform** supporting unlimited clients
-- **Professional reporting** for client presentations
-- **Partnership support** for business development
+| **Migration Wizard** | Automated | Manual | Manual | Manual |
+| **Multi-Client Console** | Yes | No | Basic | No |
+| **DDV-04 Automation** | One-Click | Manual | Manual | Manual |
+| **E-Faktura (UBL 2.1)** | Built-in with QES | No | No | No |
+| **Banking (PSD2)** | 4 Banks + CSV | Limited | None | Limited |
+| **Payroll + MPIN** | Full | No | Partial | Partial |
+| **Inventory/Warehouse** | Full with WAC | No | Basic | Basic |
+| **AI Assistant** | Yes | No | No | No |
+| **OCR Invoice Parsing** | Yes (MK+EN+SR) | No | No | No |
+| **4 Languages** | MK, SQ, TR, EN | MK only | MK only | MK only |
+| **Partner Commissions** | Built-in | None | None | None |
+| **Mobile (PWA)** | Yes | No | No | No |
+| **WooCommerce** | Yes | No | No | No |
+| **Payment Links** | CASYS/cPay | No | No | No |
 
 ---
 
-## 🎯 SLIDE 9: CLIENT SUCCESS STORIES (DEMO SCENARIOS)
+## SLIDE 8: PARTNER BUREAU VALUE PROPOSITION
 
-### **Typical Migration Success Cases**
+### **Benefits for Your Bureau**
 
-#### **📊 Scenario 1: Mid-Size Manufacturer**
-- **Before**: 3 months planned Onivo migration
-- **With Facturino**: 10-minute automated migration
-- **Result**: Operational in same day, 98% data accuracy
-- **Client Feedback**: "Impossible to believe it was this easy"
+#### **Revenue Growth**
+- 20% recurring commission on all client payments (22% for Partner Plus)
+- New client acquisition through effortless migration
+- Upselling from Free to paid tiers as clients grow
+- Retention through a platform that covers everything
 
-#### **🏪 Scenario 2: Multi-Location Retail Chain**
-- **Before**: Complex Megasoft export/import process
-- **With Facturino**: One-click migration + multi-location support
-- **Result**: All locations operational within 1 hour
-- **Client Feedback**: "Best business decision this year"
+#### **Operational Efficiency**
+- Deadline dashboard shows DDV-04, MPIN, income tax dates for all clients
+- Client document portal -- clients upload documents directly to your workspace
+- Multi-client switching from a single login
+- Automated compliance reduces manual work and error risk
 
-#### **🏢 Scenario 3: Partner Bureau (15 clients)**
-- **Before**: 6 months estimated for client migrations
-- **With Facturino**: All 15 clients migrated in 2 days
-- **Result**: 300% faster onboarding, 40% revenue increase
-- **Bureau Feedback**: "Game-changer for our business"
+#### **Competitive Advantage**
+- Only bureau offering universal migration from competitors
+- Only bureau with payroll + inventory + invoicing in one platform
+- Professional image with modern, mobile-ready platform
+- 4 languages lets you serve Albanian and Turkish-speaking clients
 
 ---
 
-## 📈 SLIDE 10: IMPLEMENTATION ROADMAP
+## SLIDE 9: PRICING AND SUBSCRIPTION TIERS
 
-### **Your Success Timeline - From Pilot to Profit**
+### **Transparent Pricing -- Start Free, Grow as Needed**
 
-#### **🚀 Week 1-2: Pilot Setup**
+| Tier | Price/Month | Invoices/Month | Users | Key Features |
+|------|-------------|----------------|-------|--------------|
+| **Free** | EUR 0 | 5 | 1 | Basic invoicing + taste of every feature (limited) |
+| **Starter** | EUR 12 | 50 | 1 | Recurring invoices, full expenses/estimates, bills, projects |
+| **Standard** | EUR 29 | 200 | 3 | E-Faktura, QES signing, PSD2 bank connections |
+| **Business** | EUR 59 | 1,000 | 5 | Multi-currency, API access, payroll (50 employees) |
+| **Max** | EUR 149 | Unlimited | Unlimited | Everything + 100 AI queries/month + IFRS reports |
+
+**Trial**: Every new signup gets 14 days of Standard tier. No credit card required.
+
+**"Taste Everything" Model**: Free users get limited access to every feature -- payroll (2 employees), E-Faktura (1/month), warehouses (1), projects (1), AI queries (3/month), and more. They experience the value before upgrading.
+
+#### **Partner Commission Structure**
+- **Standard Partners**: 20% recurring commission
+- **Partner Plus** (10+ active clients): 22% recurring commission
+- Monthly payment via bank transfer
+- Transparent tracking with real-time dashboard
+
+---
+
+## SLIDE 10: IMPLEMENTATION ROADMAP
+
+### **From Pilot to Production**
+
+#### **Week 1-2: Pilot Setup**
 - Partner bureau account creation and verification
-- Training session for your team (2 hours)
-- Demo environment access and testing
+- Training session for your team (2-3 hours)
 - Select 2-3 pilot clients for initial migration
+- Connect bank accounts, import chart of accounts
 
-#### **📊 Week 3-4: Pilot Execution**
+#### **Week 3-4: Pilot Execution**
 - Execute pilot client migrations
-- Test all core features and workflows
-- Validate commission tracking and reporting
-- Gather client feedback and satisfaction
+- Test invoicing, payroll, banking, and E-Faktura workflows
+- Validate commission tracking
+- Gather client feedback
 
-#### **🎯 Month 2: Scale Deployment**
+#### **Month 2: Scale Deployment**
 - Migrate remaining interested clients
-- Launch marketing campaign for new client acquisition
-- Begin leveraging universal migration for sales
-- Optimize workflows based on pilot learnings
+- Set up deadline dashboard for all clients
+- Activate client document portal
+- Begin using partner console daily
 
-#### **💰 Month 3+: Revenue Growth**
+#### **Month 3+: Growth**
 - Full client portfolio operational
 - New client acquisition through migration advantage
-- Commission revenue tracking and optimization
-- Partnership expansion and success measurement
+- Commission revenue growing
+- Upsell clients from Free/Starter to paid tiers as their usage grows
 
 ---
 
-## 💻 SLIDE 11: TECHNICAL ARCHITECTURE & SECURITY
+## SLIDE 11: TECHNICAL ARCHITECTURE AND SECURITY
 
-### **Enterprise-Grade Infrastructure**
+### **Production Infrastructure**
 
-#### **🏗️ Platform Architecture**
-- **Laravel 12** backend with clean architecture
-- **Vue 3 + Pinia** for reactive user experience
-- **Docker containerization** for reliable deployment
-- **Microservices approach** for scalability
+#### **Platform Architecture**
+- Laravel 10 backend with Vue 3 + Vite SPA frontend
+- Docker containerized, deployed on Railway
+- invoice2data OCR microservice (FastAPI + Tesseract)
+- Next.js marketing site (www.facturino.mk)
 
-#### **🔒 Security & Compliance**
-- **Enterprise security** with multi-factor authentication
-- **GDPR compliance** for EU data protection
-- **Company-scoped data isolation** preventing cross-tenant access
-- **Regular security audits** and vulnerability assessments
+#### **Security and Compliance**
+- Company-scoped data isolation (multi-tenant)
+- GDPR compliance for EU data protection
+- AES-256 encryption at rest and in transit
+- Multi-factor authentication support
 
-#### **⚡ Performance & Reliability**
-- **<300ms response times** for optimal user experience
-- **99.9% uptime SLA** with redundant infrastructure
-- **Automatic scaling** for traffic spikes
-- **Comprehensive monitoring** with real-time alerts
+#### **Reliability**
+- Cloudflare R2 backups every 6 hours
+- 7-day full retention + monthly retention up to 3 years
+- Automated deployment on push to main branch
+- Health monitoring and alerting
 
-#### **🔧 Integration Capabilities**
-- **RESTful APIs** for third-party integrations
-- **Webhook support** for real-time notifications
-- **Partner-specific customizations** available
-- **White-label options** for bureau branding
+#### **Integrations**
+- RESTful API (Business tier and above)
+- Webhook support for real-time notifications
+- PSD2 banking APIs
+- CASYS/cPay payment gateway
+- WooCommerce API
+- ErpNet.FP fiscal receipts
+- Central Registry of Macedonia lookup
+- NBRM exchange rate feed
 
 ---
 
-## 📞 SLIDE 12: PARTNERSHIP TERMS & SUPPORT
+## SLIDE 12: PARTNERSHIP TERMS AND SUPPORT
 
 ### **Professional Partnership Package**
 
-#### **💰 Commission Structure**
-- **20% recurring revenue** from all client subscriptions (22% for Partner Plus)
-- **Monthly payment** via bank transfer or invoice
-- **Transparent tracking** with real-time dashboard
-- **Performance bonuses** for high-volume partners
+#### **Commission Structure**
+- 20% recurring revenue from all client subscriptions (22% for Partner Plus)
+- Monthly payment via bank transfer or invoice
+- Transparent tracking with real-time dashboard
 
-#### **🎓 Training & Enablement**
-- **Comprehensive onboarding** (4-hour program)
-- **Video training library** for ongoing education
-- **Monthly partner webinars** for new features
-- **Dedicated partner success manager**
+#### **Training and Enablement**
+- Comprehensive onboarding session
+- Video training library for ongoing education
+- Partner webinars for new feature releases
 
-#### **🛠️ Technical Support**
-- **Priority support queue** for partners
-- **Direct escalation path** for urgent issues
-- **Partner-only documentation** and resources
-- **Co-marketing opportunities** and materials
+#### **Technical Support**
+- Priority support queue for partners
+- Direct escalation path for urgent issues
+- Partner-specific documentation and resources
 
-#### **📈 Business Development**
-- **Sales materials** and presentation templates
-- **Lead sharing** for qualified prospects
-- **Joint sales calls** for large opportunities
-- **Market expansion support** for growth
+#### **Business Development**
+- Sales materials and presentation templates
+- Co-marketing opportunities
+- Lead sharing for qualified prospects
 
 ---
 
-## 🎯 SLIDE 13: NEXT STEPS & CALL TO ACTION
+## SLIDE 13: ROI CALCULATOR
 
-### **Ready to Transform Your Business?**
+### **Partner Bureau ROI Analysis (15-client portfolio)**
 
-#### **🚀 Immediate Action Items**
+| Metric | Conservative | Realistic | Optimistic |
+|--------|-------------|-----------|------------|
+| **Clients on Paid Plans** | 8 | 12 | 18 |
+| **Avg. Monthly Revenue/Client** | EUR 25 | EUR 35 | EUR 50 |
+| **Monthly Commission (20%)** | EUR 40 | EUR 84 | EUR 180 |
+| **Annual Commission** | EUR 480 | EUR 1,008 | EUR 2,160 |
+| **New Clients Acquired/Year** | 3 | 6 | 10 |
+| **Year 2 Annual Commission** | EUR 624 | EUR 1,512 | EUR 3,960 |
 
-1. **Schedule Demo Call** (30 minutes)
+#### **Efficiency Gains**
+- Deadline dashboard eliminates missed filing dates across all clients
+- Client document portal reduces back-and-forth email chains
+- Automated bank reconciliation saves hours of manual matching
+- One platform instead of 3-4 separate tools
+
+---
+
+## SLIDE 14: NEXT STEPS
+
+### **Getting Started**
+
+1. **Schedule a Demo** (30 minutes)
    - Live platform demonstration
    - Migration wizard walkthrough
    - Partner console exploration
    - Q&A and technical discussion
 
-2. **Pilot Program Setup** (1 week)
-   - Partner agreement execution
-   - Account setup and configuration
+2. **Pilot Program** (2 weeks)
+   - Partner account setup
    - Team training session
-   - Select pilot clients
+   - Migrate 2-3 pilot clients
+   - Test full workflow: invoicing, banking, payroll
 
-3. **Success Measurement** (30 days)
-   - Client satisfaction surveys
+3. **Evaluate and Expand** (30 days)
+   - Client satisfaction review
    - Migration time tracking
-   - Revenue impact analysis
-   - Expansion planning
+   - Commission tracking verification
+   - Decision on full rollout
 
-#### **📅 Contact & Next Steps**
-- **Email**: partnerships@facturino.mk
-- **Phone**: +389 2 XXX-XXXX
-- **Demo Environment**: staging.facturino.mk
-- **Calendar Link**: calendly.com/facturino-partnerships
-
----
-
-## 📊 SLIDE 14: ROI CALCULATOR & BUSINESS CASE
-
-### **Partner Bureau ROI Analysis**
-
-#### **💰 Revenue Projection (15-client portfolio)**
-
-| Metric | Conservative | Realistic | Optimistic |
-|--------|-------------|-----------|------------|
-| **Clients Migrated** | 10 | 15 | 20 |
-| **Avg. Monthly Revenue/Client** | €40 | €50 | €60 |
-| **Monthly Commission (20%)** | €80 | €150 | €240 |
-| **Annual Commission** | €960 | €1,800 | €2,880 |
-| **New Client Acquisition** | 2 | 5 | 8 |
-| **Total Annual Revenue** | €1,200 | €2,250 | €3,600 |
-
-#### **⚡ Efficiency Gains**
-- **Time Savings**: 40 hours/month → 20 hours/month
-- **Error Reduction**: 90% fewer manual entry errors
-- **Client Satisfaction**: 95% vs. 70% with legacy systems
-- **New Client Capacity**: 50% more clients manageable
-
-#### **🎯 Break-Even Analysis**
-- **Implementation Cost**: €500 (training + setup)
-- **Break-Even Point**: Month 2-3 (conservative scenario)
-- **ROI After Year 1**: 200-500% depending on portfolio size
+#### **Contact**
+- **Email**: info@facturino.mk
+- **App**: app.facturino.mk
+- **Website**: www.facturino.mk
 
 ---
 
-## 🏆 SLIDE 15: SUCCESS GUARANTEE & PARTNERSHIP COMMITMENT
+## APPENDIX A: TECHNICAL SPECIFICATIONS
 
-### **Our Promise to Partner Success**
-
-#### **✅ Success Guarantee**
-- **95% data migration accuracy** or full support until resolved
-- **24-hour maximum** client onboarding time
-- **30-day satisfaction guarantee** for pilot clients
-- **Full refund** if partnership doesn't meet expectations
-
-#### **🤝 Partnership Commitment**
-- **Dedicated partner success manager** assigned
-- **Monthly check-ins** and performance reviews
-- **Continuous platform improvements** based on feedback
-- **Long-term growth partnership** vision
-
-#### **📈 Growth Support**
-- **Marketing co-op funds** for qualified partners
-- **Referral bonuses** for new partner introductions
-- **Exclusive territory opportunities** for top performers
-- **Joint business development** for enterprise clients
-
-#### **🎯 Mutual Success Metrics**
-- **Partner satisfaction**: >90% rated "excellent"
-- **Client retention**: >95% annual retention rate
-- **Revenue growth**: 50%+ partner revenue increase
-- **Market share**: Become #1 choice in Macedonia
-
----
-
-## 📞 SLIDE 16: CLOSING - READY TO DOMINATE THE MARKET?
-
-### **The Macedonia Accounting Software Revolution Starts Now**
-
-#### **🔥 The Opportunity**
-- **First-mover advantage** in universal migration
-- **Market disruption** opportunity with superior technology
-- **Partnership** with the clear Macedonia market leader
-- **Revenue growth** through effortless client acquisition
-
-#### **⏰ Urgency**
-- **Limited partner positions** in each market area
-- **Competitive advantage** diminishes as market matures
-- **Q4 2025 goal**: 50 partner bureaus across Macedonia
-- **Early partners** get best territories and terms
-
-#### **🎯 Your Decision**
-**A)** Continue with legacy systems and lose clients to migration friction  
-**B)** Partner with Facturino and dominate through superior technology
-
-#### **🚀 Let's Start Today**
-**Email**: partnerships@facturino.mk  
-**Phone**: +389 2 XXX-XXXX  
-**Demo**: staging.facturino.mk  
-**Calendar**: calendly.com/facturino-partnerships
-
-**"The future of Macedonia accounting is here. Join us."**
-
----
-
-## 📄 APPENDIX A: TECHNICAL SPECIFICATIONS
-
-### **Detailed Platform Capabilities**
-
-#### **System Requirements**
+### **System Requirements**
 - **Browser Support**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 - **Internet Connection**: Broadband (minimum 1 Mbps)
-- **Hardware**: Standard business computer (4GB RAM minimum)
-- **Mobile**: iOS 13+, Android 8+ for mobile app
+- **Mobile**: Any modern smartphone via PWA (no app store download needed)
 
-#### **Integration Capabilities**
-- **Banking APIs**: Stopanska, NLB, Komercijalna PSD2 integration
-- **Tax Authority**: E-faktura portal UBL XML integration
-- **Email Systems**: SMTP, Gmail, Outlook integration
-- **Payment Gateways**: CPAY Macedonia, international options
-- **Accounting Standards**: Macedonia GAAP, IFRS support
+### **Integration Capabilities**
+- **Banking APIs**: NLB, Stopanska, Komercijalna, Sparkasse (PSD2)
+- **Banking CSV**: Halk, ProCredit, TTK, Silk Road, Ohridska
+- **Tax Authority**: E-Faktura portal UBL 2.1 XML integration
+- **Payment Gateway**: CASYS/cPay payment links
+- **E-Commerce**: WooCommerce integration
+- **Fiscal Receipts**: ErpNet.FP integration
+- **Exchange Rates**: NBRM daily auto-import
+- **Registry**: Central Registry of Macedonia company lookup
+- **OCR**: invoice2data microservice (Tesseract, Macedonian + English + Serbian)
 
-#### **Data Security**
-- **Encryption**: AES-256 data encryption at rest and in transit
-- **Authentication**: Multi-factor authentication required
-- **Backup**: Daily automated backups with 7-year retention
+### **Data Security**
+- **Encryption**: AES-256 at rest and in transit
+- **Authentication**: Multi-factor authentication
+- **Backup**: Cloudflare R2 every 6 hours, retention up to 3 years
 - **Compliance**: GDPR, Macedonia data protection laws
-- **Hosting**: EU-based servers with Macedonia data residency
+- **Isolation**: Company-scoped multi-tenant architecture
 
 ---
 
-## 📄 APPENDIX B: PRICING & PACKAGES
+## APPENDIX B: DETAILED PRICING
 
-### **Transparent Pricing Structure**
+### **Client Subscription Tiers**
 
-#### **Client Subscription Tiers**
-- **Starter**: €25/month (up to 5 invoices/month)
-- **Professional**: €50/month (unlimited invoices, basic features)
-- **Enterprise**: €100/month (advanced features, priority support)
-- **Custom**: €150+/month (white-label, custom integrations)
+| Tier | Price/Month | Invoices | Users | Highlights |
+|------|-------------|----------|-------|------------|
+| Free | EUR 0 | 5/mo | 1 | Taste of all features with limits |
+| Starter | EUR 12 | 50/mo | 1 | Recurring invoices, expenses, estimates, bills, projects |
+| Standard | EUR 29 | 200/mo | 3 | E-Faktura, QES signing, PSD2 banking |
+| Business | EUR 59 | 1,000/mo | 5 | Multi-currency, API, payroll (50 employees) |
+| Max | EUR 149 | Unlimited | Unlimited | Everything + 100 AI queries/mo + IFRS |
 
-#### **Partner Commission Structure**
-- **Standard Partners**: 20% recurring commission (free)
-- **Partner Plus**: 22% recurring commission (€29/month or 10+ active clients)
+### **Free Tier "Taste Everything" Limits**
+- 5 invoices/month, 5 expenses/month, 3 estimates/month
+- 1 recurring invoice, 1 project, 1 warehouse
+- 3 bills/month, 5 suppliers, 1 credit note/month, 2 proformas/month
+- 2 payroll employees, 1 E-Faktura/month, 3 AI queries/month
+- 5 client document uploads/month, 3 custom deadlines
 
-#### **Additional Revenue Opportunities**
-- **Migration Services**: €200-500 per complex migration
-- **Custom Training**: €300 per bureau training session
-- **White-Label Setup**: €1,000 one-time fee
-- **Custom Development**: €5,000+ for specialized features
+### **Partner Commission Structure**
+- **Standard Partners**: 20% recurring commission
+- **Partner Plus** (10+ active clients): 22% recurring commission
 
----
-
-## 📄 APPENDIX C: COMPETITOR MIGRATION GUIDES
-
-### **Detailed Migration Support**
-
-#### **From Onivo**
-- **Data Export**: CSV export from Onivo system
-- **Field Mapping**: Automatic mapping of 95% of fields
-- **Timeline**: 10-15 minutes for complete migration
-- **Support**: Dedicated migration specialist available
-
-#### **From Megasoft**
-- **Data Export**: Excel/CSV export process
-- **Field Mapping**: Custom mapping for Megasoft formats
-- **Timeline**: 15-20 minutes including validation
-- **Support**: Video guide + live assistance
-
-#### **From Pantheon**
-- **Data Export**: Database export via Pantheon tools
-- **Field Mapping**: Enterprise-grade mapping support
-- **Timeline**: 20-30 minutes for complex setups
-- **Support**: Enterprise migration team assistance
-
-#### **From Excel/Manual Systems**
-- **Data Preparation**: Template provision for data organization
-- **Field Mapping**: Flexible mapping for any format
-- **Timeline**: 5-10 minutes for organized data
-- **Support**: Self-service with documentation
+### **Trial**
+- 14 days of Standard tier for every new signup
+- No credit card required
+- Downgrades to Free after trial unless subscribed
 
 ---
 
-## 📄 APPENDIX D: SUPPORT & TRAINING RESOURCES
+## APPENDIX C: COMPETITOR MIGRATION GUIDES
 
-### **Comprehensive Partner Enablement**
+### **From Onivo**
+- Export data as CSV from Onivo system
+- Upload to Facturino migration wizard
+- Automatic field mapping
+- Timeline: 10-15 minutes
 
-#### **Initial Training Program**
-- **Day 1**: Platform overview and core features (4 hours)
-- **Day 2**: Migration wizard and advanced features (4 hours)
-- **Day 3**: Partner console and client management (2 hours)
-- **Day 4**: Sales techniques and objection handling (2 hours)
+### **From Megasoft**
+- Export data as Excel/CSV
+- Upload to Facturino migration wizard
+- Custom mapping for Megasoft formats
+- Timeline: 15-20 minutes
 
-#### **Ongoing Education**
-- **Monthly webinars**: New features and best practices
-- **Quarterly workshops**: Advanced techniques and strategy
-- **Annual conference**: Partner networking and advanced training
-- **On-demand resources**: Video library and documentation
+### **From Pantheon**
+- Database export via Pantheon tools
+- Upload to Facturino migration wizard
+- Enterprise-grade mapping support
+- Timeline: 20-30 minutes
 
-#### **Marketing Support**
-- **Sales presentation templates** (PowerPoint, Keynote)
-- **Marketing materials** (brochures, case studies, videos)
-- **Website integration** (widgets, landing pages, APIs)
-- **Co-marketing campaigns** (email, social media, events)
-
-#### **Technical Support**
-- **Partner help desk**: Priority queue for partner issues
-- **Technical documentation**: API guides and integration help
-- **Developer resources**: Sandbox environment and testing tools
-- **Custom development**: Available for strategic partners
+### **From Excel or Manual Systems**
+- Use provided template for data organization
+- Flexible mapping for any format
+- Timeline: 5-10 minutes for organized data
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: July 26, 2025  
-**Next Review**: October 2025  
-**Document Owner**: Sales & Partnerships Team
+**Document Version**: 2.0
+**Last Updated**: February 16, 2026
+**Document Owner**: Sales and Partnerships Team
 
-**Contact Information:**
+**Contact:**
+- **General**: info@facturino.mk
 - **Partnerships**: partnerships@facturino.mk
-- **Sales**: sales@facturino.mk  
-- **Technical Support**: support@facturino.mk
-- **General Inquiries**: info@facturino.mk
-
----
-
-*This sales deck provides comprehensive information for partner bureau decision-makers to understand the value proposition, competitive advantages, and partnership opportunities with Facturino Macedonia.*
-
+- **Support**: support@facturino.mk
+- **App**: app.facturino.mk
+- **Website**: www.facturino.mk

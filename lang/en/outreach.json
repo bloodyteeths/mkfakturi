@@ -22,6 +22,23 @@
     "cta": "Start free trial",
     "last_email": "This is the last email from us. We will not contact you again."
   },
+  "followup3": {
+    "subject": "14 days free — no credit card",
+    "greeting": "Hello,",
+    "trial_offer": "We are offering a 14-day free trial of the Standard plan — no credit card, no commitment.",
+    "features": "With the Standard plan you get: e-Faktura for UJP, bank connections (NLB, Stopanska, Komercijalna, Sparkasse), automatic VAT calculations, and up to 200 invoices per month.",
+    "pricing": "After the trial, the Starter plan is just €12/month and Standard is €29/month. The most affordable solution for Macedonian businesses.",
+    "cta": "Start free trial",
+    "no_card": "No credit card required. Cancel anytime."
+  },
+  "followup4": {
+    "subject": "Final message: e-Faktura is becoming mandatory",
+    "greeting": "Hello,",
+    "urgency": "E-Faktura is becoming mandatory in Macedonia soon. Facturino is the only platform with automatic UBL 2.1 XML generation and QES digital signing — you are ready with one click.",
+    "partner_offer": "If you are an accounting bureau, we offer 20% monthly commission for every client + free access to all features. Over 50 bureaus are already partners.",
+    "cta": "Sign up for free",
+    "final_note": "This is truly our last message. We wish you success! If you ever need us — facturino.mk"
+  },
   "partner_invite": {
     "subject": "Welcome to Facturino Partner Program",
     "greeting": "Hello :name,",
@@ -29,6 +46,22 @@
     "benefits": "As a partner, you can manage clients, track commissions, and use exclusive accounting tools.",
     "cta": "Set password and complete profile",
     "contact": "For questions, contact us at partners@facturino.mk"
+  },
+  "directory": {
+    "subject": "Facturino — new Macedonian software for :directory",
+    "greeting": "Hello :name,",
+    "intro": "I am writing from Facturino DOOEL Veles. We noticed that :directory is an excellent resource for Macedonian businesses and accountants.",
+    "description": "Facturino is a new cloud invoicing and accounting platform designed specifically for the Macedonian market. We would love to be included in your directory/listing.",
+    "features_title": "Key features:",
+    "feature_1": "E-Faktura for UJP (UBL 2.1 XML + QES signing)",
+    "feature_2": "PSD2 bank connections (NLB, Stopanska, Komercijalna, Sparkasse)",
+    "feature_3": "Payroll per Macedonian law (MPIN XML export)",
+    "feature_4": "Multi-company management for accounting bureaus",
+    "feature_5": "4 languages: Macedonian, Albanian, Turkish, English",
+    "feature_6": "Pricing from €12/month — most affordable solution in MK",
+    "ask": "Would you be able to add Facturino to your directory? We are happy to provide a logo, description, and demo access for review.",
+    "cta": "Visit Facturino",
+    "closing": "Thank you for your time. We are available for collaboration."
   },
   "unsubscribe": "Unsubscribe"
 }

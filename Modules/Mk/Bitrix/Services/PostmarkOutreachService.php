@@ -9,6 +9,8 @@ use Modules\Mk\Bitrix\Models\OutreachSend;
 use Modules\Mk\Bitrix\Mail\OutreachInitialMail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp1Mail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp2Mail;
+use Modules\Mk\Bitrix\Mail\OutreachFollowUp3Mail;
+use Modules\Mk\Bitrix\Mail\OutreachFollowUp4Mail;
 use Modules\Mk\Bitrix\Mail\PartnerInviteMail;
 
 /**
@@ -70,7 +72,7 @@ class PostmarkOutreachService
      * Send an outreach email using a template.
      *
      * @param string $email Recipient email
-     * @param string $templateKey Template key (initial, followup_1, followup_2)
+     * @param string $templateKey Template key (initial, followup_1, followup_2, followup_3, followup_4)
      * @param array $data Template data (companyName, demoUrl, etc.)
      * @param string $unsubscribeUrl Unsubscribe link
      * @return string|null Postmark message ID or null on failure
@@ -328,10 +330,14 @@ class PostmarkOutreachService
         string $demoUrl,
         string $unsubscribeUrl
     ): ?\Illuminate\Mail\Mailable {
+        $signupUrl = config('app.url') . '/signup';
+
         return match ($templateKey) {
             'initial' => new OutreachInitialMail($companyName, $email, $demoUrl, $unsubscribeUrl),
             'followup_1' => new OutreachFollowUp1Mail($companyName, $email, $demoUrl, $unsubscribeUrl),
-            'followup_2' => new OutreachFollowUp2Mail($companyName, $email, $demoUrl, $unsubscribeUrl),
+            'followup_2' => new OutreachFollowUp2Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'followup_3' => new OutreachFollowUp3Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'followup_4' => new OutreachFollowUp4Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             default => null,
         };
     }

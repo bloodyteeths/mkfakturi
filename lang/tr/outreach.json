@@ -22,6 +22,23 @@
     "cta": "Ücretsiz denemeyi başlatın",
     "last_email": "Bu bizden gelen son e-postadır. Sizi bir daha rahatsız etmeyeceğiz."
   },
+  "followup3": {
+    "subject": "14 gün ücretsiz — kredi kartı gerekmez",
+    "greeting": "Merhaba,",
+    "trial_offer": "Standart planın 14 günlük ücretsiz denemesini sunuyoruz — kredi kartı yok, taahhüt yok.",
+    "features": "Standart planla: UJP için e-Fatura, banka bağlantıları (NLB, Stopanska, Komercijalna, Sparkasse), otomatik KDV hesaplamaları ve ayda 200'e kadar fatura.",
+    "pricing": "Deneme sonrası, Başlangıç planı sadece €12/ay ve Standart €29/ay. Makedon işletmeleri için en uygun fiyatlı çözüm.",
+    "cta": "Ücretsiz denemeyi başlatın",
+    "no_card": "Kredi kartı gerekmez. İstediğiniz zaman iptal edin."
+  },
+  "followup4": {
+    "subject": "Son mesaj: e-Fatura zorunlu hale geliyor",
+    "greeting": "Merhaba,",
+    "urgency": "E-Fatura yakında Makedonya'da zorunlu hale geliyor. Facturino, otomatik UBL 2.1 XML oluşturma ve QES dijital imza ile tek platform — tek tıkla hazırsınız.",
+    "partner_offer": "Muhasebe bürosuyseniz, her müşteri için aylık %20 komisyon + tüm özelliklere ücretsiz erişim sunuyoruz. 50'den fazla büro zaten partner.",
+    "cta": "Ücretsiz kaydolun",
+    "final_note": "Bu gerçekten son mesajımız. Başarılar diliyoruz! İhtiyacınız olursa — facturino.mk"
+  },
   "partner_invite": {
     "subject": "Facturino Partner Programına Hoş Geldiniz",
     "greeting": "Merhaba :name,",
@@ -29,6 +46,22 @@
     "benefits": "Partner olarak müşterileri yönetebilir, komisyonları takip edebilir ve özel muhasebe araçlarını kullanabilirsiniz.",
     "cta": "Şifre belirleyin ve profilinizi tamamlayın",
     "contact": "Sorularınız için partners@facturino.mk adresinden bize ulaşın"
+  },
+  "directory": {
+    "subject": "Facturino — :directory için yeni Makedon yazılımı",
+    "greeting": "Merhaba :name,",
+    "intro": "Facturino DOOEL Veles'ten yazıyorum. :directory'nin Makedon işletmeleri ve muhasebeciler için mükemmel bir kaynak olduğunu fark ettik.",
+    "description": "Facturino, özellikle Makedon pazarı için tasarlanmış yeni bir bulut faturalama ve muhasebe platformudur. Dizininize/listenize dahil edilmek istiyoruz.",
+    "features_title": "Temel özellikler:",
+    "feature_1": "UJP için e-Fatura (UBL 2.1 XML + QES imzası)",
+    "feature_2": "PSD2 banka bağlantıları (NLB, Stopanska, Komercijalna, Sparkasse)",
+    "feature_3": "Makedon yasalarına göre bordro (MPIN XML dışa aktarım)",
+    "feature_4": "Muhasebe büroları için çoklu şirket yönetimi",
+    "feature_5": "4 dil: Makedonce, Arnavutça, Türkçe, İngilizce",
+    "feature_6": "Aylık €12'den başlayan fiyatlar — MK'daki en uygun fiyatlı çözüm",
+    "ask": "Facturino'yu dizininize ekleyebilir misiniz? Logo, açıklama ve inceleme için demo erişimi sağlamaktan mutluluk duyarız.",
+    "cta": "Facturino'yu ziyaret edin",
+    "closing": "Zamanınız için teşekkür ederiz. İşbirliği için hazırız."
   },
   "unsubscribe": "Abonelikten çık"
 }

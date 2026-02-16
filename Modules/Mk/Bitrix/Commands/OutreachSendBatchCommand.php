@@ -36,7 +36,7 @@ class OutreachSendBatchCommand extends Command
     protected $signature = 'outreach:send-batch
                             {--limit=20 : Maximum emails to send in this batch}
                             {--dry-run : Show what would be sent without sending}
-                            {--template= : Force specific template (first_touch, followup_1, followup_2)}';
+                            {--template= : Force specific template (first_touch, followup_1, followup_2, followup_3, followup_4)}';
 
     /**
      * The console command description.
@@ -73,6 +73,8 @@ class OutreachSendBatchCommand extends Command
     protected array $followUpSchedule = [
         'followup_1' => 3,
         'followup_2' => 7,
+        'followup_3' => 14,
+        'followup_4' => 21,
     ];
 
     /**
@@ -80,7 +82,7 @@ class OutreachSendBatchCommand extends Command
      *
      * @var array<string>
      */
-    protected array $validTemplates = ['first_touch', 'followup_1', 'followup_2'];
+    protected array $validTemplates = ['first_touch', 'followup_1', 'followup_2', 'followup_3', 'followup_4'];
 
     /**
      * HubSpot service instance.
@@ -212,10 +214,7 @@ class OutreachSendBatchCommand extends Command
                 $q->whereIn('deal_stage', ['new_lead', 'new', 'emailed', 'followup_due', 'followup'])
                   ->whereNotNull('hubspot_deal_id');
             })
-            // Not suppressed
-            ->whereDoesntHave('suppression', function ($q) {
-                // This requires a suppression relation - use email check instead
-            })
+            // Not suppressed (check by email in suppressions table)
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('suppressions');
             });
@@ -288,6 +287,38 @@ class OutreachSendBatchCommand extends Command
                 ->whereIn('status', [OutreachLead::STATUS_EMAILED, OutreachLead::STATUS_FOLLOWUP]);
         }
 
+        if ($template === 'followup_3') {
+            $daysAfter = $this->followUpSchedule['followup_3'];
+            return $query
+                ->whereHas('sends', function ($q) use ($daysAfter) {
+                    $q->where('template_key', 'first_touch')
+                      ->where('sent_at', '<=', now()->subDays($daysAfter));
+                })
+                ->whereHas('sends', function ($q) {
+                    $q->where('template_key', 'followup_2');
+                })
+                ->whereDoesntHave('sends', function ($q) {
+                    $q->where('template_key', 'followup_3');
+                })
+                ->whereIn('status', [OutreachLead::STATUS_EMAILED, OutreachLead::STATUS_FOLLOWUP]);
+        }
+
+        if ($template === 'followup_4') {
+            $daysAfter = $this->followUpSchedule['followup_4'];
+            return $query
+                ->whereHas('sends', function ($q) use ($daysAfter) {
+                    $q->where('template_key', 'first_touch')
+                      ->where('sent_at', '<=', now()->subDays($daysAfter));
+                })
+                ->whereHas('sends', function ($q) {
+                    $q->where('template_key', 'followup_3');
+                })
+                ->whereDoesntHave('sends', function ($q) {
+                    $q->where('template_key', 'followup_4');
+                })
+                ->whereIn('status', [OutreachLead::STATUS_EMAILED, OutreachLead::STATUS_FOLLOWUP]);
+        }
+
         return $query;
     }
 
@@ -316,33 +347,42 @@ class OutreachSendBatchCommand extends Command
             return 'first_touch';
         }
 
-        $hasFollowup1 = $lead->sends()
-            ->whereIn('template_key', ['followup_1'])
-            ->exists();
+        $daysSinceFirst = $firstTouchSend->sent_at->diffInDays(now());
 
-        $hasFollowup2 = $lead->sends()
-            ->whereIn('template_key', ['followup_2'])
-            ->exists();
+        $hasFollowup1 = $lead->sends()->where('template_key', 'followup_1')->exists();
+        $hasFollowup2 = $lead->sends()->where('template_key', 'followup_2')->exists();
+        $hasFollowup3 = $lead->sends()->where('template_key', 'followup_3')->exists();
+        $hasFollowup4 = $lead->sends()->where('template_key', 'followup_4')->exists();
 
         if (!$hasFollowup1) {
-            // Check if enough days have passed since first touch
-            $daysSinceFirst = $firstTouchSend->sent_at->diffInDays(now());
             if ($daysSinceFirst >= $this->followUpSchedule['followup_1']) {
                 return 'followup_1';
             }
-            return null; // Not yet time for follow-up
+            return null;
         }
 
         if (!$hasFollowup2) {
-            // Check if enough days have passed since first touch
-            $daysSinceFirst = $firstTouchSend->sent_at->diffInDays(now());
             if ($daysSinceFirst >= $this->followUpSchedule['followup_2']) {
                 return 'followup_2';
             }
-            return null; // Not yet time for follow-up
+            return null;
         }
 
-        // Max 3 emails reached
+        if (!$hasFollowup3) {
+            if ($daysSinceFirst >= $this->followUpSchedule['followup_3']) {
+                return 'followup_3';
+            }
+            return null;
+        }
+
+        if (!$hasFollowup4) {
+            if ($daysSinceFirst >= $this->followUpSchedule['followup_4']) {
+                return 'followup_4';
+            }
+            return null;
+        }
+
+        // Max 5 emails reached
         return null;
     }
 
@@ -484,11 +524,21 @@ class OutreachSendBatchCommand extends Command
         }
 
         if ($templateKey === 'followup_1') {
-            $daysUntilFollowup2 = $this->followUpSchedule['followup_2'] - $this->followUpSchedule['followup_1'];
-            return now()->addDays($daysUntilFollowup2);
+            $daysUntil = $this->followUpSchedule['followup_2'] - $this->followUpSchedule['followup_1'];
+            return now()->addDays($daysUntil);
         }
 
-        // After followup_2, no more follow-ups
+        if ($templateKey === 'followup_2') {
+            $daysUntil = $this->followUpSchedule['followup_3'] - $this->followUpSchedule['followup_2'];
+            return now()->addDays($daysUntil);
+        }
+
+        if ($templateKey === 'followup_3') {
+            $daysUntil = $this->followUpSchedule['followup_4'] - $this->followUpSchedule['followup_3'];
+            return now()->addDays($daysUntil);
+        }
+
+        // After followup_4, no more follow-ups
         return now()->addDays(30);
     }
 
@@ -598,7 +648,9 @@ class OutreachSendBatchCommand extends Command
         return match ($templateKey) {
             'first_touch' => 'Facturino Partner Opportunity',
             'followup_1' => 'Following Up - Facturino Partnership',
-            'followup_2' => 'Last Chance - Facturino Partnership',
+            'followup_2' => 'Free Trial - Facturino',
+            'followup_3' => '14 Days Free - Facturino',
+            'followup_4' => 'Final Message - e-Faktura Deadline',
             default => "Facturino Outreach: {$templateKey}",
         };
     }

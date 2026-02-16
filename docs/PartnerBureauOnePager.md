@@ -1,151 +1,123 @@
 # FACTURINO
-## Macedonia's Premier Accounting Platform for Partner Bureaus
+## All-in-One Accounting Platform for Macedonian Partner Bureaus
+
+**Facturino DOOEL Veles** | February 2026 | app.facturino.mk | info@facturino.mk
 
 ---
 
-### **🏆 UNIQUE COMPETITIVE ADVANTAGES**
+### WHAT WE OFFER
 
-#### **Universal Migration Wizard** - Market Exclusive
-- **ONLY platform** in Macedonia with automated competitor migration
-- **100% accuracy** for Macedonian field mapping (naziv→name, embs→tax_id, pdv_stapka→vat_rate)  
-- **Complete business migration** in under 10 minutes (vs months with competitors)
-- **Supports ALL formats**: Onivo, Megasoft, Pantheon, CSV, Excel, XML
-- **Live demo capability**: Extract real competitor data during sales calls
-
-#### **Professional Accountant Console** - Market First
-- **Multi-client management** from single dashboard
-- **Commission tracking** with per-client rate customization
-- **Primary company designation** with visual badges
-- **Session-based company switching** with audit trail
-- **Enterprise-grade security** with partner scope validation
-
-#### **Complete Macedonia Compliance** - Unmatched
-- **ДДВ-04 VAT return automation** - "huge switch lever" competitors lack
-- **18% standard, 5% reduced VAT** with automatic calculations
-- **Digital signature support** with QES certificate management
-- **UBL 2.1 XML generation** for tax authority compliance
-- **Macedonian Cyrillic** throughout interface and documents
+Facturino is a live, production-ready accounting platform built specifically for Macedonia. Partner bureaus manage all their clients from a single dashboard, earn commissions on every subscription, and give clients a modern tool that covers invoicing, payroll, inventory, VAT returns, bank feeds, and more -- in four languages.
 
 ---
 
-### **🇲🇰 MACEDONIA-SPECIFIC BENEFITS**
+### CORE FEATURES
 
-#### **Banking Integration Excellence**
-- **All 3 major banks**: Stopanska, NLB, Komercijalna with PSD2 support
-- **Real-time transaction sync** with intelligent invoice matching
-- **MKD currency native support** with EUR conversion
-- **15 req/min rate limiting compliance** for all bank APIs
+**Invoicing & Documents**
+- Outbound invoices with Macedonian fiscal compliance (DDV-04 VAT automation, 18%/5%/0%/exempt)
+- Credit notes, proforma invoices, estimates, recurring invoices
+- UBL 2.1 XML generation, QES digital signatures, e-Faktura portal upload
+- Localized PDF output (Macedonian, Albanian, Turkish, English)
+- QR codes on invoices, CASYS/cPay payment links
 
-#### **Language & Localization Leadership**
-- **95% Macedonian interface** with professional translations
-- **Albanian language parity** serving both linguistic communities
-- **Localized PDF invoices** with "Фактура", "Подзбир", "Вкупно" headings
-- **Macedonian business workflows** built into every feature
+**Bills & Accounts Payable**
+- Inbound supplier invoices, supplier registry
+- OCR invoice parsing: PDF to structured data via Tesseract (mkd+eng+srp)
 
-#### **Tax Authority Integration**
-- **E-faktura portal upload** with automated XML generation
-- **Macedonia tax rates** (18%, 5%, 0%, exempt) pre-configured
-- **ДДВ-04 XML validation** against official XSD schemas
-- **7-year audit retention** for compliance requirements
+**Payroll (Full Macedonian Compliance)**
+- Personal tax (PDD), health, pension, employment contributions
+- Overtime (135%, 150%), leave, sick leave, maternity
+- MPIN XML export for UJP/government submissions
+- PDF payslips
 
----
+**Inventory & Warehouse**
+- Multiple warehouses, receipts, dispatches, inter-warehouse transfers
+- Weighted average cost (WAC) pricing
+- Journal entries (account classes 3, 6, 7)
+- Barcode/SKU support, low stock alerts
 
-### **💼 BUSINESS VALUE PROPOSITION**
+**Projects**
+- Revenue and expense tracking per project
+- Profitability reporting
+- Link invoices, expenses, and payments to projects
 
-#### **For Partner Bureaus**
-- **Revenue Growth**: Commission tracking + multi-client efficiency
-- **Client Acquisition**: Universal migration eliminates switching friction
-- **Competitive Edge**: ONLY platform with automated competitor migration
-- **Professional Image**: Enterprise-grade interface builds client confidence
-- **Autonomy**: Upload your own QES certificates for digital signatures
+**AI Assistant**
+- Cash flow forecasts, risk warnings, aging analysis
+- Natural language queries over your financial data
 
-#### **For Your Clients**
-- **Painless Migration**: Switch from Onivo/Megasoft in minutes, not months
-- **Modern Experience**: Vue 3 interface vs outdated competitor systems
-- **Complete Automation**: VAT returns, bank sync, invoice matching
-- **Cost Efficiency**: Competitive pricing with superior functionality
-- **Future-Proof**: Regular updates and feature enhancements
+**Banking Integration**
+- PSD2 connections: NLB, Stopanska, Komercijalna, Sparkasse
+- CSV import for all other banks
+- Real-time transaction sync with intelligent invoice matching
+- NBRM exchange rates
 
----
+**Compliance & Tax**
+- DDV-04 VAT return automation with XSD validation
+- Macedonian Chart of Accounts built in
+- Central Registry (CRRM) company lookup
+- 7-year audit retention
 
-### **🚀 TECHNICAL SUPERIORITY**
+**Client & Partner Tools**
+- Partner accountant console: multi-client management from one dashboard
+- Commission tracking with per-client rate customization
+- Client document portal: clients upload scanned docs directly
+- Deadline dashboard: DDV-04, MPIN, income tax deadlines for all clients
+- Universal migration wizard: import from Onivo, Megasoft, Pantheon, CSV, Excel, XML
 
-#### **Enterprise Architecture**
-- **Laravel 12** with clean architecture patterns
-- **Vue 3 + Pinia** for reactive user experience  
-- **Docker production stack** with automatic HTTPS
-- **Enterprise security** with multi-factor authentication
-- **Performance optimized** for <300ms response times
+**Integrations**
+- WooCommerce integration
+- PWA mobile app
+- Cloudflare R2 backups every 6 hours
 
-#### **Scalability & Reliability**
-- **Multi-tenant architecture** supporting unlimited partners
-- **Queue-based processing** for large data imports
-- **Comprehensive monitoring** with Prometheus metrics
-- **Automated backups** and disaster recovery
-- **CI/CD pipeline** with security scanning and quality gates
-
----
-
-### **📊 PROVEN TRACK RECORD**
-
-#### **Development Excellence**
-- **92% implementation quality** (comprehensive audit grade)
-- **85% production readiness** with clear path to 100%
-- **100% test coverage** for critical business logic
-- **Zero verified security vulnerabilities** (TruffleHog scan)
-
-#### **Market Validation**
-- **200+ field variations** in Macedonian corpus
-- **95% auto-mapping confidence** for competitor data
-- **Complete business workflows** tested and validated
-- **Professional staging environment** available for demos
+**Languages**
+- Macedonian, Albanian, Turkish, English -- full interface and document output in all four
 
 ---
 
-### **🎯 IMMEDIATE NEXT STEPS**
+### PRICING
 
-#### **Partner Bureau Pilot Program**
-1. **Demo Access**: staging.facturino.mk with full feature access
-2. **Migration Test**: Upload your Onivo/Megasoft export for instant conversion
-3. **Client Onboarding**: Begin pilot with 2-3 willing clients
-4. **Success Validation**: Measure time savings and client satisfaction
+| Tier | Price/mo | Invoices/mo | Users | Highlights |
+|------|----------|-------------|-------|------------|
+| Free | EUR 0 | 5 | 1 | Basic invoicing -- taste everything |
+| Starter | EUR 12 | 50 | 1 | Recurring invoices, full expenses/estimates |
+| Standard | EUR 29 | 200 | 3 | E-Faktura, QES signing, PSD2 bank connections |
+| Business | EUR 59 | 1,000 | 5 | Multi-currency, API access, payroll (50 employees) |
+| Max | EUR 149 | Unlimited | Unlimited | Everything + 100 AI queries/month |
 
-#### **Support & Training**
-- **Comprehensive documentation** with Macedonia-specific workflows
-- **Direct technical support** during pilot phase
-- **Training materials** for staff onboarding
-- **Regular feature updates** and enhancement roadmap
-
----
-
-### **💡 WHY FACTURINO WINS**
-
-#### **The Competition Cannot:**
-- ❌ Migrate data automatically from competitors
-- ❌ Manage multiple clients from single interface  
-- ❌ Generate ДДВ-04 VAT returns automatically
-- ❌ Integrate with all 3 Macedonia banks via PSD2
-- ❌ Support both Macedonian and Albanian languages natively
-
-#### **We Deliver:**
-- ✅ **Minutes vs Months**: Migration that removes switching friction
-- ✅ **Professional vs Outdated**: Modern interface that builds confidence
-- ✅ **Automated vs Manual**: VAT returns, bank sync, invoice matching
-- ✅ **Complete vs Partial**: Full Macedonia compliance and localization
-- ✅ **Growing vs Stagnant**: Active development with regular enhancements
+- 14-day free trial on the Standard tier for every new signup
+- "Taste everything" freemium model: all features visible, limits based on tier
 
 ---
 
-### **🤝 PARTNERSHIP OPPORTUNITY**
+### PARTNER PROGRAMME
 
-**Contact Information:**
-- **Staging Demo**: staging.facturino.mk
-- **Documentation**: Complete quick-start guide included
-- **Technical Support**: Direct access during pilot phase
-- **Business Development**: Ready for immediate partner bureau engagement
-
-**Ready to eliminate switching friction and dominate the Macedonia accounting market?**
+- **20% monthly commission** on every client subscription (22% for Plus partners with 10+ clients)
+- Multi-client dashboard with session-based company switching
+- Per-client commission tracking and reporting
+- Your own QES certificates for digital signatures
+- Priority support during onboarding
 
 ---
 
-*FACTURINO - Making accounting software migration effortless for Macedonia businesses*
+### TECHNOLOGY
+
+- Laravel 10 + Vue 3 + Vite SPA, hosted on Railway
+- Next.js 14 marketing site at www.facturino.mk
+- Docker production stack, CI/CD, automated backups to Cloudflare R2
+- Zero verified security vulnerabilities
+- Enterprise multi-tenant architecture
+
+---
+
+### GET STARTED
+
+1. Sign up at **app.facturino.mk** -- free tier, no credit card
+2. Test the migration wizard with your existing Onivo/Megasoft export
+3. Onboard 2-3 pilot clients
+4. Upgrade and start earning commissions
+
+**Contact:** info@facturino.mk | app.facturino.mk
+
+---
+
+*Facturino DOOEL Veles -- accounting software built for Macedonia*

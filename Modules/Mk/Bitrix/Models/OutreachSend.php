@@ -78,6 +78,8 @@ class OutreachSend extends Model
     public const TEMPLATE_FIRST_TOUCH = 'first_touch';
     public const TEMPLATE_FOLLOWUP_1 = 'followup_1';
     public const TEMPLATE_FOLLOWUP_2 = 'followup_2';
+    public const TEMPLATE_FOLLOWUP_3 = 'followup_3';
+    public const TEMPLATE_FOLLOWUP_4 = 'followup_4';
 
     /**
      * Send status constants.
