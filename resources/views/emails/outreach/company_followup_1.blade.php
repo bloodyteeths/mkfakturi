@@ -10,7 +10,8 @@
 &bull; @lang('outreach.company_followup1.feature_leave')<br>
 &bull; @lang('outreach.company_followup1.feature_payslips')<br>
 &bull; @lang('outreach.company_followup1.feature_fiscal_qr')<br>
-&bull; @lang('outreach.company_followup1.feature_bank_auto')</p>
+&bull; @lang('outreach.company_followup1.feature_bank_auto')<br>
+&bull; @lang('outreach.company_followup1.feature_ai')</p>
 
 <p>@lang('outreach.company_followup1.social')</p>
 

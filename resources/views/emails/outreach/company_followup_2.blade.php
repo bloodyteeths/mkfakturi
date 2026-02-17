@@ -9,7 +9,8 @@
 &bull; @lang('outreach.company_followup2.feature_docs')<br>
 &bull; @lang('outreach.company_followup2.feature_woo')<br>
 &bull; @lang('outreach.company_followup2.feature_recurring')<br>
-&bull; @lang('outreach.company_followup2.feature_expenses')</p>
+&bull; @lang('outreach.company_followup2.feature_expenses')<br>
+&bull; @lang('outreach.company_followup2.feature_ai')</p>
 
 <p><strong>@lang('outreach.company_followup2.pricing_title')</strong><br>
 &bull; @lang('outreach.company_followup2.pricing_starter')<br>

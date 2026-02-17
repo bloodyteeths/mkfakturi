@@ -12,7 +12,8 @@
 &bull; @lang('outreach.company_followup4.feature_fiscal')<br>
 &bull; @lang('outreach.company_followup4.feature_cloud')<br>
 &bull; @lang('outreach.company_followup4.feature_reports')<br>
-&bull; @lang('outreach.company_followup4.feature_projects')</p>
+&bull; @lang('outreach.company_followup4.feature_projects')<br>
+&bull; @lang('outreach.company_followup4.feature_ai')</p>
 
 <p>@lang('outreach.company_followup4.pricing')</p>
 
