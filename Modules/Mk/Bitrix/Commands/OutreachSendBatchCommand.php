@@ -49,22 +49,22 @@ class OutreachSendBatchCommand extends Command
     /**
      * Daily send limit.
      */
-    protected int $dailyLimit = 100;
+    protected int $dailyLimit = 500;
 
     /**
      * Hourly send limit.
      */
-    protected int $hourlyLimit = 20;
+    protected int $hourlyLimit = 80;
 
     /**
      * Minimum jitter between sends in seconds.
      */
-    protected int $minJitterSeconds = 30;
+    protected int $minJitterSeconds = 10;
 
     /**
      * Maximum jitter between sends in seconds.
      */
-    protected int $maxJitterSeconds = 60;
+    protected int $maxJitterSeconds = 30;
 
     /**
      * Follow-up schedule (template => days after initial).
