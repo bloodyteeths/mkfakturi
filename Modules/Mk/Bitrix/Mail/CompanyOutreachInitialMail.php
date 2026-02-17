@@ -29,7 +29,7 @@ class CompanyOutreachInitialMail extends Mailable implements ShouldQueue
     ) {
         $this->companyName = $companyName;
         $this->contactEmail = $contactEmail;
-        $this->demoUrl = $signupUrl;
+        $this->signupUrl = $signupUrl;
         $this->unsubscribeUrl = $unsubscribeUrl;
     }
 
@@ -39,7 +39,7 @@ class CompanyOutreachInitialMail extends Mailable implements ShouldQueue
             ->subject(__('outreach.company_initial.subject'))
             ->markdown('emails.outreach.company_initial', [
                 'companyName' => $this->companyName,
-                'demoUrl' => $this->demoUrl,
+                'signupUrl' => $this->signupUrl,
                 'unsubscribeUrl' => $this->unsubscribeUrl,
             ]);
     }
