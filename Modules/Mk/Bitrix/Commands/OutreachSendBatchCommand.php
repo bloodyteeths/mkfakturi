@@ -267,7 +267,7 @@ class OutreachSendBatchCommand extends Command
         }
 
         return $query
-            ->orderBy('created_at', 'asc')
+            ->orderByRaw("FIELD(status, 'new', 'followup', 'emailed'), created_at ASC")
             ->limit($limit)
             ->get();
     }
