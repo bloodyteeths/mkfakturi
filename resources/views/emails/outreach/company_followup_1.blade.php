@@ -1,22 +1,24 @@
 @component('mail::message')
-@lang('outreach.company_followup1.greeting', ['companyName' => $companyName])
+<p>@lang('outreach.company_followup1.greeting', ['companyName' => $companyName])</p>
 
-@lang('outreach.company_followup1.hook')
+<p>@lang('outreach.company_followup1.hook')</p>
 
-@lang('outreach.company_followup1.solution')
+<p>@lang('outreach.company_followup1.solution')</p>
 
-@lang('outreach.company_followup1.banks')
+<p>@lang('outreach.company_followup1.banks')</p>
 
-@lang('outreach.company_followup1.social')
+<p>@lang('outreach.company_followup1.social')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.company_followup1.cta')
 @endcomponent
 
+<p>
 @lang('outreach.signature_closing')<br>
-**@lang('outreach.signature_name')**<br>
+<strong>@lang('outreach.signature_name')</strong><br>
 @lang('outreach.signature_company')<br>
-[{{ __('outreach.signature_url') }}](https://{{ __('outreach.signature_url') }}) | @lang('outreach.signature_phone')
+<a href="https://{{ __('outreach.signature_url') }}">{{ __('outreach.signature_url') }}</a> | @lang('outreach.signature_phone')
+</p>
 
 ---
 <small><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></small>
