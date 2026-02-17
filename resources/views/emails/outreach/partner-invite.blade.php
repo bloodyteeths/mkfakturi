@@ -1,32 +1,13 @@
-@component('mail::layout')
-    {{-- Header --}}
-    @slot('header')
-        @component('mail::header', ['url' => config('app.url')])
-            Facturino
-        @endcomponent
-    @endslot
+@component('mail::message')
+@lang('outreach.partner_invite.greeting', ['name' => $partnerName])
 
-    {{-- Body --}}
-    @slot('subcopy')
-        @component('mail::subcopy')
-            <p>@lang('outreach.partner_invite.greeting', ['name' => $partnerName])</p>
+@lang('outreach.partner_invite.congrats')
 
-            <p>@lang('outreach.partner_invite.congrats')</p>
+@lang('outreach.partner_invite.benefits')
 
-            <p>@lang('outreach.partner_invite.benefits')</p>
+@component('mail::button', ['url' => $activationUrl])
+@lang('outreach.partner_invite.cta')
+@endcomponent
 
-            @component('mail::button', ['url' => $activationUrl])
-                @lang('outreach.partner_invite.cta')
-            @endcomponent
-
-            <p>@lang('outreach.partner_invite.contact')</p>
-        @endcomponent
-    @endslot
-
-    {{-- Footer --}}
-    @slot('footer')
-        @component('mail::footer')
-            Powered by <a class="footer-link" href="https://facturino.mk" target="_blank">Facturino</a>
-        @endcomponent
-    @endslot
+@lang('outreach.partner_invite.contact')
 @endcomponent

@@ -1,36 +1,15 @@
-@component('mail::layout')
-    {{-- Header --}}
-    @slot('header')
-        @component('mail::header', ['url' => config('app.url')])
-            Facturino
-        @endcomponent
-    @endslot
+@component('mail::message')
+@lang('outreach.initial.greeting')
 
-    {{-- Body --}}
-    @slot('subcopy')
-        @component('mail::subcopy')
-            <p>@lang('outreach.initial.greeting', ['company' => $companyName])</p>
+@lang('outreach.initial.intro')
 
-            <p>@lang('outreach.initial.intro')</p>
+@lang('outreach.initial.benefit')
 
-            <p>@lang('outreach.initial.benefit')</p>
+@component('mail::button', ['url' => $demoUrl])
+@lang('outreach.initial.cta')
+@endcomponent
 
-            @component('mail::button', ['url' => $demoUrl])
-                @lang('outreach.initial.cta')
-            @endcomponent
+<small style="color: #999;">@lang('outreach.initial.opt_out')</small>
 
-            <p style="font-size: 12px; color: #666;">
-                @lang('outreach.initial.opt_out')
-            </p>
-        @endcomponent
-    @endslot
-
-    {{-- Footer --}}
-    @slot('footer')
-        @component('mail::footer')
-            <a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a>
-            <br>
-            Powered by <a class="footer-link" href="https://facturino.mk" target="_blank">Facturino</a>
-        @endcomponent
-    @endslot
+<small><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></small>
 @endcomponent
