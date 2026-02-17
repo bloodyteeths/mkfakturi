@@ -232,8 +232,8 @@ const mk: Dictionary = {
     recommendedBadge: 'Препорачано',
     includesPrevious: 'Вклучува сè од {plan}',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['5 фактури/месец', '1 корисник', 'PDF извоз', '3 AI прашања/месец'], popular: false },
-      { name: 'Starter', price: '€12', period: '/месец', bullets: ['50 фактури/месец', '1 корисник', 'Неограничено клиенти', '10 AI прашања/месец'], popular: false },
+      { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '2 AI прашања/месец'], popular: false },
+      { name: 'Starter', price: '€12', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
       { name: 'Standard', price: '€29', period: '/месец', bullets: ['200 фактури/месец', '3 корисници', 'Е‑Фактура + QES', '25 AI прашања/месец', 'Материјално сметководство'], popular: true },
       { name: 'Business', price: '€59', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', '50 AI прашања/месец', 'Материјално сметководство'], popular: false },
       { name: 'Max', price: '€149', period: '/месец', bullets: ['Неограничено фактури', 'API пристап', 'Мулти-локации', '100 AI прашања/месец', 'Материјално сметководство'], popular: false }
@@ -249,11 +249,11 @@ const mk: Dictionary = {
       title: 'Споредете ги пакетите',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Фактури месечно', values: ['5', '50', '200', '1000', 'Неограничено'] },
+        { feature: 'Фактури месечно', values: ['3', '30', '200', '1000', 'Неограничено'] },
         { feature: 'Корисници', values: ['1', '1', '3', '5', 'Неограничено'] },
         { feature: 'Клиенти', values: ['Неограничено', 'Неограничено', 'Неограничено', 'Неограничено', 'Неограничено'] },
-        { feature: 'Е-Фактура (UJP)', values: [false, false, true, true, true] },
-        { feature: 'AI Прашања/месец', values: ['3', '10', '25', '50', '100'] },
+        { feature: 'Е-Фактура (UJP)', values: [false, '5/месец', true, true, true] },
+        { feature: 'AI Прашања/месец', values: ['2', '5', '25', '50', '100'] },
         { feature: 'Банкарски изводи (PSD2)', values: [false, false, true, true, true] },
         { feature: 'API Пристап', values: [false, false, false, true, true] },
         { feature: 'Поддршка', values: ['Email', 'Email', 'Email/Chat', 'Prioritetna', 'WhatsApp'] },
@@ -435,8 +435,8 @@ const sq: Dictionary = {
     recommendedBadge: 'I rekomanduar',
     includesPrevious: 'Përfshin gjithçka në {plan}',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['5 fatura/muaj', '1 përdorues', 'Eksport PDF', '3 pyetje AI/muaj'], popular: false },
-      { name: 'Starter', price: '€12', period: '/muaj', bullets: ['50 fatura/muaj', '1 përdorues', 'Klientë të pakufizuar', '10 pyetje AI/muaj'], popular: false },
+      { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '2 pyetje AI/muaj'], popular: false },
+      { name: 'Starter', price: '€12', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
       { name: 'Standard', price: '€29', period: '/muaj', bullets: ['200 fatura/muaj', '3 përdorues', 'e‑Faturë + QES', '25 pyetje AI/muaj', 'Kontabilitet material'], popular: true },
       { name: 'Business', price: '€59', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', '50 pyetje AI/muaj', 'Kontabilitet material'], popular: false },
       { name: 'Max', price: '€149', period: '/muaj', bullets: ['Fatura pa limit', 'Qasje API', 'Multi-lokacione', '100 pyetje AI/muaj', 'Kontabilitet material'], popular: false }
@@ -452,11 +452,11 @@ const sq: Dictionary = {
       title: 'Krahasoni paketat',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Fatura në muaj', values: ['5', '50', '200', '1000', 'Pa limit'] },
+        { feature: 'Fatura në muaj', values: ['3', '30', '200', '1000', 'Pa limit'] },
         { feature: 'Përdorues', values: ['1', '1', '3', '5', 'Pa limit'] },
         { feature: 'Klientë', values: ['Pa limit', 'Pa limit', 'Pa limit', 'Pa limit', 'Pa limit'] },
-        { feature: 'e-Faturë (UJP)', values: [false, false, true, true, true] },
-        { feature: 'Pyetje AI/muaj', values: ['3', '10', '25', '50', '100'] },
+        { feature: 'e-Faturë (UJP)', values: [false, '5/muaj', true, true, true] },
+        { feature: 'Pyetje AI/muaj', values: ['2', '5', '25', '50', '100'] },
         { feature: 'Ekstrakte bankare (PSD2)', values: [false, false, true, true, true] },
         { feature: 'Qasje API', values: [false, false, false, true, true] },
         { feature: 'Mbështetje', values: ['Email', 'Email', 'Email/Chat', 'Prioritet', 'WhatsApp'] },
@@ -638,8 +638,8 @@ const tr: Dictionary = {
     recommendedBadge: 'Önerilen',
     includesPrevious: '{plan} paketindeki her şey dahil',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/süresiz', bullets: ['5 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '3 AI soru/ay'], popular: false },
-      { name: 'Starter', price: '€12', period: '/ay', bullets: ['50 fatura/ay', '1 kullanıcı', 'Sınırsız müşteri', '10 AI soru/ay'], popular: false },
+      { name: 'Free', price: '€0', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '2 AI soru/ay'], popular: false },
+      { name: 'Starter', price: '€12', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
       { name: 'Standard', price: '€29', period: '/ay', bullets: ['200 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES', '25 AI soru/ay', 'Malzeme muhasebesi'], popular: true },
       { name: 'Business', price: '€59', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', '50 AI soru/ay', 'Malzeme muhasebesi'], popular: false },
       { name: 'Max', price: '€149', period: '/ay', bullets: ['Sınırsız fatura', 'API erişimi', 'Çoklu lokasyon', '100 AI soru/ay', 'Malzeme muhasebesi'], popular: false }
@@ -655,11 +655,11 @@ const tr: Dictionary = {
       title: 'Paketleri karşılaştırın',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Aylık Fatura', values: ['5', '50', '200', '1000', 'Sınırsız'] },
+        { feature: 'Aylık Fatura', values: ['3', '30', '200', '1000', 'Sınırsız'] },
         { feature: 'Kullanıcı', values: ['1', '1', '3', '5', 'Sınırsız'] },
         { feature: 'Müşteri', values: ['Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
-        { feature: 'e-Fatura (UJP)', values: [false, false, true, true, true] },
-        { feature: 'AI Soru/ay', values: ['3', '10', '25', '50', '100'] },
+        { feature: 'e-Fatura (UJP)', values: [false, '5/ay', true, true, true] },
+        { feature: 'AI Soru/ay', values: ['2', '5', '25', '50', '100'] },
         { feature: 'Banka Ekstreleri (PSD2)', values: [false, false, true, true, true] },
         { feature: 'API Erişimi', values: [false, false, false, true, true] },
         { feature: 'Destek', values: ['Email', 'Email', 'Email/Chat', 'Öncelikli', 'WhatsApp'] },
@@ -841,8 +841,8 @@ const en: Dictionary = {
     recommendedBadge: 'Recommended',
     includesPrevious: 'Includes everything in {plan}',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/forever', bullets: ['5 invoices/month', '1 user', 'PDF export', '3 AI questions/month'], popular: false },
-      { name: 'Starter', price: '€12', period: '/month', bullets: ['50 invoices/month', '1 user', 'Unlimited clients', '10 AI questions/month'], popular: false },
+      { name: 'Free', price: '€0', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '2 AI questions/month'], popular: false },
+      { name: 'Starter', price: '€12', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
       { name: 'Standard', price: '€29', period: '/month', bullets: ['200 invoices/month', '3 users', 'e-Invoice + QES', '25 AI questions/month', 'Material Accounting'], popular: true },
       { name: 'Business', price: '€59', period: '/month', bullets: ['1000 invoices/month', '5 users', 'Bank statements', '50 AI questions/month', 'Material Accounting'], popular: false },
       { name: 'Max', price: '€149', period: '/month', bullets: ['Unlimited invoices', 'API access', 'Multi-locations', '100 AI questions/month', 'Material Accounting'], popular: false }
@@ -858,11 +858,11 @@ const en: Dictionary = {
       title: 'Compare Plans',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Invoices per Month', values: ['5', '50', '200', '1000', 'Unlimited'] },
+        { feature: 'Invoices per Month', values: ['3', '30', '200', '1000', 'Unlimited'] },
         { feature: 'Users', values: ['1', '1', '3', '5', 'Unlimited'] },
         { feature: 'Clients', values: ['Unlimited', 'Unlimited', 'Unlimited', 'Unlimited', 'Unlimited'] },
-        { feature: 'e-Invoice (UJP)', values: [false, false, true, true, true] },
-        { feature: 'AI Questions/month', values: ['3', '10', '25', '50', '100'] },
+        { feature: 'e-Invoice (UJP)', values: [false, '5/month', true, true, true] },
+        { feature: 'AI Questions/month', values: ['2', '5', '25', '50', '100'] },
         { feature: 'Bank Statements (PSD2)', values: [false, false, true, true, true] },
         { feature: 'API Access', values: [false, false, false, true, true] },
         { feature: 'Support', values: ['Email', 'Email', 'Email/Chat', 'Priority', 'WhatsApp'] },

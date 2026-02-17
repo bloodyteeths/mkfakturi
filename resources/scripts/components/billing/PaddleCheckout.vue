@@ -46,19 +46,19 @@
           <ul class="space-y-3 mb-6">
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Up to 100 invoices/month</span>
+              <span class="text-sm text-gray-700">Up to 30 invoices/month</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Basic reporting</span>
+              <span class="text-sm text-gray-700">e-Invoice (5/month)</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Email support</span>
+              <span class="text-sm text-gray-700">Recurring invoices</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">1 company</span>
+              <span class="text-sm text-gray-700">5 AI questions/month</span>
             </li>
           </ul>
 
@@ -73,57 +73,57 @@
         </div>
       </BaseCard>
 
-      <!-- Professional Plan -->
+      <!-- Standard Plan -->
       <BaseCard
         class="relative overflow-hidden hover:shadow-xl transition-shadow duration-300 border-2 border-primary-500"
-        :class="{ 'ring-2 ring-primary-500': isCurrentPlan('professional') }"
+        :class="{ 'ring-2 ring-primary-500': isCurrentPlan('standard') }"
       >
         <div class="absolute top-0 right-0 bg-primary-500 text-white px-3 py-1 text-xs font-semibold rounded-bl-lg">
           Popular
         </div>
         <div class="p-6">
           <div class="mb-4">
-            <h3 class="text-2xl font-bold text-gray-900">Professional</h3>
+            <h3 class="text-2xl font-bold text-gray-900">Standard</h3>
             <div class="mt-2 flex items-baseline">
               <span class="text-4xl font-extrabold text-gray-900">€29</span>
               <span class="ml-1 text-xl text-gray-500">/month</span>
             </div>
           </div>
 
-          <BaseBadge v-if="isCurrentPlan('professional')" variant="success" class="mb-4">
+          <BaseBadge v-if="isCurrentPlan('standard')" variant="success" class="mb-4">
             Current Plan
           </BaseBadge>
 
           <ul class="space-y-3 mb-6">
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Unlimited invoices</span>
+              <span class="text-sm text-gray-700">Up to 200 invoices/month</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Advanced reporting & analytics</span>
+              <span class="text-sm text-gray-700">3 users</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Priority support</span>
+              <span class="text-sm text-gray-700">Unlimited e-Invoice + QES signing</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">3 companies</span>
+              <span class="text-sm text-gray-700">Bank feed integration (PSD2)</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Bank feed integration</span>
+              <span class="text-sm text-gray-700">25 AI questions/month</span>
             </li>
           </ul>
 
           <BaseButton
-            :disabled="isCurrentPlan('professional') || isProcessing"
-            :variant="isCurrentPlan('professional') ? 'white' : 'primary'"
+            :disabled="isCurrentPlan('standard') || isProcessing"
+            :variant="isCurrentPlan('standard') ? 'white' : 'primary'"
             class="w-full"
-            @click="handleSubscribe('professional')"
+            @click="handleSubscribe('standard')"
           >
-            {{ isCurrentPlan('professional') ? 'Current Plan' : 'Subscribe' }}
+            {{ isCurrentPlan('standard') ? 'Current Plan' : 'Subscribe' }}
           </BaseButton>
         </div>
       </BaseCard>
@@ -149,15 +149,15 @@
           <ul class="space-y-3 mb-6">
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Everything in Professional</span>
+              <span class="text-sm text-gray-700">Up to 1,000 invoices/month</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Unlimited companies</span>
+              <span class="text-sm text-gray-700">5 users</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">QES e-Invoice signing</span>
+              <span class="text-sm text-gray-700">Multi-currency</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
@@ -165,7 +165,7 @@
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Dedicated account manager</span>
+              <span class="text-sm text-gray-700">50 AI questions/month</span>
             </li>
           </ul>
 

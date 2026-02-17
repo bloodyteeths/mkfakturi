@@ -77,9 +77,9 @@ class SignupService
                 'stripe_price_id' => null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'До 5 фактури месечно',
-                    'Основни извештаи',
-                    'Email поддршка',
+                    'До 3 фактури месечно',
+                    'PDF извоз',
+                    '2 AI прашања/месец',
                 ],
             ],
             [
@@ -91,9 +91,10 @@ class SignupService
                 'stripe_price_id' => $stripePrices['starter']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'До 100 фактури месечно',
-                    'Проценки и плаќања',
-                    'Email поддршка',
+                    'До 30 фактури месечно',
+                    'Е-Фактура (5/месец)',
+                    'Рекурентни фактури',
+                    '5 AI прашања/месец',
                 ],
             ],
             [
@@ -105,10 +106,11 @@ class SignupService
                 'stripe_price_id' => $stripePrices['standard']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'До 500 фактури месечно',
-                    'Е-фактура (UBL XML)',
-                    'Рекурентни фактури',
-                    'Приоритетна поддршка',
+                    'До 200 фактури месечно',
+                    '3 корисници',
+                    'Е-Фактура + QES (неограничено)',
+                    'Банкарски изводи (PSD2)',
+                    '25 AI прашања/месец',
                 ],
             ],
             [
@@ -120,11 +122,11 @@ class SignupService
                 'stripe_price_id' => $stripePrices['business']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'Неограничени фактури',
-                    'PSD2 банкарски конекции',
+                    'До 1000 фактури месечно',
+                    '5 корисници',
                     'Повеќе валути',
                     'API пристап',
-                    'Премиум поддршка',
+                    '50 AI прашања/месец',
                 ],
             ],
             [
@@ -136,11 +138,11 @@ class SignupService
                 'stripe_price_id' => $stripePrices['max']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'Сите Business функции',
+                    'Неограничени фактури',
+                    'Неограничени корисници',
                     'IFRS сметководство',
-                    'White-label опции',
-                    'Посветена поддршка',
-                    'Прилагодени интеграции',
+                    'Мулти-локации',
+                    '100 AI прашања/месец',
                 ],
             ],
         ];

@@ -67,7 +67,7 @@ return [
         'subject' => 'Baslangic plani: sadece €12/ay',
         'greeting' => 'Merhaba,',
         'trial_offer' => '14 gun ucretsiz Standart plan — kredi karti yok, taahhut yok. Deneme sonrasi kendiniz karar verin.',
-        'pricing' => 'Baslangic: €12/ay (50 fatura) | Standart: €29/ay (200 fatura + e-Fatura + banka) | Isletme: €59/ay (bordro + API + 1000 fatura)',
+        'pricing' => 'Baslangic: €12/ay (30 fatura + e-Fatura) | Standart: €29/ay (200 fatura + QES + banka) | Isletme: €59/ay (bordro + API + 1000 fatura)',
         'cta' => 'Ucretsiz baslayin',
     ],
     'company_followup3' => [

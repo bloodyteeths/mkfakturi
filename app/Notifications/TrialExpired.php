@@ -45,7 +45,7 @@ class TrialExpired extends Notification
             ->line('Your account has been downgraded to the **Free** plan.')
             ->line('')
             ->line('**What this means:**')
-            ->line('- You can create up to 5 invoices per month')
+            ->line('- You can create up to 3 invoices per month')
             ->line('- Only 1 user is allowed')
             ->line('- E-Faktura and QES signing are disabled')
             ->line('')

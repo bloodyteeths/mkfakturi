@@ -67,7 +67,7 @@ return [
         'subject' => 'Plani Starter: vetem €12/muaj',
         'greeting' => 'Pershendetje,',
         'trial_offer' => '14 dite falas plani Standard — pa karte krediti, pa detyrim. Pas proves, vendosni vete.',
-        'pricing' => 'Starter: €12/muaj (50 fatura) | Standard: €29/muaj (200 fatura + e-Fakture + banke) | Business: €59/muaj (paga + API + 1000 fatura)',
+        'pricing' => 'Starter: €12/muaj (30 fatura + e-Fakture) | Standard: €29/muaj (200 fatura + QES + banke) | Business: €59/muaj (paga + API + 1000 fatura)',
         'cta' => 'Filloni falas',
     ],
     'company_followup3' => [

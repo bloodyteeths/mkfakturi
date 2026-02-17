@@ -23,7 +23,7 @@ return [
         'free' => [
             'name' => 'Free',
             'price_monthly' => 0.00,
-            'invoice_limit' => 5,
+            'invoice_limit' => 3,
             'users' => 1,
             'features' => [
                 'basic_invoicing' => true,
@@ -32,46 +32,46 @@ return [
                 'pdf_export' => true,
                 'csv_import' => true,
 
-                // Preview features with limits (let users taste premium)
-                'expenses' => true,           // Limited to 5/month
-                'custom_fields' => true,      // Limited to 2 fields
+                // Preview features with tight limits (see the feature, upgrade to use it)
+                'expenses' => true,           // Limited to 2/month
+                'custom_fields' => true,      // Limited to 1 field
                 'reports' => true,            // Basic reports only
-                'recurring_invoices' => true, // Limited to 1 active
-                'estimates' => true,          // Limited to 3/month
+                'recurring_invoices' => false, // Not available on free
+                'estimates' => true,          // Limited to 1/month
 
                 // Locked features (require paid plan)
-                'efaktura_sending' => 'preview', // Limited: 1/month taste
+                'efaktura_sending' => false,  // Requires Starter+
                 'qes_signing' => false,
                 'bank_connections' => false,
                 'auto_reconciliation' => false,
                 'multi_currency' => false,
                 'api_access' => false,
-                'ai_suggestions' => 'preview', // Limited AI preview (3/month)
+                'ai_suggestions' => 'preview', // Limited AI preview (2/month)
             ],
-            // Usage limits for preview features — taste everything, buy to use
+            // Usage limits — see the feature exists, upgrade to actually use it
             'limits' => [
-                'expenses_per_month' => 5,
-                'custom_fields' => 2,
-                'recurring_invoices_active' => 1,
-                'estimates_per_month' => 3,
-                'ai_queries_per_month' => 3,
-                'payroll_employees' => 2,     // Taste: 2 employees
-                'bills_per_month' => 3,       // Taste AP tracking
-                'suppliers_total' => 5,       // Taste supplier management
-                'credit_notes_per_month' => 1,// Taste credit workflow
-                'proformas_per_month' => 2,   // Taste sales pipeline
-                'projects_total' => 1,        // Taste project tracking
-                'warehouses_total' => 1,      // Taste inventory
-                'deadlines_custom' => 3,      // Taste deadline tracking
-                'client_documents_per_month' => 5, // Taste document flow
-                'efaktura_per_month' => 1,    // Taste e-invoice submission
+                'expenses_per_month' => 2,
+                'custom_fields' => 1,
+                'recurring_invoices_active' => 0,
+                'estimates_per_month' => 1,
+                'ai_queries_per_month' => 2,
+                'payroll_employees' => 0,     // Not available on free
+                'bills_per_month' => 1,
+                'suppliers_total' => 3,
+                'credit_notes_per_month' => 0,
+                'proformas_per_month' => 1,
+                'projects_total' => 0,
+                'warehouses_total' => 0,
+                'deadlines_custom' => 1,
+                'client_documents_per_month' => 2,
+                'efaktura_per_month' => 0,    // Not available on free
             ],
         ],
 
         'starter' => [
             'name' => 'Starter',
             'price_monthly' => 12.00,
-            'invoice_limit' => 50,
+            'invoice_limit' => 30,
             'users' => 1,
             'features' => [
                 'basic_invoicing' => true,
@@ -85,9 +85,9 @@ return [
                 'custom_fields' => true,
                 'reports' => true,
                 'ai_suggestions' => 'basic',  // Basic AI suggestions
+                'efaktura_sending' => true,   // Limited: 5/month (key differentiator)
 
                 // Locked features
-                'efaktura_sending' => false,
                 'qes_signing' => false,
                 'bank_connections' => false,
                 'auto_reconciliation' => false,
@@ -95,21 +95,21 @@ return [
                 'api_access' => false,
             ],
             'limits' => [
-                'expenses_per_month' => 50,
-                'custom_fields' => 5,
-                'recurring_invoices_active' => 5,
-                'estimates_per_month' => 20,
-                'ai_queries_per_month' => 10,
+                'expenses_per_month' => 20,
+                'custom_fields' => 3,
+                'recurring_invoices_active' => 3,
+                'estimates_per_month' => 10,
+                'ai_queries_per_month' => 5,
                 'payroll_employees' => 0,     // Payroll not available on starter
-                'bills_per_month' => 20,
-                'suppliers_total' => 20,
-                'credit_notes_per_month' => 10,
-                'proformas_per_month' => 10,
-                'projects_total' => 5,
-                'warehouses_total' => 2,
-                'deadlines_custom' => 10,
-                'client_documents_per_month' => 20,
-                'efaktura_per_month' => 0,    // E-Faktura not available on starter
+                'bills_per_month' => 10,
+                'suppliers_total' => 10,
+                'credit_notes_per_month' => 5,
+                'proformas_per_month' => 5,
+                'projects_total' => 3,
+                'warehouses_total' => 1,
+                'deadlines_custom' => 5,
+                'client_documents_per_month' => 10,
+                'efaktura_per_month' => 5,    // E-Faktura: 5/month (key Starter differentiator)
             ],
         ],
 
@@ -315,9 +315,9 @@ return [
         'ai_suggestions' => 'free',           // Preview AI for all (limited on free)
         'ai_advanced' => 'business',          // Advanced AI at Business+
 
-        // "Taste everything" — usage-limited on free, not tier-gated
-        'efaktura_sending' => 'free',         // Preview: 1/month on free, unlimited on Standard+
-        'payroll' => 'free',                  // Preview: 2 employees on free, 50 on Business+
+        // E-faktura requires Starter+ (key upgrade driver)
+        'efaktura_sending' => 'starter',      // 5/month on Starter, unlimited on Standard+
+        'payroll' => 'business',              // Payroll only on Business+ (50 employees)
     ],
 
     /*
@@ -396,110 +396,110 @@ return [
     */
     'upgrade_messages' => [
         'invoice_limit' => [
-            'free' => 'You\'ve reached your invoice limit (5/month). Upgrade to Starter for 50 invoices per month.',
-            'starter' => 'You\'ve reached your invoice limit (50/month). Upgrade to Standard for 200 invoices per month.',
+            'free' => 'You\'ve reached your invoice limit (3/month). Upgrade to Starter for 30 invoices per month.',
+            'starter' => 'You\'ve reached your invoice limit (30/month). Upgrade to Standard for 200 invoices per month.',
             'standard' => 'You\'ve reached your invoice limit (200/month). Upgrade to Business for 1,000 invoices per month.',
             'business' => 'You\'ve reached your invoice limit (1,000/month). Upgrade to Max for unlimited invoices.',
         ],
         'expenses' => [
-            'free' => 'You\'ve reached your expense limit (5/month). Upgrade to Starter for 50 expenses per month.',
-            'starter' => 'You\'ve reached your expense limit (50/month). Upgrade to Standard for unlimited expenses.',
+            'free' => 'You\'ve reached your expense limit (2/month). Upgrade to Starter for 20 expenses per month.',
+            'starter' => 'You\'ve reached your expense limit (20/month). Upgrade to Standard for unlimited expenses.',
             'standard' => 'Unlimited expenses available.',
             'business' => 'Unlimited expenses available.',
         ],
         'estimates' => [
-            'free' => 'You\'ve reached your estimate limit (3/month). Upgrade to Starter for 20 estimates per month.',
-            'starter' => 'You\'ve reached your estimate limit (20/month). Upgrade to Standard for unlimited estimates.',
+            'free' => 'You\'ve reached your estimate limit (1/month). Upgrade to Starter for 10 estimates per month.',
+            'starter' => 'You\'ve reached your estimate limit (10/month). Upgrade to Standard for unlimited estimates.',
             'standard' => 'Unlimited estimates available.',
             'business' => 'Unlimited estimates available.',
         ],
         'custom_fields' => [
-            'free' => 'You\'ve reached your custom field limit (2 fields). Upgrade to Starter for 5 custom fields.',
-            'starter' => 'You\'ve reached your custom field limit (5 fields). Upgrade to Standard for 15 custom fields.',
+            'free' => 'You\'ve reached your custom field limit (1 field). Upgrade to Starter for 3 custom fields.',
+            'starter' => 'You\'ve reached your custom field limit (3 fields). Upgrade to Standard for 15 custom fields.',
             'standard' => 'You\'ve reached your custom field limit (15 fields). Upgrade to Business for unlimited custom fields.',
             'business' => 'Unlimited custom fields available.',
         ],
         'recurring_invoices' => [
-            'free' => 'You\'ve reached your recurring invoice limit (1 active). Upgrade to Starter for 5 active recurring invoices.',
-            'starter' => 'You\'ve reached your recurring invoice limit (5 active). Upgrade to Standard for 20 active recurring invoices.',
+            'free' => 'Recurring invoices are not available on the Free plan. Upgrade to Starter for 3 active recurring invoices.',
+            'starter' => 'You\'ve reached your recurring invoice limit (3 active). Upgrade to Standard for 20 active recurring invoices.',
             'standard' => 'You\'ve reached your recurring invoice limit (20 active). Upgrade to Business for unlimited recurring invoices.',
             'business' => 'Unlimited recurring invoices available.',
         ],
-        'efaktura' => 'E-Faktura sending requires a Standard plan or higher. Upgrade now to send digital invoices to the government.',
+        'efaktura' => 'E-Faktura sending requires a Starter plan or higher. Upgrade now to send digital invoices.',
         'qes_signing' => 'QES digital signing requires a Standard plan or higher. Upgrade now to digitally sign invoices.',
         'bank_connections' => 'Bank connections require a Business plan or higher. Upgrade now to connect your bank accounts via PSD2.',
         'auto_reconciliation' => 'Automatic reconciliation requires a Business plan or higher. Upgrade now to automatically match transactions.',
         'user_limit' => [
-            'free' => 'You\'ve reached your user limit (1 user). Upgrade to Standard for 3 users.',
-            'starter' => 'You\'ve reached your user limit (1 user). Upgrade to Standard for 3 users.',
+            'free' => 'Free plan is limited to 1 user. Upgrade to Standard for 3 users.',
+            'starter' => 'Starter plan is limited to 1 user. Upgrade to Standard for 3 users.',
             'standard' => 'You\'ve reached your user limit (3 users). Upgrade to Business for 5 users.',
             'business' => 'You\'ve reached your user limit (5 users). Upgrade to Max for unlimited users.',
         ],
         'ai_suggestions' => [
-            'free' => 'You\'ve reached your AI query limit (3/month). Upgrade to Starter for 10 AI queries per month.',
-            'starter' => 'You\'ve reached your AI query limit (10/month). Upgrade to Standard for 25 AI queries per month.',
+            'free' => 'You\'ve reached your AI query limit (2/month). Upgrade to Starter for 5 AI queries per month.',
+            'starter' => 'You\'ve reached your AI query limit (5/month). Upgrade to Standard for 25 AI queries per month.',
             'standard' => 'You\'ve reached your AI query limit (25/month). Upgrade to Business for 50 AI queries per month.',
             'business' => 'You\'ve reached your AI query limit (50/month). Upgrade to Max for 100 AI queries per month.',
             'max' => 'You\'ve reached your AI query limit (100/month). Contact support for higher limits.',
         ],
-        'payroll' => 'Payroll management requires a Business plan for full access. Free plan allows 2 employees as a preview.',
+        'payroll' => 'Payroll management requires a Business plan. Upgrade to Business for payroll with up to 50 employees.',
         'payroll_employees' => [
-            'free' => 'You\'ve reached your payroll preview limit (2 employees). Upgrade to Business for 50 employees.',
+            'free' => 'Payroll is not available on the Free plan. Upgrade to Business for payroll management with 50 employees.',
             'starter' => 'Payroll is not available on the Starter plan. Upgrade to Business for payroll management with 50 employees.',
             'standard' => 'Payroll is not available on the Standard plan. Upgrade to Business for payroll management with 50 employees.',
             'business' => 'You\'ve reached your employee limit (50 employees). Upgrade to Max for unlimited employees.',
         ],
         'bills_per_month' => [
-            'free' => 'You\'ve reached your bill limit (3/month). Upgrade to Starter for 20 bills per month.',
-            'starter' => 'You\'ve reached your bill limit (20/month). Upgrade to Standard for 100 bills per month.',
+            'free' => 'You\'ve reached your bill limit (1/month). Upgrade to Starter for 10 bills per month.',
+            'starter' => 'You\'ve reached your bill limit (10/month). Upgrade to Standard for 100 bills per month.',
             'standard' => 'You\'ve reached your bill limit (100/month). Upgrade to Business for 500 bills per month.',
             'business' => 'You\'ve reached your bill limit (500/month). Upgrade to Max for unlimited bills.',
         ],
         'suppliers_total' => [
-            'free' => 'You\'ve reached your supplier limit (5 suppliers). Upgrade to Starter for 20 suppliers.',
-            'starter' => 'You\'ve reached your supplier limit (20 suppliers). Upgrade to Standard for 100 suppliers.',
+            'free' => 'You\'ve reached your supplier limit (3 suppliers). Upgrade to Starter for 10 suppliers.',
+            'starter' => 'You\'ve reached your supplier limit (10 suppliers). Upgrade to Standard for 100 suppliers.',
             'standard' => 'You\'ve reached your supplier limit (100 suppliers). Upgrade to Business for 500 suppliers.',
             'business' => 'You\'ve reached your supplier limit (500 suppliers). Upgrade to Max for unlimited suppliers.',
         ],
         'credit_notes_per_month' => [
-            'free' => 'You\'ve reached your credit note limit (1/month). Upgrade to Starter for 10 credit notes per month.',
-            'starter' => 'You\'ve reached your credit note limit (10/month). Upgrade to Standard for 50 per month.',
+            'free' => 'Credit notes are not available on the Free plan. Upgrade to Starter for 5 credit notes per month.',
+            'starter' => 'You\'ve reached your credit note limit (5/month). Upgrade to Standard for 50 per month.',
             'standard' => 'You\'ve reached your credit note limit (50/month). Upgrade to Business for 200 per month.',
             'business' => 'You\'ve reached your credit note limit (200/month). Upgrade to Max for unlimited credit notes.',
         ],
         'proformas_per_month' => [
-            'free' => 'You\'ve reached your proforma limit (2/month). Upgrade to Starter for 10 proformas per month.',
-            'starter' => 'You\'ve reached your proforma limit (10/month). Upgrade to Standard for 50 per month.',
+            'free' => 'You\'ve reached your proforma limit (1/month). Upgrade to Starter for 5 proformas per month.',
+            'starter' => 'You\'ve reached your proforma limit (5/month). Upgrade to Standard for 50 per month.',
             'standard' => 'You\'ve reached your proforma limit (50/month). Upgrade to Business for 200 per month.',
             'business' => 'You\'ve reached your proforma limit (200/month). Upgrade to Max for unlimited proformas.',
         ],
         'projects_total' => [
-            'free' => 'You\'ve reached your project limit (1 project). Upgrade to Starter for 5 projects.',
-            'starter' => 'You\'ve reached your project limit (5 projects). Upgrade to Standard for 20 projects.',
+            'free' => 'Projects are not available on the Free plan. Upgrade to Starter for 3 projects.',
+            'starter' => 'You\'ve reached your project limit (3 projects). Upgrade to Standard for 20 projects.',
             'standard' => 'You\'ve reached your project limit (20 projects). Upgrade to Business for 100 projects.',
             'business' => 'You\'ve reached your project limit (100 projects). Upgrade to Max for unlimited projects.',
         ],
         'warehouses_total' => [
-            'free' => 'You\'ve reached your warehouse limit (1 warehouse). Upgrade to Starter for 2 warehouses.',
-            'starter' => 'You\'ve reached your warehouse limit (2 warehouses). Upgrade to Standard for 5 warehouses.',
+            'free' => 'Warehouses are not available on the Free plan. Upgrade to Starter for 1 warehouse.',
+            'starter' => 'You\'ve reached your warehouse limit (1 warehouse). Upgrade to Standard for 5 warehouses.',
             'standard' => 'You\'ve reached your warehouse limit (5 warehouses). Upgrade to Business for 20 warehouses.',
             'business' => 'You\'ve reached your warehouse limit (20 warehouses). Upgrade to Max for unlimited warehouses.',
         ],
         'deadlines_custom' => [
-            'free' => 'You\'ve reached your custom deadline limit (3 deadlines). Upgrade to Starter for 10 custom deadlines.',
-            'starter' => 'You\'ve reached your custom deadline limit (10 deadlines). Upgrade to Standard for 50.',
+            'free' => 'You\'ve reached your custom deadline limit (1 deadline). Upgrade to Starter for 5 custom deadlines.',
+            'starter' => 'You\'ve reached your custom deadline limit (5 deadlines). Upgrade to Standard for 50.',
             'standard' => 'You\'ve reached your custom deadline limit (50 deadlines). Upgrade to Business for 200.',
             'business' => 'You\'ve reached your custom deadline limit (200 deadlines). Upgrade to Max for unlimited.',
         ],
         'client_documents_per_month' => [
-            'free' => 'You\'ve reached your document upload limit (5/month). Upgrade to Starter for 20 per month.',
-            'starter' => 'You\'ve reached your document upload limit (20/month). Upgrade to Standard for 100 per month.',
+            'free' => 'You\'ve reached your document upload limit (2/month). Upgrade to Starter for 10 per month.',
+            'starter' => 'You\'ve reached your document upload limit (10/month). Upgrade to Standard for 100 per month.',
             'standard' => 'You\'ve reached your document upload limit (100/month). Upgrade to Business for 500 per month.',
             'business' => 'You\'ve reached your document upload limit (500/month). Upgrade to Max for unlimited.',
         ],
         'efaktura_per_month' => [
-            'free' => 'You\'ve reached your e-Faktura preview limit (1/month). Upgrade to Standard for unlimited e-Faktura.',
-            'starter' => 'E-Faktura is not available on the Starter plan. Upgrade to Standard for unlimited e-Faktura sending.',
+            'free' => 'E-Faktura is not available on the Free plan. Upgrade to Starter for 5 e-Faktura per month.',
+            'starter' => 'You\'ve reached your e-Faktura limit (5/month). Upgrade to Standard for unlimited e-Faktura sending.',
         ],
     ],
 ];

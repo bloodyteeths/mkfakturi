@@ -67,7 +67,7 @@ return [
         'subject' => 'Starter plan: only €12/month',
         'greeting' => 'Hello,',
         'trial_offer' => '14 days free Standard plan — no credit card, no commitment. After the trial, decide for yourself.',
-        'pricing' => 'Starter: €12/mo (50 invoices) | Standard: €29/mo (200 invoices + e-Faktura + bank) | Business: €59/mo (payroll + API + 1000 invoices)',
+        'pricing' => 'Starter: €12/mo (30 invoices + e-Faktura) | Standard: €29/mo (200 invoices + QES + bank) | Business: €59/mo (payroll + API + 1000 invoices)',
         'cta' => 'Start for free',
     ],
     'company_followup3' => [
