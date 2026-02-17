@@ -1,23 +1,20 @@
 @component('mail::message')
 <p>@lang('outreach.followup3.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.followup3.hook')</p>
+<p>@lang('outreach.followup3.social_proof')<br>
+&bull; @lang('outreach.followup3.impression_dashboard')<br>
+&bull; @lang('outreach.followup3.impression_deadlines')<br>
+&bull; @lang('outreach.followup3.impression_bank')<br>
+&bull; @lang('outreach.followup3.impression_efaktura')<br>
+&bull; @lang('outreach.followup3.impression_revenue')</p>
 
-<ul>
-<li>@lang('outreach.followup3.reason_portal')</li>
-<li>@lang('outreach.followup3.reason_deadlines')</li>
-<li>@lang('outreach.followup3.reason_reports')</li>
-<li>@lang('outreach.followup3.reason_efaktura')</li>
-<li>@lang('outreach.followup3.reason_free')</li>
-</ul>
+<p>@lang('outreach.followup3.still_invited')</p>
 
-<p>@lang('outreach.followup3.pricing')</p>
+<p>@lang('outreach.followup3.conference')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.followup3.cta')
 @endcomponent
-
-<p><small style="color: #999;">@lang('outreach.followup3.no_card')</small></p>
 
 <p>
 @lang('outreach.signature_closing')<br>

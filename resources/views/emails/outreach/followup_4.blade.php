@@ -1,17 +1,17 @@
 @component('mail::message')
 <p>@lang('outreach.followup4.greeting', ['companyName' => $companyName])</p>
 
+<p>@lang('outreach.followup4.last_message')</p>
+
 <p>@lang('outreach.followup4.urgency')</p>
 
-<p>@lang('outreach.followup4.solution')</p>
-
-<p>@lang('outreach.followup4.partner_offer')</p>
+<p>@lang('outreach.followup4.conference')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.followup4.cta')
 @endcomponent
 
-<p><small style="color: #999;">@lang('outreach.followup4.final_note')</small></p>
+<p><small style="color: #999;">@lang('outreach.followup4.farewell')</small></p>
 
 <p>
 @lang('outreach.signature_closing')<br>

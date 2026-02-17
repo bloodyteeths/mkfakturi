@@ -3,22 +3,20 @@
 
 <p>@lang('outreach.followup2.busy')</p>
 
-<p>@lang('outreach.followup2.offer')</p>
+<p>@lang('outreach.followup2.building_together')<br>
+&bull; @lang('outreach.followup2.feedback_dashboard')<br>
+&bull; @lang('outreach.followup2.feedback_deadlines')<br>
+&bull; @lang('outreach.followup2.feedback_reports')</p>
 
-<p><strong>@lang('outreach.followup2.what_you_get_title')</strong></p>
+<p>@lang('outreach.followup2.revenue')</p>
 
-<ul>
-<li>@lang('outreach.followup2.portal_feature')</li>
-<li>@lang('outreach.followup2.deadlines_feature')</li>
-<li>@lang('outreach.followup2.reports_feature')</li>
-<li>@lang('outreach.followup2.commission_feature')</li>
-</ul>
-
-<p>@lang('outreach.followup2.why_free')</p>
+<p>@lang('outreach.followup2.pilot_reminder')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.followup2.cta')
 @endcomponent
+
+<p>@lang('outreach.followup2.conference')</p>
 
 <p>
 @lang('outreach.signature_closing')<br>

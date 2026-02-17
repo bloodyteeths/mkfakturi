@@ -11,7 +11,7 @@
 @lang('outreach.company_followup4.cta')
 @endcomponent
 
-<p><small style="color: #999;">@lang('outreach.company_followup4.final_note')</small></p>
+<p><small style="color: #999;">@lang('outreach.company_followup4.farewell')</small></p>
 
 <p>
 @lang('outreach.signature_closing')<br>

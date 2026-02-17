@@ -3,15 +3,12 @@
 
 <p>@lang('outreach.company_initial.pain_point')</p>
 
-<p>@lang('outreach.company_initial.solution')</p>
-
-<ul>
-<li>@lang('outreach.company_initial.feature_efaktura')</li>
-<li>@lang('outreach.company_initial.feature_bank')</li>
-<li>@lang('outreach.company_initial.feature_recurring')</li>
-<li>@lang('outreach.company_initial.feature_pdf')</li>
-<li>@lang('outreach.company_initial.feature_mpin')</li>
-</ul>
+<p>@lang('outreach.company_initial.solution')<br>
+&bull; @lang('outreach.company_initial.feature_efaktura')<br>
+&bull; @lang('outreach.company_initial.feature_bank')<br>
+&bull; @lang('outreach.company_initial.feature_recurring')<br>
+&bull; @lang('outreach.company_initial.feature_pdf')<br>
+&bull; @lang('outreach.company_initial.feature_mpin')</p>
 
 <p>@lang('outreach.company_initial.pricing_note')</p>
 

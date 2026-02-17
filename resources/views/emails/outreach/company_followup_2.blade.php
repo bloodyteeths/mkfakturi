@@ -5,13 +5,11 @@
 
 <p>@lang('outreach.company_followup2.features')</p>
 
-<p><strong>@lang('outreach.company_followup2.pricing_title')</strong></p>
-
-<ul>
-<li>@lang('outreach.company_followup2.pricing_starter')</li>
-<li>@lang('outreach.company_followup2.pricing_standard')</li>
-<li>@lang('outreach.company_followup2.pricing_business')</li>
-</ul>
+<p><strong>@lang('outreach.company_followup2.pricing_title')</strong><br>
+&bull; @lang('outreach.company_followup2.pricing_starter')<br>
+&bull; @lang('outreach.company_followup2.pricing_standard')<br>
+&bull; @lang('outreach.company_followup2.pricing_business')<br>
+&bull; @lang('outreach.company_followup2.pricing_max')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.company_followup2.cta')

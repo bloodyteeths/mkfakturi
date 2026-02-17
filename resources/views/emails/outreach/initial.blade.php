@@ -3,34 +3,23 @@
 
 <p>@lang('outreach.initial.intro')</p>
 
-<p>@lang('outreach.initial.pitch')</p>
+<p>@lang('outreach.initial.how_we_found')</p>
 
-<p>@lang('outreach.initial.pilot')</p>
+<p>@lang('outreach.initial.why_you')</p>
 
-<p><strong>@lang('outreach.initial.client_benefits_title')</strong></p>
+<p><strong>@lang('outreach.initial.partnership_title')</strong><br>
+&bull; @lang('outreach.initial.partner_portal')<br>
+&bull; @lang('outreach.initial.client_features')<br>
+&bull; @lang('outreach.initial.commission')<br>
+&bull; @lang('outreach.initial.dashboard')</p>
 
-<ul>
-<li>@lang('outreach.initial.client_efaktura')</li>
-<li>@lang('outreach.initial.client_bank')</li>
-<li>@lang('outreach.initial.client_mpin')</li>
-<li>@lang('outreach.initial.client_ai')</li>
-</ul>
-
-<p><strong>@lang('outreach.initial.partner_benefits_title')</strong></p>
-
-<ul>
-<li>@lang('outreach.initial.partner_portal')</li>
-<li>@lang('outreach.initial.partner_deadlines')</li>
-<li>@lang('outreach.initial.partner_reports')</li>
-<li>@lang('outreach.initial.partner_commission')</li>
-<li>@lang('outreach.initial.partner_free')</li>
-</ul>
+<p>@lang('outreach.initial.conference')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.initial.cta')
 @endcomponent
 
-<p><small style="color: #999;">@lang('outreach.initial.opt_out')</small></p>
+<p>@lang('outreach.initial.awaiting')</p>
 
 <p>
 @lang('outreach.signature_closing')<br>

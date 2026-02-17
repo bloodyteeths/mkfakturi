@@ -3,19 +3,21 @@
 
 <p>@lang('outreach.followup1.reference')</p>
 
-<p>@lang('outreach.followup1.hook')</p>
+<p><strong>@lang('outreach.followup1.help_title')</strong><br>
+&bull; @lang('outreach.followup1.test_psd2')<br>
+&bull; @lang('outreach.followup1.test_reconciliation')<br>
+&bull; @lang('outreach.followup1.test_mpin')<br>
+&bull; @lang('outreach.followup1.test_efaktura')</p>
 
-<ul>
-<li>@lang('outreach.followup1.feature_psd2')</li>
-<li>@lang('outreach.followup1.feature_auto')</li>
-<li>@lang('outreach.followup1.feature_csv')</li>
-</ul>
+<p>@lang('outreach.followup1.free_note')</p>
 
-<p>@lang('outreach.followup1.partner_value')</p>
+<p>@lang('outreach.followup1.conference')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.followup1.cta')
 @endcomponent
+
+<p>@lang('outreach.followup1.awaiting')</p>
 
 <p>
 @lang('outreach.signature_closing')<br>
