@@ -115,16 +115,18 @@ class PostmarkOutreachService
                 return null;
             }
 
-            // Set message stream header for outreach
-            $mailable->withSymfonyMessage(function ($message) {
+            // Send via Laravel Mail (uses Postmark driver)
+            // Note: stream header set via withSymfonyMessage inline to avoid
+            // closure serialization issues with ShouldQueue mailables
+            $streamOutreach = $this->streamOutreach;
+            $mailable->withSymfonyMessage(function ($message) use ($streamOutreach) {
                 $message->getHeaders()->addTextHeader(
                     'X-PM-Message-Stream',
-                    $this->streamOutreach
+                    $streamOutreach
                 );
             });
 
-            // Send via Laravel Mail (uses Postmark driver)
-            Mail::to($email)->send($mailable);
+            Mail::to($email)->sendNow($mailable);
 
             // Get the message ID from the response
             // Note: Laravel's Postmark transport returns the message ID in the sent event
