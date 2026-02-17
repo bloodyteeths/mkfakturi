@@ -3,8 +3,6 @@
 
 <p>@lang('outreach.initial.intro')</p>
 
-<p>@lang('outreach.initial.how_we_found')</p>
-
 <p>@lang('outreach.initial.why_you')</p>
 
 <p><strong>@lang('outreach.initial.partnership_title')</strong><br>

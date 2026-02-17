@@ -1,23 +1,20 @@
 @component('mail::message')
 <p>@lang('outreach.followup1.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.followup1.reference')</p>
+<p>@lang('outreach.followup1.direct_pitch')</p>
 
-<p><strong>@lang('outreach.followup1.help_title')</strong><br>
-&bull; @lang('outreach.followup1.test_psd2')<br>
-&bull; @lang('outreach.followup1.test_reconciliation')<br>
-&bull; @lang('outreach.followup1.test_mpin')<br>
-&bull; @lang('outreach.followup1.test_efaktura')</p>
+<p>@lang('outreach.followup1.offer_title')<br>
+&bull; @lang('outreach.followup1.offer_commission')<br>
+&bull; @lang('outreach.followup1.offer_recurring')<br>
+&bull; @lang('outreach.followup1.offer_free')<br>
+&bull; @lang('outreach.followup1.offer_feedback')</p>
 
-<p>@lang('outreach.followup1.free_note')</p>
+<p><strong>@lang('outreach.followup1.april_title')</strong><br>
+@lang('outreach.followup1.april_desc')</p>
 
-<p>@lang('outreach.followup1.conference')</p>
-
-@component('mail::button', ['url' => $signupUrl])
-@lang('outreach.followup1.cta')
-@endcomponent
-
-<p>@lang('outreach.followup1.awaiting')</p>
+<p>@lang('outreach.followup1.response_ask')<br>
+1. @lang('outreach.followup1.response_1')<br>
+2. @lang('outreach.followup1.response_2')</p>
 
 <p>
 @lang('outreach.signature_closing')<br>
