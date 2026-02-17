@@ -1,11 +1,16 @@
 @component('mail::message')
 <p>@lang('outreach.company_followup3.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.company_followup3.efaktura_urgency')</p>
+<p>@lang('outreach.company_followup3.hook')</p>
 
-<p>@lang('outreach.company_followup3.solution')</p>
+<p>@lang('outreach.company_followup3.ai_intro')<br>
+&bull; @lang('outreach.company_followup3.feature_chat')<br>
+&bull; @lang('outreach.company_followup3.feature_forecast')<br>
+&bull; @lang('outreach.company_followup3.feature_risk')<br>
+&bull; @lang('outreach.company_followup3.feature_reminders')<br>
+&bull; @lang('outreach.company_followup3.feature_recurring')</p>
 
-<p>@lang('outreach.company_followup3.social')</p>
+<p>@lang('outreach.company_followup3.closing')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.company_followup3.cta')

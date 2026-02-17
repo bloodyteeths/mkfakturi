@@ -1,9 +1,15 @@
 @component('mail::message')
 <p>@lang('outreach.company_followup2.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.company_followup2.trial_offer')</p>
+<p>@lang('outreach.company_followup2.hook')</p>
 
-<p>@lang('outreach.company_followup2.features')</p>
+<p>@lang('outreach.company_followup2.portal')</p>
+
+<p>@lang('outreach.company_followup2.features_title')<br>
+&bull; @lang('outreach.company_followup2.feature_docs')<br>
+&bull; @lang('outreach.company_followup2.feature_woo')<br>
+&bull; @lang('outreach.company_followup2.feature_recurring')<br>
+&bull; @lang('outreach.company_followup2.feature_expenses')</p>
 
 <p><strong>@lang('outreach.company_followup2.pricing_title')</strong><br>
 &bull; @lang('outreach.company_followup2.pricing_starter')<br>

@@ -1,16 +1,17 @@
 @component('mail::message')
 <p>@lang('outreach.company_initial.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.company_initial.pain_point')</p>
+<p>@lang('outreach.company_initial.hook')</p>
 
 <p>@lang('outreach.company_initial.solution')<br>
-&bull; @lang('outreach.company_initial.feature_efaktura')<br>
+&bull; @lang('outreach.company_initial.feature_inventory')<br>
+&bull; @lang('outreach.company_initial.feature_payroll')<br>
+&bull; @lang('outreach.company_initial.feature_fiscal')<br>
 &bull; @lang('outreach.company_initial.feature_bank')<br>
-&bull; @lang('outreach.company_initial.feature_recurring')<br>
-&bull; @lang('outreach.company_initial.feature_pdf')<br>
-&bull; @lang('outreach.company_initial.feature_mpin')</p>
+&bull; @lang('outreach.company_initial.feature_ai')<br>
+&bull; @lang('outreach.company_initial.feature_ecommerce')</p>
 
-<p>@lang('outreach.company_initial.pricing_note')</p>
+<p>@lang('outreach.company_initial.pricing')</p>
 
 @component('mail::button', ['url' => $signupUrl])
 @lang('outreach.company_initial.cta')

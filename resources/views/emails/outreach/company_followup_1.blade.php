@@ -3,9 +3,14 @@
 
 <p>@lang('outreach.company_followup1.hook')</p>
 
-<p>@lang('outreach.company_followup1.solution')</p>
+<p>@lang('outreach.company_followup1.question')</p>
 
-<p>@lang('outreach.company_followup1.banks')</p>
+<p>@lang('outreach.company_followup1.solution')<br>
+&bull; @lang('outreach.company_followup1.feature_mpin')<br>
+&bull; @lang('outreach.company_followup1.feature_leave')<br>
+&bull; @lang('outreach.company_followup1.feature_payslips')<br>
+&bull; @lang('outreach.company_followup1.feature_fiscal_qr')<br>
+&bull; @lang('outreach.company_followup1.feature_bank_auto')</p>
 
 <p>@lang('outreach.company_followup1.social')</p>
 
