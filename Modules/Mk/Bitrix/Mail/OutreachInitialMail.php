@@ -48,7 +48,7 @@ class OutreachInitialMail extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from(config('mail.from.address'), 'Facturino')
+        return $this->from('partners@facturino.mk', 'Facturino')
             ->subject(__('outreach.initial.subject', ['company' => $this->companyName]))
             ->markdown('emails.outreach.initial', [
                 'companyName' => $this->companyName,

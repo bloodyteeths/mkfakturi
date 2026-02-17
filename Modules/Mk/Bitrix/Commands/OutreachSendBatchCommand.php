@@ -59,12 +59,12 @@ class OutreachSendBatchCommand extends Command
     /**
      * Minimum jitter between sends in seconds.
      */
-    protected int $minJitterSeconds = 10;
+    protected int $minJitterSeconds = 2;
 
     /**
      * Maximum jitter between sends in seconds.
      */
-    protected int $maxJitterSeconds = 30;
+    protected int $maxJitterSeconds = 5;
 
     /**
      * Follow-up schedule (template => days after initial).
