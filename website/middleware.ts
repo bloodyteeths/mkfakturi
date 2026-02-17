@@ -14,12 +14,13 @@ export function middleware(request: Request) {
   const url = new URL(request.url)
   const { pathname } = url
 
-  // 1) Temporary canonical choice: only serve www.facturino.mk
+  // 1) Canonical choice: only serve www.facturino.mk
   //    If apex (facturino.mk) is hit, 301 to www while preserving path/query.
-  const host = (request.headers.get('host') || '').toLowerCase()
+  //    We build the redirect URL manually to avoid leaking Railway's internal port.
+  const host = (request.headers.get('host') || '').replace(/:\d+$/, '').toLowerCase()
   if (host === 'facturino.mk') {
-    url.hostname = 'www.facturino.mk'
-    return NextResponse.redirect(url, 301)
+    const dest = new URL(`https://www.facturino.mk${url.pathname}${url.search}`)
+    return NextResponse.redirect(dest, 301)
   }
 
   // 2) Allow root health check without locale redirect
