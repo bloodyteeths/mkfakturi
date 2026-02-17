@@ -5,7 +5,7 @@
 
 @lang('outreach.company_initial.solution')
 
-@component('mail::button', ['url' => $demoUrl])
+@component('mail::button', ['url' => $signupUrl])
 @lang('outreach.company_initial.cta')
 @endcomponent
 

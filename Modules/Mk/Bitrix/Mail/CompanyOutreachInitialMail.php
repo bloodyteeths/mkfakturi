@@ -18,18 +18,18 @@ class CompanyOutreachInitialMail extends Mailable implements ShouldQueue
 
     public string $companyName;
     public string $contactEmail;
-    public string $demoUrl;
+    public string $signupUrl;
     public string $unsubscribeUrl;
 
     public function __construct(
         string $companyName,
         string $contactEmail,
-        string $demoUrl,
+        string $signupUrl,
         string $unsubscribeUrl
     ) {
         $this->companyName = $companyName;
         $this->contactEmail = $contactEmail;
-        $this->demoUrl = $demoUrl;
+        $this->demoUrl = $signupUrl;
         $this->unsubscribeUrl = $unsubscribeUrl;
     }
 

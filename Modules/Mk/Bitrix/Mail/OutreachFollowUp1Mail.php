@@ -18,7 +18,7 @@ class OutreachFollowUp1Mail extends Mailable implements ShouldQueue
 
     public string $companyName;
     public string $contactEmail;
-    public string $demoUrl;
+    public string $signupUrl;
     public string $unsubscribeUrl;
 
     /**
@@ -26,18 +26,18 @@ class OutreachFollowUp1Mail extends Mailable implements ShouldQueue
      *
      * @param string $companyName Lead company name
      * @param string $contactEmail Lead contact email
-     * @param string $demoUrl URL to demo/landing page
+     * @param string $signupUrl URL to demo/landing page
      * @param string $unsubscribeUrl URL to unsubscribe
      */
     public function __construct(
         string $companyName,
         string $contactEmail,
-        string $demoUrl,
+        string $signupUrl,
         string $unsubscribeUrl
     ) {
         $this->companyName = $companyName;
         $this->contactEmail = $contactEmail;
-        $this->demoUrl = $demoUrl;
+        $this->demoUrl = $signupUrl;
         $this->unsubscribeUrl = $unsubscribeUrl;
     }
 

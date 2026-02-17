@@ -5,7 +5,7 @@
 
 @lang('outreach.initial.benefit')
 
-@component('mail::button', ['url' => $demoUrl])
+@component('mail::button', ['url' => $signupUrl])
 @lang('outreach.initial.cta')
 @endcomponent
 

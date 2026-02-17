@@ -5,7 +5,7 @@
 
 @lang('outreach.followup1.metric')
 
-@component('mail::button', ['url' => $demoUrl])
+@component('mail::button', ['url' => $signupUrl])
 @lang('outreach.followup1.cta')
 @endcomponent
 

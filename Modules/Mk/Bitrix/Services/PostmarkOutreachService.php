@@ -99,14 +99,14 @@ class PostmarkOutreachService
 
         try {
             $companyName = $data['companyName'] ?? 'Your Company';
-            $demoUrl = $data['demoUrl'] ?? config('app.url') . '/demo';
+            $signupUrl = config('app.url') . '/signup';
 
             // Build the appropriate mailable
             $mailable = $this->buildMailable(
                 $templateKey,
                 $companyName,
                 $email,
-                $demoUrl,
+                $signupUrl,
                 $unsubscribeUrl
             );
 
@@ -114,6 +114,9 @@ class PostmarkOutreachService
                 Log::error('Unknown outreach template', ['template' => $templateKey]);
                 return null;
             }
+
+            // Force Macedonian locale for all outreach emails
+            $mailable->locale('mk');
 
             // Send via Laravel Mail (uses Postmark driver)
             // Note: stream header set via withSymfonyMessage inline to avoid
@@ -334,20 +337,18 @@ class PostmarkOutreachService
         string $templateKey,
         string $companyName,
         string $email,
-        string $demoUrl,
+        string $signupUrl,
         string $unsubscribeUrl
     ): ?\Illuminate\Mail\Mailable {
-        $signupUrl = config('app.url') . '/signup';
-
         return match ($templateKey) {
             // Accountant templates
-            'initial' => new OutreachInitialMail($companyName, $email, $demoUrl, $unsubscribeUrl),
-            'followup_1' => new OutreachFollowUp1Mail($companyName, $email, $demoUrl, $unsubscribeUrl),
+            'initial' => new OutreachInitialMail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'followup_1' => new OutreachFollowUp1Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'followup_2' => new OutreachFollowUp2Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'followup_3' => new OutreachFollowUp3Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'followup_4' => new OutreachFollowUp4Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             // Company templates
-            'company_initial' => new CompanyOutreachInitialMail($companyName, $email, $demoUrl, $unsubscribeUrl),
+            'company_initial' => new CompanyOutreachInitialMail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'company_followup_1' => new CompanyFollowUp1Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'company_followup_2' => new CompanyFollowUp2Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'company_followup_3' => new CompanyFollowUp3Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
