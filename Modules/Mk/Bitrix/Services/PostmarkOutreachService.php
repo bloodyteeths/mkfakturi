@@ -69,8 +69,8 @@ class PostmarkOutreachService
         $this->apiToken = config('services.postmark.token') ?? '';
         $this->streamOutreach = config('bitrix.postmark.stream_outreach', 'outreach') ?? 'outreach';
         $this->streamTransactional = config('bitrix.postmark.stream_transactional', 'transactional') ?? 'transactional';
-        $this->dailyLimit = (int) (config('bitrix.outreach.daily_limit', 500) ?? 500);
-        $this->hourlyLimit = (int) (config('bitrix.outreach.hourly_limit', 80) ?? 80);
+        $this->dailyLimit = (int) (config('bitrix.outreach.daily_limit', 0) ?? 0);
+        $this->hourlyLimit = (int) (config('bitrix.outreach.hourly_limit', 0) ?? 0);
     }
 
     /**
