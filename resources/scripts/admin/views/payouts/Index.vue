@@ -74,7 +74,7 @@
               :currency="globalStore.companySettings.currency"
             />
           </span>
-          <span v-else>{{ stats.total_pending_amount.toFixed(2) }}</span>
+          <span v-else>{{ parseFloat(stats.total_pending_amount).toFixed(2) }}</span>
         </div>
       </div>
       <div class="p-4 bg-white border border-gray-200 rounded-lg">
@@ -90,7 +90,7 @@
               :currency="globalStore.companySettings.currency"
             />
           </span>
-          <span v-else>{{ stats.completed_this_month.toFixed(2) }}</span>
+          <span v-else>{{ parseFloat(stats.completed_this_month).toFixed(2) }}</span>
         </div>
       </div>
       <div class="p-4 bg-white border border-gray-200 rounded-lg">
@@ -102,7 +102,7 @@
               :currency="globalStore.companySettings.currency"
             />
           </span>
-          <span v-else>{{ stats.total_completed_all_time.toFixed(2) }}</span>
+          <span v-else>{{ parseFloat(stats.total_completed_all_time).toFixed(2) }}</span>
         </div>
       </div>
     </div>
@@ -143,7 +143,7 @@
             />
           </span>
           <span v-else>
-            {{ (row.data.amount || 0).toFixed(2) }} {{ row.data.currency || 'MKD' }}
+            {{ parseFloat(row.data.amount || 0).toFixed(2) }} {{ row.data.currency || 'MKD' }}
           </span>
         </template>
 

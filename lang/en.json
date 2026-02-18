@@ -2714,7 +2714,8 @@
     "tax_reports": "Tax Reports",
     "tax_tools": "Tax Tools",
     "users": "Users",
-    "warehouses": "Warehouses"
+    "warehouses": "Warehouses",
+    "payouts": "Payouts"
   },
   "notification_view_estimate": "[Notification] Estimate viewed",
   "notification_view_invoice": "[Notification] Invoice viewed",
