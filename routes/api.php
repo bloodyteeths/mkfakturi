@@ -1263,6 +1263,20 @@ Route::prefix('/v1')->group(function () {
             Route::get('/{partner}/upline', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'getPartnerUpline']);
         });
 
+        // ----------------------------------
+        // Payout Management Routes
+        // Super Admin only - view, approve, export partner payouts
+        // ----------------------------------
+        Route::prefix('/payouts')->middleware(['super-admin'])->group(function () {
+            Route::get('/stats', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'stats']);
+            Route::get('/export', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'export']);
+            Route::get('/', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'index']);
+            Route::get('/{payout}', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'show']);
+            Route::post('/{payout}/complete', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'markCompleted']);
+            Route::post('/{payout}/fail', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'markFailed']);
+            Route::post('/{payout}/cancel', [\App\Http\Controllers\V1\Admin\Payout\PayoutManagementController::class, 'cancel']);
+        });
+
         // AC-16: Company Helper Routes (outside partners prefix)
         Route::get('/companies/{company}/current-partner', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'getCompanyCurrentPartner'])->middleware('super-admin');
 

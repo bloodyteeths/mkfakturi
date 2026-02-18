@@ -611,6 +611,17 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'navigation.payouts',
+            'group' => 3,
+            'link' => '/admin/payouts',
+            'icon' => 'BanknotesIcon',
+            'name' => 'Payouts',
+            'owner_only' => false,
+            'super_admin_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'partner.accounting.chart_of_accounts',
             'group' => 'partner.accounting',
             'link' => '/admin/partner/accounting/chart-of-accounts',

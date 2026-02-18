@@ -216,6 +216,10 @@ const PartnerCreate = () => import('@/scripts/admin/views/partners/Create.vue')
 const PartnerView = () => import('@/scripts/admin/views/partners/View.vue')
 const NetworkGraph = () => import('@/scripts/admin/views/partners/NetworkGraph.vue')
 
+// Payouts (Super Admin)
+const PayoutIndex = () => import('@/scripts/admin/views/payouts/Index.vue')
+const PayoutView = () => import('@/scripts/admin/views/payouts/View.vue')
+
 // Company Deadlines
 const CompanyDeadlines = () => import('@/scripts/admin/views/deadlines/CompanyDeadlines.vue')
 
@@ -1049,6 +1053,20 @@ export default [
         name: 'partners.network',
         meta: { requiresSuperAdmin: true },
         component: NetworkGraph,
+      },
+
+      // Payouts (Super Admin)
+      {
+        path: 'payouts',
+        name: 'payouts.index',
+        meta: { requiresSuperAdmin: true },
+        component: PayoutIndex,
+      },
+      {
+        path: 'payouts/:id/view',
+        name: 'payouts.view',
+        meta: { requiresSuperAdmin: true },
+        component: PayoutView,
       },
 
       // Partner Accounting (PAF-04, PAF-05, PAF-09)
