@@ -83,17 +83,15 @@ class UsageLimitServiceTest extends TestCase
     public function it_can_check_if_company_can_use_feature_within_limits()
     {
         $company = Company::factory()->create();
-        // Free tier has 5 expenses per month
+        // Free tier has 2 expenses per month
         CompanySubscription::factory()->create([
             'company_id' => $company->id,
             'plan' => 'free',
             'status' => 'active',
         ]);
 
-        // Add 4 expenses
-        for ($i = 0; $i < 4; $i++) {
-            $this->service->incrementUsage($company, 'expenses_per_month');
-        }
+        // Add 1 expense (under limit of 2)
+        $this->service->incrementUsage($company, 'expenses_per_month');
 
         $canUse = $this->service->canUse($company, 'expenses_per_month');
 
@@ -104,15 +102,15 @@ class UsageLimitServiceTest extends TestCase
     public function it_returns_false_when_limit_is_exceeded()
     {
         $company = Company::factory()->create();
-        // Free tier has 5 expenses per month
+        // Free tier has 2 expenses per month
         CompanySubscription::factory()->create([
             'company_id' => $company->id,
             'plan' => 'free',
             'status' => 'active',
         ]);
 
-        // Add 5 expenses (at limit)
-        for ($i = 0; $i < 5; $i++) {
+        // Add 2 expenses (at limit)
+        for ($i = 0; $i < 2; $i++) {
             $this->service->incrementUsage($company, 'expenses_per_month');
         }
 
@@ -155,16 +153,14 @@ class UsageLimitServiceTest extends TestCase
             'status' => 'active',
         ]);
 
-        // Add 3 expenses (limit is 5)
-        for ($i = 0; $i < 3; $i++) {
-            $this->service->incrementUsage($company, 'expenses_per_month');
-        }
+        // Add 1 expense (limit is 2)
+        $this->service->incrementUsage($company, 'expenses_per_month');
 
         $usage = $this->service->getUsage($company, 'expenses_per_month');
 
-        $this->assertEquals(3, $usage['used']);
-        $this->assertEquals(5, $usage['limit']);
-        $this->assertEquals(2, $usage['remaining']);
+        $this->assertEquals(1, $usage['used']);
+        $this->assertEquals(2, $usage['limit']);
+        $this->assertEquals(1, $usage['remaining']);
     }
 
     /** @test */
@@ -177,15 +173,15 @@ class UsageLimitServiceTest extends TestCase
             'status' => 'active',
         ]);
 
-        // Create 2 custom fields (limit is 2 on free)
-        CustomField::factory()->count(2)->create([
+        // Create 1 custom field (limit is 1 on free)
+        CustomField::factory()->count(1)->create([
             'company_id' => $company->id,
         ]);
 
         $usage = $this->service->getUsage($company, 'custom_fields');
 
-        $this->assertEquals(2, $usage['used']);
-        $this->assertEquals(2, $usage['limit']);
+        $this->assertEquals(1, $usage['used']);
+        $this->assertEquals(1, $usage['limit']);
         $this->assertEquals(0, $usage['remaining']);
     }
 
@@ -193,9 +189,10 @@ class UsageLimitServiceTest extends TestCase
     public function it_counts_active_recurring_invoices_from_database()
     {
         $company = Company::factory()->create();
+        // Starter tier has 3 recurring invoices (free has 0)
         CompanySubscription::factory()->create([
             'company_id' => $company->id,
-            'plan' => 'free',
+            'plan' => 'starter',
             'status' => 'active',
         ]);
 
@@ -208,8 +205,8 @@ class UsageLimitServiceTest extends TestCase
         $usage = $this->service->getUsage($company, 'recurring_invoices_active');
 
         $this->assertEquals(1, $usage['used']);
-        $this->assertEquals(1, $usage['limit']);
-        $this->assertEquals(0, $usage['remaining']);
+        $this->assertEquals(3, $usage['limit']);
+        $this->assertEquals(2, $usage['remaining']);
     }
 
     /** @test */
