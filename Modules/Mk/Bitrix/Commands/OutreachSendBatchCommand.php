@@ -107,13 +107,21 @@ class OutreachSendBatchCommand extends Command
         HubSpotService $hubSpotService
     ): int {
         $this->hubSpotService = $hubSpotService;
-        $this->dailyLimit = config('bitrix.outreach.daily_limit', 100);
-        $this->hourlyLimit = config('bitrix.outreach.hourly_limit', 20);
 
         $limit = (int) $this->option('limit');
         $dryRun = $this->option('dry-run');
         $forcedTemplate = $this->option('template');
         $leadType = $this->option('type');
+
+        // Use separate rate limits per lead type so accountant (outreach stream)
+        // and company (broadcast stream) can run in parallel
+        if ($leadType === OutreachLead::TYPE_COMPANY) {
+            $this->dailyLimit = (int) config('bitrix.outreach.company_daily_limit', 5000);
+            $this->hourlyLimit = (int) config('bitrix.outreach.company_hourly_limit', 600);
+        } else {
+            $this->dailyLimit = (int) config('bitrix.outreach.daily_limit', 100);
+            $this->hourlyLimit = (int) config('bitrix.outreach.hourly_limit', 20);
+        }
 
         $this->info('Outreach Batch Send');
         $this->line('===================');
@@ -143,9 +151,15 @@ class OutreachSendBatchCommand extends Command
             return self::FAILURE;
         }
 
-        // Step 1: Check throttle limits
-        $dailyCount = OutreachSend::where('sent_at', '>=', now()->startOfDay())->count();
-        $hourlyCount = OutreachSend::where('sent_at', '>=', now()->subHour())->count();
+        // Step 1: Check throttle limits (per type to allow parallel streams)
+        $sendQuery = OutreachSend::query();
+        if ($leadType === OutreachLead::TYPE_COMPANY) {
+            $sendQuery->where('template_key', 'LIKE', 'company_%');
+        } elseif ($leadType === OutreachLead::TYPE_ACCOUNTANT) {
+            $sendQuery->where('template_key', 'NOT LIKE', 'company_%');
+        }
+        $dailyCount = (clone $sendQuery)->where('sent_at', '>=', now()->startOfDay())->count();
+        $hourlyCount = (clone $sendQuery)->where('sent_at', '>=', now()->subHour())->count();
 
         $this->displayQuotaStatus($dailyCount, $hourlyCount);
 

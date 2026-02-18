@@ -33,6 +33,8 @@ return [
     'outreach' => [
         'daily_limit' => (int) env('OUTREACH_DAILY_LIMIT', 100),
         'hourly_limit' => (int) env('OUTREACH_HOURLY_LIMIT', 20),
+        'company_daily_limit' => (int) env('OUTREACH_COMPANY_DAILY_LIMIT', 5000),
+        'company_hourly_limit' => (int) env('OUTREACH_COMPANY_HOURLY_LIMIT', 600),
     ],
 
     /*

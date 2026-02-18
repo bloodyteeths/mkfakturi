@@ -142,11 +142,11 @@ if (InstallUtils::isDbCreated()) {
         ->name('outreach-batch-accountant')
         ->withoutOverlapping();
 
-    // Outreach email batch send - company leads
-    // Runs every 15 minutes during business hours, separate from accountant batch
-    Schedule::command('outreach:send-batch --limit=30 --type=company')
+    // Outreach email batch send - company leads (broadcast stream, separate limits)
+    // 5000/day target: ~139 per batch, 600/hour, runs parallel with accountant batch
+    Schedule::command('outreach:send-batch --limit=150 --type=company')
         ->everyFifteenMinutes()
-        ->between('08:00', '18:00')
+        ->between('08:00', '17:00')
         ->weekdays()
         ->timezone('Europe/Skopje')
         ->runInBackground()

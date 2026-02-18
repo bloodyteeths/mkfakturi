@@ -129,13 +129,13 @@ class PostmarkOutreachService
             $mailable->locale('mk');
 
             // Send via Laravel Mail (uses Postmark driver)
-            // Note: stream header set via withSymfonyMessage inline to avoid
-            // closure serialization issues with ShouldQueue mailables
-            $streamOutreach = $this->streamOutreach;
-            $mailable->withSymfonyMessage(function ($message) use ($streamOutreach) {
+            // Company emails → broadcast stream, accountant emails → outreach stream
+            $isCompanyTemplate = str_starts_with($templateKey, 'company_');
+            $stream = $isCompanyTemplate ? 'broadcast' : $this->streamOutreach;
+            $mailable->withSymfonyMessage(function ($message) use ($stream) {
                 $message->getHeaders()->addTextHeader(
                     'X-PM-Message-Stream',
-                    $streamOutreach
+                    $stream
                 );
             });
 
