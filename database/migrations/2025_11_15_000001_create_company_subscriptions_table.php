@@ -34,7 +34,7 @@ return new class extends Migration
                 ->index('idx_company_subscriptions_plan');
 
             // Payment provider details
-            $table->enum('provider', ['paddle', 'cpay'])
+            $table->enum('provider', ['paddle', 'cpay', 'stripe'])
                 ->nullable()
                 ->index('idx_company_subscriptions_provider');
 

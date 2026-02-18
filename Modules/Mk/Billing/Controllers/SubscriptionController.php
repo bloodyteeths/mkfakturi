@@ -4,6 +4,7 @@ namespace Modules\Mk\Billing\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\CompanySubscription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -132,7 +133,18 @@ class SubscriptionController extends Controller
             // Create Stripe Checkout Session
             $session = StripeCheckoutSession::create([
                 'customer' => $stripeCustomerId,
-                'payment_method_types' => ['card'],
+                'payment_method_types' => ['card', 'customer_balance'],
+                'payment_method_options' => [
+                    'customer_balance' => [
+                        'funding_type' => 'bank_transfer',
+                        'bank_transfer' => [
+                            'type' => 'eu_bank_transfer',
+                            'eu_bank_transfer' => [
+                                'country' => 'NL', // Stripe requires EU country for bank transfer
+                            ],
+                        ],
+                    ],
+                ],
                 'line_items' => [[
                     'price' => $priceId,
                     'quantity' => 1,
@@ -187,8 +199,11 @@ class SubscriptionController extends Controller
     {
         $company = Company::findOrFail($companyId);
 
-        // Reload subscription data
-        $subscription = $company->subscription('default');
+        // Reload subscription data from CompanySubscription
+        $subscription = CompanySubscription::where('company_id', $company->id)
+            ->whereIn('status', ['trial', 'active'])
+            ->latest()
+            ->first();
 
         return response()->json([
             'message' => 'Subscription activated successfully!',
@@ -259,16 +274,20 @@ class SubscriptionController extends Controller
         // Check authorization
         $this->authorize('manage-billing', $company);
 
-        $subscription = $company->subscription('default');
+        // Find active Stripe subscription
+        $companySub = CompanySubscription::where('company_id', $company->id)
+            ->where('provider', 'stripe')
+            ->whereIn('status', ['trial', 'active'])
+            ->first();
 
-        if (! $subscription || ! $subscription->valid()) {
+        if (! $companySub || ! $companySub->provider_subscription_id) {
             return response()->json([
-                'error' => 'No active subscription to modify',
+                'error' => 'No active Stripe subscription to modify',
             ], 400);
         }
 
         $newTier = $request->input('tier');
-        $newPriceId = config("services.paddle.prices.{$newTier}");
+        $newPriceId = config("services.stripe.prices.{$newTier}.monthly");
 
         if (! $newPriceId) {
             return response()->json([
@@ -277,13 +296,28 @@ class SubscriptionController extends Controller
         }
 
         try {
-            // Swap the plan
-            $subscription->swap($newPriceId);
+            Stripe::setApiKey(config('services.stripe.secret'));
 
-            // Update company tier
-            $company->update([
-                'subscription_tier' => $newTier,
+            // Retrieve Stripe subscription and swap the price
+            $stripeSub = StripeSubscription::retrieve($companySub->provider_subscription_id);
+            StripeSubscription::update($stripeSub->id, [
+                'items' => [[
+                    'id' => $stripeSub->items->data[0]->id,
+                    'price' => $newPriceId,
+                ]],
+                'proration_behavior' => 'create_prorations',
+                'metadata' => [
+                    'company_id' => $company->id,
+                    'tier' => $newTier,
+                ],
             ]);
+
+            // Update local records
+            $companySub->update([
+                'plan' => $newTier,
+                'price_monthly' => self::TIERS[$newTier]['price'] ?? 0,
+            ]);
+            $company->update(['subscription_tier' => $newTier]);
 
             Log::info('Subscription plan swapped', [
                 'company_id' => $companyId,
@@ -318,16 +352,23 @@ class SubscriptionController extends Controller
         // Check authorization
         $this->authorize('manage-billing', $company);
 
-        $subscription = $company->subscription('default');
+        $companySub = CompanySubscription::where('company_id', $company->id)
+            ->where('provider', 'stripe')
+            ->whereIn('status', ['trial', 'active'])
+            ->first();
 
-        if (! $subscription || ! $subscription->valid()) {
+        if (! $companySub || ! $companySub->provider_subscription_id) {
             return response()->json([
                 'error' => 'No active subscription to cancel',
             ], 400);
         }
 
         try {
-            $subscription->cancel();
+            // Cancel on Stripe (at period end so access continues)
+            Stripe::setApiKey(config('services.stripe.secret'));
+            StripeSubscription::update($companySub->provider_subscription_id, [
+                'cancel_at_period_end' => true,
+            ]);
 
             Log::info('Subscription cancelled', [
                 'company_id' => $companyId,
@@ -336,7 +377,6 @@ class SubscriptionController extends Controller
 
             return response()->json([
                 'message' => 'Subscription cancelled. Access will continue until the end of the billing period.',
-                'ends_at' => $subscription->ends_at,
             ]);
 
         } catch (\Exception $e) {
@@ -361,16 +401,25 @@ class SubscriptionController extends Controller
         // Check authorization
         $this->authorize('manage-billing', $company);
 
-        $subscription = $company->subscription('default');
+        $companySub = CompanySubscription::where('company_id', $company->id)
+            ->where('provider', 'stripe')
+            ->first();
 
-        if (! $subscription || ! $subscription->onGracePeriod()) {
+        if (! $companySub || ! $companySub->provider_subscription_id) {
             return response()->json([
                 'error' => 'No subscription to resume',
             ], 400);
         }
 
         try {
-            $subscription->resume();
+            // Resume on Stripe (remove cancel_at_period_end)
+            Stripe::setApiKey(config('services.stripe.secret'));
+            StripeSubscription::update($companySub->provider_subscription_id, [
+                'cancel_at_period_end' => false,
+            ]);
+
+            // Reactivate locally
+            $companySub->activate();
 
             Log::info('Subscription resumed', [
                 'company_id' => $companyId,

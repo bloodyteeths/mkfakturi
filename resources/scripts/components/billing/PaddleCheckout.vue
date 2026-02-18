@@ -3,11 +3,11 @@
     <BasePageHeader title="Choose Your Plan">
       <template #actions>
         <BaseButton
-          v-if="currentSubscription"
+          v-if="currentTier && currentTier !== 'free'"
           variant="white"
-          @click="$router.push({ name: 'billing.index' })"
+          @click="openBillingPortal"
         >
-          View Current Subscription
+          Manage Subscription
         </BaseButton>
       </template>
     </BasePageHeader>
@@ -187,16 +187,17 @@
         All plans include a 14-day free trial. No credit card required to start.
       </p>
       <p class="text-sm text-gray-600 mt-2">
-        Prices are in EUR and billed monthly. Cancel anytime.
+        Prices are in EUR and billed monthly. Pay by card or bank transfer. Cancel anytime.
       </p>
     </div>
   </BasePage>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { CheckIcon } from '@heroicons/vue/24/solid'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
 import axios from 'axios'
 
 // Import base components
@@ -209,55 +210,30 @@ import BaseAlert from '@/scripts/components/base/BaseAlert.vue'
 import BaseSpinner from '@/scripts/components/base/BaseSpinner.vue'
 
 const router = useRouter()
+const companyStore = useCompanyStore()
 const isLoading = ref(true)
 const isProcessing = ref(false)
 const error = ref(null)
-const currentSubscription = ref(null)
-const paddleInstance = ref(null)
+const currentTier = ref('free')
 
-// Paddle configuration from environment
-const paddleClientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN
-const paddleSandbox = import.meta.env.VITE_PADDLE_SANDBOX === 'true'
-
-// Initialize Paddle.js
-const initializePaddle = async () => {
-  try {
-    // Load Paddle.js SDK dynamically
-    if (!window.Paddle) {
-      const script = document.createElement('script')
-      script.src = paddleSandbox
-        ? 'https://cdn.paddle.com/paddle/v2/paddle.js'
-        : 'https://cdn.paddle.com/paddle/v2/paddle.js'
-      script.async = true
-
-      await new Promise((resolve, reject) => {
-        script.onload = resolve
-        script.onerror = reject
-        document.head.appendChild(script)
-      })
-    }
-
-    // Initialize Paddle
-    if (window.Paddle) {
-      window.Paddle.Environment.set(paddleSandbox ? 'sandbox' : 'production')
-      window.Paddle.Initialize({
-        token: paddleClientToken,
-      })
-      paddleInstance.value = window.Paddle
-    }
-  } catch (err) {
-    console.error('Failed to initialize Paddle:', err)
-    error.value = 'Failed to load payment system. Please refresh the page.'
-  }
+// Get company ID from store
+const getCompanyId = () => {
+  return companyStore.selectedCompany?.id || window.Ls.get('selectedCompany')
 }
 
-// Fetch current subscription
+// Fetch current subscription from Stripe endpoint
 const fetchCurrentSubscription = async () => {
   try {
-    const response = await axios.get('/api/billing/subscription')
-    currentSubscription.value = response.data.data
+    const companyId = getCompanyId()
+    if (!companyId) {
+      isLoading.value = false
+      return
+    }
+
+    const response = await axios.get(`/api/v1/companies/${companyId}/subscription`)
+    currentTier.value = response.data.current_plan?.tier || 'free'
   } catch (err) {
-    // User might not have a subscription yet, which is fine
+    // User might not have a subscription yet
     if (err.response?.status !== 404) {
       console.error('Failed to fetch subscription:', err)
     }
@@ -268,10 +244,10 @@ const fetchCurrentSubscription = async () => {
 
 // Check if plan is current
 const isCurrentPlan = (plan) => {
-  return currentSubscription.value?.plan_name?.toLowerCase() === plan.toLowerCase()
+  return currentTier.value === plan
 }
 
-// Handle subscribe button click
+// Handle subscribe — redirect to Stripe Checkout
 const handleSubscribe = async (plan) => {
   if (isProcessing.value) return
 
@@ -279,34 +255,38 @@ const handleSubscribe = async (plan) => {
   error.value = null
 
   try {
-    // Call backend to create checkout session
-    const response = await axios.post('/api/billing/checkout', { plan })
-    const { checkout_url } = response.data
-
-    if (!paddleInstance.value) {
-      throw new Error('Paddle is not initialized')
+    const companyId = getCompanyId()
+    if (!companyId) {
+      throw new Error('No company selected')
     }
 
-    // Open Paddle checkout overlay
-    paddleInstance.value.Checkout.open({
-      transactionId: checkout_url,
-      successCallback: (data) => {
-        // Redirect to success page
-        router.push({ name: 'billing.success' })
-      },
-      closeCallback: () => {
-        isProcessing.value = false
-      },
-    })
+    const response = await axios.post(
+      `/api/v1/companies/${companyId}/subscription/checkout`,
+      { tier: plan, interval: 'monthly' }
+    )
+
+    // Stripe returns a checkout_url — redirect to hosted checkout
+    window.location.href = response.data.checkout_url
   } catch (err) {
     console.error('Checkout error:', err)
-    error.value = err.response?.data?.message || 'Failed to start checkout. Please try again.'
+    error.value = err.response?.data?.error || 'Failed to start checkout. Please try again.'
     isProcessing.value = false
   }
 }
 
+// Open Stripe Billing Portal for managing subscription
+const openBillingPortal = async () => {
+  try {
+    const companyId = getCompanyId()
+    const response = await axios.get(`/api/v1/companies/${companyId}/subscription/manage`)
+    window.location.href = response.data.portal_url
+  } catch (err) {
+    console.error('Billing portal error:', err)
+    error.value = 'Failed to open billing portal.'
+  }
+}
+
 onMounted(async () => {
-  await initializePaddle()
   await fetchCurrentSubscription()
 })
 </script>

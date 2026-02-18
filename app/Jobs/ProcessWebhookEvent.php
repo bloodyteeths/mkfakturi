@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\BankTransaction;
 use App\Models\Company;
+use App\Models\CompanySubscription;
 use App\Models\GatewayWebhookEvent;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -298,6 +299,8 @@ class ProcessWebhookEvent implements ShouldQueue
             'payment_intent.succeeded' => $this->handleStripePaymentSucceeded($payload),
             'payment_intent.payment_failed' => $this->handleStripePaymentFailed($payload),
             'checkout.session.completed' => $this->handleStripeCheckoutCompleted($payload),
+            'customer.subscription.updated' => $this->handleStripeSubscriptionUpdated($payload),
+            'customer.subscription.deleted' => $this->handleStripeSubscriptionDeleted($payload),
             'invoice.paid' => $this->handleStripeInvoicePaid($payload),
             'invoice.payment_failed' => $this->handleStripeInvoicePaymentFailed($payload),
             'charge.succeeded' => $this->handleStripeChargeSucceeded($payload),
@@ -380,7 +383,41 @@ class ProcessWebhookEvent implements ShouldQueue
             $this->processCompanyReferralReward((int) $metadata['company_referral_id']);
         }
 
-        // Payment handling will be done by payment_intent.succeeded event
+        // Create/update subscription record and activate company tier
+        $companyId = $metadata['company_id'] ?? null;
+        $tier = $metadata['tier'] ?? null;
+        $subscriptionId = $session['subscription'] ?? null;
+
+        if ($companyId && $tier) {
+            $company = Company::find($companyId);
+            if ($company) {
+                // Determine status: if subscription has a trial, mark as trial
+                $status = ! empty($session['subscription_data']['trial_period_days']) ? 'trial' : 'active';
+
+                // Create or update CompanySubscription
+                CompanySubscription::updateOrCreate(
+                    ['company_id' => $company->id, 'provider' => 'stripe'],
+                    [
+                        'plan' => $tier,
+                        'provider_subscription_id' => $subscriptionId,
+                        'price_monthly' => $this->getTierPrice($tier),
+                        'status' => $status,
+                        'started_at' => now(),
+                        'trial_ends_at' => $status === 'trial' ? now()->addDays(14) : null,
+                    ]
+                );
+
+                // Update company tier
+                $company->update(['subscription_tier' => $tier]);
+
+                Log::info('Stripe subscription activated', [
+                    'company_id' => $companyId,
+                    'tier' => $tier,
+                    'subscription_id' => $subscriptionId,
+                    'status' => $status,
+                ]);
+            }
+        }
     }
 
     /**
@@ -434,6 +471,139 @@ class ProcessWebhookEvent implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Handle Stripe customer.subscription.updated event
+     */
+    protected function handleStripeSubscriptionUpdated(array $payload): void
+    {
+        $subscription = $payload['data']['object'] ?? [];
+        $metadata = $subscription['metadata'] ?? [];
+        $companyId = $metadata['company_id'] ?? null;
+        $stripeStatus = $subscription['status'] ?? null;
+        $subscriptionId = $subscription['id'] ?? null;
+
+        Log::info('Stripe subscription updated', [
+            'subscription_id' => $subscriptionId,
+            'status' => $stripeStatus,
+            'company_id' => $companyId,
+        ]);
+
+        if (! $subscriptionId) {
+            return;
+        }
+
+        // Find the local subscription record
+        $companySub = CompanySubscription::where('provider_subscription_id', $subscriptionId)
+            ->where('provider', 'stripe')
+            ->first();
+
+        if (! $companySub) {
+            Log::warning('Stripe subscription not found locally', ['subscription_id' => $subscriptionId]);
+
+            return;
+        }
+
+        $company = $companySub->company;
+
+        // Handle status changes
+        match ($stripeStatus) {
+            'active' => $companySub->activate(),
+            'past_due' => $companySub->markPastDue(),
+            'canceled', 'unpaid' => $this->downgradeSubscription($companySub, $company),
+            default => null,
+        };
+
+        // Handle plan/price changes (upgrade/downgrade via Stripe portal)
+        $newPriceId = $subscription['items']['data'][0]['price']['id'] ?? null;
+        if ($newPriceId) {
+            $newTier = $this->tierFromStripePriceId($newPriceId);
+            if ($newTier && $newTier !== $companySub->plan) {
+                $companySub->update([
+                    'plan' => $newTier,
+                    'price_monthly' => $this->getTierPrice($newTier),
+                ]);
+                $company?->update(['subscription_tier' => $newTier]);
+
+                Log::info('Stripe subscription plan changed', [
+                    'company_id' => $company?->id,
+                    'old_plan' => $companySub->getOriginal('plan'),
+                    'new_plan' => $newTier,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Handle Stripe customer.subscription.deleted event
+     */
+    protected function handleStripeSubscriptionDeleted(array $payload): void
+    {
+        $subscription = $payload['data']['object'] ?? [];
+        $subscriptionId = $subscription['id'] ?? null;
+
+        Log::info('Stripe subscription deleted', ['subscription_id' => $subscriptionId]);
+
+        if (! $subscriptionId) {
+            return;
+        }
+
+        $companySub = CompanySubscription::where('provider_subscription_id', $subscriptionId)
+            ->where('provider', 'stripe')
+            ->first();
+
+        if (! $companySub) {
+            return;
+        }
+
+        $this->downgradeSubscription($companySub, $companySub->company);
+    }
+
+    /**
+     * Downgrade a subscription to free tier
+     */
+    protected function downgradeSubscription(CompanySubscription $subscription, ?Company $company): void
+    {
+        $subscription->cancel();
+
+        if ($company) {
+            $company->update(['subscription_tier' => 'free']);
+
+            Log::info('Company downgraded to free tier', ['company_id' => $company->id]);
+        }
+    }
+
+    /**
+     * Get tier price from tier name
+     */
+    protected function getTierPrice(string $tier): float
+    {
+        return match ($tier) {
+            'starter' => 12,
+            'standard' => 29,
+            'business' => 59,
+            'max' => 149,
+            default => 0,
+        };
+    }
+
+    /**
+     * Resolve tier name from Stripe price ID
+     */
+    protected function tierFromStripePriceId(string $priceId): ?string
+    {
+        $prices = config('services.stripe.prices', []);
+
+        foreach ($prices as $tier => $intervals) {
+            foreach ($intervals as $priceValue) {
+                if ($priceValue === $priceId) {
+                    return $tier;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -548,11 +718,28 @@ class ProcessWebhookEvent implements ShouldQueue
     protected function handleStripeInvoicePaymentFailed(array $payload): void
     {
         $invoice = $payload['data']['object'] ?? [];
+        $subscriptionId = $invoice['subscription'] ?? null;
 
         Log::warning('Stripe invoice payment failed', [
             'invoice_id' => $invoice['id'] ?? null,
-            'subscription_id' => $invoice['subscription'] ?? null,
+            'subscription_id' => $subscriptionId,
         ]);
+
+        // Mark local subscription as past_due
+        if ($subscriptionId) {
+            $companySub = CompanySubscription::where('provider_subscription_id', $subscriptionId)
+                ->where('provider', 'stripe')
+                ->first();
+
+            if ($companySub) {
+                $companySub->markPastDue();
+
+                Log::info('Stripe subscription marked past_due', [
+                    'company_id' => $companySub->company_id,
+                    'subscription_id' => $subscriptionId,
+                ]);
+            }
+        }
     }
 
     /**

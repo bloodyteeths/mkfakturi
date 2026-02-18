@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('outreach_leads', 'lead_type')) {
+        if (Schema::hasTable('outreach_leads') && !Schema::hasColumn('outreach_leads', 'lead_type')) {
             Schema::table('outreach_leads', function (Blueprint $table) {
                 $table->string('lead_type', 20)->default('company')->after('source_url');
                 $table->string('sector', 50)->nullable()->after('lead_type');
@@ -39,7 +39,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (Schema::hasColumn('outreach_leads', 'lead_type')) {
+        if (Schema::hasTable('outreach_leads') && Schema::hasColumn('outreach_leads', 'lead_type')) {
             Schema::table('outreach_leads', function (Blueprint $table) {
                 $table->dropIndex(['lead_type']);
                 $table->dropIndex(['sector']);

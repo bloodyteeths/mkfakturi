@@ -6,6 +6,10 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Modules\Mk\Services\CpayDriver;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeCheckoutSession;
+use Stripe\Customer as StripeCustomer;
+use Stripe\Subscription as StripeSubscription;
 
 /**
  * Unified Subscription Service
@@ -51,7 +55,7 @@ class SubscriptionService
         }
 
         // Validate provider
-        if (! in_array($provider, ['paddle', 'cpay'])) {
+        if (! in_array($provider, ['paddle', 'cpay', 'stripe'])) {
             throw new \InvalidArgumentException("Invalid payment provider: {$provider}");
         }
 
@@ -66,6 +70,8 @@ class SubscriptionService
 
         if ($provider === 'paddle') {
             return $this->createPaddleSubscription($company, $tier, $monthlyPrice);
+        } elseif ($provider === 'stripe') {
+            return $this->createStripeSubscription($company, $tier, $monthlyPrice);
         } else {
             return $this->createCpaySubscription($company, $tier, $monthlyPrice);
         }
@@ -120,6 +126,8 @@ class SubscriptionService
 
         if ($provider === 'paddle') {
             return $this->swapPaddlePlan($subscription, $newTier);
+        } elseif ($provider === 'stripe') {
+            return $this->swapStripePlan($subscription, $newTier);
         } elseif ($provider === 'cpay') {
             return $this->swapCpayPlan($subscription, $newTier);
         }
@@ -152,6 +160,9 @@ class SubscriptionService
             ]);
 
             return true;
+
+        } elseif ($provider === 'stripe') {
+            return $this->cancelStripeSubscription($subscription);
 
         } elseif ($provider === 'cpay') {
             // Extract CPAY subscription reference from metadata
@@ -293,6 +304,128 @@ class SubscriptionService
         // For CPAY, we need to cancel the old subscription and create a new one
         // This is a simplified approach - actual implementation may vary
         throw new \Exception('CPAY plan swapping not yet implemented. Please cancel and create a new subscription.');
+    }
+
+    /**
+     * Create Stripe subscription checkout session for company
+     */
+    private function createStripeSubscription(Company $company, string $tier, float $monthlyPrice): array
+    {
+        $interval = 'monthly';
+        $priceId = config("services.stripe.prices.{$tier}.{$interval}");
+
+        if (! $priceId) {
+            throw new \Exception("Stripe price ID not configured for tier: {$tier}");
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        // Create or retrieve Stripe customer
+        if (! $company->stripe_id) {
+            $customer = StripeCustomer::create([
+                'name' => $company->name,
+                'email' => $company->owner->email ?? auth()->user()->email,
+                'metadata' => ['company_id' => $company->id],
+            ]);
+            $company->update(['stripe_id' => $customer->id]);
+        }
+
+        $successUrl = url('/admin/billing/success').'?session_id={CHECKOUT_SESSION_ID}';
+        $cancelUrl = url('/admin/pricing');
+
+        $session = StripeCheckoutSession::create([
+            'customer' => $company->stripe_id,
+            'payment_method_types' => ['card', 'customer_balance'],
+            'payment_method_options' => [
+                'customer_balance' => [
+                    'funding_type' => 'bank_transfer',
+                    'bank_transfer' => [
+                        'type' => 'eu_bank_transfer',
+                        'eu_bank_transfer' => ['country' => 'NL'],
+                    ],
+                ],
+            ],
+            'line_items' => [['price' => $priceId, 'quantity' => 1]],
+            'mode' => 'subscription',
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'subscription_data' => [
+                'trial_period_days' => 14,
+                'metadata' => ['company_id' => $company->id, 'tier' => $tier],
+            ],
+            'metadata' => ['company_id' => $company->id, 'tier' => $tier],
+            'allow_promotion_codes' => true,
+        ]);
+
+        return [
+            'provider' => 'stripe',
+            'checkout_url' => $session->url,
+            'session_id' => $session->id,
+        ];
+    }
+
+    /**
+     * Swap Stripe subscription plan
+     */
+    private function swapStripePlan($subscription, string $newTier): bool
+    {
+        $newPriceId = config("services.stripe.prices.{$newTier}.monthly");
+
+        if (! $newPriceId) {
+            throw new \Exception("Stripe price ID not configured for tier: {$newTier}");
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        $providerSubId = $subscription->provider_subscription_id ?? null;
+        if (! $providerSubId) {
+            throw new \Exception('Stripe subscription ID not found');
+        }
+
+        $stripeSub = StripeSubscription::retrieve($providerSubId);
+        StripeSubscription::update($stripeSub->id, [
+            'items' => [[
+                'id' => $stripeSub->items->data[0]->id,
+                'price' => $newPriceId,
+            ]],
+            'proration_behavior' => 'create_prorations',
+            'metadata' => ['tier' => $newTier],
+        ]);
+
+        // Update local records
+        if ($subscription->billable instanceof Company) {
+            $subscription->billable->update(['subscription_tier' => $newTier]);
+        }
+
+        Log::info('Stripe subscription plan swapped', [
+            'subscription_id' => $providerSubId,
+            'new_tier' => $newTier,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Cancel Stripe subscription
+     */
+    private function cancelStripeSubscription($subscription): bool
+    {
+        $providerSubId = $subscription->provider_subscription_id ?? null;
+        if (! $providerSubId) {
+            throw new \Exception('Stripe subscription ID not found');
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        StripeSubscription::update($providerSubId, [
+            'cancel_at_period_end' => true,
+        ]);
+
+        Log::info('Stripe subscription cancelled', [
+            'subscription_id' => $providerSubId,
+        ]);
+
+        return true;
     }
 
     /**
