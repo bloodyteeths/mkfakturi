@@ -133,12 +133,6 @@ class ProcessWebhookEvent implements ShouldQueue
         ]);
 
         Log::info("Paddle payment created for invoice {$invoiceId}");
-
-        ClawdNotifier::push('payment_success', [
-            'provider' => 'paddle',
-            'invoice_id' => $invoiceId,
-            'amount' => $net,
-        ]);
     }
 
     /**
@@ -151,11 +145,6 @@ class ProcessWebhookEvent implements ShouldQueue
         if ($invoiceId) {
             Log::warning("Paddle payment failed for invoice {$invoiceId}");
         }
-
-        ClawdNotifier::push('payment_failed', [
-            'provider' => 'paddle',
-            'invoice_id' => $invoiceId,
-        ]);
     }
 
     /**
@@ -172,10 +161,6 @@ class ProcessWebhookEvent implements ShouldQueue
     protected function handlePaddleSubscriptionCancelled(array $payload): void
     {
         Log::info('Paddle subscription cancelled', ['payload' => $payload]);
-
-        ClawdNotifier::push('subscription_cancelled', [
-            'provider' => 'paddle',
-        ]);
     }
 
     /**
@@ -315,6 +300,7 @@ class ProcessWebhookEvent implements ShouldQueue
             'payment_intent.succeeded' => $this->handleStripePaymentSucceeded($payload),
             'payment_intent.payment_failed' => $this->handleStripePaymentFailed($payload),
             'checkout.session.completed' => $this->handleStripeCheckoutCompleted($payload),
+            'customer.subscription.created' => $this->handleStripeSubscriptionCreated($payload),
             'customer.subscription.updated' => $this->handleStripeSubscriptionUpdated($payload),
             'customer.subscription.deleted' => $this->handleStripeSubscriptionDeleted($payload),
             'invoice.paid' => $this->handleStripeInvoicePaid($payload),
@@ -361,12 +347,6 @@ class ProcessWebhookEvent implements ShouldQueue
                 ]);
 
                 Log::info("Stripe payment created for invoice {$invoiceId}");
-
-                ClawdNotifier::push('payment_success', [
-                    'provider' => 'stripe',
-                    'invoice_id' => $invoiceId,
-                    'amount' => $amount,
-                ]);
             }
         }
     }
@@ -383,11 +363,6 @@ class ProcessWebhookEvent implements ShouldQueue
             'payment_intent_id' => $paymentIntent['id'] ?? null,
             'error_code' => $error['code'] ?? 'unknown',
             'error_message' => $error['message'] ?? 'Unknown error',
-        ]);
-
-        ClawdNotifier::push('payment_failed', [
-            'provider' => 'stripe',
-            'error' => $error['message'] ?? 'Unknown error',
         ]);
     }
 
@@ -442,12 +417,6 @@ class ProcessWebhookEvent implements ShouldQueue
                     'tier' => $tier,
                     'subscription_id' => $subscriptionId,
                     'status' => $status,
-                ]);
-
-                ClawdNotifier::push('subscription_created', [
-                    'provider' => 'stripe',
-                    'company_id' => $companyId,
-                    'tier' => $tier,
                 ]);
             }
         }
@@ -504,6 +473,49 @@ class ProcessWebhookEvent implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Handle Stripe customer.subscription.created event
+     */
+    protected function handleStripeSubscriptionCreated(array $payload): void
+    {
+        $subscription = $payload['data']['object'] ?? [];
+        $metadata = $subscription['metadata'] ?? [];
+        $subscriptionId = $subscription['id'] ?? null;
+        $companyId = $metadata['company_id'] ?? null;
+
+        Log::info('Stripe subscription created', [
+            'subscription_id' => $subscriptionId,
+            'company_id' => $companyId,
+        ]);
+
+        // Resolve email and plan for Clawd notification
+        $email = null;
+        $plan = $metadata['tier'] ?? null;
+
+        if ($companyId) {
+            $company = Company::find($companyId);
+            $email = $company?->owner?->email;
+        }
+
+        // Fallback: try customer_email from subscription metadata or Stripe customer
+        if (! $email) {
+            $email = $subscription['customer_email'] ?? $metadata['email'] ?? null;
+        }
+
+        // Resolve plan from price ID if not in metadata
+        if (! $plan) {
+            $priceId = $subscription['items']['data'][0]['price']['id'] ?? null;
+            if ($priceId) {
+                $plan = $this->tierFromStripePriceId($priceId);
+            }
+        }
+
+        ClawdNotifier::push('new_subscription', [
+            'email' => $email,
+            'plan' => $plan,
+        ]);
     }
 
     /**
@@ -578,11 +590,6 @@ class ProcessWebhookEvent implements ShouldQueue
 
         Log::info('Stripe subscription deleted', ['subscription_id' => $subscriptionId]);
 
-        ClawdNotifier::push('subscription_cancelled', [
-            'provider' => 'stripe',
-            'subscription_id' => $subscriptionId,
-        ]);
-
         if (! $subscriptionId) {
             return;
         }
@@ -594,6 +601,15 @@ class ProcessWebhookEvent implements ShouldQueue
         if (! $companySub) {
             return;
         }
+
+        // Resolve email for Clawd notification
+        $email = $companySub->company?->owner?->email
+            ?? $subscription['customer_email']
+            ?? null;
+
+        ClawdNotifier::push('subscription_cancelled', [
+            'email' => $email,
+        ]);
 
         $this->downgradeSubscription($companySub, $companySub->company);
     }
@@ -654,10 +670,17 @@ class ProcessWebhookEvent implements ShouldQueue
         $subscriptionId = $invoice['subscription'] ?? null;
         $amountPaid = ($invoice['amount_paid'] ?? 0) / 100; // Stripe uses cents, convert to EUR
 
+        $customerEmail = $invoice['customer_email'] ?? null;
+
         Log::info('Stripe invoice paid', [
             'invoice_id' => $invoice['id'] ?? null,
             'subscription_id' => $subscriptionId,
             'amount_paid' => $amountPaid,
+        ]);
+
+        ClawdNotifier::push('payment_success', [
+            'email' => $customerEmail,
+            'amount' => $amountPaid,
         ]);
 
         // Skip if no subscription (one-time payment, not relevant for partner commissions)
@@ -757,6 +780,8 @@ class ProcessWebhookEvent implements ShouldQueue
     {
         $invoice = $payload['data']['object'] ?? [];
         $subscriptionId = $invoice['subscription'] ?? null;
+        $customerEmail = $invoice['customer_email'] ?? null;
+        $amountDue = ($invoice['amount_due'] ?? 0) / 100;
 
         Log::warning('Stripe invoice payment failed', [
             'invoice_id' => $invoice['id'] ?? null,
@@ -764,8 +789,8 @@ class ProcessWebhookEvent implements ShouldQueue
         ]);
 
         ClawdNotifier::push('payment_failed', [
-            'provider' => 'stripe',
-            'subscription_id' => $subscriptionId,
+            'email' => $customerEmail,
+            'amount' => $amountDue,
         ]);
 
         // Mark local subscription as past_due
