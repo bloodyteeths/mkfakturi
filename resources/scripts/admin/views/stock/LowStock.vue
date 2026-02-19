@@ -402,4 +402,3 @@ function exportToCsv() {
   link.click()
 }
 </script>
-// CLAUDE-CHECKPOINT

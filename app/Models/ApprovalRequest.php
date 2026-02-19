@@ -213,4 +213,3 @@ class ApprovalRequest extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

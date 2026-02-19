@@ -24,4 +24,3 @@ class GetCompanyMailConfigurationController extends Controller
         return response()->json($mailConfig);
     }
 }
-// CLAUDE-CHECKPOINT

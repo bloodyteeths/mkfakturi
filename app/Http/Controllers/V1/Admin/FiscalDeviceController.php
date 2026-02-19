@@ -358,4 +358,3 @@ class FiscalDeviceController extends Controller
         return response()->json($receipts);
     }
 }
-// CLAUDE-CHECKPOINT

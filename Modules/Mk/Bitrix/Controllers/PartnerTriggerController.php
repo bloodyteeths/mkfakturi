@@ -309,4 +309,3 @@ class PartnerTriggerController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

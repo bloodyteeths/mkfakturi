@@ -386,4 +386,3 @@ class TransactionFingerprintTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -364,6 +364,4 @@ class OpenAiProvider implements AiProviderInterface
     }
 }
 
-// CLAUDE-CHECKPOINT
 
-// CLAUDE-CHECKPOINT

@@ -144,4 +144,3 @@ class NotificationsController extends Controller
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $className));
     }
 }
-// CLAUDE-CHECKPOINT

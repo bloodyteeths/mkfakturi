@@ -56,4 +56,3 @@ class WarehouseFactory extends Factory
         });
     }
 }
-// CLAUDE-CHECKPOINT

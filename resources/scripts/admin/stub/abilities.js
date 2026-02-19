@@ -121,4 +121,3 @@ export default {
   VIEW_CLOSINGS: 'view-financial-reports', // View closings uses financial reports permission
   MANAGE_CLOSINGS: 'manage-closings', // Create/delete daily closings and period locks
 }
-// CLAUDE-CHECKPOINT

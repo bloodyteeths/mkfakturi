@@ -272,4 +272,3 @@ class ErpNetFpClient
         }
     }
 }
-// CLAUDE-CHECKPOINT

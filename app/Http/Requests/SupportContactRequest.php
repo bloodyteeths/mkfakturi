@@ -59,4 +59,3 @@ class SupportContactRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

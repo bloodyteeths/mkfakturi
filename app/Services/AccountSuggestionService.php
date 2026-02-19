@@ -1276,4 +1276,3 @@ class AccountSuggestionService
         return "account_suggestion_accuracy:{$companyId}:{$entityType}:{$reason}";
     }
 }
-// CLAUDE-CHECKPOINT

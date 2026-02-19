@@ -435,4 +435,3 @@ class McpController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

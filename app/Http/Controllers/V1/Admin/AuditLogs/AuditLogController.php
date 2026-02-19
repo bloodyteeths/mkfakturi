@@ -118,4 +118,3 @@ class AuditLogController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

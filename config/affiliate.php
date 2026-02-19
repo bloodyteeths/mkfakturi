@@ -218,4 +218,3 @@ return [
     'show_downline_info' => env('AFFILIATE_SHOW_DOWNLINE_INFO', true),
 ];
 
-// CLAUDE-CHECKPOINT

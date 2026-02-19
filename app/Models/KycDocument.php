@@ -147,4 +147,3 @@ class KycDocument extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

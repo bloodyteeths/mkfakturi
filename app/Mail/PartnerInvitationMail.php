@@ -46,4 +46,3 @@ class PartnerInvitationMail extends Mailable
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -117,4 +117,3 @@ class CheckInvoiceLimit
         return "{$paddleBaseUrl}/checkout?{$params}";
     }
 }
-// CLAUDE-CHECKPOINT

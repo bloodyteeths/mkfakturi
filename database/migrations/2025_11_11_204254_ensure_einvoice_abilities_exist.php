@@ -121,4 +121,3 @@ return new class extends Migration
         echo '  Note: E-invoice abilities are NOT removed to preserve permissions'.PHP_EOL;
     }
 };
-// CLAUDE-CHECKPOINT

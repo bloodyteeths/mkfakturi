@@ -323,7 +323,6 @@ class Company extends Model implements HasMedia
 
         return $this->subscription ? $this->subscription->plan : 'free';
     }
-    // CLAUDE-CHECKPOINT
 
     public function setupRoles()
     {

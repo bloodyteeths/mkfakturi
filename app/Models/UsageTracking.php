@@ -71,4 +71,3 @@ class UsageTracking extends Model
         return $this->period !== 'total' && preg_match('/^\d{4}-\d{2}$/', $this->period);
     }
 }
-// CLAUDE-CHECKPOINT

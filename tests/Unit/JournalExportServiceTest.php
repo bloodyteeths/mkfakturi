@@ -500,4 +500,3 @@ class JournalExportServiceTest extends TestCase
         $this->assertEquals($summary['total_debit'], $summary['total_credit']);
     }
 }
-// CLAUDE-CHECKPOINT

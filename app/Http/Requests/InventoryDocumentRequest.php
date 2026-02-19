@@ -69,4 +69,3 @@ class InventoryDocumentRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

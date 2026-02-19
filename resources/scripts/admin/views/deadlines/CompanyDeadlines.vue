@@ -511,4 +511,3 @@ onMounted(() => {
   loadDeadlines()
 })
 </script>
-// CLAUDE-CHECKPOINT

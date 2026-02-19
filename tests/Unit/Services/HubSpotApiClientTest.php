@@ -594,4 +594,3 @@ class HubSpotApiClientTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

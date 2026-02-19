@@ -343,4 +343,3 @@ class InvoiceImport implements SkipsOnFailure, ToModel, WithChunkReading, WithHe
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // CLAUDE-CHECKPOINT
         if (Schema::hasTable('unsubscribe_tokens')) {
             // Add missing columns if table exists
             Schema::table('unsubscribe_tokens', function (Blueprint $table) {

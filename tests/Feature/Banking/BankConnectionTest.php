@@ -279,4 +279,3 @@ class BankConnectionTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

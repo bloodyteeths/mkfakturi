@@ -100,4 +100,3 @@ class BackupList extends Command
         return $bytes.' bytes';
     }
 }
-// CLAUDE-CHECKPOINT

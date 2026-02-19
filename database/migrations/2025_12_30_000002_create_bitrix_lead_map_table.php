@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // CLAUDE-CHECKPOINT
         if (Schema::hasTable('bitrix_lead_map')) {
             return;
         }

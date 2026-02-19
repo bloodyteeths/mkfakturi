@@ -171,7 +171,6 @@ class EInvoiceController extends Controller
             'submissions' => $eInvoice->submissions->toArray(),
         ]);
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Generate UBL XML for an invoice (preview mode, doesn't save).
@@ -1036,5 +1035,3 @@ class EInvoiceController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT
-// CLAUDE-CHECKPOINT

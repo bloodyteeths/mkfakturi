@@ -116,4 +116,3 @@ class PeriodLock extends Model
         return $this->period_start->format('Y-m-d').' - '.$this->period_end->format('Y-m-d');
     }
 }
-// CLAUDE-CHECKPOINT

@@ -216,4 +216,3 @@ class OutreachSendOneCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

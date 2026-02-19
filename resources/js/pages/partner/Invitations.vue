@@ -321,4 +321,3 @@ function isExpiringSoon(expiresAt) {
 }
 </style>
 
-// CLAUDE-CHECKPOINT

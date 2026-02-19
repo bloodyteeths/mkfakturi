@@ -34,4 +34,3 @@ class DeleteProjectsRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

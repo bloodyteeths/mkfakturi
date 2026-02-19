@@ -117,4 +117,3 @@
 // Privacy Policy page - no logic needed
 </script>
 
-// CLAUDE-CHECKPOINT

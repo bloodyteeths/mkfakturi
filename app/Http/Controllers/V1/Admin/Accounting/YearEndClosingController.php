@@ -413,4 +413,3 @@ class YearEndClosingController extends Controller
         return $summary;
     }
 }
-// CLAUDE-CHECKPOINT

@@ -529,4 +529,3 @@ export default {
   @apply min-h-screen bg-gray-50;
 }
 </style>
-// CLAUDE-CHECKPOINT

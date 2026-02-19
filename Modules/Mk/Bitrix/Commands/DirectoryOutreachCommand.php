@@ -224,4 +224,3 @@ class DirectoryOutreachCommand extends Command
         return self::SUCCESS;
     }
 }
-// CLAUDE-CHECKPOINT

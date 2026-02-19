@@ -777,4 +777,3 @@ onMounted(() => {
   loadStatistics()
 })
 </script>
-// CLAUDE-CHECKPOINT

@@ -91,4 +91,3 @@ class PartnerCompany extends Pivot
         return $this->override_commission_rate ?? $this->partner->commission_rate;
     }
 }
-// CLAUDE-CHECKPOINT

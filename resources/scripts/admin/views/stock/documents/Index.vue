@@ -361,4 +361,3 @@ onMounted(() => {
   fetchDocuments()
 })
 </script>
-// CLAUDE-CHECKPOINT

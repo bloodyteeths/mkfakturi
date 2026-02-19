@@ -499,4 +499,3 @@ class AiDataMappingTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

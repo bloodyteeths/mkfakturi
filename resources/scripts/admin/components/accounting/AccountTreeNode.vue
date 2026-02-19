@@ -177,4 +177,3 @@ function getTypeLabel(type) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

@@ -152,4 +152,3 @@ class ItemsController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

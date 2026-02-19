@@ -140,4 +140,3 @@ class ProjectPolicy
     }
 }
 
-// CLAUDE-CHECKPOINT

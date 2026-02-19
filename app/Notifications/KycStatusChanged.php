@@ -129,4 +129,3 @@ class KycStatusChanged extends Notification implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

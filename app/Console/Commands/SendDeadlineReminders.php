@@ -164,4 +164,3 @@ class SendDeadlineReminders extends Command
         return $notified;
     }
 }
-// CLAUDE-CHECKPOINT

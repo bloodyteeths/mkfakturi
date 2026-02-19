@@ -218,4 +218,3 @@ class ProjectsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

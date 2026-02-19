@@ -69,6 +69,5 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
         return $response;
-        // CLAUDE-CHECKPOINT
     }
 }

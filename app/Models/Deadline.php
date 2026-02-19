@@ -348,4 +348,3 @@ class Deadline extends Model
         return $labels[$this->deadline_type] ?? $this->deadline_type;
     }
 }
-// CLAUDE-CHECKPOINT

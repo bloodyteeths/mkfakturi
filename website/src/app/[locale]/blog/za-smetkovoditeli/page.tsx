@@ -512,4 +512,3 @@ export default async function ZaSmetkovoditeliPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

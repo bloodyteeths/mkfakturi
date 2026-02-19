@@ -265,4 +265,3 @@ class PeriodLockTest extends TestCase
         ));
     }
 }
-// CLAUDE-CHECKPOINT

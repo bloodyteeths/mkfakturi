@@ -171,4 +171,3 @@ class RecurringInvoiceController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

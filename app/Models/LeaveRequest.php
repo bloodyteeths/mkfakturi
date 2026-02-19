@@ -257,4 +257,3 @@ class LeaveRequest extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

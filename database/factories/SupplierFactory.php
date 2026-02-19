@@ -37,4 +37,3 @@ class SupplierFactory extends Factory
         ];
     }
 }
-// CLAUDE-CHECKPOINT

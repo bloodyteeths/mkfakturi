@@ -217,4 +217,3 @@ class OutreachEvent extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -127,4 +127,3 @@ class JournalExportController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

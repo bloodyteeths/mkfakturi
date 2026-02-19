@@ -16,7 +16,6 @@ let routes = []
 // because /admin/partner/* needs to match before /admin/*
 // Public routes first since they don't require auth
 routes = routes.concat(PublicRoutes, PartnerRoutes, AdminRoutes, CustomerRoutes)
-// CLAUDE-CHECKPOINT
 
 const router = createRouter({
   history: createWebHistory(),
@@ -121,4 +120,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-// CLAUDE-CHECKPOINT

@@ -31,4 +31,3 @@ return [
     ],
 ];
 
-// CLAUDE-CHECKPOINT

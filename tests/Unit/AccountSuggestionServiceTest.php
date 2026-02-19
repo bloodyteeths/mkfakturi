@@ -371,4 +371,3 @@ class AccountSuggestionServiceTest extends TestCase
         $this->assertEquals(0.95, $suggestion['confidence']);
     }
 }
-// CLAUDE-CHECKPOINT

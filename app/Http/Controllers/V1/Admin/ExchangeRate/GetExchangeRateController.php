@@ -104,4 +104,3 @@ class GetExchangeRateController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

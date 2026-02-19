@@ -67,4 +67,3 @@ class SendCreditNoteMail extends Mailable
         return $mailContent;
     }
 }
-// CLAUDE-CHECKPOINT

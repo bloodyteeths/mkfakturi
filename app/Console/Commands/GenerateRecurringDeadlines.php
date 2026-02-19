@@ -168,4 +168,3 @@ class GenerateRecurringDeadlines extends Command
         return null;
     }
 }
-// CLAUDE-CHECKPOINT

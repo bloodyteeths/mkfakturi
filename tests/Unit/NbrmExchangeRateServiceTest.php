@@ -334,4 +334,3 @@ class NbrmExchangeRateServiceTest extends TestCase
         $service->getRate('EUR', 'MKD');
     }
 }
-// CLAUDE-CHECKPOINT

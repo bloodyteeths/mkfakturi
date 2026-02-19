@@ -130,7 +130,6 @@ class AiInsightsController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-        // CLAUDE-CHECKPOINT
     }
 
     /**
@@ -581,4 +580,3 @@ class AiInsightsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

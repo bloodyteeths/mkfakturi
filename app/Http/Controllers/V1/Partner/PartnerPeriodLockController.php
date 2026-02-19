@@ -185,4 +185,3 @@ class PartnerPeriodLockController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

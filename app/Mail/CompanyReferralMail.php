@@ -43,4 +43,3 @@ class CompanyReferralMail extends Mailable
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -85,4 +85,3 @@ class FiscalDevice extends Model
         ];
     }
 }
-// CLAUDE-CHECKPOINT

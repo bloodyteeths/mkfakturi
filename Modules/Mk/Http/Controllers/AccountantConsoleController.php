@@ -345,7 +345,6 @@ class AccountantConsoleController extends Controller
                 'message' => config('app.debug') ? $e->getMessage() : 'Internal server error',
             ], 500);
         }
-        // CLAUDE-CHECKPOINT
     }
 
     /**
@@ -531,4 +530,3 @@ class AccountantConsoleController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -141,4 +141,3 @@ class StockMovementFactory extends Factory
         });
     }
 }
-// CLAUDE-CHECKPOINT

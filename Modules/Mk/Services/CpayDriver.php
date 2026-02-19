@@ -438,4 +438,3 @@ class CpayDriver
         return hash_equals($expectedSignature, $receivedSignature);
     }
 }
-// CLAUDE-CHECKPOINT

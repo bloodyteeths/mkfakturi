@@ -285,4 +285,3 @@ class ClientDocumentController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

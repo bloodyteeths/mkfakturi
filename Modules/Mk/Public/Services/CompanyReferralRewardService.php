@@ -218,4 +218,3 @@ class CompanyReferralRewardService
     }
 }
 
-// CLAUDE-CHECKPOINT

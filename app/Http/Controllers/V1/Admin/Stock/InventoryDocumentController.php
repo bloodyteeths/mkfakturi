@@ -431,4 +431,3 @@ class InventoryDocumentController extends Controller
         ];
     }
 }
-// CLAUDE-CHECKPOINT

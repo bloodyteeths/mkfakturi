@@ -172,7 +172,6 @@ return [
         ],
     ],
 
-    // CLAUDE-CHECKPOINT
 
     'invoice_parser_driver' => env('INVOICE_PARSER_DRIVER', 'invoice2data'),
 
@@ -194,4 +193,3 @@ return [
     ],
 
 ];
-// CLAUDE-CHECKPOINT

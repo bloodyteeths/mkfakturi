@@ -58,4 +58,3 @@ class QrCodeController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

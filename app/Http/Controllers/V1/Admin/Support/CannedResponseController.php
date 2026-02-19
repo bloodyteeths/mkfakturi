@@ -177,4 +177,3 @@ class CannedResponseController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

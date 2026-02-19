@@ -318,4 +318,3 @@ export const useProjectStore = (useWindow = false) => {
   })()
 }
 
-// CLAUDE-CHECKPOINT

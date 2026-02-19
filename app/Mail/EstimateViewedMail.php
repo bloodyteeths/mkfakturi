@@ -35,4 +35,3 @@ class EstimateViewedMail extends Mailable
             ->markdown('emails.viewed.estimate', ['data' => $this->data]);
     }
 }
-// CLAUDE-CHECKPOINT

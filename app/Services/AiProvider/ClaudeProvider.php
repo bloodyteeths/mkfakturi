@@ -852,4 +852,3 @@ class ClaudeProvider implements AiProviderInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

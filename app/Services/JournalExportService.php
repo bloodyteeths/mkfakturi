@@ -1101,4 +1101,3 @@ class JournalExportService
         ];
     }
 }
-// CLAUDE-CHECKPOINT

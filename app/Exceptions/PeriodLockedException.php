@@ -45,4 +45,3 @@ class PeriodLockedException extends Exception
         ], 423);
     }
 }
-// CLAUDE-CHECKPOINT

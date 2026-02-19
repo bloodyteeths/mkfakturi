@@ -156,4 +156,3 @@ class RecurringExpenseController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

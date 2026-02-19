@@ -511,4 +511,3 @@ function setActiveTab(val) {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT

@@ -165,4 +165,3 @@ function goBack() {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

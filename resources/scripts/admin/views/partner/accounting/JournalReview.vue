@@ -564,4 +564,3 @@ function handleAccountUpdate(entry, newAccountId) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

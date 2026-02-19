@@ -241,4 +241,3 @@ class InvoiceCountService
         return "{$prefix}invoice_count:{$companyId}:{$month}";
     }
 }
-// CLAUDE-CHECKPOINT

@@ -528,5 +528,3 @@ class InvoiceProfitTest extends TestCase
         $this->assertEquals(3, $summary['invoices_analyzed']);
     }
 }
-// CLAUDE-CHECKPOINT
-// CLAUDE-CHECKPOINT

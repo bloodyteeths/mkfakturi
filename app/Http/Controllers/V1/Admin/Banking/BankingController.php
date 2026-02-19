@@ -671,7 +671,6 @@ class BankingController extends Controller
             ], 200);
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Attempt AI-based category suggestion using the configured AI provider.
@@ -889,7 +888,6 @@ PROMPT;
             return new NullAiProvider($provider, $e->getMessage());
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Resolve the active company for the authenticated user
@@ -925,4 +923,3 @@ PROMPT;
     }
 }
 
-// CLAUDE-CHECKPOINT

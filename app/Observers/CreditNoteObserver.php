@@ -190,4 +190,3 @@ class CreditNoteObserver
     }
 }
 
-// CLAUDE-CHECKPOINT

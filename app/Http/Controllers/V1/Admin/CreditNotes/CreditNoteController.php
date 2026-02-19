@@ -271,4 +271,3 @@ class CreditNoteController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

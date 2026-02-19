@@ -392,4 +392,3 @@ class PatternMatcher implements MatcherInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -440,4 +440,3 @@ class PostmarkWebhookController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

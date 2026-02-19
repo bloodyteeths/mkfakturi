@@ -111,4 +111,3 @@ function removeProject(id) {
     })
 }
 </script>
-// CLAUDE-CHECKPOINT

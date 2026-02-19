@@ -92,4 +92,3 @@ Route::post('/webhooks/bank/stopanska', [WebhookController::class, 'bankStopansk
 Route::post('/webhooks/email-inbound', [InboundMailController::class, 'handle'])
     ->name('webhooks.email_inbound');
 
-// CLAUDE-CHECKPOINT

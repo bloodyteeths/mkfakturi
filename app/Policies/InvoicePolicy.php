@@ -212,4 +212,3 @@ class InvoicePolicy
         return false;
     }
 }
-// CLAUDE-CHECKPOINT

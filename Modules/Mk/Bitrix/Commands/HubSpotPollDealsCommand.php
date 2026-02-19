@@ -431,4 +431,3 @@ class HubSpotPollDealsCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

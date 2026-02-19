@@ -60,4 +60,3 @@ trait BelongsToCompany
     }
 }
 
-// CLAUDE-CHECKPOINT

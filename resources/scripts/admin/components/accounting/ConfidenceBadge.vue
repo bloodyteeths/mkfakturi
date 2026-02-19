@@ -144,4 +144,3 @@ const reasonTooltip = computed(() => {
 })
 </script>
 
-// CLAUDE-CHECKPOINT

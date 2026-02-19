@@ -54,4 +54,3 @@ class StockAdjustmentRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

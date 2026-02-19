@@ -191,4 +191,3 @@ class DeadlineController extends Controller
         return response()->json(['message' => 'Deadline deleted successfully']);
     }
 }
-// CLAUDE-CHECKPOINT

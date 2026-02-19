@@ -588,4 +588,3 @@ class AdaptiveValidator
     }
 }
 
-// CLAUDE-CHECKPOINT

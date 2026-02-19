@@ -150,4 +150,3 @@ export const useFiscalDeviceStore = (useWindow = false) => {
     },
   })()
 }
-// CLAUDE-CHECKPOINT

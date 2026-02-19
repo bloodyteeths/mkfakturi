@@ -444,4 +444,3 @@ export default async function RokoviUjp2026Page({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

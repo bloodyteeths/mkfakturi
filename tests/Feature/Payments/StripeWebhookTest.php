@@ -333,4 +333,3 @@ class StripeWebhookTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -150,4 +150,3 @@ class LoginController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

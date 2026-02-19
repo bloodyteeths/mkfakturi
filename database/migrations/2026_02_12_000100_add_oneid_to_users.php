@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// CLAUDE-CHECKPOINT
 
 return new class extends Migration
 {
@@ -37,4 +36,3 @@ return new class extends Migration
         }
     }
 };
-// CLAUDE-CHECKPOINT

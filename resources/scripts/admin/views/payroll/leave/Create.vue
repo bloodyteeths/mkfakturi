@@ -319,4 +319,3 @@ async function submitForm() {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

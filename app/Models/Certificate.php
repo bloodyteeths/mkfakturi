@@ -359,4 +359,3 @@ class Certificate extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

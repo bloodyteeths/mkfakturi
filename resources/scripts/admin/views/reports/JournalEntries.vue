@@ -395,4 +395,3 @@ function getSourceTextColor(sourceType) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

@@ -208,4 +208,3 @@ function formatNumber(num) {
   return Number(num).toLocaleString('en-US', { maximumFractionDigits: 4 })
 }
 </script>
-// CLAUDE-CHECKPOINT

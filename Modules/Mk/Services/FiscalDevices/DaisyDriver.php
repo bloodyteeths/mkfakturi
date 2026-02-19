@@ -167,4 +167,3 @@ class DaisyDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

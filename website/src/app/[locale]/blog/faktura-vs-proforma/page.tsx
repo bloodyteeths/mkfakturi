@@ -500,4 +500,3 @@ export default async function FakturaVsProformaPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

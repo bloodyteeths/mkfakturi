@@ -423,5 +423,4 @@ class ImportTempCustomer extends Model
 
         return null;
     }
-    // CLAUDE-CHECKPOINT
 }

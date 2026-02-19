@@ -78,4 +78,3 @@ class ReconciliationAnalyticsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

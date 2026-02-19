@@ -577,4 +577,3 @@ export default async function KakoDaNapraviteFakturaPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

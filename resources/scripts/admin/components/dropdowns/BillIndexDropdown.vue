@@ -230,4 +230,3 @@ function copyPdfUrl() {
   })
 }
 </script>
-// CLAUDE-CHECKPOINT

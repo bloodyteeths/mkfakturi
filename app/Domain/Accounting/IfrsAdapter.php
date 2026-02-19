@@ -2412,7 +2412,6 @@ class IfrsAdapter
         ]);
     }
 }
-// CLAUDE-CHECKPOINT
 
 // CLAUDE-CHECKPOINT: WS1 - GL Auto-posting for Stock Movements:
 // Added postStockMovement() method with DR/CR logic for all source types

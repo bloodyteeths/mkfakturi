@@ -53,4 +53,3 @@ return new class extends Migration
         Schema::dropIfExists('gateway_webhook_events');
     }
 };
-// CLAUDE-CHECKPOINT

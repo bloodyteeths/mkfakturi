@@ -571,4 +571,3 @@ export const useProformaInvoiceStore = (useWindow = false) => {
     },
   })()
 }
-// CLAUDE-CHECKPOINT

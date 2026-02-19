@@ -231,4 +231,3 @@ class StockMovement extends Model
         return (int) round($this->balance_value / $this->balance_quantity);
     }
 }
-// CLAUDE-CHECKPOINT

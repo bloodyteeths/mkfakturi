@@ -390,4 +390,3 @@ function onDeleteAccount(account) {
     })
 }
 </script>
-// CLAUDE-CHECKPOINT

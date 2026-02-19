@@ -317,4 +317,3 @@ class BankingOAuthController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

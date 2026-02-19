@@ -92,4 +92,3 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

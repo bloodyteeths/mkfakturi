@@ -556,4 +556,3 @@ class SubmitEInvoiceJob implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

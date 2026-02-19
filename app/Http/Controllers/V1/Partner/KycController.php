@@ -189,4 +189,3 @@ class KycController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

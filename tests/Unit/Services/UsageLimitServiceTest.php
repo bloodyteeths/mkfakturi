@@ -271,4 +271,3 @@ class UsageLimitServiceTest extends TestCase
         $this->assertNull($usage['remaining']);
     }
 }
-// CLAUDE-CHECKPOINT

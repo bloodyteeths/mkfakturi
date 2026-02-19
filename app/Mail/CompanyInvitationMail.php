@@ -43,4 +43,3 @@ class CompanyInvitationMail extends Mailable
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

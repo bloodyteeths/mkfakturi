@@ -496,4 +496,3 @@ export default async function StoEEFakturaPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

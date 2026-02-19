@@ -347,4 +347,3 @@ class UnsubscribeTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

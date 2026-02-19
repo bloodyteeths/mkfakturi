@@ -655,4 +655,3 @@ PROMPT;
     }
 }
 
-// CLAUDE-CHECKPOINT

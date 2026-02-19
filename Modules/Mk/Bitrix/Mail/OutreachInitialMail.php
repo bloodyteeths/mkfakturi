@@ -57,4 +57,3 @@ class OutreachInitialMail extends Mailable implements ShouldQueue
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

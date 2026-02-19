@@ -537,4 +537,3 @@ class ExpenseDuplicateTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

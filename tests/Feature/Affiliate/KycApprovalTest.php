@@ -253,4 +253,3 @@ class KycApprovalTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

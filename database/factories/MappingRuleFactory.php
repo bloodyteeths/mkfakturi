@@ -171,4 +171,3 @@ class MappingRuleFactory extends Factory
     }
 }
 
-// CLAUDE-CHECKPOINT

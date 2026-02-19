@@ -250,4 +250,3 @@ export const useWarehouseStore = (useWindow = false) => {
   })()
 }
 
-// CLAUDE-CHECKPOINT

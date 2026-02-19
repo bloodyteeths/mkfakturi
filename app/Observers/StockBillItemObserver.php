@@ -93,4 +93,3 @@ class StockBillItemObserver
         }
     }
 }
-// CLAUDE-CHECKPOINT

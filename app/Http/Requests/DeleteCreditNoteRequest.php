@@ -64,4 +64,3 @@ class DeleteCreditNoteRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

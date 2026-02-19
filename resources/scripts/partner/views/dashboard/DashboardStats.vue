@@ -146,4 +146,3 @@ onUnmounted(() => {
 })
 </script>
 
-// CLAUDE-CHECKPOINT

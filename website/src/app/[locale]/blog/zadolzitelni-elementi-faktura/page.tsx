@@ -556,4 +556,3 @@ export default async function ZadolzitelniElementiFakturaPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

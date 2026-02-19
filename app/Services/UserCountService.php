@@ -240,4 +240,3 @@ class UserCountService
         return "{$prefix}user_count:{$companyId}";
     }
 }
-// CLAUDE-CHECKPOINT

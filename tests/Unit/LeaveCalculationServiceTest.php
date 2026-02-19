@@ -337,4 +337,3 @@ class LeaveCalculationServiceTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

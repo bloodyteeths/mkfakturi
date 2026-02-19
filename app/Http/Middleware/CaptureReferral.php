@@ -95,4 +95,3 @@ class CaptureReferral
     }
 }
 
-// CLAUDE-CHECKPOINT

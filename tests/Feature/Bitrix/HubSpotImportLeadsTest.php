@@ -475,4 +475,3 @@ class HubSpotImportLeadsTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -44,4 +44,3 @@ class CompanyOutreachInitialMail extends Mailable implements ShouldQueue
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

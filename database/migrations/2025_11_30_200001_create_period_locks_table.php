@@ -55,4 +55,3 @@ return new class extends Migration
         Schema::dropIfExists('period_locks');
     }
 };
-// CLAUDE-CHECKPOINT

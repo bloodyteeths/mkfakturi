@@ -37,4 +37,3 @@ use Illuminate\Support\Facades\Route;
 //             ->name('partner.profile');
 //     });
 
-// CLAUDE-CHECKPOINT

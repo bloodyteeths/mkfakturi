@@ -268,4 +268,3 @@ class BillsController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

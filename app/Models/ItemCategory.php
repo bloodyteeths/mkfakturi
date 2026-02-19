@@ -41,4 +41,3 @@ class ItemCategory extends Model
         return $query->where('company_id', $companyId);
     }
 }
-// CLAUDE-CHECKPOINT

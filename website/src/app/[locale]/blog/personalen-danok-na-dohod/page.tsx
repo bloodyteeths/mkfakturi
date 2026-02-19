@@ -420,4 +420,3 @@ export default async function PersonalenDanokNaDohodPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

@@ -187,4 +187,3 @@ class SignupRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

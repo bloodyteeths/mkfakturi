@@ -179,4 +179,3 @@ class SparkasseCsvParser extends AbstractCsvParser
     }
 }
 
-// CLAUDE-CHECKPOINT

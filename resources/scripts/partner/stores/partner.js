@@ -197,4 +197,3 @@ export const usePartnerStore = defineStore('partner', () => {
   }
 })
 
-// CLAUDE-CHECKPOINT

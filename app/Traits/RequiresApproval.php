@@ -202,4 +202,3 @@ trait RequiresApproval
     }
 }
 
-// CLAUDE-CHECKPOINT

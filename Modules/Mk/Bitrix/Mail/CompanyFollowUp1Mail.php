@@ -43,4 +43,3 @@ class CompanyFollowUp1Mail extends Mailable implements ShouldQueue
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

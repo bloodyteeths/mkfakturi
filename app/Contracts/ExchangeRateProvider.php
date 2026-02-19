@@ -51,4 +51,3 @@ interface ExchangeRateProvider
      */
     public function getProviderName(): string;
 }
-// CLAUDE-CHECKPOINT

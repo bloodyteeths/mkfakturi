@@ -161,4 +161,3 @@ class Warehouse extends Model
         return $latestMovement ? (int) $latestMovement->balance_value : 0;
     }
 }
-// CLAUDE-CHECKPOINT

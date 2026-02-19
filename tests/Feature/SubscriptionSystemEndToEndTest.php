@@ -426,4 +426,3 @@ class SubscriptionSystemEndToEndTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

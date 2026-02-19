@@ -22,4 +22,3 @@ class CreditNotePdfController extends Controller
         return $invoice->getGeneratedPDFOrStream('credit_note');
     }
 }
-// CLAUDE-CHECKPOINT

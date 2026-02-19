@@ -107,4 +107,3 @@ class DeadlineReminderNotification extends Notification
         ];
     }
 }
-// CLAUDE-CHECKPOINT

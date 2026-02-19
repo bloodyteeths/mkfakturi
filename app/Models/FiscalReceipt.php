@@ -61,4 +61,3 @@ class FiscalReceipt extends Model
         return $query->where('fiscal_device_id', $deviceId);
     }
 }
-// CLAUDE-CHECKPOINT

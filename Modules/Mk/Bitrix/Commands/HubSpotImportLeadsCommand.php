@@ -707,4 +707,3 @@ class HubSpotImportLeadsCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

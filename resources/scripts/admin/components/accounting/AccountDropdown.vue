@@ -123,4 +123,3 @@ function onAccountChange(value) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

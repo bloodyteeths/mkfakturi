@@ -50,4 +50,3 @@ class CreateTicketRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

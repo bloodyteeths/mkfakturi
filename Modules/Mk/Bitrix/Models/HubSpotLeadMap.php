@@ -279,4 +279,3 @@ class HubSpotLeadMap extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -417,4 +417,3 @@ class MkIfrsSeeder extends Seeder
     }
 }
 
-// CLAUDE-CHECKPOINT

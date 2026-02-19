@@ -40,4 +40,3 @@ class BitrixWebhookController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

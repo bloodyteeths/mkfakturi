@@ -5,7 +5,6 @@ namespace App\Services\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-// CLAUDE-CHECKPOINT
 
 /**
  * OpenID Connect provider for Macedonian eID/OneID login.
@@ -150,4 +149,3 @@ class OneIdProvider
         ];
     }
 }
-// CLAUDE-CHECKPOINT

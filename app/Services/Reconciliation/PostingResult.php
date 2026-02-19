@@ -165,4 +165,3 @@ class PostingResult
     }
 }
 
-// CLAUDE-CHECKPOINT

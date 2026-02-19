@@ -374,4 +374,3 @@ class CertificateExtractionService
     }
 }
 
-// CLAUDE-CHECKPOINT

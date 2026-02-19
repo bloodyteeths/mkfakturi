@@ -441,4 +441,3 @@ class BankConnectionController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -238,4 +238,3 @@ class BillPolicy
     }
 }
 
-// CLAUDE-CHECKPOINT

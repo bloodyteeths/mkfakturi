@@ -179,4 +179,3 @@ class BillPaymentObserver
     }
 }
 
-// CLAUDE-CHECKPOINT

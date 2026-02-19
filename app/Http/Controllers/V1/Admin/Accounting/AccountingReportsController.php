@@ -76,7 +76,6 @@ class AccountingReportsController extends Controller
                 'message' => 'The specified company does not exist',
             ], 404);
         }
-        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -146,7 +145,6 @@ class AccountingReportsController extends Controller
                 'message' => 'The specified company does not exist',
             ], 404);
         }
-        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -225,7 +223,6 @@ class AccountingReportsController extends Controller
                 'message' => 'The specified company does not exist',
             ], 404);
         }
-        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -373,7 +370,6 @@ class AccountingReportsController extends Controller
                 'message' => 'The specified company does not exist',
             ], 404);
         }
-        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -480,7 +476,6 @@ class AccountingReportsController extends Controller
                 'message' => 'The specified company does not exist',
             ], 404);
         }
-        // CLAUDE-CHECKPOINT
 
         // Authorize user can access this company
         $this->authorize('view', $company);
@@ -663,4 +658,3 @@ class AccountingReportsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

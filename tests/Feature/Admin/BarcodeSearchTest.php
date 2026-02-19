@@ -238,4 +238,3 @@ test('combined filters with barcode search', function () {
     expect($data[0]->price)->toBe(100);
 });
 
-// CLAUDE-CHECKPOINT

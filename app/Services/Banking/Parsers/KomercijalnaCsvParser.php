@@ -185,4 +185,3 @@ class KomercijalnaCsvParser extends AbstractCsvParser
     }
 }
 
-// CLAUDE-CHECKPOINT

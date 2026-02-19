@@ -137,4 +137,3 @@ const hasEditAbility = computed(() => {
 })
 </script>
 
-// CLAUDE-CHECKPOINT

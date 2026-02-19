@@ -55,4 +55,3 @@ class TicketResource extends JsonResource
         ];
     }
 }
-// CLAUDE-CHECKPOINT

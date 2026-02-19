@@ -70,4 +70,3 @@ return new class extends Migration
         Schema::dropIfExists('e_invoices');
     }
 };
-// CLAUDE-CHECKPOINT

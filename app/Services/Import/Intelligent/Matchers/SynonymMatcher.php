@@ -316,4 +316,3 @@ class SynonymMatcher implements MatcherInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

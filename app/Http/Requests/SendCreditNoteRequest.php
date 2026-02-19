@@ -78,4 +78,3 @@ class SendCreditNoteRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

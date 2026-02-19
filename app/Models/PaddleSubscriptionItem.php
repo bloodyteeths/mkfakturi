@@ -19,4 +19,3 @@ class PaddleSubscriptionItem extends CashierSubscriptionItem
      */
     protected $table = 'paddle_subscription_items';
 }
-// CLAUDE-CHECKPOINT

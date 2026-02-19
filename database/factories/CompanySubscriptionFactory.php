@@ -144,4 +144,3 @@ class CompanySubscriptionFactory extends Factory
         });
     }
 }
-// CLAUDE-CHECKPOINT

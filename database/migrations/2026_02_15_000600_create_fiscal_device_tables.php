@@ -73,4 +73,3 @@ return new class extends Migration
         Schema::dropIfExists('fiscal_devices');
     }
 };
-// CLAUDE-CHECKPOINT

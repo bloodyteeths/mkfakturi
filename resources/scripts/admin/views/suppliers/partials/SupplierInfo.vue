@@ -111,4 +111,3 @@ const hasAddress = computed(() => {
   )
 })
 </script>
-// CLAUDE-CHECKPOINT

@@ -109,4 +109,3 @@ class AffiliateLink extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

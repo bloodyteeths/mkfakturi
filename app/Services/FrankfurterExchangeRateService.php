@@ -351,4 +351,3 @@ class FrankfurterExchangeRateService implements ExchangeRateProvider
         return 'frankfurter';
     }
 }
-// CLAUDE-CHECKPOINT

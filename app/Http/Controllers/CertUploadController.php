@@ -109,7 +109,6 @@ class CertUploadController extends Controller
             ], 500);
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Upload and process certificate
@@ -320,7 +319,6 @@ class CertUploadController extends Controller
             ], 500);
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Delete certificate by ID
@@ -376,7 +374,6 @@ class CertUploadController extends Controller
             ], 500);
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Verify certificate by ID
@@ -568,7 +565,6 @@ class CertUploadController extends Controller
             ], 500);
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Create secure temporary file for certificate processing
@@ -707,4 +703,3 @@ class CertUploadController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

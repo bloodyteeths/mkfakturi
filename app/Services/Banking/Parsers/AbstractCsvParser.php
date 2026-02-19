@@ -400,4 +400,3 @@ abstract class AbstractCsvParser implements BankParserInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

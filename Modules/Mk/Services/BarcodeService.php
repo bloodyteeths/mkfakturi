@@ -416,4 +416,3 @@ class BarcodeService
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -112,7 +112,6 @@ export default {
       const imgUrl = new URL('$images/facturino_logo_clear.png', import.meta.url)
       return imgUrl
     }
-    // CLAUDE-CHECKPOINT
 
     return {
       stepComponent,

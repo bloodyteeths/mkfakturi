@@ -594,4 +594,3 @@ class StockController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

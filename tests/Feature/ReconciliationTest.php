@@ -186,4 +186,3 @@ class ReconciliationTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

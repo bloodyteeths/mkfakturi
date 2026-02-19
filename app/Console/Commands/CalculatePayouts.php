@@ -237,4 +237,3 @@ class CalculatePayouts extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

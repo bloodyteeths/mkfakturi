@@ -365,4 +365,3 @@ class PayoutManagementTest extends TestCase
         $response->assertStatus(401);
     }
 }
-// CLAUDE-CHECKPOINT

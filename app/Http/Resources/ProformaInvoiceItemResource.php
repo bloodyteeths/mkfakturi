@@ -48,4 +48,3 @@ class ProformaInvoiceItemResource extends JsonResource
     }
 }
 
-// CLAUDE-CHECKPOINT

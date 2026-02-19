@@ -112,4 +112,3 @@ class LeaveType extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

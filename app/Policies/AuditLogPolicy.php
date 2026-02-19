@@ -43,4 +43,3 @@ class AuditLogPolicy
     }
 }
 
-// CLAUDE-CHECKPOINT

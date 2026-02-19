@@ -38,5 +38,4 @@ export default {
     return { badgeColorClasses }
   },
 }
-// CLAUDE-CHECKPOINT
 </script>

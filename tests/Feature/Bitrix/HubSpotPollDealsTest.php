@@ -545,4 +545,3 @@ class HubSpotPollDealsTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

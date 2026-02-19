@@ -83,4 +83,3 @@ interface AiProviderInterface
     public function generateStream(string $prompt, callable $onChunk, array $options = []): string;
 }
 
-// CLAUDE-CHECKPOINT

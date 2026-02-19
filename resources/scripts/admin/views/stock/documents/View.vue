@@ -384,4 +384,3 @@ onMounted(() => {
   loadDocument()
 })
 </script>
-// CLAUDE-CHECKPOINT

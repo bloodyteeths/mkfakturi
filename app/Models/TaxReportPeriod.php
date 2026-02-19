@@ -354,4 +354,3 @@ class TaxReportPeriod extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

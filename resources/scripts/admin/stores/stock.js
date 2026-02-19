@@ -511,4 +511,3 @@ export const useStockStore = (useWindow = false) => {
     },
   })()
 }
-// CLAUDE-CHECKPOINT

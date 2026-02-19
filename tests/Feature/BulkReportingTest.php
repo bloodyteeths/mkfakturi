@@ -351,4 +351,3 @@ class BulkReportingTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

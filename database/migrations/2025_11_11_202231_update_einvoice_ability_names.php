@@ -97,4 +97,3 @@ return new class extends Migration
         // Note: We don't remove the abilities in down() because that could break existing permissions
     }
 };
-// CLAUDE-CHECKPOINT

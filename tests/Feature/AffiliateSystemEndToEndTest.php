@@ -540,4 +540,3 @@ class AffiliateSystemEndToEndTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

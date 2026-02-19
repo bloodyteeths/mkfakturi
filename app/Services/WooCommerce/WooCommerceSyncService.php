@@ -191,4 +191,3 @@ class WooCommerceSyncService
             ->toArray();
     }
 }
-// CLAUDE-CHECKPOINT

@@ -498,4 +498,3 @@ function onUnlockDay(closing) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

@@ -95,4 +95,3 @@ class BillItem extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -293,4 +293,3 @@ async function submitForm() {
   isSaving.value = false
 }
 </script>
-// CLAUDE-CHECKPOINT

@@ -685,4 +685,3 @@ onMounted(async () => {
   await Promise.all([loadAdjustments(), loadTransfers()])
 })
 </script>
-// CLAUDE-CHECKPOINT

@@ -92,4 +92,3 @@ class ProformaInvoiceItem extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

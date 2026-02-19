@@ -642,4 +642,3 @@ class Project extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

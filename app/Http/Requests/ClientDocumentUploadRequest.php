@@ -60,4 +60,3 @@ class ClientDocumentUploadRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

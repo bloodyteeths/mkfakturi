@@ -231,4 +231,3 @@ class IfrsIntegrationTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

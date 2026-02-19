@@ -245,4 +245,3 @@ class ProformaInvoicePolicy
     }
 }
 
-// CLAUDE-CHECKPOINT

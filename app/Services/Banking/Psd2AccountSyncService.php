@@ -280,4 +280,3 @@ class Psd2AccountSyncService
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -121,4 +121,3 @@ defineProps({
 }
 </style>
 
-// CLAUDE-CHECKPOINT

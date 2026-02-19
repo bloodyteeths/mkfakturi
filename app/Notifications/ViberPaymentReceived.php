@@ -47,4 +47,3 @@ class ViberPaymentReceived extends Notification implements ShouldQueue
         ];
     }
 }
-// CLAUDE-CHECKPOINT

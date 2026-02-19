@@ -67,7 +67,6 @@ class InvoiceItem extends Model
         return $this->hasMany(StockMovement::class, 'source_id')
             ->where('source_type', StockMovement::SOURCE_INVOICE_ITEM);
     }
-    // CLAUDE-CHECKPOINT
 
     public function scopeWhereCompany($query, $company_id)
     {

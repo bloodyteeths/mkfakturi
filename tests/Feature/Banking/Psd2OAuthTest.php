@@ -250,4 +250,3 @@ class Psd2OAuthTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

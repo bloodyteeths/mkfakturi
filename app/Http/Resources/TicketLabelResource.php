@@ -23,4 +23,3 @@ class TicketLabelResource extends JsonResource
         ];
     }
 }
-// CLAUDE-CHECKPOINT

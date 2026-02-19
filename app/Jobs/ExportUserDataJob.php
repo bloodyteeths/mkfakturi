@@ -422,4 +422,3 @@ README;
         rmdir($tempDir);
     }
 }
-// CLAUDE-CHECKPOINT

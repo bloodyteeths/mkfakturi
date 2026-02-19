@@ -154,4 +154,3 @@ class SeverecDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

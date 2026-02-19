@@ -625,4 +625,3 @@ abstract class Psd2Client
     }
 }
 
-// CLAUDE-CHECKPOINT

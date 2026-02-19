@@ -47,4 +47,3 @@ class CompanyLookupController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

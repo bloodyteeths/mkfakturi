@@ -354,4 +354,3 @@ async function downloadEInvoiceXml() {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT

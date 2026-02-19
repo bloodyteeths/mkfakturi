@@ -405,7 +405,6 @@ class CertificateUploadTest extends TestCase
         }
     }
 
-    // CLAUDE-CHECKPOINT
 
     /**
      * Clean up test certificates and directories

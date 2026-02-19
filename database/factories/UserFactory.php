@@ -53,4 +53,3 @@ class UserFactory extends Factory
         ];
     }
 }
-// CLAUDE-CHECKPOINT

@@ -615,5 +615,4 @@ onMounted(() => {
   console.log('[Step1Upload] showQuickStart.value:', showQuickStart.value)
   console.log('[Step1Upload] Component setup complete')
 })
-// CLAUDE-CHECKPOINT
 </script>

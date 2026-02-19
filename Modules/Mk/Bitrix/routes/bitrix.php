@@ -77,4 +77,3 @@ Route::prefix('api/bitrix')->middleware('bitrix.auth')->group(function () {
     })->name('api.bitrix.outreach.trigger');
 });
 
-// CLAUDE-CHECKPOINT

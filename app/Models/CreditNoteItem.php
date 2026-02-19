@@ -146,4 +146,3 @@ class CreditNoteItem extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

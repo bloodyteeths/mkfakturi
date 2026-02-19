@@ -148,4 +148,3 @@
 // Terms of Service page - no logic needed
 </script>
 
-// CLAUDE-CHECKPOINT

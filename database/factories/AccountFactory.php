@@ -74,4 +74,3 @@ class AccountFactory extends Factory
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

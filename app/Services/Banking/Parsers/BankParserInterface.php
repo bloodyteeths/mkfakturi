@@ -66,4 +66,3 @@ interface BankParserInterface
     public function getEncoding(): string;
 }
 
-// CLAUDE-CHECKPOINT

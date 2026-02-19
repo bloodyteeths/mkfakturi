@@ -301,4 +301,3 @@ test('multi-field search finds items by name, SKU, or barcode', function () {
     expect($response3->getData()->data)->toHaveCount(1);
 });
 
-// CLAUDE-CHECKPOINT

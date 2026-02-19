@@ -41,4 +41,3 @@ class FeatureMiddleware
     }
 }
 
-// CLAUDE-CHECKPOINT

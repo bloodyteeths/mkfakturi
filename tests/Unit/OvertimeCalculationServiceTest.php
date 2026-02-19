@@ -86,4 +86,3 @@ class OvertimeCalculationServiceTest extends TestCase
         $this->assertEquals(1.50, $this->service->getMultiplier('night'));
     }
 }
-// CLAUDE-CHECKPOINT

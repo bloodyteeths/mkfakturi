@@ -261,5 +261,4 @@ export const useConsoleStore = defineStore('console', {
   },
 })
 
-// CLAUDE-CHECKPOINT
 

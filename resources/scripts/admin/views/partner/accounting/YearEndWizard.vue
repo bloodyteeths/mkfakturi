@@ -134,4 +134,3 @@ onMounted(() => {
   store.reset()
 })
 </script>
-// CLAUDE-CHECKPOINT

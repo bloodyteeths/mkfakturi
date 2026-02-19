@@ -80,5 +80,4 @@ function refreshData() {
   router.push('/admin/suppliers')
 }
 </script>
-// CLAUDE-CHECKPOINT
 

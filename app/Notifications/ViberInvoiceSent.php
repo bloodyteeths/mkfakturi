@@ -50,4 +50,3 @@ class ViberInvoiceSent extends Notification implements ShouldQueue
         ];
     }
 }
-// CLAUDE-CHECKPOINT

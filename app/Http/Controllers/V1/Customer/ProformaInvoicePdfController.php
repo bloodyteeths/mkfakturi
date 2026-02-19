@@ -34,4 +34,3 @@ class ProformaInvoicePdfController extends Controller
         return new ProformaInvoiceResource($proformaInvoice);
     }
 }
-// CLAUDE-CHECKPOINT

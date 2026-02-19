@@ -336,4 +336,3 @@ class CurrencyExchangeService
         return $this->provider->getProviderName();
     }
 }
-// CLAUDE-CHECKPOINT

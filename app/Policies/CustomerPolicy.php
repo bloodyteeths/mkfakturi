@@ -199,4 +199,3 @@ class CustomerPolicy
         return false;
     }
 }
-// CLAUDE-CHECKPOINT

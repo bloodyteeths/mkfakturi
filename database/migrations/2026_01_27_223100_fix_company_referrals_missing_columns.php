@@ -82,4 +82,3 @@ return new class extends Migration
     }
 };
 
-// CLAUDE-CHECKPOINT

@@ -52,4 +52,3 @@ class ViberOverdueReminder extends Notification implements ShouldQueue
         ];
     }
 }
-// CLAUDE-CHECKPOINT

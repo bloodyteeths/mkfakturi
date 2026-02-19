@@ -667,6 +667,4 @@ class PartnerDashboardController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT
 
-// CLAUDE-CHECKPOINT

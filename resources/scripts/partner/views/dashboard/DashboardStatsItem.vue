@@ -81,4 +81,3 @@ const colorClasses = computed(() => {
 })
 </script>
 
-// CLAUDE-CHECKPOINT

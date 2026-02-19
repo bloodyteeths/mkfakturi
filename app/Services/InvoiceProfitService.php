@@ -294,4 +294,3 @@ class InvoiceProfitService
         ];
     }
 }
-// CLAUDE-CHECKPOINT

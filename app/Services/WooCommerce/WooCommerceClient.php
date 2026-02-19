@@ -161,4 +161,3 @@ class WooCommerceClient
         return $response->json() ?? [];
     }
 }
-// CLAUDE-CHECKPOINT

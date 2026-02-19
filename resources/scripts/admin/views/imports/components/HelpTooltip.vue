@@ -298,5 +298,4 @@ onUnmounted(() => {
 if (props.trigger === 'click') {
   document.addEventListener('click', handleClickOutside)
 }
-// CLAUDE-CHECKPOINT
 </script>

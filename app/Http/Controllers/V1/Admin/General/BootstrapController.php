@@ -304,4 +304,3 @@ class BootstrapController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

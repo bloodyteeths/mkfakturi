@@ -80,4 +80,3 @@ class ProformaInvoiceResource extends JsonResource
     }
 }
 
-// CLAUDE-CHECKPOINT

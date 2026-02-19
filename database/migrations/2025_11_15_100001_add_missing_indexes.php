@@ -184,7 +184,6 @@ return new class extends Migration
             });
         }
 
-        // CLAUDE-CHECKPOINT
     }
 
     /**
@@ -279,7 +278,6 @@ return new class extends Migration
             });
         }
 
-        // CLAUDE-CHECKPOINT
     }
 
     /**

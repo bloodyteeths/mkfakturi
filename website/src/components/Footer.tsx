@@ -235,4 +235,3 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
     </footer>
   )
 }
-// CLAUDE-CHECKPOINT

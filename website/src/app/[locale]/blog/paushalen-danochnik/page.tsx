@@ -428,4 +428,3 @@ export default async function PaushalenDanochnikPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

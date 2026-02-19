@@ -14,4 +14,3 @@ use RuntimeException;
 class Invoice2DataServiceException extends RuntimeException
 {
 }
-// CLAUDE-CHECKPOINT

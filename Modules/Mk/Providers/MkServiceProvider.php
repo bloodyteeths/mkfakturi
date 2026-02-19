@@ -43,4 +43,3 @@ class MkServiceProvider extends ServiceProvider
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -265,4 +265,3 @@ async function downloadExport() {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT

@@ -231,4 +231,3 @@ if (InstallUtils::isDbCreated()) {
     }
 }
 
-// CLAUDE-CHECKPOINT

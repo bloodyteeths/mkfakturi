@@ -61,4 +61,3 @@ class CreateDemoPartner extends Command
         return 0;
     }
 }
-// CLAUDE-CHECKPOINT

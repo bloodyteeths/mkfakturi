@@ -261,4 +261,3 @@ class BankConsent extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -528,7 +528,6 @@ Route::prefix('/v1')->group(function () {
             // Viber availability check (any authenticated user)
             Route::get('/viber/availability', [\App\Http\Controllers\V1\Admin\ViberSettingsController::class, 'checkAvailability']);
 
-            // CLAUDE-CHECKPOINT
 
             // Exports (Phase 4)
             // ----------------------------------
@@ -681,7 +680,6 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/{id}/reject', [EInvoiceController::class, 'rejectIncoming']);
                 });
             });
-            // CLAUDE-CHECKPOINT
 
             // VAT Returns
             // ----------------------------------
@@ -799,7 +797,6 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/{cannedResponse}/use', [\App\Http\Controllers\V1\Admin\Support\CannedResponseController::class, 'use']);
                 });
             });
-            // CLAUDE-CHECKPOINT
 
             // Roles
             // ----------------------------------
@@ -936,7 +933,6 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/bulk-confirm', [\App\Http\Controllers\V1\Admin\Accounting\AccountSuggestionController::class, 'bulkConfirm']);
                 });
             });
-            // CLAUDE-CHECKPOINT
 
             // Year-End Closing Wizard
             // ----------------------------------
@@ -948,7 +944,6 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/finalize', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'finalize']);
                 Route::post('/undo', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'undo']);
             });
-            // CLAUDE-CHECKPOINT
 
             // Client Document Upload Portal (P8-01)
             // ----------------------------------
@@ -959,7 +954,6 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'show']);
                 Route::delete('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'destroy']);
             });
-            // CLAUDE-CHECKPOINT
 
             // PSD2 Banking Integration (OAuth + Transaction Management)
             // Feature flag: FEATURE_PSD2_BANKING
@@ -976,7 +970,6 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/sync/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'syncAccount']);
                 Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
                 Route::post('/transactions/suggest-category', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'suggestCategory']);
-                // CLAUDE-CHECKPOINT
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
 
                 // CSV Import
@@ -988,7 +981,6 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/history', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importHistory']);
                     Route::get('/stats', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importStats']);
                 });
-                // CLAUDE-CHECKPOINT
 
                 // Invoice Reconciliation
                 Route::prefix('reconciliation')->group(function () {
@@ -1013,7 +1005,6 @@ Route::prefix('/v1')->group(function () {
                     Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'destroy']);
                     Route::post('/{id}/test', [\App\Http\Controllers\V1\Admin\Banking\MatchingRulesController::class, 'test']);
                 });
-                // CLAUDE-CHECKPOINT
 
                 // OAuth routes (these need to be accessible without full auth for callback)
                 Route::get('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankingOAuthController::class, 'start']);
@@ -1162,7 +1153,6 @@ Route::prefix('/v1')->group(function () {
             });
         });
 
-        // CLAUDE-CHECKPOINT
 
         // Self Update
         // ----------------------------------
@@ -1598,7 +1588,6 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::post('/consolidated', [BulkReportController::class, 'consolidated']);
         Route::post('/export', [BulkReportController::class, 'export']);
     });
-    // CLAUDE-CHECKPOINT
 });
 
 // AI Financial Assistant Routes (available to all, usage limits apply)

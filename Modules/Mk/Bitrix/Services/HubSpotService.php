@@ -1285,4 +1285,3 @@ class HubSpotService
     }
 }
 
-// CLAUDE-CHECKPOINT

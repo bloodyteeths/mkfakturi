@@ -346,4 +346,3 @@ const submitTicket = async () => {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT

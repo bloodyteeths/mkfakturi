@@ -656,4 +656,3 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         }
     }
 }
-// CLAUDE-CHECKPOINT

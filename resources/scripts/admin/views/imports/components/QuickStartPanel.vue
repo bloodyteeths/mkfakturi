@@ -237,5 +237,4 @@ onMounted(() => {
   const tourSkipped = localStorage.getItem('migration-wizard-tour-skipped')
   isFirstTime.value = !tourCompleted && !tourSkipped
 })
-// CLAUDE-CHECKPOINT
 </script>

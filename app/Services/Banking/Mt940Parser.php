@@ -504,4 +504,3 @@ class Mt940Parser
     }
 }
 
-// CLAUDE-CHECKPOINT

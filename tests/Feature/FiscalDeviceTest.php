@@ -420,4 +420,3 @@ describe('Fiscal Device Manager Singleton', function () {
     });
 });
 
-// CLAUDE-CHECKPOINT

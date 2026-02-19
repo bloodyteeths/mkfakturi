@@ -401,4 +401,3 @@ class StockAdjustmentController extends Controller
         ];
     }
 }
-// CLAUDE-CHECKPOINT

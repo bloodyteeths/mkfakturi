@@ -131,4 +131,3 @@ class ExpenseObserver
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -75,4 +75,3 @@ defineProps({
 defineEmits(['action', 'secondary-action'])
 </script>
 
-// CLAUDE-CHECKPOINT

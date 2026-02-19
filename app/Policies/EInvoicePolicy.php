@@ -221,4 +221,3 @@ class EInvoicePolicy
         return false;
     }
 }
-// CLAUDE-CHECKPOINT

@@ -60,4 +60,3 @@ Route::prefix('api/bitrix')
             ->name('api.bitrix.create-partner');
     });
 
-// CLAUDE-CHECKPOINT

@@ -79,4 +79,3 @@ class PaymentsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

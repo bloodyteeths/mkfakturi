@@ -134,4 +134,3 @@ class PelisterecDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

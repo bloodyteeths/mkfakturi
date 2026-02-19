@@ -87,4 +87,3 @@ class CheckUserLimit
         return $next($request);
     }
 }
-// CLAUDE-CHECKPOINT

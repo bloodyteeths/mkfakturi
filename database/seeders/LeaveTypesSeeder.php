@@ -75,4 +75,3 @@ class LeaveTypesSeeder extends Seeder
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -462,4 +462,3 @@ function cancelRequest(id) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

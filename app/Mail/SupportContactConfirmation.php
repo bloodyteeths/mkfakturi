@@ -57,4 +57,3 @@ class SupportContactConfirmation extends Mailable
         return [];
     }
 }
-// CLAUDE-CHECKPOINT

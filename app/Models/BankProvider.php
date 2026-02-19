@@ -127,4 +127,3 @@ class BankProvider extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

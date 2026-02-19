@@ -238,4 +238,3 @@ class WebhookController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

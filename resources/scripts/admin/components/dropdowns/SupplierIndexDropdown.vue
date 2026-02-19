@@ -110,4 +110,3 @@ function removeSupplier(id) {
     })
 }
 </script>
-// CLAUDE-CHECKPOINT

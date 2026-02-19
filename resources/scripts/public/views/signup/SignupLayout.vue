@@ -58,4 +58,3 @@ onUnmounted(() => {
 }
 </style>
 
-// CLAUDE-CHECKPOINT

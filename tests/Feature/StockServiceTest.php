@@ -685,4 +685,3 @@ class StockServiceTest extends TestCase
         $this->assertEquals($existingDefault->id, $warehouse->id);
     }
 }
-// CLAUDE-CHECKPOINT

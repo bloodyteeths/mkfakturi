@@ -356,4 +356,3 @@ class AccountController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

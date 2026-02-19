@@ -106,7 +106,6 @@ Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
     Route::get('/expenses/{expense}/receipt', ShowReceiptController::class);
 });
 
-// CLAUDE-CHECKPOINT
 
 // PDF Endpoints
 // ----------------------------------------------
@@ -207,7 +206,6 @@ Route::middleware('feature:monitoring')->group(function () {
 Route::get('/auth/oneid/redirect', [OneIdAuthController::class, 'redirect'])->name('auth.oneid.redirect');
 Route::get('/auth/oneid/callback', [OneIdAuthController::class, 'callback'])->name('auth.oneid.callback');
 
-// CLAUDE-CHECKPOINT
 
 // Setup for installation of app
 // ----------------------------------------------
@@ -805,4 +803,3 @@ if (env('APP_ENV') === 'production' && env('RAILWAY_ENVIRONMENT')) {
     });
 }
 
-// CLAUDE-CHECKPOINT

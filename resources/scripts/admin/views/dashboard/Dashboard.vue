@@ -91,4 +91,3 @@ onMounted(() => {
   </BasePage>
 </template>
 
-// CLAUDE-CHECKPOINT

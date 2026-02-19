@@ -219,4 +219,3 @@ class UnsubscribeController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

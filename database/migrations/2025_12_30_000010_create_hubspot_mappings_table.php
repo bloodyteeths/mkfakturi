@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // CLAUDE-CHECKPOINT
         if (Schema::hasTable('hubspot_mappings')) {
             return;
         }

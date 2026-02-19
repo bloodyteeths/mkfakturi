@@ -191,4 +191,3 @@ class ItemPolicy
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -53,4 +53,3 @@ return new class extends Migration
         Schema::dropIfExists('item_categories');
     }
 };
-// CLAUDE-CHECKPOINT

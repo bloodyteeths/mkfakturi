@@ -101,4 +101,3 @@ class GatewayWebhookEvent extends Model
         return $this->status === 'failed' && $this->retry_count < $maxRetries;
     }
 }
-// CLAUDE-CHECKPOINT

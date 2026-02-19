@@ -861,4 +861,3 @@ function getFormatLabel(format) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

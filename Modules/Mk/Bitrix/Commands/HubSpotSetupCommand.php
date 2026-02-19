@@ -645,4 +645,3 @@ class HubSpotSetupCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

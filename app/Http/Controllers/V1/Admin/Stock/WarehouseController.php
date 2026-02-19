@@ -289,4 +289,3 @@ class WarehouseController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

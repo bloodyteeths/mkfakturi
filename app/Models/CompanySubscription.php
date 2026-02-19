@@ -231,4 +231,3 @@ class CompanySubscription extends Model
         return max(0, (int) $days);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -242,4 +242,3 @@ class PaddleWebhookTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

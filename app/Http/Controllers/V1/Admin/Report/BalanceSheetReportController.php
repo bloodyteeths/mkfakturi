@@ -111,4 +111,3 @@ class BalanceSheetReportController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

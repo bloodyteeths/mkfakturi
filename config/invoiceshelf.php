@@ -817,10 +817,8 @@ return [
 ];
 
 // LLM-CHECKPOINT
-// CLAUDE-CHECKPOINT
 
 // LLM-CHECKPOINT
 // CLAUDE-CHECKPOINT PAF-10: Added partner accounting navigation menu
 // CLAUDE-CHECKPOINT: Removed certificates menu entry - no UI component available
 // CLAUDE-CHECKPOINT: Set owner_only=true for Tax Types, Payment Modes, Custom Fields, Expense Category, Exchange Rate Provider
-// CLAUDE-CHECKPOINT

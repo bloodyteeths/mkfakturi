@@ -17,4 +17,3 @@ export default {
   taxes: [],
   warehouse_id: null, // Stock module: warehouse for stock movements
 }
-// CLAUDE-CHECKPOINT

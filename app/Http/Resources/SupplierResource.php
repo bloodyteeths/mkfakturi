@@ -34,4 +34,3 @@ class SupplierResource extends JsonResource
         ];
     }
 }
-// CLAUDE-CHECKPOINT

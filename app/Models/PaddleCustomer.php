@@ -19,4 +19,3 @@ class PaddleCustomer extends CashierCustomer
      */
     protected $table = 'paddle_customers';
 }
-// CLAUDE-CHECKPOINT

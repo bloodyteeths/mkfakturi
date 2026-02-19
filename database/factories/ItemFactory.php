@@ -85,5 +85,4 @@ class ItemFactory extends Factory
         return $code.$checkDigit;
     }
 
-    // CLAUDE-CHECKPOINT
 }

@@ -41,4 +41,3 @@ class ReplyTicketRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

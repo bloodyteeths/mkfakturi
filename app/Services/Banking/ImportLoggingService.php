@@ -258,4 +258,3 @@ class ImportLoggingService
     }
 }
 
-// CLAUDE-CHECKPOINT

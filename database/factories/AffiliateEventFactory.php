@@ -90,4 +90,3 @@ class AffiliateEventFactory extends Factory
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -88,4 +88,3 @@ class PaddleWebhookController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

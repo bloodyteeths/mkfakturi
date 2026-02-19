@@ -396,4 +396,3 @@ watch(modalActive, (newValue, oldValue) => {
   }
 })
 </script>
-// CLAUDE-CHECKPOINT

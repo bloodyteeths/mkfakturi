@@ -112,4 +112,3 @@ return [
     ],
 ];
 
-// CLAUDE-CHECKPOINT

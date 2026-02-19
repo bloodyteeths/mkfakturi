@@ -90,5 +90,4 @@ const tabs = computed(() => {
 function onChange(d) {
   emit('change', tabs.value[d])
 }
-// CLAUDE-CHECKPOINT
 </script>

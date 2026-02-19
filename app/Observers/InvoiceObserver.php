@@ -177,4 +177,3 @@ class InvoiceObserver
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -317,4 +317,3 @@ class ProjectReportController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

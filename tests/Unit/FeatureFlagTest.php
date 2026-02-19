@@ -88,4 +88,3 @@ class FeatureFlagTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

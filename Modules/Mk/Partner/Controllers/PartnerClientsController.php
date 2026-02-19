@@ -282,4 +282,3 @@ class PartnerClientsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -57,4 +57,3 @@ class OutreachFollowUp1Mail extends Mailable implements ShouldQueue
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

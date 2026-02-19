@@ -369,4 +369,3 @@ export default {
          bg-blue-600 text-white text-xs font-bold px-4 py-1 rounded-full;
 }
 </style>
-// CLAUDE-CHECKPOINT

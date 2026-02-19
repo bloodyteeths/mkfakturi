@@ -52,4 +52,3 @@ class CreditNoteItemResource extends JsonResource
     }
 }
 
-// CLAUDE-CHECKPOINT

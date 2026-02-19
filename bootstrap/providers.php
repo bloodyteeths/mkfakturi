@@ -16,4 +16,3 @@ return [
     // Bitrix24 CRM integration module
     Modules\Mk\Bitrix\Providers\BitrixServiceProvider::class,
 ];
-// CLAUDE-CHECKPOINT

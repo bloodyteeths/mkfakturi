@@ -192,4 +192,3 @@ class SupportContactController extends Controller
         return round($bytes, 2).' '.$units[$i];
     }
 }
-// CLAUDE-CHECKPOINT

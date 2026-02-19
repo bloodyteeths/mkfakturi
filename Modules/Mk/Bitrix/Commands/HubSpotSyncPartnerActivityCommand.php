@@ -364,4 +364,3 @@ class HubSpotSyncPartnerActivityCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

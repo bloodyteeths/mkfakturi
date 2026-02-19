@@ -489,4 +489,3 @@ class MappingScorerTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -379,4 +379,3 @@ class BitrixSetupCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

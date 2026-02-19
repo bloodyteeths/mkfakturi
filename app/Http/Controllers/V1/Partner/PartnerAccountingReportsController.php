@@ -240,4 +240,3 @@ class PartnerAccountingReportsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

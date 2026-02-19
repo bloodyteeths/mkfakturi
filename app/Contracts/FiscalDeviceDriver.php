@@ -74,4 +74,3 @@ interface FiscalDeviceDriver
      */
     public function getDriverName(): string;
 }
-// CLAUDE-CHECKPOINT

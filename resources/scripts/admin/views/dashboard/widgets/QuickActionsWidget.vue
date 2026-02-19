@@ -138,4 +138,3 @@ import abilities from '@/scripts/admin/stub/abilities'
 const userStore = useUserStore()
 </script>
 
-// CLAUDE-CHECKPOINT

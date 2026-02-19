@@ -19,4 +19,3 @@ class PaddleTransaction extends CashierTransaction
      */
     protected $table = 'paddle_transactions';
 }
-// CLAUDE-CHECKPOINT

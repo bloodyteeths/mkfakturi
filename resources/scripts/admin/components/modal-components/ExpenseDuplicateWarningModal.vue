@@ -95,4 +95,3 @@ function formatAmount(amount) {
   return `${symbol} ${formatted}`
 }
 </script>
-// CLAUDE-CHECKPOINT

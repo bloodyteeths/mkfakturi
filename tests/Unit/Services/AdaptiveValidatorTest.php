@@ -582,4 +582,3 @@ class AdaptiveValidatorTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

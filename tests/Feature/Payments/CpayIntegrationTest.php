@@ -380,4 +380,3 @@ class CpayIntegrationTest extends TestCase
         return hash('sha256', $signatureString);
     }
 }
-// CLAUDE-CHECKPOINT

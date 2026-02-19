@@ -201,4 +201,3 @@ class CheckSubscriptionTier
         return "{$paddleBaseUrl}/checkout?{$params}";
     }
 }
-// CLAUDE-CHECKPOINT

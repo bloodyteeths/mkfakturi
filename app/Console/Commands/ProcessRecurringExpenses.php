@@ -64,4 +64,3 @@ class ProcessRecurringExpenses extends Command
         return 0;
     }
 }
-// CLAUDE-CHECKPOINT

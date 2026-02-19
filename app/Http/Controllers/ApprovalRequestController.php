@@ -259,4 +259,3 @@ class ApprovalRequestController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

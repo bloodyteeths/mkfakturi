@@ -159,4 +159,3 @@ class Payout extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

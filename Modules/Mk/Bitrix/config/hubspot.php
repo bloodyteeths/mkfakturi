@@ -60,4 +60,3 @@ return [
     ],
 ];
 
-// CLAUDE-CHECKPOINT

@@ -44,4 +44,3 @@ class InitialStockRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

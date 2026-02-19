@@ -57,4 +57,3 @@ return new class extends Migration
         Schema::dropIfExists('woocommerce_sync_log');
     }
 };
-// CLAUDE-CHECKPOINT

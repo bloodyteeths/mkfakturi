@@ -168,4 +168,3 @@ class TicketPolicy
         return true;
     }
 }
-// CLAUDE-CHECKPOINT

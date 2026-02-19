@@ -293,4 +293,3 @@ class BitrixSetupCommandTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

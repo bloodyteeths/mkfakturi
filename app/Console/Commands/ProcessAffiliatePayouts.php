@@ -251,4 +251,3 @@ class ProcessAffiliatePayouts extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -58,4 +58,3 @@ class BitrixAuthMiddleware
     }
 }
 
-// CLAUDE-CHECKPOINT

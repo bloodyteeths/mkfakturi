@@ -155,4 +155,3 @@ class RazvigorecDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

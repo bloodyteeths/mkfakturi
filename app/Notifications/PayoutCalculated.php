@@ -78,4 +78,3 @@ class PayoutCalculated extends Notification implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

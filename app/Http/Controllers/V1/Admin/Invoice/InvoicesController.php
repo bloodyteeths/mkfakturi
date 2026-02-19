@@ -269,4 +269,3 @@ class InvoicesController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

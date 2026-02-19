@@ -43,4 +43,3 @@ class ItemCategoryRequest extends FormRequest
         return $data;
     }
 }
-// CLAUDE-CHECKPOINT

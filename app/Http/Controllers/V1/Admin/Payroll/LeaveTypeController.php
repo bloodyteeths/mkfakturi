@@ -32,4 +32,3 @@ class LeaveTypeController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

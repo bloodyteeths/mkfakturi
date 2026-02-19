@@ -135,4 +135,3 @@ class SupplierStatsController extends Controller
             ]]);
     }
 }
-// CLAUDE-CHECKPOINT

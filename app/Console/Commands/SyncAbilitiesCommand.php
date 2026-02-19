@@ -85,4 +85,3 @@ class SyncAbilitiesCommand extends Command
         }
     }
 }
-// CLAUDE-CHECKPOINT

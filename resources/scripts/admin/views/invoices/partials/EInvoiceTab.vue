@@ -405,4 +405,3 @@ function getSubmissionStatusVariant(status) {
   return variants[status] || 'gray'
 }
 </script>
-// CLAUDE-CHECKPOINT

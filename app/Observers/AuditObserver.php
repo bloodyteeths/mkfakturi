@@ -333,4 +333,3 @@ class AuditObserver
     }
 }
 
-// CLAUDE-CHECKPOINT

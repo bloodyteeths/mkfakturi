@@ -92,4 +92,3 @@ class StockInvoiceItemObserver
         }
     }
 }
-// CLAUDE-CHECKPOINT

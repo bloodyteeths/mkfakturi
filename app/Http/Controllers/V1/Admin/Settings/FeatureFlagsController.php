@@ -156,4 +156,3 @@ class FeatureFlagsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

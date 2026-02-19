@@ -195,4 +195,3 @@ export const useYearEndClosingStore = defineStore('yearEndClosing', () => {
     reset,
   }
 })
-// CLAUDE-CHECKPOINT

@@ -647,4 +647,3 @@ class IntelligentFieldMapper
     }
 }
 
-// CLAUDE-CHECKPOINT

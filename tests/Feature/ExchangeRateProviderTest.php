@@ -127,4 +127,3 @@ class ExchangeRateProviderTest extends TestCase
         );
     }
 }
-// CLAUDE-CHECKPOINT

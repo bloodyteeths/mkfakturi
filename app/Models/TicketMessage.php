@@ -46,4 +46,3 @@ class TicketMessage extends BaseMessage implements HasMedia
         });
     }
 }
-// CLAUDE-CHECKPOINT

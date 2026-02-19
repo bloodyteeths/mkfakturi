@@ -276,4 +276,3 @@ class InventoryDocument extends Model
         return $labels[$this->status] ?? $this->status;
     }
 }
-// CLAUDE-CHECKPOINT

@@ -105,4 +105,3 @@ class ContributionBaseCapTest extends TestCase
         $this->assertEquals($expectedTax, $result->incomeTax);
     }
 }
-// CLAUDE-CHECKPOINT

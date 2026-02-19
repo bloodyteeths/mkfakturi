@@ -57,4 +57,3 @@ class GenerateProformaInvoicePdfJob implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

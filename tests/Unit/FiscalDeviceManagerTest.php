@@ -415,4 +415,3 @@ class FiscalDeviceManagerTest extends TestCase
         $this->assertNull($exception->getDeviceSerial());
     }
 }
-// CLAUDE-CHECKPOINT

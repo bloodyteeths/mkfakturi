@@ -291,4 +291,3 @@ class FuzzyMatcher implements MatcherInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -675,4 +675,3 @@ class PartnerJournalExportController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

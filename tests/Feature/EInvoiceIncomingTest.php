@@ -299,4 +299,3 @@ class EInvoiceIncomingTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

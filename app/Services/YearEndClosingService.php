@@ -707,4 +707,3 @@ class YearEndClosingService
     }
 
 }
-// CLAUDE-CHECKPOINT

@@ -144,4 +144,3 @@ class EnsureCompanySubscription
         return $currentPlanLevel >= $requiredPlanLevel;
     }
 }
-// CLAUDE-CHECKPOINT

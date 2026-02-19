@@ -155,4 +155,3 @@ class AlphaDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

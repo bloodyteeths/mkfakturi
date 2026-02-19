@@ -122,4 +122,3 @@ function onDownload() {
 </script>
 
 // CLAUDE-CHECKPOINT: Added GeneralLedger and JournalEntries tabs
-// CLAUDE-CHECKPOINT

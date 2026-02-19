@@ -525,4 +525,3 @@ function balanceColorClass(balance) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

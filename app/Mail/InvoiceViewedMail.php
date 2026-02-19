@@ -35,4 +35,3 @@ class InvoiceViewedMail extends Mailable
             ->markdown('emails.viewed.invoice', ['data' => $this->data]);
     }
 }
-// CLAUDE-CHECKPOINT

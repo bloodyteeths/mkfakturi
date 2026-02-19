@@ -213,4 +213,3 @@ export const usePeriodLockStore = (useWindow = false) => {
     },
   })()
 }
-// CLAUDE-CHECKPOINT

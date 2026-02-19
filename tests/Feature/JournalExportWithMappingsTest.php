@@ -559,4 +559,3 @@ class JournalExportWithMappingsTest extends TestCase
         $this->assertGreaterThan(0, $defaultCount);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -429,4 +429,3 @@ class PostmarkOutreachService
     }
 }
 
-// CLAUDE-CHECKPOINT

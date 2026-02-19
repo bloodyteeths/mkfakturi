@@ -129,4 +129,3 @@ class BitrixLeadMap extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -402,4 +402,3 @@ class CreateRetroactiveStockMovements extends Command
         }
     }
 }
-// CLAUDE-CHECKPOINT

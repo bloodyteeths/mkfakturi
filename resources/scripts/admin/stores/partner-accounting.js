@@ -889,4 +889,3 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
   },
 })
 
-// CLAUDE-CHECKPOINT

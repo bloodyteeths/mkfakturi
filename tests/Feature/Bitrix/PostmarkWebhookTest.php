@@ -461,4 +461,3 @@ class PostmarkWebhookTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

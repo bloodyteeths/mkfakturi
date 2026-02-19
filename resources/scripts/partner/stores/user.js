@@ -122,4 +122,3 @@ export const useUserStore = defineStore('partnerUser', () => {
     hasAbilities
   }
 })
-// CLAUDE-CHECKPOINT

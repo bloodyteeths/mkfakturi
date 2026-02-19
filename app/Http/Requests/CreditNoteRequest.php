@@ -243,4 +243,3 @@ class CreditNoteRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

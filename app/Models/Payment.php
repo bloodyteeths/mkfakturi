@@ -569,4 +569,3 @@ class Payment extends Model implements HasMedia
     }
 }
 
-// CLAUDE-CHECKPOINT

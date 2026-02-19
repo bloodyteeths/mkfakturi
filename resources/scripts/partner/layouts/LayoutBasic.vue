@@ -205,7 +205,6 @@ const hasAbilities = (ability) => {
 }
 
 // Navigate to partner console
-// CLAUDE-CHECKPOINT
 const goToConsole = () => {
   router.push('/admin/console')
 }

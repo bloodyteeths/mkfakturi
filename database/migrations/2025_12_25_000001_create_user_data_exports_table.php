@@ -46,4 +46,3 @@ return new class extends Migration
         Schema::dropIfExists('user_data_exports');
     }
 };
-// CLAUDE-CHECKPOINT

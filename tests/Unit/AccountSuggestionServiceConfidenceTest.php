@@ -398,4 +398,3 @@ class AccountSuggestionServiceConfidenceTest extends TestCase
         $this->assertEquals($company2ReceivablesAccount->id, $result2['debit_account_id']);
     }
 }
-// CLAUDE-CHECKPOINT

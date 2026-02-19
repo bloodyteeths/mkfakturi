@@ -41,4 +41,3 @@ const labelStatus = computed(() => {
   }
 })
 </script>
-// CLAUDE-CHECKPOINT

@@ -456,4 +456,3 @@ export default async function FacturinoVsExcelPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

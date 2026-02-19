@@ -155,4 +155,3 @@ class ExpertSxDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

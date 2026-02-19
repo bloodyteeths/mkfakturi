@@ -360,7 +360,6 @@ class PartnerAccountController extends Controller
             'data' => $updatedAccount,
         ]);
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Delete an account.
@@ -588,7 +587,6 @@ class PartnerAccountController extends Controller
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
             ->header('Content-Length', strlen($csvContent));
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Get partner from authenticated request.
@@ -652,7 +650,5 @@ class PartnerAccountController extends Controller
 
         return $descendantIds;
     }
-    // CLAUDE-CHECKPOINT
 }
 
-// CLAUDE-CHECKPOINT

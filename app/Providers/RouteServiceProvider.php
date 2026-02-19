@@ -64,5 +64,4 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
     }
-    // CLAUDE-CHECKPOINT
 }

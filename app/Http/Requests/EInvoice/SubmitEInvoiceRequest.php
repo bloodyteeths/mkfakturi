@@ -81,4 +81,3 @@ class SubmitEInvoiceRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

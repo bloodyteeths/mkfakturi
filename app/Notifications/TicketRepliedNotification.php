@@ -76,4 +76,3 @@ class TicketRepliedNotification extends Notification implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

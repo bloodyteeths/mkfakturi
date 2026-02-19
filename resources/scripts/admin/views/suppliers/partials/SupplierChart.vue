@@ -226,4 +226,3 @@ async function onChangeYear(yearData) {
   return true
 }
 </script>
-// CLAUDE-CHECKPOINT

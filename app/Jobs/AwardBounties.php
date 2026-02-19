@@ -211,4 +211,3 @@ class AwardBounties implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

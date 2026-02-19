@@ -152,4 +152,3 @@ class TicketMessageController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -96,5 +96,4 @@ async function addSupplier() {
   router.push({ name: 'suppliers.create' })
 }
 </script>
-// CLAUDE-CHECKPOINT
 

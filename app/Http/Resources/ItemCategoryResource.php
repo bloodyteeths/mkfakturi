@@ -22,4 +22,3 @@ class ItemCategoryResource extends JsonResource
         ];
     }
 }
-// CLAUDE-CHECKPOINT

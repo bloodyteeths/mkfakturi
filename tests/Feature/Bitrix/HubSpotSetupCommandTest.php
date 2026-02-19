@@ -353,4 +353,3 @@ class HubSpotSetupCommandTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -112,4 +112,3 @@ class FeatureHelper
     }
 }
 
-// CLAUDE-CHECKPOINT

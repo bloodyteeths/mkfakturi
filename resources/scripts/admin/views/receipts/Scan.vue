@@ -280,5 +280,4 @@ function createBill() {
     }
   })
 }
-// CLAUDE-CHECKPOINT
 </script>

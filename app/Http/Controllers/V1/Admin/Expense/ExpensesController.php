@@ -182,4 +182,3 @@ class ExpensesController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

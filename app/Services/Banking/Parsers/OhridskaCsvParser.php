@@ -163,4 +163,3 @@ class OhridskaCsvParser extends AbstractCsvParser
     }
 }
 
-// CLAUDE-CHECKPOINT

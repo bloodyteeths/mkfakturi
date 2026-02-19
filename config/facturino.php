@@ -58,4 +58,3 @@ return [
         'psd2' => '1.0.0',
     ],
 ];
-// CLAUDE-CHECKPOINT

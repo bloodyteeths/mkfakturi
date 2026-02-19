@@ -98,4 +98,3 @@ class SyncWooCommerceOrdersJob implements ShouldQueue
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

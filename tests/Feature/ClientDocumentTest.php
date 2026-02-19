@@ -266,4 +266,3 @@ describe('Partner Document Review', function () {
     });
 });
 
-// CLAUDE-CHECKPOINT

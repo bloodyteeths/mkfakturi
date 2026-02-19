@@ -503,4 +503,3 @@ class EInvoice extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

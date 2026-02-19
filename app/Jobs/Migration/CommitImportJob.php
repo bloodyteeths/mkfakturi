@@ -541,7 +541,6 @@ class CommitImportJob implements ShouldQueue
         ];
     }
 
-    // CLAUDE-CHECKPOINT
 
     /**
      * Commit payments

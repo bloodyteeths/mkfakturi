@@ -482,4 +482,3 @@ class MultiTenantAccountingTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

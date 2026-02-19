@@ -223,4 +223,3 @@ class CommissionCalculatorService
     }
 }
 
-// CLAUDE-CHECKPOINT

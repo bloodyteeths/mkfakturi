@@ -404,4 +404,3 @@ class PartnerInvitationController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

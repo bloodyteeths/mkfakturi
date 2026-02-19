@@ -42,4 +42,3 @@ class GenerateCreditNotePdfJob implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

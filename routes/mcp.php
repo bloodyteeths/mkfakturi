@@ -32,4 +32,3 @@ Route::middleware(['mcp.token'])->prefix('internal/mcp')->group(function () {
     Route::post('/scan-anomalies', [McpController::class, 'scanAnomalies']);
 });
 
-// CLAUDE-CHECKPOINT

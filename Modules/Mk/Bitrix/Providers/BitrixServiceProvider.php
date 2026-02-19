@@ -92,4 +92,3 @@ class BitrixServiceProvider extends ServiceProvider
     }
 }
 
-// CLAUDE-CHECKPOINT

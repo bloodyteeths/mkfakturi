@@ -472,4 +472,3 @@ export default async function SmetkovodstvoZaPocetniciPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

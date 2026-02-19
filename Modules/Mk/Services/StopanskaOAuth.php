@@ -164,4 +164,3 @@ class StopanskaOAuth extends Psd2Client
     }
 }
 
-// CLAUDE-CHECKPOINT

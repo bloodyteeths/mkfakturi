@@ -56,4 +56,3 @@ class ReconciliationPosted
     }
 }
 
-// CLAUDE-CHECKPOINT

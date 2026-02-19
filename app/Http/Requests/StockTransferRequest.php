@@ -51,4 +51,3 @@ class StockTransferRequest extends FormRequest
         ];
     }
 }
-// CLAUDE-CHECKPOINT

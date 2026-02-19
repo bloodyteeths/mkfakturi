@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-// CLAUDE-CHECKPOINT
 
 /**
  * Handles Macedonian eID/OneID OpenID Connect authentication flow.
@@ -208,4 +207,3 @@ class OneIdAuthController extends Controller
         return $user;
     }
 }
-// CLAUDE-CHECKPOINT

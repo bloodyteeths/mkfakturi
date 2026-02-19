@@ -731,4 +731,3 @@ class CreditNote extends Model implements HasMedia
     }
 }
 
-// CLAUDE-CHECKPOINT

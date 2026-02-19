@@ -240,4 +240,3 @@ class UjpPortalClient
         return $tempFile;
     }
 }
-// CLAUDE-CHECKPOINT

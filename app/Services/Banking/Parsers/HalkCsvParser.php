@@ -163,4 +163,3 @@ class HalkCsvParser extends AbstractCsvParser
     }
 }
 
-// CLAUDE-CHECKPOINT

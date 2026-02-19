@@ -34,4 +34,3 @@ class Ticket extends BaseTicket
         );
     }
 }
-// CLAUDE-CHECKPOINT

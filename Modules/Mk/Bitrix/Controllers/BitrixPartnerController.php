@@ -268,4 +268,3 @@ class BitrixPartnerController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

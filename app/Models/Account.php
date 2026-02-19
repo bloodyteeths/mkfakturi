@@ -194,4 +194,3 @@ class Account extends Model
         ];
     }
 }
-// CLAUDE-CHECKPOINT

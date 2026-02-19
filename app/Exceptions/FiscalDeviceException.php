@@ -35,4 +35,3 @@ class FiscalDeviceException extends RuntimeException
         return $this->deviceSerial;
     }
 }
-// CLAUDE-CHECKPOINT

@@ -417,4 +417,3 @@ class CompanySubscriptionTest extends TestCase
         $this->assertEquals('verified', $accountant->kyc_status);
     }
 }
-// CLAUDE-CHECKPOINT

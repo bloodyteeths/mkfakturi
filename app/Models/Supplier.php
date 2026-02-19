@@ -258,4 +258,3 @@ class Supplier extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

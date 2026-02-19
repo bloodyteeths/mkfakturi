@@ -223,4 +223,3 @@ class ClientDocument extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

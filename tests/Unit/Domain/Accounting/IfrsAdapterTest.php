@@ -277,4 +277,3 @@ class IfrsAdapterTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -110,4 +110,3 @@ class DailyClosing extends Model
             ->exists();
     }
 }
-// CLAUDE-CHECKPOINT

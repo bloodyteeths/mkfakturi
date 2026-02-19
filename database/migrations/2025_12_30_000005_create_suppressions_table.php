@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // CLAUDE-CHECKPOINT
         if (Schema::hasTable('suppressions')) {
             // Add missing columns if table exists
             Schema::table('suppressions', function (Blueprint $table) {

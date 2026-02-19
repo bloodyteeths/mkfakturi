@@ -423,4 +423,3 @@ class BitrixImportLeadsTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

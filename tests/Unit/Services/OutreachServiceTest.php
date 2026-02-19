@@ -515,4 +515,3 @@ class OutreachServiceTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -188,4 +188,3 @@ class NlbOAuth extends Psd2Client
     }
 }
 
-// CLAUDE-CHECKPOINT

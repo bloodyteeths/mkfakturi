@@ -228,4 +228,3 @@ onMounted(() => {
   fetchData()
 })
 </script>
-// CLAUDE-CHECKPOINT

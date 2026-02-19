@@ -885,4 +885,3 @@ export default async function BlogPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

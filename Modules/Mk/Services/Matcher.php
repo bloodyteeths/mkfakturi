@@ -492,7 +492,6 @@ class Matcher
         return min($score, 1.0);
     }
 
-    // CLAUDE-CHECKPOINT
 
     /**
      * Calculate amount matching score
@@ -700,4 +699,3 @@ class Matcher
     }
 }
 
-// CLAUDE-CHECKPOINT

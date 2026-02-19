@@ -29,4 +29,3 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   return <ContactForm locale={locale} />
 }
-// CLAUDE-CHECKPOINT

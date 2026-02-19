@@ -300,4 +300,3 @@ class AdminTicketController extends Controller
         return $ticketCount > 0 ? round($totalHours / $ticketCount, 2) : 0;
     }
 }
-// CLAUDE-CHECKPOINT

@@ -121,4 +121,3 @@ async function doUndo() {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT

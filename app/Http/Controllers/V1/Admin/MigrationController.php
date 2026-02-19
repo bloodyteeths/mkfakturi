@@ -875,7 +875,6 @@ class MigrationController extends Controller
             return response()->json(['message' => 'Download failed: '.$e->getMessage()], 500);
         }
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Get list of available templates
@@ -939,7 +938,5 @@ class MigrationController extends Controller
             ],
         ]);
     }
-    // CLAUDE-CHECKPOINT
 }
 
-// CLAUDE-CHECKPOINT

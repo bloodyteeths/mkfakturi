@@ -214,4 +214,3 @@ class InventoryDocumentService
         return InventoryDocument::generateDocumentNumber($companyId, $type);
     }
 }
-// CLAUDE-CHECKPOINT

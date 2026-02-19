@@ -76,4 +76,3 @@ return new class extends Migration
         Schema::dropIfExists('signature_logs');
     }
 };
-// CLAUDE-CHECKPOINT

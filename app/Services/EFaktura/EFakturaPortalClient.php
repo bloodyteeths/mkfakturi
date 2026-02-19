@@ -207,4 +207,3 @@ class EFakturaPortalClient
         return null;
     }
 }
-// CLAUDE-CHECKPOINT

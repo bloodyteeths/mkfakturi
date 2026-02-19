@@ -667,4 +667,3 @@ function deleteRun() {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

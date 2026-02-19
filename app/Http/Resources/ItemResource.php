@@ -50,5 +50,4 @@ class ItemResource extends JsonResource
         ];
     }
 
-    // CLAUDE-CHECKPOINT
 }

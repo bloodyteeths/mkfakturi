@@ -504,4 +504,3 @@ export default async function UpravuvanjeSoRashodiPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

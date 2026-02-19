@@ -111,4 +111,3 @@ class TrialBalanceReportController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

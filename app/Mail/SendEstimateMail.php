@@ -67,4 +67,3 @@ class SendEstimateMail extends Mailable
         return $mailContent;
     }
 }
-// CLAUDE-CHECKPOINT

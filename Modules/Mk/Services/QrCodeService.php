@@ -605,4 +605,3 @@ class QrCodeService
     }
 }
 
-// CLAUDE-CHECKPOINT

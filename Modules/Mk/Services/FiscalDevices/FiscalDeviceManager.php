@@ -141,4 +141,3 @@ class FiscalDeviceManager
         return $this->defaultConnectionTypes[strtolower($deviceType)] ?? 'serial';
     }
 }
-// CLAUDE-CHECKPOINT

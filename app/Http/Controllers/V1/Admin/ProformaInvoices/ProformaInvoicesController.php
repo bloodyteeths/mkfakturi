@@ -263,4 +263,3 @@ class ProformaInvoicesController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

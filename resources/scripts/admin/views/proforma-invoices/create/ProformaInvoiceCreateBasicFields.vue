@@ -96,4 +96,3 @@ const companyStore = useCompanyStore()
 
 const selectedSettings = computed(() => companyStore.selectedCompanySettings || {})
 </script>
-// CLAUDE-CHECKPOINT

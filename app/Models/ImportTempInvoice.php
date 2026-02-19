@@ -430,7 +430,6 @@ class ImportTempInvoice extends Model
 
         return null;
     }
-    // CLAUDE-CHECKPOINT
 
     public function getValidationSummary()
     {

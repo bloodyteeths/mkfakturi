@@ -800,7 +800,6 @@ export default {
     }
   }
 }
-// CLAUDE-CHECKPOINT
 </script>
 
 <style scoped>

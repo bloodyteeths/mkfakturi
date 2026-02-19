@@ -193,4 +193,3 @@ function getAllFromStore(store) {
     request.onerror = () => reject(request.error)
   })
 }
-// CLAUDE-CHECKPOINT

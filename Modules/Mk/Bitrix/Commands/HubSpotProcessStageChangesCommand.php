@@ -372,4 +372,3 @@ class HubSpotProcessStageChangesCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

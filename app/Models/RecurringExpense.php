@@ -167,4 +167,3 @@ class RecurringExpense extends Model
         $this->update(['is_active' => true]);
     }
 }
-// CLAUDE-CHECKPOINT

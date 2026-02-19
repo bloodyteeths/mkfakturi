@@ -77,5 +77,4 @@ class ItemsRequest extends FormRequest
         ];
     }
 
-    // CLAUDE-CHECKPOINT
 }

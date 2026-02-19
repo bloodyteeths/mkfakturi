@@ -70,4 +70,3 @@ class CpayCallbackController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

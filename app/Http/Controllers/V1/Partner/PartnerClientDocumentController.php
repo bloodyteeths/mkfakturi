@@ -353,4 +353,3 @@ class PartnerClientDocumentController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -309,4 +309,3 @@ enum PartnerPermission: string
     }
 }
 
-// CLAUDE-CHECKPOINT

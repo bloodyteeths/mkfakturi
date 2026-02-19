@@ -621,4 +621,3 @@ export default async function GodishnaSmetka2025Page({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

@@ -154,4 +154,3 @@ class ProcessTrialExpirations extends Command
         return $count;
     }
 }
-// CLAUDE-CHECKPOINT

@@ -582,4 +582,3 @@ class MappingScorer
     }
 }
 
-// CLAUDE-CHECKPOINT

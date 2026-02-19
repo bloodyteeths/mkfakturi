@@ -246,4 +246,3 @@ class ImportPostmarkContactsCommand extends Command
         return ucfirst($domainParts[0] ?? $email);
     }
 }
-// CLAUDE-CHECKPOINT

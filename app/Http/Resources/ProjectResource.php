@@ -102,4 +102,3 @@ class ProjectResource extends JsonResource
     }
 }
 
-// CLAUDE-CHECKPOINT

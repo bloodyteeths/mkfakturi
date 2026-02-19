@@ -328,4 +328,3 @@ async function exportReport(format) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

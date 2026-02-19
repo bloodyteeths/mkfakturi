@@ -596,4 +596,3 @@ loadProformaInvoice()
     <SendProformaInvoiceModal @update="updateSentProformaInvoice" />
   </BasePage>
 </template>
-// CLAUDE-CHECKPOINT

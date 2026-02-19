@@ -187,5 +187,4 @@ watch(
   }
 )
 
-// CLAUDE-CHECKPOINT
 </script>

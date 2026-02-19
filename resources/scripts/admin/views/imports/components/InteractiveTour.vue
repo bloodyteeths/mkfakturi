@@ -387,5 +387,4 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
-// CLAUDE-CHECKPOINT
 </script>

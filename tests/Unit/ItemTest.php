@@ -133,4 +133,3 @@ test('generated EAN-13 barcode has valid check digit', function () {
     expect($actualCheckDigit)->toBe($calculatedCheckDigit);
 });
 
-// CLAUDE-CHECKPOINT

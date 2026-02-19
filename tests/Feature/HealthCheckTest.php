@@ -124,4 +124,3 @@ class HealthCheckTest extends TestCase
         $this->assertTrue($data['checks']['database']);
     }
 }
-// CLAUDE-CHECKPOINT

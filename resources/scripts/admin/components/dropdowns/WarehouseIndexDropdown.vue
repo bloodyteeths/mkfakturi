@@ -122,4 +122,3 @@ function removeWarehouse(id) {
     })
 }
 </script>
-// CLAUDE-CHECKPOINT

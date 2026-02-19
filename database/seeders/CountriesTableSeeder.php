@@ -12,7 +12,6 @@ class CountriesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // CLAUDE-CHECKPOINT
         // Use upsert for idempotent seeding - safe to run multiple times without data loss
         $countries = [
             ['id' => 1, 'code' => 'AF', 'name' => 'Afghanistan', 'phonecode' => 93],

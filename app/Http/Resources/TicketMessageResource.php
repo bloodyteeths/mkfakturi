@@ -73,4 +73,3 @@ class TicketMessageResource extends JsonResource
         ];
     }
 }
-// CLAUDE-CHECKPOINT

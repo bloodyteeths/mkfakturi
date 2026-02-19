@@ -470,4 +470,3 @@ onMounted(() => {
   loadTickets()
 })
 </script>
-// CLAUDE-CHECKPOINT

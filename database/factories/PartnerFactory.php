@@ -72,4 +72,3 @@ class PartnerFactory extends Factory
     }
 }
 
-// CLAUDE-CHECKPOINT

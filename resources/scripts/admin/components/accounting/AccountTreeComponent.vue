@@ -98,4 +98,3 @@ function handleDelete(account) {
 }
 </style>
 
-// CLAUDE-CHECKPOINT

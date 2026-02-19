@@ -33,4 +33,3 @@ class DeleteProformaInvoiceRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

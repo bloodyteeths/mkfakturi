@@ -108,4 +108,3 @@ class RecurringExpenseTest extends TestCase
         $this->assertFalse($dueExpenses->contains($futureExpense));
     }
 }
-// CLAUDE-CHECKPOINT

@@ -45,4 +45,3 @@ const statusLabel = computed(() => {
   return t(`e_invoice.status_${props.status.toLowerCase()}`)
 })
 </script>
-// CLAUDE-CHECKPOINT

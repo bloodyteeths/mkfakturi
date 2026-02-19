@@ -48,4 +48,3 @@ return new class extends Migration
         Schema::dropIfExists('inventory_document_items');
     }
 };
-// CLAUDE-CHECKPOINT

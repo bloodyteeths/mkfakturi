@@ -110,7 +110,6 @@ async function deletePayment(paymentId) {
 onMounted(() => {
   loadBill()
 })
-// CLAUDE-CHECKPOINT
 </script>
 
 <template>

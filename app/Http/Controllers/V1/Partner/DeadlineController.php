@@ -358,4 +358,3 @@ class DeadlineController extends Controller
         return Partner::where('user_id', $user->id)->first();
     }
 }
-// CLAUDE-CHECKPOINT

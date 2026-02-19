@@ -162,4 +162,3 @@ class BankToken extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

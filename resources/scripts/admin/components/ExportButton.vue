@@ -150,4 +150,3 @@ async function pollExportStatus(companyId, exportJobId, attempts = 0) {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT

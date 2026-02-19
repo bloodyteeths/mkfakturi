@@ -372,4 +372,3 @@ class AffiliateCommissionWebhookTest extends TestCase
         }
     }
 }
-// CLAUDE-CHECKPOINT

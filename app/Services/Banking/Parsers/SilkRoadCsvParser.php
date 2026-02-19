@@ -163,4 +163,3 @@ class SilkRoadCsvParser extends AbstractCsvParser
     }
 }
 
-// CLAUDE-CHECKPOINT

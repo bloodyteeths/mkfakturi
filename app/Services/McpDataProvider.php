@@ -2749,4 +2749,3 @@ class McpDataProvider
     }
 }
 
-// CLAUDE-CHECKPOINT

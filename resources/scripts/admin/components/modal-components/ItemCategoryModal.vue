@@ -157,4 +157,3 @@ function closeModal() {
   }, 300)
 }
 </script>
-// CLAUDE-CHECKPOINT

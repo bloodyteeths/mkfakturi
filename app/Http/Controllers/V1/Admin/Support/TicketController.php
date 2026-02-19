@@ -168,4 +168,3 @@ class TicketController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -330,4 +330,3 @@ export const useTicketStore = defineStore({
     },
   },
 })
-// CLAUDE-CHECKPOINT

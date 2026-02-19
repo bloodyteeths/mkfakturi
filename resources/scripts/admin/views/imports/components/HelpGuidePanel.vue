@@ -300,5 +300,4 @@ const openVideoTutorial = () => {
   // This would open a video tutorial modal or external link
   window.open('https://example.com/migration-wizard-tutorial', '_blank')
 }
-// CLAUDE-CHECKPOINT
 </script>

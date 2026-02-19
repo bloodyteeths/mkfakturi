@@ -56,4 +56,3 @@ class ViewServiceProvider extends ServiceProvider
     }
 }
 
-// CLAUDE-CHECKPOINT

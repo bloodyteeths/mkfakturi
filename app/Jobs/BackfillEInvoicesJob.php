@@ -311,4 +311,3 @@ class BackfillEInvoicesJob implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

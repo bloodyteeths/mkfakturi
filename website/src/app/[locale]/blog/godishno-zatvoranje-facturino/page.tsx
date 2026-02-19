@@ -875,4 +875,3 @@ export default async function YearEndClosingPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

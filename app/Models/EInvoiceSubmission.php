@@ -331,4 +331,3 @@ class EInvoiceSubmission extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

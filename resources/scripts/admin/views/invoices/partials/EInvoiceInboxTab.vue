@@ -467,4 +467,3 @@ function getStatusLabel(status) {
 }
 
 </script>
-// CLAUDE-CHECKPOINT

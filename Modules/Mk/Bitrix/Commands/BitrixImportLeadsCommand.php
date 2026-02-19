@@ -420,4 +420,3 @@ class BitrixImportLeadsCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

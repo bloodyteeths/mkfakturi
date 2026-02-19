@@ -176,4 +176,3 @@ class PartnerReferralsController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

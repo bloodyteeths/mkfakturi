@@ -205,4 +205,3 @@ class PaddlePaymentServiceTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

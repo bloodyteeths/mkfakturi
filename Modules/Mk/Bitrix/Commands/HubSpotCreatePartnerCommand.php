@@ -409,4 +409,3 @@ class HubSpotCreatePartnerCommand extends Command
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -207,4 +207,3 @@ class BankConnection extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

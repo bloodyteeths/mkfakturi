@@ -440,4 +440,3 @@ function formatMoney(amount) {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

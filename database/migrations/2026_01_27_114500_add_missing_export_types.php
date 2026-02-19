@@ -34,4 +34,3 @@ return new class extends Migration
         DB::statement("ALTER TABLE export_jobs MODIFY COLUMN type ENUM('invoices', 'bills', 'customers', 'suppliers', 'transactions', 'expenses', 'payments') NOT NULL");
     }
 };
-// CLAUDE-CHECKPOINT

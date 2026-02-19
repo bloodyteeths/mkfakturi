@@ -58,4 +58,3 @@ class DirectoryListingMail extends Mailable implements ShouldQueue
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

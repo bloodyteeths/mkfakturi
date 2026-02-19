@@ -628,4 +628,3 @@ export default async function PresmetkaNaPlataMkPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

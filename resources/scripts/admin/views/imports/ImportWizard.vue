@@ -405,5 +405,4 @@ onUnmounted(() => {
   // Stop any active polling when component unmounts
   importStore.stopProgressPolling()
 })
-// CLAUDE-CHECKPOINT
 </script>

@@ -362,4 +362,3 @@ onMounted(async () => {
   await loadValuation()
 })
 </script>
-// CLAUDE-CHECKPOINT

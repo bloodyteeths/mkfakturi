@@ -64,4 +64,3 @@ return new class extends Migration
         Schema::dropIfExists('account_suggestion_feedback');
     }
 };
-// CLAUDE-CHECKPOINT

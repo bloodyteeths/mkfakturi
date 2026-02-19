@@ -144,7 +144,6 @@ class Invoice extends Model implements HasMedia
         return $this->belongsTo(Project::class);
     }
 
-    // CLAUDE-CHECKPOINT
     /**
      * Get the e-invoice associated with this invoice
      */
@@ -941,7 +940,6 @@ class Invoice extends Model implements HasMedia
         return true;
     }
 
-    // CLAUDE-CHECKPOINT
     /**
      * Check if invoice has an associated e-invoice
      */

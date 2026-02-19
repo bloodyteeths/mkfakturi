@@ -448,4 +448,3 @@ describe('INV-01: Item Barcode and SKU Management', () => {
   })
 })
 
-// CLAUDE-CHECKPOINT

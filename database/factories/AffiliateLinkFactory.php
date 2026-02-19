@@ -44,4 +44,3 @@ class AffiliateLinkFactory extends Factory
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -432,4 +432,3 @@ onMounted(async () => {
   await loadSummary()
 })
 </script>
-// CLAUDE-CHECKPOINT

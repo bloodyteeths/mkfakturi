@@ -268,4 +268,3 @@ class ErpNetFpDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

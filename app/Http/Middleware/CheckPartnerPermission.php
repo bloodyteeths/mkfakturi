@@ -88,4 +88,3 @@ class CheckPartnerPermission
     }
 }
 
-// CLAUDE-CHECKPOINT

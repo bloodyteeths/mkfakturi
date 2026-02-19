@@ -75,4 +75,3 @@ class SignEInvoiceRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

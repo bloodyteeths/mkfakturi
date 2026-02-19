@@ -247,4 +247,3 @@ class ApprovalRequestTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

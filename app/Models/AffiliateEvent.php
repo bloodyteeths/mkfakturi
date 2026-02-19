@@ -160,4 +160,3 @@ class AffiliateEvent extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

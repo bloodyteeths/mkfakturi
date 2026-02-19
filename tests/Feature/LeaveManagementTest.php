@@ -368,4 +368,3 @@ class LeaveManagementTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

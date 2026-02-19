@@ -169,4 +169,3 @@ class LeaveCalculationService
     }
 }
 
-// CLAUDE-CHECKPOINT

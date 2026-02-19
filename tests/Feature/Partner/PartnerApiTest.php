@@ -381,4 +381,3 @@ class PartnerApiTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

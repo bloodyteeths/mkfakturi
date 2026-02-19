@@ -29,5 +29,4 @@ const props = defineProps({
 const logoUrl = computed(() => {
   return props.variant === 'clear' ? clearLogo : standardLogo
 })
-// CLAUDE-CHECKPOINT
 </script>

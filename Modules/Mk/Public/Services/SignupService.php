@@ -434,4 +434,3 @@ class SignupService
     }
 }
 
-// CLAUDE-CHECKPOINT

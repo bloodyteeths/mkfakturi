@@ -380,4 +380,3 @@ class MappingRuleSeeder extends Seeder
     }
 }
 
-// CLAUDE-CHECKPOINT

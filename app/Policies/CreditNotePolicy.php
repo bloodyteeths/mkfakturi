@@ -187,4 +187,3 @@ class CreditNotePolicy
     }
 }
 
-// CLAUDE-CHECKPOINT

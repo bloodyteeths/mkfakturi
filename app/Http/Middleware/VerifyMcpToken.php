@@ -51,4 +51,3 @@ class VerifyMcpToken
     }
 }
 
-// CLAUDE-CHECKPOINT

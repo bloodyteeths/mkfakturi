@@ -317,4 +317,3 @@ class McpToolsTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

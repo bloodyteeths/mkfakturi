@@ -117,4 +117,3 @@ class IncomeStatementReportController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

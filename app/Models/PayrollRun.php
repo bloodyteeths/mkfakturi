@@ -189,4 +189,3 @@ class PayrollRun extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

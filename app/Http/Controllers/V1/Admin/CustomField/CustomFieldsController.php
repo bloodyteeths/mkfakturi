@@ -108,4 +108,3 @@ class CustomFieldsController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

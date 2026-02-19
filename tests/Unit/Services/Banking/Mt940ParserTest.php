@@ -190,4 +190,3 @@ class Mt940ParserTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

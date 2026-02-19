@@ -38,4 +38,3 @@ const publicRoutes = [
 
 export default publicRoutes
 
-// CLAUDE-CHECKPOINT

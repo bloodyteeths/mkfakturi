@@ -46,4 +46,3 @@ trait TenantScope
     }
 }
 
-// CLAUDE-CHECKPOINT

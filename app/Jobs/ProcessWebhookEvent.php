@@ -773,4 +773,3 @@ class ProcessWebhookEvent implements ShouldQueue
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

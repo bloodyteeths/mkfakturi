@@ -145,4 +145,3 @@ class ExactMatcher implements MatcherInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

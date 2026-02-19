@@ -265,4 +265,3 @@ class SyncBankTransactions implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

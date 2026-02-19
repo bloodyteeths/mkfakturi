@@ -171,4 +171,3 @@ class ProformaInvoiceRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

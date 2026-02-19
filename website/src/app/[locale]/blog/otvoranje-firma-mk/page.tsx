@@ -460,4 +460,3 @@ export default async function OtvoranjeFirmaMkPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

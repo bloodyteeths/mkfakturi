@@ -52,4 +52,3 @@ class PartnerInviteMail extends Mailable implements ShouldQueue
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

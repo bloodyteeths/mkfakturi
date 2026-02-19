@@ -349,4 +349,3 @@ class BankTransaction extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

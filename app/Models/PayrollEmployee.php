@@ -151,4 +151,3 @@ class PayrollEmployee extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

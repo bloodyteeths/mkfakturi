@@ -322,4 +322,3 @@ class SignatureLog extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

@@ -385,4 +385,3 @@ function getTypeTextColor(type) {
   return colors[type] || 'text-gray-800'
 }
 </script>
-// CLAUDE-CHECKPOINT

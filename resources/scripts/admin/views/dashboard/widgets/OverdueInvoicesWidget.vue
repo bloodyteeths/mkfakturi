@@ -218,4 +218,3 @@ onMounted(() => {
 })
 </script>
 
-// CLAUDE-CHECKPOINT

@@ -795,4 +795,3 @@ export default async function BilansNaSostojbaPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

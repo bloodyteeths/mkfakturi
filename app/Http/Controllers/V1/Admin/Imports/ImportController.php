@@ -560,7 +560,6 @@ class ImportController extends Controller
                     }
                 }
                 break;
-                // CLAUDE-CHECKPOINT
 
             case 'items':
                 // Required fields for items
@@ -652,7 +651,6 @@ class ImportController extends Controller
                     $warnings[] = "Row {$rowNumber}: Tax type is provided but tax rate is missing";
                 }
                 break;
-                // CLAUDE-CHECKPOINT
 
             case 'expenses':
                 // Required fields for expenses
@@ -729,7 +727,6 @@ class ImportController extends Controller
                     $warnings[] = "Row {$rowNumber}: Customer name provided - will attempt to link expense to customer if found";
                 }
                 break;
-                // CLAUDE-CHECKPOINT
 
             case 'customers':
             default:
@@ -766,7 +763,6 @@ class ImportController extends Controller
             'warnings' => $warnings,
         ];
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Commit the import
@@ -1049,7 +1045,6 @@ class ImportController extends Controller
 
         return $invoice;
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Map CSV status to valid Invoice status constant
@@ -1193,7 +1188,6 @@ class ImportController extends Controller
 
         return $item;
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Import a payment record
@@ -1313,7 +1307,6 @@ class ImportController extends Controller
 
         return $payment;
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Import an expense record
@@ -1435,7 +1428,6 @@ class ImportController extends Controller
 
         return $expense;
     }
-    // CLAUDE-CHECKPOINT
 
     /**
      * Get import progress
@@ -1725,7 +1717,6 @@ class ImportController extends Controller
             ),
             default => $customerMappingRules, // Default to customer rules
         };
-        // CLAUDE-CHECKPOINT
 
         // Apply mapping suggestions to detected fields
         foreach ($detectedFields as $field) {

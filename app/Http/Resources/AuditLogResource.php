@@ -74,4 +74,3 @@ class AuditLogResource extends JsonResource
     }
 }
 
-// CLAUDE-CHECKPOINT

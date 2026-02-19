@@ -76,4 +76,3 @@ class CannedResponse extends Model
         return $query->where('category', $category);
     }
 }
-// CLAUDE-CHECKPOINT

@@ -226,4 +226,3 @@ class Suppression extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

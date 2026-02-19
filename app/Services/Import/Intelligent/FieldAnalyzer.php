@@ -557,4 +557,3 @@ class FieldAnalyzer
     }
 }
 
-// CLAUDE-CHECKPOINT

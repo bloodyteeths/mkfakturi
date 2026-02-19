@@ -321,4 +321,3 @@ class BankAuthController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

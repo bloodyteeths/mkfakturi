@@ -63,4 +63,3 @@ export default {
   name: 'BillingSuccess'
 }
 </script>
-// CLAUDE-CHECKPOINT

@@ -576,4 +576,3 @@ class StockReportsTest extends TestCase
         $this->assertLessThan(60000, $wac);
     }
 }
-// CLAUDE-CHECKPOINT

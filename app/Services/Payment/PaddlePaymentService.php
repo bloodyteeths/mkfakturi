@@ -298,4 +298,3 @@ class PaddlePaymentService
     }
 }
 
-// CLAUDE-CHECKPOINT

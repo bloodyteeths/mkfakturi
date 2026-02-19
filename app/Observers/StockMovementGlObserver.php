@@ -66,4 +66,3 @@ class StockMovementGlObserver
         }
     }
 }
-// CLAUDE-CHECKPOINT

@@ -752,4 +752,3 @@ class StockService
         ];
     }
 }
-// CLAUDE-CHECKPOINT

@@ -47,4 +47,3 @@ class UserInvitationMail extends Mailable
             ]);
     }
 }
-// CLAUDE-CHECKPOINT

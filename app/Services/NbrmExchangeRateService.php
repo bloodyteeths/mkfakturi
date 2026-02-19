@@ -456,4 +456,3 @@ class NbrmExchangeRateService implements ExchangeRateProvider
         }
     }
 }
-// CLAUDE-CHECKPOINT

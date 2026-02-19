@@ -106,4 +106,3 @@ class QrCodeGenerationTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

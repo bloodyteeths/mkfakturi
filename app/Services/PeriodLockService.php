@@ -196,4 +196,3 @@ class PeriodLockService
             ->get();
     }
 }
-// CLAUDE-CHECKPOINT

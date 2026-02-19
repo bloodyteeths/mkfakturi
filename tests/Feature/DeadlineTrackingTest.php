@@ -314,4 +314,3 @@ class DeadlineTrackingTest extends TestCase
         $this->assertDatabaseHas('deadlines', ['id' => $deadline->id]);
     }
 }
-// CLAUDE-CHECKPOINT

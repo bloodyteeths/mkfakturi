@@ -442,4 +442,3 @@ export default async function DigitalnoSmetkovodstvoPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

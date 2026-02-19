@@ -116,4 +116,3 @@ class NullAiProvider implements AiProviderInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

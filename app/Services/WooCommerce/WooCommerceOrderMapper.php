@@ -131,4 +131,3 @@ class WooCommerceOrderMapper
         return 'woo_order_'.$order['id'].'_'.$order['date_modified'];
     }
 }
-// CLAUDE-CHECKPOINT

@@ -421,4 +421,3 @@ class HealthController extends Controller
         }
     }
 }
-// CLAUDE-CHECKPOINT

@@ -590,4 +590,3 @@ export default async function TrudovoPravoOsnoviPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

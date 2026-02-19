@@ -53,4 +53,3 @@ return new class extends Migration
         Schema::dropIfExists('export_jobs');
     }
 };
-// CLAUDE-CHECKPOINT

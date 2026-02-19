@@ -128,4 +128,3 @@ class LeaveRequestRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

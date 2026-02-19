@@ -399,4 +399,3 @@ class BountyAwardTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

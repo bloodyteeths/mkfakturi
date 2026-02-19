@@ -81,4 +81,3 @@ class ExportJobTest extends TestCase
         $response->assertStatus(403);
     }
 }
-// CLAUDE-CHECKPOINT

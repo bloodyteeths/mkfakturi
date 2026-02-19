@@ -43,4 +43,3 @@ class ProformaInvoicePdfController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

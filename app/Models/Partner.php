@@ -210,7 +210,6 @@ class Partner extends Model
     /**
      * Get permissions for a specific company
      */
-    // CLAUDE-CHECKPOINT
     public function getPermissionsForCompany(int $companyId): array
     {
         $link = \DB::table('partner_company_links')
@@ -292,4 +291,3 @@ class Partner extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

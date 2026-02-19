@@ -171,4 +171,3 @@ Facturino Monitoring System
 EMAIL;
     }
 }
-// CLAUDE-CHECKPOINT

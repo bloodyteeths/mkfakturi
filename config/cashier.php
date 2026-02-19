@@ -104,4 +104,3 @@ return [
     'transaction_model' => \App\Models\PaddleTransaction::class,
 
 ];
-// CLAUDE-CHECKPOINT

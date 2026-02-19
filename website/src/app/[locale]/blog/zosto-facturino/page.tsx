@@ -352,4 +352,3 @@ export default async function ZostoFacturinoPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

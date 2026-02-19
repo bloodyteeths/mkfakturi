@@ -1354,4 +1354,3 @@ class HubSpotApiClient
     }
 }
 
-// CLAUDE-CHECKPOINT

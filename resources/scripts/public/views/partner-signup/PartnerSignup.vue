@@ -248,4 +248,3 @@ const submitForm = async () => {
 }
 </script>
 
-// CLAUDE-CHECKPOINT

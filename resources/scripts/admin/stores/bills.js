@@ -392,4 +392,3 @@ export const useBillsStore = (useWindow = false) => {
     },
   })()
 }
-// CLAUDE-CHECKPOINT

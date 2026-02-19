@@ -45,7 +45,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
                 ->group(base_path('routes/bitrix.php'));
         },
-        // CLAUDE-CHECKPOINT
     )
     ->withCommands([
         \App\Console\Commands\RefreshTemplateCache::class,
@@ -112,7 +111,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
             'bitrix.auth' => \Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware::class, // Bitrix CRM integration
         ]);
-        // CLAUDE-CHECKPOINT
 
         $middleware->priority([
             \Illuminate\Session\Middleware\StartSession::class,

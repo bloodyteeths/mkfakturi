@@ -134,4 +134,3 @@ class SupportContact extends Model
         return ucfirst($this->priority);
     }
 }
-// CLAUDE-CHECKPOINT

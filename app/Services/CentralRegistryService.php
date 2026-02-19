@@ -260,4 +260,3 @@ class CentralRegistryService
         return null;
     }
 }
-// CLAUDE-CHECKPOINT

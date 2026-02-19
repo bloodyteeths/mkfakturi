@@ -347,4 +347,3 @@ class BankAccount extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

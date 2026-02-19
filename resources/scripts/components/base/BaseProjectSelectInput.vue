@@ -110,4 +110,3 @@ async function addProject() {
   router.push({ name: 'projects.create' })
 }
 </script>
-// CLAUDE-CHECKPOINT

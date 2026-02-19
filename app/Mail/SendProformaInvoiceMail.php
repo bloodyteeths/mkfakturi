@@ -67,4 +67,3 @@ class SendProformaInvoiceMail extends Mailable
         return $mailContent;
     }
 }
-// CLAUDE-CHECKPOINT

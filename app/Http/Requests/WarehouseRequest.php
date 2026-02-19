@@ -64,4 +64,3 @@ class WarehouseRequest extends FormRequest
     }
 }
 
-// CLAUDE-CHECKPOINT

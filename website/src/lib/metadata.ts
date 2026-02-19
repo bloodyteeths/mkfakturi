@@ -34,4 +34,3 @@ export function buildPageMetadata(locale: string, path: string, meta: PageMeta) 
     },
   }
 }
-// CLAUDE-CHECKPOINT

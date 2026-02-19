@@ -98,7 +98,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Client Document Upload Portal (P8-01)
         Gate::policy(\App\Models\ClientDocument::class, \App\Policies\ClientDocumentPolicy::class);
-        // CLAUDE-CHECKPOINT
 
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
@@ -133,7 +132,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Register Fiscal Device Manager as singleton (P10-02)
         $this->app->singleton(\Modules\Mk\Services\FiscalDevices\FiscalDeviceManager::class);
-        // CLAUDE-CHECKPOINT
 
         // Register AI services
         $this->app->singleton(McpDataProvider::class, function ($app) {

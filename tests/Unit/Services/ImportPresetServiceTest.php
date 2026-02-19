@@ -193,4 +193,3 @@ class ImportPresetServiceTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

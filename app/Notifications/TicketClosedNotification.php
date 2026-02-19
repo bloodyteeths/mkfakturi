@@ -69,4 +69,3 @@ class TicketClosedNotification extends Notification implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

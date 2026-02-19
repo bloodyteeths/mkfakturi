@@ -577,4 +577,3 @@ class BackfillTaxReturnsJob implements ShouldQueue
     }
 }
 
-// CLAUDE-CHECKPOINT

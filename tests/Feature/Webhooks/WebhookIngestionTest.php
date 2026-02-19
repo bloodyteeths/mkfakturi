@@ -80,4 +80,3 @@ class WebhookIngestionTest extends TestCase
         $response->assertJson(['error' => 'Missing company_id']);
     }
 }
-// CLAUDE-CHECKPOINT

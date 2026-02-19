@@ -126,4 +126,3 @@ class CompanyReferral extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

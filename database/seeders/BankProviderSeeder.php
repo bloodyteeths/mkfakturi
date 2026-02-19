@@ -76,4 +76,3 @@ class BankProviderSeeder extends Seeder
     }
 }
 
-// CLAUDE-CHECKPOINT

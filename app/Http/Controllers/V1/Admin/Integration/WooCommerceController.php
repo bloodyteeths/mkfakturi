@@ -149,4 +149,3 @@ class WooCommerceController extends Controller
         return response()->json(['data' => $history]);
     }
 }
-// CLAUDE-CHECKPOINT

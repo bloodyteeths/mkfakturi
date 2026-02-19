@@ -507,4 +507,3 @@ class GeminiProvider implements AiProviderInterface
     }
 }
 
-// CLAUDE-CHECKPOINT

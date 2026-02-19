@@ -154,4 +154,3 @@ class DavidDriver implements FiscalDeviceDriver
         }
     }
 }
-// CLAUDE-CHECKPOINT

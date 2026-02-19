@@ -68,4 +68,3 @@ return new class extends Migration
         Schema::dropIfExists('account_mappings');
     }
 };
-// CLAUDE-CHECKPOINT

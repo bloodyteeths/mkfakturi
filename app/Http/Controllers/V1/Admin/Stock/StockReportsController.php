@@ -680,4 +680,3 @@ class StockReportsController extends Controller
         ]);
     }
 }
-// CLAUDE-CHECKPOINT

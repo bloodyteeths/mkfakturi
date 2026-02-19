@@ -32,4 +32,3 @@ class PrometheusServiceProvider extends ServiceProvider
     }
 }
 
-// CLAUDE-CHECKPOINT

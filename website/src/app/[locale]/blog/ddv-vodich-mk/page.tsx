@@ -378,4 +378,3 @@ export default async function DdvVodichMkPage({
     </main>
   )
 }
-// CLAUDE-CHECKPOINT

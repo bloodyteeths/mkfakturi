@@ -654,4 +654,3 @@ class UjpApiClient
         Log::info('UjpApiClient: Token cache invalidated');
     }
 }
-// CLAUDE-CHECKPOINT

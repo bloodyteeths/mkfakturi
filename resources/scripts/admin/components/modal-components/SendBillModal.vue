@@ -287,5 +287,4 @@ function closeSendBillModal() {
     templateUrl.value = null
   }, 300)
 }
-// CLAUDE-CHECKPOINT
 </script>

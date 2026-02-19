@@ -283,4 +283,3 @@ export const useEInvoiceStore = (useWindow = false) => {
     },
   })()
 }
-// CLAUDE-CHECKPOINT

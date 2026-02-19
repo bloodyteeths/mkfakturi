@@ -368,4 +368,3 @@ class Bitrix24ApiClientTest extends TestCase
     }
 }
 
-// CLAUDE-CHECKPOINT

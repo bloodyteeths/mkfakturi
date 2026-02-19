@@ -145,7 +145,6 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
-    // CLAUDE-CHECKPOINT
 
     public function estimates(): HasMany
     {
@@ -360,7 +359,6 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         $this->clearCachedComputed('all_settings');
     }
 
-    // CLAUDE-CHECKPOINT
     public function hasCompany($company_id)
     {
         // Use already loaded companies if available to avoid query

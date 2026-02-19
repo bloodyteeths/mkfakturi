@@ -332,4 +332,3 @@ class HubSpotMapping extends Model
     }
 }
 
-// CLAUDE-CHECKPOINT

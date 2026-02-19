@@ -255,4 +255,3 @@ class SignupController extends Controller
     }
 }
 
-// CLAUDE-CHECKPOINT

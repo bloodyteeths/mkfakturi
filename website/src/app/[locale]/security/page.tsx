@@ -459,4 +459,3 @@ export default async function SecurityPage({ params }: { params: Promise<{ local
     </main>
   )
 }
-// CLAUDE-CHECKPOINT
