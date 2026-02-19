@@ -46,13 +46,13 @@ class ClawdStatusController extends Controller
      * Reply to a support ticket as the Clawd AI assistant.
      * Posts the message as the first super admin user and notifies the ticket owner.
      */
-    public function replyToTicket(Request $request, int $ticketId): JsonResponse
+    public function replyToTicket(Request $request, int $ticket): JsonResponse
     {
         $request->validate([
             'message' => 'required|string|max:10000',
         ]);
 
-        $ticket = Ticket::find($ticketId);
+        $ticket = Ticket::find($ticket);
         if (! $ticket) {
             return response()->json(['error' => 'Ticket not found'], 404);
         }
