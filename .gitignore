@@ -94,3 +94,13 @@ UBL-2.1.zip
 
 # Screenshots
 screenshots/
+
+# Lead/contact CSV files (private data)
+storage/leads/
+branding_report.csv
+
+# Root-level test CSV files
+test_*.csv
+
+# Uploaded import files
+storage/app/imports/
