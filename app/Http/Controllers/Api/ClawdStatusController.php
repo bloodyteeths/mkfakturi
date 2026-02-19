@@ -49,7 +49,7 @@ class ClawdStatusController extends Controller
     public function replyToTicket(Request $request, int $ticket): JsonResponse
     {
         $request->validate([
-            'message' => 'required|string|max:10000',
+            'body' => 'required|string|max:10000',
         ]);
 
         $ticket = Ticket::find($ticket);
@@ -69,7 +69,7 @@ class ClawdStatusController extends Controller
         $message = TicketMessage::create([
             $ticketForeignId => $ticket->id,
             'user_id' => $agent->id,
-            'message' => $request->message,
+            'message' => $request->body,
         ]);
 
         $ticket->touch();
