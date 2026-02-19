@@ -1615,11 +1615,11 @@ Route::prefix('v1/public/partner-signup')->middleware(['throttle:public'])->grou
 });
 // Clawd AI Assistant Monitoring Endpoint
 // ----------------------------------
-Route::middleware(['throttle:60,1'])
+Route::middleware(['throttle:60,1', 'clawd.token'])
     ->prefix('v1/clawd')
     ->group(function () {
-        Route::get('/status', \App\Http\Controllers\Api\ClawdStatusController::class)
-            ->middleware('clawd.token');
+        Route::get('/status', [\App\Http\Controllers\Api\ClawdStatusController::class, '__invoke']);
+        Route::post('/tickets/{ticket}/reply', [\App\Http\Controllers\Api\ClawdStatusController::class, 'replyToTicket']);
     });
 
 // CLAUDE-CHECKPOINT: Public signup endpoints with referral tracking

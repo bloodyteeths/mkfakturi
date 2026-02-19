@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ticket;
+use App\Models\TicketMessage;
+use App\Models\User;
+use App\Notifications\TicketRepliedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -34,6 +39,53 @@ class ClawdStatusController extends Controller
             'health' => $health,
             'metrics' => $this->getMetrics(),
             'recent_events' => $this->getRecentEvents(),
+        ]);
+    }
+
+    /**
+     * Reply to a support ticket as the Clawd AI assistant.
+     * Posts the message as the first super admin user and notifies the ticket owner.
+     */
+    public function replyToTicket(Request $request, int $ticketId): JsonResponse
+    {
+        $request->validate([
+            'message' => 'required|string|max:10000',
+        ]);
+
+        $ticket = Ticket::find($ticketId);
+        if (! $ticket) {
+            return response()->json(['error' => 'Ticket not found'], 404);
+        }
+
+        // Use the first super admin as the responder
+        $agent = User::where('role', 'super admin')->first();
+        if (! $agent) {
+            return response()->json(['error' => 'No admin user available'], 500);
+        }
+
+        // Create the reply message
+        $ticketForeignId = config('laravel_ticket.table_names.messages.columns.ticket_foreign_id', 'ticket_id');
+
+        $message = TicketMessage::create([
+            $ticketForeignId => $ticket->id,
+            'user_id' => $agent->id,
+            'message' => $request->message,
+        ]);
+
+        $ticket->touch();
+
+        // Re-open if resolved
+        if ($ticket->is_resolved) {
+            $ticket->update(['is_resolved' => false, 'status' => 'open']);
+        }
+
+        // Notify the ticket owner (customer)
+        $ticket->user->notify(new TicketRepliedNotification($ticket, $message, true));
+
+        return response()->json([
+            'success' => true,
+            'ticket_id' => $ticket->id,
+            'message_id' => $message->id,
         ]);
     }
 
