@@ -110,6 +110,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super-admin' => \App\Http\Middleware\SuperAdminMiddleware::class, // AC-08: Super admin only routes
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
             'bitrix.auth' => \Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware::class, // Bitrix CRM integration
+            'clawd.token' => \App\Http\Middleware\VerifyClawdToken::class, // Clawd AI assistant monitoring
         ]);
 
         $middleware->priority([

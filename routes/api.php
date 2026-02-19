@@ -1613,4 +1613,13 @@ Route::prefix('v1/public/partner-signup')->middleware(['throttle:public'])->grou
     Route::post('/validate-referral', [\Modules\Mk\Public\Controllers\PartnerSignupController::class, 'validateReferral']);
     Route::post('/register', [\Modules\Mk\Public\Controllers\PartnerSignupController::class, 'register'])->middleware('throttle:strict');
 });
+// Clawd AI Assistant Monitoring Endpoint
+// ----------------------------------
+Route::middleware(['throttle:60,1'])
+    ->prefix('v1/clawd')
+    ->group(function () {
+        Route::get('/status', \App\Http\Controllers\Api\ClawdStatusController::class)
+            ->middleware('clawd.token');
+    });
+
 // CLAUDE-CHECKPOINT: Public signup endpoints with referral tracking

@@ -23,8 +23,10 @@ use App\Services\AiInsightsService;
 use App\Services\McpClient;
 use App\Services\McpDataProvider;
 use App\Space\InstallUtils;
+use App\Services\ClawdNotifier;
 use Gate;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Silber\Bouncer\Database\Models as BouncerModels;
 use Silber\Bouncer\Database\Role;
@@ -104,6 +106,7 @@ class AppServiceProvider extends ServiceProvider
         $this->bootAuth();
         $this->bootBroadcast();
         $this->bootObservers();
+        $this->bootClawdNotifications();
 
         // In demo mode, prevent all outgoing emails and notifications
         if (config('app.env') === 'demo') {
@@ -288,6 +291,29 @@ class AppServiceProvider extends ServiceProvider
 
         // Company observer - seeds chart of accounts for new companies (Partner Accounting Phase 4)
         \App\Models\Company::observe(\App\Observers\CompanyObserver::class);
+    }
+
+    /**
+     * Register Clawd AI assistant notifications for critical events.
+     */
+    protected function bootClawdNotifications(): void
+    {
+        // Notify on new user registration
+        \App\Models\User::created(function (\App\Models\User $user) {
+            ClawdNotifier::push('new_user', [
+                'email' => $user->email,
+                'name' => $user->name,
+            ]);
+        });
+
+        // Notify on queue job failures
+        Queue::failing(function (\Illuminate\Queue\Events\JobFailed $event) {
+            ClawdNotifier::push('queue_failed', [
+                'job' => $event->job->resolveName(),
+                'queue' => $event->job->getQueue(),
+                'exception' => \Str::limit($event->exception->getMessage(), 300),
+            ]);
+        });
     }
 
     /**

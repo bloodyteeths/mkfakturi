@@ -192,4 +192,9 @@ return [
         'shared_secret' => env('BITRIX_SHARED_SECRET'),
     ],
 
+    'clawd' => [
+        'webhook_url' => env('CLAWD_WEBHOOK_URL'),
+        'monitor_token' => env('CLAWD_MONITOR_TOKEN'),
+    ],
+
 ];
