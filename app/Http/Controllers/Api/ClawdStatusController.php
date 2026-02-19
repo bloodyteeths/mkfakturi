@@ -103,6 +103,9 @@ class ClawdStatusController extends Controller
                 ->where('failed_at', '>=', $now->copy()->subDay())
                 ->count(),
             'pending_jobs' => DB::table('jobs')->count(),
+            'new_tickets_24h' => DB::table('tickets')
+                ->where('created_at', '>=', $now->copy()->subDay())
+                ->count(),
         ];
     }
 
@@ -141,6 +144,23 @@ class ClawdStatusController extends Controller
                 'queue' => $job->queue,
                 'exception' => \Str::limit($job->exception, 200),
                 'at' => Carbon::parse($job->failed_at)->toIso8601String(),
+            ];
+        }
+
+        // Support tickets (last 24h)
+        $tickets = DB::table('tickets')
+            ->join('users', 'tickets.user_id', '=', 'users.id')
+            ->where('tickets.created_at', '>=', $cutoff)
+            ->orderByDesc('tickets.created_at')
+            ->limit(10)
+            ->get(['users.email', 'tickets.title', 'tickets.created_at']);
+
+        foreach ($tickets as $ticket) {
+            $events[] = [
+                'type' => 'support_ticket',
+                'email' => $ticket->email,
+                'subject' => $ticket->title,
+                'at' => Carbon::parse($ticket->created_at)->toIso8601String(),
             ];
         }
 
