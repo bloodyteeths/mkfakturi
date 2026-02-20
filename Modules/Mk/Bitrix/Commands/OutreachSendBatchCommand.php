@@ -240,6 +240,8 @@ class OutreachSendBatchCommand extends Command
     protected function findEligibleLeads(int $limit, ?string $forcedTemplate, ?string $leadType = null)
     {
         $query = OutreachLead::query()
+            // Only send to leads with verified MX records
+            ->where('mx_valid', true)
             // Not suppressed (check by email in suppressions table)
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('suppressions');

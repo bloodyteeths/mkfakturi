@@ -130,6 +130,15 @@ if (InstallUtils::isDbCreated()) {
         ->name('process-data-exports')
         ->withoutOverlapping();
 
+    // MX verification for outreach leads - runs before send window
+    // Verifies DNS MX records to prevent bounces from dead mailboxes
+    Schedule::command('outreach:verify-mx --limit=2000')
+        ->dailyAt('07:00')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->name('outreach-verify-mx')
+        ->withoutOverlapping();
+
     // Outreach email batch send - accountant leads
     // Runs every 15 minutes during business hours 08:00-17:00 Skopje
     // 3000/day target: ~83 per batch, 350/hour, 2-5s jitter

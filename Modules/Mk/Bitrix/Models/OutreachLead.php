@@ -58,6 +58,8 @@ class OutreachLead extends Model
         'sector',
         'status',
         'partner_id',
+        'mx_valid',
+        'mx_checked_at',
         'next_followup_at',
         'last_contacted_at',
     ];
@@ -68,6 +70,8 @@ class OutreachLead extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'mx_valid' => 'boolean',
+        'mx_checked_at' => 'datetime',
         'next_followup_at' => 'datetime',
         'last_contacted_at' => 'datetime',
     ];
@@ -182,6 +186,22 @@ class OutreachLead extends Model
     public function scopeCompanies($query)
     {
         return $query->where('lead_type', self::TYPE_COMPANY);
+    }
+
+    /**
+     * Scope to leads with valid MX records.
+     */
+    public function scopeMxValid($query)
+    {
+        return $query->where('mx_valid', true);
+    }
+
+    /**
+     * Scope to leads that haven't been MX-checked yet.
+     */
+    public function scopeMxUnchecked($query)
+    {
+        return $query->whereNull('mx_valid');
     }
 
     /**
