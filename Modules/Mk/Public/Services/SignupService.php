@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 // Hash not needed - User model has setPasswordAttribute mutator
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\Mk\Bitrix\Services\WelcomeEmailService;
 
 /**
  * SignupService
@@ -218,6 +219,20 @@ class SignupService
             }
 
             DB::commit();
+
+            // Send welcome drip series (Day 0 immediately, rest via cron)
+            try {
+                app(WelcomeEmailService::class)->sendCompanyWelcome(
+                    $company,
+                    $data['email'],
+                    $data['name']
+                );
+            } catch (\Exception $e) {
+                Log::warning('Welcome email failed (non-blocking)', [
+                    'company_id' => $company->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             Log::info('Company registration successful', [
                 'company_id' => $company->id,

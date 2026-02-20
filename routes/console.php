@@ -186,6 +186,16 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
+    // Welcome drip emails for new signups (companies + partners)
+    // Sends Day 2, 5, 10, 14 follow-ups during business hours
+    Schedule::command('welcome:send-drip')
+        ->hourly()
+        ->between('08:00', '18:00')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->name('welcome-send-drip')
+        ->withoutOverlapping();
+
     // Send deadline reminder notifications - runs daily at 09:00 (P8-02)
     // Reminds company owners and partners about upcoming deadlines
     // Also updates overdue/due_today statuses

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Modules\Mk\Bitrix\Services\WelcomeEmailService;
 
 /**
  * PartnerSignupController
@@ -141,6 +142,16 @@ class PartnerSignupController extends Controller
             }
 
             DB::commit();
+
+            // Send welcome drip series (Day 0 immediately, rest via cron)
+            try {
+                app(WelcomeEmailService::class)->sendPartnerWelcome($partner);
+            } catch (\Exception $e) {
+                Log::warning('Welcome email failed (non-blocking)', [
+                    'partner_id' => $partner->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             Log::info('Partner registration successful', [
                 'partner_id' => $partner->id,
