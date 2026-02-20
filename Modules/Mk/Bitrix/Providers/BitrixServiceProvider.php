@@ -21,6 +21,7 @@ use Modules\Mk\Bitrix\Commands\OutreachSendBatchCommand;
 use Modules\Mk\Bitrix\Commands\DirectoryOutreachCommand;
 use Modules\Mk\Bitrix\Commands\ImportPostmarkContactsCommand;
 use Modules\Mk\Bitrix\Commands\ImportCsvLeadsCommand;
+use Modules\Mk\Bitrix\Commands\OutreachVerifyMxCommand;
 use Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware;
 use Modules\Mk\Bitrix\Services\PartnerMetricsService;
 
@@ -72,6 +73,7 @@ class BitrixServiceProvider extends ServiceProvider
                 DirectoryOutreachCommand::class,
                 ImportPostmarkContactsCommand::class,
                 ImportCsvLeadsCommand::class,
+                OutreachVerifyMxCommand::class,
             ]);
         }
 
