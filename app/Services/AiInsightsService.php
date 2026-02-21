@@ -191,7 +191,7 @@ class AiInsightsService
             // Detect query context and determine required data
             // Use fast classification if enabled, otherwise use regex patterns
             if (config('ai.use_fast_classification', true)) {
-                $classificationResult = $this->classifyQueryIntentFast($question);
+                $classificationResult = $this->classifyQueryIntentFast($question, $conversationHistory);
                 $contextTypes = $classificationResult['contexts'];
 
                 Log::info('[AiInsightsService] Query context detected (fast)', [
@@ -270,21 +270,34 @@ class AiInsightsService
      * Uses Claude Haiku for 10x cheaper intent classification.
      *
      * @param  string  $question  The user's question
+     * @param  array  $conversationHistory  Previous messages for context
      * @return array{contexts: array<string>} Array with detected context types
      *
      * @throws \Exception If classification fails
      */
-    private function classifyQueryIntentFast(string $question): array
+    private function classifyQueryIntentFast(string $question, array $conversationHistory = []): array
     {
         try {
+            // Include last user message from history for follow-up context
+            $contextHint = '';
+            if (! empty($conversationHistory)) {
+                $lastUserMessages = array_filter($conversationHistory, fn ($m) => $m['role'] === 'user');
+                $lastUserMsg = end($lastUserMessages);
+                if ($lastUserMsg) {
+                    $contextHint = "\nPrevious user message: " . mb_substr($lastUserMsg['content'], 0, 150);
+                }
+            }
+
             Log::info('[AiInsightsService] Fast classification started', [
                 'question' => $question,
+                'has_history' => ! empty($conversationHistory),
             ]);
 
-            $prompt = <<<'PROMPT'
+            $prompt = <<<PROMPT
 Classify this user question into one or more categories. Return ONLY category names, comma-separated. Pick the MOST SPECIFIC category that matches.
 
 RULE: If the question mentions a specific feature (bank, expense, payroll, etc.), classify under THAT feature's category — NOT under a generic one like "invoices" or "basic".
+RULE: If the question is a follow-up (e.g. "where can I see it?", "how?", "which menu?"), use the PREVIOUS user message to determine the topic.
 
 Data categories (user wants to see numbers/stats/lists):
 - invoices: "show my invoices", "how many unpaid", "overdue invoices list"
@@ -326,7 +339,7 @@ Q: "какви се моите трошоци?" → basic
 Q: "како да додадам трошок?" → help_expenses
 Q: "e-faktura kako da pratam?" → help_efaktura
 
-Question: {$question}
+Question: {$question}{$contextHint}
 
 Categories:
 PROMPT;
@@ -743,17 +756,19 @@ PROMPT;
                 }
             }
 
-            // Load knowledge base content for any help_* categories
-            $helpTopics = array_filter($contextTypes, fn ($t) => str_starts_with($t, 'help_'));
-            if (! empty($helpTopics)) {
+            // Load ALL knowledge for any help query.
+            // Total ~50KB / ~13K tokens — fits easily in Gemini's 1M context.
+            // This eliminates classification errors: the AI always has every
+            // feature's docs and can answer any question correctly.
+            $hasHelpTopic = ! empty(array_filter($contextTypes, fn ($t) => str_starts_with($t, 'help_')));
+            if ($hasHelpTopic) {
                 try {
                     $knowledgeService = app(KnowledgeBaseService::class);
                     $userRole = $this->detectUserRole($company);
-                    $knowledge = $knowledgeService->getKnowledge($helpTopics, $userRole);
+                    $knowledge = $knowledgeService->getAllKnowledge($userRole);
                     if (! empty($knowledge)) {
                         $data['knowledge'] = $knowledge;
-                        Log::info('[AiInsightsService] Knowledge base content loaded', [
-                            'topics' => $helpTopics,
+                        Log::info('[AiInsightsService] Full knowledge base loaded', [
                             'user_role' => $userRole,
                             'content_length' => strlen($knowledge),
                         ]);
@@ -1074,6 +1089,8 @@ PROMPT;
             'sq' => ['recent' => 'Faturat e fundit (3 muajt e fundit)', 'overdue' => 'Fatura të vonuara', 'by_customer' => 'Fatura sipas klientit (të papaguara)', 'trends' => 'Trendet mujore', 'growth' => 'Rritja e klientëve'],
             'tr' => ['recent' => 'Son faturalar (son 3 ay)', 'overdue' => 'Gecikmiş faturalar', 'by_customer' => 'Müşteriye göre faturalar (ödenmemiş)', 'trends' => 'Aylık trendler', 'growth' => 'Müşteri büyümesi'],
             'en' => ['recent' => 'Recent invoices (last 3 months)', 'overdue' => 'Overdue invoices', 'by_customer' => 'Invoices by customer (unpaid)', 'trends' => 'Monthly trends', 'growth' => 'Customer growth'],
+            'sr' => ['recent' => 'Последње фактуре (последња 3 месеца)', 'overdue' => 'Закаснеле фактуре', 'by_customer' => 'Фактуре по купцу (неплаћене)', 'trends' => 'Месечни трендови', 'growth' => 'Раст купаца'],
+            'bs' => ['recent' => 'Posljednje fakture (posljednja 3 mjeseca)', 'overdue' => 'Zakasnele fakture', 'by_customer' => 'Fakture po kupcu (neplaćene)', 'trends' => 'Mjesečni trendovi', 'growth' => 'Rast kupaca'],
         ];
         $secLabel = $sectionLabels[$detectedLang] ?? $sectionLabels['mk'];
 
@@ -1706,28 +1723,10 @@ COMPLEX_INSTRUCTIONS;
         }
 
         $hasHistory = ! empty($conversationHistory);
-        $prompt .= <<<FINAL_INSTRUCTIONS
 
-Обезбеди јасен, конкретен и корисен одговор. Користи ги податоците од компанијата за да го персонализираш одговорот само кога е релевантно. Ако прашањето бара конкретни бројки, користи ги достапните податоци.
-
-ВАЖНО ЗА ОДНЕСУВАЊЕ ВО КОНВЕРЗАЦИЈА:
-- НЕ поздравувај со "Здраво" на секоја порака. Поздрави само на првата порака во конверзацијата.
-- Биди директен и одговори на прашањето без воведи и церемонии.
-- НЕ повторувај статистики за компанијата (број на фактури, приходи итн.) освен ако корисникот конкретно прашува за тоа.
-- Ако имаш документација за функционалноста (App documentation), користи ја за конкретни чекори наместо да претпоставуваш.
-- Одговарај кратко и прецизно — не пишувај есеј за секое прашање.
-
-ВАЖНО ЗА ФОРМАТИРАЊЕ:
-- За табели СЕКОГАШ користи markdown формат со | сепаратори:
-  | Колона 1 | Колона 2 | Колона 3 |
-  |----------|----------|----------|
-  | Вредност | Вредност | Вредност |
-- За листи користи - или 1. 2. 3.
-- За нагласување користи **bold** текст
-- За код или бројки користи `inline code`
-
-Ако корисникот се повикува на претходната конверзација (на пример, "што рековте порано", "за тоа што го споменавме", "продолжи", "дај ми повеќе детали"), користи го контекстот од претходната конверзација за да дадеш релевантен одговор.
-FINAL_INSTRUCTIONS;
+        // Language-aware final instructions
+        $finalInstructions = $this->getFinalInstructions($detectedLang);
+        $prompt .= "\n" . $finalInstructions;
 
         return $prompt;
     }
@@ -3252,6 +3251,132 @@ DOCUMENTATION;
         return 'company';
     }
 
+    /**
+     * Get language-specific final instructions for the chat prompt
+     *
+     * @param  string  $lang  Language code ('mk', 'sq', 'tr', 'en', 'sr', 'bs')
+     * @return string Final instructions in the detected language
+     */
+    private function getFinalInstructions(string $lang): string
+    {
+        $instructions = [
+            'mk' => <<<'INST'
+Обезбеди јасен, конкретен и корисен одговор. Користи ги податоците од компанијата за да го персонализираш одговорот само кога е релевантно. Ако прашањето бара конкретни бројки, користи ги достапните податоци.
+
+ВАЖНО ЗА ОДНЕСУВАЊЕ ВО КОНВЕРЗАЦИЈА:
+- НЕ поздравувај со "Здраво" на секоја порака. Поздрави само на првата порака во конверзацијата.
+- Биди директен и одговори на прашањето без воведи и церемонии.
+- НЕ повторувај статистики за компанијата (број на фактури, приходи итн.) освен ако корисникот конкретно прашува за тоа.
+- Ако имаш документација за функционалноста (App documentation), користи ја за конкретни чекори наместо да претпоставуваш.
+- Одговарај кратко и прецизно — не пишувај есеј за секое прашање.
+
+ВАЖНО ЗА ФОРМАТИРАЊЕ:
+- За табели СЕКОГАШ користи markdown формат со | сепаратори
+- За листи користи - или 1. 2. 3.
+- За нагласување користи **bold** текст
+- За код или бројки користи `inline code`
+
+Ако корисникот се повикува на претходната конверзација, користи го контекстот од претходната конверзација за да дадеш релевантен одговор.
+
+ОДГОВАРАЈ НА МАКЕДОНСКИ ЈАЗИК.
+INST,
+            'sq' => <<<'INST'
+Jep një përgjigje të qartë, konkrete dhe të dobishme. Përdor të dhënat e kompanisë për ta personalizuar përgjigjen vetëm kur është relevante. Nëse pyetja kërkon numra konkretë, përdor të dhënat e disponueshme.
+
+E RËNDËSISHME PËR SJELLJEN NË BISEDË:
+- MOS përshëndet me "Përshëndetje" në çdo mesazh. Përshëndet vetëm në mesazhin e parë.
+- Ji i drejtpërdrejtë dhe përgjigju pyetjes pa hyrje.
+- MOS përsërit statistikat e kompanisë përveçse nëse përdoruesi pyet për to.
+- Nëse ke dokumentacion për funksionalitetin (App documentation), përdore për hapa konkretë.
+- Përgjigju shkurt dhe saktë.
+
+E RËNDËSISHME PËR FORMATIMIN:
+- Për tabela përdor formatin markdown me | ndarës
+- Për lista përdor - ose 1. 2. 3.
+- Për theksim përdor **bold** tekst
+- Për kod ose numra përdor `inline code`
+
+PËRGJIGJU NË GJUHËN SHQIPE.
+INST,
+            'tr' => <<<'INST'
+Net, somut ve faydalı bir cevap ver. Şirket verilerini cevabı kişiselleştirmek için sadece ilgili olduğunda kullan. Soru belirli rakamlar gerektiriyorsa, mevcut verileri kullan.
+
+KONUŞMA DAVRANIŞI İÇİN ÖNEMLİ:
+- Her mesajda "Merhaba" diye selamlama. Sadece ilk mesajda selamla.
+- Doğrudan ol ve soruyu girişsiz cevapla.
+- Kullanıcı özellikle sormadıkça şirket istatistiklerini tekrarlama.
+- Fonksiyonellik hakkında dokümantasyonun varsa (App documentation), somut adımlar için kullan.
+- Kısa ve öz cevap ver.
+
+BİÇİMLENDİRME İÇİN ÖNEMLİ:
+- Tablolar için markdown formatını | ayırıcılarla kullan
+- Listeler için - veya 1. 2. 3. kullan
+- Vurgulama için **kalın** metin kullan
+- Kod veya rakamlar için `satır içi kod` kullan
+
+TÜRKÇE OLARAK CEVAP VER.
+INST,
+            'en' => <<<'INST'
+Provide a clear, concrete and helpful answer. Use company data to personalize the response only when relevant. If the question requires specific numbers, use the available data.
+
+IMPORTANT FOR CONVERSATION BEHAVIOR:
+- Do NOT greet with "Hello" on every message. Only greet on the first message in the conversation.
+- Be direct and answer the question without introductions.
+- Do NOT repeat company statistics (invoice count, revenue, etc.) unless the user specifically asks.
+- If you have documentation about the feature (App documentation), use it for concrete steps instead of guessing.
+- Answer briefly and precisely — don't write an essay for every question.
+
+IMPORTANT FOR FORMATTING:
+- For tables ALWAYS use markdown format with | separators
+- For lists use - or 1. 2. 3.
+- For emphasis use **bold** text
+- For code or numbers use `inline code`
+
+If the user refers to a previous conversation, use the context from the previous conversation to give a relevant answer.
+
+RESPOND IN ENGLISH.
+INST,
+            'sr' => <<<'INST'
+Пружи јасан, конкретан и користан одговор. Користи податке компаније за персонализацију одговора само када је релевантно. Ако питање захтева конкретне бројке, користи доступне податке.
+
+ВАЖНО ЗА ПОНАШАЊЕ У КОНВЕРЗАЦИЈИ:
+- НЕ поздрављај са "Здраво" у свакој поруци. Поздрави само у првој поруци.
+- Буди директан и одговори на питање без увода.
+- НЕ понављај статистике компаније осим ако корисник конкретно пита за то.
+- Ако имаш документацију о функционалности (App documentation), користи је за конкретне кораке.
+- Одговарај кратко и прецизно.
+
+ВАЖНО ЗА ФОРМАТИРАЊЕ:
+- За табеле користи markdown формат са | сепараторима
+- За листе користи - или 1. 2. 3.
+- За наглашавање користи **bold** текст
+- За код или бројке користи `inline code`
+
+ОДГОВАРАЈ НА СРПСКОМ ЈЕЗИКУ.
+INST,
+            'bs' => <<<'INST'
+Pruži jasan, konkretan i koristan odgovor. Koristi podatke kompanije za personalizaciju odgovora samo kada je relevantno. Ako pitanje zahtijeva konkretne brojke, koristi dostupne podatke.
+
+VAŽNO ZA PONAŠANJE U KONVERZACIJI:
+- NE pozdravljaj sa "Zdravo" u svakoj poruci. Pozdravi samo u prvoj poruci.
+- Budi direktan i odgovori na pitanje bez uvoda.
+- NE ponavljaj statistike kompanije osim ako korisnik konkretno pita za to.
+- Ako imaš dokumentaciju o funkcionalnosti (App documentation), koristi je za konkretne korake.
+- Odgovaraj kratko i precizno.
+
+VAŽNO ZA FORMATIRANJE:
+- Za tabele koristi markdown format sa | separatorima
+- Za liste koristi - ili 1. 2. 3.
+- Za naglašavanje koristi **bold** tekst
+- Za kod ili brojke koristi `inline code`
+
+ODGOVARAJ NA BOSANSKOM JEZIKU.
+INST,
+        ];
+
+        return $instructions[$lang] ?? $instructions['mk'];
+    }
+
     private function detectLanguage(string $text): string
     {
         $text = mb_strtolower(trim($text));
@@ -3282,8 +3407,38 @@ DOCUMENTATION;
             }
         }
 
-        // Macedonian/Cyrillic indicators
+        // Serbian indicators (Cyrillic script, but different from Macedonian)
+        $serbianCyrillicPatterns = [
+            '/\b(шта|где|зашто|колико|како|јесте|није|имате|немате)\b/u',
+            '/\b(фактура|купац|плаћање|дуг|приход|расход|трошак)\b/u',
+            '/\b(здраво|хвала|молим|да|не|ако|може)\b/u',
+        ];
+        $serbianLatinPatterns = [
+            '/\b(šta|gde|zašto|koliko|jeste|nije|imate|nemate)\b/u',
+            '/\b(kupac|plaćanje|dugovanje|rashod|trošak|zarada)\b/u',
+            '/\b(hvala|molim|možete|trebam|želim)\b/u',
+            '/[đžćčš]/u',  // Serbian Latin unique diacritics
+        ];
+
+        // Bosnian indicators (very close to Serbian, check for Bosnian-specific words)
+        $bosnianPatterns = [
+            '/\b(šta|gdje|zašto|koliko|jeste|nije|imate|nemate)\b/u',
+            '/\b(kupac|plaćanje|dugovanje|rashod|trošak)\b/u',
+            '/\b(hvala|molim|možete|trebam|želim|haj[de]?)\b/u',
+        ];
+
+        // Check Serbian Cyrillic first
         if (preg_match('/[\p{Cyrillic}]/u', $text)) {
+            $serbianScore = 0;
+            foreach ($serbianCyrillicPatterns as $pattern) {
+                if (preg_match($pattern, $text)) {
+                    $serbianScore++;
+                }
+            }
+            if ($serbianScore >= 1) {
+                return 'sr';
+            }
+            // Default Cyrillic = Macedonian (primary market)
             return 'mk';
         }
 
@@ -3299,20 +3454,32 @@ DOCUMENTATION;
             }
         }
 
-        // English indicators
-        $englishPatterns = [
-            '/\b(who|what|where|why|when|how|which)\b/u',
-            '/\b(invoice|customer|payment|debt|profit|loss|expense|revenue)\b/u',
-            '/\b(hello|thanks|please|the|and|but)\b/u',
-        ];
-        $englishScore = 0;
-        foreach ($englishPatterns as $pattern) {
+        // Check Serbian/Bosnian Latin (after Macedonian Latin, since they share some words)
+        // Bosnian uses "gdje" while Serbian uses "gde"
+        if (preg_match('/\bgdje\b/u', $text)) {
+            return 'bs';
+        }
+        foreach ($serbianLatinPatterns as $pattern) {
             if (preg_match($pattern, $text)) {
-                $englishScore++;
+                return 'sr';
             }
         }
-        if ($englishScore >= 2) {
-            return 'en';
+        foreach ($bosnianPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return 'bs';
+            }
+        }
+
+        // English indicators (low threshold — any single match is enough)
+        $englishPatterns = [
+            '/\b(who|what|where|why|when|how|which)\b/u',
+            '/\b(invoice|customer|payment|debt|profit|loss|expense|revenue|bank|warehouse|stock|employee|payroll)\b/u',
+            '/\b(hello|thanks|please|the|and|but|can|could|would|should|show|see|add|create|delete|edit)\b/u',
+        ];
+        foreach ($englishPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return 'en';
+            }
         }
 
         // Default to Macedonian (primary market)
@@ -3322,7 +3489,7 @@ DOCUMENTATION;
     /**
      * Get multilingual prompt templates
      *
-     * @param  string  $lang  Language code ('mk', 'sq', 'tr', 'en')
+     * @param  string  $lang  Language code ('mk', 'sq', 'tr', 'en', 'sr', 'bs')
      * @return array Prompt template with intro, role, language instruction and labels
      */
     private function getMultilingualPrompt(string $lang): array
@@ -3388,9 +3555,40 @@ DOCUMENTATION;
                     'estimates' => 'Estimates', 'bills' => 'Bills from suppliers', 'projects' => 'Projects',
                 ],
             ],
+            'sr' => [
+                'intro' => 'Ти си финансијски саветник који ради са Facturino - системом за фактурисање и финансијско управљање.',
+                'role_items' => "- Познајеш све функције Facturino апликације\n- Помажеш корисницима са финансијским питањима, анализом и саветима\n- Дајеш конкретне, применљиве савете\n- Можеш им помоћи да користе апликацију",
+                'response_language' => '- Одговарај на српском језику',
+                'context_label' => 'Контекст компаније',
+                'labels' => [
+                    'name' => 'Назив', 'total_invoices' => 'Укупно фактура', 'draft_invoices' => 'Фактуре у изради',
+                    'pending_invoices' => 'Чека на наплату', 'overdue_invoices' => 'Закаснеле фактуре',
+                    'revenue' => 'Приходи', 'expenses' => 'Расходи', 'profit' => 'Добит', 'margin' => 'маржа',
+                    'payments_received' => 'Наплаћена плаћања', 'outstanding' => 'Неплаћене фактуре (износ)',
+                    'avg_invoice' => 'Просечна вредност фактуре', 'customers' => 'Број купаца',
+                    'suppliers' => 'Број добављача', 'items' => 'Број артикала',
+                    'estimates' => 'Понуде', 'bills' => 'Рачуни од добављача', 'projects' => 'Пројекти',
+                ],
+            ],
+            'bs' => [
+                'intro' => 'Ti si finansijski savjetnik koji radi sa Facturino - sistemom za fakturisanje i finansijsko upravljanje.',
+                'role_items' => "- Poznaješ sve funkcije Facturino aplikacije\n- Pomažeš korisnicima sa finansijskim pitanjima, analizom i savjetima\n- Daješ konkretne, primjenjive savjete\n- Možeš im pomoći da koriste aplikaciju",
+                'response_language' => '- Odgovaraj na bosanskom jeziku',
+                'context_label' => 'Kontekst kompanije',
+                'labels' => [
+                    'name' => 'Naziv', 'total_invoices' => 'Ukupno faktura', 'draft_invoices' => 'Fakture u izradi',
+                    'pending_invoices' => 'Čeka na naplatu', 'overdue_invoices' => 'Zakasnele fakture',
+                    'revenue' => 'Prihodi', 'expenses' => 'Rashodi', 'profit' => 'Dobit', 'margin' => 'marža',
+                    'payments_received' => 'Naplaćena plaćanja', 'outstanding' => 'Neplaćene fakture (iznos)',
+                    'avg_invoice' => 'Prosječna vrijednost fakture', 'customers' => 'Broj kupaca',
+                    'suppliers' => 'Broj dobavljača', 'items' => 'Broj artikala',
+                    'estimates' => 'Ponude', 'bills' => 'Računi od dobavljača', 'projects' => 'Projekti',
+                ],
+            ],
         ];
 
         return $prompts[$lang] ?? $prompts['mk'];
     }
 }
+// CLAUDE-CHECKPOINT
 

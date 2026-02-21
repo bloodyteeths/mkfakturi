@@ -82,6 +82,45 @@ class KnowledgeBaseService
     }
 
     /**
+     * Load ALL knowledge files at once, filtered by role.
+     *
+     * Total ~50KB / ~13K tokens — fits easily in Gemini's 1M context.
+     * This eliminates misclassification: the AI always has every feature's
+     * documentation and can answer any question correctly.
+     *
+     * @param  string  $userRole  'company' or 'accountant'
+     * @return string All knowledge content concatenated
+     */
+    public function getAllKnowledge(string $userRole = 'company'): string
+    {
+        $cacheKey = "knowledge:all:{$userRole}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($userRole) {
+            $sections = [];
+
+            foreach (self::TOPIC_MAP as $fileName) {
+                $content = $this->loadFile($fileName);
+                if (! $content) {
+                    continue;
+                }
+
+                $filtered = $this->filterByRole($content, $userRole);
+                if (! empty($filtered)) {
+                    $sections[] = $filtered;
+                }
+            }
+
+            Log::info('[KnowledgeBaseService] All knowledge loaded', [
+                'user_role' => $userRole,
+                'files_loaded' => count($sections),
+                'total_length' => array_sum(array_map('strlen', $sections)),
+            ]);
+
+            return implode("\n\n---\n\n", $sections);
+        });
+    }
+
+    /**
      * Get list of all available help topics for the classification prompt
      *
      * @return array<string, string> Map of category => description
