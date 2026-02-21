@@ -218,7 +218,7 @@ class WelcomeEmailService
 
         try {
             $mailable = new $mailableClass($name);
-            Mail::to($email)->send($mailable);
+            Mail::to($email)->locale('mk')->send($mailable);
 
             // Mark as sent
             WelcomeSend::where('email', $email)
