@@ -221,8 +221,7 @@ chown -R www:www /var/www/html/bootstrap/cache || echo "WARN: Failed to chown bo
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || echo "WARN: Failed to chmod"
 echo "✅ Final permissions set for www user"
 
-# Start supervisor in background (nginx, php-fpm, scheduler)
-# Queue workers are disabled by default in supervisord.conf
+# Start supervisor in background (nginx, php-fpm, scheduler, queue worker)
 echo "Starting application services in background..."
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &
 SUPERVISOR_PID=$!
