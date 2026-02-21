@@ -132,11 +132,20 @@ class GeminiProvider implements AiProviderInterface
         string $method,
         ?string $modelOverride = null
     ): string {
+        $generationConfig = [
+            'temperature' => $temperature,
+            'maxOutputTokens' => $maxTokens,
+        ];
+
+        // Gemini 2.5 models use "thinking" tokens that count toward maxOutputTokens.
+        // For short-output tasks (classification, etc.), disable thinking to avoid
+        // the model consuming the entire token budget on internal reasoning.
+        if ($maxTokens <= 500 && str_contains($modelOverride ?? $this->model, '2.5')) {
+            $generationConfig['thinkingConfig'] = ['thinkingBudget' => 0];
+        }
+
         $requestPayload = array_merge($payload, [
-            'generationConfig' => [
-                'temperature' => $temperature,
-                'maxOutputTokens' => $maxTokens,
-            ],
+            'generationConfig' => $generationConfig,
         ]);
 
         // Use model override if provided, otherwise use default

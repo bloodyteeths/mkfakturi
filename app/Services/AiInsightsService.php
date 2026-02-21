@@ -323,14 +323,14 @@ PROMPT;
             // Use generateWithModel if provider supports it (Claude, Gemini)
             if (method_exists($this->aiProvider, 'generateWithModel')) {
                 $response = $this->aiProvider->generateWithModel($prompt, $classificationModel, [
-                    'max_tokens' => 100,
-                    'temperature' => 0.3,
+                    'max_tokens' => 200,
+                    'temperature' => 0.1,
                 ]);
             } else {
                 // Fallback for providers without model routing
                 $response = $this->aiProvider->generate($prompt, [
-                    'max_tokens' => 100,
-                    'temperature' => 0.3,
+                    'max_tokens' => 200,
+                    'temperature' => 0.1,
                 ]);
             }
 
