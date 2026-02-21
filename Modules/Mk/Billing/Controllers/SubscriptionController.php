@@ -79,6 +79,7 @@ class SubscriptionController extends Controller
         $request->validate([
             'tier' => 'required|in:starter,standard,business,max',
             'interval' => 'sometimes|in:monthly,yearly',
+            'payment_currency' => 'sometimes|in:mkd,eur',
         ]);
 
         $company = Company::findOrFail($companyId);
@@ -88,9 +89,11 @@ class SubscriptionController extends Controller
 
         $tier = $request->input('tier');
         $interval = $request->input('interval', 'monthly');
+        $paymentCurrency = strtolower($request->input('payment_currency', 'mkd'));
 
-        // Get Stripe price ID based on tier and interval
-        $priceId = config("services.stripe.prices.{$tier}.{$interval}");
+        // Get Stripe price ID based on tier, interval, and currency
+        $pricesKey = $paymentCurrency === 'eur' ? 'services.stripe.prices_eur' : 'services.stripe.prices';
+        $priceId = config("{$pricesKey}.{$tier}.{$interval}");
 
         if (! $priceId) {
             Log::warning('Stripe price not configured', [
@@ -130,21 +133,15 @@ class SubscriptionController extends Controller
             $successUrl = url('/admin/billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = url('/admin/pricing');
 
+            // Payment methods: card for MKD, card + SEPA for EUR
+            $paymentMethods = $paymentCurrency === 'eur'
+                ? ['card', 'sepa_debit']
+                : ['card'];
+
             // Create Stripe Checkout Session
             $session = StripeCheckoutSession::create([
                 'customer' => $stripeCustomerId,
-                'payment_method_types' => ['card', 'customer_balance'],
-                'payment_method_options' => [
-                    'customer_balance' => [
-                        'funding_type' => 'bank_transfer',
-                        'bank_transfer' => [
-                            'type' => 'eu_bank_transfer',
-                            'eu_bank_transfer' => [
-                                'country' => 'NL', // Stripe requires EU country for bank transfer
-                            ],
-                        ],
-                    ],
-                ],
+                'payment_method_types' => $paymentMethods,
                 'line_items' => [[
                     'price' => $priceId,
                     'quantity' => 1,
@@ -162,6 +159,7 @@ class SubscriptionController extends Controller
                 'metadata' => [
                     'company_id' => $company->id,
                     'tier' => $tier,
+                    'payment_currency' => $paymentCurrency,
                 ],
                 'allow_promotion_codes' => true,
             ]);

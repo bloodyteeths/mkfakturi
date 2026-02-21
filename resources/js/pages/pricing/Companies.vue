@@ -38,6 +38,36 @@
             </span>
           </button>
         </div>
+
+        <!-- Currency Toggle (MKD / EUR SEPA) -->
+        <div class="mt-3 inline-flex bg-gray-100 p-1 rounded-lg">
+          <button
+            @click="paymentCurrency = 'mkd'"
+            :class="[
+              'py-1.5 px-4 text-xs font-medium rounded-md transition-all',
+              paymentCurrency === 'mkd'
+                ? 'bg-white text-gray-900 shadow'
+                : 'text-gray-500'
+            ]"
+          >
+            🇲🇰 MKD (Картичка)
+          </button>
+          <button
+            @click="paymentCurrency = 'eur'"
+            :class="[
+              'py-1.5 px-4 text-xs font-medium rounded-md transition-all',
+              paymentCurrency === 'eur'
+                ? 'bg-white text-gray-900 shadow'
+                : 'text-gray-500'
+            ]"
+          >
+            🇪🇺 EUR (SEPA)
+          </button>
+        </div>
+
+        <p v-if="paymentCurrency === 'eur'" class="mt-3 text-xs text-green-600">
+          SEPA банкарски трансфер овозможен на checkout.
+        </p>
       </div>
 
       <!-- Pricing Cards -->
@@ -56,10 +86,10 @@
 
           <div class="mt-4">
             <span class="text-4xl font-bold text-gray-900">{{ formatPrice(prices.starter) }}</span>
-            <span class="text-gray-500 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            <span class="text-gray-500 ml-1">{{ currencyLabel }}/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
           </div>
           <p v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mt-1">
-            {{ Math.round(prices.starter / 12).toLocaleString() }} ден/мес
+            {{ Math.round(prices.starter / 12).toLocaleString() }} {{ currencyLabel }}/мес
           </p>
 
           <ul class="mt-6 space-y-3 flex-1">
@@ -114,10 +144,10 @@
 
           <div class="mt-4">
             <span class="text-4xl font-bold text-gray-900">{{ formatPrice(prices.standard) }}</span>
-            <span class="text-gray-500 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            <span class="text-gray-500 ml-1">{{ currencyLabel }}/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
           </div>
           <p v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mt-1">
-            {{ Math.round(prices.standard / 12).toLocaleString() }} ден/мес
+            {{ Math.round(prices.standard / 12).toLocaleString() }} {{ currencyLabel }}/мес
           </p>
 
           <div class="mt-3 text-xs text-blue-600 font-medium">
@@ -184,10 +214,10 @@
 
           <div class="mt-4">
             <span class="text-4xl font-bold text-gray-900">{{ formatPrice(prices.business) }}</span>
-            <span class="text-gray-500 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            <span class="text-gray-500 ml-1">{{ currencyLabel }}/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
           </div>
           <p v-if="billingInterval === 'yearly'" class="text-sm text-green-600 mt-1">
-            {{ Math.round(prices.business / 12).toLocaleString() }} ден/мес
+            {{ Math.round(prices.business / 12).toLocaleString() }} {{ currencyLabel }}/мес
           </p>
 
           <div class="mt-3 text-xs text-blue-600 font-medium">
@@ -246,10 +276,10 @@
 
           <div class="mt-4">
             <span class="text-4xl font-bold text-white">{{ formatPrice(prices.max) }}</span>
-            <span class="text-gray-400 ml-1">ден/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
+            <span class="text-gray-400 ml-1">{{ currencyLabel }}/{{ billingInterval === 'monthly' ? 'мес' : 'год' }}</span>
           </div>
           <p v-if="billingInterval === 'yearly'" class="text-sm text-green-400 mt-1">
-            {{ Math.round(prices.max / 12).toLocaleString() }} ден/мес
+            {{ Math.round(prices.max / 12).toLocaleString() }} {{ currencyLabel }}/мес
           </p>
 
           <div class="mt-3 text-xs text-yellow-400 font-medium">
@@ -350,24 +380,44 @@ export default {
       loading: false,
       selectedCompanyId: null,
       billingInterval: 'monthly',
+      paymentCurrency: 'mkd',
       monthlyPrices: {
-        starter: 799,
-        standard: 1799,
-        business: 3699,
-        max: 9199
+        starter: 590,
+        standard: 1490,
+        business: 2990,
+        max: 7490
       },
       yearlyPrices: {
-        starter: 7990,
-        standard: 17990,
-        business: 36990,
-        max: 91990
+        starter: 5900,
+        standard: 14900,
+        business: 29900,
+        max: 74900
+      },
+      monthlyPricesEur: {
+        starter: 12,
+        standard: 29,
+        business: 59,
+        max: 149
+      },
+      yearlyPricesEur: {
+        starter: 120,
+        standard: 290,
+        business: 590,
+        max: 1490
       }
     }
   },
 
   computed: {
     prices() {
+      if (this.paymentCurrency === 'eur') {
+        return this.billingInterval === 'monthly' ? this.monthlyPricesEur : this.yearlyPricesEur
+      }
       return this.billingInterval === 'monthly' ? this.monthlyPrices : this.yearlyPrices
+    },
+
+    currencyLabel() {
+      return this.paymentCurrency === 'eur' ? '€' : 'ден'
     },
 
     effectiveCompanyId() {
@@ -420,14 +470,15 @@ export default {
         }
 
         if (!this.effectiveCompanyId) {
-          Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
+          Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval, payment_currency: this.paymentCurrency }))
           this.$router.push({ name: 'login' })
           return
         }
 
         const response = await axios.post(`/companies/${this.effectiveCompanyId}/subscription/checkout`, {
           tier,
-          interval: this.billingInterval
+          interval: this.billingInterval,
+          payment_currency: this.paymentCurrency
         })
 
         if (response.data.checkout_url) {
@@ -437,7 +488,7 @@ export default {
         console.error('Failed to create checkout session', error)
 
         if (error.response?.status === 401) {
-          Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval }))
+          Ls.set('pendingSubscription', JSON.stringify({ tier, interval: this.billingInterval, payment_currency: this.paymentCurrency }))
           this.$router.push({ name: 'login' })
           return
         }

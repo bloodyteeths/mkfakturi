@@ -47,7 +47,7 @@ class SubscriptionService
      *
      * @throws \Exception
      */
-    public function createCompanySubscription(Company $company, string $tier, string $provider = 'paddle'): array
+    public function createCompanySubscription(Company $company, string $tier, string $provider = 'paddle', string $paymentCurrency = 'mkd'): array
     {
         // Validate tier
         if (! in_array($tier, ['starter', 'standard', 'business', 'max'])) {
@@ -66,12 +66,13 @@ class SubscriptionService
             'tier' => $tier,
             'provider' => $provider,
             'price' => $monthlyPrice,
+            'payment_currency' => $paymentCurrency,
         ]);
 
         if ($provider === 'paddle') {
             return $this->createPaddleSubscription($company, $tier, $monthlyPrice);
         } elseif ($provider === 'stripe') {
-            return $this->createStripeSubscription($company, $tier, $monthlyPrice);
+            return $this->createStripeSubscription($company, $tier, $monthlyPrice, $paymentCurrency);
         } else {
             return $this->createCpaySubscription($company, $tier, $monthlyPrice);
         }
@@ -309,13 +310,14 @@ class SubscriptionService
     /**
      * Create Stripe subscription checkout session for company
      */
-    private function createStripeSubscription(Company $company, string $tier, float $monthlyPrice): array
+    private function createStripeSubscription(Company $company, string $tier, float $monthlyPrice, string $paymentCurrency = 'mkd'): array
     {
         $interval = 'monthly';
-        $priceId = config("services.stripe.prices.{$tier}.{$interval}");
+        $pricesKey = $paymentCurrency === 'eur' ? 'services.stripe.prices_eur' : 'services.stripe.prices';
+        $priceId = config("{$pricesKey}.{$tier}.{$interval}");
 
         if (! $priceId) {
-            throw new \Exception("Stripe price ID not configured for tier: {$tier}");
+            throw new \Exception("Stripe price ID not configured for tier: {$tier} ({$paymentCurrency})");
         }
 
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -333,18 +335,14 @@ class SubscriptionService
         $successUrl = url('/admin/billing/success').'?session_id={CHECKOUT_SESSION_ID}';
         $cancelUrl = url('/admin/pricing');
 
+        // Payment methods: card for MKD, card + SEPA for EUR
+        $paymentMethods = $paymentCurrency === 'eur'
+            ? ['card', 'sepa_debit']
+            : ['card'];
+
         $session = StripeCheckoutSession::create([
             'customer' => $company->stripe_id,
-            'payment_method_types' => ['card', 'customer_balance'],
-            'payment_method_options' => [
-                'customer_balance' => [
-                    'funding_type' => 'bank_transfer',
-                    'bank_transfer' => [
-                        'type' => 'eu_bank_transfer',
-                        'eu_bank_transfer' => ['country' => 'NL'],
-                    ],
-                ],
-            ],
+            'payment_method_types' => $paymentMethods,
             'line_items' => [['price' => $priceId, 'quantity' => 1]],
             'mode' => 'subscription',
             'success_url' => $successUrl,
@@ -353,7 +351,7 @@ class SubscriptionService
                 'trial_period_days' => 14,
                 'metadata' => ['company_id' => $company->id, 'tier' => $tier],
             ],
-            'metadata' => ['company_id' => $company->id, 'tier' => $tier],
+            'metadata' => ['company_id' => $company->id, 'tier' => $tier, 'payment_currency' => $paymentCurrency],
             'allow_promotion_codes' => true,
         ]);
 
