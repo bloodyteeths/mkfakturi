@@ -26,6 +26,7 @@ class PartnerWelcome5Mail extends Mailable implements ShouldQueue
     {
         return $this->from('partners@facturino.mk', 'Мериса Т. — Facturino')
             ->subject(__('welcome.partner_5.subject'))
+            ->withSymfonyMessage(fn ($message) => $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast'))
             ->markdown('emails.welcome.partner_5', [
                 'name' => $this->name,
                 'ctaUrl' => $this->ctaUrl,

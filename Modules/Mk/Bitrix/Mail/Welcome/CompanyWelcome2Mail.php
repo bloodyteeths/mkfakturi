@@ -26,6 +26,7 @@ class CompanyWelcome2Mail extends Mailable implements ShouldQueue
     {
         return $this->from(config('mail.from.address'), 'Мериса Т. — Facturino')
             ->subject(__('welcome.company_2.subject'))
+            ->withSymfonyMessage(fn ($message) => $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast'))
             ->markdown('emails.welcome.company_2', [
                 'name' => $this->name,
                 'ctaUrl' => $this->ctaUrl,
