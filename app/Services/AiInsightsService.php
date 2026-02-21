@@ -3384,68 +3384,59 @@ INST,
     {
         $text = mb_strtolower(trim($text));
 
-        // Albanian indicators (check first - has unique characters like ë, ç)
-        $albanianPatterns = [
-            '/[ëç]/u',  // Unique Albanian characters
-            '/\b(kush|sa|si|pse|ku|cili|cila|kam|ke|ka|jemi|jeni|jan[eë])\b/u',
-            '/\b(fatur[aë]|klient|pag[eu]|borxh|fitim|humbje|shpenzim)\b/u',
-            '/\b(mir[eë]dita|faleminderit|po|jo|n[eë]se|mund)\b/u',
-        ];
-        foreach ($albanianPatterns as $pattern) {
-            if (preg_match($pattern, $text)) {
-                return 'sq';
-            }
+        // ── PHASE 1: Unambiguous character-based detection ──
+        // These characters are unique to specific languages and never cause false positives.
+
+        // Albanian unique chars (ë, ç) — instant match
+        if (preg_match('/[ëç]/u', $text)) {
+            return 'sq';
         }
 
-        // Turkish indicators (has unique characters like ı, ş, ğ)
-        $turkishPatterns = [
-            '/[ışğ]/u',  // Unique Turkish characters
-            '/\b(kim|nas[ıi]l|nerede|neden|hangi|var|yok)\b/u',
-            '/\b(fatura|m[uü][sş]teri|[oö]deme|bor[cç]|gider)\b/u',
-            '/\b(merhaba|te[sş]ekk[uü]r|evet|hay[ıi]r|l[uü]tfen)\b/u',
-        ];
-        foreach ($turkishPatterns as $pattern) {
-            if (preg_match($pattern, $text)) {
-                return 'tr';
-            }
+        // Turkish unique chars (ı, ş, ğ) — instant match
+        if (preg_match('/[ışğ]/u', $text)) {
+            return 'tr';
         }
 
-        // Serbian indicators (Cyrillic script, but different from Macedonian)
-        $serbianCyrillicPatterns = [
-            '/\b(шта|где|зашто|колико|како|јесте|није|имате|немате)\b/u',
-            '/\b(фактура|купац|плаћање|дуг|приход|расход|трошак)\b/u',
-            '/\b(здраво|хвала|молим|да|не|ако|може)\b/u',
-        ];
-        $serbianLatinPatterns = [
-            '/\b(šta|gde|zašto|koliko|jeste|nije|imate|nemate)\b/u',
-            '/\b(kupac|plaćanje|dugovanje|rashod|trošak|zarada)\b/u',
-            '/\b(hvala|molim|možete|trebam|želim)\b/u',
-            '/[đžćčš]/u',  // Serbian Latin unique diacritics
-        ];
+        // Serbian/Bosnian Latin diacritics (đ, ž, ć, č, š) — instant match
+        // But only if NO English words present (these chars don't appear in English)
+        if (preg_match('/[đćč]/u', $text)) {
+            if (preg_match('/\bgdje\b/u', $text)) {
+                return 'bs';
+            }
+            return 'sr';
+        }
 
-        // Bosnian indicators (very close to Serbian, check for Bosnian-specific words)
-        $bosnianPatterns = [
-            '/\b(šta|gdje|zašto|koliko|jeste|nije|imate|nemate)\b/u',
-            '/\b(kupac|plaćanje|dugovanje|rashod|trošak)\b/u',
-            '/\b(hvala|molim|možete|trebam|želim|haj[de]?)\b/u',
-        ];
-
-        // Check Serbian Cyrillic first
+        // Cyrillic script → Serbian or Macedonian
         if (preg_match('/[\p{Cyrillic}]/u', $text)) {
-            $serbianScore = 0;
+            // Serbian-specific Cyrillic words (different from Macedonian)
+            $serbianCyrillicPatterns = [
+                '/\b(шта|где|зашто|колико|јесте|није|имате|немате)\b/u',
+                '/\b(купац|плаћање|дуг|приход|расход|трошак)\b/u',
+            ];
             foreach ($serbianCyrillicPatterns as $pattern) {
                 if (preg_match($pattern, $text)) {
-                    $serbianScore++;
+                    return 'sr';
                 }
-            }
-            if ($serbianScore >= 1) {
-                return 'sr';
             }
             // Default Cyrillic = Macedonian (primary market)
             return 'mk';
         }
 
-        // Macedonian Latin transliteration patterns
+        // ── PHASE 2: English detection (check BEFORE ambiguous word patterns) ──
+        // English words are very common and must be caught before Albanian/Turkish
+        // word patterns that share short words with English (e.g. "page", "var").
+        $englishPatterns = [
+            '/\b(who|what|where|why|when|how|which)\b/u',
+            '/\b(invoice|customer|payment|debt|profit|loss|expense|revenue|bank|warehouse|stock|employee|payroll)\b/u',
+            '/\b(hello|thanks|please|the|but|can|could|would|should|show|see|add|create|delete|edit|use|give|details|need|want|help)\b/u',
+        ];
+        foreach ($englishPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return 'en';
+            }
+        }
+
+        // ── PHASE 3: Macedonian Latin transliteration ──
         $macedonianLatinPatterns = [
             '/\b(koj|shto|kade|zoshto|kolku|dali|ima|nema|faktura)\b/u',
             '/\b(klient|plakanje|dolg|profit|zaguba|trosok)\b/u',
@@ -3457,8 +3448,47 @@ INST,
             }
         }
 
-        // Check Serbian/Bosnian Latin (after Macedonian Latin, since they share some words)
-        // Bosnian uses "gdje" while Serbian uses "gde"
+        // ── PHASE 4: Word-based detection for Albanian/Turkish/Serbian/Bosnian ──
+        // These require 2+ matches to avoid false positives from short shared words.
+
+        // Albanian word patterns (require 2+ matches)
+        $albanianWordPatterns = [
+            '/\b(kush|pse|cili|cila|kam|jemi|jeni|jan[eë])\b/u',
+            '/\b(fatur[aë]|klient|pagu|borxh|fitim|humbje|shpenzim)\b/u',
+            '/\b(mir[eë]dita|faleminderit|n[eë]se|mund|gjithashtu)\b/u',
+        ];
+        $albanianScore = 0;
+        foreach ($albanianWordPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                $albanianScore++;
+            }
+        }
+        if ($albanianScore >= 2) {
+            return 'sq';
+        }
+
+        // Turkish word patterns (require 2+ matches)
+        $turkishWordPatterns = [
+            '/\b(nas[ıi]l|nerede|neden|hangi|yok)\b/u',
+            '/\b(fatura|m[uü][sş]teri|[oö]deme|bor[cç]|gider)\b/u',
+            '/\b(merhaba|te[sş]ekk[uü]r|evet|hay[ıi]r|l[uü]tfen)\b/u',
+        ];
+        $turkishScore = 0;
+        foreach ($turkishWordPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                $turkishScore++;
+            }
+        }
+        if ($turkishScore >= 2) {
+            return 'tr';
+        }
+
+        // Serbian/Bosnian Latin (with ž/š diacritics but no đ/ć/č caught in Phase 1)
+        $serbianLatinPatterns = [
+            '/\b(šta|gde|zašto|koliko|jeste|nije|imate|nemate)\b/u',
+            '/\b(kupac|plaćanje|dugovanje|rashod|trošak|zarada)\b/u',
+            '/\b(hvala|molim|možete|trebam|želim)\b/u',
+        ];
         if (preg_match('/\bgdje\b/u', $text)) {
             return 'bs';
         }
@@ -3467,22 +3497,13 @@ INST,
                 return 'sr';
             }
         }
-        foreach ($bosnianPatterns as $pattern) {
-            if (preg_match($pattern, $text)) {
-                return 'bs';
-            }
-        }
 
-        // English indicators (low threshold — any single match is enough)
-        $englishPatterns = [
-            '/\b(who|what|where|why|when|how|which)\b/u',
-            '/\b(invoice|customer|payment|debt|profit|loss|expense|revenue|bank|warehouse|stock|employee|payroll)\b/u',
-            '/\b(hello|thanks|please|the|and|but|can|could|would|should|show|see|add|create|delete|edit)\b/u',
-        ];
-        foreach ($englishPatterns as $pattern) {
-            if (preg_match($pattern, $text)) {
-                return 'en';
-            }
+        // Single Albanian match (lower confidence, but still better than default)
+        if ($albanianScore >= 1) {
+            return 'sq';
+        }
+        if ($turkishScore >= 1) {
+            return 'tr';
         }
 
         // Default to Macedonian (primary market)
