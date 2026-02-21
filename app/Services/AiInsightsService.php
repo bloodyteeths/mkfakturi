@@ -1219,6 +1219,9 @@ PROMPT;
             $prompt .= "\n{$appDocs}\n";
         }
 
+        // CRITICAL: Prevent AI from falsely claiming features don't exist
+        $prompt .= "\nCRITICAL RULE: NEVER say that Facturino does not support a feature or that a feature does not exist. Facturino is a comprehensive accounting and invoicing platform with 40+ features including: invoicing, estimates, proforma invoices, credit notes, recurring invoices, expenses, bills/suppliers, banking (PSD2), e-faktura, accounting/general ledger, payroll, inventory/warehouses, reports, settings, partner/accountant portal, fiscal devices (fiscalni aparati), WooCommerce integration, projects, custom fields, multi-currency, client portal, data import/export, receipt scanner (OCR), AI assistant, support tickets, deadlines, reconciliation, approval workflows, referral system, KYC verification, and more. If you don't find specific documentation about a feature, say you'll help them find it or suggest they check the relevant menu section — but NEVER say it's not supported.\n";
+
         // Inject persistent user memory from previous conversations
         $currentUser = auth()->user();
         if ($currentUser) {

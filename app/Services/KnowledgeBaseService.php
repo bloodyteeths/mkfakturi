@@ -31,6 +31,20 @@ class KnowledgeBaseService
         'help_reports' => 'reports',
         'help_settings' => 'settings',
         'help_partner' => 'partner-accountant',
+        'help_fiscal' => 'fiscal-devices',
+        'help_woocommerce' => 'woocommerce',
+        'help_proforma' => 'proforma-invoices',
+        'help_credit_notes' => 'credit-notes',
+        'help_projects' => 'projects',
+        'help_custom_fields' => 'custom-fields',
+        'help_currency' => 'multi-currency',
+        'help_client_portal' => 'client-portal',
+        'help_import' => 'import-export',
+        'help_support' => 'support-tickets',
+        'help_receipt_scanner' => 'receipt-scanner',
+        'help_ai' => 'ai-assistant',
+        'help_deadlines' => 'deadlines',
+        'help_payments' => 'payments',
     ];
 
     private string $knowledgePath;
