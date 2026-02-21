@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiConversation;
 use App\Models\Company;
 use App\Services\AiInsightsService;
 use App\Services\UsageLimitService;
@@ -10,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -222,19 +224,28 @@ class AiInsightsController extends Controller
 
         try {
             // Generate conversation ID if not provided
-            $conversationId = $validated['conversation_id'] ?? \Illuminate\Support\Str::uuid()->toString();
+            $conversationId = $validated['conversation_id'] ?? Str::uuid()->toString();
             $cacheKey = "ai_chat:{$company->id}:{$conversationId}";
             $cacheTtl = 3600; // 1 hour
 
-            // Retrieve conversation history from cache
-            $conversation = Cache::get($cacheKey, [
-                'messages' => [],
-                'created_at' => now()->toDateTimeString(),
-                'last_activity' => now()->toDateTimeString(),
-            ]);
+            // Find or create conversation in DB for persistence
+            $dbConversation = AiConversation::firstOrCreate(
+                ['conversation_id' => $conversationId],
+                [
+                    'user_id' => auth()->id(),
+                    'company_id' => $company->id,
+                    'messages' => [],
+                    'title' => null,
+                ]
+            );
 
-            // Extract conversation history (last 10 messages max)
-            $conversationHistory = array_slice($conversation['messages'], -10);
+            // Try cache first for speed, fallback to DB
+            $cachedConversation = Cache::get($cacheKey);
+            if ($cachedConversation) {
+                $conversationHistory = array_slice($cachedConversation['messages'], -10);
+            } else {
+                $conversationHistory = array_slice($dbConversation->getMessages(), -10);
+            }
 
             // Get AI response with conversation context
             $response = $this->aiService->answerQuestion(
@@ -246,29 +257,39 @@ class AiInsightsController extends Controller
             // Increment usage after successful AI call
             $usageService->incrementUsage($company, 'ai_queries_per_month');
 
-            // Update conversation history
-            $conversation['messages'][] = [
-                'role' => 'user',
-                'content' => $validated['message'],
-                'timestamp' => now()->toDateTimeString(),
+            // Save messages to DB (persistent)
+            $dbConversation->addMessage('user', $validated['message']);
+            $dbConversation->addMessage('assistant', $response);
+
+            // Auto-generate title from first user message
+            if (! $dbConversation->title && $dbConversation->message_count <= 2) {
+                $dbConversation->update(['title' => Str::limit($validated['message'], 100)]);
+            }
+
+            // Also write to cache for fast within-session retrieval
+            $cacheConversation = [
+                'messages' => $dbConversation->getMessages(),
+                'created_at' => $dbConversation->created_at->toDateTimeString(),
+                'last_activity' => now()->toDateTimeString(),
             ];
+            Cache::put($cacheKey, $cacheConversation, $cacheTtl);
 
-            $conversation['messages'][] = [
-                'role' => 'assistant',
-                'content' => $response,
-                'timestamp' => now()->toDateTimeString(),
-            ];
-
-            $conversation['last_activity'] = now()->toDateTimeString();
-
-            // Store updated conversation in cache
-            Cache::put($cacheKey, $conversation, $cacheTtl);
+            // Trigger memory compaction every 10 messages
+            if ($dbConversation->message_count > 0 && $dbConversation->message_count % 10 === 0) {
+                try {
+                    $this->aiService->compactUserMemory($company, auth()->user());
+                } catch (\Exception $e) {
+                    Log::warning('[AiInsightsController] Memory compaction failed', [
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             return response()->json([
                 'response' => $response,
                 'conversation_id' => $conversationId,
                 'timestamp' => now()->toDateTimeString(),
-                'message_count' => count($conversation['messages']),
+                'message_count' => $dbConversation->message_count,
             ]);
 
         } catch (\Exception $e) {
@@ -303,7 +324,23 @@ class AiInsightsController extends Controller
         $this->authorize('view dashboard', $company);
 
         try {
+            // Mark conversation as inactive in DB (preserves history for memory)
+            $dbConversation = AiConversation::where('conversation_id', $conversationId)->first();
+            if ($dbConversation) {
+                $dbConversation->update(['is_active' => false]);
+            }
+
+            // Clear from cache
             $this->aiService->clearConversation($company, $conversationId);
+
+            // Trigger memory compaction after ending a conversation
+            try {
+                $this->aiService->compactUserMemory($company, auth()->user());
+            } catch (\Exception $e) {
+                Log::warning('[AiInsightsController] Memory compaction after clear failed', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'message' => 'Conversation cleared successfully',
@@ -322,6 +359,29 @@ class AiInsightsController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * List past conversations for the current user
+     *
+     * GET /api/v1/ai/conversations
+     */
+    public function conversationHistory(Request $request): JsonResponse
+    {
+        $company = Company::find($request->header('company'));
+
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view dashboard', $company);
+
+        $conversations = AiConversation::forUser(auth()->id(), $company->id)
+            ->orderByDesc('updated_at')
+            ->limit(20)
+            ->get(['id', 'conversation_id', 'title', 'message_count', 'is_active', 'updated_at']);
+
+        return response()->json(['conversations' => $conversations]);
     }
 
     /**

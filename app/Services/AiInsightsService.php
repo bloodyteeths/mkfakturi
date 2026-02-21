@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AiConversation;
+use App\Models\AiUserMemory;
 use App\Models\Company;
 use App\Services\AiProvider\AiProviderInterface;
 use App\Services\AiProvider\ClaudeProvider;
@@ -11,6 +13,7 @@ use App\Services\AiProvider\OpenAiProvider;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * AI Insights Service
@@ -279,9 +282,9 @@ class AiInsightsService
             ]);
 
             $prompt = <<<'PROMPT'
-Classify this financial question into one or more categories. Return ONLY the category names as a comma-separated list.
+Classify this question into one or more categories. Return ONLY the category names as a comma-separated list.
 
-Categories:
+Data categories (user wants to see their data):
 - invoices: Questions about specific invoices, invoice lists, overdue/unpaid invoices
 - customers: Questions about customers who owe money, customer details, outstanding balances
 - trends: Questions about revenue trends, cash flow patterns, growth over time
@@ -293,6 +296,22 @@ Categories:
 - documents: Questions about uploaded documents, client documents, receipts, contracts, document review status
 - einvoices: Questions about e-invoices, electronic invoices, incoming/outgoing e-faktura, UJP submissions
 - basic: General questions about company stats
+
+Help categories (user needs instructions on HOW to use a feature):
+- help_invoicing: How to create/edit/send/clone invoices, proforma invoices, credit notes, PDF generation
+- help_estimates: How to create estimates/quotes, convert to invoices
+- help_recurring: How to set up recurring/automatic invoices, billing schedules
+- help_customers: How to add/manage customers, customer portal, import customers
+- help_expenses: How to record expenses, expense categories, receipt scanning
+- help_bills: How to manage suppliers, create bills, accounts payable
+- help_banking: How to connect bank accounts, PSD2, import transactions, reconciliation
+- help_efaktura: How to send/receive e-faktura, electronic invoicing, UJP, QES digital signing
+- help_accounting: How to use chart of accounts, journal entries, trial balance, daily closing, year-end
+- help_payroll: How to manage employees, run payroll, payslips, leave management
+- help_inventory: How to manage stock, warehouses, inventory documents
+- help_reports: How to generate reports: sales, expenses, P&L, tax, general ledger
+- help_settings: How to configure settings: company info, users, roles, taxes, templates, billing
+- help_partner: How to use partner/accountant portal, manage client companies, commissions
 
 Question: {$question}
 
@@ -321,7 +340,7 @@ PROMPT;
             $contexts = array_filter($contexts); // Remove empty values
 
             // Validate against known categories
-            $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'payroll', 'leave', 'deadlines', 'documents', 'einvoices', 'basic'];
+            $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'payroll', 'leave', 'deadlines', 'documents', 'einvoices', 'basic', 'help_invoicing', 'help_estimates', 'help_recurring', 'help_customers', 'help_expenses', 'help_bills', 'help_banking', 'help_efaktura', 'help_accounting', 'help_payroll', 'help_inventory', 'help_reports', 'help_settings', 'help_partner'];
             $contexts = array_intersect($contexts, $validCategories);
 
             // Default to 'basic' if no valid contexts found
@@ -698,10 +717,38 @@ PROMPT;
                         break;
 
                     default:
-                        Log::warning('[AiInsightsService] Unknown context type', [
-                            'context' => $context,
-                        ]);
+                        // Handle help_* categories via KnowledgeBaseService
+                        if (str_starts_with($context, 'help_')) {
+                            // Knowledge will be loaded after the loop for all help topics at once
+                            Log::info('[AiInsightsService] Help topic detected', ['context' => $context]);
+                        } else {
+                            Log::warning('[AiInsightsService] Unknown context type', [
+                                'context' => $context,
+                            ]);
+                        }
                         break;
+                }
+            }
+
+            // Load knowledge base content for any help_* categories
+            $helpTopics = array_filter($contextTypes, fn ($t) => str_starts_with($t, 'help_'));
+            if (! empty($helpTopics)) {
+                try {
+                    $knowledgeService = app(KnowledgeBaseService::class);
+                    $userRole = $this->detectUserRole($company);
+                    $knowledge = $knowledgeService->getKnowledge($helpTopics, $userRole);
+                    if (! empty($knowledge)) {
+                        $data['knowledge'] = $knowledge;
+                        Log::info('[AiInsightsService] Knowledge base content loaded', [
+                            'topics' => $helpTopics,
+                            'user_role' => $userRole,
+                            'content_length' => strlen($knowledge),
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('[AiInsightsService] Failed to load knowledge base', [
+                        'error' => $e->getMessage(),
+                    ]);
                 }
             }
 
@@ -1133,10 +1180,28 @@ PROMPT;
             $prompt .= "- Влезни одбиени: {$es['incoming_rejected']}\n";
         }
 
-        // Add app documentation for "how to" queries
-        if ($isHowToQuery) {
+        // Add knowledge base content for help queries (dynamic, topic-specific)
+        if (! empty($contextualData['knowledge'])) {
+            $prompt .= "\nApp documentation (use this to answer the user's question):\n{$contextualData['knowledge']}\n";
+        } elseif ($isHowToQuery) {
+            // Fallback to hardcoded docs if knowledge base didn't load
             $appDocs = $this->getAppDocumentation();
             $prompt .= "\n{$appDocs}\n";
+        }
+
+        // Inject persistent user memory from previous conversations
+        $currentUser = auth()->user();
+        if ($currentUser) {
+            $userMemory = AiUserMemory::where('user_id', $currentUser->id)
+                ->where('company_id', $company->id)
+                ->first();
+
+            if ($userMemory && ! empty($userMemory->memory_summary)) {
+                $prompt .= "\nМеморија за овој корисник (од претходни конверзации):\n";
+                $prompt .= $userMemory->memory_summary . "\n";
+                $prompt .= "Претпочитан јазик: {$userMemory->preferred_language}\n";
+                $prompt .= "Вкупно конверзации: {$userMemory->total_conversations}\n\n";
+            }
         }
 
         // Detect conversation references and extract entities
@@ -1662,6 +1727,108 @@ FINAL_INSTRUCTIONS;
             'company_id' => $company->id,
             'conversation_id' => $conversationId,
         ]);
+    }
+
+    /**
+     * Compact user memory from recent conversations into a brief summary.
+     *
+     * Pulls the last 5 conversations (~30 messages), asks the AI to generate
+     * a ~200-word memory summary, and stores it in ai_user_memory.
+     * This keeps cross-session context compact and cheap to inject.
+     *
+     * @param  Company  $company  The company context
+     * @param  mixed  $user  The authenticated user
+     * @return void
+     */
+    public function compactUserMemory(Company $company, $user): void
+    {
+        try {
+            // Get last 5 conversations for this user+company
+            $conversations = AiConversation::forUser($user->id, $company->id)
+                ->orderByDesc('updated_at')
+                ->limit(5)
+                ->get();
+
+            if ($conversations->isEmpty()) {
+                return;
+            }
+
+            // Build all messages from recent conversations
+            $allMessages = [];
+            foreach ($conversations as $conv) {
+                foreach ($conv->getMessages() as $msg) {
+                    $allMessages[] = $msg;
+                }
+            }
+
+            if (empty($allMessages)) {
+                return;
+            }
+
+            // Take last 30 messages to keep prompt reasonable
+            $recentMessages = array_slice($allMessages, -30);
+            $messagesText = collect($recentMessages)->map(fn ($m) =>
+                ($m['role'] === 'user' ? 'User' : 'Assistant') . ': ' . Str::limit($m['content'], 200)
+            )->implode("\n");
+
+            // Ask AI to generate compact memory summary
+            $prompt = <<<PROMPT
+            Based on these recent conversations between a user and an AI financial assistant, create a brief memory summary (max 200 words) that captures:
+            1. What topics the user frequently asks about
+            2. Any user preferences (language, detail level, specific areas of interest)
+            3. Key context from recent conversations (specific issues discussed, unresolved questions)
+            4. The user's role (company owner, accountant, employee)
+
+            Conversations:
+            {$messagesText}
+
+            Write the summary in the same language the user mostly uses. Be concise — this summary will be injected into future conversations so the AI remembers the user.
+            PROMPT;
+
+            $summary = $this->aiProvider->generate($prompt, [
+                'max_tokens' => 300,
+                'temperature' => 0.3,
+            ]);
+
+            if (empty($summary)) {
+                Log::warning('[AiInsightsService] Memory compaction returned empty summary', [
+                    'user_id' => $user->id,
+                    'company_id' => $company->id,
+                ]);
+                return;
+            }
+
+            // Detect preferred language from user messages
+            $userMessagesText = collect($recentMessages)
+                ->where('role', 'user')
+                ->pluck('content')
+                ->implode(' ');
+            $detectedLang = $this->detectLanguage($userMessagesText);
+
+            // Update or create memory record
+            AiUserMemory::updateOrCreate(
+                ['user_id' => $user->id, 'company_id' => $company->id],
+                [
+                    'memory_summary' => $summary,
+                    'preferred_language' => $detectedLang,
+                    'total_conversations' => AiConversation::forUser($user->id, $company->id)->count(),
+                    'total_messages' => $conversations->sum('message_count'),
+                ]
+            );
+
+            Log::info('[AiInsightsService] User memory compacted', [
+                'user_id' => $user->id,
+                'company_id' => $company->id,
+                'summary_length' => strlen($summary),
+                'language' => $detectedLang,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[AiInsightsService] Memory compaction failed', [
+                'user_id' => $user->id,
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -3048,6 +3215,22 @@ DOCUMENTATION;
      * @param  string  $text  The text to analyze
      * @return string Language code ('mk', 'sq', 'tr', 'en')
      */
+    /**
+     * Detect user role based on company context
+     *
+     * @param  Company  $company  The company context
+     * @return string 'accountant' or 'company'
+     */
+    private function detectUserRole(Company $company): string
+    {
+        $user = auth()->user();
+        if ($user && $user->role === 'partner') {
+            return 'accountant';
+        }
+
+        return 'company';
+    }
+
     private function detectLanguage(string $text): string
     {
         $text = mb_strtolower(trim($text));

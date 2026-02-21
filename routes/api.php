@@ -1061,6 +1061,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/insights/chat', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'chat']);
                 Route::delete('/insights/chat/{conversationId}', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'clearConversation']);
                 Route::post('/insights/chat-stream', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'chatStream']);
+                Route::get('/conversations', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'conversationHistory']);
                 Route::get('/risks', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'risks']);
                 Route::get('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'getSettings']);
                 Route::post('/settings', [\App\Http\Controllers\V1\Admin\AiInsightsController::class, 'updateSettings']);

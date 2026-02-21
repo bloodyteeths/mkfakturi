@@ -1,0 +1,170 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Knowledge Base Service
+ *
+ * Loads topic-based knowledge files from storage/app/knowledge/
+ * and returns relevant content for AI chat prompts.
+ */
+class KnowledgeBaseService
+{
+    /**
+     * Map of help classification categories to knowledge file names
+     */
+    private const TOPIC_MAP = [
+        'help_invoicing' => 'invoicing',
+        'help_estimates' => 'estimates',
+        'help_recurring' => 'recurring-invoices',
+        'help_customers' => 'customers',
+        'help_expenses' => 'expenses',
+        'help_bills' => 'suppliers-bills',
+        'help_banking' => 'banking',
+        'help_efaktura' => 'efaktura',
+        'help_accounting' => 'accounting',
+        'help_payroll' => 'payroll',
+        'help_inventory' => 'inventory',
+        'help_reports' => 'reports',
+        'help_settings' => 'settings',
+        'help_partner' => 'partner-accountant',
+    ];
+
+    private string $knowledgePath;
+
+    public function __construct()
+    {
+        $this->knowledgePath = storage_path('app/knowledge');
+    }
+
+    /**
+     * Get knowledge content for the given classified topics
+     *
+     * @param  array<string>  $topics  Classified help topic categories (e.g. ['help_invoicing', 'help_banking'])
+     * @param  string  $userRole  'company' or 'accountant'
+     * @return string Combined knowledge text for prompt injection
+     */
+    public function getKnowledge(array $topics, string $userRole = 'company'): string
+    {
+        $helpTopics = array_filter($topics, fn ($t) => str_starts_with($t, 'help_'));
+
+        if (empty($helpTopics)) {
+            return '';
+        }
+
+        $sections = [];
+
+        foreach ($helpTopics as $topic) {
+            $fileName = self::TOPIC_MAP[$topic] ?? null;
+            if (! $fileName) {
+                continue;
+            }
+
+            $content = $this->loadFile($fileName);
+            if (! $content) {
+                continue;
+            }
+
+            $filtered = $this->filterByRole($content, $userRole);
+            if (! empty($filtered)) {
+                $sections[] = $filtered;
+            }
+        }
+
+        if (empty($sections)) {
+            return '';
+        }
+
+        return implode("\n\n---\n\n", $sections);
+    }
+
+    /**
+     * Get list of all available help topics for the classification prompt
+     *
+     * @return array<string, string> Map of category => description
+     */
+    public function getTopicsList(): array
+    {
+        return [
+            'help_invoicing' => 'Questions about creating/editing/sending invoices, proforma invoices, credit notes, PDF generation',
+            'help_estimates' => 'Questions about creating estimates/quotes, converting to invoices',
+            'help_recurring' => 'Questions about recurring/automatic invoices, billing schedules',
+            'help_customers' => 'Questions about adding/managing customers, customer portal',
+            'help_expenses' => 'Questions about recording expenses, expense categories, receipt scanning',
+            'help_bills' => 'Questions about suppliers, bills from suppliers, accounts payable',
+            'help_banking' => 'Questions about connecting bank accounts, PSD2, transaction import, reconciliation',
+            'help_efaktura' => 'Questions about e-faktura, electronic invoicing, UJP, QES digital signing',
+            'help_accounting' => 'Questions about chart of accounts, journal entries, trial balance, daily closing, year-end',
+            'help_payroll' => 'Questions about employees, payroll, salaries, payslips, leave management',
+            'help_inventory' => 'Questions about stock, warehouses, inventory documents, item cards',
+            'help_reports' => 'Questions about reports: sales, expenses, P&L, tax, general ledger',
+            'help_settings' => 'Questions about settings: company info, users, roles, taxes, templates, billing',
+            'help_partner' => 'Questions about partner/accountant portal, managing client companies, commissions',
+        ];
+    }
+
+    /**
+     * Load a knowledge file from storage, with caching
+     *
+     * @param  string  $fileName  File name without extension
+     * @return string|null File content or null if not found
+     */
+    private function loadFile(string $fileName): ?string
+    {
+        $cacheKey = "knowledge:{$fileName}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($fileName) {
+            $filePath = $this->knowledgePath . '/' . $fileName . '.md';
+
+            if (! file_exists($filePath)) {
+                Log::warning('[KnowledgeBaseService] Knowledge file not found', [
+                    'file' => $filePath,
+                ]);
+
+                return null;
+            }
+
+            $content = file_get_contents($filePath);
+
+            Log::info('[KnowledgeBaseService] Knowledge file loaded', [
+                'file' => $fileName,
+                'length' => strlen($content),
+            ]);
+
+            return $content;
+        });
+    }
+
+    /**
+     * Filter knowledge content by user role
+     *
+     * Files marked "## For: accountant" are excluded for company users.
+     * Files marked "## For: company" are excluded for accountant users.
+     * Files marked "## For: both" are included for everyone.
+     *
+     * @param  string  $content  Raw knowledge file content
+     * @param  string  $userRole  'company' or 'accountant'
+     * @return string Filtered content (empty string if role doesn't match)
+     */
+    private function filterByRole(string $content, string $userRole): string
+    {
+        // Extract the "## For:" line
+        if (preg_match('/^## For:\s*(.+)$/m', $content, $matches)) {
+            $forRole = trim(strtolower($matches[1]));
+
+            if ($forRole === 'both') {
+                return $content;
+            }
+
+            if ($forRole !== $userRole) {
+                return '';
+            }
+        }
+
+        return $content;
+    }
+}
+// CLAUDE-CHECKPOINT
