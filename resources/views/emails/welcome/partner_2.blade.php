@@ -1,19 +1,21 @@
 @component('mail::message')
-@lang('welcome.partner_2.greeting', ['name' => $name])
+<p>@lang('welcome.partner_2.greeting', ['name' => $name])</p>
 
-@lang('welcome.partner_2.hook')
+<p>@lang('welcome.partner_2.hook')</p>
 
-@lang('welcome.partner_2.body')
+<p>@lang('welcome.partner_2.body')</p>
 
-@lang('welcome.partner_2.features')
+<p>@lang('welcome.partner_2.features')</p>
 
-@lang('welcome.partner_2.cta_text') {{ $ctaUrl }}
+<p>@lang('welcome.partner_2.cta_text') {{ $ctaUrl }}</p>
 
-@lang('welcome.partner_2.closing')
+<p>@lang('welcome.partner_2.closing')</p>
 
-@lang('welcome.signature_closing')
-**@lang('welcome.signature_name')**
-@lang('welcome.signature_company')
-@lang('welcome.signature_phone')
-[facturino.mk](https://facturino.mk)
+<p>
+@lang('welcome.signature_closing')<br>
+<strong>@lang('welcome.signature_name')</strong><br>
+@lang('welcome.signature_company')<br>
+@lang('welcome.signature_phone')<br>
+<a href="https://facturino.mk">facturino.mk</a>
+</p>
 @endcomponent
