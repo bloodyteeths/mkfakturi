@@ -231,7 +231,7 @@ class AiInsightsService
 
             // Get AI response
             $response = $this->aiProvider->generate($prompt, [
-                'max_tokens' => 2048,
+                'max_tokens' => 4096,
             ]);
 
             Log::info('[AiInsightsService] Chat response received', [
@@ -338,6 +338,37 @@ PROMPT;
             $response = trim($response);
             $contexts = array_map('trim', explode(',', $response));
             $contexts = array_filter($contexts); // Remove empty values
+
+            // Remap common misclassifications (LLM may return bare names without help_ prefix)
+            $remapToHelp = [
+                'banking' => 'help_banking',
+                'accounting' => 'help_accounting',
+                'inventory' => 'help_inventory',
+                'reports' => 'help_reports',
+                'settings' => 'help_settings',
+                'billing' => 'help_settings',
+                'expenses' => 'help_expenses',
+                'estimates' => 'help_estimates',
+                'recurring' => 'help_recurring',
+                'efaktura' => 'help_efaktura',
+                'partner' => 'help_partner',
+            ];
+
+            // Detect how-to intent — if user is asking HOW to do something, remap data categories to help categories
+            $isHowTo = (bool) preg_match('/\b(how|како|si|nasıl|can i|help|помош|explain|objasni|упатство|guide|tutorial|чекор|step|додад|add|create|креира|направ|set up|постав|connect|поврз|import|увез)\b/iu', $question);
+
+            $contexts = array_map(function ($ctx) use ($remapToHelp, $isHowTo) {
+                // Direct remaps (categories that don't exist as data categories)
+                if (isset($remapToHelp[$ctx])) {
+                    return $remapToHelp[$ctx];
+                }
+                // If user is asking how-to, remap data categories to help equivalents
+                if ($isHowTo && isset($remapToHelp[$ctx])) {
+                    return $remapToHelp[$ctx];
+                }
+                return $ctx;
+            }, $contexts);
+            $contexts = array_unique($contexts);
 
             // Validate against known categories
             $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'payroll', 'leave', 'deadlines', 'documents', 'einvoices', 'basic', 'help_invoicing', 'help_estimates', 'help_recurring', 'help_customers', 'help_expenses', 'help_bills', 'help_banking', 'help_efaktura', 'help_accounting', 'help_payroll', 'help_inventory', 'help_reports', 'help_settings', 'help_partner'];
