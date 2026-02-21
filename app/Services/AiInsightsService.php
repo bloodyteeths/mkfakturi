@@ -282,40 +282,53 @@ class AiInsightsService
             ]);
 
             $prompt = <<<'PROMPT'
-Classify this question into one or more categories. Return ONLY the category names as a comma-separated list.
+Classify this user question into one or more categories. Return ONLY category names, comma-separated. Pick the MOST SPECIFIC category that matches.
 
-Data categories (user wants to see their data):
-- invoices: Questions about specific invoices, invoice lists, overdue/unpaid invoices
-- customers: Questions about customers who owe money, customer details, outstanding balances
-- trends: Questions about revenue trends, cash flow patterns, growth over time
-- payment_timing: Questions about late payments, payment speed, average payment time
-- top_customers: Questions about best customers, customer rankings, biggest clients
-- payroll: Questions about salaries, payroll runs, gross/net pay, contributions, overtime hours/pay
-- leave: Questions about leave requests, vacation days, sick leave, annual leave, maternity leave
-- deadlines: Questions about tax deadlines, VAT returns, MPIN, CIT, annual financial statements, due dates
-- documents: Questions about uploaded documents, client documents, receipts, contracts, document review status
-- einvoices: Questions about e-invoices, electronic invoices, incoming/outgoing e-faktura, UJP submissions
-- basic: General questions about company stats
+RULE: If the question mentions a specific feature (bank, expense, payroll, etc.), classify under THAT feature's category — NOT under a generic one like "invoices" or "basic".
 
-Help categories (user needs instructions on HOW to use a feature):
-- help_invoicing: How to create/edit/send/clone invoices, proforma invoices, credit notes, PDF generation
-- help_estimates: How to create estimates/quotes, convert to invoices
-- help_recurring: How to set up recurring/automatic invoices, billing schedules
-- help_customers: How to add/manage customers, customer portal, import customers
-- help_expenses: How to record expenses, expense categories, receipt scanning
-- help_bills: How to manage suppliers, create bills, accounts payable
-- help_banking: How to connect bank accounts, PSD2, import transactions, reconciliation
-- help_efaktura: How to send/receive e-faktura, electronic invoicing, UJP, QES digital signing
-- help_accounting: How to use chart of accounts, journal entries, trial balance, daily closing, year-end
-- help_payroll: How to manage employees, run payroll, payslips, leave management
-- help_inventory: How to manage stock, warehouses, inventory documents
-- help_reports: How to generate reports: sales, expenses, P&L, tax, general ledger
-- help_settings: How to configure settings: company info, users, roles, taxes, templates, billing
-- help_partner: How to use partner/accountant portal, manage client companies, commissions
+Data categories (user wants to see numbers/stats/lists):
+- invoices: "show my invoices", "how many unpaid", "overdue invoices list"
+- customers: "who owes money", "customer balances", "top clients"
+- trends: "revenue this year", "growth rate", "monthly comparison"
+- payment_timing: "average payment time", "late payments"
+- top_customers: "biggest clients", "best customers by revenue"
+- payroll: "total salaries", "payroll summary", "net pay last month"
+- leave: "pending leave requests", "vacation days used"
+- deadlines: "upcoming tax deadlines", "when is VAT due"
+- documents: "uploaded documents status", "pending reviews"
+- einvoices: "e-invoice status", "sent e-faktura count"
+- basic: General company overview, overall stats
+
+Help categories (user asks HOW to do something):
+- help_invoicing: Creating/editing/sending invoices, proforma, credit notes, PDF, templates
+- help_estimates: Creating quotes/estimates, converting to invoices
+- help_recurring: Setting up recurring/automatic invoices
+- help_customers: Adding/importing/managing customers, customer portal
+- help_expenses: Recording expenses, categories, receipt scanning/OCR
+- help_bills: Managing suppliers, entering bills, accounts payable
+- help_banking: Bank accounts, bank connections, PSD2, add/connect bank, transactions, reconciliation, bank integration
+- help_efaktura: E-faktura, electronic invoicing, UJP, QES digital signing
+- help_accounting: Chart of accounts, journal entries, trial balance, closing
+- help_payroll: Employees, salaries, payslips, leave management, MPIN
+- help_inventory: Stock, warehouses, inventory items, item cards
+- help_reports: Reports: sales, expenses, P&L, tax, general ledger
+- help_settings: Company settings, users, roles, taxes, billing plan, subscription
+- help_partner: Partner/accountant portal, client companies, commissions, KYC
+
+Examples:
+Q: "how can I add a new bank?" → help_banking
+Q: "how many invoices this month?" → invoices
+Q: "how to create an invoice?" → help_invoicing
+Q: "connect my bank account" → help_banking
+Q: "show me payroll for January" → payroll
+Q: "how to add an employee?" → help_payroll
+Q: "какви се моите трошоци?" → basic
+Q: "како да додадам трошок?" → help_expenses
+Q: "e-faktura kako da pratam?" → help_efaktura
 
 Question: {$question}
 
-Response (comma-separated categories only):
+Categories:
 PROMPT;
 
             $classificationModel = config('ai.model_routing.classification', 'gemini-2.5-flash');
@@ -338,37 +351,6 @@ PROMPT;
             $response = trim($response);
             $contexts = array_map('trim', explode(',', $response));
             $contexts = array_filter($contexts); // Remove empty values
-
-            // Remap common misclassifications (LLM may return bare names without help_ prefix)
-            $remapToHelp = [
-                'banking' => 'help_banking',
-                'accounting' => 'help_accounting',
-                'inventory' => 'help_inventory',
-                'reports' => 'help_reports',
-                'settings' => 'help_settings',
-                'billing' => 'help_settings',
-                'expenses' => 'help_expenses',
-                'estimates' => 'help_estimates',
-                'recurring' => 'help_recurring',
-                'efaktura' => 'help_efaktura',
-                'partner' => 'help_partner',
-            ];
-
-            // Detect how-to intent — if user is asking HOW to do something, remap data categories to help categories
-            $isHowTo = (bool) preg_match('/\b(how|како|si|nasıl|can i|help|помош|explain|objasni|упатство|guide|tutorial|чекор|step|додад|add|create|креира|направ|set up|постав|connect|поврз|import|увез)\b/iu', $question);
-
-            $contexts = array_map(function ($ctx) use ($remapToHelp, $isHowTo) {
-                // Direct remaps (categories that don't exist as data categories)
-                if (isset($remapToHelp[$ctx])) {
-                    return $remapToHelp[$ctx];
-                }
-                // If user is asking how-to, remap data categories to help equivalents
-                if ($isHowTo && isset($remapToHelp[$ctx])) {
-                    return $remapToHelp[$ctx];
-                }
-                return $ctx;
-            }, $contexts);
-            $contexts = array_unique($contexts);
 
             // Validate against known categories
             $validCategories = ['invoices', 'customers', 'trends', 'payment_timing', 'top_customers', 'payroll', 'leave', 'deadlines', 'documents', 'einvoices', 'basic', 'help_invoicing', 'help_estimates', 'help_recurring', 'help_customers', 'help_expenses', 'help_bills', 'help_banking', 'help_efaktura', 'help_accounting', 'help_payroll', 'help_inventory', 'help_reports', 'help_settings', 'help_partner'];
