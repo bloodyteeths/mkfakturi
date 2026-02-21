@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Knowledge Base Service
  *
- * Loads topic-based knowledge files from storage/app/knowledge/
+ * Loads topic-based knowledge files from resources/knowledge/
  * and returns relevant content for AI chat prompts.
  */
 class KnowledgeBaseService
@@ -37,7 +37,7 @@ class KnowledgeBaseService
 
     public function __construct()
     {
-        $this->knowledgePath = storage_path('app/knowledge');
+        $this->knowledgePath = resource_path('knowledge');
     }
 
     /**
