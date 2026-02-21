@@ -73,6 +73,15 @@ class GeminiProvider implements AiProviderInterface
         $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
         $temperature = $options['temperature'] ?? $this->temperature;
 
+        // Guard: if a non-Gemini model name is passed (e.g. claude-3-haiku), fall back to default
+        if (! str_starts_with($model, 'gemini')) {
+            Log::warning('[GeminiProvider] Non-Gemini model requested, falling back to default', [
+                'requested_model' => $model,
+                'fallback_model' => $this->model,
+            ]);
+            $model = $this->model;
+        }
+
         return $this->sendRequest([
             'contents' => [
                 [
