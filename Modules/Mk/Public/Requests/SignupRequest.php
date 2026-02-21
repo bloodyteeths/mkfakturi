@@ -79,6 +79,11 @@ class SignupRequest extends FormRequest
                 'string',
                 'in:monthly,yearly',
             ],
+            'payment_currency' => [
+                'nullable',
+                'string',
+                'in:mkd,eur',
+            ],
 
             // Company preferences (optional - defaults to MKD/mk)
             'currency' => [

@@ -277,8 +277,8 @@
         description="Одберете го планот што најмногу ви одговара"
       >
         <div class="mb-8">
-          <!-- Billing Period Toggle -->
-          <div class="flex justify-center mb-8">
+          <!-- Billing Period + Currency Toggle -->
+          <div class="flex flex-col items-center gap-4 mb-8">
             <div class="inline-flex items-center bg-gray-100 rounded-full p-1">
               <button
                 :class="[
@@ -302,6 +302,32 @@
               >
                 Годишно
                 <span class="ml-1 text-xs text-green-600 font-bold">-17%</span>
+              </button>
+            </div>
+
+            <!-- Currency Toggle (MKD / EUR for SEPA) -->
+            <div class="inline-flex items-center bg-gray-100 rounded-full p-1">
+              <button
+                :class="[
+                  'px-5 py-1.5 rounded-full text-xs font-medium transition-all',
+                  paymentCurrency === 'mkd'
+                    ? 'bg-white text-primary-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                ]"
+                @click="paymentCurrency = 'mkd'"
+              >
+                🇲🇰 MKD (Картичка)
+              </button>
+              <button
+                :class="[
+                  'px-5 py-1.5 rounded-full text-xs font-medium transition-all',
+                  paymentCurrency === 'eur'
+                    ? 'bg-white text-primary-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                ]"
+                @click="paymentCurrency = 'eur'"
+              >
+                🇪🇺 EUR (SEPA)
               </button>
             </div>
           </div>
@@ -351,6 +377,19 @@
                 </h3>
                 <div class="mb-4">
                   <span v-if="plan.price === 0" class="text-2xl font-bold text-green-600">Бесплатно</span>
+                  <template v-else-if="paymentCurrency === 'eur'">
+                    <div v-if="billingPeriod === 'monthly'">
+                      <span class="text-2xl font-bold text-gray-900">€{{ plan.price_eur }}</span>
+                      <span class="text-sm text-gray-600">/месец</span>
+                    </div>
+                    <div v-else>
+                      <span class="text-2xl font-bold text-gray-900">€{{ plan.price_eur_yearly }}</span>
+                      <span class="text-sm text-gray-600">/год</span>
+                      <div class="text-xs text-green-600 mt-1">
+                        (€{{ Math.round(plan.price_eur_yearly / 12) }}/месец)
+                      </div>
+                    </div>
+                  </template>
                   <template v-else>
                     <div v-if="billingPeriod === 'monthly'">
                       <span class="text-2xl font-bold text-gray-900">{{ plan.price }}</span>
@@ -382,9 +421,15 @@
             </div>
           </div>
 
-          <!-- SEPA Bank Transfer Note -->
+          <!-- SEPA Info Note -->
           <div class="mt-6 text-center">
-            <p class="inline-flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5">
+            <p v-if="paymentCurrency === 'eur'" class="inline-flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-full px-5 py-2.5">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              SEPA банкарски трансфер е овозможен. На checkout ќе можете да платите со картичка или банкарски трансфер.
+            </p>
+            <p v-else class="inline-flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5">
               <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
@@ -456,7 +501,8 @@
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Цена:</span>
-                  <span class="font-medium text-gray-900">{{ selectedPlan?.price }} ден/месец</span>
+                  <span v-if="paymentCurrency === 'eur'" class="font-medium text-gray-900">€{{ selectedPlan?.price_eur }}/{{ billingPeriod === 'monthly' ? 'месец' : 'год' }}</span>
+                  <span v-else class="font-medium text-gray-900">{{ billingPeriod === 'monthly' ? selectedPlan?.price : selectedPlan?.price_yearly }} ден/{{ billingPeriod === 'monthly' ? 'месец' : 'год' }}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Компанија:</span>
@@ -523,6 +569,7 @@ const plansError = ref('')
 const plans = ref([])
 const selectedPlan = ref(null)
 const billingPeriod = ref('monthly')
+const paymentCurrency = ref('mkd')
 const isProcessing = ref(false)
 const registrationError = ref('')
 const currencies = ref([])
@@ -657,6 +704,8 @@ async function loadPlans() {
       name: plan.name,
       price: plan.price || 0,
       price_yearly: plan.price_yearly || 0,
+      price_eur: plan.price_eur || 0,
+      price_eur_yearly: plan.price_eur_yearly || 0,
       stripe_price_id: plan.stripe_price_id || null,
       popular: plan.id === 'standard', // Mark standard as popular
       features: plan.features || [],
@@ -731,6 +780,7 @@ async function completeRegistration() {
       password: userForm.password,
       plan: selectedPlan.value.id,
       billing_period: billingPeriod.value,
+      payment_currency: paymentCurrency.value,
     }
 
     // Add partner referral data if available

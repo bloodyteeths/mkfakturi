@@ -49,6 +49,26 @@ return [
             ],
         ],
 
+        // Subscription price IDs (EUR) - for SEPA bank transfer payments
+        'prices_eur' => [
+            'starter' => [
+                'monthly' => env('STRIPE_PRICE_STARTER_EUR_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_STARTER_EUR_YEARLY'),
+            ],
+            'standard' => [
+                'monthly' => env('STRIPE_PRICE_STANDARD_EUR_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_STANDARD_EUR_YEARLY'),
+            ],
+            'business' => [
+                'monthly' => env('STRIPE_PRICE_BUSINESS_EUR_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_BUSINESS_EUR_YEARLY'),
+            ],
+            'max' => [
+                'monthly' => env('STRIPE_PRICE_MAX_EUR_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_MAX_EUR_YEARLY'),
+            ],
+        ],
+
         'currency' => 'mkd',
 
         // Stripe Connect for partner payouts (Cross-border to Macedonia)

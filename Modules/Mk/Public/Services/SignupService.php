@@ -68,6 +68,15 @@ class SignupService
             'max' => 7490,
         ];
 
+        // EUR pricing for SEPA bank transfer payments
+        $pricingEur = [
+            'free' => 0,
+            'starter' => 12,
+            'standard' => 29,
+            'business' => 59,
+            'max' => 149,
+        ];
+
         $plans = [
             [
                 'id' => 'free',
@@ -75,6 +84,8 @@ class SignupService
                 'description' => 'Започнете бесплатно',
                 'price' => $pricing['free'],
                 'price_yearly' => 0,
+                'price_eur' => $pricingEur['free'],
+                'price_eur_yearly' => 0,
                 'stripe_price_id' => null,
                 'currency' => strtoupper($currency),
                 'features' => [
@@ -89,6 +100,8 @@ class SignupService
                 'description' => 'За мали бизниси',
                 'price' => $pricing['starter'],
                 'price_yearly' => $pricing['starter'] * 10,
+                'price_eur' => $pricingEur['starter'],
+                'price_eur_yearly' => $pricingEur['starter'] * 10,
                 'stripe_price_id' => $stripePrices['starter']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
@@ -104,6 +117,8 @@ class SignupService
                 'description' => 'За растечки бизниси',
                 'price' => $pricing['standard'],
                 'price_yearly' => $pricing['standard'] * 10,
+                'price_eur' => $pricingEur['standard'],
+                'price_eur_yearly' => $pricingEur['standard'] * 10,
                 'stripe_price_id' => $stripePrices['standard']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
@@ -120,6 +135,8 @@ class SignupService
                 'description' => 'Напредни функции',
                 'price' => $pricing['business'],
                 'price_yearly' => $pricing['business'] * 10,
+                'price_eur' => $pricingEur['business'],
+                'price_eur_yearly' => $pricingEur['business'] * 10,
                 'stripe_price_id' => $stripePrices['business']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
@@ -136,6 +153,8 @@ class SignupService
                 'description' => 'Сè што ви треба',
                 'price' => $pricing['max'],
                 'price_yearly' => $pricing['max'] * 10,
+                'price_eur' => $pricingEur['max'],
+                'price_eur_yearly' => $pricingEur['max'] * 10,
                 'stripe_price_id' => $stripePrices['max']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
@@ -373,12 +392,15 @@ class SignupService
 
         $plan = $data['plan'] ?? 'starter';
         $billingPeriod = $data['billing_period'] ?? 'monthly'; // monthly or yearly
+        $paymentCurrency = strtolower($data['payment_currency'] ?? 'mkd');
 
-        $prices = config('services.stripe.prices');
+        // Select MKD or EUR price IDs based on payment currency
+        $pricesKey = $paymentCurrency === 'eur' ? 'services.stripe.prices_eur' : 'services.stripe.prices';
+        $prices = config($pricesKey);
         $priceId = $prices[$plan][$billingPeriod] ?? null;
 
         if (! $priceId) {
-            throw new \Exception("Invalid plan or billing period: {$plan}/{$billingPeriod}");
+            throw new \Exception("Invalid plan, billing period, or currency: {$plan}/{$billingPeriod}/{$paymentCurrency}");
         }
 
         $successUrl = config('app.url').'/signup/success?session_id={CHECKOUT_SESSION_ID}';
@@ -414,6 +436,11 @@ class SignupService
                 'trial_period_days' => 14, // 14-day trial
             ],
         ];
+
+        // For EUR payments, enable SEPA Direct Debit alongside card
+        if ($paymentCurrency === 'eur') {
+            $sessionParams['payment_method_types'] = ['card', 'sepa_debit'];
+        }
 
         // Apply company referral discount (10% off first payment)
         if ($companyReferral && $companyReferral->isEligibleForRewards()) {

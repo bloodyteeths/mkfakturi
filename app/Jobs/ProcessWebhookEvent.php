@@ -647,12 +647,15 @@ class ProcessWebhookEvent implements ShouldQueue
      */
     protected function tierFromStripePriceId(string $priceId): ?string
     {
-        $prices = config('services.stripe.prices', []);
+        // Check both MKD and EUR price configs
+        foreach (['services.stripe.prices', 'services.stripe.prices_eur'] as $configKey) {
+            $prices = config($configKey, []);
 
-        foreach ($prices as $tier => $intervals) {
-            foreach ($intervals as $priceValue) {
-                if ($priceValue === $priceId) {
-                    return $tier;
+            foreach ($prices as $tier => $intervals) {
+                foreach ($intervals as $priceValue) {
+                    if ($priceValue === $priceId) {
+                        return $tier;
+                    }
                 }
             }
         }
