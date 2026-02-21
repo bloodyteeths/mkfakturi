@@ -51,6 +51,7 @@ export type Dictionary = {
     partnerSubtitle: string
     cta: string
     ctaPartner: string
+    sepaNote: string
     comparisonTable: {
       title: string
       plans: string[]
@@ -232,19 +233,20 @@ const mk: Dictionary = {
     recommendedBadge: 'Препорачано',
     includesPrevious: 'Вклучува сè од {plan}',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '2 AI прашања/месец'], popular: false },
-      { name: 'Starter', price: '€12', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
-      { name: 'Standard', price: '€29', period: '/месец', bullets: ['200 фактури/месец', '3 корисници', 'Е‑Фактура + QES', '25 AI прашања/месец', 'Материјално сметководство'], popular: true },
-      { name: 'Business', price: '€59', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', '50 AI прашања/месец', 'Материјално сметководство'], popular: false },
-      { name: 'Max', price: '€149', period: '/месец', bullets: ['Неограничено фактури', 'API пристап', 'Мулти-локации', '100 AI прашања/месец', 'Материјално сметководство'], popular: false }
+      { name: 'Free', price: '0 ден', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '2 AI прашања/месец'], popular: false },
+      { name: 'Starter', price: '590 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
+      { name: 'Standard', price: '1,490 ден', period: '/месец', bullets: ['200 фактури/месец', '3 корисници', 'Е‑Фактура + QES', '25 AI прашања/месец', 'Материјално сметководство'], popular: true },
+      { name: 'Business', price: '2,990 ден', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', '50 AI прашања/месец', 'Материјално сметководство'], popular: false },
+      { name: 'Max', price: '7,490 ден', period: '/месец', bullets: ['Неограничено фактури', 'API пристап', 'Мулти-локации', '100 AI прашања/месец', 'Материјално сметководство'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Партнер портал', '20% рекурентна провизија', 'Следење на заработка'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/месec', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
+      { name: 'Partner Plus', price: '1,490 ден', period: '/месец', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
     ],
     partnerSubtitle: 'За сметководствени канцеларии',
     cta: 'Започни сега',
     ctaPartner: 'Придружи се',
+    sepaNote: 'Немате картичка? Изберете EUR за плаќање преку банкарски трансфер (SEPA).',
     comparisonTable: {
       title: 'Споредете ги пакетите',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
@@ -435,19 +437,20 @@ const sq: Dictionary = {
     recommendedBadge: 'I rekomanduar',
     includesPrevious: 'Përfshin gjithçka në {plan}',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '2 pyetje AI/muaj'], popular: false },
-      { name: 'Starter', price: '€12', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
-      { name: 'Standard', price: '€29', period: '/muaj', bullets: ['200 fatura/muaj', '3 përdorues', 'e‑Faturë + QES', '25 pyetje AI/muaj', 'Kontabilitet material'], popular: true },
-      { name: 'Business', price: '€59', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', '50 pyetje AI/muaj', 'Kontabilitet material'], popular: false },
-      { name: 'Max', price: '€149', period: '/muaj', bullets: ['Fatura pa limit', 'Qasje API', 'Multi-lokacione', '100 pyetje AI/muaj', 'Kontabilitet material'], popular: false }
+      { name: 'Free', price: '0 den', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '2 pyetje AI/muaj'], popular: false },
+      { name: 'Starter', price: '590 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
+      { name: 'Standard', price: '1,490 den', period: '/muaj', bullets: ['200 fatura/muaj', '3 përdorues', 'e‑Faturë + QES', '25 pyetje AI/muaj', 'Kontabilitet material'], popular: true },
+      { name: 'Business', price: '2,990 den', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', '50 pyetje AI/muaj', 'Kontabilitet material'], popular: false },
+      { name: 'Max', price: '7,490 den', period: '/muaj', bullets: ['Fatura pa limit', 'Qasje API', 'Multi-lokacione', '100 pyetje AI/muaj', 'Kontabilitet material'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portal partneri', 'Komision 20% rekurent', 'Ndjekje fitimesh'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
+      { name: 'Partner Plus', price: '1,490 den', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
     ],
     partnerSubtitle: 'Për zyrat e kontabilitetit',
     cta: 'Fillo tani',
     ctaPartner: 'Bashkohu',
+    sepaNote: 'Nuk keni kartë? Zgjidhni EUR për të paguar me transfertë bankare (SEPA).',
     comparisonTable: {
       title: 'Krahasoni paketat',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
@@ -638,19 +641,20 @@ const tr: Dictionary = {
     recommendedBadge: 'Önerilen',
     includesPrevious: '{plan} paketindeki her şey dahil',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '2 AI soru/ay'], popular: false },
-      { name: 'Starter', price: '€12', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
-      { name: 'Standard', price: '€29', period: '/ay', bullets: ['200 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES', '25 AI soru/ay', 'Malzeme muhasebesi'], popular: true },
-      { name: 'Business', price: '€59', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', '50 AI soru/ay', 'Malzeme muhasebesi'], popular: false },
-      { name: 'Max', price: '€149', period: '/ay', bullets: ['Sınırsız fatura', 'API erişimi', 'Çoklu lokasyon', '100 AI soru/ay', 'Malzeme muhasebesi'], popular: false }
+      { name: 'Free', price: '0 den', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '2 AI soru/ay'], popular: false },
+      { name: 'Starter', price: '590 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
+      { name: 'Standard', price: '1,490 den', period: '/ay', bullets: ['200 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES', '25 AI soru/ay', 'Malzeme muhasebesi'], popular: true },
+      { name: 'Business', price: '2,990 den', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', '50 AI soru/ay', 'Malzeme muhasebesi'], popular: false },
+      { name: 'Max', price: '7,490 den', period: '/ay', bullets: ['Sınırsız fatura', 'API erişimi', 'Çoklu lokasyon', '100 AI soru/ay', 'Malzeme muhasebesi'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Partner portalı', '%20 tekrarlayan komisyon', 'Kazanç takibi'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
+      { name: 'Partner Plus', price: '1,490 den', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
     ],
     partnerSubtitle: 'Muhasebe ofisleri için',
     cta: 'Şimdi başla',
     ctaPartner: 'Katıl',
+    sepaNote: 'Kartınız yok mu? Banka havalesiyle ödeme yapmak için EUR seçin (SEPA).',
     comparisonTable: {
       title: 'Paketleri karşılaştırın',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
@@ -841,19 +845,20 @@ const en: Dictionary = {
     recommendedBadge: 'Recommended',
     includesPrevious: 'Includes everything in {plan}',
     companyPlans: [
-      { name: 'Free', price: '€0', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '2 AI questions/month'], popular: false },
-      { name: 'Starter', price: '€12', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
-      { name: 'Standard', price: '€29', period: '/month', bullets: ['200 invoices/month', '3 users', 'e-Invoice + QES', '25 AI questions/month', 'Material Accounting'], popular: true },
-      { name: 'Business', price: '€59', period: '/month', bullets: ['1000 invoices/month', '5 users', 'Bank statements', '50 AI questions/month', 'Material Accounting'], popular: false },
-      { name: 'Max', price: '€149', period: '/month', bullets: ['Unlimited invoices', 'API access', 'Multi-locations', '100 AI questions/month', 'Material Accounting'], popular: false }
+      { name: 'Free', price: '0 MKD', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '2 AI questions/month'], popular: false },
+      { name: 'Starter', price: '590 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
+      { name: 'Standard', price: '1,490 MKD', period: '/month', bullets: ['200 invoices/month', '3 users', 'e-Invoice + QES', '25 AI questions/month', 'Material Accounting'], popular: true },
+      { name: 'Business', price: '2,990 MKD', period: '/month', bullets: ['1000 invoices/month', '5 users', 'Bank statements', '50 AI questions/month', 'Material Accounting'], popular: false },
+      { name: 'Max', price: '7,490 MKD', period: '/month', bullets: ['Unlimited invoices', 'API access', 'Multi-locations', '100 AI questions/month', 'Material Accounting'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Partner portal', '20% recurring commission', 'Earnings tracking'], popular: true },
-      { name: 'Partner Plus', price: '€29', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
+      { name: 'Partner Plus', price: '1,490 MKD', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
     ],
     partnerSubtitle: 'For accounting firms',
     cta: 'Start Now',
     ctaPartner: 'Join',
+    sepaNote: 'No card? Choose EUR to pay via bank transfer (SEPA).',
     comparisonTable: {
       title: 'Compare Plans',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],

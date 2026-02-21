@@ -18,10 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'Pricing & Plans — Facturino',
     },
     description: {
-      mk: 'Бесплатен план, Pro од €12/месец, без кредитна картичка. Споредете ги сите пакети на Facturino и започнете бесплатно 14 дена.',
-      sq: 'Plan falas, Pro nga €12/muaj, pa karte krediti. Krahasoni te gjitha paketat e Facturino dhe filloni falas per 14 dite.',
-      tr: 'Ucretsiz plan, Pro €12/ay\'dan baslayan fiyatlar, kredi karti gerekmez. Facturino paketlerini karsilastirin, 14 gun ucretsiz deneyin.',
-      en: 'Free plan, Pro from €12/month, no credit card required. Compare all Facturino plans and start your free 14-day trial today.',
+      mk: 'Бесплатен план, Standard од 1,490 ден/месец, без кредитна картичка. Споредете ги сите пакети на Facturino и започнете бесплатно 14 дена.',
+      sq: 'Plan falas, Standard nga 1,490 den/muaj, pa kartë krediti. Krahasoni të gjitha paketat e Facturino dhe filloni falas për 14 ditë.',
+      tr: 'Ücretsiz plan, Standard 1,490 den/ay\'dan başlayan fiyatlar, kredi kartı gerekmez. Facturino paketlerini karşılaştırın, 14 gün ücretsiz deneyin.',
+      en: 'Free plan, Standard from 1,490 MKD/month, no credit card required. Compare all Facturino plans and start your free 14-day trial today.',
     },
   })
 }
@@ -32,7 +32,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const t = await getDictionary(locale)
 
   if (!t.pricingPage) return null
-  const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, partnerSubtitle, companyPlans, partnerPlans, cta, ctaPartner } = t.pricingPage
+  const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, partnerSubtitle, companyPlans, partnerPlans, cta, ctaPartner, sepaNote } = t.pricingPage
 
   const softwareAppLd = {
     '@context': 'https://schema.org',
@@ -44,8 +44,8 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
     offers: companyPlans.map((p) => ({
       '@type': 'Offer',
       name: p.name,
-      price: p.price.replace('€', ''),
-      priceCurrency: 'EUR',
+      price: p.price.replace(/[^\d]/g, ''),
+      priceCurrency: 'MKD',
       description: p.bullets.join(', '),
     })),
   }
@@ -131,6 +131,18 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
               )
             })}
           </div>
+
+          {/* SEPA Note */}
+          {sepaNote && (
+            <div className="mt-8 text-center">
+              <p className="inline-flex items-center gap-2 text-sm text-gray-500 bg-white border border-gray-200 rounded-full px-5 py-2.5 shadow-sm">
+                <svg className="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                {sepaNote}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Partner Pricing */}
