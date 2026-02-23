@@ -73,6 +73,11 @@ class OutreachService
             return false;
         }
 
+        // Skip leads that already registered as users (converted)
+        if (DB::table('users')->where('email', $lead->email)->exists()) {
+            return false;
+        }
+
         // Check if recently emailed (cooldown period)
         if ($lead->last_contacted_at &&
             $lead->last_contacted_at->diffInDays(now()) < $this->contactCooldownDays) {

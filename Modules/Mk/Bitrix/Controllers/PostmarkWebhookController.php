@@ -336,15 +336,15 @@ class PostmarkWebhookController extends Controller
         $bounceType = $event->payload['Type'] ?? 'unknown';
         $description = $event->payload['Description'] ?? '';
 
-        // Add to suppression list using model
-        Suppression::suppress($email, Suppression::REASON_BOUNCE, Suppression::SOURCE_POSTMARK, [
+        // Add to suppression list using convenience method
+        Suppression::fromBounce($email, "{$bounceType}: {$description}", [
             'type' => $bounceType,
             'description' => $description,
             'message_id' => $event->postmark_message_id,
         ]);
 
         // Update send status
-        $send?->update(['status' => OutreachSend::STATUS_BOUNCED, 'bounced_at' => now()]);
+        $send?->update(['status' => OutreachSend::STATUS_BOUNCED]);
 
         // Update HubSpot - move deal to lost
         if ($mapping) {
@@ -396,8 +396,8 @@ class PostmarkWebhookController extends Controller
      */
     protected function handleSpamComplaint(?OutreachSend $send, ?HubSpotLeadMap $mapping, OutreachEvent $event, string $email): void
     {
-        // Add to suppression list using model
-        Suppression::suppress($email, Suppression::TYPE_COMPLAINT, Suppression::SOURCE_POSTMARK, [
+        // Add to suppression list using convenience method
+        Suppression::fromComplaint($email, 'Spam complaint received', [
             'message_id' => $event->postmark_message_id,
         ]);
 

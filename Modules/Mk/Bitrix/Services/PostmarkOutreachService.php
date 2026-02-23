@@ -133,11 +133,10 @@ class PostmarkOutreachService
                 );
             });
 
-            Mail::to($email)->sendNow($mailable);
+            $sentMessage = Mail::to($email)->send($mailable);
 
-            // Get the message ID from the response
-            // Note: Laravel's Postmark transport returns the message ID in the sent event
-            $messageId = $this->getLastMessageId();
+            // Extract real Postmark MessageID from the SentMessage
+            $messageId = $this->extractMessageId($sentMessage);
 
             Log::info('Outreach email sent', [
                 'email' => $email,
@@ -182,9 +181,9 @@ class PostmarkOutreachService
                 );
             });
 
-            Mail::to($email)->send($mailable);
+            $sentMessage = Mail::to($email)->send($mailable);
 
-            $messageId = $this->getLastMessageId();
+            $messageId = $this->extractMessageId($sentMessage);
 
             Log::info('Partner invite email sent', [
                 'email' => $email,
@@ -362,18 +361,35 @@ class PostmarkOutreachService
     }
 
     /**
-     * Get the last sent message ID.
+     * Extract the Postmark MessageID from a SentMessage.
      *
-     * Note: This is a placeholder. In production, you would capture
-     * the message ID from the Mail::sent event or use the raw API.
+     * The Postmark Symfony transport sets the MessageID on the SentMessage
+     * after a successful API call. Format: UUID (e.g. "87196cc2-2d62-...").
      *
+     * @param \Illuminate\Mail\SentMessage|null $sentMessage
      * @return string|null
      */
-    protected function getLastMessageId(): ?string
+    protected function extractMessageId($sentMessage): ?string
     {
-        // Generate a tracking ID for now
-        // In production, capture from Postmark response via event listener
-        return 'pm-' . uniqid();
+        if (!$sentMessage) {
+            return null;
+        }
+
+        $messageId = $sentMessage->getMessageId();
+
+        if (!$messageId) {
+            return null;
+        }
+
+        // Symfony may wrap the ID in angle brackets: <uuid@server>
+        $messageId = trim($messageId, '<>');
+
+        // Strip @domain suffix if present (Symfony format: uuid@server.postmarkapp.com)
+        if (str_contains($messageId, '@')) {
+            $messageId = explode('@', $messageId)[0];
+        }
+
+        return $messageId;
     }
 
     /**

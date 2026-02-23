@@ -190,13 +190,25 @@ class DirectoryOutreachCommand extends Command
                     );
                 });
 
-                Mail::to($directory['email'])->send($mailable);
+                $sentMessage = Mail::to($directory['email'])->send($mailable);
+
+                // Extract real Postmark MessageID from the sent response
+                $messageId = null;
+                if ($sentMessage) {
+                    $messageId = $sentMessage->getMessageId();
+                    if ($messageId) {
+                        $messageId = trim($messageId, '<>');
+                        if (str_contains($messageId, '@')) {
+                            $messageId = explode('@', $messageId)[0];
+                        }
+                    }
+                }
 
                 // Record the send
                 OutreachSend::create([
                     'email' => $directory['email'],
                     'template_key' => 'directory_listing',
-                    'postmark_message_id' => 'pm-dir-' . uniqid(),
+                    'postmark_message_id' => $messageId,
                     'status' => OutreachSend::STATUS_SENT,
                     'sent_at' => now(),
                 ]);
