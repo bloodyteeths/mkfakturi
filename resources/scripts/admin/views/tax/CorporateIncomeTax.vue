@@ -43,12 +43,13 @@
             v-if="previewData"
             variant="primary"
             :loading="isFiling"
+            :disabled="citFiled"
             @click="fileReturn"
           >
             <template #left="slotProps">
-              <BaseIcon name="PaperAirplaneIcon" :class="slotProps.class" />
+              <BaseIcon :name="citFiled ? 'CheckCircleIcon' : 'PaperAirplaneIcon'" :class="slotProps.class" />
             </template>
-            {{ $t('banking.file_return', 'File Return') }}
+            {{ citFiled ? $t('tax.cit.already_filed', 'Filed') : $t('banking.file_return', 'File Return') }}
           </BaseButton>
         </div>
       </div>
@@ -280,6 +281,7 @@ const periods = ref([])
 const isPreviewing = ref(false)
 const isGenerating = ref(false)
 const isFiling = ref(false)
+const citFiled = ref(false)
 const isLoadingPeriods = ref(false)
 
 // Predefined non-deductible expense categories per Macedonian tax law
@@ -343,6 +345,7 @@ async function previewCit() {
     return
   }
   isPreviewing.value = true
+  citFiled.value = false
   try {
     const response = await window.axios.post('/tax/cit-return/preview', getRequestPayload())
     previewData.value = response.data.data
@@ -415,7 +418,7 @@ async function fileReturn() {
       type: 'success',
       message: t('tax.cit.filed', 'CIT return filed successfully'),
     })
-    previewData.value = null
+    citFiled.value = true
     loadPeriods()
   } catch (error) {
     const msg = error.response?.data?.message || 'Failed to file CIT return'

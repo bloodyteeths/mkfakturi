@@ -379,9 +379,10 @@
             <BaseButton
               variant="primary"
               :loading="isFilingCit"
+              :disabled="citFiled"
               @click="fileCitReturn"
             >
-              {{ $t('banking.file_return', 'File Return') }}
+              {{ citFiled ? $t('tax.cit.already_filed', 'Filed') : $t('banking.file_return', 'File Return') }}
             </BaseButton>
           </div>
         </div>
@@ -419,6 +420,7 @@ const citPreviewData = ref(null)
 const isPreviewingCit = ref(false)
 const isGeneratingCit = ref(false)
 const isFilingCit = ref(false)
+const citFiled = ref(false)
 
 // Forms
 function getLocalDateString(date = new Date()) {
@@ -606,6 +608,7 @@ async function fileVatReturn() {
 
 async function previewCit() {
   isPreviewingCit.value = true
+  citFiled.value = false
   try {
     const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/cit-return/preview`,
@@ -674,7 +677,7 @@ async function fileCitReturn() {
       }
     )
     notificationStore.showNotification({ type: 'success', message: t('tax.cit.filed', 'CIT return filed successfully') })
-    citPreviewData.value = null
+    citFiled.value = true
   } catch (error) {
     const msg = error.response?.data?.message || 'Failed to file CIT return'
     notificationStore.showNotification({ type: 'error', message: msg })
