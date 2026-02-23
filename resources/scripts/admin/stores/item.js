@@ -43,6 +43,9 @@ export const useItemStore = (useWindow = false) => {
         minimum_quantity: null,
         category: '',
         category_id: null,
+        inventory_account_id: null,
+        cogs_account_id: null,
+        purchase_account_id: null,
       },
     }),
     getters: {
@@ -68,9 +71,12 @@ export const useItemStore = (useWindow = false) => {
           minimum_quantity: null,
           category: '',
           category_id: null,
+          inventory_account_id: null,
+          cogs_account_id: null,
+          purchase_account_id: null,
         }
       },
-      // CLAUDE-CHECKPOINT: Added SKU and barcode to item store state
+      // CLAUDE-CHECKPOINT: Added GL account fields to item store state
       fetchItems(params) {
         return new Promise((resolve, reject) => {
           axios

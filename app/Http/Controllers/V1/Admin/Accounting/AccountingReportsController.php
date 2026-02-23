@@ -484,6 +484,8 @@ class AccountingReportsController extends Controller
         $validated = $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'account_id' => 'nullable|integer',
+            'account_code' => 'nullable|string',
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
         ]);
@@ -498,10 +500,29 @@ class AccountingReportsController extends Controller
             return response()->json($journalEntries, 400);
         }
 
+        $entries = $journalEntries['entries'];
+
+        // Filter by account if specified
+        $filterAccountCode = $validated['account_code'] ?? null;
+        if (! $filterAccountCode && ! empty($validated['account_id'])) {
+            $account = \App\Models\Account::find($validated['account_id']);
+            $filterAccountCode = $account?->code;
+        }
+
+        if ($filterAccountCode) {
+            $entries = array_values(array_filter($entries, function ($entry) use ($filterAccountCode) {
+                foreach ($entry['lines'] as $line) {
+                    if ($line['account_code'] === $filterAccountCode) {
+                        return true;
+                    }
+                }
+                return false;
+            }));
+        }
+
         // Apply pagination if requested
         $page = $validated['page'] ?? 1;
         $perPage = $validated['per_page'] ?? 25;
-        $entries = $journalEntries['entries'];
         $total = count($entries);
         $offset = ($page - 1) * $perPage;
         $paginatedEntries = array_slice($entries, $offset, $perPage);
@@ -642,6 +663,73 @@ class AccountingReportsController extends Controller
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
     }
+
+    /**
+     * Cash Flow Statement (indirect method)
+     * GET /api/v1/accounting/cash-flow?start_date=2025-01-01&end_date=2025-12-31
+     */
+    public function cashFlow(Request $request): JsonResponse
+    {
+        if (! $this->isFeatureEnabled()) {
+            return response()->json(['error' => 'Accounting backbone feature is disabled'], 403);
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view', $company);
+
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $result = $this->ifrsAdapter->getCashFlowStatement($company, $validated['start_date'], $validated['end_date']);
+
+        if (isset($result['error'])) {
+            return response()->json($result, 400);
+        }
+
+        return response()->json(['success' => true, 'data' => $result]);
+    }
+
+    /**
+     * Statement of Changes in Equity
+     * GET /api/v1/accounting/equity-changes?year=2025
+     */
+    public function equityChanges(Request $request): JsonResponse
+    {
+        if (! $this->isFeatureEnabled()) {
+            return response()->json(['error' => 'Accounting backbone feature is disabled'], 403);
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view', $company);
+
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2020|max:2099',
+        ]);
+
+        $result = $this->ifrsAdapter->getEquityChanges($company, (int) $validated['year']);
+
+        if (isset($result['error'])) {
+            return response()->json($result, 400);
+        }
+
+        return response()->json(['success' => true, 'data' => $result]);
+    }
+
+    // CLAUDE-CHECKPOINT: Added cashFlow and equityChanges endpoints
 
     /**
      * Check if accounting backbone feature is enabled

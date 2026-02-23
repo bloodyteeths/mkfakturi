@@ -1113,6 +1113,24 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/TrialBalance.vue'),
       },
       {
+        path: 'partner/accounting/fixed-assets',
+        name: 'partner.accounting.fixed-assets',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/FixedAssets.vue'),
+      },
+      {
+        path: 'partner/accounting/cash-flow',
+        name: 'partner.accounting.cash-flow',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/CashFlow.vue'),
+      },
+      {
+        path: 'partner/accounting/equity-changes',
+        name: 'partner.accounting.equity-changes',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/EquityChanges.vue'),
+      },
+      {
         path: 'partner/accounting/year-end',
         name: 'partner.accounting.year-end',
         meta: { isPartner: true },
@@ -1206,6 +1224,24 @@ export default [
         name: 'reports.journal-entries',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: JournalEntries,
+      },
+      {
+        path: 'reports/cash-flow',
+        name: 'reports.cash-flow',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('./views/reports/CashFlow.vue'),
+      },
+      {
+        path: 'reports/equity-changes',
+        name: 'reports.equity-changes',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('./views/reports/EquityChanges.vue'),
+      },
+      {
+        path: 'accounting/fixed-assets',
+        name: 'accounting.fixed-assets',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('./views/accounting/FixedAssets.vue'),
       },
 
       // Support Tickets

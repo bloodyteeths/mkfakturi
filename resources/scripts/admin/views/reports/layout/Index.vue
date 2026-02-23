@@ -87,6 +87,18 @@
           >
             <JournalEntries ref="report" />
           </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.cash_flow', 'Cash Flow')"
+            tab-panel-container="px-0 py-0"
+          >
+            <CashFlow ref="report" />
+          </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.equity_changes', 'Equity Changes')"
+            tab-panel-container="px-0 py-0"
+          >
+            <EquityChanges ref="report" />
+          </BaseTab>
         </BaseTabGroup>
       </BaseTab>
     </BaseTabGroup>
@@ -105,6 +117,8 @@ import BalanceSheet from '../BalanceSheet.vue'
 import IncomeStatement from '../IncomeStatement.vue'
 import GeneralLedger from '../GeneralLedger.vue'
 import JournalEntries from '../JournalEntries.vue'
+import CashFlow from '../CashFlow.vue'
+import EquityChanges from '../EquityChanges.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 // Feature flag constant

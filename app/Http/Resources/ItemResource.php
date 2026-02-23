@@ -34,6 +34,9 @@ class ItemResource extends JsonResource
             'minimum_quantity' => $this->minimum_quantity,
             'category' => $this->category,
             'category_id' => $this->category_id,
+            'inventory_account_id' => $this->inventory_account_id,
+            'cogs_account_id' => $this->cogs_account_id,
+            'purchase_account_id' => $this->purchase_account_id,
             'formatted_created_at' => $this->formattedCreatedAt,
             'unit' => $this->whenLoaded('unit', function () {
                 return UnitResource::make($this->unit);

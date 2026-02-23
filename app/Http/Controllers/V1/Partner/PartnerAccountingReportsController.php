@@ -88,6 +88,24 @@ class PartnerAccountingReportsController extends Controller
 
         $entries = $this->ifrsAdapter->getJournalEntries($companyModel, $fromDate, $toDate);
 
+        // Filter by account if specified
+        $filterAccountCode = $request->query('account_code');
+        if (!$filterAccountCode && $request->query('account_id')) {
+            $account = \App\Models\Account::find($request->query('account_id'));
+            $filterAccountCode = $account?->code;
+        }
+
+        if ($filterAccountCode && isset($entries['entries'])) {
+            $entries['entries'] = array_values(array_filter($entries['entries'], function ($entry) use ($filterAccountCode) {
+                foreach ($entry['lines'] as $line) {
+                    if ($line['account_code'] === $filterAccountCode) {
+                        return true;
+                    }
+                }
+                return false;
+            }));
+        }
+
         return response()->json([
             'success' => true,
             'data' => $entries,
@@ -200,6 +218,52 @@ class PartnerAccountingReportsController extends Controller
     /**
      * Check IFRS accounting status for a client company.
      */
+    public function cashFlow(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            return response()->json(['success' => false, 'message' => 'Company not found'], 404);
+        }
+
+        $startDate = $request->query('start_date', now()->startOfYear()->toDateString());
+        $endDate = $request->query('end_date', now()->toDateString());
+
+        $result = $this->ifrsAdapter->getCashFlowStatement($companyModel, $startDate, $endDate);
+
+        return response()->json(['success' => true, 'data' => $result]);
+    }
+
+    public function equityChanges(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            return response()->json(['success' => false, 'message' => 'Company not found'], 404);
+        }
+
+        $year = (int) $request->query('year', now()->year);
+        $result = $this->ifrsAdapter->getEquityChanges($companyModel, $year);
+
+        return response()->json(['success' => true, 'data' => $result]);
+    }
+
+    // CLAUDE-CHECKPOINT: Added cashFlow and equityChanges partner endpoints
+
     public function ifrsStatus(Request $request, int $company): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);

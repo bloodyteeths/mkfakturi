@@ -74,6 +74,21 @@ class ItemsRequest extends FormRequest
                 'integer',
                 'exists:currencies,id',
             ],
+            'inventory_account_id' => [
+                'nullable',
+                'integer',
+                'exists:accounts,id',
+            ],
+            'cogs_account_id' => [
+                'nullable',
+                'integer',
+                'exists:accounts,id',
+            ],
+            'purchase_account_id' => [
+                'nullable',
+                'integer',
+                'exists:accounts,id',
+            ],
         ];
     }
 

@@ -185,6 +185,78 @@
             />
           </BaseInputGroup>
 
+          <!-- GL Account Mapping (for accounting integration) -->
+          <template v-if="accountingEnabled && accounts.length > 0">
+            <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ $t('items.gl_accounts', 'GL Account Mapping') }}
+              </h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ $t('items.gl_accounts_hint', 'Link this product to specific accounts for automatic journal entries.') }}
+              </p>
+            </div>
+
+            <BaseInputGroup
+              :label="$t('items.inventory_account', 'Inventory Account')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMultiselect
+                v-model="itemStore.currentItem.inventory_account_id"
+                :content-loading="isFetchingInitialData"
+                :options="accounts"
+                :custom-label="formatAccountLabel"
+                label="name"
+                value-prop="id"
+                :placeholder="$t('items.select_account', 'Select account (optional)')"
+                searchable
+                :can-deselect="true"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.inventory_account_hint', 'Account for stock in warehouse (default: 630)') }}
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.cogs_account', 'COGS Account')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMultiselect
+                v-model="itemStore.currentItem.cogs_account_id"
+                :content-loading="isFetchingInitialData"
+                :options="accounts"
+                :custom-label="formatAccountLabel"
+                label="name"
+                value-prop="id"
+                :placeholder="$t('items.select_account', 'Select account (optional)')"
+                searchable
+                :can-deselect="true"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.cogs_account_hint', 'Cost of goods sold account (default: 702)') }}
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.purchase_account', 'Purchase Account')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMultiselect
+                v-model="itemStore.currentItem.purchase_account_id"
+                :content-loading="isFetchingInitialData"
+                :options="accounts"
+                :custom-label="formatAccountLabel"
+                label="name"
+                value-prop="id"
+                :placeholder="$t('items.select_account', 'Select account (optional)')"
+                searchable
+                :can-deselect="true"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.purchase_account_hint', 'Purchase calculation account (default: 303)') }}
+              </p>
+            </BaseInputGroup>
+          </template>
+
           <!-- Stock Tracking Toggle (only shows when stock module is enabled) -->
           <BaseInputGroup
             v-if="stockEnabled"
@@ -392,6 +464,10 @@ import abilities from '@/scripts/admin/stub/abilities'
 const itemStore = useItemStore()
 const globalStore = useGlobalStore()
 const warehouseStore = useWarehouseStore()
+
+// GL account mapping
+const accounts = ref([])
+const accountingEnabled = ref(false)
 const taxTypeStore = useTaxTypeStore()
 const modalStore = useModalStore()
 const companyStore = useCompanyStore()
@@ -623,7 +699,26 @@ async function loadData() {
     }
   }
 
+  // Load GL accounts if accounting is enabled
+  try {
+    const acctResponse = await window.axios.get('/accounting/accounts', { params: { limit: 'all' } })
+    if (acctResponse.data?.data && acctResponse.data.data.length > 0) {
+      accounts.value = acctResponse.data.data.map(a => ({
+        ...a,
+        label: `${a.code} - ${a.name}`,
+      }))
+      accountingEnabled.value = true
+    }
+  } catch {
+    // Accounting not enabled for this company - hide GL fields
+    accountingEnabled.value = false
+  }
+
   isFetchingInitialData.value = false
+}
+
+function formatAccountLabel(account) {
+  return `${account.code} - ${account.name}`
 }
 
 async function submitItem() {

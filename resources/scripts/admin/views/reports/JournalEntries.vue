@@ -2,7 +2,20 @@
   <div class="grid gap-8 pt-10">
     <!-- Filters Card -->
     <div class="p-6 bg-white rounded-lg shadow">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Account filter -->
+        <BaseInputGroup :label="$t('accounting.general_ledger.select_account', 'Filter by Account')">
+          <BaseMultiselect
+            v-model="filters.account_id"
+            :options="accounts"
+            label="label"
+            value-prop="id"
+            searchable
+            :can-deselect="true"
+            :placeholder="$t('accounting.journal_entries.all_accounts', 'All accounts')"
+          />
+        </BaseInputGroup>
+
         <!-- Start date -->
         <BaseInputGroup :label="$t('general.from_date')" required>
           <BaseDatePicker
@@ -243,11 +256,29 @@ const expandedEntries = ref(new Set())
 const isLoading = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
+const accounts = ref([])
 
 const filters = ref({
   start_date: moment().startOf('month').format('YYYY-MM-DD'),
   end_date: moment().endOf('month').format('YYYY-MM-DD'),
+  account_id: null,
 })
+
+// Load accounts for filter dropdown
+async function loadAccounts() {
+  try {
+    const response = await window.axios.get('/accounting/accounts', { params: { limit: 'all' } })
+    if (response.data?.data) {
+      accounts.value = response.data.data.map(a => ({
+        ...a,
+        label: `${a.code} - ${a.name}`,
+      }))
+    }
+  } catch {
+    // Accounting not enabled
+  }
+}
+loadAccounts()
 
 const pagination = ref({
   currentPage: 1,
@@ -279,14 +310,16 @@ async function loadEntries(page = 1) {
   hasSearched.value = true
 
   try {
-    const response = await window.axios.get('/accounting/journal-entries', {
-      params: {
-        start_date: filters.value.start_date,
-        end_date: filters.value.end_date,
-        page: page,
-        per_page: pagination.value.perPage,
-      },
-    })
+    const params = {
+      start_date: filters.value.start_date,
+      end_date: filters.value.end_date,
+      page: page,
+      per_page: pagination.value.perPage,
+    }
+    if (filters.value.account_id) {
+      params.account_id = filters.value.account_id
+    }
+    const response = await window.axios.get('/accounting/journal-entries', { params })
 
     entries.value = response.data.data
     pagination.value = {

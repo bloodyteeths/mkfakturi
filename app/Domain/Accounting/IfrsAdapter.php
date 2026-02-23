@@ -1710,6 +1710,226 @@ class IfrsAdapter
     }
 
     /**
+     * Generate Cash Flow Statement (indirect method)
+     */
+    public function getCashFlowStatement(Company $company, string $startDate, string $endDate): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return ['error' => 'Accounting backbone feature is disabled'];
+        }
+
+        try {
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (! $entity) {
+                return ['error' => 'IFRS Entity not available'];
+            }
+
+            $this->setUserEntityContext($entity);
+
+            // Get income statement for net income
+            $incomeStatement = $this->getIncomeStatement($company, $startDate, $endDate);
+            $netIncome = ($incomeStatement['totals']['revenue'] ?? 0) - ($incomeStatement['totals']['expenses'] ?? 0);
+
+            // Get balance sheet at start and end dates
+            $bsStart = $this->getBalanceSheet($company, $startDate);
+            $bsEnd = $this->getBalanceSheet($company, $endDate);
+
+            // Helper to find account balance by code prefix
+            $findBalance = function (array $accounts, string $codePrefix) {
+                $total = 0;
+                foreach ($accounts as $account) {
+                    if (isset($account['code']) && str_starts_with($account['code'], $codePrefix)) {
+                        $total += $account['balance'] ?? 0;
+                    }
+                }
+                return $total;
+            };
+
+            $startAssets = $bsStart['assets'] ?? [];
+            $endAssets = $bsEnd['assets'] ?? [];
+            $startLiabilities = $bsStart['liabilities'] ?? [];
+            $endLiabilities = $bsEnd['liabilities'] ?? [];
+
+            // Operating Activities (indirect method)
+            // Depreciation add-back (account codes starting with 43)
+            $depreciation = $findBalance($endAssets, '43') - $findBalance($startAssets, '43');
+            if ($depreciation < 0) {
+                $depreciation = abs($depreciation); // Accumulated depreciation increases (contra-asset)
+            } else {
+                $depreciation = 0;
+            }
+
+            // Working capital changes
+            $arChange = -($findBalance($endAssets, '12') - $findBalance($startAssets, '12')); // Receivables (increase = cash out)
+            $inventoryChange = -($findBalance($endAssets, '63') + $findBalance($endAssets, '60') + $findBalance($endAssets, '61') - $findBalance($startAssets, '63') - $findBalance($startAssets, '60') - $findBalance($startAssets, '61'));
+            $prepaidChange = -($findBalance($endAssets, '19') - $findBalance($startAssets, '19'));
+            $apChange = $findBalance($endLiabilities, '22') - $findBalance($startLiabilities, '22'); // Payables (increase = cash in)
+            $taxPayableChange = $findBalance($endLiabilities, '27') - $findBalance($startLiabilities, '27');
+            $otherCurrentLiabChange = $findBalance($endLiabilities, '24') + $findBalance($endLiabilities, '25') - $findBalance($startLiabilities, '24') - $findBalance($startLiabilities, '25');
+
+            $operatingCashFlow = $netIncome + $depreciation + $arChange + $inventoryChange + $prepaidChange + $apChange + $taxPayableChange + $otherCurrentLiabChange;
+
+            // Investing Activities
+            $fixedAssetChange = -($findBalance($endAssets, '02') + $findBalance($endAssets, '01') - $findBalance($startAssets, '02') - $findBalance($startAssets, '01'));
+            $intangibleChange = -($findBalance($endAssets, '00') - $findBalance($startAssets, '00'));
+            $investmentChange = -($findBalance($endAssets, '03') + $findBalance($endAssets, '04') - $findBalance($startAssets, '03') - $findBalance($startAssets, '04'));
+
+            $investingCashFlow = $fixedAssetChange + $intangibleChange + $investmentChange;
+
+            // Financing Activities
+            $longTermDebtChange = $findBalance($endLiabilities, '20') - $findBalance($startLiabilities, '20');
+            $shortTermDebtChange = $findBalance($endLiabilities, '21') - $findBalance($startLiabilities, '21');
+            $equityChange = ($bsEnd['totals']['equity'] ?? 0) - ($bsStart['totals']['equity'] ?? 0) - $netIncome;
+
+            $financingCashFlow = $longTermDebtChange + $shortTermDebtChange + $equityChange;
+
+            // Cash positions
+            $cashStart = $findBalance($startAssets, '10') + $findBalance($startAssets, '11');
+            $cashEnd = $findBalance($endAssets, '10') + $findBalance($endAssets, '11');
+            $netChange = $operatingCashFlow + $investingCashFlow + $financingCashFlow;
+
+            return [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'operating' => [
+                    'net_income' => round($netIncome, 2),
+                    'depreciation' => round($depreciation, 2),
+                    'receivables_change' => round($arChange, 2),
+                    'inventory_change' => round($inventoryChange, 2),
+                    'prepaid_change' => round($prepaidChange, 2),
+                    'payables_change' => round($apChange, 2),
+                    'tax_payable_change' => round($taxPayableChange, 2),
+                    'other_current_liabilities_change' => round($otherCurrentLiabChange, 2),
+                    'total' => round($operatingCashFlow, 2),
+                ],
+                'investing' => [
+                    'fixed_assets' => round($fixedAssetChange, 2),
+                    'intangible_assets' => round($intangibleChange, 2),
+                    'investments' => round($investmentChange, 2),
+                    'total' => round($investingCashFlow, 2),
+                ],
+                'financing' => [
+                    'long_term_debt' => round($longTermDebtChange, 2),
+                    'short_term_debt' => round($shortTermDebtChange, 2),
+                    'equity_changes' => round($equityChange, 2),
+                    'total' => round($financingCashFlow, 2),
+                ],
+                'summary' => [
+                    'cash_start' => round($cashStart, 2),
+                    'net_change' => round($netChange, 2),
+                    'cash_end' => round($cashEnd, 2),
+                    'cash_end_actual' => round($cashEnd, 2),
+                ],
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to generate cash flow statement', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Generate Statement of Changes in Equity
+     */
+    public function getEquityChanges(Company $company, int $year): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return ['error' => 'Accounting backbone feature is disabled'];
+        }
+
+        try {
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (! $entity) {
+                return ['error' => 'IFRS Entity not available'];
+            }
+
+            $this->setUserEntityContext($entity);
+
+            $startDate = "{$year}-01-01";
+            $endDate = "{$year}-12-31";
+            $prevYearEnd = ($year - 1) . '-12-31';
+
+            // Get opening equity (balance sheet at previous year end)
+            $bsOpening = $this->getBalanceSheet($company, $prevYearEnd);
+            // Get closing equity (balance sheet at year end)
+            $bsClosing = $this->getBalanceSheet($company, $endDate);
+
+            // Get net income for the year
+            $incomeStatement = $this->getIncomeStatement($company, $startDate, $endDate);
+            $netIncome = ($incomeStatement['totals']['revenue'] ?? 0) - ($incomeStatement['totals']['expenses'] ?? 0);
+
+            // Helper to extract equity components by code prefix
+            $extractEquity = function (array $equityAccounts) {
+                $components = [
+                    'share_capital' => 0,     // 30 - Основен капитал
+                    'reserves' => 0,          // 31, 32 - Резерви
+                    'retained_earnings' => 0, // 34, 35 - Нераспределена добивка
+                    'revaluation' => 0,       // 33 - Ревалоризациски резерви
+                    'other' => 0,
+                ];
+
+                foreach ($equityAccounts as $account) {
+                    $code = $account['code'] ?? '';
+                    $balance = $account['balance'] ?? 0;
+
+                    if (str_starts_with($code, '30')) {
+                        $components['share_capital'] += $balance;
+                    } elseif (str_starts_with($code, '31') || str_starts_with($code, '32')) {
+                        $components['reserves'] += $balance;
+                    } elseif (str_starts_with($code, '34') || str_starts_with($code, '35')) {
+                        $components['retained_earnings'] += $balance;
+                    } elseif (str_starts_with($code, '33')) {
+                        $components['revaluation'] += $balance;
+                    } else {
+                        $components['other'] += $balance;
+                    }
+                }
+
+                $components['total'] = array_sum($components);
+                return $components;
+            };
+
+            $opening = $extractEquity($bsOpening['equity'] ?? []);
+            $closing = $extractEquity($bsClosing['equity'] ?? []);
+
+            // Calculate changes
+            $changes = [
+                'share_capital' => round($closing['share_capital'] - $opening['share_capital'], 2),
+                'reserves' => round($closing['reserves'] - $opening['reserves'], 2),
+                'retained_earnings' => round($closing['retained_earnings'] - $opening['retained_earnings'], 2),
+                'revaluation' => round($closing['revaluation'] - $opening['revaluation'], 2),
+                'other' => round($closing['other'] - $opening['other'], 2),
+                'net_income' => round($netIncome, 2),
+            ];
+            $changes['total'] = round($closing['total'] - $opening['total'], 2);
+
+            // Round all values
+            foreach (['share_capital', 'reserves', 'retained_earnings', 'revaluation', 'other', 'total'] as $key) {
+                $opening[$key] = round($opening[$key], 2);
+                $closing[$key] = round($closing[$key], 2);
+            }
+
+            return [
+                'year' => $year,
+                'opening' => $opening,
+                'changes' => $changes,
+                'closing' => $closing,
+                'net_income' => round($netIncome, 2),
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to generate equity changes', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    // CLAUDE-CHECKPOINT: Added getCashFlowStatement and getEquityChanges methods
+
+    /**
      * Map IFRS transaction type to friendly name
      *
      * @param  string  $transactionType

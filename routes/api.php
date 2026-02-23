@@ -842,7 +842,20 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/general-ledger/export', [AccountingReportsController::class, 'generalLedgerExport']);
                 Route::get('/journal-entries', [AccountingReportsController::class, 'journalEntries']);
                 Route::get('/journal-entries/export', [AccountingReportsController::class, 'journalEntriesExport']);
+                Route::get('/cash-flow', [AccountingReportsController::class, 'cashFlow']);
+                Route::get('/equity-changes', [AccountingReportsController::class, 'equityChanges']);
                 Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
+
+                // Fixed Assets
+                Route::prefix('fixed-assets')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'index']);
+                    Route::post('/', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'store']);
+                    Route::get('/register', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'register']);
+                    Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'show']);
+                    Route::put('/{id}', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'update']);
+                    Route::post('/{id}/dispose', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'dispose']);
+                    Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Accounting\FixedAssetController::class, 'destroy']);
+                });
             });
 
             // Project Reports - available to all tiers
@@ -1571,6 +1584,13 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
         Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);
         Route::get('/income-statement', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'incomeStatement']);
+        Route::get('/cash-flow', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlow']);
+        Route::get('/equity-changes', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChanges']);
+
+        // Fixed Assets Register (read-only for partners)
+        Route::get('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'index']);
+        Route::get('/fixed-assets/register', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'register']);
+        Route::get('/fixed-assets/{id}', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'show']);
     });
 
     // Partner Tax Returns (VAT + CIT) for Client Companies
