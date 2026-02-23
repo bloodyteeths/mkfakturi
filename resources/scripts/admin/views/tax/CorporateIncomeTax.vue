@@ -40,10 +40,9 @@
             {{ $t('general.generate', 'Generate XML') }}
           </BaseButton>
           <BaseButton
-            v-if="previewData"
             variant="primary"
             :loading="isFiling"
-            :disabled="citFiled"
+            :disabled="!previewData || citFiled"
             @click="fileReturn"
           >
             <template #left="slotProps">
