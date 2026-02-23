@@ -139,6 +139,15 @@ if (InstallUtils::isDbCreated()) {
         ->name('outreach-verify-mx')
         ->withoutOverlapping();
 
+    // SMTP RCPT TO verification - runs after MX, before send window
+    // Catches dead mailboxes on valid domains, auto-suppresses invalid
+    Schedule::command('outreach:verify-smtp --limit=500')
+        ->dailyAt('07:30')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->name('outreach-verify-smtp')
+        ->withoutOverlapping();
+
     // Outreach email batch send - accountant leads
     // Runs every 15 minutes during business hours 08:00-17:00 Skopje
     // 3000/day target: ~83 per batch, 350/hour, 2-5s jitter

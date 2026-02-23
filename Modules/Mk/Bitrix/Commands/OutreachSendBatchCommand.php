@@ -242,6 +242,10 @@ class OutreachSendBatchCommand extends Command
         $query = OutreachLead::query()
             // Only send to leads with verified MX records
             ->where('mx_valid', true)
+            // Skip leads that failed SMTP verification (null = unchecked/inconclusive, allowed)
+            ->where(function ($q) {
+                $q->whereNull('smtp_valid')->orWhere('smtp_valid', true);
+            })
             // Not suppressed (check by email in suppressions table)
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('suppressions');
