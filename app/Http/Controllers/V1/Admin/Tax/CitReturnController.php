@@ -131,7 +131,7 @@ class CitReturnController extends Controller
 
         $companyId = $validated['company_id'] ?? $request->header('company');
         $company = Company::findOrFail($companyId);
-        Gate::authorize('manage', $company);
+        Gate::authorize('view', $company);
 
         try {
             $year = $validated['year'];
