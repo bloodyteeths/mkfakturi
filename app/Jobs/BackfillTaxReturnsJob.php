@@ -331,13 +331,13 @@ class BackfillTaxReturnsJob implements ShouldQueue
                     'xml_data' => $data['xml_summary'],
                 ],
                 'response_data' => null,
-                'submission_reference' => $data['receipt_number'],
+                'receipt_number' => $data['receipt_number'],
                 'submitted_at' => $data['submitted_at'] ?? $period->end_date,
-                'submitted_by_id' => null, // Unknown who submitted historically
+                'submitted_by' => null, // Unknown who submitted historically
                 'accepted_at' => null,
                 'rejected_at' => null,
                 'rejection_reason' => null,
-                'amendment_of_id' => null,
+                'amendment_of' => null,
             ]);
 
             Log::info('Created tax return from backfilled XML', [
@@ -547,11 +547,12 @@ class BackfillTaxReturnsJob implements ShouldQueue
             'quarter' => $data['quarter'],
             'start_date' => $data['start_date'],
             'end_date' => $data['end_date'],
+            'due_date' => Carbon::parse($data['end_date'])->addDays(25)->toDateString(),
             'status' => TaxReportPeriod::STATUS_FILED,
-            'closed_at' => $data['submitted_at'] ?? $data['end_date'],
-            'closed_by_id' => null, // Unknown who closed historically
+            'locked_at' => $data['submitted_at'] ?? $data['end_date'],
+            'locked_by' => null, // Unknown who locked historically
             'reopened_at' => null,
-            'reopened_by_id' => null,
+            'reopened_by' => null,
             'reopen_reason' => null,
         ]);
 

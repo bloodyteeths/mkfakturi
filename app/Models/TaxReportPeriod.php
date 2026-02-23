@@ -27,10 +27,10 @@ use Illuminate\Support\Facades\DB;
  * @property Carbon $start_date Period start date
  * @property Carbon $end_date Period end date
  * @property string $status Period status (OPEN, CLOSED, FILED, AMENDED)
- * @property Carbon|null $closed_at Timestamp when period was closed
- * @property int|null $closed_by_id User who closed the period
+ * @property Carbon|null $locked_at Timestamp when period was locked/closed
+ * @property int|null $locked_by User who locked the period
  * @property Carbon|null $reopened_at Timestamp when period was last reopened
- * @property int|null $reopened_by_id User who reopened the period
+ * @property int|null $reopened_by User who reopened the period
  * @property string|null $reopen_reason Reason for reopening period
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -44,22 +44,22 @@ class TaxReportPeriod extends Model
     /**
      * Period status constants
      */
-    public const STATUS_OPEN = 'OPEN';
+    public const STATUS_OPEN = 'open';
 
-    public const STATUS_CLOSED = 'CLOSED';
+    public const STATUS_CLOSED = 'closed';
 
-    public const STATUS_FILED = 'FILED';
+    public const STATUS_FILED = 'filed';
 
-    public const STATUS_AMENDED = 'AMENDED';
+    public const STATUS_AMENDED = 'amended';
 
     /**
      * Period type constants
      */
-    public const PERIOD_MONTHLY = 'MONTHLY';
+    public const PERIOD_MONTHLY = 'monthly';
 
-    public const PERIOD_QUARTERLY = 'QUARTERLY';
+    public const PERIOD_QUARTERLY = 'quarterly';
 
-    public const PERIOD_ANNUAL = 'ANNUAL';
+    public const PERIOD_ANNUAL = 'annual';
 
     /**
      * The attributes that are mass assignable.
@@ -75,10 +75,11 @@ class TaxReportPeriod extends Model
         'start_date',
         'end_date',
         'status',
-        'closed_at',
-        'closed_by_id',
+        'due_date',
+        'locked_at',
+        'locked_by',
         'reopened_at',
-        'reopened_by_id',
+        'reopened_by',
         'reopen_reason',
     ];
 
@@ -104,7 +105,8 @@ class TaxReportPeriod extends Model
             'quarter' => 'integer',
             'start_date' => 'datetime',
             'end_date' => 'datetime',
-            'closed_at' => 'datetime',
+            'due_date' => 'date',
+            'locked_at' => 'datetime',
             'reopened_at' => 'datetime',
         ];
     }
@@ -130,7 +132,7 @@ class TaxReportPeriod extends Model
      */
     public function lockedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'closed_by_id');
+        return $this->belongsTo(User::class, 'locked_by');
     }
 
     /**
@@ -138,7 +140,7 @@ class TaxReportPeriod extends Model
      */
     public function reopenedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'reopened_by_id');
+        return $this->belongsTo(User::class, 'reopened_by');
     }
 
     /**
@@ -160,8 +162,8 @@ class TaxReportPeriod extends Model
 
         return DB::transaction(function () use ($userId) {
             $this->status = self::STATUS_CLOSED;
-            $this->closed_at = now();
-            $this->closed_by_id = $userId;
+            $this->locked_at = now();
+            $this->locked_by = $userId;
 
             return $this->save();
         });
@@ -185,7 +187,7 @@ class TaxReportPeriod extends Model
         return DB::transaction(function () use ($userId, $reason) {
             $this->status = self::STATUS_OPEN;
             $this->reopened_at = now();
-            $this->reopened_by_id = $userId;
+            $this->reopened_by = $userId;
             $this->reopen_reason = $reason;
 
             return $this->save();

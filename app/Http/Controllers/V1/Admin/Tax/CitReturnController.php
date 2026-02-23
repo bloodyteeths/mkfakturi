@@ -145,6 +145,7 @@ class CitReturnController extends Controller
                 [
                     'start_date' => Carbon::create($year, 1, 1),
                     'end_date' => Carbon::create($year, 12, 31),
+                    'due_date' => Carbon::create($year + 1, 3, 15),
                     'status' => TaxReportPeriod::STATUS_OPEN,
                 ]
             );
@@ -168,8 +169,8 @@ class CitReturnController extends Controller
 
             if ($period->status === TaxReportPeriod::STATUS_OPEN) {
                 $period->status = TaxReportPeriod::STATUS_CLOSED;
-                $period->closed_at = now();
-                $period->closed_by_id = Auth::id();
+                $period->locked_at = now();
+                $period->locked_by = Auth::id();
                 $period->save();
             }
 
@@ -178,7 +179,7 @@ class CitReturnController extends Controller
                 'data' => [
                     'tax_return_id' => $taxReturn->id,
                     'period_id' => $period->id,
-                    'submission_reference' => $taxReturn->submission_reference,
+                    'receipt_number' => $taxReturn->receipt_number,
                     'submitted_at' => $taxReturn->submitted_at,
                 ],
             ], 201);
@@ -197,7 +198,7 @@ class CitReturnController extends Controller
     {
         $validated = $request->validate([
             'company_id' => 'nullable|integer|exists:companies,id',
-            'status' => 'nullable|string|in:OPEN,CLOSED,FILED,AMENDED',
+            'status' => 'nullable|string|in:open,closed,filed,amended,OPEN,CLOSED,FILED,AMENDED',
             'limit' => 'nullable|integer|min:1|max:100',
         ]);
 
@@ -248,7 +249,7 @@ class CitReturnController extends Controller
                         'id' => $return->id,
                         'status' => $return->status,
                         'status_label' => $return->status_label,
-                        'submission_reference' => $return->submission_reference,
+                        'receipt_number' => $return->receipt_number,
                         'submitted_at' => $return->submitted_at,
                         'submitted_by' => $return->submittedBy ? [
                             'id' => $return->submittedBy->id,
@@ -258,7 +259,7 @@ class CitReturnController extends Controller
                         'accepted_at' => $return->accepted_at,
                         'rejected_at' => $return->rejected_at,
                         'rejection_reason' => $return->rejection_reason,
-                        'is_amendment' => $return->amendment_of_id !== null,
+                        'is_amendment' => $return->amendment_of !== null,
                         'created_at' => $return->created_at,
                     ];
                 });
@@ -300,7 +301,7 @@ class CitReturnController extends Controller
         $companyName = preg_replace('/[^a-zA-Z0-9]/', '_', $taxReturn->company->name);
         $filename = sprintf('DB_VP_%s_%d.xml', $companyName, $period->year);
 
-        if ($taxReturn->amendment_of_id) {
+        if ($taxReturn->amendment_of) {
             $filename = str_replace('.xml', '_AMENDMENT.xml', $filename);
         }
 

@@ -197,14 +197,15 @@ class PartnerTaxController extends Controller
             $period = TaxReportPeriod::firstOrCreate(
                 [
                     'company_id' => $companyModel->id,
-                    'period_type' => $validated['period_type'],
+                    'period_type' => strtolower($validated['period_type']),
                     'year' => $periodStart->year,
-                    'month' => $validated['period_type'] === 'MONTHLY' ? $periodStart->month : null,
-                    'quarter' => $validated['period_type'] === 'QUARTERLY' ? $periodStart->quarter : null,
+                    'month' => strtolower($validated['period_type']) === TaxReportPeriod::PERIOD_MONTHLY ? $periodStart->month : null,
+                    'quarter' => strtolower($validated['period_type']) === TaxReportPeriod::PERIOD_QUARTERLY ? $periodStart->quarter : null,
                 ],
                 [
                     'start_date' => $periodStart,
                     'end_date' => $periodEnd,
+                    'due_date' => $periodEnd->copy()->addDays(25),
                     'status' => TaxReportPeriod::STATUS_OPEN,
                 ]
             );
@@ -229,8 +230,8 @@ class PartnerTaxController extends Controller
 
             if ($period->status === TaxReportPeriod::STATUS_OPEN) {
                 $period->status = TaxReportPeriod::STATUS_CLOSED;
-                $period->closed_at = now();
-                $period->closed_by_id = Auth::id();
+                $period->locked_at = now();
+                $period->locked_by = Auth::id();
                 $period->save();
             }
 
@@ -239,7 +240,7 @@ class PartnerTaxController extends Controller
                 'data' => [
                     'tax_return_id' => $taxReturn->id,
                     'period_id' => $period->id,
-                    'submission_reference' => $taxReturn->submission_reference,
+                    'receipt_number' => $taxReturn->receipt_number,
                     'submitted_at' => $taxReturn->submitted_at,
                 ],
             ], 201);
@@ -325,7 +326,7 @@ class PartnerTaxController extends Controller
                         'id' => $return->id,
                         'status' => $return->status,
                         'status_label' => $return->status_label,
-                        'submission_reference' => $return->submission_reference,
+                        'receipt_number' => $return->receipt_number,
                         'submitted_at' => $return->submitted_at,
                         'submitted_by' => $return->submittedBy ? [
                             'id' => $return->submittedBy->id,
@@ -334,7 +335,7 @@ class PartnerTaxController extends Controller
                         'accepted_at' => $return->accepted_at,
                         'rejected_at' => $return->rejected_at,
                         'rejection_reason' => $return->rejection_reason,
-                        'is_amendment' => $return->amendment_of_id !== null,
+                        'is_amendment' => $return->amendment_of !== null,
                         'created_at' => $return->created_at,
                     ];
                 });
@@ -388,7 +389,7 @@ class PartnerTaxController extends Controller
             $period->end_date->format('Y-m-d')
         );
 
-        if ($taxReturn->amendment_of_id) {
+        if ($taxReturn->amendment_of) {
             $filename = str_replace('.xml', '_AMENDMENT.xml', $filename);
         }
 
@@ -587,6 +588,7 @@ class PartnerTaxController extends Controller
                 [
                     'start_date' => Carbon::create($validated['year'], 1, 1),
                     'end_date' => Carbon::create($validated['year'], 12, 31),
+                    'due_date' => Carbon::create($validated['year'] + 1, 3, 15),
                     'status' => TaxReportPeriod::STATUS_OPEN,
                 ]
             );

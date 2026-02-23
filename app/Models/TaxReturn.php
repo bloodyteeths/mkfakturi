@@ -23,15 +23,15 @@ use Illuminate\Support\Facades\DB;
  * @property int $period_id Tax report period ID
  * @property string $return_type Type of tax return (VAT, income, etc.)
  * @property string $status Return status (DRAFT, FILED, ACCEPTED, REJECTED, AMENDED)
- * @property array|null $return_data Tax return form data
+ * @property array|null $return_data Tax return form data (JSON)
  * @property array|null $response_data Response from tax authority
- * @property string|null $submission_reference Reference number from submission
+ * @property string|null $receipt_number Receipt/confirmation number from tax authority
  * @property Carbon|null $submitted_at Timestamp of submission
- * @property int|null $submitted_by_id User who submitted the return
+ * @property int|null $submitted_by User who submitted the return
  * @property Carbon|null $accepted_at Timestamp when accepted by tax authority
  * @property Carbon|null $rejected_at Timestamp when rejected by tax authority
  * @property string|null $rejection_reason Reason for rejection
- * @property int|null $amendment_of_id Original return ID if this is an amendment
+ * @property int|null $amendment_of Original return ID if this is an amendment
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
@@ -44,15 +44,15 @@ class TaxReturn extends Model
     /**
      * Tax return status constants
      */
-    public const STATUS_DRAFT = 'DRAFT';
+    public const STATUS_DRAFT = 'draft';
 
-    public const STATUS_FILED = 'FILED';
+    public const STATUS_FILED = 'filed';
 
-    public const STATUS_ACCEPTED = 'ACCEPTED';
+    public const STATUS_ACCEPTED = 'accepted';
 
-    public const STATUS_REJECTED = 'REJECTED';
+    public const STATUS_REJECTED = 'rejected';
 
-    public const STATUS_AMENDED = 'AMENDED';
+    public const STATUS_AMENDED = 'amended';
 
     /**
      * Tax return type constants
@@ -77,13 +77,13 @@ class TaxReturn extends Model
         'status',
         'return_data',
         'response_data',
-        'submission_reference',
+        'receipt_number',
         'submitted_at',
-        'submitted_by_id',
+        'submitted_by',
         'accepted_at',
         'rejected_at',
         'rejection_reason',
-        'amendment_of_id',
+        'amendment_of',
     ];
 
     /**
@@ -132,7 +132,7 @@ class TaxReturn extends Model
      */
     public function submittedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'submitted_by_id');
+        return $this->belongsTo(User::class, 'submitted_by');
     }
 
     /**
@@ -140,7 +140,7 @@ class TaxReturn extends Model
      */
     public function amendmentOf(): BelongsTo
     {
-        return $this->belongsTo(TaxReturn::class, 'amendment_of_id');
+        return $this->belongsTo(TaxReturn::class, 'amendment_of');
     }
 
     /**
@@ -148,7 +148,7 @@ class TaxReturn extends Model
      */
     public function amendments(): HasMany
     {
-        return $this->hasMany(TaxReturn::class, 'amendment_of_id');
+        return $this->hasMany(TaxReturn::class, 'amendment_of');
     }
 
     /**
@@ -166,15 +166,15 @@ class TaxReturn extends Model
     public function file(int $userId, ?string $reference = null, ?array $responseData = null): bool
     {
         // Prevent duplicate filing for the same period (unless it's an amendment)
-        if (! $this->amendment_of_id && $this->hasDuplicateFiling()) {
+        if (! $this->amendment_of && $this->hasDuplicateFiling()) {
             throw new \Exception('A tax return has already been filed for this period');
         }
 
         return DB::transaction(function () use ($userId, $reference, $responseData) {
             $this->status = self::STATUS_FILED;
             $this->submitted_at = now();
-            $this->submitted_by_id = $userId;
-            $this->submission_reference = $reference;
+            $this->submitted_by = $userId;
+            $this->receipt_number = $reference;
 
             if ($responseData !== null) {
                 $this->response_data = $responseData;
@@ -262,7 +262,7 @@ class TaxReturn extends Model
                 'return_type' => $this->return_type,
                 'status' => self::STATUS_DRAFT,
                 'return_data' => $returnData,
-                'amendment_of_id' => $this->id,
+                'amendment_of' => $this->id,
             ]);
 
             return $amendment;
@@ -389,7 +389,7 @@ class TaxReturn extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
+        return match (strtolower($this->status)) {
             self::STATUS_DRAFT => 'Draft',
             self::STATUS_FILED => 'Filed',
             self::STATUS_ACCEPTED => 'Accepted',

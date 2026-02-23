@@ -39,7 +39,7 @@ class VatReturnController extends Controller
             'company_id' => 'required|integer|exists:companies,id',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
-            'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
+            'period_type' => 'required|string|in:monthly,MONTHLY,quarterly,QUARTERLY',
         ]);
 
         // Get company and authorize access
@@ -129,7 +129,7 @@ class VatReturnController extends Controller
             'company_id' => 'required|integer|exists:companies,id',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
-            'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
+            'period_type' => 'required|string|in:monthly,MONTHLY,quarterly,QUARTERLY',
             'validate_xml' => 'boolean',
         ]);
 
@@ -164,7 +164,7 @@ class VatReturnController extends Controller
             // Parse dates
             $periodStart = Carbon::parse($validated['period_start']);
             $periodEnd = Carbon::parse($validated['period_end']);
-            $periodType = $validated['period_type'];
+            $periodType = strtolower($validated['period_type']);
 
             \Log::info('VatReturnController::generate - Dates parsed', [
                 'period_start' => $periodStart->format('Y-m-d'),
@@ -400,7 +400,7 @@ class VatReturnController extends Controller
             'company_id' => 'required|integer|exists:companies,id',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
-            'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
+            'period_type' => 'required|string|in:monthly,MONTHLY,quarterly,QUARTERLY',
             'xml_content' => 'required|string',
             'receipt_number' => 'nullable|string',
             'response_data' => 'nullable|array',
@@ -414,7 +414,7 @@ class VatReturnController extends Controller
             // Parse dates
             $periodStart = Carbon::parse($validated['period_start']);
             $periodEnd = Carbon::parse($validated['period_end']);
-            $periodType = $validated['period_type'];
+            $periodType = strtolower($validated['period_type']);
 
             // Validate period length
             $this->validatePeriodLength($periodStart, $periodEnd, $periodType);
@@ -425,12 +425,13 @@ class VatReturnController extends Controller
                     'company_id' => $company->id,
                     'period_type' => $periodType,
                     'year' => $periodStart->year,
-                    'month' => $periodType === 'MONTHLY' ? $periodStart->month : null,
-                    'quarter' => $periodType === 'QUARTERLY' ? $periodStart->quarter : null,
+                    'month' => $periodType === TaxReportPeriod::PERIOD_MONTHLY ? $periodStart->month : null,
+                    'quarter' => $periodType === TaxReportPeriod::PERIOD_QUARTERLY ? $periodStart->quarter : null,
                 ],
                 [
                     'start_date' => $periodStart,
                     'end_date' => $periodEnd,
+                    'due_date' => $periodEnd->copy()->addDays(25),
                     'status' => TaxReportPeriod::STATUS_OPEN,
                 ]
             );
@@ -459,8 +460,8 @@ class VatReturnController extends Controller
             // Lock the period if this is the first filing
             if ($period->status === TaxReportPeriod::STATUS_OPEN) {
                 $period->status = TaxReportPeriod::STATUS_CLOSED;
-                $period->closed_at = now();
-                $period->closed_by_id = Auth::id();
+                $period->locked_at = now();
+                $period->locked_by = Auth::id();
                 $period->save();
             }
 
@@ -469,7 +470,7 @@ class VatReturnController extends Controller
                 'data' => [
                     'tax_return_id' => $taxReturn->id,
                     'period_id' => $period->id,
-                    'submission_reference' => $taxReturn->submission_reference,
+                    'receipt_number' => $taxReturn->receipt_number,
                     'submitted_at' => $taxReturn->submitted_at,
                 ],
             ], 201);
@@ -491,7 +492,7 @@ class VatReturnController extends Controller
     {
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
-            'status' => 'nullable|string|in:OPEN,CLOSED,FILED,AMENDED',
+            'status' => 'nullable|string|in:open,closed,filed,amended,OPEN,CLOSED,FILED,AMENDED',
             'period_type' => 'nullable|string|in:MONTHLY,QUARTERLY,ANNUAL',
             'year' => 'nullable|integer',
             'limit' => 'nullable|integer|min:1|max:100',
@@ -550,7 +551,7 @@ class VatReturnController extends Controller
 
         try {
             $returns = TaxReturn::forPeriod($periodId)
-                ->with(['submittedBy:id,name,email', 'amendmentOf:id,submission_reference'])
+                ->with(['submittedBy:id,name,email', 'amendmentOf:id,receipt_number'])
                 ->orderBySubmission('desc')
                 ->get()
                 ->map(function ($return) {
@@ -559,7 +560,7 @@ class VatReturnController extends Controller
                         'return_type' => $return->return_type,
                         'status' => $return->status,
                         'status_label' => $return->status_label,
-                        'submission_reference' => $return->submission_reference,
+                        'receipt_number' => $return->receipt_number,
                         'submitted_at' => $return->submitted_at,
                         'submitted_by' => $return->submittedBy ? [
                             'id' => $return->submittedBy->id,
@@ -568,10 +569,10 @@ class VatReturnController extends Controller
                         'accepted_at' => $return->accepted_at,
                         'rejected_at' => $return->rejected_at,
                         'rejection_reason' => $return->rejection_reason,
-                        'is_amendment' => $return->amendment_of_id !== null,
+                        'is_amendment' => $return->amendment_of !== null,
                         'amendment_of' => $return->amendmentOf ? [
                             'id' => $return->amendmentOf->id,
-                            'submission_reference' => $return->amendmentOf->submission_reference,
+                            'receipt_number' => $return->amendmentOf->receipt_number,
                         ] : null,
                         'xml_download_url' => route('api.v1.tax.vat-returns.download-xml', ['id' => $return->id]),
                         'created_at' => $return->created_at,
@@ -628,8 +629,8 @@ class VatReturnController extends Controller
                 'data' => [
                     'period_id' => $period->id,
                     'status' => $period->status,
-                    'closed_at' => $period->closed_at,
-                    'closed_by_id' => $period->closed_by_id,
+                    'locked_at' => $period->locked_at,
+                    'locked_by' => $period->locked_by,
                 ],
             ]);
 
@@ -712,7 +713,7 @@ class VatReturnController extends Controller
             );
 
             // Add amendment suffix if applicable
-            if ($taxReturn->amendment_of_id) {
+            if ($taxReturn->amendment_of) {
                 $filename = str_replace('.xml', '_AMENDMENT.xml', $filename);
             }
 
