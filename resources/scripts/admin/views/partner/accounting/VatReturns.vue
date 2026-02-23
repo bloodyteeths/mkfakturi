@@ -261,17 +261,25 @@
           <!-- Non-deductible adjustments -->
           <div class="mt-6">
             <h4 class="text-sm font-medium text-gray-700 mb-2">
-              {{ $t('tax.cit.adjustments', 'Non-Deductible Expense Adjustments') }}
+              {{ $t('tax.cit.adjustments', 'Non-Deductible Expense Adjustments (Неданочно признаени расходи)') }}
             </h4>
+            <p class="text-xs text-gray-500 mb-3">
+              {{ $t('tax.cit.adjustments_help', 'Select expense categories that are not tax-deductible under Macedonian tax law.') }}
+            </p>
             <div
               v-for="(adj, index) in citForm.adjustments"
               :key="index"
               class="flex items-center gap-3 mb-2"
             >
-              <BaseInput
-                v-model="adj.description"
-                :placeholder="$t('tax.cit.adjustment_description', 'Description (e.g. Fines, Representation excess)')"
+              <BaseMultiselect
+                v-model="adj.category"
+                :options="adjustmentCategories"
+                label="label"
+                value-prop="value"
+                :searchable="true"
+                :placeholder="$t('tax.cit.select_category', 'Select category')"
                 class="flex-1"
+                @update:model-value="(val) => onCitCategoryChange(adj, val)"
               />
               <BaseInput
                 v-model="adj.amount"
@@ -292,7 +300,7 @@
             <BaseButton
               variant="primary-outline"
               size="sm"
-              @click="citForm.adjustments.push({ description: '', amount: 0 })"
+              @click="citForm.adjustments.push({ category: '', description: '', amount: 0 })"
             >
               <template #left="slotProps">
                 <BaseIcon name="PlusIcon" :class="slotProps.class" />
@@ -387,7 +395,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import axios from 'axios'
+// Use window.axios (configured with baseURL + company header interceptor)
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
@@ -465,6 +473,26 @@ const yearOptions = computed(() => {
   return options
 })
 
+const adjustmentCategories = [
+  { label: 'Казни и пенали (Fines & penalties)', value: 'fines', description: 'Казни и пенали' },
+  { label: 'Репрезентација > 1% (Representation excess)', value: 'representation', description: 'Репрезентација над дозволен лимит' },
+  { label: 'Недокументирани расходи (Undocumented expenses)', value: 'undocumented', description: 'Недокументирани расходи' },
+  { label: 'Расходи за лично возило (Personal vehicle)', value: 'personal_vehicle', description: 'Расходи за лично возило' },
+  { label: 'Донации > лимит (Donations over limit)', value: 'donations_excess', description: 'Донации над дозволен лимит' },
+  { label: 'Спонзорства > лимит (Sponsorships over limit)', value: 'sponsorships_excess', description: 'Спонзорства над дозволен лимит' },
+  { label: 'Камати на поврзани лица (Related party interest)', value: 'related_party_interest', description: 'Камати на поврзани лица' },
+  { label: 'Отпис на побарувања (Bad debt write-off)', value: 'bad_debt_writeoff', description: 'Отпис на ненаплатени побарувања' },
+  { label: 'Амортизација > даночна (Depreciation excess)', value: 'depreciation_excess', description: 'Амортизација над даночно призната' },
+  { label: 'Останати корекции (Other adjustments)', value: 'other', description: 'Останати неданочно признаени расходи' },
+]
+
+function onCitCategoryChange(adj, val) {
+  const cat = adjustmentCategories.find(c => c.value === val)
+  if (cat) {
+    adj.description = cat.description
+  }
+}
+
 const vatStatusClass = computed(() => {
   if (!vatStatus.value) return 'bg-gray-100 text-gray-800'
   switch (vatStatus.value.current_status) {
@@ -489,7 +517,7 @@ function onCompanyChange() {
 
 async function loadVatStatus() {
   try {
-    const response = await axios.get(`/partner/companies/${selectedCompanyId.value}/tax/vat-status`)
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/tax/vat-status`)
     vatStatus.value = response.data
   } catch (error) {
     console.error('Failed to load VAT status:', error)
@@ -499,7 +527,7 @@ async function loadVatStatus() {
 async function loadVatPeriods() {
   isLoadingPeriods.value = true
   try {
-    const response = await axios.get(`/partner/companies/${selectedCompanyId.value}/tax/vat-return/periods`)
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/tax/vat-return/periods`)
     vatPeriods.value = response.data.data?.data || response.data.data || []
   } catch (error) {
     console.error('Failed to load VAT periods:', error)
@@ -511,7 +539,7 @@ async function loadVatPeriods() {
 async function previewVat() {
   isPreviewingVat.value = true
   try {
-    const response = await axios.post(
+    const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/vat-return/preview`,
       vatForm.value
     )
@@ -527,7 +555,7 @@ async function previewVat() {
 async function generateVatXml() {
   isGeneratingVat.value = true
   try {
-    const response = await axios.post(
+    const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/vat-return`,
       vatForm.value,
       { responseType: 'blob' }
@@ -552,13 +580,13 @@ async function fileVatReturn() {
   isFilingVat.value = true
   try {
     // First generate the XML content
-    const xmlResponse = await axios.post(
+    const xmlResponse = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/vat-return`,
       vatForm.value,
       { responseType: 'text' }
     )
 
-    await axios.post(
+    await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/vat-return/file`,
       {
         ...vatForm.value,
@@ -579,11 +607,11 @@ async function fileVatReturn() {
 async function previewCit() {
   isPreviewingCit.value = true
   try {
-    const response = await axios.post(
+    const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/cit-return/preview`,
       {
         year: citForm.value.year,
-        adjustments: citForm.value.adjustments.filter(a => a.description && a.amount > 0),
+        adjustments: citForm.value.adjustments.filter(a => a.category && a.amount > 0),
         loss_carryforward: citForm.value.loss_carryforward || 0,
       }
     )
@@ -599,11 +627,11 @@ async function previewCit() {
 async function generateCitXml() {
   isGeneratingCit.value = true
   try {
-    const response = await axios.post(
+    const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/cit-return`,
       {
         year: citForm.value.year,
-        adjustments: citForm.value.adjustments.filter(a => a.description && a.amount > 0),
+        adjustments: citForm.value.adjustments.filter(a => a.category && a.amount > 0),
         loss_carryforward: citForm.value.loss_carryforward || 0,
       },
       { responseType: 'blob' }
@@ -627,17 +655,17 @@ async function fileCitReturn() {
   if (!citPreviewData.value) return
   isFilingCit.value = true
   try {
-    const xmlResponse = await axios.post(
+    const xmlResponse = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/cit-return`,
       {
         year: citForm.value.year,
-        adjustments: citForm.value.adjustments.filter(a => a.description && a.amount > 0),
+        adjustments: citForm.value.adjustments.filter(a => a.category && a.amount > 0),
         loss_carryforward: citForm.value.loss_carryforward || 0,
       },
       { responseType: 'text' }
     )
 
-    await axios.post(
+    await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/tax/cit-return/file`,
       {
         year: citForm.value.year,
