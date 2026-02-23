@@ -48,7 +48,7 @@
             <template #left="slotProps">
               <BaseIcon :name="citFiled ? 'CheckCircleIcon' : 'PaperAirplaneIcon'" :class="slotProps.class" />
             </template>
-            {{ citFiled ? $t('tax.cit.already_filed', 'Filed') : $t('banking.file_return', 'File Return') }}
+            {{ citFiled ? $t('tax.cit.already_filed', 'Filed') : $t('tax.cit.file_at_ujp', 'File at UJP') }}
           </BaseButton>
         </div>
       </div>
@@ -415,10 +415,13 @@ async function fileReturn() {
 
     notificationStore.showNotification({
       type: 'success',
-      message: t('tax.cit.filed', 'CIT return filed successfully'),
+      message: t('tax.cit.filed', 'CIT return saved. Opening UJP e-Tax portal...'),
     })
     citFiled.value = true
     loadPeriods()
+
+    // Open UJP e-Tax portal in new tab
+    window.open('https://etax.ujp.gov.mk', '_blank')
   } catch (error) {
     const msg = error.response?.data?.message || 'Failed to file CIT return'
     notificationStore.showNotification({ type: 'error', message: msg })
