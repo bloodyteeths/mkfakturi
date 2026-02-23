@@ -694,6 +694,14 @@ Route::prefix('/v1')->group(function () {
                 Route::post('vat-return/periods/{periodId}/reopen', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'reopenPeriod']);
                 Route::get('vat-return/{id}/download-xml', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'downloadXml']);
                 Route::get('vat-status/{company}', [App\Http\Controllers\V1\Admin\Tax\VatReturnController::class, 'status']);
+
+                // Corporate Income Tax (CIT / DB-VP) Returns
+                Route::post('cit-return/preview', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'preview']);
+                Route::post('cit-return', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'generate']);
+                Route::post('cit-return/file', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'file']);
+                Route::get('cit-return/periods', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'getPeriods']);
+                Route::get('cit-return/periods/{periodId}/returns', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'getReturns']);
+                Route::get('cit-return/{id}/download-xml', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'downloadXml']);
             });
 
             // Suppliers, Bills, Bill Payments (Accounts Payable)
@@ -971,6 +979,7 @@ Route::prefix('/v1')->group(function () {
                 Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
                 Route::post('/transactions/suggest-category', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'suggestCategory']);
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
+                Route::post('/transactions/manual', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'storeManualTransaction']);
 
                 // CSV Import
                 Route::prefix('import')->group(function () {
@@ -1555,11 +1564,39 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
 
     // Partner IFRS Accounting Reports for Client Companies
     Route::prefix('/companies/{company}/accounting')->group(function () {
+        Route::get('/ifrs-status', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'ifrsStatus']);
+        Route::post('/enable-ifrs', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'enableIfrs']);
         Route::get('/general-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'generalLedger']);
         Route::get('/journal-entries', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'journalEntries']);
         Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
         Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);
         Route::get('/income-statement', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'incomeStatement']);
+    });
+
+    // Partner Tax Returns (VAT + CIT) for Client Companies
+    Route::prefix('/companies/{company}/tax')->group(function () {
+        // VAT (DDV-04)
+        Route::post('/vat-return/preview', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatPreview']);
+        Route::post('/vat-return', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatGenerate']);
+        Route::post('/vat-return/file', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatFile']);
+        Route::get('/vat-return/periods', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatPeriods']);
+        Route::get('/vat-return/periods/{periodId}/returns', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatReturns']);
+        Route::get('/vat-return/{id}/download-xml', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatDownloadXml']);
+        Route::get('/vat-status', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatStatus']);
+        // CIT (DB-VP)
+        Route::post('/cit-return/preview', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citPreview']);
+        Route::post('/cit-return', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citGenerate']);
+        Route::post('/cit-return/file', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citFile']);
+        Route::get('/cit-return/{id}/download-xml', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citDownloadXml']);
+    });
+
+    // Partner Payroll Reports for Client Companies
+    Route::prefix('/companies/{company}/payroll-reports')->group(function () {
+        Route::get('/tax-summary', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'taxSummary']);
+        Route::get('/statistics', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'statistics']);
+        Route::get('/monthly-comparison', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'monthlyComparison']);
+        Route::get('/download-mpin-xml', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'downloadMpinXml']);
+        Route::get('/download-ddv04-xml', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'downloadDdv04Xml']);
     });
 
     // Client Document Upload Portal - Partner Review (P8-01)

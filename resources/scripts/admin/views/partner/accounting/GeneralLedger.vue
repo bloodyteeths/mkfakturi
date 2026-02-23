@@ -34,8 +34,34 @@
       </BaseInputGroup>
     </div>
 
+    <!-- IFRS Not Enabled Warning -->
+    <div
+      v-if="selectedCompanyId && ifrsChecked && !ifrsEnabled"
+      class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-6"
+    >
+      <div class="flex items-start">
+        <BaseIcon name="ExclamationTriangleIcon" class="h-6 w-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" />
+        <div class="flex-1">
+          <h3 class="text-sm font-medium text-yellow-800">
+            {{ $t('partner.accounting.ifrs_not_enabled_title', 'Accounting is not enabled for this company') }}
+          </h3>
+          <p class="mt-1 text-sm text-yellow-700">
+            {{ $t('partner.accounting.ifrs_not_enabled_description', 'Enable double-entry accounting to start tracking journal entries, general ledger, and financial reports for this company.') }}
+          </p>
+          <BaseButton
+            class="mt-3"
+            variant="primary"
+            :loading="isEnablingIfrs"
+            @click="enableIfrs"
+          >
+            {{ $t('partner.accounting.enable_accounting', 'Enable Accounting') }}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+
     <!-- Filters Card -->
-    <div v-if="selectedCompanyId" class="p-6 bg-white rounded-lg shadow mb-6">
+    <div v-if="selectedCompanyId && ifrsEnabled" class="p-6 bg-white rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Account selector -->
         <BaseInputGroup :label="$t('reports.accounting.general_ledger.select_account')" required>
@@ -216,7 +242,7 @@
 
     <!-- Initial State - Has company but no search yet -->
     <div
-      v-else-if="selectedCompanyId && !hasSearched"
+      v-else-if="selectedCompanyId && ifrsEnabled && !hasSearched"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
       <BaseIcon name="MagnifyingGlassIcon" class="mx-auto h-12 w-12 text-gray-400" />
@@ -262,6 +288,9 @@ const isLoading = ref(false)
 const isLoadingAccounts = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
+const ifrsEnabled = ref(false)
+const ifrsChecked = ref(false)
+const isEnablingIfrs = ref(false)
 
 // AbortController for cancelling requests
 let abortController = null
@@ -317,7 +346,10 @@ onMounted(async () => {
     // Auto-select first company if available
     if (companies.value.length > 0) {
       selectedCompanyId.value = companies.value[0].id
-      await loadAccounts()
+      await checkIfrsStatus()
+      if (ifrsEnabled.value) {
+        await loadAccounts()
+      }
     }
   } catch (error) {
     notificationStore.showNotification({
@@ -339,17 +371,59 @@ const debouncedLoadAccounts = debounce(async () => {
   await loadAccounts()
 }, 300)
 
-watch(selectedCompanyId, (newCompanyId) => {
+watch(selectedCompanyId, async (newCompanyId) => {
   if (newCompanyId) {
-    debouncedLoadAccounts()
-    // Reset ledger data when company changes
+    // Reset state when company changes
     ledgerData.value = null
     hasSearched.value = false
     filters.value.account_id = null
+    ifrsEnabled.value = false
+    ifrsChecked.value = false
+
+    await checkIfrsStatus()
+    if (ifrsEnabled.value) {
+      debouncedLoadAccounts()
+    }
   }
 })
 
 // Methods
+async function checkIfrsStatus() {
+  if (!selectedCompanyId.value) return
+
+  ifrsChecked.value = false
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/ifrs-status`)
+    ifrsEnabled.value = response.data?.ifrs_enabled === true
+  } catch {
+    ifrsEnabled.value = false
+  } finally {
+    ifrsChecked.value = true
+  }
+}
+
+async function enableIfrs() {
+  if (!selectedCompanyId.value) return
+
+  isEnablingIfrs.value = true
+  try {
+    await window.axios.post(`/partner/companies/${selectedCompanyId.value}/accounting/enable-ifrs`)
+    ifrsEnabled.value = true
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('partner.accounting.accounting_enabled_success', 'Accounting has been enabled for this company'),
+    })
+    await loadAccounts()
+  } catch {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_enable_accounting', 'Failed to enable accounting'),
+    })
+  } finally {
+    isEnablingIfrs.value = false
+  }
+}
+
 async function loadAccounts() {
   if (!selectedCompanyId.value) return
 

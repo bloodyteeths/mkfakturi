@@ -59,6 +59,15 @@
             {{ $t('matching_rules.title') || 'Matching Rules' }}
           </BaseButton>
           <BaseButton
+            variant="primary-outline"
+            @click="showManualEntryModal = true"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PencilSquareIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.manual_entry.button', 'Manual Entry') }}
+          </BaseButton>
+          <BaseButton
             variant="primary"
             @click="showConnectModal = true"
           >
@@ -254,6 +263,13 @@
       :transaction="selectedTransaction"
       @categorized="onTransactionCategorized"
     />
+
+    <!-- Manual Entry Modal -->
+    <ManualEntryModal
+      v-model="showManualEntryModal"
+      :accounts="manualEntryAccounts"
+      @created="onManualEntryCreated"
+    />
   </BasePage>
 </template>
 
@@ -267,6 +283,7 @@ import axios from 'axios'
 import ConnectBank from './ConnectBank.vue'
 import TransactionsList from './TransactionsList.vue'
 import TransactionCategorization from './TransactionCategorization.vue'
+import ManualEntryModal from './ManualEntryModal.vue'
 import { BanknotesIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -279,6 +296,7 @@ const connectedAccounts = ref([])
 const isLoadingAccounts = ref(true)
 const showConnectModal = ref(false)
 const showCategorizationModal = ref(false)
+const showManualEntryModal = ref(false)
 const selectedTransaction = ref(null)
 const showFilters = ref(false)
 
@@ -395,7 +413,18 @@ const openCategorizationModal = (transaction) => {
 const onTransactionCategorized = () => {
   showCategorizationModal.value = false
   selectedTransaction.value = null
-  // Optionally refresh transactions list
+}
+
+const manualEntryAccounts = computed(() => {
+  return connectedAccounts.value.map(acc => ({
+    id: acc.id,
+    label: `${acc.bank_name} - ${acc.account_number}`,
+  }))
+})
+
+const onManualEntryCreated = () => {
+  // Refresh accounts and transactions
+  fetchConnectedAccounts()
 }
 
 const toggleFilters = () => {

@@ -586,6 +586,108 @@ class BankingController extends Controller
     }
 
     /**
+     * Manually create a single bank transaction
+     */
+    public function storeManualTransaction(Request $request): JsonResponse
+    {
+        try {
+            $company = $this->resolveCompany($request);
+
+            if (! $company) {
+                return response()->json(['error' => 'No company found'], 404);
+            }
+
+            $validated = $request->validate([
+                'bank_account_id' => 'required|integer|exists:bank_accounts,id',
+                'amount' => 'required|numeric|not_in:0',
+                'transaction_date' => 'required|date',
+                'description' => 'required|string|max:1000',
+                'transaction_type' => 'required|in:credit,debit',
+                'counterparty_name' => 'nullable|string|max:500',
+                'counterparty_iban' => 'nullable|string|max:34',
+                'remittance_info' => 'nullable|string|max:1000',
+                'payment_reference' => 'nullable|string|max:255',
+            ]);
+
+            // Verify the bank account belongs to this company
+            $bankAccount = BankAccount::where('id', $validated['bank_account_id'])
+                ->where('company_id', $company->id)
+                ->first();
+
+            if (! $bankAccount) {
+                return response()->json(['error' => 'Bank account not found'], 404);
+            }
+
+            // Ensure amount sign matches transaction type
+            $amount = abs($validated['amount']);
+            if ($validated['transaction_type'] === 'debit') {
+                $amount = -$amount;
+            }
+
+            $transactionData = [
+                'bank_account_id' => $bankAccount->id,
+                'company_id' => $company->id,
+                'amount' => $amount,
+                'currency' => $bankAccount->currency?->code ?? 'MKD',
+                'transaction_type' => $validated['transaction_type'],
+                'transaction_date' => Carbon::parse($validated['transaction_date']),
+                'booking_date' => Carbon::parse($validated['transaction_date']),
+                'description' => $validated['description'],
+                'remittance_info' => $validated['remittance_info'] ?? null,
+                'payment_reference' => $validated['payment_reference'] ?? null,
+                'source' => BankTransaction::SOURCE_MANUAL,
+                'processing_status' => BankTransaction::STATUS_UNPROCESSED,
+                'booking_status' => BankTransaction::BOOKING_BOOKED,
+            ];
+
+            // Set counterparty fields based on transaction type
+            if ($validated['transaction_type'] === 'credit') {
+                $transactionData['debtor_name'] = $validated['counterparty_name'] ?? null;
+                $transactionData['debtor_iban'] = $validated['counterparty_iban'] ?? null;
+            } else {
+                $transactionData['creditor_name'] = $validated['counterparty_name'] ?? null;
+                $transactionData['creditor_iban'] = $validated['counterparty_iban'] ?? null;
+            }
+
+            $transaction = BankTransaction::create($transactionData);
+
+            Log::info('Manual bank transaction created', [
+                'company_id' => $company->id,
+                'transaction_id' => $transaction->id,
+                'amount' => $amount,
+            ]);
+
+            return response()->json([
+                'message' => 'Transaction created successfully',
+                'data' => [
+                    'id' => $transaction->id,
+                    'transaction_date' => $transaction->transaction_date?->toIso8601String(),
+                    'amount' => $transaction->amount,
+                    'description' => $transaction->description,
+                    'counterparty_name' => $transaction->counterparty_name,
+                    'source' => $transaction->source,
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Failed to create manual transaction', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to create transaction',
+                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    // CLAUDE-CHECKPOINT
+
+    /**
      * Suggest an expense category for a bank transaction using AI or keyword matching.
      *
      * Called by TransactionCategorization.vue to provide an AI-powered suggestion

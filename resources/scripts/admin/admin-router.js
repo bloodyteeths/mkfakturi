@@ -1118,6 +1118,18 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/YearEndWizard.vue'),
       },
+      {
+        path: 'partner/accounting/vat-returns',
+        name: 'partner.accounting.vat-returns',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/VatReturns.vue'),
+      },
+      {
+        path: 'partner/accounting/payroll-reports',
+        name: 'partner.accounting.payroll-reports',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/PayrollReports.vue'),
+      },
 
       // Banking
       {
@@ -1222,6 +1234,14 @@ export default [
         name: 'support.admin',
         meta: { requiresAuth: true, requiresSuperAdmin: true },
         component: TicketAdminIndex,
+      },
+
+      // Corporate Income Tax (CIT / DB)
+      {
+        path: 'tax/corporate-income-tax',
+        name: 'tax.cit',
+        meta: { requiresAuth: true },
+        component: () => import('@/scripts/admin/views/tax/CorporateIncomeTax.vue'),
       },
 
       // Payroll Module (Business+ tier)

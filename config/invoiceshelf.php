@@ -630,6 +630,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.journal_review',
@@ -640,6 +641,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.journal_export',
@@ -650,6 +652,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.period_lock',
@@ -660,6 +663,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.daily_closing',
@@ -670,6 +674,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.general_ledger',
@@ -680,6 +685,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.trial_balance',
@@ -690,6 +696,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'partner.accounting.year_end_closing',
@@ -700,6 +707,29 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
+            'title' => 'partner.accounting.vat_returns',
+            'group' => 'partner.accounting',
+            'link' => '/admin/partner/accounting/vat-returns',
+            'icon' => 'DocumentTextIcon',
+            'name' => 'partner.accounting.vat-returns',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
+            'title' => 'partner.accounting.payroll_reports',
+            'group' => 'partner.accounting',
+            'link' => '/admin/partner/accounting/payroll-reports',
+            'icon' => 'UsersIcon',
+            'name' => 'partner.accounting.payroll-reports',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'payroll',
         ],
         [
             'title' => 'partner.accounting.partner_dashboard',

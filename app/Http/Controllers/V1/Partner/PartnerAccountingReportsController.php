@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Partner;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\CompanySetting;
 use App\Models\Partner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -195,6 +196,64 @@ class PartnerAccountingReportsController extends Controller
             'income_statement' => $incomeStatement,
         ]);
     }
+
+    /**
+     * Check IFRS accounting status for a client company.
+     */
+    public function ifrsStatus(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $ifrsEnabled = CompanySetting::getSetting('ifrs_enabled', $company);
+        $isEnabled = $ifrsEnabled === 'YES' || $ifrsEnabled === true || $ifrsEnabled === '1';
+
+        return response()->json([
+            'success' => true,
+            'ifrs_enabled' => $isEnabled,
+        ]);
+    }
+
+    /**
+     * Enable IFRS accounting for a client company.
+     * Partners can activate accounting for companies they manage.
+     */
+    public function enableIfrs(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            return response()->json(['success' => false, 'message' => 'Company not found'], 404);
+        }
+
+        CompanySetting::setSettings([
+            'ifrs_enabled' => 'YES',
+        ], $company);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Accounting enabled for this company',
+            'ifrs_enabled' => true,
+        ]);
+    }
+
+    // CLAUDE-CHECKPOINT
 
     /**
      * Get partner from authenticated request.
