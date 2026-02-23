@@ -489,7 +489,7 @@ function onCompanyChange() {
 
 async function loadVatStatus() {
   try {
-    const response = await axios.get(`/v1/partner/companies/${selectedCompanyId.value}/tax/vat-status`)
+    const response = await axios.get(`/partner/companies/${selectedCompanyId.value}/tax/vat-status`)
     vatStatus.value = response.data
   } catch (error) {
     console.error('Failed to load VAT status:', error)
@@ -499,7 +499,7 @@ async function loadVatStatus() {
 async function loadVatPeriods() {
   isLoadingPeriods.value = true
   try {
-    const response = await axios.get(`/v1/partner/companies/${selectedCompanyId.value}/tax/vat-return/periods`)
+    const response = await axios.get(`/partner/companies/${selectedCompanyId.value}/tax/vat-return/periods`)
     vatPeriods.value = response.data.data?.data || response.data.data || []
   } catch (error) {
     console.error('Failed to load VAT periods:', error)
@@ -512,7 +512,7 @@ async function previewVat() {
   isPreviewingVat.value = true
   try {
     const response = await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/vat-return/preview`,
+      `/partner/companies/${selectedCompanyId.value}/tax/vat-return/preview`,
       vatForm.value
     )
     vatPreviewData.value = response.data.data
@@ -528,7 +528,7 @@ async function generateVatXml() {
   isGeneratingVat.value = true
   try {
     const response = await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/vat-return`,
+      `/partner/companies/${selectedCompanyId.value}/tax/vat-return`,
       vatForm.value,
       { responseType: 'blob' }
     )
@@ -553,13 +553,13 @@ async function fileVatReturn() {
   try {
     // First generate the XML content
     const xmlResponse = await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/vat-return`,
+      `/partner/companies/${selectedCompanyId.value}/tax/vat-return`,
       vatForm.value,
       { responseType: 'text' }
     )
 
     await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/vat-return/file`,
+      `/partner/companies/${selectedCompanyId.value}/tax/vat-return/file`,
       {
         ...vatForm.value,
         xml_content: xmlResponse.data,
@@ -580,7 +580,7 @@ async function previewCit() {
   isPreviewingCit.value = true
   try {
     const response = await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/cit-return/preview`,
+      `/partner/companies/${selectedCompanyId.value}/tax/cit-return/preview`,
       {
         year: citForm.value.year,
         adjustments: citForm.value.adjustments.filter(a => a.description && a.amount > 0),
@@ -600,7 +600,7 @@ async function generateCitXml() {
   isGeneratingCit.value = true
   try {
     const response = await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/cit-return`,
+      `/partner/companies/${selectedCompanyId.value}/tax/cit-return`,
       {
         year: citForm.value.year,
         adjustments: citForm.value.adjustments.filter(a => a.description && a.amount > 0),
@@ -628,7 +628,7 @@ async function fileCitReturn() {
   isFilingCit.value = true
   try {
     const xmlResponse = await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/cit-return`,
+      `/partner/companies/${selectedCompanyId.value}/tax/cit-return`,
       {
         year: citForm.value.year,
         adjustments: citForm.value.adjustments.filter(a => a.description && a.amount > 0),
@@ -638,7 +638,7 @@ async function fileCitReturn() {
     )
 
     await axios.post(
-      `/v1/partner/companies/${selectedCompanyId.value}/tax/cit-return/file`,
+      `/partner/companies/${selectedCompanyId.value}/tax/cit-return/file`,
       {
         year: citForm.value.year,
         return_data: citPreviewData.value,

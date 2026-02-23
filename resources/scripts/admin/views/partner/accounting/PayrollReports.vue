@@ -274,11 +274,11 @@ async function loadData() {
 
   try {
     const [statsRes, summaryRes, comparisonRes] = await Promise.all([
-      axios.get(`/v1/partner/companies/${selectedCompanyId.value}/payroll-reports/statistics`),
-      axios.get(`/v1/partner/companies/${selectedCompanyId.value}/payroll-reports/tax-summary`, {
+      axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/statistics`),
+      axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/tax-summary`, {
         params: { year: selectedYear.value, month: selectedMonth.value },
       }),
-      axios.get(`/v1/partner/companies/${selectedCompanyId.value}/payroll-reports/monthly-comparison`, {
+      axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/monthly-comparison`, {
         params: { year: selectedYear.value },
       }),
     ])
@@ -303,7 +303,7 @@ async function downloadMpinXml() {
   isDownloadingMpin.value = true
   try {
     const response = await axios.get(
-      `/v1/partner/companies/${selectedCompanyId.value}/payroll-reports/download-mpin-xml`,
+      `/partner/companies/${selectedCompanyId.value}/payroll-reports/download-mpin-xml`,
       {
         params: { year: selectedYear.value, month: selectedMonth.value },
         responseType: 'blob',
@@ -329,7 +329,7 @@ async function downloadDdv04Xml() {
   isDownloadingDdv04.value = true
   try {
     const response = await axios.get(
-      `/v1/partner/companies/${selectedCompanyId.value}/payroll-reports/download-ddv04-xml`,
+      `/partner/companies/${selectedCompanyId.value}/payroll-reports/download-ddv04-xml`,
       {
         params: { year: selectedYear.value },
         responseType: 'blob',
