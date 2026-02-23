@@ -42,12 +42,14 @@ class CitReturnController extends Controller
             'company_id' => 'required|integer|exists:companies,id',
             'year' => 'required|integer|min:2020|max:2100',
             'adjustments' => 'nullable|array',
+            'adjustments.*.category' => 'nullable|string',
             'adjustments.*.description' => 'required|string',
             'adjustments.*.amount' => 'required|numeric|min:0',
             'loss_carryforward' => 'nullable|numeric|min:0',
         ]);
 
-        $company = Company::findOrFail($validated['company_id']);
+        $companyId = $validated['company_id'] ?? $request->header('company');
+        $company = Company::findOrFail($companyId);
         Gate::authorize('view', $company);
 
         try {
@@ -76,12 +78,14 @@ class CitReturnController extends Controller
             'company_id' => 'required|integer|exists:companies,id',
             'year' => 'required|integer|min:2020|max:2100',
             'adjustments' => 'nullable|array',
+            'adjustments.*.category' => 'nullable|string',
             'adjustments.*.description' => 'required|string',
             'adjustments.*.amount' => 'required|numeric|min:0',
             'loss_carryforward' => 'nullable|numeric|min:0',
         ]);
 
-        $company = Company::findOrFail($validated['company_id']);
+        $companyId = $validated['company_id'] ?? $request->header('company');
+        $company = Company::findOrFail($companyId);
         Gate::authorize('view', $company);
 
         try {
@@ -125,7 +129,8 @@ class CitReturnController extends Controller
             'receipt_number' => 'nullable|string',
         ]);
 
-        $company = Company::findOrFail($validated['company_id']);
+        $companyId = $validated['company_id'] ?? $request->header('company');
+        $company = Company::findOrFail($companyId);
         Gate::authorize('manage', $company);
 
         try {
@@ -191,12 +196,13 @@ class CitReturnController extends Controller
     public function getPeriods(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'company_id' => 'required|integer|exists:companies,id',
+            'company_id' => 'nullable|integer|exists:companies,id',
             'status' => 'nullable|string|in:OPEN,CLOSED,FILED,AMENDED',
             'limit' => 'nullable|integer|min:1|max:100',
         ]);
 
-        $company = Company::findOrFail($validated['company_id']);
+        $companyId = $validated['company_id'] ?? $request->header('company');
+        $company = Company::findOrFail($companyId);
         Gate::authorize('view', $company);
 
         try {

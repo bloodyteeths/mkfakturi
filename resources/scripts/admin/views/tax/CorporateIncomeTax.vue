@@ -56,20 +56,25 @@
       <!-- Non-deductible adjustments -->
       <div class="mt-6 border-t border-gray-200 pt-6">
         <h4 class="text-sm font-medium text-gray-700 mb-3">
-          {{ $t('tax.cit.adjustments', 'Non-Deductible Expense Adjustments') }}
+          {{ $t('tax.cit.adjustments', 'Non-Deductible Expense Adjustments (Неданочно признаени расходи)') }}
         </h4>
         <p class="text-xs text-gray-500 mb-3">
-          {{ $t('tax.cit.adjustments_help', 'Add expenses that are not tax-deductible: fines (kazni), representation excess (>1%), undocumented expenses, etc.') }}
+          {{ $t('tax.cit.adjustments_help', 'Select expense categories that are not tax-deductible under Macedonian tax law. These are added back to the accounting profit.') }}
         </p>
         <div
           v-for="(adj, index) in adjustments"
           :key="index"
           class="flex items-center gap-3 mb-2"
         >
-          <BaseInput
-            v-model="adj.description"
-            :placeholder="$t('tax.cit.adjustment_description', 'Description')"
+          <BaseMultiselect
+            v-model="adj.category"
+            :options="adjustmentCategories"
+            label="label"
+            value-prop="value"
+            :searchable="true"
+            :placeholder="$t('tax.cit.select_category', 'Select category')"
             class="flex-1"
+            @update:model-value="(val) => onCategoryChange(adj, val)"
           />
           <BaseInput
             v-model="adj.amount"
@@ -90,7 +95,7 @@
         <BaseButton
           variant="primary-outline"
           size="sm"
-          @click="adjustments.push({ description: '', amount: 0 })"
+          @click="addAdjustment"
         >
           <template #left="slotProps">
             <BaseIcon name="PlusIcon" :class="slotProps.class" />
@@ -101,7 +106,7 @@
 
       <!-- Loss carryforward -->
       <div class="mt-4">
-        <BaseInputGroup :label="$t('tax.cit.loss_carryforward', 'Loss Carryforward from Previous Years')">
+        <BaseInputGroup :label="$t('tax.cit.loss_carryforward', 'Loss Carryforward from Previous Years (Пренесена загуба)')">
           <BaseInput
             v-model="lossCarryforward"
             type="number"
@@ -165,7 +170,7 @@
           </div>
 
           <div class="flex justify-between items-center py-3 border-b-2 border-gray-300 bg-gray-50 px-4 rounded">
-            <span class="text-base font-bold text-gray-900">{{ $t('tax.cit.taxable_base', 'Taxable Base') }}</span>
+            <span class="text-base font-bold text-gray-900">{{ $t('tax.cit.taxable_base', 'Taxable Base (Даночна основа)') }}</span>
             <span class="text-xl font-bold text-gray-900">{{ formatMoney(previewData.taxable_base) }}</span>
           </div>
 
@@ -175,7 +180,7 @@
           </div>
 
           <div class="flex justify-between items-center py-3 border-b-2 border-primary-300 bg-primary-50 px-4 rounded">
-            <span class="text-base font-bold text-primary-900">{{ $t('tax.cit.cit_amount', 'CIT Amount Due') }}</span>
+            <span class="text-base font-bold text-primary-900">{{ $t('tax.cit.cit_amount', 'CIT Amount Due (Данок на добивка)') }}</span>
             <span class="text-xl font-bold text-primary-600">{{ formatMoney(previewData.cit_amount) }}</span>
           </div>
 
@@ -258,10 +263,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import axios from 'axios'
 
 const { t } = useI18n()
+const companyStore = useCompanyStore()
 const notificationStore = useNotificationStore()
 
 // State
@@ -276,6 +282,20 @@ const isGenerating = ref(false)
 const isFiling = ref(false)
 const isLoadingPeriods = ref(false)
 
+// Predefined non-deductible expense categories per Macedonian tax law
+const adjustmentCategories = [
+  { label: t('tax.cit.adj_fines', 'Казни и пенали (Fines & penalties)'), value: 'fines', description: 'Казни и пенали' },
+  { label: t('tax.cit.adj_representation', 'Репрезентација > 1% (Representation excess)'), value: 'representation', description: 'Репрезентација над дозволен лимит' },
+  { label: t('tax.cit.adj_undocumented', 'Недокументирани расходи (Undocumented expenses)'), value: 'undocumented', description: 'Недокументирани расходи' },
+  { label: t('tax.cit.adj_personal', 'Приватни трошоци (Owner personal expenses)'), value: 'personal', description: 'Приватни трошоци на сопственикот' },
+  { label: t('tax.cit.adj_interest', 'Камати > пазарна стапка (Interest above market rate)'), value: 'interest', description: 'Камати над пазарна стапка' },
+  { label: t('tax.cit.adj_donations', 'Донации > 5% (Donations excess)'), value: 'donations', description: 'Донации над дозволен лимит' },
+  { label: t('tax.cit.adj_depreciation', 'Амортизација > стапка (Depreciation above rate)'), value: 'depreciation_excess', description: 'Амортизација над дозволена стапка' },
+  { label: t('tax.cit.adj_provisions', 'Резервирања (Provisions)'), value: 'provisions', description: 'Даночно непризнаени резервирања' },
+  { label: t('tax.cit.adj_related_party', 'Трансферни цени (Transfer pricing adj.)'), value: 'transfer_pricing', description: 'Корекции по трансферни цени' },
+  { label: t('tax.cit.adj_other', 'Останати неданочни трошоци (Other)'), value: 'other', description: 'Останати неданочно признаени расходи' },
+]
+
 // Computed
 const yearOptions = computed(() => {
   const currentYear = new Date().getFullYear()
@@ -286,20 +306,45 @@ const yearOptions = computed(() => {
   return options
 })
 
+const companyId = computed(() => {
+  return companyStore.selectedCompany?.id
+})
+
 // Methods
 function getRequestPayload() {
   return {
-    company_id: parseInt(window.Ls?.store?.companyId || document.querySelector('meta[name="company-id"]')?.content || 0),
+    company_id: companyId.value,
     year: selectedYear.value,
-    adjustments: adjustments.value.filter(a => a.description && a.amount > 0),
-    loss_carryforward: lossCarryforward.value || 0,
+    adjustments: adjustments.value
+      .filter(a => a.category && a.amount > 0)
+      .map(a => ({
+        category: a.category,
+        description: a.description,
+        amount: parseFloat(a.amount) || 0,
+      })),
+    loss_carryforward: parseFloat(lossCarryforward.value) || 0,
+  }
+}
+
+function addAdjustment() {
+  adjustments.value.push({ category: '', description: '', amount: 0 })
+}
+
+function onCategoryChange(adj, val) {
+  const found = adjustmentCategories.find(c => c.value === val)
+  if (found) {
+    adj.description = found.description
   }
 }
 
 async function previewCit() {
+  if (!companyId.value) {
+    notificationStore.showNotification({ type: 'error', message: 'No company selected' })
+    return
+  }
   isPreviewing.value = true
   try {
-    const response = await axios.post('/tax/cit-return/preview', getRequestPayload())
+    const response = await window.axios.post('/tax/cit-return/preview', getRequestPayload())
     previewData.value = response.data.data
   } catch (error) {
     const msg = error.response?.data?.message || error.response?.data?.error || 'Failed to preview CIT'
@@ -310,9 +355,13 @@ async function previewCit() {
 }
 
 async function generateXml() {
+  if (!companyId.value) {
+    notificationStore.showNotification({ type: 'error', message: 'No company selected' })
+    return
+  }
   isGenerating.value = true
   try {
-    const response = await axios.post(
+    const response = await window.axios.post(
       '/tax/cit-return',
       getRequestPayload(),
       { responseType: 'blob' }
@@ -326,25 +375,36 @@ async function generateXml() {
     link.remove()
     window.URL.revokeObjectURL(url)
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: 'Failed to generate CIT XML' })
+    // When responseType is blob, we need to parse the error differently
+    let msg = 'Failed to generate CIT XML'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        msg = json.message || json.error || msg
+      } catch { /* ignore parse error */ }
+    } else {
+      msg = error.response?.data?.message || error.response?.data?.error || msg
+    }
+    notificationStore.showNotification({ type: 'error', message: msg })
   } finally {
     isGenerating.value = false
   }
 }
 
 async function fileReturn() {
-  if (!previewData.value) return
+  if (!previewData.value || !companyId.value) return
   isFiling.value = true
   try {
     // Generate XML first
-    const xmlResponse = await axios.post(
+    const xmlResponse = await window.axios.post(
       '/tax/cit-return',
       getRequestPayload(),
       { responseType: 'text' }
     )
 
     const payload = getRequestPayload()
-    await axios.post('/tax/cit-return/file', {
+    await window.axios.post('/tax/cit-return/file', {
       company_id: payload.company_id,
       year: payload.year,
       return_data: previewData.value,
@@ -366,11 +426,11 @@ async function fileReturn() {
 }
 
 async function loadPeriods() {
+  if (!companyId.value) return
   isLoadingPeriods.value = true
   try {
-    const payload = getRequestPayload()
-    const response = await axios.get('/tax/cit-return/periods', {
-      params: { company_id: payload.company_id },
+    const response = await window.axios.get('/tax/cit-return/periods', {
+      params: { company_id: companyId.value },
     })
     periods.value = response.data.data?.data || response.data.data || []
   } catch (error) {

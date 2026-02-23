@@ -530,6 +530,17 @@ return [
             'feature_flag' => 'payroll',
         ],
         [
+            'title' => 'navigation.tax',
+            'group' => 2,
+            'link' => '/admin/tax/corporate-income-tax',
+            'icon' => 'CalculatorIcon',
+            'name' => 'Tax',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
             'title' => 'navigation.deadlines',
             'group' => 2,
             'link' => '/admin/deadlines',
