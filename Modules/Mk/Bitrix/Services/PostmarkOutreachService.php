@@ -102,14 +102,8 @@ class PostmarkOutreachService
             $marketingUrl = rtrim(config('app.marketing_url', 'https://facturino.mk'), '/');
             $signupUrl = config('app.url') . '/signup';
 
-            // Early emails → landing page (they don't know us yet)
-            // Later followups → signup (they've seen the pitch)
-            $ctaUrl = match ($templateKey) {
-                'initial', 'followup_1' => $marketingUrl . '/mk/for-accountants',
-                'company_initial', 'company_followup_1' => $marketingUrl . '/mk/features',
-                'company_followup_2' => $marketingUrl . '/mk/pricing',
-                default => $signupUrl,
-            };
+            // All emails link directly to signup to minimize friction
+            $ctaUrl = $signupUrl;
 
             // Build the appropriate mailable
             $mailable = $this->buildMailable(

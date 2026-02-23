@@ -9,8 +9,8 @@ use App\Models\CompanySetting;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-// Hash not needed - User model has setPasswordAttribute mutator
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Modules\Mk\Bitrix\Services\WelcomeEmailService;
 
@@ -227,8 +227,12 @@ class SignupService
                     'subscription_status' => 'active',
                 ]);
 
-                // Login URL for free plan
-                $checkoutUrl = config('app.url').'/login?registered=1&email='.urlencode($data['email']);
+                // Auto-login URL for free plan (signed, expires in 5 minutes)
+                $checkoutUrl = URL::temporarySignedRoute(
+                    'signup.auto-login',
+                    now()->addMinutes(5),
+                    ['user' => $user->id]
+                );
             } else {
                 // Create Stripe Checkout session for paid plans
                 // Pass company referral for discount application

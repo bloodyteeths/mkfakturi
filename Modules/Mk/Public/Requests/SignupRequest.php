@@ -2,12 +2,15 @@
 
 namespace Modules\Mk\Public\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 /**
  * SignupRequest
  *
- * Validation rules for public company registration
+ * Validation rules for public company registration.
+ * Handles cleanup of abandoned signups (never logged in, created >1h ago).
  */
 class SignupRequest extends FormRequest
 {
@@ -18,6 +21,61 @@ class SignupRequest extends FormRequest
     {
         // Public endpoint - no authorization required
         return true;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * Clean up abandoned signups: if email belongs to a user who
+     * never logged in and was created more than 1 hour ago, delete
+     * the orphaned user and their company so the email can be reused.
+     */
+    protected function prepareForValidation(): void
+    {
+        $email = $this->input('email');
+
+        if (! $email) {
+            return;
+        }
+
+        $existingUser = User::where('email', $email)->first();
+
+        if (! $existingUser) {
+            return;
+        }
+
+        // Only clean up if user never used the account and it's >1 hour old
+        $hasTokens = $existingUser->tokens()->exists();
+        if ($hasTokens) {
+            return;
+        }
+
+        if ($existingUser->created_at->gt(now()->subHour())) {
+            return;
+        }
+
+        Log::info('Cleaning up abandoned signup', [
+            'email' => $email,
+            'user_id' => $existingUser->id,
+            'created_at' => $existingUser->created_at,
+        ]);
+
+        // Delete orphaned company (if user owns one with no invoices)
+        $companies = $existingUser->companies;
+        foreach ($companies as $company) {
+            if ($company->owner_id === $existingUser->id) {
+                // Only delete if company has no real data (no invoices)
+                $hasInvoices = $company->invoices()->exists();
+                if (! $hasInvoices) {
+                    $company->delete();
+                }
+            }
+        }
+
+        // Detach from companies and delete user
+        $existingUser->companies()->detach();
+        $existingUser->tokens()->delete();
+        $existingUser->delete();
     }
 
     /**
@@ -142,29 +200,26 @@ class SignupRequest extends FormRequest
     }
 
     /**
-     * Get custom validation messages
+     * Get custom validation messages (Macedonian)
      *
      * @return array<string, string>
      */
     public function messages(): array
     {
         return [
-            'company_name.required' => 'Company name is required.',
-            'company_name.min' => 'Company name must be at least 2 characters.',
-            'vat_number.regex' => 'VAT number must be in EU format (e.g., MK12345678).',
-            'name.required' => 'Your name is required.',
-            'email.required' => 'Email address is required.',
-            'email.unique' => 'This email address is already registered.',
-            'password.required' => 'Password is required.',
-            'password.confirmed' => 'Password confirmation does not match.',
-            'plan.required' => 'Please select a subscription plan.',
-            'plan.in' => 'Invalid subscription plan selected.',
-            'billing_period.required' => 'Please select a billing period.',
-            'billing_period.in' => 'Invalid billing period selected.',
-            'accept_terms.required' => 'You must accept the terms of service.',
-            'accept_terms.accepted' => 'You must accept the terms of service.',
-            'accept_privacy.required' => 'You must accept the privacy policy.',
-            'accept_privacy.accepted' => 'You must accept the privacy policy.',
+            'company_name.required' => 'Внесете име на компанија.',
+            'company_name.min' => 'Името мора да содржи најмалку 2 знаци.',
+            'vat_number.regex' => 'ДДВ бројот мора да биде во EU формат (пр. MK12345678).',
+            'name.required' => 'Внесете го вашето име.',
+            'email.required' => 'Внесете email адреса.',
+            'email.unique' => 'Оваа email адреса е веќе регистрирана. Обидете се со најава.',
+            'password.required' => 'Внесете лозинка.',
+            'password.min' => 'Лозинката мора да содржи најмалку 8 знаци.',
+            'password.confirmed' => 'Лозинките не се совпаѓаат.',
+            'plan.required' => 'Изберете план за претплата.',
+            'plan.in' => 'Невалиден план за претплата.',
+            'billing_period.required' => 'Изберете период на наплата.',
+            'billing_period.in' => 'Невалиден период на наплата.',
         ];
     }
 
@@ -176,19 +231,17 @@ class SignupRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'company_name' => 'company name',
-            'vat_number' => 'VAT number',
-            'tax_id' => 'tax ID',
-            'name' => 'full name',
-            'email' => 'email address',
-            'password' => 'password',
-            'password_confirmation' => 'password confirmation',
-            'plan' => 'subscription plan',
-            'billing_period' => 'billing period',
-            'referral_code' => 'referral code',
-            'accept_terms' => 'terms of service',
-            'accept_privacy' => 'privacy policy',
+            'company_name' => 'име на компанија',
+            'vat_number' => 'ДДВ број',
+            'tax_id' => 'ЕДБ',
+            'name' => 'име и презиме',
+            'email' => 'email адреса',
+            'password' => 'лозинка',
+            'password_confirmation' => 'потврда на лозинка',
+            'plan' => 'план за претплата',
+            'billing_period' => 'период на наплата',
+            'referral_code' => 'код за препорака',
         ];
     }
 }
-
+// CLAUDE-CHECKPOINT

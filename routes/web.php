@@ -214,6 +214,14 @@ Route::get('/installation', function () {
     return view('app');
 })->name('install')->middleware('redirect-if-installed');
 
+// Auto-login after free signup (signed URL, expires in 5 minutes)
+Route::get('/signup/auto-login/{user}', function (\App\Models\User $user) {
+    \Illuminate\Support\Facades\Auth::login($user);
+    request()->session()->regenerate();
+
+    return redirect('/admin');
+})->name('signup.auto-login')->middleware('signed');
+
 // Public signup page (referral-based registration)
 // No redirect-if-installed middleware - this is a public registration page
 Route::get('/signup', function () {

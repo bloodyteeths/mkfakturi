@@ -53,9 +53,9 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
           <Link href={`${APP_URL}/admin`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
             {t.nav.login}
           </Link>
-          <Link href={`/${locale}/pricing`} className="btn-accent text-sm">
+          <a href={`${APP_URL}/signup`} className="btn-accent text-sm">
             {t.nav.start}
-          </Link>
+          </a>
         </div>
 
         {/* Mobile Actions */}

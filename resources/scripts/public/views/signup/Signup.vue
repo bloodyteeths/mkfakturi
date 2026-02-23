@@ -38,188 +38,58 @@
 
     <!-- Wizard Navigation -->
     <div class="px-6 py-6 border-b border-gray-200">
-      <BaseWizardNavigation :current-step="currentStep" :steps="4" />
+      <BaseWizardNavigation :current-step="currentStep" :steps="2" />
     </div>
 
     <!-- Wizard Content -->
     <div class="px-6 py-8">
-      <!-- Step 1: Company Info -->
+      <!-- Step 1: Account (Company Name + Email + Password) -->
       <BaseWizardStep
         v-show="currentStep === 0"
-        title="Информации за компанијата"
-        description="Внесете ги основните податоци за вашата компанија"
+        title="Креирајте сметка"
+        description="Потребни се само 3 полиња за да започнете"
       >
         <form @submit.prevent="nextStep">
           <div class="grid grid-cols-1 gap-6 mb-6">
             <BaseInputGroup
               :label="'Име на компанија'"
-              :error="companyV$.companyForm.name.$error && companyV$.companyForm.name.$errors[0]?.$message"
+              :error="v$.companyForm.name.$error && v$.companyForm.name.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="companyForm.name"
-                :invalid="companyV$.companyForm.name.$error"
+                :invalid="v$.companyForm.name.$error"
                 type="text"
                 placeholder="Компанија ДООЕЛ"
-                @input="companyV$.companyForm.name.$touch()"
-              />
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              :label="'ЕДБ (Единствен Даночен Број)'"
-              :error="companyV$.companyForm.tax_id.$error && companyV$.companyForm.tax_id.$errors[0]?.$message"
-              required
-            >
-              <BaseInput
-                v-model.trim="companyForm.tax_id"
-                :invalid="companyV$.companyForm.tax_id.$error"
-                type="text"
-                placeholder="1234567890123"
-                @input="companyV$.companyForm.tax_id.$touch()"
-              />
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              :label="'Адреса'"
-              :error="companyV$.companyForm.address.$error && companyV$.companyForm.address.$errors[0]?.$message"
-              required
-            >
-              <BaseInput
-                v-model.trim="companyForm.address"
-                :invalid="companyV$.companyForm.address.$error"
-                type="text"
-                placeholder="Улица бр. 123"
-                @input="companyV$.companyForm.address.$touch()"
-              />
-            </BaseInputGroup>
-
-            <div class="grid grid-cols-2 gap-4">
-              <BaseInputGroup
-                :label="'Град'"
-                :error="companyV$.companyForm.city.$error && companyV$.companyForm.city.$errors[0]?.$message"
-                required
-              >
-                <BaseInput
-                  v-model.trim="companyForm.city"
-                  :invalid="companyV$.companyForm.city.$error"
-                  type="text"
-                  placeholder="Скопје"
-                  @input="companyV$.companyForm.city.$touch()"
-                />
-              </BaseInputGroup>
-
-              <BaseInputGroup
-                :label="'Поштенски број'"
-                :error="companyV$.companyForm.zip.$error && companyV$.companyForm.zip.$errors[0]?.$message"
-              >
-                <BaseInput
-                  v-model.trim="companyForm.zip"
-                  :invalid="companyV$.companyForm.zip.$error"
-                  type="text"
-                  placeholder="1000"
-                  @input="companyV$.companyForm.zip.$touch()"
-                />
-              </BaseInputGroup>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <BaseInputGroup
-                :label="'Валута'"
-                :error="companyV$.companyForm.currency.$error && companyV$.companyForm.currency.$errors[0]?.$message"
-                required
-              >
-                <BaseMultiselect
-                  v-model="companyForm.currency"
-                  :options="currencies"
-                  label="name"
-                  value-prop="id"
-                  :searchable="true"
-                  track-by="name"
-                  placeholder="Изберете валута"
-                  :invalid="companyV$.companyForm.currency.$error"
-                  class="w-full"
-                  :content-loading="loadingCurrencies"
-                />
-              </BaseInputGroup>
-
-              <BaseInputGroup
-                :label="'Јазик'"
-                :error="companyV$.companyForm.language.$error && companyV$.companyForm.language.$errors[0]?.$message"
-                required
-              >
-                <BaseMultiselect
-                  v-model="companyForm.language"
-                  :options="languages"
-                  label="name"
-                  value-prop="code"
-                  :searchable="true"
-                  track-by="name"
-                  placeholder="Изберете јазик"
-                  :invalid="companyV$.companyForm.language.$error"
-                  class="w-full"
-                  :content-loading="loadingLanguages"
-                />
-              </BaseInputGroup>
-            </div>
-          </div>
-
-          <div class="flex justify-end">
-            <BaseButton type="submit">
-              Продолжи
-              <template #right="slotProps">
-                <BaseIcon name="ChevronRightIcon" :class="slotProps.class" />
-              </template>
-            </BaseButton>
-          </div>
-        </form>
-      </BaseWizardStep>
-
-      <!-- Step 2: Admin User -->
-      <BaseWizardStep
-        v-show="currentStep === 1"
-        title="Администраторски корисник"
-        description="Креирајте го вашиот администраторски профил"
-      >
-        <form @submit.prevent="nextStep">
-          <div class="grid grid-cols-1 gap-6 mb-6">
-            <BaseInputGroup
-              :label="'Име и презиме'"
-              :error="userV$.userForm.name.$error && userV$.userForm.name.$errors[0]?.$message"
-              required
-            >
-              <BaseInput
-                v-model.trim="userForm.name"
-                :invalid="userV$.userForm.name.$error"
-                type="text"
-                placeholder="Марко Петровски"
-                @input="userV$.userForm.name.$touch()"
+                @input="v$.companyForm.name.$touch()"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
               :label="'Email адреса'"
-              :error="userV$.userForm.email.$error && userV$.userForm.email.$errors[0]?.$message"
+              :error="v$.userForm.email.$error && v$.userForm.email.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="userForm.email"
-                :invalid="userV$.userForm.email.$error"
+                :invalid="v$.userForm.email.$error"
                 type="email"
                 placeholder="marko@kompanija.mk"
-                @input="userV$.userForm.email.$touch()"
+                @input="v$.userForm.email.$touch()"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
               :label="'Лозинка'"
-              :error="userV$.userForm.password.$error && userV$.userForm.password.$errors[0]?.$message"
+              :error="v$.userForm.password.$error && v$.userForm.password.$errors[0]?.$message"
               required
             >
               <BaseInput
                 v-model.trim="userForm.password"
-                :invalid="userV$.userForm.password.$error"
+                :invalid="v$.userForm.password.$error"
                 :type="showPassword ? 'text' : 'password'"
-                @input="userV$.userForm.password.$touch()"
+                placeholder="Најмалку 8 знаци"
+                @input="v$.userForm.password.$touch()"
               >
                 <template #right>
                   <BaseIcon
@@ -230,51 +100,36 @@
                 </template>
               </BaseInput>
             </BaseInputGroup>
-
-            <BaseInputGroup
-              :label="'Потврди лозинка'"
-              :error="userV$.userForm.password_confirmation.$error && userV$.userForm.password_confirmation.$errors[0]?.$message"
-              required
-            >
-              <BaseInput
-                v-model.trim="userForm.password_confirmation"
-                :invalid="userV$.userForm.password_confirmation.$error"
-                :type="showPasswordConfirm ? 'text' : 'password'"
-                @input="userV$.userForm.password_confirmation.$touch()"
-              >
-                <template #right>
-                  <BaseIcon
-                    :name="showPasswordConfirm ? 'EyeIcon' : 'EyeSlashIcon'"
-                    class="mr-1 text-gray-500 cursor-pointer"
-                    @click="showPasswordConfirm = !showPasswordConfirm"
-                  />
-                </template>
-              </BaseInput>
-            </BaseInputGroup>
           </div>
 
-          <div class="flex justify-between">
-            <BaseButton variant="outline" @click="prevStep">
-              <template #left="slotProps">
-                <BaseIcon name="ChevronLeftIcon" :class="slotProps.class" />
-              </template>
-              Назад
-            </BaseButton>
-            <BaseButton type="submit">
+          <p class="text-xs text-gray-500 mb-6">
+            Со регистрација се согласувате со
+            <a href="/terms" target="_blank" class="text-primary-600 hover:underline">условите за користење</a>
+            и
+            <a href="/privacy" target="_blank" class="text-primary-600 hover:underline">политиката за приватност</a>.
+          </p>
+
+          <div class="flex justify-end">
+            <BaseButton type="submit" class="w-full sm:w-auto">
               Продолжи
               <template #right="slotProps">
                 <BaseIcon name="ChevronRightIcon" :class="slotProps.class" />
               </template>
             </BaseButton>
           </div>
+
+          <p class="text-center text-sm text-gray-600 mt-6">
+            Веќе имате сметка?
+            <router-link to="/login" class="text-primary-600 font-medium hover:underline">Најавете се</router-link>
+          </p>
         </form>
       </BaseWizardStep>
 
-      <!-- Step 3: Plan Selection -->
+      <!-- Step 2: Plan Selection -->
       <BaseWizardStep
-        v-show="currentStep === 2"
+        v-show="currentStep === 1"
         title="Избери план"
-        description="Одберете го планот што најмногу ви одговара"
+        description="Сите платени планови имаат 14 дена бесплатен пробен период"
       >
         <div class="mb-8">
           <!-- Billing Period + Currency Toggle -->
@@ -316,7 +171,7 @@
                 ]"
                 @click="paymentCurrency = 'mkd'"
               >
-                🇲🇰 MKD (Картичка)
+                MKD (Картичка)
               </button>
               <button
                 :class="[
@@ -327,7 +182,7 @@
                 ]"
                 @click="paymentCurrency = 'eur'"
               >
-                🇪🇺 EUR (SEPA)
+                EUR (SEPA)
               </button>
             </div>
           </div>
@@ -371,6 +226,14 @@
                 Популарен
               </div>
 
+              <!-- Trial Badge for paid plans -->
+              <div
+                v-if="plan.price > 0"
+                class="absolute -top-3 right-8 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
+              >
+                14 дена бесплатно
+              </div>
+
               <div class="text-center">
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">
                   {{ plan.name }}
@@ -403,6 +266,10 @@
                       </div>
                     </div>
                   </template>
+                  <!-- Trial note for paid plans -->
+                  <p v-if="plan.price > 0" class="text-xs text-green-600 mt-1 font-medium">
+                    Првите 14 дена не се наплаќаат
+                  </p>
                 </div>
                 <ul class="text-sm text-left space-y-2 mb-6">
                   <li
@@ -445,100 +312,34 @@
             </template>
             Назад
           </BaseButton>
-          <BaseButton :disabled="!selectedPlan" @click="nextStep">
-            Продолжи кон плаќање
-            <template #right="slotProps">
-              <BaseIcon name="ChevronRightIcon" :class="slotProps.class" />
+          <BaseButton
+            :disabled="!selectedPlan || isProcessing"
+            :loading="isProcessing"
+            @click="completeRegistration"
+          >
+            <template #left="slotProps">
+              <BaseIcon
+                v-if="!isProcessing"
+                :name="selectedPlan?.price === 0 ? 'CheckCircleIcon' : 'CreditCardIcon'"
+                :class="slotProps.class"
+              />
             </template>
+            {{ selectedPlan?.price === 0 ? 'Започни бесплатно' : 'Започни 14-дневен пробен период' }}
           </BaseButton>
         </div>
-      </BaseWizardStep>
 
-      <!-- Step 4: Payment -->
-      <BaseWizardStep
-        v-show="currentStep === 3"
-        title="Плаќање"
-        description="Завршете ја вашата регистрација со плаќање"
-      >
-        <div class="text-center py-8">
-          <div v-if="isProcessing" class="space-y-4">
-            <BaseSpinner class="w-16 h-16 mx-auto text-primary-500" />
-            <p class="text-lg font-medium text-gray-900">
-              Ве пренасочуваме кон плаќање...
-            </p>
-            <p class="text-sm text-gray-600">
-              Ве молиме почекајте додека ја подготвуваме вашата сесија за плаќање.
-            </p>
-          </div>
-
-          <div v-else-if="registrationError" class="space-y-4">
-            <BaseIcon name="XCircleIcon" class="w-16 h-16 mx-auto text-red-500" />
-            <p class="text-lg font-medium text-red-900">
-              Грешка при регистрација
-            </p>
-            <p class="text-sm text-gray-600">
-              {{ registrationError }}
-            </p>
-            <div class="flex justify-center gap-4">
-              <BaseButton variant="outline" @click="prevStep">
-                Назад
-              </BaseButton>
-              <BaseButton @click="completeRegistration">
-                Обиди се повторно
-              </BaseButton>
-            </div>
-          </div>
-
-          <div v-else class="space-y-6">
-            <div class="bg-primary-50 rounded-lg p-6">
-              <h4 class="text-lg font-semibold text-gray-900 mb-4">
-                Резиме на нарачка
-              </h4>
-              <div class="space-y-3 text-left max-w-md mx-auto">
-                <div class="flex justify-between">
-                  <span class="text-gray-600">План:</span>
-                  <span class="font-medium text-gray-900">{{ selectedPlan?.name }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Цена:</span>
-                  <span v-if="paymentCurrency === 'eur'" class="font-medium text-gray-900">€{{ selectedPlan?.price_eur }}/{{ billingPeriod === 'monthly' ? 'месец' : 'год' }}</span>
-                  <span v-else class="font-medium text-gray-900">{{ billingPeriod === 'monthly' ? selectedPlan?.price : selectedPlan?.price_yearly }} ден/{{ billingPeriod === 'monthly' ? 'месец' : 'год' }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Компанија:</span>
-                  <span class="font-medium text-gray-900">{{ companyForm.name }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Email:</span>
-                  <span class="font-medium text-gray-900">{{ userForm.email }}</span>
-                </div>
-              </div>
-            </div>
-
-            <p class="text-sm text-gray-600">
-              Со кликање на "Заврши регистрација" ќе бидете пренасочени кон Stripe за безбедно плаќање.
-            </p>
-
-            <div class="flex justify-between">
-              <BaseButton variant="outline" @click="prevStep">
-                <template #left="slotProps">
-                  <BaseIcon name="ChevronLeftIcon" :class="slotProps.class" />
-                </template>
-                Назад
-              </BaseButton>
-              <BaseButton
-                :loading="isProcessing"
-                @click="completeRegistration"
+        <!-- Registration Error -->
+        <div v-if="registrationError" class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start">
+            <BaseIcon name="XCircleIcon" class="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" />
+            <div>
+              <p class="text-sm text-red-800">{{ registrationError }}</p>
+              <button
+                class="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                @click="registrationError = ''"
               >
-                <template #left="slotProps">
-                  <BaseIcon
-                    v-if="!isProcessing"
-                    name="CreditCardIcon"
-                    :class="slotProps.class"
-                  />
-                </template>
-                Заврши регистрација
-              </BaseButton>
+                Затвори
+              </button>
             </div>
           </div>
         </div>
@@ -551,7 +352,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
-import { required, email, minLength, sameAs, helpers } from '@vuelidate/validators'
+import { required, email, minLength, helpers } from '@vuelidate/validators'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
@@ -563,7 +364,6 @@ const currentStep = ref(0)
 const referralCode = ref('')
 const referralPartnerName = ref('')
 const showPassword = ref(false)
-const showPasswordConfirm = ref(false)
 const loadingPlans = ref(false)
 const plansError = ref('')
 const plans = ref([])
@@ -572,81 +372,38 @@ const billingPeriod = ref('monthly')
 const paymentCurrency = ref('mkd')
 const isProcessing = ref(false)
 const registrationError = ref('')
-const currencies = ref([])
-const languages = ref([])
-const loadingCurrencies = ref(false)
-const loadingLanguages = ref(false)
 
 // Forms
 const companyForm = reactive({
   name: '',
-  tax_id: '',
-  address: '',
-  city: '',
-  zip: '',
-  currency: null,
-  language: 'mk',
 })
 
 const userForm = reactive({
-  name: '',
   email: '',
   password: '',
-  password_confirmation: '',
 })
 
-// Validation Rules
-const companyRules = {
+// Validation Rules — only 3 fields required
+const rules = {
   companyForm: {
     name: {
-      required: helpers.withMessage('Полето за име на компанија е задолжително', required),
-    },
-    tax_id: {
-      required: helpers.withMessage('Полето за ЕДБ е задолжително', required),
-      minLength: helpers.withMessage('ЕДБ мора да содржи најмалку 13 знаци', minLength(13)),
-    },
-    address: {
-      required: helpers.withMessage('Полето за адреса е задолжително', required),
-    },
-    city: {
-      required: helpers.withMessage('Полето за град е задолжително', required),
-    },
-    zip: {},
-    currency: {
-      required: helpers.withMessage('Полето за валута е задолжително', required),
-    },
-    language: {
-      required: helpers.withMessage('Полето за јазик е задолжително', required),
+      required: helpers.withMessage('Внесете име на компанија', required),
+      minLength: helpers.withMessage('Името мора да содржи најмалку 2 знаци', minLength(2)),
     },
   },
-}
-
-const userRules = {
   userForm: {
-    name: {
-      required: helpers.withMessage('Полето за име е задолжително', required),
-    },
     email: {
-      required: helpers.withMessage('Полето за email е задолжително', required),
-      email: helpers.withMessage('Ве молиме внесете валидна email адреса', email),
+      required: helpers.withMessage('Внесете email адреса', required),
+      email: helpers.withMessage('Внесете валидна email адреса', email),
     },
     password: {
-      required: helpers.withMessage('Полето за лозинка е задолжително', required),
+      required: helpers.withMessage('Внесете лозинка', required),
       minLength: helpers.withMessage('Лозинката мора да содржи најмалку 8 знаци', minLength(8)),
-    },
-    password_confirmation: {
-      required: helpers.withMessage('Полето за потврда на лозинка е задолжително', required),
-      sameAs: helpers.withMessage('Лозинките не се совпаѓаат', sameAs(computed(() => userForm.password))),
     },
   },
 }
 
-// Separate vuelidate instances for each form
-const companyV$ = useVuelidate(companyRules, { companyForm })
-const userV$ = useVuelidate(userRules, { userForm })
-
-// Computed to get current validator
-const v$ = computed(() => currentStep.value === 0 ? companyV$ : userV$)
+const v$ = useVuelidate(rules, { companyForm, userForm })
 
 // Referral data for registration
 const referralData = ref(null)
@@ -670,7 +427,6 @@ async function validateReferralCode() {
     }
   } catch (error) {
     console.error('Failed to validate referral code:', error)
-    // Don't show error to user - just proceed without referral
   }
 }
 
@@ -687,7 +443,6 @@ async function validateCompanyReferral() {
     }
   } catch (error) {
     console.error('Failed to validate company referral:', error)
-    // Don't show error to user - just proceed without referral discount
   }
 }
 
@@ -707,7 +462,7 @@ async function loadPlans() {
       price_eur: plan.price_eur || 0,
       price_eur_yearly: plan.price_eur_yearly || 0,
       stripe_price_id: plan.stripe_price_id || null,
-      popular: plan.id === 'standard', // Mark standard as popular
+      popular: plan.id === 'standard',
       features: plan.features || [],
       description: plan.description || '',
       currency: plan.currency || 'MKD',
@@ -731,26 +486,15 @@ function selectPlan(plan) {
 }
 
 async function nextStep() {
-  // Validate current step
+  // Validate step 1 fields
   if (currentStep.value === 0) {
-    await companyV$.value.$validate()
-    if (companyV$.value.$error) return
-  } else if (currentStep.value === 1) {
-    await userV$.value.$validate()
-    if (userV$.value.$error) return
-  } else if (currentStep.value === 2) {
-    if (!selectedPlan.value) {
-      notificationStore.showNotification({
-        type: 'error',
-        message: 'Ве молиме изберете план',
-      })
-      return
-    }
-  }
+    await v$.value.$validate()
+    if (v$.value.$error) return
 
-  // Load plans when entering step 3
-  if (currentStep.value === 1 && plans.value.length === 0) {
-    await loadPlans()
+    // Load plans when entering step 2
+    if (plans.value.length === 0) {
+      await loadPlans()
+    }
   }
 
   currentStep.value++
@@ -763,19 +507,15 @@ function prevStep() {
 }
 
 async function completeRegistration() {
+  if (!selectedPlan.value) return
+
   isProcessing.value = true
   registrationError.value = ''
 
   try {
     const payload = {
       company_name: companyForm.name,
-      tax_id: companyForm.tax_id,
-      address: companyForm.address,
-      city: companyForm.city,
-      zip: companyForm.zip,
-      currency: companyForm.currency,
-      language: companyForm.language,
-      name: userForm.name,
+      name: userForm.email.split('@')[0], // Use email prefix as name
       email: userForm.email,
       password: userForm.password,
       plan: selectedPlan.value.id,
@@ -791,17 +531,17 @@ async function completeRegistration() {
       payload.referral_code = referralCode.value
     }
 
-    // Add company referral token if available (for 10% discount)
+    // Add company referral token if available
     if (companyReferralToken.value && companyReferralData.value) {
       payload.company_referral_token = companyReferralToken.value
     }
 
     const response = await axios.post('/public/signup/register', payload)
 
-    // Get checkout URL from response (can be in data.checkout_url or data.data.checkout_url)
+    // Get checkout URL from response
     const checkoutUrl = response.data.data?.checkout_url || response.data.checkout_url
 
-    // Redirect to Stripe Checkout or login page (for free plan)
+    // Redirect to Stripe Checkout or auto-login (for free plan)
     if (checkoutUrl) {
       window.location.href = checkoutUrl
     } else {
@@ -811,15 +551,12 @@ async function completeRegistration() {
     console.error('Registration failed:', error)
     isProcessing.value = false
 
-    // Extract error message
     let errorMsg = 'Настана грешка при регистрацијата. Ве молиме обидете се повторно.'
 
     if (error.response?.data) {
       const data = error.response.data
 
-      // Check for validation errors
       if (data.errors) {
-        // Get first validation error
         const firstError = Object.values(data.errors)[0]
         errorMsg = Array.isArray(firstError) ? firstError[0] : firstError
       } else if (data.message) {
@@ -838,52 +575,19 @@ async function completeRegistration() {
   }
 }
 
-async function loadCurrencies() {
-  loadingCurrencies.value = true
-  try {
-    const response = await axios.get('/public/signup/currencies')
-    currencies.value = response.data.data || []
-    // Pre-select MKD
-    const mkd = currencies.value.find((c) => c.code === 'MKD')
-    if (mkd && !companyForm.currency) {
-      companyForm.currency = mkd.id
-    }
-  } catch (error) {
-    console.error('Failed to load currencies:', error)
-  } finally {
-    loadingCurrencies.value = false
-  }
-}
-
-async function loadLanguages() {
-  loadingLanguages.value = true
-  try {
-    const response = await axios.get('/public/signup/languages')
-    languages.value = response.data.data || []
-  } catch (error) {
-    console.error('Failed to load languages:', error)
-  } finally {
-    loadingLanguages.value = false
-  }
-}
-
 // Lifecycle
 onMounted(() => {
-  // Load currencies and languages for Step 1 form
-  loadCurrencies()
-  loadLanguages()
-
   // Capture partner referral code from URL
   if (route.query.ref) {
     referralCode.value = route.query.ref
     validateReferralCode()
   }
 
-  // Capture company referral token from URL (for 10% discount)
+  // Capture company referral token from URL
   if (route.query.company_ref) {
     companyReferralToken.value = route.query.company_ref
     validateCompanyReferral()
   }
 })
 </script>
-
+// CLAUDE-CHECKPOINT

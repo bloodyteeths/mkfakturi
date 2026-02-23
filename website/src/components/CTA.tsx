@@ -22,12 +22,12 @@ export default function CTA({ t, locale }: { t: Dictionary; locale: Locale }) {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href={`/${locale}/pricing`}
+          <a
+            href="https://app.facturino.mk/signup"
             className="px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
           >
             {t.cta.button}
-          </Link>
+          </a>
           <Link
             href={`/${locale}/contact`}
             className="px-8 py-4 bg-indigo-700/50 text-white border border-white/20 rounded-xl font-bold text-lg hover:bg-indigo-700/70 transition-all duration-300 backdrop-blur-sm"

@@ -110,13 +110,13 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
                     >
                         {t.nav.login}
                     </Link>
-                    <Link
-                        href={`/${locale}/pricing`}
+                    <a
+                        href="https://app.facturino.mk/signup"
                         className="btn-accent text-center justify-center py-3 px-4"
                         onClick={() => setIsOpen(false)}
                     >
                         {t.nav.start}
-                    </Link>
+                    </a>
                 </div>
             )}
         </div>
