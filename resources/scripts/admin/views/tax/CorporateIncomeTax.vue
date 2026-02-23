@@ -299,7 +299,7 @@ function getRequestPayload() {
 async function previewCit() {
   isPreviewing.value = true
   try {
-    const response = await axios.post('/admin/tax/cit-return/preview', getRequestPayload())
+    const response = await axios.post('/tax/cit-return/preview', getRequestPayload())
     previewData.value = response.data.data
   } catch (error) {
     const msg = error.response?.data?.message || error.response?.data?.error || 'Failed to preview CIT'
@@ -313,7 +313,7 @@ async function generateXml() {
   isGenerating.value = true
   try {
     const response = await axios.post(
-      '/admin/tax/cit-return',
+      '/tax/cit-return',
       getRequestPayload(),
       { responseType: 'blob' }
     )
@@ -338,13 +338,13 @@ async function fileReturn() {
   try {
     // Generate XML first
     const xmlResponse = await axios.post(
-      '/admin/tax/cit-return',
+      '/tax/cit-return',
       getRequestPayload(),
       { responseType: 'text' }
     )
 
     const payload = getRequestPayload()
-    await axios.post('/admin/tax/cit-return/file', {
+    await axios.post('/tax/cit-return/file', {
       company_id: payload.company_id,
       year: payload.year,
       return_data: previewData.value,
@@ -369,7 +369,7 @@ async function loadPeriods() {
   isLoadingPeriods.value = true
   try {
     const payload = getRequestPayload()
-    const response = await axios.get('/admin/tax/cit-return/periods', {
+    const response = await axios.get('/tax/cit-return/periods', {
       params: { company_id: payload.company_id },
     })
     periods.value = response.data.data?.data || response.data.data || []
