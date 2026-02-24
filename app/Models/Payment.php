@@ -405,7 +405,23 @@ class Payment extends Model implements HasMedia
 
     public function scopeWhereOrder($query, $orderByField, $orderBy)
     {
-        $query->orderBy($orderByField, $orderBy);
+        switch ($orderByField) {
+            case 'name':
+                $query->leftJoin('customers', 'customers.id', '=', 'payments.customer_id')
+                    ->orderBy('customers.name', $orderBy)
+                    ->select('payments.*');
+                break;
+
+            case 'invoice_number':
+                $query->leftJoin('invoices', 'invoices.id', '=', 'payments.invoice_id')
+                    ->orderBy('invoices.invoice_number', $orderBy)
+                    ->select('payments.*');
+                break;
+
+            default:
+                $query->orderBy($orderByField, $orderBy);
+                break;
+        }
     }
 
     public function scopeWherePayment($query, $payment_id)
