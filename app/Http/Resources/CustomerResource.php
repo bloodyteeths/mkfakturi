@@ -31,7 +31,7 @@ class CustomerResource extends JsonResource
             'created_at' => $this->created_at,
             'formatted_created_at' => $this->formattedCreatedAt,
             'updated_at' => $this->updated_at,
-            'avatar' => $this->avatar,
+            'avatar' => $this->relationLoaded('media') ? $this->avatar : 0,
             'due_amount' => $this->due_amount,
             'base_due_amount' => $this->base_due_amount,
             'prefix' => $this->prefix,

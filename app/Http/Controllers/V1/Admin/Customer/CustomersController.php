@@ -22,14 +22,7 @@ class CustomersController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $customers = Customer::with([
-            'creator',
-            'billingAddress',
-            'shippingAddress',
-            'fields.customField',
-            'fields.company',
-            'company',
-        ])
+        $customers = Customer::with(['currency'])
             ->whereCompany()
             ->applyFilters($request->all())
             ->withSum([
@@ -47,7 +40,9 @@ class CustomersController extends Controller
         return CustomerResource::collection($customers)
             ->additional([
                 'meta' => [
-                    'customer_total_count' => Customer::whereCompany()->count(),
+                    'customer_total_count' => $customers instanceof \Illuminate\Pagination\LengthAwarePaginator
+                        ? $customers->total()
+                        : $customers->count(),
                 ],
             ]);
     }
@@ -75,6 +70,14 @@ class CustomersController extends Controller
     public function show(Customer $customer)
     {
         $this->authorize('view', $customer);
+
+        $customer->load([
+            'billingAddress',
+            'shippingAddress',
+            'fields.customField',
+            'company',
+            'media',
+        ]);
 
         return new CustomerResource($customer);
     }

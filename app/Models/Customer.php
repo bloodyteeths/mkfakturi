@@ -42,7 +42,6 @@ class Customer extends Authenticatable implements HasMedia
 
     protected $appends = [
         'formattedCreatedAt',
-        'avatar',
     ];
 
     protected function casts(): array
