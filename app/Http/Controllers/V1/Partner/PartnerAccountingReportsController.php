@@ -9,6 +9,8 @@ use App\Models\CompanySetting;
 use App\Models\Partner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use PDF;
 
 /**
  * Partner Accounting Reports Controller
@@ -240,6 +242,80 @@ class PartnerAccountingReportsController extends Controller
 
         return response()->json(['success' => true, 'data' => $result]);
     }
+
+    /**
+     * Export Cash Flow Statement as PDF (UJP Образец 38)
+     */
+    public function cashFlowExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+
+        $startDate = $request->query('start_date', now()->startOfYear()->toDateString());
+        $endDate = $request->query('end_date', now()->toDateString());
+
+        // Current period
+        $current = $this->ifrsAdapter->getCashFlowStatement($companyModel, $startDate, $endDate);
+
+        // Previous period (same length, one year back)
+        $prevStart = date('Y-m-d', strtotime($startDate . ' -1 year'));
+        $prevEnd = date('Y-m-d', strtotime($endDate . ' -1 year'));
+        $previous = $this->ifrsAdapter->getCashFlowStatement($companyModel, $prevStart, $prevEnd);
+
+        // Build AOP rows from config
+        $aopConfig = config('ujp_aop.obrazec_38');
+        $aopRows = [];
+
+        foreach (['operating', 'investing', 'financing', 'summary'] as $section) {
+            foreach ($aopConfig[$section] as $row) {
+                $currentVal = 0;
+                $previousVal = 0;
+
+                if (!empty($row['data_key'])) {
+                    $keys = explode('.', $row['data_key']);
+                    $currentVal = $current[$keys[0]][$keys[1]] ?? 0;
+                    $previousVal = $previous[$keys[0]][$keys[1]] ?? 0;
+                }
+
+                $aopRows[] = [
+                    'aop' => $row['aop'],
+                    'label' => $row['label'],
+                    'indent' => $row['indent'],
+                    'is_total' => $row['is_total'] ?? false,
+                    'is_summary' => $section === 'summary',
+                    'data_key' => $row['data_key'] ?? null,
+                    'current' => round($currentVal, 2),
+                    'previous' => round($previousVal, 2),
+                ];
+            }
+        }
+
+        $currency = CompanySetting::getSetting('currency', $company);
+
+        view()->share([
+            'company' => $companyModel,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'aopRows' => $aopRows,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.cash-flow');
+
+        return $pdf->download("cash_flow_{$startDate}_{$endDate}.pdf");
+    }
+
+    // CLAUDE-CHECKPOINT
 
     public function equityChanges(Request $request, int $company): JsonResponse
     {

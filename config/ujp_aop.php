@@ -4,7 +4,8 @@
  * UJP AOP Code Mapping for Macedonian Financial Reports
  *
  * Maps IFRS account types to official AOP (Аналитичка Ознака на Позиција) codes
- * used in Образец 36 (Balance Sheet) and Образец 37 (Income Statement).
+ * used in Образец 36 (Balance Sheet), Образец 37 (Income Statement),
+ * and Образец 38 (Cash Flow Statement).
  *
  * Each row: aop code, Macedonian label, IFRS types that contribute, hierarchy.
  * Subtotal rows have 'sum_of' pointing to child AOP codes.
@@ -76,6 +77,44 @@ return [
             ['aop' => '250', 'label' => 'Данок на добивка (10%)', 'formula' => 'tax', 'indent' => 0],
             ['aop' => '255', 'label' => 'Нето добивка', 'formula' => 'net_profit', 'condition' => 'positive', 'indent' => 0],
             ['aop' => '256', 'label' => 'Нето загуба', 'formula' => 'net_loss', 'condition' => 'negative', 'indent' => 0],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Образец 38 — Извештај за парични текови (Cash Flow Statement)
+    |--------------------------------------------------------------------------
+    */
+    'obrazec_38' => [
+        'operating' => [
+            ['aop' => '301', 'label' => 'I. ПАРИЧНИ ТЕКОВИ ОД ОПЕРАТИВНИ АКТИВНОСТИ', 'is_total' => false, 'indent' => 0],
+            ['aop' => '302', 'label' => 'Нето добивка / загуба', 'data_key' => 'operating.net_income', 'indent' => 1],
+            ['aop' => '303', 'label' => 'Амортизација', 'data_key' => 'operating.depreciation', 'indent' => 1],
+            ['aop' => '304', 'label' => 'Промени во побарувања', 'data_key' => 'operating.receivables_change', 'indent' => 1],
+            ['aop' => '305', 'label' => 'Промени во залихи', 'data_key' => 'operating.inventory_change', 'indent' => 1],
+            ['aop' => '306', 'label' => 'Промени во обврски кон добавувачи', 'data_key' => 'operating.payables_change', 'indent' => 1],
+            ['aop' => '307', 'label' => 'Промени во даночни обврски', 'data_key' => 'operating.tax_payable_change', 'indent' => 1],
+            ['aop' => '308', 'label' => 'Останати оперативни промени', 'data_key' => 'operating.other_current_liabilities_change', 'indent' => 1],
+            ['aop' => '310', 'label' => 'Нето парични средства од оперативни активности', 'data_key' => 'operating.total', 'is_total' => true, 'indent' => 0],
+        ],
+        'investing' => [
+            ['aop' => '320', 'label' => 'II. ПАРИЧНИ ТЕКОВИ ОД ИНВЕСТИЦИСКИ АКТИВНОСТИ', 'is_total' => false, 'indent' => 0],
+            ['aop' => '321', 'label' => 'Набавка/продажба на основни средства', 'data_key' => 'investing.fixed_assets', 'indent' => 1],
+            ['aop' => '322', 'label' => 'Набавка/продажба на нематеријални средства', 'data_key' => 'investing.intangible_assets', 'indent' => 1],
+            ['aop' => '323', 'label' => 'Долгорочни финансиски вложувања', 'data_key' => 'investing.investments', 'indent' => 1],
+            ['aop' => '330', 'label' => 'Нето парични средства од инвестициски активности', 'data_key' => 'investing.total', 'is_total' => true, 'indent' => 0],
+        ],
+        'financing' => [
+            ['aop' => '340', 'label' => 'III. ПАРИЧНИ ТЕКОВИ ОД ФИНАНСИСКИ АКТИВНОСТИ', 'is_total' => false, 'indent' => 0],
+            ['aop' => '341', 'label' => 'Промени во долгорочни обврски', 'data_key' => 'financing.long_term_debt', 'indent' => 1],
+            ['aop' => '342', 'label' => 'Промени во краткорочни обврски', 'data_key' => 'financing.short_term_debt', 'indent' => 1],
+            ['aop' => '343', 'label' => 'Промени во капитал', 'data_key' => 'financing.equity_changes', 'indent' => 1],
+            ['aop' => '350', 'label' => 'Нето парични средства од финансиски активности', 'data_key' => 'financing.total', 'is_total' => true, 'indent' => 0],
+        ],
+        'summary' => [
+            ['aop' => '360', 'label' => 'Парични средства на почеток на периодот', 'data_key' => 'summary.cash_start', 'indent' => 0],
+            ['aop' => '370', 'label' => 'Нето промена на парични средства', 'data_key' => 'summary.net_change', 'indent' => 0],
+            ['aop' => '380', 'label' => 'Парични средства на крај на периодот', 'data_key' => 'summary.cash_end', 'is_total' => true, 'indent' => 0],
         ],
     ],
 
