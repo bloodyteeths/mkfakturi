@@ -22,15 +22,21 @@ class PaymentsController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $payments = Payment::whereCompany()
+        // Build base query with filters first
+        $query = Payment::whereCompany()
+            ->applyFilters($request->all());
+
+        // Get total count from filtered query (not a separate unfiltered scan)
+        $totalCount = (clone $query)->count();
+
+        $payments = $query
             ->with(['customer:id,name,currency_id', 'customer.currency', 'invoice:id,invoice_number', 'paymentMethod:id,name'])
-            ->applyFilters($request->all())
             ->latest()
             ->paginateData($limit);
 
         return PaymentResource::collection($payments)
             ->additional(['meta' => [
-                'payment_total_count' => Payment::whereCompany()->count(),
+                'payment_total_count' => $totalCount,
             ]]);
     }
 

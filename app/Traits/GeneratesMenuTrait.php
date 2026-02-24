@@ -20,6 +20,22 @@ trait GeneratesMenuTrait
             $isPartner = $user->role === 'partner';
             $isSuperAdmin = $user->role === 'super admin';
 
+            // Pre-fetch once: feature flags (cached) and company for tier checks
+            $featureFlags = \App\Models\Setting::getFeatureFlags();
+            $company = null;
+            $currentTier = null;
+            if (!$isSuperAdmin) {
+                $companyId = request()->header('company');
+                if ($companyId) {
+                    $company = \App\Models\Company::find($companyId);
+                    if ($company) {
+                        $usageLimitService = app(\App\Services\UsageLimitService::class);
+                        $currentTier = $usageLimitService->getCompanyTier($company);
+                    }
+                }
+            }
+            $hierarchy = config('subscriptions.plan_hierarchy', []);
+
             foreach ($items as $data) {
                 // Super admin only menu items (infrastructure settings)
                 $superAdminOnly = $data->data['super_admin_only'] ?? false;
@@ -30,7 +46,6 @@ trait GeneratesMenuTrait
                 // Feature flag check - skip menu items if feature is disabled
                 $featureFlag = $data->data['feature_flag'] ?? null;
                 if ($featureFlag) {
-                    $featureFlags = \App\Models\Setting::getFeatureFlags();
                     if (!($featureFlags[$featureFlag] ?? false)) {
                         continue;
                     }
@@ -41,22 +56,13 @@ trait GeneratesMenuTrait
                         $featureConfig = config("features.{$featureFlag}");
                         $minimumTier = $featureConfig['minimum_tier'] ?? null;
 
-                        if ($minimumTier) {
-                            $companyId = request()->header('company');
-                            $company = \App\Models\Company::find($companyId);
+                        if ($minimumTier && $company) {
+                            $currentLevel = $hierarchy[$currentTier] ?? 0;
+                            $requiredLevel = $hierarchy[$minimumTier] ?? 0;
 
-                            if ($company) {
-                                $usageLimitService = app(\App\Services\UsageLimitService::class);
-                                $currentTier = $usageLimitService->getCompanyTier($company);
-                                $hierarchy = config('subscriptions.plan_hierarchy', []);
-
-                                $currentLevel = $hierarchy[$currentTier] ?? 0;
-                                $requiredLevel = $hierarchy[$minimumTier] ?? 0;
-
-                                // Skip menu if current tier is below minimum required tier
-                                if ($currentLevel < $requiredLevel) {
-                                    continue;
-                                }
+                            // Skip menu if current tier is below minimum required tier
+                            if ($currentLevel < $requiredLevel) {
+                                continue;
                             }
                         }
                     }

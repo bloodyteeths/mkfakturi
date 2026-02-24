@@ -282,25 +282,8 @@ class BootstrapController extends Controller
      */
     private function getFeatureFlags(): array
     {
-        $feature_flags = [];
-        $features_config = config('features', []);
-
-        foreach ($features_config as $key => $feature) {
-            // Check database value first
-            $dbKey = 'feature_flag.'.$key;
-            $dbValue = Setting::getSetting($dbKey);
-
-            if ($dbValue !== null) {
-                $feature_flags[$key] = filter_var($dbValue, FILTER_VALIDATE_BOOLEAN);
-            } else {
-                $feature_flags[$key] = $feature['enabled'] ?? false;
-            }
-        }
-
-        // Stock module is always enabled - no feature flag needed
-        $feature_flags['stock'] = true;
-
-        return $feature_flags;
+        // Use the batched, cached method on Setting instead of N individual queries
+        return Setting::getFeatureFlags();
     }
 }
 
