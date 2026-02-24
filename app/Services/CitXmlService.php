@@ -83,20 +83,20 @@ class CitXmlService
         $taxPayer->appendChild($address);
 
         $companyAddress = $company->address;
-        $address->appendChild($dom->createElement('Street', htmlspecialchars($companyAddress->address_street_1 ?? '')));
-        $address->appendChild($dom->createElement('City', htmlspecialchars($companyAddress->city ?? '')));
-        $address->appendChild($dom->createElement('PostalCode', htmlspecialchars($companyAddress->zip ?? '')));
+        $address->appendChild($dom->createElement('Street', htmlspecialchars($this->formatAddress($companyAddress->address_street_1 ?? ''))));
+        $address->appendChild($dom->createElement('City', htmlspecialchars($this->formatAddress($companyAddress->city ?? ''))));
+        $address->appendChild($dom->createElement('PostalCode', htmlspecialchars(trim($companyAddress->zip ?? ''))));
         $address->appendChild($dom->createElement('Country', 'MK'));
 
         if ($companyAddress->state ?? null) {
-            $address->appendChild($dom->createElement('Municipality', htmlspecialchars($companyAddress->state)));
+            $address->appendChild($dom->createElement('Municipality', htmlspecialchars($this->formatAddress($companyAddress->state))));
         }
 
         $contactInfo = $dom->createElement('ContactInfo');
         $taxPayer->appendChild($contactInfo);
 
         if ($companyAddress->phone ?? null) {
-            $contactInfo->appendChild($dom->createElement('Phone', htmlspecialchars($companyAddress->phone)));
+            $contactInfo->appendChild($dom->createElement('Phone', htmlspecialchars($this->formatPhone($companyAddress->phone))));
         }
         if ($company->owner && $company->owner->email) {
             $contactInfo->appendChild($dom->createElement('Email', htmlspecialchars($company->owner->email)));
@@ -259,6 +259,30 @@ class CitXmlService
     protected function formatAmount(float $amount): string
     {
         return number_format($amount, 2, '.', '');
+    }
+
+    /**
+     * Format address field (city, street) — proper title case, trim whitespace.
+     */
+    protected function formatAddress(?string $value): string
+    {
+        if (!$value) {
+            return '';
+        }
+
+        return mb_convert_case(trim($value), MB_CASE_TITLE, 'UTF-8');
+    }
+
+    /**
+     * Format phone number — strip everything except digits, +, spaces, dashes, parens.
+     */
+    protected function formatPhone(?string $phone): string
+    {
+        if (!$phone) {
+            return '';
+        }
+
+        return preg_replace('/[^\d+\-\s()]/', '', trim($phone));
     }
 
     /**

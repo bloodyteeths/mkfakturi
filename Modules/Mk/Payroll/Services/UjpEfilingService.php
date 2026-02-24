@@ -232,18 +232,18 @@ class UjpEfilingService
         $this->appendElement($dom, $employer, 'EDB', $edb);
         $this->appendElement($dom, $employer, 'CompanyName', $company->name);
 
-        // Address
+        // Address (normalized to title case)
         $address = $dom->createElement('Address');
-        $this->appendElement($dom, $address, 'Street', $company->address->address_street_1 ?? '');
-        $this->appendElement($dom, $address, 'City', $company->address->city ?? '');
-        $this->appendElement($dom, $address, 'PostalCode', $company->address->zip ?? '');
+        $this->appendElement($dom, $address, 'Street', $this->formatAddress($company->address->address_street_1 ?? ''));
+        $this->appendElement($dom, $address, 'City', $this->formatAddress($company->address->city ?? ''));
+        $this->appendElement($dom, $address, 'PostalCode', trim($company->address->zip ?? ''));
         $this->appendElement($dom, $address, 'Country', $company->address->country->code ?? 'MK');
         $employer->appendChild($address);
 
         // Contact info
         $contact = $dom->createElement('ContactInfo');
-        $this->appendElement($dom, $contact, 'Phone', $company->address->phone ?? '');
-        $this->appendElement($dom, $contact, 'Email', $company->owner->email ?? '');
+        $this->appendElement($dom, $contact, 'Phone', $this->formatPhone($company->address->phone ?? ''));
+        $this->appendElement($dom, $contact, 'Email', trim($company->owner->email ?? ''));
         $employer->appendChild($contact);
 
         return $employer;
@@ -303,9 +303,9 @@ class UjpEfilingService
     {
         $employee = $dom->createElement('Employee');
 
-        $this->appendElement($dom, $employee, 'EMBG', $line->employee->embg);
-        $this->appendElement($dom, $employee, 'FirstName', $line->employee->first_name);
-        $this->appendElement($dom, $employee, 'LastName', $line->employee->last_name);
+        $this->appendElement($dom, $employee, 'EMBG', $this->formatEmbg($line->employee->embg));
+        $this->appendElement($dom, $employee, 'FirstName', $this->formatPersonName($line->employee->first_name));
+        $this->appendElement($dom, $employee, 'LastName', $this->formatPersonName($line->employee->last_name));
         $this->appendElement($dom, $employee, 'EmployeeNumber', $line->employee->employee_number);
 
         // Income details
@@ -426,9 +426,9 @@ class UjpEfilingService
     {
         $employee = $dom->createElement('Employee');
 
-        $this->appendElement($dom, $employee, 'EMBG', $data['employee']->embg);
-        $this->appendElement($dom, $employee, 'FirstName', $data['employee']->first_name);
-        $this->appendElement($dom, $employee, 'LastName', $data['employee']->last_name);
+        $this->appendElement($dom, $employee, 'EMBG', $this->formatEmbg($data['employee']->embg));
+        $this->appendElement($dom, $employee, 'FirstName', $this->formatPersonName($data['employee']->first_name));
+        $this->appendElement($dom, $employee, 'LastName', $this->formatPersonName($data['employee']->last_name));
         $this->appendElement($dom, $employee, 'EmployeeNumber', $data['employee']->employee_number);
 
         // Annual totals
@@ -533,6 +533,58 @@ class UjpEfilingService
         $clean = str_pad(substr($clean, 0, 13), 13, '0', STR_PAD_LEFT);
 
         return $clean;
+    }
+
+    /**
+     * Format ЕМБГ (personal ID) — strip non-digits, pad/truncate to 13 digits.
+     */
+    private function formatEmbg(?string $embg): string
+    {
+        if (!$embg) {
+            return '0000000000000';
+        }
+
+        $clean = preg_replace('/[^0-9]/', '', $embg);
+        $clean = str_pad(substr($clean, 0, 13), 13, '0', STR_PAD_LEFT);
+
+        return $clean;
+    }
+
+    /**
+     * Format person name — proper title case, trim whitespace.
+     * Handles Cyrillic (mb_convert_case) and Latin names.
+     */
+    private function formatPersonName(?string $name): string
+    {
+        if (!$name) {
+            return '';
+        }
+
+        return mb_convert_case(trim($name), MB_CASE_TITLE, 'UTF-8');
+    }
+
+    /**
+     * Format address field (city, street) — proper title case, trim whitespace.
+     */
+    private function formatAddress(?string $value): string
+    {
+        if (!$value) {
+            return '';
+        }
+
+        return mb_convert_case(trim($value), MB_CASE_TITLE, 'UTF-8');
+    }
+
+    /**
+     * Format phone number — strip everything except digits, +, spaces, dashes.
+     */
+    private function formatPhone(?string $phone): string
+    {
+        if (!$phone) {
+            return '';
+        }
+
+        return preg_replace('/[^\d+\-\s()]/', '', trim($phone));
     }
 
     /**
