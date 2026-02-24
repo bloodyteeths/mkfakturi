@@ -1855,9 +1855,9 @@ class IfrsAdapter
                         }
 
                         $accounts = $categoryData['accounts'] ?? [];
-                        // IFRS returns accounts as Eloquent Collection, not plain array
+                        // IFRS returns accounts as Eloquent Collection of Model/stdClass objects
                         if ($accounts instanceof \Illuminate\Support\Collection) {
-                            $accounts = $accounts->toArray();
+                            $accounts = $accounts->map(fn ($a) => $a instanceof \Illuminate\Database\Eloquent\Model ? $a->toArray() : (array) $a)->toArray();
                         }
                         if (! is_array($accounts) || empty($accounts)) {
                             // No individual accounts, use category total
@@ -1868,6 +1868,7 @@ class IfrsAdapter
                         }
 
                         foreach ($accounts as $account) {
+                            $account = (array) $account;
                             $code = (string) ($account['code'] ?? '');
                             // closingBalance is negative for credit accounts (equity), take absolute value
                             $balance = abs($account['closingBalance'] ?? 0);
