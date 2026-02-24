@@ -110,10 +110,11 @@ class PayrollGLService
             ]);
 
             // DEBIT: Salary Expense (total gross)
+            // PayrollRun stores amounts in cents (integer), IFRS expects base currency units
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $salaryExpenseAccount->id,
-                'amount' => $run->total_gross, // Convert cents to dollars
+                'amount' => $run->total_gross / 100, // Convert cents to MKD
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
@@ -121,7 +122,7 @@ class PayrollGLService
 
             // DEBIT: Employer Contributions (pension + health)
             // Use total_employer_tax which is set by the controller
-            $employerContributions = $run->total_employer_tax ?? 0;
+            $employerContributions = ($run->total_employer_tax ?? 0) / 100;
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $employerContributionAccount->id,
@@ -135,14 +136,14 @@ class PayrollGLService
             LineItem::create([
                 'transaction_id' => $transaction->id,
                 'account_id' => $netSalaryPayableAccount->id,
-                'amount' => $run->total_net,
+                'amount' => $run->total_net / 100, // Convert cents to MKD
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
             ]);
 
             // CREDIT: Tax & Contribution Liabilities (employee deductions + employer contributions)
-            $employeeDeductions = $run->total_employee_tax ?? 0;
+            $employeeDeductions = ($run->total_employee_tax ?? 0) / 100;
             $totalLiabilities = $employeeDeductions + $employerContributions;
             LineItem::create([
                 'transaction_id' => $transaction->id,
@@ -167,8 +168,9 @@ class PayrollGLService
             Log::info('Payroll run posted to GL', [
                 'payroll_run_id' => $run->id,
                 'ifrs_transaction_id' => $transaction->id,
-                'total_gross' => $run->total_gross,
-                'total_net' => $run->total_net,
+                'total_gross_cents' => $run->total_gross,
+                'total_gross_mkd' => $run->total_gross / 100,
+                'total_net_mkd' => $run->total_net / 100,
             ]);
 
             return $transaction->id;
@@ -263,8 +265,11 @@ class PayrollGLService
      */
     public function getJournalPreview($run): array
     {
-        $employerContributions = $run->total_employer_tax ?? 0;
-        $employeeDeductions = $run->total_employee_tax ?? 0;
+        // Convert cents to MKD for display
+        $totalGross = ($run->total_gross ?? 0) / 100;
+        $totalNet = ($run->total_net ?? 0) / 100;
+        $employerContributions = ($run->total_employer_tax ?? 0) / 100;
+        $employeeDeductions = ($run->total_employee_tax ?? 0) / 100;
         $totalLiabilities = $employeeDeductions + $employerContributions;
 
         return [
@@ -274,7 +279,7 @@ class PayrollGLService
                 [
                     'account_code' => '420',
                     'account_name' => 'Плати на вработени (Salary Expense)',
-                    'debit' => $run->total_gross,
+                    'debit' => $totalGross,
                     'credit' => 0,
                 ],
                 [
@@ -287,7 +292,7 @@ class PayrollGLService
                     'account_code' => '240',
                     'account_name' => 'Обврски за нето плати (Net Salary Payable)',
                     'debit' => 0,
-                    'credit' => $run->total_net,
+                    'credit' => $totalNet,
                 ],
                 [
                     'account_code' => '241',
@@ -297,8 +302,8 @@ class PayrollGLService
                 ],
             ],
             'totals' => [
-                'debit' => ($run->total_gross + $employerContributions),
-                'credit' => ($run->total_net + $totalLiabilities),
+                'debit' => ($totalGross + $employerContributions),
+                'credit' => ($totalNet + $totalLiabilities),
             ],
         ];
     }
