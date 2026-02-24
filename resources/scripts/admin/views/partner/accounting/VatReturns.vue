@@ -461,10 +461,10 @@ const tabs = computed(() => [
   { key: 'cit', label: t('tax.cit.tab', 'CIT Annual Return (DB)') },
 ])
 
-const periodTypes = [
-  { label: 'Monthly', value: 'MONTHLY' },
-  { label: 'Quarterly', value: 'QUARTERLY' },
-]
+const periodTypes = computed(() => [
+  { label: t('vat.monthly', 'Monthly'), value: 'MONTHLY' },
+  { label: t('vat.quarterly', 'Quarterly'), value: 'QUARTERLY' },
+])
 
 const yearOptions = computed(() => {
   const currentYear = new Date().getFullYear()
