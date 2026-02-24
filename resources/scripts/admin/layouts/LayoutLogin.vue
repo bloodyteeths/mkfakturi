@@ -5,7 +5,6 @@
     <div
       class="
         flex
-        items-center
         justify-center
         w-full
         max-w-sm
@@ -16,14 +15,15 @@
         md:p-8 md:col-span-6
         lg:col-span-4
         overflow-y-auto
+        min-h-0
         py-8
         md:py-16
       "
     >
-      <div class="w-full">
+      <div class="w-full my-auto">
         <MainLogo
           v-if="!loginPageLogo"
-          class="block h-32 w-auto mb-32"
+          class="block h-32 w-auto mb-8 md:mb-16"
           variant="clear"
         />
         <!-- CLAUDE-CHECKPOINT -->
@@ -31,21 +31,21 @@
         <img
           v-else
           :src="loginPageLogo"
-          class="block w-48 h-auto max-w-full mb-32 text-primary-500"
+          class="block w-48 h-auto max-w-full mb-8 md:mb-16 text-primary-500"
         />
 
         <router-view />
 
         <div
           class="
-            pt-24
+            pt-12
             mt-0
             text-sm
             not-italic
             font-medium
             leading-relaxed
             text-left text-gray-400
-            md:pt-40
+            md:pt-24
           "
         >
           <p class="mb-3">
@@ -81,7 +81,7 @@
 
       <LoginBackgroundOverlay class="absolute h-full w-full right-[7.5%]" />
 
-      <div class="md:pl-10 xl:pl-0 relative z-50 w-7/12 xl:w-5/12 xl:w-5/12">
+      <div class="md:pl-10 xl:pl-0 relative z-50 w-7/12 xl:w-5/12 select-none">
         <h1
           class="
             hidden
