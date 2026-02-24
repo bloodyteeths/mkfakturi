@@ -3925,7 +3925,9 @@
     "something_went_wrong": "Diçka тргnë nëопаку",
     "try_again": "Обdheдете се повторно",
     "contact_support": "Контактdheрајте me пngaдршка",
-    "back_to_dashboard": "Kthehu кон paneli"
+    "back_to_dashboard": "Kthehu кон paneli",
+    "failed_to_load_companies": "Dështoi ngarkimi i kompanive",
+    "failed_to_load_data": "Dështoi ngarkimi i të dhënave"
   },
   "pdf_estimate_label": "Проценка",
   "pdf_estimate_number": "Numri në проценка",

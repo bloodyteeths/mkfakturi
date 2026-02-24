@@ -3497,7 +3497,9 @@
     "something_went_wrong": "Bir şeyler ters gitti",
     "try_again": "Tekrar deneyin",
     "contact_support": "İletişimveрајте ile destek",
-    "back_to_dashboard": "Geri кон kontrol paneli"
+    "back_to_dashboard": "Geri кон kontrol paneli",
+    "failed_to_load_companies": "Şirketler yüklenemedi",
+    "failed_to_load_data": "Veriler yüklenemedi"
   },
   "pdf_estimate_label": "Teklif",
   "pdf_estimate_number": "Teklif Numarası",

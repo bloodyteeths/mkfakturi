@@ -1080,7 +1080,9 @@
     "validation_error": "Validation Error",
     "validation_error_message": "Validation Error Message",
     "validation_errors": "Validation Errors",
-    "validation_failed": "Validation Failed"
+    "validation_failed": "Validation Failed",
+    "failed_to_load_companies": "Failed to load companies",
+    "failed_to_load_data": "Failed to load data"
   },
   "estimates": {
     "Estimate": "Estimate | Estimates",

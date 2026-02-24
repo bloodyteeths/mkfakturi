@@ -3989,7 +3989,9 @@
     "something_went_wrong": "Нешто тргна наопаку",
     "try_again": "Обидете се повторно",
     "contact_support": "Контактирајте со поддршка",
-    "back_to_dashboard": "Назад кон контролна табла"
+    "back_to_dashboard": "Назад кон контролна табла",
+    "failed_to_load_companies": "Неуспешно вчитување на компании",
+    "failed_to_load_data": "Неуспешно вчитување на податоци"
   },
   "pdf_estimate_label": "Проценка",
   "pdf_estimate_number": "Број на проценка",
