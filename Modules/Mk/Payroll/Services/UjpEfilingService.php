@@ -225,9 +225,11 @@ class UjpEfilingService
      */
     private function createEmployerSection(DOMDocument $dom, Company $company): \DOMElement
     {
+        $company->loadMissing('owner');
         $employer = $dom->createElement('Employer');
 
-        $this->appendElement($dom, $employer, 'TaxID', $company->vat_number ?: ($company->tax_id ?? ''));
+        $edb = $this->formatEdb($company->vat_number ?: ($company->tax_id ?? ''));
+        $this->appendElement($dom, $employer, 'EDB', $edb);
         $this->appendElement($dom, $employer, 'CompanyName', $company->name);
 
         // Address
@@ -499,20 +501,38 @@ class UjpEfilingService
     {
         $declaration = $dom->createElement('Declaration');
 
-        $owner = $company->owner;
+        $company->loadMissing('owner');
+        $ownerName = $company->owner ? $company->owner->name : $company->name;
+        $ownerEmail = $company->owner ? $company->owner->email : '';
 
-        $this->appendElement($dom, $declaration, 'DeclarantName', $owner->name ?? '');
-        $this->appendElement($dom, $declaration, 'DeclarantPosition', 'Owner');
+        $this->appendElement($dom, $declaration, 'DeclarantName', $ownerName);
+        $this->appendElement($dom, $declaration, 'DeclarantPosition', 'Управител');
         $this->appendElement($dom, $declaration, 'DeclarationDate', now()->format('Y-m-d'));
 
         // Responsible person
         $responsiblePerson = $dom->createElement('ResponsiblePerson');
-        $this->appendElement($dom, $responsiblePerson, 'Name', $owner->name ?? '');
-        $this->appendElement($dom, $responsiblePerson, 'Position', 'Owner');
-        $this->appendElement($dom, $responsiblePerson, 'Email', $owner->email ?? '');
+        $this->appendElement($dom, $responsiblePerson, 'Name', $ownerName);
+        $this->appendElement($dom, $responsiblePerson, 'Position', 'Управител');
+        $this->appendElement($dom, $responsiblePerson, 'Email', $ownerEmail);
         $declaration->appendChild($responsiblePerson);
 
         return $declaration;
+    }
+
+    /**
+     * Format VAT number to ЕДБ standard (13 digits, no MK prefix).
+     */
+    private function formatEdb(?string $vatNumber): string
+    {
+        if (!$vatNumber) {
+            return '0000000000000';
+        }
+
+        $clean = preg_replace('/^(MK|МК)/i', '', $vatNumber);
+        $clean = preg_replace('/[^0-9]/', '', $clean);
+        $clean = str_pad(substr($clean, 0, 13), 13, '0', STR_PAD_LEFT);
+
+        return $clean;
     }
 
     /**
