@@ -225,6 +225,11 @@ class Company extends Model implements HasMedia
         return $this->hasMany(UsageTracking::class);
     }
 
+    public function fixedAssets(): HasMany
+    {
+        return $this->hasMany(FixedAsset::class);
+    }
+
     /**
      * Company's IFRS Entity relationship
      */

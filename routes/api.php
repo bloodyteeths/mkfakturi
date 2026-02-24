@@ -1587,10 +1587,14 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/cash-flow', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlow']);
         Route::get('/equity-changes', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChanges']);
 
-        // Fixed Assets Register (read-only for partners)
+        // Fixed Assets (full CRUD for partners)
         Route::get('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'index']);
+        Route::post('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'store']);
         Route::get('/fixed-assets/register', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'register']);
         Route::get('/fixed-assets/{id}', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'show']);
+        Route::put('/fixed-assets/{id}', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'update']);
+        Route::post('/fixed-assets/{id}/dispose', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'dispose']);
+        Route::delete('/fixed-assets/{id}', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'destroy']);
     });
 
     // Partner Tax Returns (VAT + CIT) for Client Companies

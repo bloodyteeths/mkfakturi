@@ -213,6 +213,14 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
+    // Post monthly depreciation GL entries on 1st of each month at 00:30
+    Schedule::command('depreciation:post-monthly')
+        ->monthlyOn(1, '00:30')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('post-monthly-depreciation');
+
     // Note: Commented out until proper parameters are configured
     // Schedule::job(new \App\Jobs\PantheonExportJob([], 1))
     //     ->dailyAt('02:00')

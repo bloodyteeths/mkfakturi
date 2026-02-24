@@ -9,6 +9,7 @@ use App\Models\Partner;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PartnerFixedAssetController extends Controller
 {
@@ -41,22 +42,7 @@ class PartnerFixedAssetController extends Controller
         $asOfDate = Carbon::now();
 
         $data = $assets->map(function (FixedAsset $asset) use ($asOfDate) {
-            return [
-                'id' => $asset->id,
-                'name' => $asset->name,
-                'asset_code' => $asset->asset_code,
-                'category' => $asset->category,
-                'acquisition_date' => $asset->acquisition_date->toDateString(),
-                'acquisition_cost' => (float) $asset->acquisition_cost,
-                'residual_value' => (float) $asset->residual_value,
-                'useful_life_months' => $asset->useful_life_months,
-                'depreciation_method' => $asset->depreciation_method,
-                'depreciation_rate' => $asset->depreciation_rate,
-                'accumulated_depreciation' => $asset->getAccumulatedDepreciation($asOfDate),
-                'net_book_value' => $asset->getNetBookValue($asOfDate),
-                'status' => $asset->status,
-                'account' => $asset->account ? ['code' => $asset->account->code, 'name' => $asset->account->name] : null,
-            ];
+            return $this->formatAsset($asset, $asOfDate);
         });
 
         return response()->json(['success' => true, 'data' => $data]);
@@ -186,6 +172,196 @@ class PartnerFixedAssetController extends Controller
                 'depreciation_schedule' => $asset->getDepreciationSchedule(),
             ],
         ]);
+    }
+
+    /**
+     * Create a new fixed asset for a client company.
+     */
+    public function store(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'asset_code' => 'nullable|string|max:50',
+            'category' => 'required|in:real_estate,buildings,equipment,vehicles,computers_software,other',
+            'account_id' => 'nullable|integer|exists:accounts,id',
+            'depreciation_account_id' => 'nullable|integer|exists:accounts,id',
+            'acquisition_date' => 'required|date',
+            'acquisition_cost' => 'required|numeric|min:0.01',
+            'residual_value' => 'nullable|numeric|min:0',
+            'useful_life_months' => 'required|integer|min:1|max:1200',
+            'depreciation_method' => 'nullable|in:straight_line,declining_balance',
+            'notes' => 'nullable|string',
+        ]);
+
+        $validated['company_id'] = $company;
+        $validated['creator_id'] = $request->user()->id;
+        $validated['residual_value'] = $validated['residual_value'] ?? 0;
+        $validated['depreciation_method'] = $validated['depreciation_method'] ?? 'straight_line';
+        $validated['status'] = 'active';
+
+        $asset = FixedAsset::create($validated);
+
+        Log::info('Partner created fixed asset', [
+            'partner_id' => $partner->id,
+            'company_id' => $company,
+            'asset_id' => $asset->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatAsset($asset->fresh(['account:id,code,name', 'depreciationAccount:id,code,name'])),
+            'message' => 'Fixed asset created successfully.',
+        ], 201);
+    }
+
+    /**
+     * Update a fixed asset for a client company.
+     */
+    public function update(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $asset = FixedAsset::forCompany($company)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'asset_code' => 'nullable|string|max:50',
+            'category' => 'sometimes|required|in:real_estate,buildings,equipment,vehicles,computers_software,other',
+            'account_id' => 'nullable|integer|exists:accounts,id',
+            'depreciation_account_id' => 'nullable|integer|exists:accounts,id',
+            'acquisition_date' => 'sometimes|required|date',
+            'acquisition_cost' => 'sometimes|required|numeric|min:0.01',
+            'residual_value' => 'nullable|numeric|min:0',
+            'useful_life_months' => 'sometimes|required|integer|min:1|max:1200',
+            'depreciation_method' => 'nullable|in:straight_line,declining_balance',
+            'notes' => 'nullable|string',
+        ]);
+
+        $asset->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatAsset($asset->fresh(['account:id,code,name', 'depreciationAccount:id,code,name'])),
+            'message' => 'Fixed asset updated successfully.',
+        ]);
+    }
+
+    /**
+     * Dispose of a fixed asset for a client company.
+     */
+    public function dispose(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $asset = FixedAsset::forCompany($company)->where('status', 'active')->findOrFail($id);
+
+        $validated = $request->validate([
+            'disposal_date' => 'required|date',
+            'disposal_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $asset->update([
+            'status' => FixedAsset::STATUS_DISPOSED,
+            'disposal_date' => $validated['disposal_date'],
+            'disposal_amount' => $validated['disposal_amount'] ?? 0,
+        ]);
+
+        Log::info('Partner disposed fixed asset', [
+            'partner_id' => $partner->id,
+            'company_id' => $company,
+            'asset_id' => $asset->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatAsset($asset->fresh(['account:id,code,name', 'depreciationAccount:id,code,name'])),
+            'message' => 'Fixed asset disposed successfully.',
+        ]);
+    }
+
+    /**
+     * Delete a fixed asset for a client company.
+     */
+    public function destroy(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $asset = FixedAsset::forCompany($company)->findOrFail($id);
+
+        Log::info('Partner deleted fixed asset', [
+            'partner_id' => $partner->id,
+            'company_id' => $company,
+            'asset_id' => $asset->id,
+            'asset_name' => $asset->name,
+        ]);
+
+        $asset->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Fixed asset deleted successfully.',
+        ]);
+    }
+
+    /**
+     * Format a single asset for response.
+     */
+    protected function formatAsset(FixedAsset $asset, ?Carbon $asOfDate = null): array
+    {
+        $asOfDate = $asOfDate ?? Carbon::now();
+
+        return [
+            'id' => $asset->id,
+            'name' => $asset->name,
+            'description' => $asset->description,
+            'asset_code' => $asset->asset_code,
+            'category' => $asset->category,
+            'account' => $asset->account ? ['id' => $asset->account->id, 'code' => $asset->account->code, 'name' => $asset->account->name] : null,
+            'depreciation_account' => $asset->depreciationAccount ? ['id' => $asset->depreciationAccount->id, 'code' => $asset->depreciationAccount->code, 'name' => $asset->depreciationAccount->name] : null,
+            'acquisition_date' => $asset->acquisition_date->toDateString(),
+            'acquisition_cost' => (float) $asset->acquisition_cost,
+            'residual_value' => (float) $asset->residual_value,
+            'useful_life_months' => $asset->useful_life_months,
+            'depreciation_method' => $asset->depreciation_method,
+            'depreciation_rate' => $asset->depreciation_rate,
+            'monthly_depreciation' => $asset->monthly_depreciation,
+            'annual_depreciation' => $asset->annual_depreciation,
+            'accumulated_depreciation' => $asset->getAccumulatedDepreciation($asOfDate),
+            'net_book_value' => $asset->getNetBookValue($asOfDate),
+            'status' => $asset->status,
+            'disposal_date' => $asset->disposal_date?->toDateString(),
+            'disposal_amount' => $asset->disposal_amount ? (float) $asset->disposal_amount : null,
+            'notes' => $asset->notes,
+            'created_at' => $asset->created_at->toDateTimeString(),
+        ];
     }
 
     protected function getPartnerFromRequest(Request $request): ?Partner
