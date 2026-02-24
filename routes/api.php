@@ -1587,11 +1587,13 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/cash-flow', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlow']);
         Route::get('/cash-flow/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlowExport']);
         Route::get('/equity-changes', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChanges']);
+        Route::get('/equity-changes/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChangesExport']);
 
         // Fixed Assets (full CRUD for partners)
         Route::get('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'index']);
         Route::post('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'store']);
         Route::get('/fixed-assets/register', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'register']);
+        Route::get('/fixed-assets/register/export', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'registerExport']);
         Route::get('/fixed-assets/{id}', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'show']);
         Route::put('/fixed-assets/{id}', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'update']);
         Route::post('/fixed-assets/{id}/dispose', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'dispose']);

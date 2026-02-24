@@ -261,6 +261,8 @@ class PartnerAccountingReportsController extends Controller
             abort(404, 'Company not found');
         }
 
+        $companyModel->load('address');
+
         $startDate = $request->query('start_date', now()->startOfYear()->toDateString());
         $endDate = $request->query('end_date', now()->toDateString());
 
@@ -338,7 +340,46 @@ class PartnerAccountingReportsController extends Controller
         return response()->json(['success' => true, 'data' => $result]);
     }
 
-    // CLAUDE-CHECKPOINT: Added cashFlow and equityChanges partner endpoints
+    /**
+     * Export Equity Changes as PDF
+     */
+    public function equityChangesExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+
+        $companyModel->load('address');
+
+        $year = (int) $request->query('year', now()->year);
+        $current = $this->ifrsAdapter->getEquityChanges($companyModel, $year);
+        $previous = $this->ifrsAdapter->getEquityChanges($companyModel, $year - 1);
+
+        $currency = CompanySetting::getSetting('currency', $company);
+
+        view()->share([
+            'company' => $companyModel,
+            'year' => $year,
+            'current' => $current,
+            'previous' => $previous,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.equity-changes');
+
+        return $pdf->download("equity_changes_{$year}.pdf");
+    }
+
+    // CLAUDE-CHECKPOINT
 
     public function ifrsStatus(Request $request, int $company): JsonResponse
     {

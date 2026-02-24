@@ -4,12 +4,15 @@ namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\CompanySetting;
 use App\Models\FixedAsset;
 use App\Models\Partner;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 class PartnerFixedAssetController extends Controller
 {
@@ -128,6 +131,98 @@ class PartnerFixedAssetController extends Controller
                 'totals' => $totals,
             ],
         ]);
+    }
+
+    /**
+     * Export Fixed Assets Register as PDF
+     */
+    public function registerExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            abort(404, 'Partner not found');
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (! $companyModel) {
+            abort(404, 'Company not found');
+        }
+
+        $companyModel->load('address');
+
+        $asOfDate = Carbon::parse($request->query('as_of_date', now()->toDateString()));
+
+        $assets = FixedAsset::forCompany($company)
+            ->with(['account:id,code,name'])
+            ->orderBy('category')
+            ->orderBy('acquisition_date')
+            ->get();
+
+        $categories = [];
+        $totals = ['acquisition_cost' => 0, 'accumulated_depreciation' => 0, 'net_book_value' => 0, 'count' => 0];
+
+        foreach ($assets as $asset) {
+            $accumulated = $asset->getAccumulatedDepreciation($asOfDate);
+            $netBookValue = $asset->getNetBookValue($asOfDate);
+            $cat = $asset->category;
+
+            if (! isset($categories[$cat])) {
+                $categories[$cat] = [
+                    'category' => $cat,
+                    'assets' => [],
+                    'subtotal_cost' => 0,
+                    'subtotal_depreciation' => 0,
+                    'subtotal_net' => 0,
+                ];
+            }
+
+            $categories[$cat]['assets'][] = [
+                'id' => $asset->id,
+                'name' => $asset->name,
+                'asset_code' => $asset->asset_code,
+                'acquisition_date' => $asset->acquisition_date->toDateString(),
+                'acquisition_cost' => (float) $asset->acquisition_cost,
+                'depreciation_rate' => $asset->depreciation_rate,
+                'accumulated_depreciation' => $accumulated,
+                'net_book_value' => $netBookValue,
+            ];
+
+            $categories[$cat]['subtotal_cost'] += (float) $asset->acquisition_cost;
+            $categories[$cat]['subtotal_depreciation'] += $accumulated;
+            $categories[$cat]['subtotal_net'] += $netBookValue;
+
+            $totals['acquisition_cost'] += (float) $asset->acquisition_cost;
+            $totals['accumulated_depreciation'] += $accumulated;
+            $totals['net_book_value'] += $netBookValue;
+            $totals['count']++;
+        }
+
+        foreach ($categories as &$cat) {
+            $cat['subtotal_cost'] = round($cat['subtotal_cost'], 2);
+            $cat['subtotal_depreciation'] = round($cat['subtotal_depreciation'], 2);
+            $cat['subtotal_net'] = round($cat['subtotal_net'], 2);
+        }
+
+        $totals['acquisition_cost'] = round($totals['acquisition_cost'], 2);
+        $totals['accumulated_depreciation'] = round($totals['accumulated_depreciation'], 2);
+        $totals['net_book_value'] = round($totals['net_book_value'], 2);
+
+        $currency = CompanySetting::getSetting('currency', $company);
+
+        view()->share([
+            'company' => $companyModel,
+            'as_of_date' => $asOfDate->toDateString(),
+            'categories' => array_values($categories),
+            'totals' => $totals,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.fixed-assets-register');
+
+        return $pdf->download("fixed_assets_register_{$asOfDate->toDateString()}.pdf");
     }
 
     /**

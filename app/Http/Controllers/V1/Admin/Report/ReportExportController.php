@@ -266,6 +266,7 @@ class ReportExportController extends Controller
      */
     private function exportBalanceSheetPdf($balanceSheet, $company, $asOfDate): Response
     {
+        $company->load('address');
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
         $formattedDate = Carbon::createFromFormat('Y-m-d', $asOfDate)->translatedFormat($dateFormat);
         $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));

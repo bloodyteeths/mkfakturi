@@ -169,16 +169,7 @@
 
 <body>
     <div class="sub-container">
-        <table class="report-header">
-            <tr>
-                <td>
-                    <p class="heading-text">{{ $company->name }}</p>
-                </td>
-                <td>
-                    <p class="heading-date">{{ $as_of_date }}</p>
-                </td>
-            </tr>
-        </table>
+        @include('app.pdf.reports._company-header', ['report_period' => $as_of_date])
         <p class="sub-heading-text">БИЛАНС НА СОСТОЈБА</p>
         <p class="form-label">Образец 36 — состојба на {{ $as_of_date }}</p>
 

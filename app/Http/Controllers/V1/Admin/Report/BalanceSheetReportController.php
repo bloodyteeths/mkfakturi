@@ -23,6 +23,7 @@ class BalanceSheetReportController extends Controller
     public function __invoke(Request $request, $hash)
     {
         $company = Company::where('unique_hash', $hash)->first();
+        $company->load('address');
 
         $this->authorize('view report', $company);
 

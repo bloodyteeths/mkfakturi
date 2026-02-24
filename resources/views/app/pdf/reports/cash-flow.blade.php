@@ -170,16 +170,7 @@
 
 <body>
     <div class="sub-container">
-        <table class="report-header">
-            <tr>
-                <td>
-                    <p class="heading-text">{{ $company->name }}</p>
-                </td>
-                <td>
-                    <p class="heading-date">{{ $start_date }} — {{ $end_date }}</p>
-                </td>
-            </tr>
-        </table>
+        @include('app.pdf.reports._company-header', ['report_period' => $start_date . ' — ' . $end_date])
         <p class="sub-heading-text">ИЗВЕШТАЈ ЗА ПАРИЧНИ ТЕКОВИ</p>
         <p class="form-label">Образец 38 — за период {{ $start_date }} до {{ $end_date }}</p>
 

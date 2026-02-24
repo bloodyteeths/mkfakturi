@@ -66,6 +66,16 @@
             </template>
             {{ $t('accounting.fixed_assets.register', 'Register') }}
           </BaseButton>
+          <BaseButton
+            variant="primary-outline"
+            :loading="isExportingRegister"
+            @click="exportRegisterPdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+            </template>
+            {{ $t('reports.cash_flow.export_pdf', 'Export PDF') }}
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -368,6 +378,7 @@ const selectedAsset = ref(null)
 const accounts = ref([])
 const isLoading = ref(false)
 const isLoadingRegister = ref(false)
+const isExportingRegister = ref(false)
 const isSaving = ref(false)
 const isDisposing = ref(false)
 const hasSearched = ref(false)
@@ -494,6 +505,32 @@ async function loadRegister() {
     notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to load register' })
   } finally {
     isLoadingRegister.value = false
+  }
+}
+
+async function exportRegisterPdf() {
+  if (!selectedCompanyId.value) return
+  isExportingRegister.value = true
+  try {
+    const response = await window.axios.get(
+      `/partner/companies/${selectedCompanyId.value}/accounting/fixed-assets/register/export`,
+      {
+        params: { as_of_date: asOfDate.value },
+        responseType: 'blob',
+      }
+    )
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `fixed_assets_register_${asOfDate.value}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to export PDF' })
+  } finally {
+    isExportingRegister.value = false
   }
 }
 

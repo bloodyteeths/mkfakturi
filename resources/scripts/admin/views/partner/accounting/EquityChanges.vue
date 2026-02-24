@@ -30,12 +30,23 @@
             value-prop="value"
           />
         </BaseInputGroup>
-        <div class="flex items-end">
-          <BaseButton variant="primary" class="w-full" :loading="isLoading" @click="loadReport">
+        <div class="flex items-end space-x-2">
+          <BaseButton variant="primary" class="flex-1" :loading="isLoading" @click="loadReport">
             <template #left="slotProps">
               <BaseIcon :class="slotProps.class" name="MagnifyingGlassIcon" />
             </template>
             {{ $t('general.load') }}
+          </BaseButton>
+          <BaseButton
+            variant="primary-outline"
+            :loading="isExporting"
+            :disabled="!data"
+            @click="exportPdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+            </template>
+            {{ $t('reports.cash_flow.export_pdf', 'Export PDF') }}
           </BaseButton>
         </div>
       </div>
@@ -172,6 +183,7 @@ const notificationStore = useNotificationStore()
 const selectedCompanyId = ref(null)
 const data = ref(null)
 const isLoading = ref(false)
+const isExporting = ref(false)
 const hasSearched = ref(false)
 const selectedYear = ref(new Date().getFullYear() - 1)
 
@@ -222,6 +234,32 @@ async function loadReport() {
     data.value = null
   } finally {
     isLoading.value = false
+  }
+}
+
+async function exportPdf() {
+  if (!selectedCompanyId.value || !data.value) return
+  isExporting.value = true
+  try {
+    const response = await window.axios.get(
+      `/partner/companies/${selectedCompanyId.value}/accounting/equity-changes/export`,
+      {
+        params: { year: selectedYear.value },
+        responseType: 'blob',
+      }
+    )
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `equity_changes_${selectedYear.value}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to export PDF' })
+  } finally {
+    isExporting.value = false
   }
 }
 
