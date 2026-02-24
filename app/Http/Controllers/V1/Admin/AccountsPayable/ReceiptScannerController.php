@@ -140,14 +140,18 @@ class ReceiptScannerController extends Controller
                 // For PDFs, use the converted image path so we can display the image preview
                 $imageUrl = url('api/v1/receipts/image/'.$ocrFilePath);
 
+                // Parse OCR text to extract structured invoice data for form pre-fill
+                $parsedData = $this->parseOcrText($ocrResult['text'] ?? '');
+
                 $responsePayload = [
                     'image_url' => $imageUrl,
-                    'stored_path' => $storedPath, // Keep original PDF path for reference
+                    'stored_path' => $storedPath, // Keep original file path for bill attachment
                     'ocr_file_path' => $ocrFilePath, // Path used for OCR (converted image for PDFs)
                     'ocr_text' => $ocrResult['text'] ?? '',
                     'hocr' => $ocrResult['hocr'] ?? null, // Include hOCR for selectable text overlay
                     'image_width' => $ocrResult['image_width'] ?? null,
                     'image_height' => $ocrResult['image_height'] ?? null,
+                    'data' => $parsedData, // Structured data for bill form pre-fill
                 ];
 
                 \Log::info('ReceiptScannerController::scan - Returning response', [
@@ -230,5 +234,85 @@ class ReceiptScannerController extends Controller
 
             return response()->json(['error' => 'Failed to load image'], 500);
         }
+    } // CLAUDE-CHECKPOINT
+
+    /**
+     * Extract structured invoice data from OCR text for form pre-fill.
+     */
+    private function parseOcrText(string $text): ?array
+    {
+        if (empty(trim($text))) {
+            return null;
+        }
+
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $text))));
+
+        // Supplier name is typically the first non-empty line
+        $vendorName = $lines[0] ?? null;
+
+        // Date detection (YYYY-MM-DD or DD.MM.YYYY or DD/MM/YYYY)
+        $date = null;
+        if (preg_match('/(\d{4}-\d{2}-\d{2})/', $text, $m)) {
+            $date = $m[1];
+        } elseif (preg_match('/(\d{2}\.\d{2}\.\d{4})/', $text, $m)) {
+            $date = $m[1];
+        } elseif (preg_match('/(\d{2}\/\d{2}\/\d{4})/', $text, $m)) {
+            $date = $m[1];
+        }
+
+        // Invoice number detection
+        $invoiceNumber = null;
+        $invoicePatterns = [
+            '/(?:фактура|invoice|faktura|fatura)\s*(?:бр\.?|no\.?|nr\.?|#)?\s*[:\-]?\s*(\S+)/iu',
+            '/(?:бр\.?|no\.?|nr\.?)\s*[:\-]?\s*(\d[\d\-\/]+)/iu',
+        ];
+        foreach ($invoicePatterns as $pattern) {
+            if (preg_match($pattern, $text, $m)) {
+                $invoiceNumber = trim($m[1]);
+                break;
+            }
+        }
+
+        // Total amount - look for lines with keywords
+        $keywords = ['total', 'вкупно', 'vkupno', 'износ за плаќање', 'вкупен износ', 'iznos', 'toplam', 'totali'];
+        $total = null;
+        foreach ($lines as $line) {
+            $lower = mb_strtolower($line);
+            foreach ($keywords as $kw) {
+                if (mb_strpos($lower, $kw) !== false) {
+                    if (preg_match('/(\d[\d.,]*\d)/', $line, $m)) {
+                        $val = (float) str_replace(',', '.', $m[1]);
+                        if ($val > 0 && $val < 1000000) {
+                            $total = $val;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // If no keyword match, use largest reasonable number
+        if ($total === null) {
+            $allNumbers = [];
+            preg_match_all('/(\d+[.,]\d{2})/', $text, $matches);
+            foreach ($matches[1] as $raw) {
+                $val = (float) str_replace(',', '.', $raw);
+                if ($val > 0 && $val < 1000000) {
+                    $allNumbers[] = $val;
+                }
+            }
+            if (! empty($allNumbers)) {
+                $total = max($allNumbers);
+            }
+        }
+
+        return [
+            'vendor_name' => $vendorName,
+            'bill_number' => $invoiceNumber,
+            'bill_date' => $date,
+            'due_date' => null,
+            'total' => $total,
+            'tax' => null,
+        ];
     } // CLAUDE-CHECKPOINT
 }

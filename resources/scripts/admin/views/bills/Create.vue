@@ -471,6 +471,7 @@ function buildPayload() {
     exchange_rate: bill.exchange_rate,
     discount: bill.discount || 0,
     project_id: bill.project_id,
+    scanned_receipt_path: bill.scanned_receipt_path || null,
     discount_val: Math.round(discountVal),
     sub_total: Math.round(subTotal),
     tax: Math.round(taxAmount),

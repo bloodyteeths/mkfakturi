@@ -11,6 +11,7 @@ use App\Jobs\GenerateBillPdfJob;
 use App\Models\Bill;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BillsController extends Controller
 {
@@ -100,6 +101,28 @@ class BillsController extends Controller
             if ($request->customFields) {
                 \Log::info('BillsController::store - Adding custom fields');
                 $bill->addCustomFields($request->customFields);
+            }
+
+            // Attach scanned invoice file as media if provided
+            if ($request->scanned_receipt_path) {
+                try {
+                    $disk = config('filesystems.default', 'local');
+                    $storedPath = $request->scanned_receipt_path;
+
+                    if (Storage::disk($disk)->exists($storedPath)) {
+                        $bill->addMediaFromDisk($storedPath, $disk)
+                            ->toMediaCollection('scanned_invoice');
+                        \Log::info('BillsController::store - Scanned invoice attached as media', [
+                            'bill_id' => $bill->id,
+                            'path' => $storedPath,
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('BillsController::store - Failed to attach scanned invoice', [
+                        'bill_id' => $bill->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
             $bill->load($this->billResourceRelations());

@@ -147,7 +147,7 @@ const BillsPayments = () =>
   import('@/scripts/admin/views/bills/Payments.vue')
 const BillsInbox = () => import('@/scripts/admin/views/bills/Inbox.vue')
 
-// Receipt Scanner (Accounts Payable)
+// Invoice Scanner (Accounts Payable)
 const ReceiptScan = () => import('@/scripts/admin/views/receipts/Scan.vue')
 
 // Payments
@@ -599,7 +599,7 @@ export default [
         component: BillsInbox,
       },
 
-      // Receipt Scanner
+      // Invoice Scanner
       {
         path: 'receipts/scan',
         name: 'receipts.scan',

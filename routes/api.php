@@ -727,7 +727,7 @@ Route::prefix('/v1')->group(function () {
             // Bills CSV/XLSX Import
             Route::post('/bills/import', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsImportController::class, 'import']);
 
-            // Receipt Scanner (Fiscal QR → Expense/Bill)
+            // Invoice Scanner (OCR → Bill)
             Route::post('/receipts/scan', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'scan']);
 
             // Proforma Invoices
@@ -1319,9 +1319,9 @@ Route::prefix('/v1')->group(function () {
     });
 });
 
-// Public image serving route (outside auth:sanctum to allow browser img tags with session cookies)
+// Public image serving route for scanned supplier invoices (outside auth:sanctum to allow browser img tags with session cookies)
 // This route is intentionally outside the auth middleware to support standard browser <img> tags
-// Security: Path validation in controller ensures only scanned-receipts/ images are served
+// Security: Path validation in controller ensures only scanned-receipts/ invoice images are served
 Route::prefix('/v1')->group(function () {
     Route::get('/receipts/image/{path}', [\App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController::class, 'getImage'])
         ->where('path', '.*')
